@@ -218,8 +218,10 @@
             border-right: 5px solid transparent;
             border-top: 5px solid #fff;
         }
-        .sort-arrow.active {
+        .sort-arrow.active.up {
             border-bottom-color: #58FF54;
+        }
+        .sort-arrow.active.down {
             border-top-color: #58FF54;
         }
     
@@ -232,6 +234,10 @@
 </style>
 
 <script>
+    let sortColumn = 8; // Default sort column (ETH)
+    let sortDirection = -1; // Default sort direction (descending)
+
+    function sortTable(column) {
     let sortColumn = 8; // Default sort column (ETH)
     let sortDirection = -1; // Default sort direction (descending)
 
@@ -275,7 +281,7 @@
                 const upArrow = arrows.querySelector('.sort-arrow.up');
                 const downArrow = arrows.querySelector('.sort-arrow.down');
                 
-                if (index + 2 === column) {
+                if (index + 8 === column) { // Adjusted index to match column
                     upArrow.classList.toggle('active', sortDirection === 1);
                     downArrow.classList.toggle('active', sortDirection === -1);
                 } else {

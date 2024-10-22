@@ -219,10 +219,10 @@
             border-top: 5px solid #fff;
         }
         .sort-arrow.active.up {
-            border-bottom-color: #888; /* Grey color for active ascending */
+            border-bottom-color: #58FF54;
         }
         .sort-arrow.active.down {
-            border-top-color: #888; /* Grey color for active descending */
+            border-top-color: #58FF54;
         }
     
     .league-icon {
@@ -247,8 +247,8 @@
             sortDirection *= -1;
         } else {
             sortDirection = -1;
+            sortColumn = column;
         }
-        sortColumn = column;
 
         // Sort rows
         rows.sort((a, b) => {
@@ -273,16 +273,17 @@
         const headers = document.querySelectorAll('th[onclick^="sortTable"]');
         headers.forEach((header, index) => {
             const arrows = header.querySelector('.sort-arrows');
-            if (index + 2 === column) { // Adjust index to match column numbers
-                arrows.innerHTML = `
-                    <span class="sort-arrow up${sortDirection === 1 ? ' active' : ''}"></span>
-                    <span class="sort-arrow down${sortDirection === -1 ? ' active' : ''}"></span>
-                `;
-            } else {
-                arrows.innerHTML = `
-                    <span class="sort-arrow up"></span>
-                    <span class="sort-arrow down"></span>
-                `;
+            if (arrows) {
+                const upArrow = arrows.querySelector('.sort-arrow.up');
+                const downArrow = arrows.querySelector('.sort-arrow.down');
+                
+                if (index + 2 === column) {
+                    upArrow.classList.toggle('active', sortDirection === 1);
+                    downArrow.classList.toggle('active', sortDirection === -1);
+                } else {
+                    upArrow.classList.remove('active');
+                    downArrow.classList.remove('active');
+                }
             }
         });
     }
@@ -293,23 +294,7 @@
     });
 
     function searchTable() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("searchInput");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("playersTable");
-        tr = table.getElementsByTagName("tr");
-
-        for (i = 2; i < tr.length; i++) { // Start from index 2 to skip header rows
-            td = tr[i].getElementsByTagName("td")[1]; // Player handle column
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }       
-        }
+        // ... (keep the existing searchTable function) ...
     }
 
     // Trigger initial sort

@@ -218,10 +218,8 @@
             border-right: 5px solid transparent;
             border-top: 5px solid #fff;
         }
-        .sort-arrow.active.up {
+        .sort-arrow.active {
             border-bottom-color: #58FF54;
-        }
-        .sort-arrow.active.down {
             border-top-color: #58FF54;
         }
     
@@ -247,8 +245,8 @@
             sortDirection *= -1;
         } else {
             sortDirection = -1;
+            sortColumn = column;
         }
-        sortColumn = column;
 
         // Sort rows
         rows.sort((a, b) => {

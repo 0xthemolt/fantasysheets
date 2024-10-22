@@ -247,8 +247,8 @@
             sortDirection *= -1;
         } else {
             sortDirection = -1;
-            sortColumn = column;
         }
+        sortColumn = column;
 
         // Sort rows
         rows.sort((a, b) => {
@@ -294,7 +294,23 @@
     });
 
     function searchTable() {
-        // ... (keep the existing searchTable function) ...
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("playersTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 2; i < tr.length; i++) { // Start from index 2 to skip header rows
+            td = tr[i].getElementsByTagName("td")[1]; // Player handle column
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }       
+        }
     }
 
     // Trigger initial sort

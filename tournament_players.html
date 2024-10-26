@@ -193,9 +193,9 @@
             <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/4.png" class="league-icon" alt="Bronze"> Bronze</th>
             <th class="rank-columns"><alt="Reverse Score"> Reverse </th>
             <th class="rank-columns">ITM Decks</th>
-            <th class="reward-columns" onclick="sortTable(8)">ETH <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
-            <th class="reward-columns" onclick="sortTable(9)">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-            <th class="reward-columns" onclick="sortTable(10)">Fan <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            <th class="reward-columns" data-sort="reward_eth">ETH <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+            <th class="reward-columns" data-sort="reward_pack">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            <th class="reward-columns" data-sort="reward_fan">Fan <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
         </tr>
 
     <style>
@@ -238,56 +238,47 @@
     let sortColumn = 8; // Default sort column (ETH)
     let sortDirection = -1; // Default sort direction (descending)
 
-    function sortTable(column) {
-        const table = document.getElementById("playersTable");
-        const tbody = table.tBodies[0];
-        const rows = Array.from(tbody.rows).slice(2); // Skip header rows
+    function sortTable(column, ascending) {{
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("heroTable");
+        switching = true;
+        while (switching) {{
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {{
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[column];
+                y = rows[i + 1].getElementsByTagName("TD")[column];
+                if (column === 1) {{ // Hero name column
+                    if (ascending ? x.textContent.toLowerCase() > y.textContent.toLowerCase() : x.textContent.toLowerCase() < y.textContent.toLowerCase()) {{
+                        shouldSwitch = true;
+                        break;
+                    }}
+                }} else {{
+                    var xValue = parseFloat(x.querySelector('span').textContent.replace('%', ''));
+                    var yValue = parseFloat(y.querySelector('span').textContent.replace('%', ''));
+                    if (isNaN(xValue)) xValue = 0;
+                    if (isNaN(yValue)) yValue = 0;
+                    if (ascending ? xValue > yValue : xValue < yValue) {{
+                        shouldSwitch = true;
+                        break;
+                    }}
+                }}
+            }}
+            if (shouldSwitch) {{
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }}
+        }}
+        updateRanks();
+    }}
 
-        // Determine sort direction
-        if (sortColumn === column) {
-            sortDirection *= -1;
-        } else {
-            sortDirection = -1;
-            sortColumn = column;
-        }
-
-        // Sort rows
-        rows.sort((a, b) => {
-            let aValue = a.cells[column].textContent.trim();
-            let bValue = b.cells[column].textContent.trim();
-
-            // Remove non-numeric characters and convert to number
-            aValue = parseFloat(aValue.replace(/[^\d.-]/g, '')) || 0;
-            bValue = parseFloat(bValue.replace(/[^\d.-]/g, '')) || 0;
-
-            return sortDirection * (aValue - bValue);
-        });
-
-        // Append sorted rows
-        rows.forEach(row => tbody.appendChild(row));
-
-        // Update sort arrows
-        updateSortArrows(column);
-    }
-
-    function updateSortArrows(column) {
-        const headers = document.querySelectorAll('th[onclick^="sortTable"]');
-        headers.forEach((header, index) => {
-            const arrows = header.querySelector('.sort-arrows');
-            if (arrows) {
-                const upArrow = arrows.querySelector('.sort-arrow.up');
-                const downArrow = arrows.querySelector('.sort-arrow.down');
-                
-                if (index + 8 === column) { // Adjusted index to match column
-                    upArrow.classList.toggle('active', sortDirection === 1);
-                    downArrow.classList.toggle('active', sortDirection === -1);
-                } else {
-                    upArrow.classList.remove('active');
-                    downArrow.classList.remove('active');
-                }
-            }
-        });
-    }
+    function updateRanks() {{
+        var rows = document.querySelectorAll('tbody tr');
+        rows.forEach((row, index) => {{
+            row.querySelector('td.rank').textContent = index + 1;
+        }});
+    }}
 
     // Initial sort on page load
     document.addEventListener('DOMContentLoaded', () => {

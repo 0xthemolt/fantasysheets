@@ -248,6 +248,7 @@
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('search-box').addEventListener('input', function() {
         var searchTerm = this.value.toLowerCase();
         var rows = document.querySelectorAll('tbody tr');
@@ -264,7 +265,7 @@
         });
     });
     
-document.addEventListener('DOMContentLoaded', function() {
+
     document.querySelectorAll('img').forEach(img => {
         img.onerror = function() {
             this.onerror = null; // Prevent infinite loop if placeholder also fails
@@ -274,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }});
     }});
 
-document.addEventListener('DOMContentLoaded', function() {{
     console.log('DOM fully loaded and parsed');
 
     function getActualColumnIndex(headerCell) {{
@@ -344,28 +344,32 @@ document.addEventListener('DOMContentLoaded', function() {{
         }});
     }});
 
-    function searchTable() {{
+    function searchTable() {
         console.log('Search function initialized');
         var searchBox = document.getElementById('search-box');
-        if (!searchBox) {{
+        if (!searchBox) {
             console.error('Search box not found');
             return;
-        }}
-        searchBox.addEventListener('input', function() {{
+        }
+        searchBox.addEventListener('input', function() {
             console.log('Searching for:', this.value);
             var searchTerm = this.value.toLowerCase();
             var rows = document.querySelectorAll('#playersTable tbody tr');
-            rows.forEach(function(row) {{
+            rows.forEach(function(row) {
                 var playerCell = row.querySelector('td.player-handle');
-                if (!playerCell) {{
+                if (!playerCell) {
                     console.error('Player cell not found in row:', row);
                     return;
-                }}
+                }
                 var playerName = playerCell.textContent.toLowerCase();
-                row.style.display = playerName.includes(searchTerm) ? '' : 'none';
-            }});
-        }});
-    }}
+                if (playerName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
 
     searchTable();
     console.log('Initial sort');

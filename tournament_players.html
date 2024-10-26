@@ -245,11 +245,11 @@
 <script>
     document.getElementById('search-box').addEventListener('input', function() {
         var searchTerm = this.value.toLowerCase();
-        var rows = document.querySelectorAll('tbody tr');
+        var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach(function(row) {
-            var heroCell = row.querySelector('td.player-handle');
-            var heroName = heroCell.textContent.toLowerCase();
-            if (heroName.includes(searchTerm)) {
+            var playerHandleCell = row.querySelector('td.player-handle span');
+            var playerHandle = playerHandleCell.textContent.toLowerCase();
+            if (playerHandle.includes(searchTerm)) {
                 row.style.display = '';
                 row.classList.add('highlight');
             } else {

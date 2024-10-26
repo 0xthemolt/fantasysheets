@@ -252,7 +252,7 @@
 <script>
     function sortTable(column, ascending) {
         var table, rows, switching, i, x, y, shouldSwitch;
-        table = document.getElementById("playersTable"); // Corrected table ID
+        table = document.getElementById("playersTable");
         switching = true;
         while (switching) {
             switching = false;
@@ -286,7 +286,7 @@
     }
 
     function updateRanks() {
-        var rows = document.querySelectorAll('#playersTable tbody tr'); // Corrected table ID
+        var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach((row, index) => {
             row.querySelector('td.rank').textContent = index + 1;
         });
@@ -307,7 +307,7 @@
     });
 
     // Initial sort by ETH rewards (descending)
-    sortTable(8, false); // Adjusted column index for ETH rewards
+    sortTable(8, false);
 
     function searchTable() {
         document.getElementById('search-box').addEventListener('input', function() { // Corrected search box ID

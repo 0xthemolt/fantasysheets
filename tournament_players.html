@@ -263,12 +263,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (column === 1) { // Player name column
                 return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             } else {
-                aValue = parseFloat(aValue.replace(/[^\d.-]/g, ''));
-                bValue = parseFloat(bValue.replace(/[^\d.-]/g, ''));
+                // Remove any non-numeric characters except decimal point
+                aValue = parseFloat(aValue.replace(/[^\d.]/g, ''));
+                bValue = parseFloat(bValue.replace(/[^\d.]/g, ''));
                 return ascending ? aValue - bValue : bValue - aValue;
             }
         });
 
+        // Clear the table body
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+
+        // Append sorted rows
         rows.forEach(row => tbody.appendChild(row));
         updateRanks();
     }
@@ -276,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateRanks() {
         var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach((row, index) => {
-            row.querySelector('td.rank').textContent = index + 1;
+            row.querySelector('td:first-child').textContent = index + 1;
         });
     }
 
@@ -312,10 +319,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 var playerName = playerCell.textContent.toLowerCase();
                 if (playerName.includes(searchTerm)) {
                     row.style.display = '';
-                    row.classList.add('highlight');
                 } else {
                     row.style.display = 'none';
-                    row.classList.remove('highlight');
                 }
             });
         });

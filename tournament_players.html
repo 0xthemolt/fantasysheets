@@ -295,6 +295,7 @@
     document.querySelectorAll('th.reward-columns').forEach(th => {
         th.addEventListener('click', function() {
             var column = Array.from(this.parentNode.children).indexOf(this);
+            console.log('Clicked column index:', column);  // Debug log
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
             document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
             if (currentAscending) { 

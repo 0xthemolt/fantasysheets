@@ -253,8 +253,23 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM fully loaded and parsed');
 
-    function sortTable(column, ascending) {
+    function getActualColumnIndex(headerCell) {
+        let headerRow = headerCell.closest('tr');
+        let headerIndex = Array.from(headerRow.cells).indexOf(headerCell);
+        let colspan = parseInt(headerCell.getAttribute('colspan')) || 1;
+        let actualIndex = 0;
+
+        for (let i = 0; i < headerIndex; i++) {
+            actualIndex += parseInt(headerRow.cells[i].getAttribute('colspan')) || 1;
+        }
+
+        return actualIndex;
+    }
+
+    function sortTable(headerCell, ascending) {
+        let column = getActualColumnIndex(headerCell);
         console.log('Sorting table by column:', column, 'ascending:', ascending);
+        
         var table = document.getElementById("playersTable");
         var tbody = table.querySelector('tbody');
         var rows = Array.from(tbody.querySelectorAll('tr'));
@@ -264,11 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
             let bValue = b.cells[column].textContent.trim();
             console.log('Comparing:', aValue, bValue);
 
-            if (column === 1) { // Player name column
+            if (headerCell.classList.contains('player-columns')) {
                 return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             } else {
-                aValue = parseFloat(aValue.replace(/[^\d.]/g, ''));
-                bValue = parseFloat(bValue.replace(/[^\d.]/g, ''));
+                aValue = parseFloat(aValue.replace(/[^\d.]/g, '')) || 0;
+                bValue = parseFloat(bValue.replace(/[^\d.]/g, '')) || 0;
                 console.log('Parsed values:', aValue, bValue);
                 return ascending ? aValue - bValue : bValue - aValue;
             }
@@ -276,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log('Sorted rows:', rows.map(row => row.cells[column].textContent));
 
-        // Clear and repopulate tbody
         tbody.innerHTML = '';
         rows.forEach(row => tbody.appendChild(row));
         updateRanks();
@@ -286,14 +300,15 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Updating ranks');
         var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
+            if (row.cells[0]) {
+                row.cells[0].textContent = index + 1;
+            }
         });
     }
 
-    document.querySelectorAll('th.reward-columns').forEach(th => {
+    document.querySelectorAll('th.reward-columns, th.rank-columns, th.player-columns').forEach(th => {
         th.addEventListener('click', function() {
             console.log('Column header clicked:', this.textContent);
-            var column = Array.from(this.parentNode.children).indexOf(this);
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
             document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
             if (currentAscending) {
@@ -301,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 this.querySelector('.sort-arrow.up').classList.add('active');
             }
-            sortTable(column, !currentAscending);
+            sortTable(this, !currentAscending);
         });
     });
 
@@ -330,7 +345,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     searchTable();
     console.log('Initial sort');
-    sortTable(8, false); // Initial sort by ETH rewards (descending)
+    // Find the ETH header and trigger a click on it for initial sort
+    let ethHeader = Array.from(document.querySelectorAll('th.reward-columns')).find(th => th.textContent.trim() === 'ETH');
+    if (ethHeader) {
+        ethHeader.click();
+    } else {
+        console.error('ETH header not found for initial sort');
+    }
 });
 </script>
 

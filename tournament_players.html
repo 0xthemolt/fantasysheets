@@ -243,12 +243,11 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('search-box').addEventListener('input', function() {
         var searchTerm = this.value.toLowerCase();
         var rows = document.querySelectorAll('tbody tr');
         rows.forEach(function(row) {
-            var heroCell = row.querySelector('td.hero-cell');
+            var heroCell = row.querySelector('td.player-handle');
             var heroName = heroCell.textContent.toLowerCase();
             if (heroName.includes(searchTerm)) {
                 row.style.display = '';
@@ -259,108 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-
-    document.querySelectorAll('img').forEach(img => {
-        img.onerror = function() {
-            this.onerror = null; // Prevent infinite loop if placeholder also fails
-            this.src = 'https://pbs.twimg.com/profile_images/1754590022664101888/geh_HFDq_400x400.jpg';
-            console.log('Image failed to load, using placeholder:', this.alt);
-            }};
-        }});
-    }});
-
-    console.log('DOM fully loaded and parsed');
-
-    function sortTable(headerCell, ascending) {
-        let column = Array.from(headerCell.parentNode.children).indexOf(headerCell);
-        console.log('Sorting table by column:', column, 'ascending:', ascending);
-        
-        var table = document.getElementById("playersTable");
-        var tbody = table.querySelector('tbody');
-        var rows = Array.from(tbody.querySelectorAll('tr'));
-
-        rows.sort((a, b) => {
-            let aValue = a.cells[column].textContent.trim();
-            let bValue = b.cells[column].textContent.trim();
-            console.log('Comparing:', aValue, bValue);
-
-            if (headerCell.classList.contains('player-columns')) {
-                return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-            } else {
-                aValue = parseFloat(aValue.replace(/[^\d.]/g, '')) || 0;
-                bValue = parseFloat(bValue.replace(/[^\d.]/g, '')) || 0;
-                console.log('Parsed values:', aValue, bValue);
-                return ascending ? aValue - bValue : bValue - aValue;
-            }
-        });
-
-        console.log('Sorted rows:', rows.map(row => row.cells[column].textContent));
-
-        tbody.innerHTML = '';
-        rows.forEach(row => tbody.appendChild(row));
-        updateRanks();
-    }
-
-    function updateRanks() {
-        console.log('Updating ranks');
-        var rows = document.querySelectorAll('#playersTable tbody tr');
-        rows.forEach((row, index) => {
-            if (row.cells[0]) {
-                row.cells[0].textContent = index + 1;
-            }
-        });
-    }
-
-    document.querySelectorAll('#playersTable th').forEach(th => {
-        th.addEventListener('click', function() {
-            console.log('Column header clicked:', this.textContent);
-            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
-            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
-            if (currentAscending) {
-                this.querySelector('.sort-arrow.down').classList.add('active');
-            } else {
-                this.querySelector('.sort-arrow.up').classList.add('active');
-            }
-            sortTable(this, !currentAscending);
-        });
-    });
-
-
-    function searchTable() {
-        console.log('Search function initialized');
-        var searchBox = document.getElementById('search-box');
-        if (!searchBox) {
-            console.error('Search box not found');
-            return;
-        }
-        searchBox.addEventListener('input', function() {
-            console.log('Searching for:', this.value);
-            var searchTerm = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#playersTable tbody tr');
-            rows.forEach(function(row) {
-                var rowText = row.textContent.toLowerCase();
-                if (rowText.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    }
-
-    // Call the function to initialize the search
-    searchTable()
-    
-    console.log('Initial sort');
-    // Find the ETH header and trigger a click on it for initial sort
-    let ethHeader = Array.from(document.querySelectorAll('th')).find(th => th.textContent.trim().startsWith('ETH'));
-    if (ethHeader) {
-        ethHeader.click();
-    } else {
-        console.error('ETH header not found for initial sort');
-    }
-});
 </script>
 
         <tr>

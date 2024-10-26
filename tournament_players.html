@@ -292,7 +292,7 @@
         });
     }
 
-    document.querySelectorAll('th.rank-columns').forEach(th => {
+    document.querySelectorAll('th.reward-columns').forEach(th => {
         th.addEventListener('click', function() {
             var column = Array.from(this.parentNode.children).indexOf(this);
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');

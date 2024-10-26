@@ -15,21 +15,16 @@
             flex-direction: column;
             align-items: center;
         }
-        .header-container {
-            display: flex; 
-            justify-content: space-between; 
+        .header-container, .title-container {
+            display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 20px;
         }
         h1 {
             font-size: 1.7em;
             text-align: center;
-        }
-        .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
         }
         #search-container {
             position: fixed;
@@ -44,15 +39,6 @@
             background-color: #141515;
             color: #fff;
         }
-        
-        .column-container { display: flex; justify-content: space-between; }
-        .column { width: 32%; text-align: center; }
-        .column img { width: 36px; height: 36px; clip-path: circle(50%); object-fit: cover; display: block; margin: 0 auto; }
-        .column p { font-size: 0.8em; margin: 5px 0; }
-        .reward-value { display: inline-flex; align-items: center; justify-content: center; text-align: center; }
-        .reward-value img { width: 20px; height: 20px; margin-left: 5px; vertical-align: middle; }
-        
-        /* Table styling */
         table {
             border-collapse: separate;
             border-spacing: 0;
@@ -67,21 +53,52 @@
             padding: 8px;
             color: #fff;
             text-align: center;
-            border-bottom: 1px solid #444;  // Keep this for consistent row borders
+            border-bottom: 1px solid #444;
         }
         th {
             background-color: #141515;
             text-transform: uppercase;
             cursor: pointer;
         }
-        td {
-            background-color: #141515;
-            font-size: 1em;
+        .column-container {
+            display: flex;
+            justify-content: space-between;
         }
-       /* Updated styles for column group separation and rounded edges */
+        .column {
+            width: 32%;
+            text-align: center;
+        }
+        .column img {
+            width: 36px;
+            height: 36px;
+            clip-path: circle(50%);
+            object-fit: cover;
+            display: block;
+            margin: 0 auto;
+        }
+        .column p, .small-text {
+            font-size: 0.8em;
+            margin: 5px 0;
+            color: #aaa;
+            text-align: center;
+        }
+        .reward-value {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .reward-value img, .icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
         th.column-group {
             position: relative;
             overflow: hidden;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
         }
         th.column-group::before,
         th.column-group::after {
@@ -94,31 +111,9 @@
         }
         th.column-group::before { left: -15px; }
         th.column-group::after { right: -15px; }
-        th.column-group.player-columns {
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-        th.column-group.rank-columns {
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-        th.column-group.reward-columns {
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-        .small-text {
-            font-size: 0.8em;
-            color: #aaa;
-            text-align: center;
-            margin: 5px 0;
-        }
         .player-handle {
             text-align: left;
             padding-left: 8px;
-            // Remove any border properties here
-        }
-        table tr:last-child td {
-            border-bottom: none;  // Ensure no border on the last row
         }
         .player-handle img {
             width: 30px;
@@ -127,21 +122,38 @@
             vertical-align: middle;
             margin-right: 10px;
         }
-        .handle-text { vertical-align: middle; }
-   
-        .black-text { color: #000; }
-        .multi-line div { margin: 5px 0; }
-        .icon { width: 20px; height: 20px; vertical-align: middle; margin-left: 5px; }
-        .rank { font-size: 1.2em; font-weight: bold; padding-right: 5px; }
-        .sort-arrow { font-size: 0.7em; margin-left: 5px; }
-        h2 { margin-top: 40px; font-size: 1.2em; text-align: left; }
-
+        .handle-text {
+            vertical-align: middle;
+        }
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        .black-text {
+            color: #000;
+        }
+        .multi-line div {
+            margin: 5px 0;
+        }
+        .rank {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding-right: 5px;
+        }
+        .sort-arrow {
+            font-size: 0.7em;
+            margin-left: 5px;
+        }
+        h2 {
+            margin-top: 40px;
+            font-size: 1.2em;
+            text-align: left;
+        }
         @media (max-width: 768px) {
             .quadrant-container {
                 flex-direction: column;
             }
             .quadrant {
-                width: 100%; /* Make quadrant full width in smaller screens */
+                width: 100%;
             }
         }
         .tournament-badge {

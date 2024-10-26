@@ -280,10 +280,9 @@
         }});
     }}
 
-    // Initial sort on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        sortTable(sortColumn);
-    });
+    // Initial sort by Elite utilization (descending)
+    sortTable(8, false);
+
 
     function searchTable() {
         var input, filter, table, tr, td, i, txtValue;
@@ -305,8 +304,6 @@
         }
     }
 
-    // Trigger initial sort
-    sortTable(sortColumn);
 </script>
 
         <tr>

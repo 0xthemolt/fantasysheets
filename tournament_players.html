@@ -78,11 +78,6 @@
             background-color: #141515;
             font-size: 1em;
         }
-        .player-handle {
-            text-align: left;
-            padding-left: 8px;
-            border: none;  // Remove border from player-handle to avoid double lines
-        }
        /* Updated styles for column group separation and rounded edges */
         th.column-group {
             position: relative;
@@ -119,9 +114,11 @@
         }
         .player-handle {
             text-align: left;
-            border-top: 1px solid #444;
-            border-bottom: 1px solid #444;
             padding-left: 8px;
+            // Remove any border properties here
+        }
+        table tr:last-child td {
+            border-bottom: none;  // Ensure no border on the last row
         }
         .player-handle img {
             width: 30px;

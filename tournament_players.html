@@ -272,72 +272,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('DOM fully loaded and parsed');
 
-    function getActualColumnIndex(headerCell) {{
-        let headerRow = headerCell.closest('tr');
-        let headerIndex = Array.from(headerRow.cells).indexOf(headerCell);
-        let colspan = parseInt(headerCell.getAttribute('colspan')) || 1;
-        let actualIndex = 0;
-
-        for (let i = 0; i < headerIndex; i++) {{
-            actualIndex += parseInt(headerRow.cells[i].getAttribute('colspan')) || 1;
-        }}
-
-        return actualIndex;
-    }}
-
-    function sortTable(headerCell, ascending) {{
-        let column = getActualColumnIndex(headerCell);
+    function sortTable(headerCell, ascending) {
+        let column = Array.from(headerCell.parentNode.children).indexOf(headerCell);
         console.log('Sorting table by column:', column, 'ascending:', ascending);
         
         var table = document.getElementById("playersTable");
         var tbody = table.querySelector('tbody');
         var rows = Array.from(tbody.querySelectorAll('tr'));
 
-        rows.sort((a, b) => {{
+        rows.sort((a, b) => {
             let aValue = a.cells[column].textContent.trim();
             let bValue = b.cells[column].textContent.trim();
             console.log('Comparing:', aValue, bValue);
 
-            if (headerCell.classList.contains('player-columns')) {{
+            if (headerCell.classList.contains('player-columns')) {
                 return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-            }} else {{
+            } else {
                 aValue = parseFloat(aValue.replace(/[^\d.]/g, '')) || 0;
                 bValue = parseFloat(bValue.replace(/[^\d.]/g, '')) || 0;
                 console.log('Parsed values:', aValue, bValue);
                 return ascending ? aValue - bValue : bValue - aValue;
-            }}
-        }});
+            }
+        });
 
         console.log('Sorted rows:', rows.map(row => row.cells[column].textContent));
 
         tbody.innerHTML = '';
         rows.forEach(row => tbody.appendChild(row));
         updateRanks();
-    }}
+    }
 
-    function updateRanks() {{
+    function updateRanks() {
         console.log('Updating ranks');
         var rows = document.querySelectorAll('#playersTable tbody tr');
-        rows.forEach((row, index) => {{
-            if (row.cells[0]) {{
+        rows.forEach((row, index) => {
+            if (row.cells[0]) {
                 row.cells[0].textContent = index + 1;
-            }}
-        }});
-    }}
+            }
+        });
+    }
 
-    document.querySelectorAll('th.reward-columns, th.rank-columns, th.player-columns').forEach(th => {{
-        th.addEventListener('click', function() {{
+    document.querySelectorAll('#playersTable th').forEach(th => {
+        th.addEventListener('click', function() {
             console.log('Column header clicked:', this.textContent);
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
             document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
-            if (currentAscending) {{
+            if (currentAscending) {
                 this.querySelector('.sort-arrow.down').classList.add('active');
-            }} else {{
+            } else {
                 this.querySelector('.sort-arrow.up').classList.add('active');
-            }}
+            }
             sortTable(this, !currentAscending);
-        }});
-    }});
+        });
+    });
+
 
     function searchTable() {
         console.log('Search function initialized');
@@ -372,13 +360,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('Initial sort');
     // Find the ETH header and trigger a click on it for initial sort
-    let ethHeader = Array.from(document.querySelectorAll('th.reward-columns')).find(th => th.textContent.trim() === 'ETH');
-    if (ethHeader) {{
+    let ethHeader = Array.from(document.querySelectorAll('th')).find(th => th.textContent.trim().startsWith('ETH'));
+    if (ethHeader) {
         ethHeader.click();
-    }} else {{
+    } else {
         console.error('ETH header not found for initial sort');
-    }}
-}});
+    }
+});
 </script>
 
         <tr>

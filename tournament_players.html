@@ -250,98 +250,80 @@
 </style>
 
 <script>
-        function sortTable(column, ascending) {
-            var table, rows, switching, i, x, y, shouldSwitch;
-            table = document.getElementById("heroTable");
-            switching = true;
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[column];
-                    y = rows[i + 1].getElementsByTagName("TD")[column];
-                    if (column === 1) { // Hero name column
-                        if (ascending ? x.textContent.toLowerCase() > y.textContent.toLowerCase() : x.textContent.toLowerCase() < y.textContent.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else {
-                        var xValue = parseFloat(x.querySelector('span').textContent.replace('%', ''));
-                        var yValue = parseFloat(y.querySelector('span').textContent.replace('%', ''));
-                        if (isNaN(xValue)) xValue = 0;
-                        if (isNaN(yValue)) yValue = 0;
-                        if (ascending ? xValue > yValue : xValue < yValue) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                }
+document.addEventListener('DOMContentLoaded', function() {
+    function sortTable(column, ascending) {
+        var table = document.getElementById("playersTable");
+        var tbody = table.querySelector('tbody');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            let aValue = a.cells[column].textContent.trim();
+            let bValue = b.cells[column].textContent.trim();
+
+            if (column === 1) { // Player name column
+                return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            } else {
+                aValue = parseFloat(aValue.replace(/[^\d.-]/g, ''));
+                bValue = parseFloat(bValue.replace(/[^\d.-]/g, ''));
+                return ascending ? aValue - bValue : bValue - aValue;
             }
-            updateRanks();
-        }
-
-        function updateRanks() {
-            var rows = document.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                row.querySelector('td.rank').textContent = index + 1;
-            });
-        }
-
-        document.querySelectorAll('th.reward-columns').forEach(th => {
-            th.addEventListener('click', function() {
-                var column = Array.from(this.parentNode.children).indexOf(this);
-                var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
-                document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
-                if (currentAscending) {
-                    this.querySelector('.sort-arrow.down').classList.add('active');
-                } else {
-                    this.querySelector('.sort-arrow.up').classList.add('active');
-                }
-                sortTable(column, !currentAscending);
-            });
         });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        function searchTable() {
-            console.log('searchTable function initialized');
-            var searchBox = document.getElementById('search-box');
-            if (!searchBox) {
-                console.error('Search box not found');
-                return;
-            }
-            searchBox.addEventListener('input', function() {
-                console.log('Search term:', this.value);
-                var searchTerm = this.value.toLowerCase();
-                var rows = document.querySelectorAll('#playersTable tbody tr');
-                rows.forEach(function(row) {
-                    var playerCell = row.querySelector('td.player-handle');
-                    if (!playerCell) {
-                        console.error('Player cell not found in row:', row);
-                        return;
-                    }
-                    var playerName = playerCell.textContent.toLowerCase();
-                    if (playerName.includes(searchTerm)) {
-                        row.style.display = '';
-                        row.classList.add('highlight');
-                    } else {
-                        row.style.display = 'none';
-                        row.classList.remove('highlight');
-                    }
-                });
-            });
-        }
+        rows.forEach(row => tbody.appendChild(row));
+        updateRanks();
+    }
 
-        searchTable(); // Call the function after it's defined
-        console.log('DOMContentLoaded event fired');
+    function updateRanks() {
+        var rows = document.querySelectorAll('#playersTable tbody tr');
+        rows.forEach((row, index) => {
+            row.querySelector('td.rank').textContent = index + 1;
+        });
+    }
+
+    document.querySelectorAll('th.reward-columns').forEach(th => {
+        th.addEventListener('click', function() {
+            var column = Array.from(this.parentNode.children).indexOf(this);
+            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
+            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
+            if (currentAscending) {
+                this.querySelector('.sort-arrow.down').classList.add('active');
+            } else {
+                this.querySelector('.sort-arrow.up').classList.add('active');
+            }
+            sortTable(column, !currentAscending);
+        });
     });
 
-    // Initial sort by ETH rewards (descending)
-    sortTable(8, false);
+    function searchTable() {
+        var searchBox = document.getElementById('search-box');
+        if (!searchBox) {
+            console.error('Search box not found');
+            return;
+        }
+        searchBox.addEventListener('input', function() {
+            var searchTerm = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#playersTable tbody tr');
+            rows.forEach(function(row) {
+                var playerCell = row.querySelector('td.player-handle');
+                if (!playerCell) {
+                    console.error('Player cell not found in row:', row);
+                    return;
+                }
+                var playerName = playerCell.textContent.toLowerCase();
+                if (playerName.includes(searchTerm)) {
+                    row.style.display = '';
+                    row.classList.add('highlight');
+                } else {
+                    row.style.display = 'none';
+                    row.classList.remove('highlight');
+                }
+            });
+        });
+    }
+
+    searchTable();
+    sortTable(8, false); // Initial sort by ETH rewards (descending)
+});
 </script>
 
         <tr>

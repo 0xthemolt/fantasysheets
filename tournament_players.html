@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Player cell not found in row:', row);
                     return;
                 }
-                var playerName = playerCell.textContent.toLowerCase();
+                var playerName = playerCell.querySelector('span').textContent.toLowerCase();
                 if (playerName.includes(searchTerm)) {
                     row.style.display = '';
                 } else {
@@ -353,9 +353,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
-    searchTable();
-    // ... (rest of the code remains unchanged)
 });
 
     console.log('Initial sort');

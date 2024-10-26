@@ -209,7 +209,7 @@
             <th class="rank-columns"><alt="Reverse Score"> Reverse </th>
             <th class="rank-columns">ITM Decks</th>
             <th class="reward-columns" data-sort="reward_eth">ETH <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
-            <th class="reward-columns" data-sort="reward_pack" data-sort-column="9">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            <th class="reward-columns" data-sort="reward_pack">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
             <th class="reward-columns" data-sort="reward_fan">Fan <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
         </tr>
 
@@ -294,9 +294,15 @@
 
     document.querySelectorAll('th.reward-columns').forEach(th => {
         th.addEventListener('click', function() {
-            var column = parseInt(this.getAttribute('data-sort-column'), 10);
-            console.log('Clicked column index:', column);  // Debug log
-            // ... rest of the event listener code ...
+            var column = Array.from(this.parentNode.children).indexOf(this);
+            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
+            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
+            if (currentAscending) { 
+                this.querySelector('.sort-arrow.down').classList.add('active');
+            } else {
+                this.querySelector('.sort-arrow.up').classList.add('active');
+            }
+            sortTable(column, !currentAscending);
         });
     });
 

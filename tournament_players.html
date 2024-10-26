@@ -39,7 +39,7 @@
             background-color: #141515;
             color: #fff;
         }
-        table {
+         table {
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 10px;
@@ -59,6 +59,16 @@
             background-color: #141515;
             text-transform: uppercase;
             cursor: pointer;
+        }
+        td {
+            background-color: #141515;
+            font-size: 1em;
+        }
+        td:first-child {
+            text-align: left;
+        }
+        table tr:last-child td {
+            border-bottom: none;
         }
         .column-container {
             display: flex;
@@ -125,9 +135,6 @@
         .handle-text {
             vertical-align: middle;
         }
-        table tr:last-child td {
-            border-bottom: none;
-        }
         .black-text {
             color: #000;
         }
@@ -172,7 +179,7 @@
         margin-right: 5px;
     }
 </style>
-    
+
 </head>
 <body>
     <div id="search-container">

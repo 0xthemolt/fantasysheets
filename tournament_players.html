@@ -251,7 +251,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed');
+
     function sortTable(column, ascending) {
+        console.log('Sorting table by column:', column, 'ascending:', ascending);
         var table = document.getElementById("playersTable");
         var tbody = table.querySelector('tbody');
         var rows = Array.from(tbody.querySelectorAll('tr'));
@@ -259,36 +262,37 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.sort((a, b) => {
             let aValue = a.cells[column].textContent.trim();
             let bValue = b.cells[column].textContent.trim();
+            console.log('Comparing:', aValue, bValue);
 
             if (column === 1) { // Player name column
                 return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             } else {
-                // Remove any non-numeric characters except decimal point
                 aValue = parseFloat(aValue.replace(/[^\d.]/g, ''));
                 bValue = parseFloat(bValue.replace(/[^\d.]/g, ''));
+                console.log('Parsed values:', aValue, bValue);
                 return ascending ? aValue - bValue : bValue - aValue;
             }
         });
 
-        // Clear the table body
-        while (tbody.firstChild) {
-            tbody.removeChild(tbody.firstChild);
-        }
+        console.log('Sorted rows:', rows.map(row => row.cells[column].textContent));
 
-        // Append sorted rows
+        // Clear and repopulate tbody
+        tbody.innerHTML = '';
         rows.forEach(row => tbody.appendChild(row));
         updateRanks();
     }
 
     function updateRanks() {
+        console.log('Updating ranks');
         var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach((row, index) => {
-            row.querySelector('td:first-child').textContent = index + 1;
+            row.cells[0].textContent = index + 1;
         });
     }
 
     document.querySelectorAll('th.reward-columns').forEach(th => {
         th.addEventListener('click', function() {
+            console.log('Column header clicked:', this.textContent);
             var column = Array.from(this.parentNode.children).indexOf(this);
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
             document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
@@ -302,12 +306,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function searchTable() {
+        console.log('Search function initialized');
         var searchBox = document.getElementById('search-box');
         if (!searchBox) {
             console.error('Search box not found');
             return;
         }
         searchBox.addEventListener('input', function() {
+            console.log('Searching for:', this.value);
             var searchTerm = this.value.toLowerCase();
             var rows = document.querySelectorAll('#playersTable tbody tr');
             rows.forEach(function(row) {
@@ -317,16 +323,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 var playerName = playerCell.textContent.toLowerCase();
-                if (playerName.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = playerName.includes(searchTerm) ? '' : 'none';
             });
         });
     }
 
     searchTable();
+    console.log('Initial sort');
     sortTable(8, false); // Initial sort by ETH rewards (descending)
 });
 </script>

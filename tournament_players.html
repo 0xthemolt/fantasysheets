@@ -339,13 +339,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var searchTerm = this.value.toLowerCase();
             var rows = document.querySelectorAll('#playersTable tbody tr');
             rows.forEach(function(row) {
-                var playerCell = row.querySelector('td.player-handle');
-                if (!playerCell) {
-                    console.error('Player cell not found in row:', row);
-                    return;
-                }
-                var playerName = playerCell.querySelector('span').textContent.toLowerCase();
-                if (playerName.includes(searchTerm)) {
+                var rowText = row.textContent.toLowerCase();
+                if (rowText.includes(searchTerm)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -353,8 +348,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-});
 
+    // Call the function to initialize the search
+    searchTable()
+    
     console.log('Initial sort');
     // Find the ETH header and trigger a click on it for initial sort
     let ethHeader = Array.from(document.querySelectorAll('th')).find(th => th.textContent.trim().startsWith('ETH'));

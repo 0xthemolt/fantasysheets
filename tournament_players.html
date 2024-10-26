@@ -248,6 +248,22 @@
 </style>
 
 <script>
+    document.getElementById('search-box').addEventListener('input', function() {
+        var searchTerm = this.value.toLowerCase();
+        var rows = document.querySelectorAll('tbody tr');
+        rows.forEach(function(row) {
+            var heroCell = row.querySelector('td.hero-cell');
+            var heroName = heroCell.textContent.toLowerCase();
+            if (heroName.includes(searchTerm)) {
+                row.style.display = '';
+                row.classList.add('highlight');
+            } else {
+                row.style.display = 'none';
+                row.classList.remove('highlight');
+            }
+        });
+    });
+    
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('img').forEach(img => {
         img.onerror = function() {

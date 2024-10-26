@@ -32,31 +32,6 @@
             color: #fff; 
         }
         
-        /* Ensure quadrants wrap and fill the available space */
-        .quadrant-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-        }
-        
-        .quadrant {
-            flex: 1 1 calc(25% - 20px); /* Allow quadrants to take up to 25% of the width */
-            max-width: calc(25% - 20px); /* Ensure quadrants don't exceed 25% width */
-            padding: 10px;
-            border-radius: 15px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 2px solid white;
-            font-size: 1.15em;
-        }
-
-        .quadrant.elite { color: #24489A; }
-        .quadrant.gold { color: #6C7326; }
-        .quadrant.silver { color: #4A4A4A; }
-        .quadrant.bronze { color: #64400F; }
-        
         .column-container { display: flex; justify-content: space-between; }
         .column { width: 32%; text-align: center; }
         .column img { width: 36px; height: 36px; clip-path: circle(50%); object-fit: cover; display: block; margin: 0 auto; }
@@ -160,14 +135,8 @@
         <h1>Classic - Main 22 Leaders</h1>
         <p class="timestamp">Last updated: 2024-10-24 19:03 UTC </p>
     </div>
-    <!-- Quadrant container for dynamic content -->
-    <div class="quadrant-container">
-        <!-- Dynamically insert quadrants here -->
-    </div>
 </body>
 </html>
-
-    </div>
 
     <!-- Title and Search Box on the Same Line -->
     <div class="title-search-container">
@@ -282,7 +251,6 @@
 
     // Initial sort by Elite utilization (descending)
     sortTable(8, false);
-
 
     function searchTable() {
         var input, filter, table, tr, td, i, txtValue;

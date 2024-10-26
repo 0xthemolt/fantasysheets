@@ -120,6 +120,14 @@
                 width: 100%; /* Make quadrant full width in smaller screens */
             }
         }
+        .tournament-badge {
+            background-color: white;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
     
     .league-icon {
         width: 20px;
@@ -131,13 +139,10 @@
     
 </head>
 <body>
-   <div class="header-container">
+    <div class="header-container">
         <h1>Classic - Main 22 Leaders</h1>
         <p class="timestamp">Last updated: 2024-10-24 19:03 UTC </p>
     </div>
-</body>
-</html>
-
     <!-- Title and Search Box on the Same Line -->
     <div class="title-search-container">
         <h2>Player Total Rewards Leaders</h2>
@@ -145,8 +150,7 @@
             <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search players...">
         </div>
     </div>
-
-   <!-- Main Player Table -->
+    <!-- Main Player Table -->
     <table id="playersTable">
         <tr>
             <th colspan="2" class="column-group player-columns"></th>
@@ -168,32 +172,32 @@
         </tr>
 
     <style>
-        .sort-arrows {{
+        .sort-arrows {
             display: inline-block;
             vertical-align: middle;
-        }}
-        .sort-arrow {{
+        }
+        .sort-arrow {
             display: block;
             width: 0;
             height: 0;
             margin: 2px auto;
-        }}
-        .sort-arrow.up {{
+        }
+        .sort-arrow.up {
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
             border-bottom: 5px solid #ccc;
-        }}
-        .sort-arrow.down {{
+        }
+        .sort-arrow.down {
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
             border-top: 5px solid #ccc;
-        }}
-        .sort-arrow.active.up {{
+        }
+        .sort-arrow.active.up {
             border-bottom-color: #4CAF50; /* Green */
-        }}
-        .sort-arrow.active.down {{
+        }
+        .sort-arrow.active.down {
             border-top-color: #F44336; /* Red */
-        }}
+        }
     
     .league-icon {
         width: 20px;
@@ -207,69 +211,67 @@
     let sortColumn = 8; // Default sort column (ETH)
     let sortDirection = -1; // Default sort direction (descending)
 
-    function sortTable(column, ascending) {{
+    function sortTable(column, ascending) {
         var table, rows, switching, i, x, y, shouldSwitch;
         table = document.getElementById("heroTable");
         switching = true;
-        while (switching) {{
+        while (switching) {
             switching = false;
             rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i++) {{
+            for (i = 1; i < (rows.length - 1); i++) {
                 shouldSwitch = false;
                 x = rows[i].getElementsByTagName("TD")[column];
                 y = rows[i + 1].getElementsByTagName("TD")[column];
-                if (column === 1) {{ // Hero name column
-                    if (ascending ? x.textContent.toLowerCase() > y.textContent.toLowerCase() : x.textContent.toLowerCase() < y.textContent.toLowerCase()) {{
+                if (column === 1) { // Hero name column
+                    if (ascending ? x.textContent.toLowerCase() > y.textContent.toLowerCase() : x.textContent.toLowerCase() < y.textContent.toLowerCase()) {
                         shouldSwitch = true;
                         break;
-                    }}
-                }} else {{
+                    }
+                } else {
                     var xValue = parseFloat(x.querySelector('span').textContent.replace('%', ''));
                     var yValue = parseFloat(y.querySelector('span').textContent.replace('%', ''));
                     if (isNaN(xValue)) xValue = 0;
                     if (isNaN(yValue)) yValue = 0;
-                    if (ascending ? xValue > yValue : xValue < yValue) {{
+                    if (ascending ? xValue > yValue : xValue < yValue) {
                         shouldSwitch = true;
                         break;
-                    }}
-                }}
-            }}
-            if (shouldSwitch) {{
+                    }
+                }
+            }
+            if (shouldSwitch) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
-            }}
-        }}
+            }
+        }
         updateRanks();
-    }}
+    }
 
-    function updateRanks() {{
+    function updateRanks() {
         var rows = document.querySelectorAll('tbody tr');
-        rows.forEach((row, index) => {{
+        rows.forEach((row, index) => {
             row.querySelector('td.rank').textContent = index + 1;
-        }});
-    }}
+        });
+    }
 
     // Initial sort by Elite utilization (descending)
     sortTable(8, false);
 
     function searchTable() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("searchInput");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("playersTable");
-        tr = table.getElementsByTagName("tr");
-
-        for (i = 2; i < tr.length; i++) { // Start from index 2 to skip header rows
-            td = tr[i].getElementsByTagName("td")[1]; // Player handle column
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
+        document.getElementById('searchInput').addEventListener('input', function() {
+            var searchTerm = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#playersTable tbody tr');
+            rows.forEach(function(row) {
+                var playerCell = row.querySelector('td.player-handle');
+                var playerName = playerCell.textContent.toLowerCase();
+                if (playerName.includes(searchTerm)) {
+                    row.style.display = '';
+                    row.classList.add('highlight');
                 } else {
-                    tr[i].style.display = "none";
+                    row.style.display = 'none';
+                    row.classList.remove('highlight');
                 }
-            }       
-        }
+            });
+        });
     }
 
 </script>

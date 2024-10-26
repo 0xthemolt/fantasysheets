@@ -294,16 +294,9 @@
 
     document.querySelectorAll('th.reward-columns').forEach(th => {
         th.addEventListener('click', function() {
-            var column = Array.from(this.parentNode.children).indexOf(this);
+            var column = parseInt(this.getAttribute('data-sort-column'), 10);
             console.log('Clicked column index:', column);  // Debug log
-            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
-            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
-            if (currentAscending) { 
-                this.querySelector('.sort-arrow.down').classList.add('active');
-            } else {
-                this.querySelector('.sort-arrow.up').classList.add('active');
-            }
-            sortTable(column, !currentAscending);
+            // ... rest of the event listener code ...
         });
     });
 

@@ -372,6 +372,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     searchTable();
+    // ... (rest of the code remains unchanged)
+});
+
     console.log('Initial sort');
     // Find the ETH header and trigger a click on it for initial sort
     let ethHeader = Array.from(document.querySelectorAll('th.reward-columns')).find(th => th.textContent.trim() === 'ETH');

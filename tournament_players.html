@@ -27,10 +27,8 @@
             text-align: center;
         }
         #search-container {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
+            margin: 10px 0;
+            text-align: center;
         }
         #search-box {
             padding: 5px;
@@ -38,6 +36,7 @@
             border: 1px solid #ccc;
             background-color: #141515;
             color: #fff;
+            width: 200px;
         }
          table {
             border-collapse: separate;
@@ -182,12 +181,12 @@
 
 </head>
 <body>
-    <div id="search-container">
-        <input type="text" id="search-box" placeholder="Search hero...">
-    </div>
     <div class="title-container">
         <h1>Player Total Rewards Leaders</h1>
         <div class="tournament-badge">Main 22</div>
+    </div>
+        <div id="search-container">
+        <input type="text" id="search-box" placeholder="Search hero...">
     </div>
     <div class="small-text">
         <span>Last updated: 2024-10-24 19:03 UTC</span>

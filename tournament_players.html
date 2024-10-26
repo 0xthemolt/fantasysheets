@@ -292,42 +292,42 @@
         });
     }
 
-    document.querySelectorAll('th.reward-columns').forEach(th => {
-        th.addEventListener('click', function() {
-            var column = Array.from(this.parentNode.children).indexOf(this);
-            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
-            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
-            if (currentAscending) { 
-                this.querySelector('.sort-arrow.down').classList.add('active');
-            } else {
-                this.querySelector('.sort-arrow.up').classList.add('active');
+    document.addEventListener('DOMContentLoaded', function() {
+        function searchTable() {
+            console.log('searchTable function initialized');
+            var searchBox = document.getElementById('search-box');
+            if (!searchBox) {
+                console.error('Search box not found');
+                return;
             }
-            sortTable(column, !currentAscending);
-        });
+            searchBox.addEventListener('input', function() {
+                console.log('Search term:', this.value);
+                var searchTerm = this.value.toLowerCase();
+                var rows = document.querySelectorAll('#playersTable tbody tr');
+                rows.forEach(function(row) {
+                    var playerCell = row.querySelector('td.player-handle');
+                    if (!playerCell) {
+                        console.error('Player cell not found in row:', row);
+                        return;
+                    }
+                    var playerName = playerCell.textContent.toLowerCase();
+                    if (playerName.includes(searchTerm)) {
+                        row.style.display = '';
+                        row.classList.add('highlight');
+                    } else {
+                        row.style.display = 'none';
+                        row.classList.remove('highlight');
+                    }
+                });
+            });
+        }
+
+        searchTable(); // Call the function after it's defined
+        console.log('DOMContentLoaded event fired');
     });
 
     // Initial sort by ETH rewards (descending)
     sortTable(8, false);
-
-    function searchTable() {
-        document.getElementById('search-box').addEventListener('input', function() { // Corrected search box ID
-            var searchTerm = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#playersTable tbody tr'); // Corrected table ID
-            rows.forEach(function(row) {
-                var playerCell = row.querySelector('td.player-handle');
-                var playerName = playerCell.textContent.toLowerCase();
-                if (playerName.includes(searchTerm)) {
-                    row.style.display = '';
-                    row.classList.add('highlight');
-                } else {
-                    row.style.display = 'none';
-                    row.classList.remove('highlight');
-                }
-            });
-        });
-    }
-
-    searchTable(); // Ensure search functionality is initialized
 </script>
 
         <tr>

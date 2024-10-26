@@ -191,27 +191,27 @@
         <span>Last updated: 2024-10-24 19:03 UTC</span>
     </div>
     <!-- Main Player Table -->
-    <table id="playersTable">
-        <thead>
-            <tr>
-                <th class="player-columns">Rank</th>
-                <th class="player-columns">Player</th>
-                <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/1.png" class="league-icon" alt="Elite"> Elite</th>
-                <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/2.png" class="league-icon" alt="Gold"> Gold</th>
-                <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/3.png" class="league-icon" alt="Silver"> Silver</th>
-                <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/4.png" class="league-icon" alt="Bronze"> Bronze</th>
-                <th class="rank-columns"><alt="Reverse Score"> Reverse </th>
-                <th class="rank-columns">ITM Decks</th>
-                <th class="reward-columns" data-sort="reward_eth">ETH <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
-                <th class="reward-columns" data-sort="reward_pack">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-                <th class="reward-columns" data-sort="reward_fan">Fan <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be dynamically added here -->
-            { table_rows }
-        </tbody>
-    </table>
+<table id="playersTable">
+    <thead>
+        <tr>
+            <th class="player-columns">Rank</th>
+            <th class="player-columns">Player</th>
+            <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/1.png" class="league-icon" alt="Elite"> Elite</th>
+            <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/2.png" class="league-icon" alt="Gold"> Gold</th>
+            <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/3.png" class="league-icon" alt="Silver"> Silver</th>
+            <th class="rank-columns"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/4.png" class="league-icon" alt="Bronze"> Bronze</th>
+            <th class="rank-columns"><alt="Reverse Score"> Reverse </th>
+            <th class="rank-columns">ITM Decks</th>
+            <th class="reward-columns" data-sort="reward_eth">ETH <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+            <th class="reward-columns" data-sort="reward_pack">Cards <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            <th class="reward-columns" data-sort="reward_fan">Fan <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Rows will be dynamically added here -->
+        { table_rows }
+    </tbody>
+</table>
 
     <style>
         .sort-arrows {

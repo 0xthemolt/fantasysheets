@@ -260,21 +260,30 @@ document.addEventListener('DOMContentLoaded', function() {
         var rows = Array.from(tbody.querySelectorAll('tr'));
 
         rows.sort((a, b) => {
-            let aValue = a.cells[column].textContent.trim();
-            let bValue = b.cells[column].textContent.trim();
+            // Check if the cell exists before accessing its content
+            let aCell = a.cells[column];
+            let bCell = b.cells[column];
+            
+            if (!aCell || !bCell) {
+                console.error('Cell not found for column', column, 'in row', a, 'or', b);
+                return 0;
+            }
+
+            let aValue = aCell.textContent.trim();
+            let bValue = bCell.textContent.trim();
             console.log('Comparing:', aValue, bValue);
 
             if (column === 1) { // Player name column
                 return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
             } else {
-                aValue = parseFloat(aValue.replace(/[^\d.]/g, ''));
-                bValue = parseFloat(bValue.replace(/[^\d.]/g, ''));
+                aValue = parseFloat(aValue.replace(/[^\d.]/g, '')) || 0;
+                bValue = parseFloat(bValue.replace(/[^\d.]/g, '')) || 0;
                 console.log('Parsed values:', aValue, bValue);
                 return ascending ? aValue - bValue : bValue - aValue;
             }
         });
 
-        console.log('Sorted rows:', rows.map(row => row.cells[column].textContent));
+        console.log('Sorted rows:', rows.map(row => row.cells[column] ? row.cells[column].textContent : 'N/A'));
 
         // Clear and repopulate tbody
         tbody.innerHTML = '';
@@ -286,14 +295,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Updating ranks');
         var rows = document.querySelectorAll('#playersTable tbody tr');
         rows.forEach((row, index) => {
-            row.cells[0].textContent = index + 1;
+            if (row.cells[0]) {
+                row.cells[0].textContent = index + 1;
+            }
         });
     }
 
-    document.querySelectorAll('th.reward-columns').forEach(th => {
+    document.querySelectorAll('th.reward-columns').forEach((th, index) => {
         th.addEventListener('click', function() {
-            console.log('Column header clicked:', this.textContent);
+            console.log('Column header clicked:', this.textContent, 'Index:', index);
             var column = Array.from(this.parentNode.children).indexOf(this);
+            console.log('Calculated column index:', column);
             var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
             document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
             if (currentAscending) {

@@ -250,12 +250,9 @@
 </style>
 
 <script>
-    let sortColumn = 8; // Default sort column (ETH)
-    let sortDirection = -1; // Default sort direction (descending)
-
     function sortTable(column, ascending) {
         var table, rows, switching, i, x, y, shouldSwitch;
-        table = document.getElementById("heroTable");
+        table = document.getElementById("playersTable"); // Corrected table ID
         switching = true;
         while (switching) {
             switching = false;
@@ -264,17 +261,17 @@
                 shouldSwitch = false;
                 x = rows[i].getElementsByTagName("TD")[column];
                 y = rows[i + 1].getElementsByTagName("TD")[column];
-                if (column === 1) { // Hero name column
+                if (column === 1) {     // Player name column
                     if (ascending ? x.textContent.toLowerCase() > y.textContent.toLowerCase() : x.textContent.toLowerCase() < y.textContent.toLowerCase()) {
                         shouldSwitch = true;
                         break;
                     }
                 } else {
-                    var xValue = parseFloat(x.querySelector('span').textContent.replace('%', ''));
-                    var yValue = parseFloat(y.querySelector('span').textContent.replace('%', ''));
+                    var xValue = parseFloat(x.textContent.replace(/[^0-9.-]+/g, ''));
+                    var yValue = parseFloat(y.textContent.replace(/[^0-9.-]+/g, ''));
                     if (isNaN(xValue)) xValue = 0;
                     if (isNaN(yValue)) yValue = 0;
-                    if (ascending ? xValue > yValue : xValue < yValue) {
+                    if (ascending ? xValue > yValue : xValue < yValue) {    
                         shouldSwitch = true;
                         break;
                     }
@@ -289,19 +286,33 @@
     }
 
     function updateRanks() {
-        var rows = document.querySelectorAll('tbody tr');
+        var rows = document.querySelectorAll('#playersTable tbody tr'); // Corrected table ID
         rows.forEach((row, index) => {
             row.querySelector('td.rank').textContent = index + 1;
         });
     }
 
-    // Initial sort by Elite utilization (descending)
-    sortTable(8, false);
+    document.querySelectorAll('th.rank-columns').forEach(th => {
+        th.addEventListener('click', function() {
+            var column = Array.from(this.parentNode.children).indexOf(this);
+            var currentAscending = this.querySelector('.sort-arrow.up').classList.contains('active');
+            document.querySelectorAll('th .sort-arrow').forEach(arrow => arrow.classList.remove('active'));
+            if (currentAscending) { 
+                this.querySelector('.sort-arrow.down').classList.add('active');
+            } else {
+                this.querySelector('.sort-arrow.up').classList.add('active');
+            }
+            sortTable(column, !currentAscending);
+        });
+    });
+
+    // Initial sort by ETH rewards (descending)
+    sortTable(8, false); // Adjusted column index for ETH rewards
 
     function searchTable() {
-        document.getElementById('searchInput').addEventListener('input', function() {
+        document.getElementById('search-box').addEventListener('input', function() { // Corrected search box ID
             var searchTerm = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#playersTable tbody tr');
+            var rows = document.querySelectorAll('#playersTable tbody tr'); // Corrected table ID
             rows.forEach(function(row) {
                 var playerCell = row.querySelector('td.player-handle');
                 var playerName = playerCell.textContent.toLowerCase();
@@ -316,6 +327,7 @@
         });
     }
 
+    searchTable(); // Ensure search functionality is initialized
 </script>
 
         <tr>

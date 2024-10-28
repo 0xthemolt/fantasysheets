@@ -113,7 +113,7 @@ def get_heroes_data():
     df_heroes = df_heroes.sort_values(by='hero_fantasy_score', ascending=False)
 
     # Add a rank column based on total_utilization, skipping identical values
-    df_heroes['rank'] = df_heroes['total_utilization'].rank(method='dense', ascending=False).astype(int)
+    df_heroes['rank'] = df_heroes['hero_fantasy_score'].rank(method='dense', ascending=False).astype(int)
 
     # Calculate the latest timestamp and time difference
     latest_score_timestamp = max(df_heroes['score_timestamp'])
@@ -258,7 +258,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 });
             }
 
-             function sortTable(column, descending) {
+            function sortTable(column, descending) {
                 var table = document.getElementById("heroesTable");
                 var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
                 
@@ -268,8 +268,8 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 
                 if (columnIndex === -1) return; // Exit if column not found
 
-                // Set ascending to false for hero_fantasy_score to sort in descending order
-                const ascending = (column === 'hero_fantasy_score') ? false : !descending; // Always sort hero_fantasy_score in descending order
+                // Remove the special case for hero_fantasy_score
+                const ascending = !descending;
 
                 rows.sort((a, b) => {
                     let aCell = a.cells[columnIndex];
@@ -279,7 +279,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                     let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
                     let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
 
-                    return ascending ? aValue - bValue : bValue - aValue; // Adjusted for descending order
+                    return ascending ? aValue - bValue : bValue - aValue;
                 });
 
                 // Reinsert rows in new order
@@ -323,20 +323,25 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                         
                         // Find current sort direction
                         const currentArrow = this.querySelector('.sort-arrow.active');
-                        const isAscending = currentArrow && currentArrow.classList.contains('up');
+                        const isDescending = currentArrow && currentArrow.classList.contains('down');
                         
                         // Reset all arrows in all headers
                         document.querySelectorAll('.sort-arrow').forEach(arrow => {
                             arrow.classList.remove('active');
                         });
                         
-                        // Update active arrow in clicked header
-                        const newArrow = this.querySelector(isAscending ? '.sort-arrow.down' : '.sort-arrow.up');
+                        // Toggle between ascending and descending
+                        const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
                         if (newArrow) {
                             newArrow.classList.add('active');
                         }
                         
-                        sortTable(column, !isAscending);
+                        // For hero_fantasy_score, we want to maintain descending as default
+                        const descending = (column === 'hero_fantasy_score') 
+                            ? (isDescending ? false : true)  // Toggle between true/false
+                            : (isDescending ? false : true); // Toggle between true/false
+
+                        sortTable(column, descending);
                     });
                 });
             });

@@ -34,7 +34,7 @@ def get_heroes_data():
             where town.tournament_unique_key   in ('Main {TOURNAMENT_NUMBER}')
         )
         ,all_heroes as (
-            select hero_id,COUNT(*) as hero_usage_count,MIN(db_updated_cst) db_updated_cst from tournament_base group by 1
+            select hero_id,COUNT(*) as hero_usage_count,ROUND(MAX(case when hero_rarity = 'common' then hero_fantasy_score else 0 end),0) hero_fantasy_score, MIN(db_updated_cst) db_updated_cst from tournament_base group by 1
         )
         ,unique_decks AS (
             SELECT COUNT(distinct tournament_player_deck_id) unique_decks
@@ -81,6 +81,7 @@ def get_heroes_data():
             group by 1
         )
         select ghwss.hero_handle,
+            ah.hero_fantasy_score,
             ah.hero_usage_count,
             ud.unique_decks,
             ah.hero_usage_count::numeric / ud.unique_decks  as total_utilization,
@@ -147,6 +148,10 @@ def format_utilization_with_count(value, vmin, vmax, hero_usage_count, unique_de
     color = get_color(value, vmin, vmax)
     return f'<span style="color: {color}">{float(value):.1%}</span><br><span class="small-count">({hero_usage_count} of {unique_decks})</span>'
 
+def get_fan_score_color(score, min_score, max_score):
+    norm = Normalize(min_score, max_score)
+    rgba = plt.get_cmap('RdYlGn')(norm(score))  # Use RdYlGn colormap instead of viridis
+    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
 
 def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards):
 
@@ -196,6 +201,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
             <tr>
                 <th>Rank</th>
                 <th style="text-align: left;">Hero</th>
+                <th class="rank-columns" data-sort="hero_fantasy_score">Score <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="elite_utilization"><img src="{LEAGUE_IMAGES['elite']}" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
                 <th class="rank-columns" data-sort="gold_utilization"><img src="{LEAGUE_IMAGES['gold']}" class="league-icon" alt="Gold"> Gold <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="silver_utilization"><img src="{LEAGUE_IMAGES['silver']}" class="league-icon" alt="Silver"> Silver <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
@@ -206,6 +212,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     """
 
     for _, row in df_heroes.iterrows():
+        fan_score_color = get_fan_score_color(row['hero_fantasy_score'], min_fan_score, max_fan_score)  # Calculate color
         html_content += f"""
             <tr>
                 <td class="rank">{row['rank']}</td>
@@ -213,6 +220,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                     <img src="{row['hero_pfp_url']}" class="hero-image" alt="{row['hero_handle']}">
                     <span>{row['hero_handle']}</span>
                 </td>
+                <td data-value="{row['hero_fantasy_score'] or 0}" style="color: {fan_score_color};">{int(row['hero_fantasy_score'])}</td> 
                 <td data-value="{row['elite_utilization'] or 0}">{format_utilization(row['elite_utilization'], *league_min_max['elite_utilization'])}</td>
                 <td data-value="{row['gold_utilization'] or 0}">{format_utilization(row['gold_utilization'], *league_min_max['gold_utilization'])}</td>
                 <td data-value="{row['silver_utilization'] or 0}">{format_utilization(row['silver_utilization'], *league_min_max['silver_utilization'])}</td>
@@ -326,4 +334,9 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
 if __name__ == "__main__":
     # Update the unpacking of return values
     df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards = get_heroes_data()
+    
+    # Calculate min and max fan scores based on your data
+    min_fan_score = df_heroes['hero_fantasy_score'].min()  # Calculate minimum score
+    max_fan_score = df_heroes['hero_fantasy_score'].max()  # Calculate maximum score
+
     generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards)

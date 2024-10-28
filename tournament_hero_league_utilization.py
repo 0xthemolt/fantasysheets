@@ -109,8 +109,12 @@ def get_heroes_data():
     # Close the connection
     conn.close()
     
-    # Add a rank column based on reward_eth in descending order
-    df_heroes['rank'] = df_heroes['elite_utilization'].rank(method='min', ascending=False).astype(int)
+    # After fetching the heroes data, sort by hero_fantasy_score in descending order
+    df_heroes = df_heroes.sort_values(by='hero_fantasy_score', ascending=False)
+
+    # Add a rank column based on total_utilization, skipping identical values
+    df_heroes['rank'] = df_heroes['total_utilization'].rank(method='dense', ascending=False).astype(int)
+
     # Calculate the latest timestamp and time difference
     latest_score_timestamp = max(df_heroes['score_timestamp'])
     latest_score_timestamp = df_heroes['score_timestamp'].max().strftime("%Y-%m-%d %H:%M")
@@ -201,8 +205,8 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
             <tr>
                 <th>Rank</th>
                 <th style="text-align: left;">Hero</th>
-                <th class="rank-columns" data-sort="hero_fantasy_score">Score <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-                <th class="rank-columns" data-sort="elite_utilization"><img src="{LEAGUE_IMAGES['elite']}" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+                <th class="rank-columns" data-sort="hero_fantasy_score">Score <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+                <th class="rank-columns" data-sort="elite_utilization"><img src="{LEAGUE_IMAGES['elite']}" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="gold_utilization"><img src="{LEAGUE_IMAGES['gold']}" class="league-icon" alt="Gold"> Gold <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="silver_utilization"><img src="{LEAGUE_IMAGES['silver']}" class="league-icon" alt="Silver"> Silver <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="bronze_utilization"><img src="{LEAGUE_IMAGES['bronze']}" class="league-icon" alt="Bronze"> Bronze <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
@@ -254,7 +258,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 });
             }
 
-            function sortTable(column, ascending) {
+             function sortTable(column, descending) {
                 var table = document.getElementById("heroesTable");
                 var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
                 
@@ -264,6 +268,9 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 
                 if (columnIndex === -1) return; // Exit if column not found
 
+                // Set ascending to false for hero_fantasy_score to sort in descending order
+                const ascending = (column === 'hero_fantasy_score') ? false : !descending; // Always sort hero_fantasy_score in descending order
+
                 rows.sort((a, b) => {
                     let aCell = a.cells[columnIndex];
                     let bCell = b.cells[columnIndex];
@@ -272,22 +279,37 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                     let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
                     let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
 
-                    return ascending ? aValue - bValue : bValue - aValue;
+                    return ascending ? aValue - bValue : bValue - aValue; // Adjusted for descending order
                 });
 
                 // Reinsert rows in new order
                 rows.forEach(row => table.appendChild(row));
                 
-                updateRanks();
+                updateRanks(); // Call to update ranks after sorting
             }
 
+            // Ensure that the ranking is based on hero_fantasy_score
             function updateRanks() {
                 var rows = document.querySelectorAll('#heroesTable tr');
+                let currentRank = 1; // Start ranking from 1
+                let lastValue = null; // To track the last value for skipping identical ranks
+                let lastRank = 1; // To track the last assigned rank
+
                 rows.forEach((row, index) => {
                     if (index === 0) return; // Skip header row
                     var rankCell = row.querySelector('td.rank');
                     if (rankCell) {
-                        rankCell.textContent = index;
+                        let currentValue = parseFloat(row.querySelector('td[data-value]').getAttribute('data-value')) || 0;
+
+                        // If the current value is the same as the last value, keep the same rank
+                        if (currentValue === lastValue) {
+                            rankCell.textContent = lastRank; // Same rank for identical values
+                        } else {
+                            rankCell.textContent = currentRank; // Assign new rank
+                            lastRank = currentRank; // Update lastRank to current
+                        }
+                        lastValue = currentValue; // Update lastValue to current
+                        currentRank++; // Increment rank for next unique value
                     }
                 });
             }

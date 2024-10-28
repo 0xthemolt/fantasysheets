@@ -1,0 +1,2639 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hero Utilization by League</title>
+        <link rel="stylesheet" href="./styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </head>
+    <body>
+        <div class="title-container">
+            <h1>
+                <a href="home.html" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                Player Total Rewards Leaders
+            </h1>
+            <div class="tournament-badge">Main 22</div>
+        </div>
+        <div id="search-container">
+            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+        </div>
+        <div class="small-text">
+            <span>Total Heroes: 179 | Total Decks: 19419 | Total Cards: 97095 | Last updated: 2024-10-24 14:02 UTC</span>
+        </div>
+        <!-- Main Hero Table -->
+        <table id="heroesTable">
+            <tr>
+                <th>Rank</th>
+                <th style="text-align: left;">Hero</th>
+                <th class="rank-columns" data-sort="elite_utilization"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/1.png" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+                <th class="rank-columns" data-sort="gold_utilization"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/2.png" class="league-icon" alt="Gold"> Gold <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="silver_utilization"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/3.png" class="league-icon" alt="Silver"> Silver <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="bronze_utilization"><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/4.png" class="league-icon" alt="Bronze"> Bronze <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="reverse_utilization">Reverse <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="total_utilization">Total Utilization <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            </tr>
+    
+            <tr>
+                <td class="rank">1</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1596041341380997120/8dy91BAl_normal.jpg" class="hero-image" alt="mememe69696969">
+                    <span>mememe69696969</span>
+                </td>
+                <td data-value="0.2528985507246377"><span style="color: #fde724">25.3%</span></td>
+                <td data-value="0.18035426731078905"><span style="color: #fde724">18.0%</span></td>
+                <td data-value="0.09736842105263158"><span style="color: #88d547">9.7%</span></td>
+                <td data-value="0.03424657534246575"><span style="color: #2e6b8e">3.4%</span></td>
+                <td data-value="0.02476780185758514"><span style="color: #472a79">2.5%</span></td>
+                <td data-value="0.08064266955044029"><span style="color: #9dd93a">8.1%</span><br><span class="small-count">(1566 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">2</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850569503437991937/XWfDWBxH_normal.jpg" class="hero-image" alt="intuitio_">
+                    <span>intuitio_</span>
+                </td>
+                <td data-value="0.12173913043478261"><span style="color: #228a8d">12.2%</span></td>
+                <td data-value="0.06964573268921095"><span style="color: #2c728e">7.0%</span></td>
+                <td data-value="0.05430622009569378"><span style="color: #24858d">5.4%</span></td>
+                <td data-value="0.02031176192725555"><span style="color: #404487">2.0%</span></td>
+                <td data-value="0.12452700378396973"><span style="color: #22a784">12.5%</span></td>
+                <td data-value="0.05674854523919872"><span style="color: #22a784">5.7%</span><br><span class="small-count">(1102 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">3</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1416723334683893767/HvpCjb43_normal.jpg" class="hero-image" alt="tier10k">
+                    <span>tier10k</span>
+                </td>
+                <td data-value="0.11594202898550725"><span style="color: #24858d">11.6%</span></td>
+                <td data-value="0.07246376811594203"><span style="color: #2a768e">7.2%</span></td>
+                <td data-value="0.0430622009569378"><span style="color: #2e6d8e">4.3%</span></td>
+                <td data-value="0.015233821445441663"><span style="color: #453580">1.5%</span></td>
+                <td data-value="0.029927760577915376"><span style="color: #46317e">3.0%</span></td>
+                <td data-value="0.03790102476955559"><span style="color: #2a778e">3.8%</span><br><span class="small-count">(736 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">4</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1767366822309855232/YJCVbrQl_normal.jpg" class="hero-image" alt="Pentosh1">
+                    <span>Pentosh1</span>
+                </td>
+                <td data-value="0.11521739130434783"><span style="color: #24858d">11.5%</span></td>
+                <td data-value="0.1360708534621578"><span style="color: #5ec961">13.6%</span></td>
+                <td data-value="0.11435406698564593"><span style="color: #e9e419">11.4%</span></td>
+                <td data-value="0.07404345772319319"><span style="color: #62ca5f">7.4%</span></td>
+                <td data-value="0.07774337805297557"><span style="color: #2c718e">7.8%</span></td>
+                <td data-value="0.09413461043308101"><span style="color: #fde724">9.4%</span><br><span class="small-count">(1828 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">5</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1788435723625914368/rBRnT7h-_normal.jpg" class="hero-image" alt="franklinisbored">
+                    <span>franklinisbored</span>
+                </td>
+                <td data-value="0.09420289855072464"><span style="color: #2c708e">9.4%</span></td>
+                <td data-value="0.037037037037037035"><span style="color: #414186">3.7%</span></td>
+                <td data-value="0.01770334928229665"><span style="color: #46317e">1.8%</span></td>
+                <td data-value="0.005077940481813888"><span style="color: #471265">0.5%</span></td>
+                <td data-value="0.0030959752321981426"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.017920593233431176"><span style="color: #423d84">1.8%</span><br><span class="small-count">(348 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">6</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1749792005251620864/Af6z5kSC_normal.jpg" class="hero-image" alt="Cbb0fe">
+                    <span>Cbb0fe</span>
+                </td>
+                <td data-value="0.09130434782608696"><span style="color: #2e6d8e">9.1%</span></td>
+                <td data-value="0.06481481481481481"><span style="color: #2e6b8e">6.5%</span></td>
+                <td data-value="0.05263157894736842"><span style="color: #26818e">5.3%</span></td>
+                <td data-value="0.018776570618800188"><span style="color: #424085">1.9%</span></td>
+                <td data-value="0.0017199862401100791"><span style="color: #440255">0.2%</span></td>
+                <td data-value="0.034553787527679077"><span style="color: #2d6e8e">3.5%</span><br><span class="small-count">(671 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">7</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1663128307393519621/leQ2uGee_normal.jpg" class="hero-image" alt="apixtwts">
+                    <span>apixtwts</span>
+                </td>
+                <td data-value="0.06884057971014493"><span style="color: #38578c">6.9%</span></td>
+                <td data-value="0.08574879227053141"><span style="color: #23888d">8.6%</span></td>
+                <td data-value="0.06555023923444976"><span style="color: #1e9b89">6.6%</span></td>
+                <td data-value="0.04853566367501181"><span style="color: #208f8c">4.9%</span></td>
+                <td data-value="0.07705538355693155"><span style="color: #2c708e">7.7%</span></td>
+                <td data-value="0.06267058035944179"><span style="color: #33b679">6.3%</span><br><span class="small-count">(1217 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">8</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850176577956651008/_tcJdizK_normal.jpg" class="hero-image" alt="lex_node">
+                    <span>lex_node</span>
+                </td>
+                <td data-value="0.06811594202898551"><span style="color: #38568b">6.8%</span></td>
+                <td data-value="0.08574879227053141"><span style="color: #23888d">8.6%</span></td>
+                <td data-value="0.056698564593301436"><span style="color: #22898d">5.7%</span></td>
+                <td data-value="0.04121398205007085"><span style="color: #277d8e">4.1%</span></td>
+                <td data-value="0.016855865153078776"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.04850919202842577"><span style="color: #1f928c">4.9%</span><br><span class="small-count">(942 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">9</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1650746818798444544/OaAb9GI0_normal.jpg" class="hero-image" alt="IcedKnife">
+                    <span>IcedKnife</span>
+                </td>
+                <td data-value="0.06666666666666667"><span style="color: #39548b">6.7%</span></td>
+                <td data-value="0.055958132045088566"><span style="color: #345f8d">5.6%</span></td>
+                <td data-value="0.024641148325358853"><span style="color: #404387">2.5%</span></td>
+                <td data-value="0.00803023145961266"><span style="color: #481d6f">0.8%</span></td>
+                <td data-value="0.004471964224286206"><span style="color: #45085b">0.4%</span></td>
+                <td data-value="0.02137082239044235"><span style="color: #3e4989">2.1%</span><br><span class="small-count">(415 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">10</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1795636010442985473/zxOfI_KX_normal.jpg" class="hero-image" alt="boldleonidas">
+                    <span>boldleonidas</span>
+                </td>
+                <td data-value="0.0644927536231884"><span style="color: #3a528b">6.4%</span></td>
+                <td data-value="0.00966183574879227"><span style="color: #470f62">1.0%</span></td>
+                <td data-value="0.005263157894736842"><span style="color: #460c5f">0.5%</span></td>
+                <td data-value="0.0022437411431270667"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.00803336938050363"><span style="color: #481c6e">0.8%</span><br><span class="small-count">(156 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">11</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1814298715194097664/O2y4pHt3_normal.jpg" class="hero-image" alt="0xBreadguy">
+                    <span>0xBreadguy</span>
+                </td>
+                <td data-value="0.06086956521739131"><span style="color: #3c4e8a">6.1%</span></td>
+                <td data-value="0.045491143317230275"><span style="color: #3c4e8a">4.5%</span></td>
+                <td data-value="0.03014354066985646"><span style="color: #3b518a">3.0%</span></td>
+                <td data-value="0.010510155880963629"><span style="color: #472575">1.1%</span></td>
+                <td data-value="0.029927760577915376"><span style="color: #46317e">3.0%</span></td>
+                <td data-value="0.02569648282609815"><span style="color: #38568b">2.6%</span><br><span class="small-count">(499 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">12</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1642482315602395138/7g4NNyuA_normal.jpg" class="hero-image" alt="zhusu">
+                    <span>zhusu</span>
+                </td>
+                <td data-value="0.059420289855072465"><span style="color: #3d4c89">5.9%</span></td>
+                <td data-value="0.03462157809983897"><span style="color: #423d84">3.5%</span></td>
+                <td data-value="0.011961722488038277"><span style="color: #482172">1.2%</span></td>
+                <td data-value="0.003778932451582428"><span style="color: #460e61">0.4%</span></td>
+                <td data-value="0.0068799449604403165"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.01390390854317936"><span style="color: #46307d">1.4%</span><br><span class="small-count">(270 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">13</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1606041732004593664/JxLZNWsq_normal.jpg" class="hero-image" alt="CryptoKaleo">
+                    <span>CryptoKaleo</span>
+                </td>
+                <td data-value="0.057971014492753624"><span style="color: #3d4b89">5.8%</span></td>
+                <td data-value="0.04669887278582931"><span style="color: #3b518a">4.7%</span></td>
+                <td data-value="0.0361244019138756"><span style="color: #345e8d">3.6%</span></td>
+                <td data-value="0.015942371280113367"><span style="color: #443781">1.6%</span></td>
+                <td data-value="0.005847953216374269"><span style="color: #46095c">0.6%</span></td>
+                <td data-value="0.02569648282609815"><span style="color: #38568b">2.6%</span><br><span class="small-count">(499 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">14</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1694151089904312320/1QNDNd_f_normal.jpg" class="hero-image" alt="LilMoonLambo">
+                    <span>LilMoonLambo</span>
+                </td>
+                <td data-value="0.0572463768115942"><span style="color: #3d4a89">5.7%</span></td>
+                <td data-value="0.04710144927536232"><span style="color: #3a528b">4.7%</span></td>
+                <td data-value="0.02894736842105263"><span style="color: #3c4d8a">2.9%</span></td>
+                <td data-value="0.015470004723665564"><span style="color: #453580">1.5%</span></td>
+                <td data-value="0.05022359821121431"><span style="color: #3c4e8a">5.0%</span></td>
+                <td data-value="0.030588598794994593"><span style="color: #32638d">3.1%</span><br><span class="small-count">(594 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">15</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1793351020946276352/Iw6yyWXS_normal.jpg" class="hero-image" alt="BigDickBull69">
+                    <span>BigDickBull69</span>
+                </td>
+                <td data-value="0.05652173913043478"><span style="color: #3e4989">5.7%</span></td>
+                <td data-value="0.04066022544283414"><span style="color: #3e4888">4.1%</span></td>
+                <td data-value="0.029904306220095694"><span style="color: #3b508a">3.0%</span></td>
+                <td data-value="0.012871988663202645"><span style="color: #462d7c">1.3%</span></td>
+                <td data-value="0.032679738562091505"><span style="color: #453580">3.3%</span></td>
+                <td data-value="0.02615994644420413"><span style="color: #38578c">2.6%</span><br><span class="small-count">(508 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">16</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1831727040686329856/Y9BC1ijJ_normal.jpg" class="hero-image" alt="mattomattik">
+                    <span>mattomattik</span>
+                </td>
+                <td data-value="0.05507246376811594"><span style="color: #3e4888">5.5%</span></td>
+                <td data-value="0.05756843800322061"><span style="color: #33618d">5.8%</span></td>
+                <td data-value="0.031339712918660285"><span style="color: #3a538b">3.1%</span></td>
+                <td data-value="0.0136986301369863"><span style="color: #46307d">1.4%</span></td>
+                <td data-value="0.004471964224286206"><span style="color: #45085b">0.4%</span></td>
+                <td data-value="0.02466656367475153"><span style="color: #3a538b">2.5%</span><br><span class="small-count">(479 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">17</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1809672496909840384/O0TskP_X_normal.jpg" class="hero-image" alt="NotChaseColeman">
+                    <span>NotChaseColeman</span>
+                </td>
+                <td data-value="0.05434782608695652"><span style="color: #3f4788">5.4%</span></td>
+                <td data-value="0.030193236714975844"><span style="color: #453580">3.0%</span></td>
+                <td data-value="0.02057416267942584"><span style="color: #443982">2.1%</span></td>
+                <td data-value="0.008384506376948512"><span style="color: #481e70">0.8%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.016324218548843916"><span style="color: #443982">1.6%</span><br><span class="small-count">(317 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">18</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1846209791363846144/oJ5K-_IL_normal.jpg" class="hero-image" alt="mikadontlouz">
+                    <span>mikadontlouz</span>
+                </td>
+                <td data-value="0.05289855072463768"><span style="color: #404487">5.3%</span></td>
+                <td data-value="0.030595813204508857"><span style="color: #453681">3.1%</span></td>
+                <td data-value="0.016267942583732056"><span style="color: #472c7b">1.6%</span></td>
+                <td data-value="0.004605573925366084"><span style="color: #471163">0.5%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.013697924712910037"><span style="color: #46307d">1.4%</span><br><span class="small-count">(266 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">19</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1654073228426629120/uxDUcLH6_normal.jpg" class="hero-image" alt="artsch00lreject">
+                    <span>artsch00lreject</span>
+                </td>
+                <td data-value="0.05144927536231884"><span style="color: #404387">5.1%</span></td>
+                <td data-value="0.02576489533011272"><span style="color: #462d7c">2.6%</span></td>
+                <td data-value="0.014832535885167464"><span style="color: #472878">1.5%</span></td>
+                <td data-value="0.002952290977798772"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="0.007223942208462332"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.012513517688861425"><span style="color: #472c7b">1.3%</span><br><span class="small-count">(243 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">20</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1800635357886894080/77abqSRA_normal.jpg" class="hero-image" alt="vydamo_">
+                    <span>vydamo_</span>
+                </td>
+                <td data-value="0.050724637681159424"><span style="color: #414286">5.1%</span></td>
+                <td data-value="0.02576489533011272"><span style="color: #462d7c">2.6%</span></td>
+                <td data-value="0.014832535885167464"><span style="color: #472878">1.5%</span></td>
+                <td data-value="0.004959848842701937"><span style="color: #471265">0.5%</span></td>
+                <td data-value="0.0027519779841761265"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.012668005561563417"><span style="color: #472c7b">1.3%</span><br><span class="small-count">(246 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">20</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1774497511987724289/qIqYZUu__normal.jpg" class="hero-image" alt="QwQiao">
+                    <span>QwQiao</span>
+                </td>
+                <td data-value="0.050724637681159424"><span style="color: #414286">5.1%</span></td>
+                <td data-value="0.050724637681159424"><span style="color: #38578c">5.1%</span></td>
+                <td data-value="0.02631578947368421"><span style="color: #3f4788">2.6%</span></td>
+                <td data-value="0.0134624468587624"><span style="color: #462f7c">1.3%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.023533652608270252"><span style="color: #3b508a">2.4%</span><br><span class="small-count">(457 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">22</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1831904183001247744/ALdr5oD1_normal.jpg" class="hero-image" alt="rasmr_eth">
+                    <span>rasmr_eth</span>
+                </td>
+                <td data-value="0.05"><span style="color: #414286">5.0%</span></td>
+                <td data-value="0.017310789049919485"><span style="color: #481e70">1.7%</span></td>
+                <td data-value="0.009808612440191388"><span style="color: #481a6c">1.0%</span></td>
+                <td data-value="0.0017713745866792632"><span style="color: #450558">0.2%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.008754312786446264"><span style="color: #481e70">0.9%</span><br><span class="small-count">(170 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">23</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1773988714462461952/woSArAj4_normal.jpg" class="hero-image" alt="lmrankhan">
+                    <span>lmrankhan</span>
+                </td>
+                <td data-value="0.04927536231884058"><span style="color: #414186">4.9%</span></td>
+                <td data-value="0.055958132045088566"><span style="color: #345f8d">5.6%</span></td>
+                <td data-value="0.04665071770334928"><span style="color: #2a758e">4.7%</span></td>
+                <td data-value="0.024681152574397732"><span style="color: #3a528b">2.5%</span></td>
+                <td data-value="0.007223942208462332"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.032545445182553166"><span style="color: #2f698d">3.3%</span><br><span class="small-count">(632 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">23</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1755899881783185408/Mtp0uwfM_normal.jpg" class="hero-image" alt="theunipcs">
+                    <span>theunipcs</span>
+                </td>
+                <td data-value="0.04927536231884058"><span style="color: #414186">4.9%</span></td>
+                <td data-value="0.025362318840579712"><span style="color: #462d7c">2.5%</span></td>
+                <td data-value="0.01291866028708134"><span style="color: #482374">1.3%</span></td>
+                <td data-value="0.0030703826169107226"><span style="color: #460b5e">0.3%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.010865647046706834"><span style="color: #472676">1.1%</span><br><span class="small-count">(211 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">25</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1832943105051631616/7KNFTcNW_normal.jpg" class="hero-image" alt="MINHxDYNASTY">
+                    <span>MINHxDYNASTY</span>
+                </td>
+                <td data-value="0.0463768115942029"><span style="color: #423d84">4.6%</span></td>
+                <td data-value="0.06884057971014493"><span style="color: #2c718e">6.9%</span></td>
+                <td data-value="0.02799043062200957"><span style="color: #3d4b89">2.8%</span></td>
+                <td data-value="0.011100614076523381"><span style="color: #472777">1.1%</span></td>
+                <td data-value="0.005847953216374269"><span style="color: #46095c">0.6%</span></td>
+                <td data-value="0.023842628353674237"><span style="color: #3b518a">2.4%</span><br><span class="small-count">(463 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">26</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850446155240390656/ADeJP12S_normal.jpg" class="hero-image" alt="trading_axe">
+                    <span>trading_axe</span>
+                </td>
+                <td data-value="0.04565217391304348"><span style="color: #433c84">4.6%</span></td>
+                <td data-value="0.00644122383252818"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.004066985645933014"><span style="color: #46095c">0.4%</span></td>
+                <td data-value="0.0012990080302314596"><span style="color: #440357">0.1%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.005561563417271744"><span style="color: #471265">0.6%</span><br><span class="small-count">(108 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">27</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1546301678994874371/tcdVqsPP_normal.jpg" class="hero-image" alt="dcfgod">
+                    <span>dcfgod</span>
+                </td>
+                <td data-value="0.04492753623188406"><span style="color: #433b83">4.5%</span></td>
+                <td data-value="0.09339774557165861"><span style="color: #1f928c">9.3%</span></td>
+                <td data-value="0.11818181818181818"><span style="color: #fde724">11.8%</span></td>
+                <td data-value="0.0735710911667454"><span style="color: #60c960">7.4%</span></td>
+                <td data-value="0.0030959752321981426"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.07312425974560997"><span style="color: #6bcd59">7.3%</span><br><span class="small-count">(1420 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">28</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1698011995578961920/haUv3SQy_normal.jpg" class="hero-image" alt="a1lon9">
+                    <span>a1lon9</span>
+                </td>
+                <td data-value="0.042753623188405795"><span style="color: #443982">4.3%</span></td>
+                <td data-value="0.02818035426731079"><span style="color: #45327f">2.8%</span></td>
+                <td data-value="0.012679425837320573"><span style="color: #482374">1.3%</span></td>
+                <td data-value="0.004605573925366084"><span style="color: #471163">0.5%</span></td>
+                <td data-value="0.003783969728242174"><span style="color: #45065a">0.4%</span></td>
+                <td data-value="0.011947062155620783"><span style="color: #472a79">1.2%</span><br><span class="small-count">(232 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">28</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1824291487355637762/aTHlX07H_normal.jpg" class="hero-image" alt="TylerDurden">
+                    <span>TylerDurden</span>
+                </td>
+                <td data-value="0.042753623188405795"><span style="color: #443982">4.3%</span></td>
+                <td data-value="0.01247987117552335"><span style="color: #471567">1.2%</span></td>
+                <td data-value="0.0066985645933014355"><span style="color: #471265">0.7%</span></td>
+                <td data-value="0.0016532829475673122"><span style="color: #450558">0.2%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.006900458314022349"><span style="color: #47186a">0.7%</span><br><span class="small-count">(134 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">28</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1708404723169087488/MY0bWMA0_normal.jpg" class="hero-image" alt="SCHIZO_FREQ">
+                    <span>SCHIZO_FREQ</span>
+                </td>
+                <td data-value="0.042753623188405795"><span style="color: #443982">4.3%</span></td>
+                <td data-value="0.026167471819645734"><span style="color: #462f7c">2.6%</span></td>
+                <td data-value="0.011483253588516746"><span style="color: #482071">1.1%</span></td>
+                <td data-value="0.003897024090694379"><span style="color: #460e61">0.4%</span></td>
+                <td data-value="0.0020639834881320948"><span style="color: #440357">0.2%</span></td>
+                <td data-value="0.010865647046706834"><span style="color: #472676">1.1%</span><br><span class="small-count">(211 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">31</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1679262771697926145/r3qk5Ycf_normal.jpg" class="hero-image" alt="functi0nZer0">
+                    <span>functi0nZer0</span>
+                </td>
+                <td data-value="0.042028985507246375"><span style="color: #443781">4.2%</span></td>
+                <td data-value="0.03140096618357488"><span style="color: #443781">3.1%</span></td>
+                <td data-value="0.011961722488038277"><span style="color: #482172">1.2%</span></td>
+                <td data-value="0.0025980160604629193"><span style="color: #45085b">0.3%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.01122611874967815"><span style="color: #472777">1.1%</span><br><span class="small-count">(218 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">32</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1724493543010619392/VfZB8Tjr_normal.jpg" class="hero-image" alt="djenn">
+                    <span>djenn</span>
+                </td>
+                <td data-value="0.041304347826086954"><span style="color: #443781">4.1%</span></td>
+                <td data-value="0.042270531400966184"><span style="color: #3d4a89">4.2%</span></td>
+                <td data-value="0.0722488038277512"><span style="color: #23a982">7.2%</span></td>
+                <td data-value="0.06306093528578177"><span style="color: #2eb27c">6.3%</span></td>
+                <td data-value="0.004815961472308222"><span style="color: #45085b">0.5%</span></td>
+                <td data-value="0.05211390905813894"><span style="color: #1e9b89">5.2%</span><br><span class="small-count">(1012 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">33</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1804118307118694400/mW6yS3Ai_normal.jpg" class="hero-image" alt="heartereum">
+                    <span>heartereum</span>
+                </td>
+                <td data-value="0.04057971014492753"><span style="color: #453681">4.1%</span></td>
+                <td data-value="0.013687600644122383"><span style="color: #47186a">1.4%</span></td>
+                <td data-value="0.008851674641148326"><span style="color: #47186a">0.9%</span></td>
+                <td data-value="0.0024799244213509685"><span style="color: #45085b">0.2%</span></td>
+                <td data-value="0.0013759889920880633"><span style="color: #440255">0.1%</span></td>
+                <td data-value="0.007827385550234307"><span style="color: #481c6e">0.8%</span><br><span class="small-count">(152 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">33</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1812147308449939456/TyGeo5fJ_normal.jpg" class="hero-image" alt="knveth">
+                    <span>knveth</span>
+                </td>
+                <td data-value="0.04057971014492753"><span style="color: #453681">4.1%</span></td>
+                <td data-value="0.030595813204508857"><span style="color: #453681">3.1%</span></td>
+                <td data-value="0.020813397129186603"><span style="color: #443982">2.1%</span></td>
+                <td data-value="0.0067312234293812"><span style="color: #47186a">0.7%</span></td>
+                <td data-value="0.004815961472308222"><span style="color: #45085b">0.5%</span></td>
+                <td data-value="0.01493382769452598"><span style="color: #45347f">1.5%</span><br><span class="small-count">(290 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">35</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1847482699805597696/ZhvERGEx_normal.jpg" class="hero-image" alt="blknoiz06">
+                    <span>blknoiz06</span>
+                </td>
+                <td data-value="0.03985507246376811"><span style="color: #453580">4.0%</span></td>
+                <td data-value="0.009259259259259259"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.00645933014354067"><span style="color: #471163">0.6%</span></td>
+                <td data-value="0.002834199338686821"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.006642978526185695"><span style="color: #471669">0.7%</span><br><span class="small-count">(129 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">36</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1638374572247646209/K5ikWE9__normal.jpg" class="hero-image" alt="punk9059">
+                    <span>punk9059</span>
+                </td>
+                <td data-value="0.0391304347826087"><span style="color: #45347f">3.9%</span></td>
+                <td data-value="0.0535426731078905"><span style="color: #365b8c">5.4%</span></td>
+                <td data-value="0.038995215311004784"><span style="color: #31648d">3.9%</span></td>
+                <td data-value="0.027987718469532356"><span style="color: #365b8c">2.8%</span></td>
+                <td data-value="0.006535947712418301"><span style="color: #460b5e">0.7%</span></td>
+                <td data-value="0.031206550285802565"><span style="color: #31658d">3.1%</span><br><span class="small-count">(606 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">36</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1724383779307843584/YiFv8ORd_normal.jpg" class="hero-image" alt="KookCapitalLLC">
+                    <span>KookCapitalLLC</span>
+                </td>
+                <td data-value="0.0391304347826087"><span style="color: #45347f">3.9%</span></td>
+                <td data-value="0.007648953301127214"><span style="color: #460b5e">0.8%</span></td>
+                <td data-value="0.00645933014354067"><span style="color: #471163">0.6%</span></td>
+                <td data-value="0.0014170996693434106"><span style="color: #440357">0.1%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.005767547247541068"><span style="color: #471466">0.6%</span><br><span class="small-count">(112 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">38</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850355565471379456/uN2E97T4_normal.jpg" class="hero-image" alt="muzzyvermillion">
+                    <span>muzzyvermillion</span>
+                </td>
+                <td data-value="0.03768115942028986"><span style="color: #45327f">3.8%</span></td>
+                <td data-value="0.011272141706924315"><span style="color: #471265">1.1%</span></td>
+                <td data-value="0.005502392344497608"><span style="color: #460e61">0.6%</span></td>
+                <td data-value="0.0004723665564478035"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.005561563417271744"><span style="color: #471265">0.6%</span><br><span class="small-count">(108 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">39</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1766155710432526336/cXUlVP1F_normal.jpg" class="hero-image" alt="notthreadguy">
+                    <span>notthreadguy</span>
+                </td>
+                <td data-value="0.03695652173913044"><span style="color: #46317e">3.7%</span></td>
+                <td data-value="0.01288244766505636"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.01076555023923445"><span style="color: #481d6f">1.1%</span></td>
+                <td data-value="0.0023618327822390174"><span style="color: #45085b">0.2%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.007672897677532314"><span style="color: #481a6c">0.8%</span><br><span class="small-count">(149 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">39</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1797820768396402688/stXcDcyP_normal.jpg" class="hero-image" alt="based16z">
+                    <span>based16z</span>
+                </td>
+                <td data-value="0.03695652173913044"><span style="color: #46317e">3.7%</span></td>
+                <td data-value="0.006843800322061192"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.004784688995215311"><span style="color: #460b5e">0.5%</span></td>
+                <td data-value="0.0010628247520075578"><span style="color: #440255">0.1%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.005098099799165766"><span style="color: #471163">0.5%</span><br><span class="small-count">(99 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">39</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1692517757055537152/MTqwUteH_normal.jpg" class="hero-image" alt="GwartyGwart">
+                    <span>GwartyGwart</span>
+                </td>
+                <td data-value="0.03695652173913044"><span style="color: #46317e">3.7%</span></td>
+                <td data-value="0.030193236714975844"><span style="color: #453580">3.0%</span></td>
+                <td data-value="0.010047846889952153"><span style="color: #481c6e">1.0%</span></td>
+                <td data-value="0.00271610769957487"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="0.0013759889920880633"><span style="color: #440255">0.1%</span></td>
+                <td data-value="0.010041711725629537"><span style="color: #482374">1.0%</span><br><span class="small-count">(195 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">39</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1610827135978987522/qGWbuvec_normal.jpg" class="hero-image" alt="beast_ico">
+                    <span>beast_ico</span>
+                </td>
+                <td data-value="0.03695652173913044"><span style="color: #46317e">3.7%</span></td>
+                <td data-value="0.011674718196457327"><span style="color: #471466">1.2%</span></td>
+                <td data-value="0.00861244019138756"><span style="color: #47186a">0.9%</span></td>
+                <td data-value="0.0015351913084553613"><span style="color: #450558">0.2%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.0067459704413203566"><span style="color: #47186a">0.7%</span><br><span class="small-count">(131 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">43</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1827602713426657281/oW6MAiLZ_normal.jpg" class="hero-image" alt="CharlotteFang77">
+                    <span>CharlotteFang77</span>
+                </td>
+                <td data-value="0.036231884057971016"><span style="color: #46317e">3.6%</span></td>
+                <td data-value="0.04106280193236715"><span style="color: #3e4888">4.1%</span></td>
+                <td data-value="0.026555023923444977"><span style="color: #3e4888">2.7%</span></td>
+                <td data-value="0.014643363249881908"><span style="color: #45327f">1.5%</span></td>
+                <td data-value="0.02304781561747506"><span style="color: #472777">2.3%</span></td>
+                <td data-value="0.023379164735568257"><span style="color: #3c4e8a">2.3%</span><br><span class="small-count">(454 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">44</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1849498278255071232/drdvg74U_normal.jpg" class="hero-image" alt="LucaNetz">
+                    <span>LucaNetz</span>
+                </td>
+                <td data-value="0.035507246376811595"><span style="color: #46307d">3.6%</span></td>
+                <td data-value="0.03743961352657005"><span style="color: #414286">3.7%</span></td>
+                <td data-value="0.02368421052631579"><span style="color: #414186">2.4%</span></td>
+                <td data-value="0.012753897024090695"><span style="color: #472c7b">1.3%</span></td>
+                <td data-value="0.03439972480220158"><span style="color: #443982">3.4%</span></td>
+                <td data-value="0.0231216849477316"><span style="color: #3c4e8a">2.3%</span><br><span class="small-count">(449 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">44</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1840815824367407104/8BavYHyT_normal.jpg" class="hero-image" alt="wallstreetbets">
+                    <span>wallstreetbets</span>
+                </td>
+                <td data-value="0.035507246376811595"><span style="color: #46307d">3.6%</span></td>
+                <td data-value="0.008454106280193236"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.005980861244019139"><span style="color: #470f62">0.6%</span></td>
+                <td data-value="0.001889466225791214"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.005716051289973737"><span style="color: #471466">0.6%</span><br><span class="small-count">(111 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">44</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1670794831428304904/rV3aLfpH_normal.jpg" class="hero-image" alt="EasyEatsBodega">
+                    <span>EasyEatsBodega</span>
+                </td>
+                <td data-value="0.035507246376811595"><span style="color: #46307d">3.6%</span></td>
+                <td data-value="0.04106280193236715"><span style="color: #3e4888">4.1%</span></td>
+                <td data-value="0.025358851674641147"><span style="color: #404487">2.5%</span></td>
+                <td data-value="0.015706188001889467"><span style="color: #453681">1.6%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.021988773881250322"><span style="color: #3d4b89">2.2%</span><br><span class="small-count">(427 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">44</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1386091770312802305/83V7DZ4B_normal.jpg" class="hero-image" alt="WazzCrypto">
+                    <span>WazzCrypto</span>
+                </td>
+                <td data-value="0.035507246376811595"><span style="color: #46307d">3.6%</span></td>
+                <td data-value="0.00644122383252818"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.004545454545454545"><span style="color: #460b5e">0.5%</span></td>
+                <td data-value="0.002007557864903165"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="0.0017199862401100791"><span style="color: #440255">0.2%</span></td>
+                <td data-value="0.0054585715021370825"><span style="color: #471265">0.5%</span><br><span class="small-count">(106 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">48</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1769485822686867456/rskxivL-_normal.jpg" class="hero-image" alt="0xjaypeg">
+                    <span>0xjaypeg</span>
+                </td>
+                <td data-value="0.034782608695652174"><span style="color: #462f7c">3.5%</span></td>
+                <td data-value="0.020531400966183576"><span style="color: #472575">2.1%</span></td>
+                <td data-value="0.013636363636363636"><span style="color: #472676">1.4%</span></td>
+                <td data-value="0.0035427491733585263"><span style="color: #460c5f">0.4%</span></td>
+                <td data-value="0.032679738562091505"><span style="color: #453580">3.3%</span></td>
+                <td data-value="0.014470364076420002"><span style="color: #45327f">1.4%</span><br><span class="small-count">(281 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">49</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850414854307209216/it7ofQkk_normal.jpg" class="hero-image" alt="SolJakey">
+                    <span>SolJakey</span>
+                </td>
+                <td data-value="0.034057971014492754"><span style="color: #462d7c">3.4%</span></td>
+                <td data-value="0.008856682769726247"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.003110047846889952"><span style="color: #45065a">0.3%</span></td>
+                <td data-value="0.000944733112895607"><span style="color: #440255">0.1%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.004737628096194449"><span style="color: #470f62">0.5%</span><br><span class="small-count">(92 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">49</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1790533676809203712/x04Hb9ZT_normal.jpg" class="hero-image" alt="adamscochran">
+                    <span>adamscochran</span>
+                </td>
+                <td data-value="0.034057971014492754"><span style="color: #462d7c">3.4%</span></td>
+                <td data-value="0.04508856682769726"><span style="color: #3c4e8a">4.5%</span></td>
+                <td data-value="0.02727272727272727"><span style="color: #3d4a89">2.7%</span></td>
+                <td data-value="0.01606046291922532"><span style="color: #443781">1.6%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.021576806220711675"><span style="color: #3e4989">2.2%</span><br><span class="small-count">(419 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">49</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1837393560942854144/TJf2HW5H_normal.jpg" class="hero-image" alt="ercwl">
+                    <span>ercwl</span>
+                </td>
+                <td data-value="0.034057971014492754"><span style="color: #462d7c">3.4%</span></td>
+                <td data-value="0.03140096618357488"><span style="color: #443781">3.1%</span></td>
+                <td data-value="0.056220095693779906"><span style="color: #23898d">5.6%</span></td>
+                <td data-value="0.06542276806802079"><span style="color: #38b976">6.5%</span></td>
+                <td data-value="0.0935672514619883"><span style="color: #24848d">9.4%</span></td>
+                <td data-value="0.061074205674854526"><span style="color: #2eb27c">6.1%</span><br><span class="small-count">(1186 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">49</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1804179452114456577/bRIFqky0_normal.jpg" class="hero-image" alt="CirrusNFT">
+                    <span>CirrusNFT</span>
+                </td>
+                <td data-value="0.034057971014492754"><span style="color: #462d7c">3.4%</span></td>
+                <td data-value="0.05314009661835749"><span style="color: #365a8c">5.3%</span></td>
+                <td data-value="0.0861244019138756"><span style="color: #4fc369">8.6%</span></td>
+                <td data-value="0.07947567312234294"><span style="color: #86d449">7.9%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.06431845100159637"><span style="color: #3bba75">6.4%</span><br><span class="small-count">(1249 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">53</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1561354964534018049/T9lKN_2c_normal.jpg" class="hero-image" alt="Tyler_Did_It">
+                    <span>Tyler_Did_It</span>
+                </td>
+                <td data-value="0.03333333333333333"><span style="color: #462d7c">3.3%</span></td>
+                <td data-value="0.03542673107890499"><span style="color: #423e85">3.5%</span></td>
+                <td data-value="0.025358851674641147"><span style="color: #404487">2.5%</span></td>
+                <td data-value="0.007321681624940954"><span style="color: #481a6c">0.7%</span></td>
+                <td data-value="0.0013759889920880633"><span style="color: #440255">0.1%</span></td>
+                <td data-value="0.015757763015603277"><span style="color: #453681">1.6%</span><br><span class="small-count">(306 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">54</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1725249311816941569/V-VuS0Lv_normal.png" class="hero-image" alt="MoonOverlord">
+                    <span>MoonOverlord</span>
+                </td>
+                <td data-value="0.03260869565217391"><span style="color: #472c7b">3.3%</span></td>
+                <td data-value="0.05152979066022544"><span style="color: #37588c">5.2%</span></td>
+                <td data-value="0.041626794258373206"><span style="color: #2f6a8d">4.2%</span></td>
+                <td data-value="0.022437411431270666"><span style="color: #3d4b89">2.2%</span></td>
+                <td data-value="0.048503611971104234"><span style="color: #3d4c89">4.9%</span></td>
+                <td data-value="0.03491425923065039"><span style="color: #2d6f8e">3.5%</span><br><span class="small-count">(678 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">54</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1663505820833955842/anBwGtM2_normal.jpg" class="hero-image" alt="0xENAS">
+                    <span>0xENAS</span>
+                </td>
+                <td data-value="0.03260869565217391"><span style="color: #472c7b">3.3%</span></td>
+                <td data-value="0.007648953301127214"><span style="color: #460b5e">0.8%</span></td>
+                <td data-value="0.00861244019138756"><span style="color: #47186a">0.9%</span></td>
+                <td data-value="0.0015351913084553613"><span style="color: #450558">0.2%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.005819043205108399"><span style="color: #471466">0.6%</span><br><span class="small-count">(113 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">56</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1819103197648011264/HNvdkG6y_normal.jpg" class="hero-image" alt="gianinaskarlett">
+                    <span>gianinaskarlett</span>
+                </td>
+                <td data-value="0.03188405797101449"><span style="color: #472b7a">3.2%</span></td>
+                <td data-value="0.016505636070853463"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.013397129186602871"><span style="color: #472575">1.3%</span></td>
+                <td data-value="0.003778932451582428"><span style="color: #460e61">0.4%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.008960296616715588"><span style="color: #482071">0.9%</span><br><span class="small-count">(174 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">57</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1812298915661623296/P0Yj0Xgq_normal.jpg" class="hero-image" alt="inversebrah">
+                    <span>inversebrah</span>
+                </td>
+                <td data-value="0.031159420289855074"><span style="color: #472a79">3.1%</span></td>
+                <td data-value="0.02455716586151369"><span style="color: #472b7a">2.5%</span></td>
+                <td data-value="0.012679425837320573"><span style="color: #482374">1.3%</span></td>
+                <td data-value="0.006022673594709494"><span style="color: #471567">0.6%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.010814151089139502"><span style="color: #472676">1.1%</span><br><span class="small-count">(210 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">58</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1775535430835863552/zgFeCArT_normal.jpg" class="hero-image" alt="0xMert_">
+                    <span>0xMert_</span>
+                </td>
+                <td data-value="0.030434782608695653"><span style="color: #472a79">3.0%</span></td>
+                <td data-value="0.00966183574879227"><span style="color: #470f62">1.0%</span></td>
+                <td data-value="0.008133971291866028"><span style="color: #471669">0.8%</span></td>
+                <td data-value="0.0033065658951346244"><span style="color: #460b5e">0.3%</span></td>
+                <td data-value="0.0010319917440660474"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.0067459704413203566"><span style="color: #47186a">0.7%</span><br><span class="small-count">(131 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">59</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1742947102953512976/DO-YOUbV_normal.jpg" class="hero-image" alt="intern">
+                    <span>intern</span>
+                </td>
+                <td data-value="0.029710144927536233"><span style="color: #472878">3.0%</span></td>
+                <td data-value="0.04911433172302738"><span style="color: #39558b">4.9%</span></td>
+                <td data-value="0.05526315789473684"><span style="color: #23878d">5.5%</span></td>
+                <td data-value="0.03649031648559282"><span style="color: #2c718e">3.6%</span></td>
+                <td data-value="0.03611971104231166"><span style="color: #433b83">3.6%</span></td>
+                <td data-value="0.04160873371440342"><span style="color: #26808e">4.2%</span><br><span class="small-count">(808 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">60</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1550148855852834816/L6xlDzwf_normal.jpg" class="hero-image" alt="AltcoinPsycho">
+                    <span>AltcoinPsycho</span>
+                </td>
+                <td data-value="0.028985507246376812"><span style="color: #472777">2.9%</span></td>
+                <td data-value="0.05676328502415459"><span style="color: #33608d">5.7%</span></td>
+                <td data-value="0.042583732057416265"><span style="color: #2e6c8e">4.3%</span></td>
+                <td data-value="0.026334435521965044"><span style="color: #38568b">2.6%</span></td>
+                <td data-value="0.15170278637770898"><span style="color: #53c567">15.2%</span></td>
+                <td data-value="0.05268036459137958"><span style="color: #1e9d88">5.3%</span><br><span class="small-count">(1023 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">61</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1847789420306366464/IaUqlG51_normal.png" class="hero-image" alt="SHL0MS">
+                    <span>SHL0MS</span>
+                </td>
+                <td data-value="0.02826086956521739"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.04710144927536232"><span style="color: #3a528b">4.7%</span></td>
+                <td data-value="0.08660287081339713"><span style="color: #51c468">8.7%</span></td>
+                <td data-value="0.07794048181388757"><span style="color: #7cd24f">7.8%</span></td>
+                <td data-value="0.005847953216374269"><span style="color: #46095c">0.6%</span></td>
+                <td data-value="0.0615376692929605"><span style="color: #2fb37b">6.2%</span><br><span class="small-count">(1195 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">61</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1831212713638334464/BO9u6xxl_normal.jpg" class="hero-image" alt="izebel_eth">
+                    <span>izebel_eth</span>
+                </td>
+                <td data-value="0.02826086956521739"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.037037037037037035"><span style="color: #414186">3.7%</span></td>
+                <td data-value="0.04401913875598086"><span style="color: #2d6f8e">4.4%</span></td>
+                <td data-value="0.03424657534246575"><span style="color: #2e6b8e">3.4%</span></td>
+                <td data-value="0.011007911936704506"><span style="color: #471466">1.1%</span></td>
+                <td data-value="0.03280292497038982"><span style="color: #2f698d">3.3%</span><br><span class="small-count">(637 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">61</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1833727487823564800/KcyLHgBd_normal.jpg" class="hero-image" alt="banditxbt">
+                    <span>banditxbt</span>
+                </td>
+                <td data-value="0.02826086956521739"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.04790660225442834"><span style="color: #3a538b">4.8%</span></td>
+                <td data-value="0.06076555023923445"><span style="color: #1f928c">6.1%</span></td>
+                <td data-value="0.054558337269721306"><span style="color: #1e9e88">5.5%</span></td>
+                <td data-value="0.019951840385276916"><span style="color: #482273">2.0%</span></td>
+                <td data-value="0.04799423245275246"><span style="color: #20918c">4.8%</span><br><span class="small-count">(932 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">61</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1813094420809719809/dzOsbCvF_normal.jpg" class="hero-image" alt="kaiynne">
+                    <span>kaiynne</span>
+                </td>
+                <td data-value="0.02826086956521739"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.029790660225442835"><span style="color: #453580">3.0%</span></td>
+                <td data-value="0.031339712918660285"><span style="color: #3a538b">3.1%</span></td>
+                <td data-value="0.02834199338686821"><span style="color: #365b8c">2.8%</span></td>
+                <td data-value="0.20743034055727555"><span style="color: #fde724">20.7%</span></td>
+                <td data-value="0.055976105875688756"><span style="color: #21a685">5.6%</span><br><span class="small-count">(1087 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">61</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1833549033643905028/b4xBD8iP_normal.jpg" class="hero-image" alt="Tradermayne">
+                    <span>Tradermayne</span>
+                </td>
+                <td data-value="0.02826086956521739"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.02576489533011272"><span style="color: #462d7c">2.6%</span></td>
+                <td data-value="0.015311004784688996"><span style="color: #472a79">1.5%</span></td>
+                <td data-value="0.006495040151157298"><span style="color: #47186a">0.6%</span></td>
+                <td data-value="0.004471964224286206"><span style="color: #45085b">0.4%</span></td>
+                <td data-value="0.012101550028322777"><span style="color: #472a79">1.2%</span><br><span class="small-count">(235 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">66</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850139901863563265/07lhNxdz_normal.jpg" class="hero-image" alt="frankdegods">
+                    <span>frankdegods</span>
+                </td>
+                <td data-value="0.02753623188405797"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.040257648953301126"><span style="color: #3f4788">4.0%</span></td>
+                <td data-value="0.03779904306220096"><span style="color: #32628d">3.8%</span></td>
+                <td data-value="0.022437411431270666"><span style="color: #3d4b89">2.2%</span></td>
+                <td data-value="0.016511867905056758"><span style="color: #481c6e">1.7%</span></td>
+                <td data-value="0.027498841340954736"><span style="color: #365b8c">2.7%</span><br><span class="small-count">(534 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">66</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1836969001051729920/4X-dVvQD_normal.jpg" class="hero-image" alt="screentimes">
+                    <span>screentimes</span>
+                </td>
+                <td data-value="0.02753623188405797"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.04066022544283414"><span style="color: #3e4888">4.1%</span></td>
+                <td data-value="0.03062200956937799"><span style="color: #3a528b">3.1%</span></td>
+                <td data-value="0.018540387340576288"><span style="color: #424085">1.9%</span></td>
+                <td data-value="0.0027519779841761265"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.022246253669086977"><span style="color: #3d4b89">2.2%</span><br><span class="small-count">(432 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">66</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1696580524599398400/YIbEmus7_normal.jpg" class="hero-image" alt="Zeneca">
+                    <span>Zeneca</span>
+                </td>
+                <td data-value="0.02753623188405797"><span style="color: #472676">2.8%</span></td>
+                <td data-value="0.04790660225442834"><span style="color: #3a538b">4.8%</span></td>
+                <td data-value="0.05143540669856459"><span style="color: #277e8e">5.1%</span></td>
+                <td data-value="0.049362305148795464"><span style="color: #20918c">4.9%</span></td>
+                <td data-value="0.108703130374957"><span style="color: #1f958b">10.9%</span></td>
+                <td data-value="0.056954529069468046"><span style="color: #22a784">5.7%</span><br><span class="small-count">(1106 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">69</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1831209728459866112/_jWUnCci_normal.jpg" class="hero-image" alt="kmoney_69">
+                    <span>kmoney_69</span>
+                </td>
+                <td data-value="0.025362318840579712"><span style="color: #482374">2.5%</span></td>
+                <td data-value="0.0426731078904992"><span style="color: #3d4a89">4.3%</span></td>
+                <td data-value="0.03349282296650718"><span style="color: #37588c">3.3%</span></td>
+                <td data-value="0.03377420878601795"><span style="color: #2f6a8d">3.4%</span></td>
+                <td data-value="0.017543859649122806"><span style="color: #481e70">1.8%</span></td>
+                <td data-value="0.03182450177661054"><span style="color: #30678d">3.2%</span><br><span class="small-count">(618 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">69</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1593307551457738752/xT7UmPH0_normal.jpg" class="hero-image" alt="rektmando">
+                    <span>rektmando</span>
+                </td>
+                <td data-value="0.025362318840579712"><span style="color: #482374">2.5%</span></td>
+                <td data-value="0.040257648953301126"><span style="color: #3f4788">4.0%</span></td>
+                <td data-value="0.04760765550239234"><span style="color: #2a778e">4.8%</span></td>
+                <td data-value="0.02964100141709967"><span style="color: #345f8d">3.0%</span></td>
+                <td data-value="0.04093567251461988"><span style="color: #414286">4.1%</span></td>
+                <td data-value="0.036253154127401"><span style="color: #2b738e">3.6%</span><br><span class="small-count">(704 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">71</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1828372853000908800/N5lpVhlQ_normal.jpg" class="hero-image" alt="0xKipit">
+                    <span>0xKipit</span>
+                </td>
+                <td data-value="0.02463768115942029"><span style="color: #482273">2.5%</span></td>
+                <td data-value="0.01892109500805153"><span style="color: #482172">1.9%</span></td>
+                <td data-value="0.03229665071770335"><span style="color: #38568b">3.2%</span></td>
+                <td data-value="0.06967406707605102"><span style="color: #4bc26c">7.0%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.043411092229260005"><span style="color: #24858d">4.3%</span><br><span class="small-count">(843 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">71</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1469588644088451073/VEu0DKDG_normal.jpg" class="hero-image" alt="Route2FI">
+                    <span>Route2FI</span>
+                </td>
+                <td data-value="0.02463768115942029"><span style="color: #482273">2.5%</span></td>
+                <td data-value="0.03260869565217391"><span style="color: #433a83">3.3%</span></td>
+                <td data-value="0.024880382775119617"><span style="color: #404387">2.5%</span></td>
+                <td data-value="0.017123287671232876"><span style="color: #433b83">1.7%</span></td>
+                <td data-value="0.013759889920880633"><span style="color: #47186a">1.4%</span></td>
+                <td data-value="0.02080436685720171"><span style="color: #3f4788">2.1%</span><br><span class="small-count">(404 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">71</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1748136011417161728/2AVT6Js__normal.jpg" class="hero-image" alt="wizardofsoho">
+                    <span>wizardofsoho</span>
+                </td>
+                <td data-value="0.02463768115942029"><span style="color: #482273">2.5%</span></td>
+                <td data-value="0.024154589371980676"><span style="color: #472b7a">2.4%</span></td>
+                <td data-value="0.013875598086124402"><span style="color: #472676">1.4%</span></td>
+                <td data-value="0.00543221539914974"><span style="color: #471466">0.5%</span></td>
+                <td data-value="0.0010319917440660474"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.010350687471033524"><span style="color: #472575">1.0%</span><br><span class="small-count">(201 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">74</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1749647387247693825/IGD_vcy6_normal.jpg" class="hero-image" alt="0xSisyphus">
+                    <span>0xSisyphus</span>
+                </td>
+                <td data-value="0.02391304347826087"><span style="color: #482172">2.4%</span></td>
+                <td data-value="0.039452495974235106"><span style="color: #3f4587">3.9%</span></td>
+                <td data-value="0.04688995215311005"><span style="color: #2a758e">4.7%</span></td>
+                <td data-value="0.02975909305621162"><span style="color: #345f8d">3.0%</span></td>
+                <td data-value="0.002407980736154111"><span style="color: #440357">0.2%</span></td>
+                <td data-value="0.030176631134455945"><span style="color: #32628d">3.0%</span><br><span class="small-count">(586 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">74</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1680184510510669825/fmWRG1f-_normal.jpg" class="hero-image" alt="Arthur_0x">
+                    <span>Arthur_0x</span>
+                </td>
+                <td data-value="0.02391304347826087"><span style="color: #482172">2.4%</span></td>
+                <td data-value="0.049516908212560384"><span style="color: #39558b">5.0%</span></td>
+                <td data-value="0.045454545454545456"><span style="color: #2c728e">4.5%</span></td>
+                <td data-value="0.03530940009447331"><span style="color: #2d6e8e">3.5%</span></td>
+                <td data-value="0.07361541107671139"><span style="color: #2e6c8e">7.4%</span></td>
+                <td data-value="0.0442350275503373"><span style="color: #23888d">4.4%</span><br><span class="small-count">(859 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">74</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1499571704753901569/wLAcCdsu_normal.jpg" class="hero-image" alt="PacmanBlur">
+                    <span>PacmanBlur</span>
+                </td>
+                <td data-value="0.02391304347826087"><span style="color: #482172">2.4%</span></td>
+                <td data-value="0.040257648953301126"><span style="color: #3f4788">4.0%</span></td>
+                <td data-value="0.05909090909090909"><span style="color: #218e8c">5.9%</span></td>
+                <td data-value="0.06884742560226736"><span style="color: #47c06e">6.9%</span></td>
+                <td data-value="0.01891984864121087"><span style="color: #482071">1.9%</span></td>
+                <td data-value="0.05242288480354292"><span style="color: #1e9c89">5.2%</span><br><span class="small-count">(1018 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">77</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1718767209957171200/rZ6-U7l8_normal.jpg" class="hero-image" alt="ColdBloodShill">
+                    <span>ColdBloodShill</span>
+                </td>
+                <td data-value="0.02318840579710145"><span style="color: #482071">2.3%</span></td>
+                <td data-value="0.017713365539452495"><span style="color: #482071">1.8%</span></td>
+                <td data-value="0.0066985645933014355"><span style="color: #471265">0.7%</span></td>
+                <td data-value="0.0016532829475673122"><span style="color: #450558">0.2%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0060765229929450534"><span style="color: #471567">0.6%</span><br><span class="small-count">(118 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">77</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1833184180722597888/cCc5A3sj_normal.jpg" class="hero-image" alt="DeeZe">
+                    <span>DeeZe</span>
+                </td>
+                <td data-value="0.02318840579710145"><span style="color: #482071">2.3%</span></td>
+                <td data-value="0.043478260869565216"><span style="color: #3d4c89">4.3%</span></td>
+                <td data-value="0.03253588516746411"><span style="color: #38568b">3.3%</span></td>
+                <td data-value="0.02338214454416627"><span style="color: #3c4d8a">2.3%</span></td>
+                <td data-value="0.013759889920880633"><span style="color: #47186a">1.4%</span></td>
+                <td data-value="0.026468922189608116"><span style="color: #37588c">2.6%</span><br><span class="small-count">(514 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">77</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1581014308397502464/NPogKMyk_normal.jpg" class="hero-image" alt="greg16676935420">
+                    <span>greg16676935420</span>
+                </td>
+                <td data-value="0.02318840579710145"><span style="color: #482071">2.3%</span></td>
+                <td data-value="0.007246376811594203"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.005023923444976076"><span style="color: #460c5f">0.5%</span></td>
+                <td data-value="0.0035427491733585263"><span style="color: #460c5f">0.4%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0052010917143004275"><span style="color: #471265">0.5%</span><br><span class="small-count">(101 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">77</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1544887512455188480/NTlA57Iu_normal.jpg" class="hero-image" alt="Evan_ss6">
+                    <span>Evan_ss6</span>
+                </td>
+                <td data-value="0.02318840579710145"><span style="color: #482071">2.3%</span></td>
+                <td data-value="0.011272141706924315"><span style="color: #471265">1.1%</span></td>
+                <td data-value="0.010047846889952153"><span style="color: #481c6e">1.0%</span></td>
+                <td data-value="0.002952290977798772"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.006591482568618363"><span style="color: #471669">0.7%</span><br><span class="small-count">(128 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">81</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1745824328594214912/-P4ZBCue_normal.jpg" class="hero-image" alt="0xfoobar">
+                    <span>0xfoobar</span>
+                </td>
+                <td data-value="0.02246376811594203"><span style="color: #482071">2.2%</span></td>
+                <td data-value="0.02938808373590982"><span style="color: #45347f">2.9%</span></td>
+                <td data-value="0.056937799043062204"><span style="color: #22898d">5.7%</span></td>
+                <td data-value="0.07569674067076052"><span style="color: #6dce58">7.6%</span></td>
+                <td data-value="0.0784313725490196"><span style="color: #2c728e">7.8%</span></td>
+                <td data-value="0.0623616046140378"><span style="color: #32b57a">6.2%</span><br><span class="small-count">(1211 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">82</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1572199012790603778/GF4NXSKr_normal.jpg" class="hero-image" alt="DefiIgnas">
+                    <span>DefiIgnas</span>
+                </td>
+                <td data-value="0.021739130434782608"><span style="color: #481e70">2.2%</span></td>
+                <td data-value="0.039452495974235106"><span style="color: #3f4587">3.9%</span></td>
+                <td data-value="0.031578947368421054"><span style="color: #39548b">3.2%</span></td>
+                <td data-value="0.020902220122815306"><span style="color: #3f4788">2.1%</span></td>
+                <td data-value="0.03164774681802546"><span style="color: #45347f">3.2%</span></td>
+                <td data-value="0.02724136155311808"><span style="color: #365a8c">2.7%</span><br><span class="small-count">(529 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">82</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1700199367511064576/v-3PNyPw_normal.jpg" class="hero-image" alt="waleswoosh">
+                    <span>waleswoosh</span>
+                </td>
+                <td data-value="0.021739130434782608"><span style="color: #481e70">2.2%</span></td>
+                <td data-value="0.00966183574879227"><span style="color: #470f62">1.0%</span></td>
+                <td data-value="0.007894736842105263"><span style="color: #471567">0.8%</span></td>
+                <td data-value="0.0021256495040151155"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.0054585715021370825"><span style="color: #471265">0.5%</span><br><span class="small-count">(106 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">82</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1779597396940312576/jz-QfeDO_normal.jpg" class="hero-image" alt="Web3Quant">
+                    <span>Web3Quant</span>
+                </td>
+                <td data-value="0.021739130434782608"><span style="color: #481e70">2.2%</span></td>
+                <td data-value="0.026972624798711754"><span style="color: #46307d">2.7%</span></td>
+                <td data-value="0.018421052631578946"><span style="color: #45327f">1.8%</span></td>
+                <td data-value="0.008856872933396315"><span style="color: #482071">0.9%</span></td>
+                <td data-value="0.0030959752321981426"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.01328595705237139"><span style="color: #462f7c">1.3%</span><br><span class="small-count">(258 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">85</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843424781980389376/K63epjc3_normal.jpg" class="hero-image" alt="chumbawamba22">
+                    <span>chumbawamba22</span>
+                </td>
+                <td data-value="0.021014492753623187"><span style="color: #481d6f">2.1%</span></td>
+                <td data-value="0.04508856682769726"><span style="color: #3c4e8a">4.5%</span></td>
+                <td data-value="0.053349282296650716"><span style="color: #25838d">5.3%</span></td>
+                <td data-value="0.057510628247520075"><span style="color: #21a685">5.8%</span></td>
+                <td data-value="0.05847953216374269"><span style="color: #37598c">5.8%</span></td>
+                <td data-value="0.05257737267624491"><span style="color: #1e9c89">5.3%</span><br><span class="small-count">(1021 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">85</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843081960199278592/Cgiv-vGS_normal.jpg" class="hero-image" alt="0xprerich">
+                    <span>0xprerich</span>
+                </td>
+                <td data-value="0.021014492753623187"><span style="color: #481d6f">2.1%</span></td>
+                <td data-value="0.043478260869565216"><span style="color: #3d4c89">4.3%</span></td>
+                <td data-value="0.03732057416267943"><span style="color: #33618d">3.7%</span></td>
+                <td data-value="0.021138403401039205"><span style="color: #3f4788">2.1%</span></td>
+                <td data-value="0.03990368077055383"><span style="color: #424085">4.0%</span></td>
+                <td data-value="0.030279623049590608"><span style="color: #32628d">3.0%</span><br><span class="small-count">(588 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">87</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1845475643292614670/xisSeeyl_normal.jpg" class="hero-image" alt="JasonYanowitz">
+                    <span>JasonYanowitz</span>
+                </td>
+                <td data-value="0.020289855072463767"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.030595813204508857"><span style="color: #453681">3.1%</span></td>
+                <td data-value="0.053110047846889955"><span style="color: #25828e">5.3%</span></td>
+                <td data-value="0.06695795937647614"><span style="color: #3ebc73">6.7%</span></td>
+                <td data-value="0.058135534915720675"><span style="color: #37598c">5.8%</span></td>
+                <td data-value="0.05468870693650548"><span style="color: #1fa286">5.5%</span><br><span class="small-count">(1062 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">87</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1778954511349903360/kBSJNkBx_normal.jpg" class="hero-image" alt="0xRamonos">
+                    <span>0xRamonos</span>
+                </td>
+                <td data-value="0.020289855072463767"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.004428341384863124"><span style="color: #440357">0.4%</span></td>
+                <td data-value="0.004784688995215311"><span style="color: #460b5e">0.5%</span></td>
+                <td data-value="0.0007085498346717053"><span style="color: #440154">0.1%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0033472372418765126"><span style="color: #46095c">0.3%</span><br><span class="small-count">(65 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">87</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843728522226929665/TkG1PpB1_normal.jpg" class="hero-image" alt="naniXBT">
+                    <span>naniXBT</span>
+                </td>
+                <td data-value="0.020289855072463767"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.04388083735909823"><span style="color: #3d4c89">4.4%</span></td>
+                <td data-value="0.03636363636363636"><span style="color: #345e8d">3.6%</span></td>
+                <td data-value="0.02562588568729334"><span style="color: #39548b">2.6%</span></td>
+                <td data-value="0.03130374957000344"><span style="color: #45347f">3.1%</span></td>
+                <td data-value="0.030743086667696585"><span style="color: #31648d">3.1%</span><br><span class="small-count">(597 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">87</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1779799324341473280/AwP2plSz_normal.jpg" class="hero-image" alt="CL207">
+                    <span>CL207</span>
+                </td>
+                <td data-value="0.020289855072463767"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.021739130434782608"><span style="color: #472676">2.2%</span></td>
+                <td data-value="0.025598086124401915"><span style="color: #3f4587">2.6%</span></td>
+                <td data-value="0.014052905054322154"><span style="color: #46317e">1.4%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.016375714506411246"><span style="color: #443982">1.6%</span><br><span class="small-count">(318 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">87</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1794086017193906179/w-WNT6jm_normal.jpg" class="hero-image" alt="0xMikado">
+                    <span>0xMikado</span>
+                </td>
+                <td data-value="0.020289855072463767"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.008454106280193236"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.018421052631578946"><span style="color: #45327f">1.8%</span></td>
+                <td data-value="0.034600850259801606"><span style="color: #2e6c8e">3.5%</span></td>
+                <td data-value="0.05607155142758858"><span style="color: #38568b">5.6%</span></td>
+                <td data-value="0.02997064730418662"><span style="color: #33618d">3.0%</span><br><span class="small-count">(582 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">92</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1809546800774189057/81CmmOb1_normal.jpg" class="hero-image" alt="ZoomerOracle">
+                    <span>ZoomerOracle</span>
+                </td>
+                <td data-value="0.01956521739130435"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.03904991948470209"><span style="color: #404487">3.9%</span></td>
+                <td data-value="0.03588516746411483"><span style="color: #355d8c">3.6%</span></td>
+                <td data-value="0.05054322153991497"><span style="color: #1f948b">5.1%</span></td>
+                <td data-value="0.026487788097695218"><span style="color: #472c7b">2.6%</span></td>
+                <td data-value="0.04011535094495082"><span style="color: #277c8e">4.0%</span><br><span class="small-count">(779 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">92</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843305528866320384/MZHmV4Pt_normal.jpg" class="hero-image" alt="travisbickle0x">
+                    <span>travisbickle0x</span>
+                </td>
+                <td data-value="0.01956521739130435"><span style="color: #481c6e">2.0%</span></td>
+                <td data-value="0.01610305958132045"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.03205741626794258"><span style="color: #39558b">3.2%</span></td>
+                <td data-value="0.061761927255550304"><span style="color: #2ab07e">6.2%</span></td>
+                <td data-value="0.017543859649122806"><span style="color: #481e70">1.8%</span></td>
+                <td data-value="0.039909367114681495"><span style="color: #277c8e">4.0%</span><br><span class="small-count">(775 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">94</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1600235674585686019/Em6jTVS8_normal.jpg" class="hero-image" alt="KeyboardMonkey3">
+                    <span>KeyboardMonkey3</span>
+                </td>
+                <td data-value="0.01884057971014493"><span style="color: #481a6c">1.9%</span></td>
+                <td data-value="0.030595813204508857"><span style="color: #453681">3.1%</span></td>
+                <td data-value="0.03301435406698565"><span style="color: #38578c">3.3%</span></td>
+                <td data-value="0.05928200283419934"><span style="color: #23a982">5.9%</span></td>
+                <td data-value="0.10457516339869281"><span style="color: #20908c">10.5%</span></td>
+                <td data-value="0.053864771615428186"><span style="color: #1ea087">5.4%</span><br><span class="small-count">(1046 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">94</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1681431804434153476/PuTSFblP_normal.jpg" class="hero-image" alt="TaikiMaeda2">
+                    <span>TaikiMaeda2</span>
+                </td>
+                <td data-value="0.01884057971014493"><span style="color: #481a6c">1.9%</span></td>
+                <td data-value="0.02254428341384863"><span style="color: #472777">2.3%</span></td>
+                <td data-value="0.031578947368421054"><span style="color: #39548b">3.2%</span></td>
+                <td data-value="0.02137458667926311"><span style="color: #3e4888">2.1%</span></td>
+                <td data-value="0.08221534227726178"><span style="color: #2a778e">8.2%</span></td>
+                <td data-value="0.03264843709768783"><span style="color: #2f698d">3.3%</span><br><span class="small-count">(634 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1815785917111562241/neCEJ099_normal.jpg" class="hero-image" alt="wsbmod">
+                    <span>wsbmod</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.007648953301127214"><span style="color: #460b5e">0.8%</span></td>
+                <td data-value="0.01770334928229665"><span style="color: #46317e">1.8%</span></td>
+                <td data-value="0.0471185640056684"><span style="color: #228b8d">4.7%</span></td>
+                <td data-value="0.017887856897144824"><span style="color: #481e70">1.8%</span></td>
+                <td data-value="0.029301199855811318"><span style="color: #33608d">2.9%</span><br><span class="small-count">(569 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1842622314086612993/3t9rhUn7_normal.jpg" class="hero-image" alt="ChartFuMonkey">
+                    <span>ChartFuMonkey</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.021739130434782608"><span style="color: #472676">2.2%</span></td>
+                <td data-value="0.017942583732057416"><span style="color: #46317e">1.8%</span></td>
+                <td data-value="0.010273972602739725"><span style="color: #472575">1.0%</span></td>
+                <td data-value="0.006191950464396285"><span style="color: #460b5e">0.6%</span></td>
+                <td data-value="0.013337453009938719"><span style="color: #462f7c">1.3%</span><br><span class="small-count">(259 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1676401842815901696/rO62w0Cr_normal.jpg" class="hero-image" alt="Chilearmy123">
+                    <span>Chilearmy123</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.026570048309178744"><span style="color: #462f7c">2.7%</span></td>
+                <td data-value="0.01722488038277512"><span style="color: #46307d">1.7%</span></td>
+                <td data-value="0.0067312234293812"><span style="color: #47186a">0.7%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.011432102579947473"><span style="color: #472878">1.1%</span><br><span class="small-count">(222 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1838579532539760640/gtUopAGU_normal.jpg" class="hero-image" alt="SmokeyTheBera">
+                    <span>SmokeyTheBera</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.033011272141706925"><span style="color: #433b83">3.3%</span></td>
+                <td data-value="0.042344497607655504"><span style="color: #2e6c8e">4.2%</span></td>
+                <td data-value="0.04605573925366084"><span style="color: #23898d">4.6%</span></td>
+                <td data-value="0.02063983488132095"><span style="color: #482374">2.1%</span></td>
+                <td data-value="0.037798032854420925"><span style="color: #2a778e">3.8%</span><br><span class="small-count">(734 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1543128738145222656/mnP7hq3t_normal.jpg" class="hero-image" alt="evan_van_ness">
+                    <span>evan_van_ness</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.03180354267310789"><span style="color: #443982">3.2%</span></td>
+                <td data-value="0.07033492822966507"><span style="color: #21a685">7.0%</span></td>
+                <td data-value="0.09718941898913556"><span style="color: #fde724">9.7%</span></td>
+                <td data-value="0.007223942208462332"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.06395797929862505"><span style="color: #39b976">6.4%</span><br><span class="small-count">(1242 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1815929669683707904/5jsa2HB9_normal.jpg" class="hero-image" alt="NBA__trey">
+                    <span>NBA__trey</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.008856682769726247"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.013875598086124402"><span style="color: #472676">1.4%</span></td>
+                <td data-value="0.032002834199338685"><span style="color: #31658d">3.2%</span></td>
+                <td data-value="0.037495700034399726"><span style="color: #433c84">3.7%</span></td>
+                <td data-value="0.02497553942015552"><span style="color: #39548b">2.5%</span><br><span class="small-count">(485 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1794879828673404928/QXoysakL_normal.jpg" class="hero-image" alt="HugoMartingale">
+                    <span>HugoMartingale</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.04066022544283414"><span style="color: #3e4888">4.1%</span></td>
+                <td data-value="0.05095693779904306"><span style="color: #277d8e">5.1%</span></td>
+                <td data-value="0.027279168634860653"><span style="color: #37598c">2.7%</span></td>
+                <td data-value="0.0041279669762641896"><span style="color: #45065a">0.4%</span></td>
+                <td data-value="0.02997064730418662"><span style="color: #33618d">3.0%</span><br><span class="small-count">(582 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1845432462974865408/SCV0OkEm_normal.jpg" class="hero-image" alt="free_electron0">
+                    <span>free_electron0</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.014895330112721417"><span style="color: #48196b">1.5%</span></td>
+                <td data-value="0.009569377990430622"><span style="color: #481a6c">1.0%</span></td>
+                <td data-value="0.0024799244213509685"><span style="color: #45085b">0.2%</span></td>
+                <td data-value="0.0006879944960440316"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.00643699469591637"><span style="color: #471669">0.6%</span><br><span class="small-count">(125 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">96</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1774942228630134784/tzr1yvLR_normal.jpg" class="hero-image" alt="idrawline">
+                    <span>idrawline</span>
+                </td>
+                <td data-value="0.018115942028985508"><span style="color: #48196b">1.8%</span></td>
+                <td data-value="0.008454106280193236"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.005741626794258373"><span style="color: #460e61">0.6%</span></td>
+                <td data-value="0.003660840812470477"><span style="color: #460c5f">0.4%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0052010917143004275"><span style="color: #471265">0.5%</span><br><span class="small-count">(101 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">105</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1760942755545800704/wFBpdSgp_normal.jpg" class="hero-image" alt="zacxbt">
+                    <span>zacxbt</span>
+                </td>
+                <td data-value="0.017391304347826087"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.05877616747181964"><span style="color: #32638d">5.9%</span></td>
+                <td data-value="0.05837320574162679"><span style="color: #218d8c">5.8%</span></td>
+                <td data-value="0.08644307982994803"><span style="color: #b5dd2b">8.6%</span></td>
+                <td data-value="0.020295837633298935"><span style="color: #482273">2.0%</span></td>
+                <td data-value="0.06205262886863381"><span style="color: #30b47a">6.2%</span><br><span class="small-count">(1205 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">105</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1734910308072955904/Mj2t7aAs_normal.jpg" class="hero-image" alt="0xDamien">
+                    <span>0xDamien</span>
+                </td>
+                <td data-value="0.017391304347826087"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.0430756843800322"><span style="color: #3d4b89">4.3%</span></td>
+                <td data-value="0.031578947368421054"><span style="color: #39548b">3.2%</span></td>
+                <td data-value="0.02267359470949457"><span style="color: #3d4c89">2.3%</span></td>
+                <td data-value="0.07361541107671139"><span style="color: #2e6c8e">7.4%</span></td>
+                <td data-value="0.03445079561254442"><span style="color: #2d6e8e">3.4%</span><br><span class="small-count">(669 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">105</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1844106950298017792/1_aP3vaK_normal.jpg" class="hero-image" alt="loomdart">
+                    <span>loomdart</span>
+                </td>
+                <td data-value="0.017391304347826087"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.008454106280193236"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.020095693779904306"><span style="color: #443781">2.0%</span></td>
+                <td data-value="0.04652810581010865"><span style="color: #228a8d">4.7%</span></td>
+                <td data-value="0.033367733058135535"><span style="color: #453681">3.3%</span></td>
+                <td data-value="0.0319274936917452"><span style="color: #30678d">3.2%</span><br><span class="small-count">(620 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">105</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1849413886673326081/ZyZJ6V52_normal.jpg" class="hero-image" alt="glebble">
+                    <span>glebble</span>
+                </td>
+                <td data-value="0.017391304347826087"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.02214170692431562"><span style="color: #472777">2.2%</span></td>
+                <td data-value="0.022966507177033493"><span style="color: #423e85">2.3%</span></td>
+                <td data-value="0.04605573925366084"><span style="color: #23898d">4.6%</span></td>
+                <td data-value="0.01479188166494668"><span style="color: #48196b">1.5%</span></td>
+                <td data-value="0.03130954220093723"><span style="color: #31658d">3.1%</span><br><span class="small-count">(608 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">109</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1752187877453389824/CijSSkyY_normal.jpg" class="hero-image" alt="stoicsavage">
+                    <span>stoicsavage</span>
+                </td>
+                <td data-value="0.016666666666666666"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.016505636070853463"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.00861244019138756"><span style="color: #47186a">0.9%</span></td>
+                <td data-value="0.002007557864903165"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="0.009975920192638458"><span style="color: #471163">1.0%</span></td>
+                <td data-value="0.007518409804830321"><span style="color: #481a6c">0.8%</span><br><span class="small-count">(146 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">109</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1654487711653265410/9Fzvqbhr_normal.jpg" class="hero-image" alt="crypto_linn">
+                    <span>crypto_linn</span>
+                </td>
+                <td data-value="0.016666666666666666"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.011674718196457327"><span style="color: #471466">1.2%</span></td>
+                <td data-value="0.028708133971291867"><span style="color: #3c4d8a">2.9%</span></td>
+                <td data-value="0.0478271138403401"><span style="color: #218d8c">4.8%</span></td>
+                <td data-value="0.048503611971104234"><span style="color: #3d4c89">4.9%</span></td>
+                <td data-value="0.03697409753334363"><span style="color: #2a758e">3.7%</span><br><span class="small-count">(718 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">109</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1826092771590934528/YGIm2aCM_normal.jpg" class="hero-image" alt="farokh">
+                    <span>farokh</span>
+                </td>
+                <td data-value="0.016666666666666666"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.026167471819645734"><span style="color: #462f7c">2.6%</span></td>
+                <td data-value="0.03444976076555024"><span style="color: #365a8c">3.4%</span></td>
+                <td data-value="0.030585734529995277"><span style="color: #33618d">3.1%</span></td>
+                <td data-value="0.042655658754729965"><span style="color: #404487">4.3%</span></td>
+                <td data-value="0.03167001390390854"><span style="color: #31668d">3.2%</span><br><span class="small-count">(615 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">109</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1841622195639914496/hWg9ydbm_normal.jpg" class="hero-image" alt="patty_fi">
+                    <span>patty_fi</span>
+                </td>
+                <td data-value="0.016666666666666666"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.005636070853462158"><span style="color: #45065a">0.6%</span></td>
+                <td data-value="0.005263157894736842"><span style="color: #460c5f">0.5%</span></td>
+                <td data-value="0.002007557864903165"><span style="color: #45065a">0.2%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0039136927751171535"><span style="color: #460c5f">0.4%</span><br><span class="small-count">(76 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">109</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1806352489840852992/WDJq36zj_normal.jpg" class="hero-image" alt="HerroCrypto">
+                    <span>HerroCrypto</span>
+                </td>
+                <td data-value="0.016666666666666666"><span style="color: #47186a">1.7%</span></td>
+                <td data-value="0.008051529790660225"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.014832535885167464"><span style="color: #472878">1.5%</span></td>
+                <td data-value="0.030231459612659425"><span style="color: #33608d">3.0%</span></td>
+                <td data-value="0.044031647746818024"><span style="color: #3f4788">4.4%</span></td>
+                <td data-value="0.02518152325042484"><span style="color: #39548b">2.5%</span><br><span class="small-count">(489 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">114</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1605984553310437376/Du3FX-og_normal.jpg" class="hero-image" alt="ZAGABOND">
+                    <span>ZAGABOND</span>
+                </td>
+                <td data-value="0.015942028985507246"><span style="color: #471669">1.6%</span></td>
+                <td data-value="0.010466988727858293"><span style="color: #471163">1.0%</span></td>
+                <td data-value="0.020095693779904306"><span style="color: #443781">2.0%</span></td>
+                <td data-value="0.0410958904109589"><span style="color: #277c8e">4.1%</span></td>
+                <td data-value="0.007223942208462332"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.025799474741232814"><span style="color: #38568b">2.6%</span><br><span class="small-count">(501 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">114</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1758646426840584192/x0ZLPgjw_normal.jpg" class="hero-image" alt="icebergy_">
+                    <span>icebergy_</span>
+                </td>
+                <td data-value="0.015942028985507246"><span style="color: #471669">1.6%</span></td>
+                <td data-value="0.033816425120772944"><span style="color: #433c84">3.4%</span></td>
+                <td data-value="0.03373205741626794"><span style="color: #37598c">3.4%</span></td>
+                <td data-value="0.03401039206424185"><span style="color: #2f6a8d">3.4%</span></td>
+                <td data-value="0.012039903680770554"><span style="color: #471567">1.2%</span></td>
+                <td data-value="0.02935269581337865"><span style="color: #33608d">2.9%</span><br><span class="small-count">(570 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">114</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1816831656180736001/VtvLbE8N_normal.jpg" class="hero-image" alt="cozymaximalist">
+                    <span>cozymaximalist</span>
+                </td>
+                <td data-value="0.015942028985507246"><span style="color: #471669">1.6%</span></td>
+                <td data-value="0.008856682769726247"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.013875598086124402"><span style="color: #472676">1.4%</span></td>
+                <td data-value="0.0334199338686821"><span style="color: #2f698d">3.3%</span></td>
+                <td data-value="0.03130374957000344"><span style="color: #45347f">3.1%</span></td>
+                <td data-value="0.02451207580204954"><span style="color: #3a528b">2.5%</span><br><span class="small-count">(476 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">114</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1801434183543197696/nIkDz_Z1_normal.jpg" class="hero-image" alt="0xPajke">
+                    <span>0xPajke</span>
+                </td>
+                <td data-value="0.015942028985507246"><span style="color: #471669">1.6%</span></td>
+                <td data-value="0.007246376811594203"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.016267942583732056"><span style="color: #472c7b">1.6%</span></td>
+                <td data-value="0.04865375531412376"><span style="color: #208f8c">4.9%</span></td>
+                <td data-value="0.021327829377364983"><span style="color: #482374">2.1%</span></td>
+                <td data-value="0.02997064730418662"><span style="color: #33618d">3.0%</span><br><span class="small-count">(582 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">118</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1739414823396356096/EgeEiZUV_normal.jpg" class="hero-image" alt="vohvohh">
+                    <span>vohvohh</span>
+                </td>
+                <td data-value="0.015217391304347827"><span style="color: #471567">1.5%</span></td>
+                <td data-value="0.01570048309178744"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.013636363636363636"><span style="color: #472676">1.4%</span></td>
+                <td data-value="0.007675956542276807"><span style="color: #481c6e">0.8%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.009423760234821566"><span style="color: #482172">0.9%</span><br><span class="small-count">(183 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">118</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1557078856753942530/KyKHxE38_normal.jpg" class="hero-image" alt="0xMakesy">
+                    <span>0xMakesy</span>
+                </td>
+                <td data-value="0.015217391304347827"><span style="color: #471567">1.5%</span></td>
+                <td data-value="0.028985507246376812"><span style="color: #45347f">2.9%</span></td>
+                <td data-value="0.052870813397129186"><span style="color: #25828e">5.3%</span></td>
+                <td data-value="0.09128483703353803"><span style="color: #d7e219">9.1%</span></td>
+                <td data-value="0.011695906432748537"><span style="color: #471567">1.2%</span></td>
+                <td data-value="0.05772696843297801"><span style="color: #24aa82">5.8%</span><br><span class="small-count">(1121 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">118</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1749873563304067072/NkgDwXBn_normal.jpg" class="hero-image" alt="andy8052">
+                    <span>andy8052</span>
+                </td>
+                <td data-value="0.015217391304347827"><span style="color: #471567">1.5%</span></td>
+                <td data-value="0.00644122383252818"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.01076555023923445"><span style="color: #481d6f">1.1%</span></td>
+                <td data-value="0.031884742560226734"><span style="color: #31658d">3.2%</span></td>
+                <td data-value="0.03199174406604747"><span style="color: #453580">3.2%</span></td>
+                <td data-value="0.02291570111746228"><span style="color: #3c4d8a">2.3%</span><br><span class="small-count">(445 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">118</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1842023420281663489/2TcYoTFL_normal.jpg" class="hero-image" alt="ParallelAiRev">
+                    <span>ParallelAiRev</span>
+                </td>
+                <td data-value="0.015217391304347827"><span style="color: #471567">1.5%</span></td>
+                <td data-value="0.01610305958132045"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.030861244019138756"><span style="color: #3a528b">3.1%</span></td>
+                <td data-value="0.06648559282002835"><span style="color: #3bba75">6.6%</span></td>
+                <td data-value="0.023391812865497075"><span style="color: #472777">2.3%</span></td>
+                <td data-value="0.04227818116277872"><span style="color: #25828e">4.2%</span><br><span class="small-count">(821 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">118</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1707558009776242688/Mu8g3JM2_normal.jpg" class="hero-image" alt="surfcoderepeat">
+                    <span>surfcoderepeat</span>
+                </td>
+                <td data-value="0.015217391304347827"><span style="color: #471567">1.5%</span></td>
+                <td data-value="0.024154589371980676"><span style="color: #472b7a">2.4%</span></td>
+                <td data-value="0.04138755980861244"><span style="color: #2f698d">4.1%</span></td>
+                <td data-value="0.045229097779877186"><span style="color: #23878d">4.5%</span></td>
+                <td data-value="0.17406260749914002"><span style="color: #92d741">17.4%</span></td>
+                <td data-value="0.05885987949945929"><span style="color: #27ad80">5.9%</span><br><span class="small-count">(1143 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1604808218135314432/3J-ABo1I_normal.jpg" class="hero-image" alt="0xgaut">
+                    <span>0xgaut</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.010466988727858293"><span style="color: #471163">1.0%</span></td>
+                <td data-value="0.007894736842105263"><span style="color: #471567">0.8%</span></td>
+                <td data-value="0.00271610769957487"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="0.0196078431372549"><span style="color: #482172">2.0%</span></td>
+                <td data-value="0.008187857253205623"><span style="color: #481d6f">0.8%</span><br><span class="small-count">(159 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1584989392132866086/36z_WjdM_normal.jpg" class="hero-image" alt="CoinGurruu">
+                    <span>CoinGurruu</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.030193236714975844"><span style="color: #453580">3.0%</span></td>
+                <td data-value="0.04090909090909091"><span style="color: #30688d">4.1%</span></td>
+                <td data-value="0.03684459140292867"><span style="color: #2c728e">3.7%</span></td>
+                <td data-value="0.013415892672858616"><span style="color: #47186a">1.3%</span></td>
+                <td data-value="0.03177300581904321"><span style="color: #31668d">3.2%</span><br><span class="small-count">(617 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1772065807901532161/VQa4zFxU_normal.jpg" class="hero-image" alt="ScizRtrading">
+                    <span>ScizRtrading</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.01892109500805153"><span style="color: #482172">1.9%</span></td>
+                <td data-value="0.03779904306220096"><span style="color: #32628d">3.8%</span></td>
+                <td data-value="0.05975436939064714"><span style="color: #25ab81">6.0%</span></td>
+                <td data-value="0.03715170278637771"><span style="color: #433c84">3.7%</span></td>
+                <td data-value="0.04320510839899068"><span style="color: #24858d">4.3%</span><br><span class="small-count">(839 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843252624386048001/VfQjPTzf_normal.png" class="hero-image" alt="osf_rekt">
+                    <span>osf_rekt</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.037037037037037035"><span style="color: #414186">3.7%</span></td>
+                <td data-value="0.03373205741626794"><span style="color: #37598c">3.4%</span></td>
+                <td data-value="0.02302786962683042"><span style="color: #3d4c89">2.3%</span></td>
+                <td data-value="0.0846233230134159"><span style="color: #287a8e">8.5%</span></td>
+                <td data-value="0.03573819455172769"><span style="color: #2c718e">3.6%</span><br><span class="small-count">(694 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1788723968783851520/xzeMFEkG_normal.jpg" class="hero-image" alt="knowerofmarkets">
+                    <span>knowerofmarkets</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.006843800322061192"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.013397129186602871"><span style="color: #472575">1.3%</span></td>
+                <td data-value="0.03731695795937648"><span style="color: #2b738e">3.7%</span></td>
+                <td data-value="0.02476780185758514"><span style="color: #472a79">2.5%</span></td>
+                <td data-value="0.024769555589886194"><span style="color: #3a538b">2.5%</span><br><span class="small-count">(481 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">123</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1850403458731417600/pqsx3UAv_normal.jpg" class="hero-image" alt="lilclearpill">
+                    <span>lilclearpill</span>
+                </td>
+                <td data-value="0.014492753623188406"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.016505636070853463"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.027033492822966507"><span style="color: #3e4989">2.7%</span></td>
+                <td data-value="0.054912612187057154"><span style="color: #1e9f88">5.5%</span></td>
+                <td data-value="0.033367733058135535"><span style="color: #453681">3.3%</span></td>
+                <td data-value="0.03790102476955559"><span style="color: #2a778e">3.8%</span><br><span class="small-count">(736 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">129</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1814439350702084096/eZbXeWJ__normal.jpg" class="hero-image" alt="NewsyJohnson">
+                    <span>NewsyJohnson</span>
+                </td>
+                <td data-value="0.013768115942028985"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.01570048309178744"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.007655502392344498"><span style="color: #471567">0.8%</span></td>
+                <td data-value="0.003660840812470477"><span style="color: #460c5f">0.4%</span></td>
+                <td data-value="0.0041279669762641896"><span style="color: #45065a">0.4%</span></td>
+                <td data-value="0.006848962356455018"><span style="color: #47186a">0.7%</span><br><span class="small-count">(133 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">129</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1840730660740419584/DeHLI4Bu_normal.jpg" class="hero-image" alt="bsol_x">
+                    <span>bsol_x</span>
+                </td>
+                <td data-value="0.013768115942028985"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.025362318840579712"><span style="color: #462d7c">2.5%</span></td>
+                <td data-value="0.022966507177033493"><span style="color: #423e85">2.3%</span></td>
+                <td data-value="0.014407179971658007"><span style="color: #45327f">1.4%</span></td>
+                <td data-value="0.013415892672858616"><span style="color: #47186a">1.3%</span></td>
+                <td data-value="0.017457129615325195"><span style="color: #433c84">1.7%</span><br><span class="small-count">(339 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">129</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1610342982187900928/84eyMoam_normal.jpg" class="hero-image" alt="machibigbrother">
+                    <span>machibigbrother</span>
+                </td>
+                <td data-value="0.013768115942028985"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.020531400966183576"><span style="color: #472575">2.1%</span></td>
+                <td data-value="0.03444976076555024"><span style="color: #365a8c">3.4%</span></td>
+                <td data-value="0.0747520075578649"><span style="color: #67cc5c">7.5%</span></td>
+                <td data-value="0.008255933952528379"><span style="color: #460e61">0.8%</span></td>
+                <td data-value="0.04485297904114527"><span style="color: #23898d">4.5%</span><br><span class="small-count">(871 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">129</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1815190821882179585/3YFSh1dZ_normal.jpg" class="hero-image" alt="twobitidiot">
+                    <span>twobitidiot</span>
+                </td>
+                <td data-value="0.013768115942028985"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.027777777777777776"><span style="color: #46317e">2.8%</span></td>
+                <td data-value="0.042344497607655504"><span style="color: #2e6c8e">4.2%</span></td>
+                <td data-value="0.034600850259801606"><span style="color: #2e6c8e">3.5%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.029249703898243988"><span style="color: #345f8d">2.9%</span><br><span class="small-count">(568 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">129</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843257265685458944/z-IqKBQF_normal.jpg" class="hero-image" alt="Crypto_McKenna">
+                    <span>Crypto_McKenna</span>
+                </td>
+                <td data-value="0.013768115942028985"><span style="color: #471466">1.4%</span></td>
+                <td data-value="0.035024154589371984"><span style="color: #423d84">3.5%</span></td>
+                <td data-value="0.05215311004784689"><span style="color: #26808e">5.2%</span></td>
+                <td data-value="0.052550779404818136"><span style="color: #1e998a">5.3%</span></td>
+                <td data-value="0.015479876160990712"><span style="color: #481a6c">1.5%</span></td>
+                <td data-value="0.041917709459807405"><span style="color: #26818e">4.2%</span><br><span class="small-count">(814 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">134</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1826444445006626816/xC2LvU7N_normal.jpg" class="hero-image" alt="jdubzW">
+                    <span>jdubzW</span>
+                </td>
+                <td data-value="0.013043478260869565"><span style="color: #471265">1.3%</span></td>
+                <td data-value="0.006038647342995169"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.01076555023923445"><span style="color: #481d6f">1.1%</span></td>
+                <td data-value="0.016769012753897024"><span style="color: #433a83">1.7%</span></td>
+                <td data-value="0.09391124871001032"><span style="color: #24848d">9.4%</span></td>
+                <td data-value="0.025387507080694167"><span style="color: #39558b">2.5%</span><br><span class="small-count">(493 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">134</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1838924181532221440/GvZgQ855_normal.jpg" class="hero-image" alt="elliotrades">
+                    <span>elliotrades</span>
+                </td>
+                <td data-value="0.013043478260869565"><span style="color: #471265">1.3%</span></td>
+                <td data-value="0.030595813204508857"><span style="color: #453681">3.1%</span></td>
+                <td data-value="0.038516746411483255"><span style="color: #32638d">3.9%</span></td>
+                <td data-value="0.0410958904109589"><span style="color: #277c8e">4.1%</span></td>
+                <td data-value="0.03061575507395941"><span style="color: #45327f">3.1%</span></td>
+                <td data-value="0.035635202636593026"><span style="color: #2c718e">3.6%</span><br><span class="small-count">(692 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">134</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1790827449682403328/V2xmp0PI_normal.jpg" class="hero-image" alt="vers_laLune">
+                    <span>vers_laLune</span>
+                </td>
+                <td data-value="0.013043478260869565"><span style="color: #471265">1.3%</span></td>
+                <td data-value="0.02254428341384863"><span style="color: #472777">2.3%</span></td>
+                <td data-value="0.03971291866028708"><span style="color: #31668d">4.0%</span></td>
+                <td data-value="0.08230987246102976"><span style="color: #97d83e">8.2%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.05015706267058036"><span style="color: #1e978a">5.0%</span><br><span class="small-count">(974 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">134</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1684331571795443713/5S3Ocdxm_normal.jpg" class="hero-image" alt="gabrielhaines">
+                    <span>gabrielhaines</span>
+                </td>
+                <td data-value="0.013043478260869565"><span style="color: #471265">1.3%</span></td>
+                <td data-value="0.020531400966183576"><span style="color: #472575">2.1%</span></td>
+                <td data-value="0.045454545454545456"><span style="color: #2c728e">4.5%</span></td>
+                <td data-value="0.05845536136041568"><span style="color: #22a784">5.8%</span></td>
+                <td data-value="0.009287925696594427"><span style="color: #471163">0.9%</span></td>
+                <td data-value="0.040218342860085486"><span style="color: #277d8e">4.0%</span><br><span class="small-count">(781 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">138</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1762364859084361728/QY1KxjDw_normal.jpg" class="hero-image" alt="based_d0m">
+                    <span>based_d0m</span>
+                </td>
+                <td data-value="0.012318840579710146"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.03904991948470209"><span style="color: #404487">3.9%</span></td>
+                <td data-value="0.04066985645933014"><span style="color: #30688d">4.1%</span></td>
+                <td data-value="0.04841757203589986"><span style="color: #208f8c">4.8%</span></td>
+                <td data-value="0.06467148262813897"><span style="color: #33618d">6.5%</span></td>
+                <td data-value="0.04541943457438591"><span style="color: #228a8d">4.5%</span><br><span class="small-count">(882 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">138</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1689026858728181760/1qOfYkDa_normal.jpg" class="hero-image" alt="0xrwu">
+                    <span>0xrwu</span>
+                </td>
+                <td data-value="0.012318840579710146"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.010466988727858293"><span style="color: #471163">1.0%</span></td>
+                <td data-value="0.02416267942583732"><span style="color: #414286">2.4%</span></td>
+                <td data-value="0.05030703826169107"><span style="color: #1f948b">5.0%</span></td>
+                <td data-value="0.01582387340901273"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.03172150986147587"><span style="color: #31668d">3.2%</span><br><span class="small-count">(616 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">138</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1837666026424528897/GvQmT7IM_normal.jpg" class="hero-image" alt="penguin_curator">
+                    <span>penguin_curator</span>
+                </td>
+                <td data-value="0.012318840579710146"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.028985507246376812"><span style="color: #45347f">2.9%</span></td>
+                <td data-value="0.03660287081339713"><span style="color: #345f8d">3.7%</span></td>
+                <td data-value="0.07203589985829004"><span style="color: #57c665">7.2%</span></td>
+                <td data-value="0.008943928448572412"><span style="color: #470f62">0.9%</span></td>
+                <td data-value="0.04521345074411659"><span style="color: #22898d">4.5%</span><br><span class="small-count">(878 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">138</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1828805788334182400/SNSMfhh2_normal.jpg" class="hero-image" alt="notsofast">
+                    <span>notsofast</span>
+                </td>
+                <td data-value="0.012318840579710146"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.01247987117552335"><span style="color: #471567">1.2%</span></td>
+                <td data-value="0.026076555023923444"><span style="color: #3f4788">2.6%</span></td>
+                <td data-value="0.05892772791686349"><span style="color: #23a883">5.9%</span></td>
+                <td data-value="0.03199174406604747"><span style="color: #453580">3.2%</span></td>
+                <td data-value="0.03857047221793089"><span style="color: #29798e">3.9%</span><br><span class="small-count">(749 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">138</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1762664342359576576/apkS1dmD_normal.jpg" class="hero-image" alt="larpalt">
+                    <span>larpalt</span>
+                </td>
+                <td data-value="0.012318840579710146"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.014895330112721417"><span style="color: #48196b">1.5%</span></td>
+                <td data-value="0.02799043062200957"><span style="color: #3d4b89">2.8%</span></td>
+                <td data-value="0.04794520547945205"><span style="color: #218d8c">4.8%</span></td>
+                <td data-value="0.033367733058135535"><span style="color: #453681">3.3%</span></td>
+                <td data-value="0.03470827540038107"><span style="color: #2d6e8e">3.5%</span><br><span class="small-count">(674 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">143</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1838751656227565568/7TyIqfNW_normal.jpg" class="hero-image" alt="OX_DAO">
+                    <span>OX_DAO</span>
+                </td>
+                <td data-value="0.011594202898550725"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.011272141706924315"><span style="color: #471265">1.1%</span></td>
+                <td data-value="0.015311004784688996"><span style="color: #472a79">1.5%</span></td>
+                <td data-value="0.041332073689182805"><span style="color: #277d8e">4.1%</span></td>
+                <td data-value="0.01719986240110079"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.02615994644420413"><span style="color: #38578c">2.6%</span><br><span class="small-count">(508 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">143</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1849041036665864192/0tMY52_E_normal.jpg" class="hero-image" alt="thecexoffender">
+                    <span>thecexoffender</span>
+                </td>
+                <td data-value="0.011594202898550725"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.01247987117552335"><span style="color: #471567">1.2%</span></td>
+                <td data-value="0.028708133971291867"><span style="color: #3c4d8a">2.9%</span></td>
+                <td data-value="0.03401039206424185"><span style="color: #2f6a8d">3.4%</span></td>
+                <td data-value="0.15755073959408325"><span style="color: #62ca5f">15.8%</span></td>
+                <td data-value="0.04701580925897317"><span style="color: #218e8c">4.7%</span><br><span class="small-count">(913 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">143</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1811694187038789633/FTiNGz0B_normal.jpg" class="hero-image" alt="Fiskantes">
+                    <span>Fiskantes</span>
+                </td>
+                <td data-value="0.011594202898550725"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.010869565217391304"><span style="color: #471265">1.1%</span></td>
+                <td data-value="0.027751196172248804"><span style="color: #3d4b89">2.8%</span></td>
+                <td data-value="0.05207841284837034"><span style="color: #1e988a">5.2%</span></td>
+                <td data-value="0.09769521843825249"><span style="color: #23898d">9.8%</span></td>
+                <td data-value="0.045522426489520575"><span style="color: #228a8d">4.6%</span><br><span class="small-count">(884 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">143</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1771189756463894528/c-9wYzAu_normal.jpg" class="hero-image" alt="max_the_plug">
+                    <span>max_the_plug</span>
+                </td>
+                <td data-value="0.011594202898550725"><span style="color: #471163">1.2%</span></td>
+                <td data-value="0.014090177133655395"><span style="color: #47186a">1.4%</span></td>
+                <td data-value="0.01985645933014354"><span style="color: #453681">2.0%</span></td>
+                <td data-value="0.035781766650921115"><span style="color: #2d6f8e">3.6%</span></td>
+                <td data-value="0.10663914688682491"><span style="color: #1f938b">10.7%</span></td>
+                <td data-value="0.03846748030279623"><span style="color: #29798e">3.8%</span><br><span class="small-count">(747 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">147</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1822948258752442368/rqjcPBNB_normal.jpg" class="hero-image" alt="0xPrismatic">
+                    <span>0xPrismatic</span>
+                </td>
+                <td data-value="0.010869565217391304"><span style="color: #470f62">1.1%</span></td>
+                <td data-value="0.010869565217391304"><span style="color: #471265">1.1%</span></td>
+                <td data-value="0.026555023923444977"><span style="color: #3e4888">2.7%</span></td>
+                <td data-value="0.06447803495512518"><span style="color: #33b679">6.4%</span></td>
+                <td data-value="0.0068799449604403165"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.03702559349091096"><span style="color: #2a758e">3.7%</span><br><span class="small-count">(719 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">147</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1741228410397999104/hSup_xwc_normal.jpg" class="hero-image" alt="LarpVonTrier">
+                    <span>LarpVonTrier</span>
+                </td>
+                <td data-value="0.010869565217391304"><span style="color: #470f62">1.1%</span></td>
+                <td data-value="0.026570048309178744"><span style="color: #462f7c">2.7%</span></td>
+                <td data-value="0.021052631578947368"><span style="color: #433a83">2.1%</span></td>
+                <td data-value="0.011691072272083136"><span style="color: #472878">1.2%</span></td>
+                <td data-value="0.0027519779841761265"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.014212884288583347"><span style="color: #46317e">1.4%</span><br><span class="small-count">(276 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">147</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1830676952551751680/oFCRRO05_normal.jpg" class="hero-image" alt="0xJim">
+                    <span>0xJim</span>
+                </td>
+                <td data-value="0.010869565217391304"><span style="color: #470f62">1.1%</span></td>
+                <td data-value="0.020933977455716585"><span style="color: #472575">2.1%</span></td>
+                <td data-value="0.02200956937799043"><span style="color: #433c84">2.2%</span></td>
+                <td data-value="0.03117619272555503"><span style="color: #32638d">3.1%</span></td>
+                <td data-value="0.038527691778465774"><span style="color: #423e85">3.9%</span></td>
+                <td data-value="0.027550337298522066"><span style="color: #365b8c">2.8%</span><br><span class="small-count">(535 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">147</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1831735812586668032/sv3E_lBU_normal.jpg" class="hero-image" alt="barneytheboi">
+                    <span>barneytheboi</span>
+                </td>
+                <td data-value="0.010869565217391304"><span style="color: #470f62">1.1%</span></td>
+                <td data-value="0.013285024154589372"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.018421052631578946"><span style="color: #45327f">1.8%</span></td>
+                <td data-value="0.03849787435049599"><span style="color: #2a768e">3.8%</span></td>
+                <td data-value="0.07327141382868937"><span style="color: #2e6c8e">7.3%</span></td>
+                <td data-value="0.03419331582470776"><span style="color: #2e6d8e">3.4%</span><br><span class="small-count">(664 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">147</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1773721481899393024/c2ANpCMq_normal.jpg" class="hero-image" alt="tomhschmidt">
+                    <span>tomhschmidt</span>
+                </td>
+                <td data-value="0.010869565217391304"><span style="color: #470f62">1.1%</span></td>
+                <td data-value="0.008051529790660225"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.014354066985645933"><span style="color: #472777">1.4%</span></td>
+                <td data-value="0.03790741615493623"><span style="color: #2a758e">3.8%</span></td>
+                <td data-value="0.05675954592363261"><span style="color: #38578c">5.7%</span></td>
+                <td data-value="0.02991915134661929"><span style="color: #33618d">3.0%</span><br><span class="small-count">(581 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">152</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1766117510221307904/z7IRFqRq_normal.jpg" class="hero-image" alt="Loopifyyy">
+                    <span>Loopifyyy</span>
+                </td>
+                <td data-value="0.010144927536231883"><span style="color: #460e61">1.0%</span></td>
+                <td data-value="0.010466988727858293"><span style="color: #471163">1.0%</span></td>
+                <td data-value="0.019377990430622008"><span style="color: #453580">1.9%</span></td>
+                <td data-value="0.03117619272555503"><span style="color: #32638d">3.1%</span></td>
+                <td data-value="0.06776745786033712"><span style="color: #31658d">6.8%</span></td>
+                <td data-value="0.02997064730418662"><span style="color: #33618d">3.0%</span><br><span class="small-count">(582 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">152</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1735741854459514880/CX7vO79Y_normal.jpg" class="hero-image" alt="divine_economy">
+                    <span>divine_economy</span>
+                </td>
+                <td data-value="0.010144927536231883"><span style="color: #460e61">1.0%</span></td>
+                <td data-value="0.009259259259259259"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.017942583732057416"><span style="color: #46317e">1.8%</span></td>
+                <td data-value="0.023500236183278223"><span style="color: #3c4e8a">2.4%</span></td>
+                <td data-value="0.007223942208462332"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.01709665791235388"><span style="color: #433b83">1.7%</span><br><span class="small-count">(332 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">152</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1609578914371846144/fzeCeUMd_normal.jpg" class="hero-image" alt="TraderMercury">
+                    <span>TraderMercury</span>
+                </td>
+                <td data-value="0.010144927536231883"><span style="color: #460e61">1.0%</span></td>
+                <td data-value="0.02214170692431562"><span style="color: #472777">2.2%</span></td>
+                <td data-value="0.017942583732057416"><span style="color: #46317e">1.8%</span></td>
+                <td data-value="0.014170996693434105"><span style="color: #46317e">1.4%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.01550028322776662"><span style="color: #453681">1.6%</span><br><span class="small-count">(301 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">152</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1833898219173969920/N56UKPdf_normal.jpg" class="hero-image" alt="sumfattytuna">
+                    <span>sumfattytuna</span>
+                </td>
+                <td data-value="0.010144927536231883"><span style="color: #460e61">1.0%</span></td>
+                <td data-value="0.004830917874396135"><span style="color: #450558">0.5%</span></td>
+                <td data-value="0.01076555023923445"><span style="color: #481d6f">1.1%</span></td>
+                <td data-value="0.0201936702881436"><span style="color: #404487">2.0%</span></td>
+                <td data-value="0.05056759545923633"><span style="color: #3b508a">5.1%</span></td>
+                <td data-value="0.020031927493691745"><span style="color: #404487">2.0%</span><br><span class="small-count">(389 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">152</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1785124710952660992/H2EytKBn_normal.jpg" class="hero-image" alt="optimizoor">
+                    <span>optimizoor</span>
+                </td>
+                <td data-value="0.010144927536231883"><span style="color: #460e61">1.0%</span></td>
+                <td data-value="0.03341384863123994"><span style="color: #433b83">3.3%</span></td>
+                <td data-value="0.030861244019138756"><span style="color: #3a528b">3.1%</span></td>
+                <td data-value="0.019603212092583845"><span style="color: #414286">2.0%</span></td>
+                <td data-value="0.10595115239078087"><span style="color: #1f928c">10.6%</span></td>
+                <td data-value="0.03604717029713168"><span style="color: #2c728e">3.6%</span><br><span class="small-count">(700 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">157</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1492672526656446467/uH5PD24j_normal.jpg" class="hero-image" alt="santiagoroel">
+                    <span>santiagoroel</span>
+                </td>
+                <td data-value="0.009420289855072464"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.014492753623188406"><span style="color: #48196b">1.4%</span></td>
+                <td data-value="0.020095693779904306"><span style="color: #443781">2.0%</span></td>
+                <td data-value="0.03897024090694379"><span style="color: #29788e">3.9%</span></td>
+                <td data-value="0.04368765049879601"><span style="color: #3f4587">4.4%</span></td>
+                <td data-value="0.03038261496472527"><span style="color: #32638d">3.0%</span><br><span class="small-count">(590 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">157</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1766167563661168640/iSJO6z8K_normal.jpg" class="hero-image" alt="sershokunin">
+                    <span>sershokunin</span>
+                </td>
+                <td data-value="0.009420289855072464"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.02455716586151369"><span style="color: #472b7a">2.5%</span></td>
+                <td data-value="0.038516746411483255"><span style="color: #32638d">3.9%</span></td>
+                <td data-value="0.04581955597543694"><span style="color: #23898d">4.6%</span></td>
+                <td data-value="0.0034399724802201583"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.0325969411401205"><span style="color: #2f698d">3.3%</span><br><span class="small-count">(633 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">157</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1787697051058278400/kT_Ct6Mj_normal.jpg" class="hero-image" alt="wabdoteth">
+                    <span>wabdoteth</span>
+                </td>
+                <td data-value="0.009420289855072464"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.016908212560386472"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.031578947368421054"><span style="color: #39548b">3.2%</span></td>
+                <td data-value="0.05148795465281058"><span style="color: #1e978a">5.1%</span></td>
+                <td data-value="0.1324389404884761"><span style="color: #2bb17d">13.2%</span></td>
+                <td data-value="0.05190792522786961"><span style="color: #1e9b89">5.2%</span><br><span class="small-count">(1008 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">157</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1695773404064796672/KYJYUFuo_normal.jpg" class="hero-image" alt="beaniemaxi">
+                    <span>beaniemaxi</span>
+                </td>
+                <td data-value="0.009420289855072464"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.023752012882447666"><span style="color: #472a79">2.4%</span></td>
+                <td data-value="0.016267942583732056"><span style="color: #472c7b">1.6%</span></td>
+                <td data-value="0.005550307038261691"><span style="color: #471466">0.6%</span></td>
+                <td data-value="0.033367733058135535"><span style="color: #453681">3.3%</span></td>
+                <td data-value="0.014624851949121994"><span style="color: #45327f">1.5%</span><br><span class="small-count">(284 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">161</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1841863624412864512/Tt8_R1-m_normal.jpg" class="hero-image" alt="basedkarbon">
+                    <span>basedkarbon</span>
+                </td>
+                <td data-value="0.008695652173913044"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.01570048309178744"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.018421052631578946"><span style="color: #45327f">1.8%</span></td>
+                <td data-value="0.009801606046291923"><span style="color: #482273">1.0%</span></td>
+                <td data-value="0.0027519779841761265"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.011277614707245481"><span style="color: #472777">1.1%</span><br><span class="small-count">(219 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">161</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1512588351592882185/-b1tizOG_normal.jpg" class="hero-image" alt="sherlock_hodles">
+                    <span>sherlock_hodles</span>
+                </td>
+                <td data-value="0.008695652173913044"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.02455716586151369"><span style="color: #472b7a">2.5%</span></td>
+                <td data-value="0.02368421052631579"><span style="color: #414186">2.4%</span></td>
+                <td data-value="0.018776570618800188"><span style="color: #424085">1.9%</span></td>
+                <td data-value="0.0030959752321981426"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.01750862557289253"><span style="color: #433c84">1.8%</span><br><span class="small-count">(340 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">161</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1545356330122166272/d-FiFFm2_normal.jpg" class="hero-image" alt="safetyth1rd">
+                    <span>safetyth1rd</span>
+                </td>
+                <td data-value="0.008695652173913044"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.006038647342995169"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.012679425837320573"><span style="color: #482374">1.3%</span></td>
+                <td data-value="0.03554558337269721"><span style="color: #2d6f8e">3.6%</span></td>
+                <td data-value="0.05159958720330237"><span style="color: #3b518a">5.2%</span></td>
+                <td data-value="0.02734435346825274"><span style="color: #365a8c">2.7%</span><br><span class="small-count">(531 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">161</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1626216945698881541/kF6xM_Cb_normal.jpg" class="hero-image" alt="gmoneyNFT">
+                    <span>gmoneyNFT</span>
+                </td>
+                <td data-value="0.008695652173913044"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.009259259259259259"><span style="color: #460e61">0.9%</span></td>
+                <td data-value="0.017464114832535887"><span style="color: #46307d">1.7%</span></td>
+                <td data-value="0.040741615493623054"><span style="color: #287b8e">4.1%</span></td>
+                <td data-value="0.022015823873409012"><span style="color: #472575">2.2%</span></td>
+                <td data-value="0.02662341006231011"><span style="color: #37588c">2.7%</span><br><span class="small-count">(517 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">161</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1835888983768797184/lsojQUkd_normal.jpg" class="hero-image" alt="wrld_sol">
+                    <span>wrld_sol</span>
+                </td>
+                <td data-value="0.008695652173913044"><span style="color: #460c5f">0.9%</span></td>
+                <td data-value="0.03341384863123994"><span style="color: #433b83">3.3%</span></td>
+                <td data-value="0.03779904306220096"><span style="color: #32628d">3.8%</span></td>
+                <td data-value="0.0334199338686821"><span style="color: #2f698d">3.3%</span></td>
+                <td data-value="0.012727898176814585"><span style="color: #471669">1.3%</span></td>
+                <td data-value="0.029507183686080643"><span style="color: #33608d">3.0%</span><br><span class="small-count">(573 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">166</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1710969844034650112/cZkdOHxX_normal.jpg" class="hero-image" alt="kirbxbt">
+                    <span>kirbxbt</span>
+                </td>
+                <td data-value="0.007971014492753623"><span style="color: #460b5e">0.8%</span></td>
+                <td data-value="0.005233494363929146"><span style="color: #45065a">0.5%</span></td>
+                <td data-value="0.015789473684210527"><span style="color: #472b7a">1.6%</span></td>
+                <td data-value="0.0271610769957487"><span style="color: #37588c">2.7%</span></td>
+                <td data-value="0.1675266597867217"><span style="color: #7ed24e">16.8%</span></td>
+                <td data-value="0.04155723775683609"><span style="color: #26808e">4.2%</span><br><span class="small-count">(807 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">167</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1711399954164674560/hgBradso_normal.jpg" class="hero-image" alt="mrjasonchoi">
+                    <span>mrjasonchoi</span>
+                </td>
+                <td data-value="0.007246376811594203"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.00644122383252818"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.019377990430622008"><span style="color: #453580">1.9%</span></td>
+                <td data-value="0.042512990080302314"><span style="color: #26808e">4.3%</span></td>
+                <td data-value="0.016167870657034743"><span style="color: #481c6e">1.6%</span></td>
+                <td data-value="0.026468922189608116"><span style="color: #37588c">2.6%</span><br><span class="small-count">(514 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">168</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1843439709571219456/iNRM1482_normal.jpg" class="hero-image" alt="orangie">
+                    <span>orangie</span>
+                </td>
+                <td data-value="0.006521739130434782"><span style="color: #45085b">0.7%</span></td>
+                <td data-value="0.00644122383252818"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.008133971291866028"><span style="color: #471669">0.8%</span></td>
+                <td data-value="0.002834199338686821"><span style="color: #46095c">0.3%</span></td>
+                <td data-value="0.0010319917440660474"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.004428652350790463"><span style="color: #460e61">0.4%</span><br><span class="small-count">(86 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">168</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1849100419513135104/aWCjsfkF_normal.jpg" class="hero-image" alt="0xLawliette">
+                    <span>0xLawliette</span>
+                </td>
+                <td data-value="0.006521739130434782"><span style="color: #45085b">0.7%</span></td>
+                <td data-value="0.021739130434782608"><span style="color: #472676">2.2%</span></td>
+                <td data-value="0.03253588516746411"><span style="color: #38568b">3.3%</span></td>
+                <td data-value="0.052550779404818136"><span style="color: #1e998a">5.3%</span></td>
+                <td data-value="0.03199174406604747"><span style="color: #453580">3.2%</span></td>
+                <td data-value="0.03795252072712292"><span style="color: #2a778e">3.8%</span><br><span class="small-count">(737 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">168</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1847009423853563904/Rk8-dNNf_normal.jpg" class="hero-image" alt="cryptoleon_xyz">
+                    <span>cryptoleon_xyz</span>
+                </td>
+                <td data-value="0.006521739130434782"><span style="color: #45085b">0.7%</span></td>
+                <td data-value="0.011674718196457327"><span style="color: #471466">1.2%</span></td>
+                <td data-value="0.0215311004784689"><span style="color: #433b83">2.2%</span></td>
+                <td data-value="0.01759565422768068"><span style="color: #433c84">1.8%</span></td>
+                <td data-value="0.0030959752321981426"><span style="color: #450558">0.3%</span></td>
+                <td data-value="0.014727843864256657"><span style="color: #45347f">1.5%</span><br><span class="small-count">(286 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">171</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1759256121905233920/O4ZSkOm6_normal.jpg" class="hero-image" alt="chiefingza">
+                    <span>chiefingza</span>
+                </td>
+                <td data-value="0.005797101449275362"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.016505636070853463"><span style="color: #481d6f">1.7%</span></td>
+                <td data-value="0.020095693779904306"><span style="color: #443781">2.0%</span></td>
+                <td data-value="0.023618327822390175"><span style="color: #3c4e8a">2.4%</span></td>
+                <td data-value="0.032679738562091505"><span style="color: #453580">3.3%</span></td>
+                <td data-value="0.022040269838817652"><span style="color: #3d4b89">2.2%</span><br><span class="small-count">(428 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">171</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1747525526145699840/8MluaGAV_normal.jpg" class="hero-image" alt="maybectrlfreak">
+                    <span>maybectrlfreak</span>
+                </td>
+                <td data-value="0.005797101449275362"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.011674718196457327"><span style="color: #471466">1.2%</span></td>
+                <td data-value="0.024880382775119617"><span style="color: #404387">2.5%</span></td>
+                <td data-value="0.029995276334435522"><span style="color: #33608d">3.0%</span></td>
+                <td data-value="0.1365669074647403"><span style="color: #32b57a">13.7%</span></td>
+                <td data-value="0.040784798393326126"><span style="color: #277e8e">4.1%</span><br><span class="small-count">(792 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">171</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1795944646754861056/BvLWDVYq_normal.jpg" class="hero-image" alt="dabit3">
+                    <span>dabit3</span>
+                </td>
+                <td data-value="0.005797101449275362"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.029790660225442835"><span style="color: #453580">3.0%</span></td>
+                <td data-value="0.03397129186602871"><span style="color: #37598c">3.4%</span></td>
+                <td data-value="0.045111006140765235"><span style="color: #23878d">4.5%</span></td>
+                <td data-value="0.0068799449604403165"><span style="color: #460c5f">0.7%</span></td>
+                <td data-value="0.03223646943714918"><span style="color: #30688d">3.2%</span><br><span class="small-count">(626 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">171</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1830738945237250048/2d9vOGIY_normal.jpg" class="hero-image" alt="mdudas">
+                    <span>mdudas</span>
+                </td>
+                <td data-value="0.005797101449275362"><span style="color: #45085b">0.6%</span></td>
+                <td data-value="0.024154589371980676"><span style="color: #472b7a">2.4%</span></td>
+                <td data-value="0.026555023923444977"><span style="color: #3e4888">2.7%</span></td>
+                <td data-value="0.04463863958431743"><span style="color: #24868d">4.5%</span></td>
+                <td data-value="0.04196766425868593"><span style="color: #404387">4.2%</span></td>
+                <td data-value="0.03496575518821773"><span style="color: #2d6f8e">3.5%</span><br><span class="small-count">(679 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">175</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1776459365161238528/myBWpmT5_normal.jpg" class="hero-image" alt="0xMerp">
+                    <span>0xMerp</span>
+                </td>
+                <td data-value="0.005072463768115942"><span style="color: #45065a">0.5%</span></td>
+                <td data-value="0.008051529790660225"><span style="color: #460c5f">0.8%</span></td>
+                <td data-value="0.015311004784688996"><span style="color: #472a79">1.5%</span></td>
+                <td data-value="0.01983939537080775"><span style="color: #404387">2.0%</span></td>
+                <td data-value="0.005503955968352253"><span style="color: #46095c">0.6%</span></td>
+                <td data-value="0.014161388331016015"><span style="color: #46317e">1.4%</span><br><span class="small-count">(275 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">176</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1673530491750719488/zjB5OMTf_normal.jpg" class="hero-image" alt="chooserich">
+                    <span>chooserich</span>
+                </td>
+                <td data-value="0.002898550724637681"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.023752012882447666"><span style="color: #472a79">2.4%</span></td>
+                <td data-value="0.023205741626794257"><span style="color: #424085">2.3%</span></td>
+                <td data-value="0.020902220122815306"><span style="color: #3f4788">2.1%</span></td>
+                <td data-value="0.004471964224286206"><span style="color: #45085b">0.4%</span></td>
+                <td data-value="0.01802358514856584"><span style="color: #423e85">1.8%</span><br><span class="small-count">(350 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">176</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1517222273039708161/98wNOFut_normal.jpg" class="hero-image" alt="WuWei113">
+                    <span>WuWei113</span>
+                </td>
+                <td data-value="0.002898550724637681"><span style="color: #440357">0.3%</span></td>
+                <td data-value="0.007246376811594203"><span style="color: #46095c">0.7%</span></td>
+                <td data-value="0.013157894736842105"><span style="color: #472575">1.3%</span></td>
+                <td data-value="0.009919697685403874"><span style="color: #482374">1.0%</span></td>
+                <td data-value="0.003783969728242174"><span style="color: #45065a">0.4%</span></td>
+                <td data-value="0.008857304701580925"><span style="color: #482071">0.9%</span><br><span class="small-count">(172 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">178</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1609924605421944836/veyUE6Qs_normal.jpg" class="hero-image" alt="TheFlowHorse">
+                    <span>TheFlowHorse</span>
+                </td>
+                <td data-value="0.002173913043478261"><span style="color: #440255">0.2%</span></td>
+                <td data-value="0.0036231884057971015"><span style="color: #440255">0.4%</span></td>
+                <td data-value="0.0014354066985645933"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.00035427491733585264"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.0003439972480220158"><span style="color: #440154">0.0%</span></td>
+                <td data-value="0.0011329110664812813"><span style="color: #440154">0.1%</span><br><span class="small-count">(22 of 19419)</span></td>
+            </tr>
+        
+            <tr>
+                <td class="rank">179</td>
+                <td class="hero-cell">
+                    <img src="https://pbs.twimg.com/profile_images/1789254181997694976/iSzH5TDD_normal.jpg" class="hero-image" alt="honey_xbt">
+                    <span>honey_xbt</span>
+                </td>
+                <td data-value="0.0007246376811594203"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.0024154589371980675"><span style="color: #440154">0.2%</span></td>
+                <td data-value="0.0011961722488038277"><span style="color: #440154">0.1%</span></td>
+                <td data-value="0.0004723665564478035"><span style="color: #440154">0.0%</span></td>
+                <td data-value="nan">-</td>
+                <td data-value="0.0008239353210772954"><span style="color: #440154">0.1%</span><br><span class="small-count">(16 of 19419)</span></td>
+            </tr>
+        
+            </tbody>
+            </table>
+            <script>
+            // Function to search
+            function searchHeroes() {
+                document.getElementById('hero-search-box').addEventListener('input', function() {
+                    var searchTerm = this.value.toLowerCase();
+                    var rows = document.querySelectorAll('#heroesTable tr');
+                    rows.forEach(function(row, index) {
+                        if (index === 0) return; // Skip the header row
+                        var playerHandleCell = row.querySelector('td:nth-child(2)');
+                        if (playerHandleCell) {
+                            var playerHandle = playerHandleCell.textContent.toLowerCase();
+                            if (playerHandle.includes(searchTerm)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+            }
+
+            function sortTable(column, ascending) {
+                var table = document.getElementById("heroesTable");
+                var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
+                
+                // Find the column index based on the data-sort attribute
+                var headerCells = table.rows[0].cells;
+                var columnIndex = Array.from(headerCells).findIndex(cell => cell.getAttribute('data-sort') === column);
+                
+                if (columnIndex === -1) return; // Exit if column not found
+
+                rows.sort((a, b) => {
+                    let aCell = a.cells[columnIndex];
+                    let bCell = b.cells[columnIndex];
+                    
+                    // Use the raw values stored in data-value
+                    let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
+                    let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
+
+                    return ascending ? aValue - bValue : bValue - aValue;
+                });
+
+                // Reinsert rows in new order
+                rows.forEach(row => table.appendChild(row));
+                
+                updateRanks();
+            }
+
+            function updateRanks() {
+                var rows = document.querySelectorAll('#heroesTable tr');
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    var rankCell = row.querySelector('td.rank');
+                    if (rankCell) {
+                        rankCell.textContent = index;
+                    }
+                });
+            }
+
+            // Add click event listeners to the headers
+            document.addEventListener('DOMContentLoaded', function() {
+                const headers = document.querySelectorAll('th[data-sort]');
+                headers.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const column = this.getAttribute('data-sort');
+                        
+                        // Find current sort direction
+                        const currentArrow = this.querySelector('.sort-arrow.active');
+                        const isAscending = currentArrow && currentArrow.classList.contains('up');
+                        
+                        // Reset all arrows in all headers
+                        document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                            arrow.classList.remove('active');
+                        });
+                        
+                        // Update active arrow in clicked header
+                        const newArrow = this.querySelector(isAscending ? '.sort-arrow.down' : '.sort-arrow.up');
+                        if (newArrow) {
+                            newArrow.classList.add('active');
+                        }
+                        
+                        sortTable(column, !isAscending);
+                    });
+                });
+            });
+
+            // Initialize search functionality
+            searchHeroes();
+            </script>
+        </body>
+        </html>
+        

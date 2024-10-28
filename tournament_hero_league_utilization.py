@@ -181,7 +181,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 <a href="home.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
-                Player Total Rewards Leaders
+                Hero Utilization by League
             </h1>
             <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>

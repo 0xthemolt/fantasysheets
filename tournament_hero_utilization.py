@@ -1,11 +1,10 @@
 import psycopg2
-from jinja2 import Template
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import numpy as np
+import pandas as pd
 import json
-from datetime import datetime, timedelta
-
+import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable, viridis
+from decimal import Decimal
 
 # Load configuration from config.json
 with open('C:/fantasy_top_analysis/pages/config.json', 'r') as config_file:
@@ -16,624 +15,364 @@ TOURNAMENT_NUMBER = config['tournament_number']
 LEAGUE_IMAGES = config['league_images']
 REWARD_IMAGES = config['reward_images']
 
+def get_heroes_data():
+    # Connect to your PostgreSQL database
+    conn = psycopg2.connect(
+        dbname="0xthemolt",
+        user="postgres",
+        password="admin",
+        host="localhost",
+        port="5432"
+    )
 
-# Define your query
-query = f"""
-WITH player_sample AS (
-    SELECT tournament_unique_key
-    ,COUNT(DISTINCT tournament_player_deck_id) AS total_decks
-    ,COUNT(DISTINCT tournament_player_deck_id)*5 AS total_cards
-    FROM agg.TournamentOwnership
-    WHERE 1=1
-    -- player_rank <= 100
-    --AND tournament_unique_key = 'Main 10'
-    group by tournament_unique_key
-)
-SELECT 
-    a.hero_handle,  --0
-    COALESCE(hero_stars,2) hero_stars,  --1
-    coalesce(ghwss.hero_pfp_image_url  , 'https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/neutral/' || a.hero_handle || '.png')  as hero_pfp_url,  --2
-   -- 'https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/neutral/' || a.hero_handle || '.png' hero_pfp_url,
-    COUNT(*) AS card_usage_count, --3
-    ROUND(100*(COUNT(*)::NUMERIC/MAX(total_cards)), 1) AS card_ownership,  --4
-    MAX(ROUND(COALESCE(ghst.fantasy_score,0), 0)) AS tournament_fan_score,  --5
-    MAX(ROUND(COALESCE(ghst.reach,0), 0)) AS tournament_reach,  --6
-    MAX(ROUND(COALESCE(ghst.views,0), 0)) AS tournament_views,  --7
-    MAX(ROUND(COALESCE(ghst.tweet_count,0), 0)) AS tournament_tweets, --8
-    MIN(a.db_updated_cst) AS ownership_timestamp, --9
-    MAX(total_decks) AS total_decks, --10
-    MAX(total_cards) as total_cards, --11
-    MIN(a.db_updated_cst)::timestamp AS score_timestamp,  --12
-    ROUND(100*(COUNT(*)::NUMERIC/MAX(sup.aggregate_cards)),0) AS card_supply_usage  --13
-FROM agg.TournamentOwnership a
-LEFT JOIN flatten.GET_HEROS_WITH_STATS_TOURNAMENT ghst
-    on a.hero_id = ghst.hero_id
-    and a.tournament_id = ghst.tournament_id
-LEFT JOIN flatten.get_heros_with_stats_snapshot ghwss 
-    ON a.hero_id = ghwss.hero_id 
-    AND ghwss.snapshot_rank = 1 
-left join flatten.get_supply_PER_HERO_ID sup
-	on a.hero_id  = sup.hero_id 
-	and sup.snapshot_rank  = 1
-CROSS JOIN player_sample
-WHERE 1=1
-and a.hero_handle not IN ('satsdart','delucinator')
-and a.tournament_unique_key = player_sample.tournament_unique_key
-and a.tournament_unique_key  = 'Main {TOURNAMENT_NUMBER}'
-GROUP BY 1, 2, 3
-ORDER BY CAST(COUNT(*) AS FLOAT)/100 DESC
-"""
-
-try:
-    conn = psycopg2.connect("dbname='0xthemolt' user='postgres' host='localhost' password='admin'")
-except:
-    print("I am unable to connect to the database")
+    # Query the database
+    query = f"""
+        with tournament_base as (
+        select town.*
+            from agg.TournamentOwnership town
+            join flatten.get_heros_with_stats_snapshot ghwss on town.hero_id = ghwss.hero_id and ghwss.snapshot_rank = 1 and is_deleted = 0
+            where town.tournament_unique_key   in ('Main {TOURNAMENT_NUMBER}')
+        )
+        ,all_heroes as (
+            select hero_id,COUNT(*) as hero_usage_count,ROUND(MAX(case when hero_rarity = 'common' then hero_fantasy_score else 0 end),0) hero_fantasy_score, MIN(db_updated_cst) db_updated_cst from tournament_base group by 1
+        )
+        ,unique_decks AS (
+            SELECT COUNT(distinct tournament_player_deck_id) unique_decks
+            FROM tournament_base
+        )
+        ,unique_decks_by_league AS (
+            SELECT tournament_league_unique_key,COUNT(distinct tournament_player_deck_id) unique_decks
+            FROM tournament_base
+            group by 1
+        )
+        , reverse as (
+            select hero_id,COUNT(*)::numeric /  MAX(b.unique_decks)  pct_total
+            from  tournament_base a
+            left join unique_decks_by_league b on a.tournament_league_unique_key = b.tournament_league_unique_key
+            where a.tournament_name  in ('Reverse Score')
+            group by 1
+        )
+        , bronze as (
+            select hero_id,COUNT(*)::numeric /  MAX(b.unique_decks)  pct_total
+            from  tournament_base a
+            left join unique_decks_by_league b on a.tournament_league_unique_key = b.tournament_league_unique_key
+            where a.tournament_name  in ('Bronze')
+            group by 1
+        )
+        , silver as (
+            select hero_id,COUNT(*)::numeric /  MAX(b.unique_decks)  pct_total
+            from  tournament_base a
+            left join unique_decks_by_league b on a.tournament_league_unique_key = b.tournament_league_unique_key
+            where a.tournament_name  in ('Silver')
+            group by 1
+        )
+        , gold as (
+            select hero_id,COUNT(*)::numeric /  MAX(b.unique_decks)  pct_total
+            from  tournament_base a
+            left join unique_decks_by_league b on a.tournament_league_unique_key = b.tournament_league_unique_key
+            where a.tournament_name  in ('Gold')
+            group by 1
+        )
+        , elite as (
+            select hero_id,COUNT(*)::numeric /  MAX(b.unique_decks)  pct_total
+            from  tournament_base a
+            left join unique_decks_by_league b on a.tournament_league_unique_key = b.tournament_league_unique_key
+            where a.tournament_name  in ('Elite')
+            group by 1
+        )
+        select ghwss.hero_handle,
+            ah.hero_fantasy_score,
+            ah.hero_usage_count,
+            ud.unique_decks,
+            ah.hero_usage_count::numeric / ud.unique_decks  as total_utilization,
+            e.pct_total elite_utilization,
+            g.pct_total gold_utilization,
+            s.pct_total silver_utilization,
+            b.pct_total bronze_utilization,
+            r.pct_total as reverse_utilization,
+            hero_usage_count::NUMERIC/sup.aggregate_cards AS card_supply_utilization, 
+            sup.aggregate_cards as card_supply,
+            coalesce(ghwss.hero_pfp_image_url, 'https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/neutral/' || ghwss.hero_handle || '.png') as hero_pfp_url,
+            ah.db_updated_cst::timestamp AS score_timestamp
+        from all_heroes ah
+        JOIN flatten.get_heros_with_stats_snapshot ghwss 
+            ON ah.hero_id = ghwss.hero_id 
+            AND ghwss.snapshot_rank = 1 
+        cross join unique_decks ud
+        left join reverse r on ah.hero_id = r.hero_id
+        left join bronze b on ah.hero_id = b.hero_id
+        left join silver s on ah.hero_id = s.hero_id
+        left join gold g on ah.hero_id = g.hero_id
+        left join elite e on ah.hero_id = e.hero_id
+        left join flatten.get_supply_PER_HERO_ID sup
+			on ah.hero_id  = sup.hero_id 
+			and sup.snapshot_rank  = 1
+        order by 5 desc
+    """
+    df_heroes = pd.read_sql(query, conn)
     
-# Execute the query and fetch data
-cur = conn.cursor()
-cur.execute(query)
-rows = cur.fetchall()
-
-# Close cursor and connection
-cur.close()
-conn.close()
-
-# Function to convert hero_stars to star emojis
-def convert_to_stars(hero_stars):
-    return '⭐' * hero_stars
-
-# Helper function to format numbers
-def format_number(value):
-    if value >= 1_000_000:
-        return f"{value / 1_000_000:.1f}M"
-    elif value >= 1_000:
-        return f"{value / 1_000:.1f}K"
-    else:
-        return str(value)
+    # Close the connection
+    conn.close()
     
-# Convert hero_stars to star emojis in the rows
-rows = [(row[0], convert_to_stars(row[1]), row[2], row[3], float(row[4]), float(row[5]), round(float(row[6])), round(float(row[7])), round(float(row[8])), row[9], row[10], row[11], row[12], int(row[13])) for row in rows]
+    # After fetching the heroes data, sort by hero_fantasy_score in descending order
+    df_heroes = df_heroes.sort_values(by='hero_fantasy_score', ascending=False)
 
-# Organize rows by hero_stars for card ownership
-stars_dict_ownership = {}
-for row in rows:
-    stars = row[1]
-    if stars not in stars_dict_ownership:
-        stars_dict_ownership[stars] = []
-    stars_dict_ownership[stars].append(row)  # Remove the limit of 5
+    # Add a rank column based on total_utilization, skipping identical values
+    df_heroes['rank'] = df_heroes['hero_fantasy_score'].rank(method='dense', ascending=False).astype(int)
 
-# Sort stars_dict by hero_stars value (ascending)
-stars_dict_ownership = dict(sorted(stars_dict_ownership.items(), key=lambda x: len(x[0])))
+    # Calculate the latest timestamp and time difference
+    latest_score_timestamp = max(df_heroes['score_timestamp'])
+    latest_score_timestamp = df_heroes['score_timestamp'].max().strftime("%Y-%m-%d %H:%M")
+    # Calculate total decks and total cards
+    total_heroes = len(df_heroes)
+    total_decks = df_heroes['unique_decks'].iloc[0]
+    total_cards = total_decks * 5
 
-# Organize rows by hero_stars for fan score
-stars_dict_fan_score = {}
-for row in sorted(rows, key=lambda x: x[5], reverse=True):  # Sort by fan score descending
-    stars = row[1]
-    if stars not in stars_dict_fan_score:
-        stars_dict_fan_score[stars] = []
-    if len(stars_dict_fan_score[stars]) < 40:  # Get only top 10 for each star value
-        stars_dict_fan_score[stars].append(row)
-
-# Sort stars_dict by hero_stars value (ascending)
-stars_dict_fan_score = dict(sorted(stars_dict_fan_score.items(), key=lambda x: len(x[0])))
-
-# Organize rows by hero_stars for card supply usage
-stars_dict_supply_usage = {}
-for row in sorted(rows, key=lambda x: x[13], reverse=True):  # Sort by card supply usage descending
-    stars = row[1]
-    if stars not in stars_dict_supply_usage:
-        stars_dict_supply_usage[stars] = []
-    stars_dict_supply_usage[stars].append(row)  # Remove the limit of 5
-
-# Sort stars_dict by hero_stars value (ascending)
-stars_dict_supply_usage = dict(sorted(stars_dict_supply_usage.items(), key=lambda x: len(x[0])))
-
-# Get the latest score_timestamp and calculate the time difference in minutes
-latest_score_timestamp = max(row[12] for row in rows)
-latest_score_timestamp_formatted = latest_score_timestamp.strftime("%Y-%m-%d %H:%M")
-current_time = datetime.now()  # Get the current local time
-time_diff_minutes = int((current_time - latest_score_timestamp).total_seconds() / 60)
-
-print(latest_score_timestamp_formatted)
-
-# Prepare ownership for conditional formatting
-all_ownerships = [record[4] for records in stars_dict_ownership.values() for record in records]
-min_ownership = min(all_ownerships)
-max_ownership = max(all_ownerships)
-norm_ownership = plt.Normalize(min_ownership, max_ownership)
-cmap_ownership = cm.get_cmap('viridis')  # Use viridis for better contrast with white text
-
-def get_ownership_color(ownership, min_ownership, max_ownership):
-    norm = plt.Normalize(min_ownership, max_ownership)
-    rgba = cmap_ownership(norm(ownership))
-    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
-
-# Prepare supply usage for conditional formatting
-all_supplyusage = [record[13] for records in stars_dict_ownership.values() for record in records]
-min_supplyusage = min(all_supplyusage)
-max_supplyusage = max(all_supplyusage)
-norm_supplyusage = plt.Normalize(min_supplyusage, max_supplyusage)
-cmap_supplyusage = cm.get_cmap('viridis')  # Use viridis for better contrast with white text
-
-def get_supplyusage_color(supplyusage, min_supplyusage, max_supplyusage):
-    norm = plt.Normalize(min_supplyusage, max_supplyusage)
-    rgba = cmap_supplyusage(norm(supplyusage))
-    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
-
-# Prepare fan_score for conditional formatting
-all_scores = [record[5] for records in stars_dict_fan_score.values() for record in records]
-min_score = min(all_scores)
-max_score = max(all_scores)
-norm_fan_score = plt.Normalize(min_score, max_score)
-cmap_fan_score = cm.get_cmap('RdYlGn')
-
-def get_fan_score_color(score, min_score, max_score):
-    norm = plt.Normalize(min_score, max_score)
-    rgba = cmap_fan_score(norm(score))
-    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
-
-views_cap = 1000000  # Set the cap value as needed
-
-# Normalize the views, tweets, and reach for conditional formatting
-all_views = [record[7] for records in stars_dict_fan_score.values() for record in records]
-all_tweets = [record[8] for records in stars_dict_fan_score.values() for record in records]
-all_reach = [record[6] for records in stars_dict_fan_score.values() for record in records]
-
-min_views, max_views = min(all_views), max(all_views)
-min_tweets, max_tweets = min(all_tweets), max(all_tweets)
-min_reach, max_reach = min(all_reach), max(all_reach)
-
-def normalize_value(value, min_value, max_value):
-    return (value - min_value) / (max_value - min_value)
-
-norm_views = plt.Normalize(0, 1)
-norm_tweets = plt.Normalize(0, 1)
-norm_reach = plt.Normalize(0, 1)
-
-cmap_views = cm.get_cmap('RdYlGn')
-cmap_tweets = cm.get_cmap('RdYlGn')
-cmap_reach = cm.get_cmap('RdYlGn')
-
-def get_color(value, min_value, max_value, cmap, norm_func):
-    normalized = normalize_value(value, min_value, max_value)
-    rgba = cmap(norm_func(normalized))
-    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
-
-def get_views_color(views):
-    return get_color(views, min_views, max_views, cmap_views, norm_views)
-
-def get_tweets_color(tweets):
-    return get_color(tweets, min_tweets, max_tweets, cmap_tweets, norm_tweets)
-
-def get_reach_color(reach):
-    return get_color(reach, min_reach, max_reach, cmap_reach, norm_reach)
+    return df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards
 
 
-# Define the HTML template
-html_template = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Data</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #000; color: #fff; }
-        .sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .section { width: 12%; margin-bottom: 20px; }
-        .section h2 { text-align: center; color: #FFD700; font-size: 0.9em; margin: 5px 0; }  /* Reduced margin-bottom */
-        h1 { font-size: 1.5em; }  /* Smaller font size for h1 tag */
-        h2 { text-align: center; }  /* Center-align h2 elements */
-        .timestamp { font-size: 0.5em; color: #aaa; text-align: center; margin: 5px 0; }  /* Reduced margin-bottom */
-        .small-text { font-size: 0.7em; color: #aaa; text-align: center; margin: 5px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.7em; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 8px; color: #fff; text-align: center; }
-        th { background-color: #141515; border-bottom: 1px solid #fff; text-transform: uppercase; }
-        td { background-color: #141515; border-top: 1px solid #ddd; font-size: 1em; }
-        td { border-bottom: 1px solid #444; } /* finer grey line */
-        .card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
-        .card p { font-size: 0.6em; text-align: center; }
-        table tr:last-child td { border-bottom: none; } /* No horizontal line at the bottom */
-        .black-text { color: #000; }
-        .multi-line div { margin: 5px 0; }
-        #search-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        #search-box {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .highlight td {
-            border: none;
-        }
-        .highlight td:first-child {
-            border-left: 3px solid white;
-        }
-        .highlight td:last-child {
-            border-right: 3px solid white;
-        }
-        .highlight {
-            border-top: 3px solid white;
-            border-bottom: 3px solid white;
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update the search functionality
-            const searchBox = document.getElementById('search-box');
-            const cards = document.querySelectorAll('.card');
+# Function to get color based on value
+def get_color(value, vmin, vmax, cmap_name='viridis'):
+    # Convert Decimal to float if necessary
+    value = float(value) if isinstance(value, Decimal) else value
+    vmin = float(vmin) if isinstance(vmin, Decimal) else vmin
+    vmax = float(vmax) if isinstance(vmax, Decimal) else vmax
 
-            searchBox.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                cards.forEach(card => {
-                    const heroName = card.querySelector('p').textContent.toLowerCase();
-                    const row = card.closest('tr');
-                    if (searchTerm && heroName.includes(searchTerm)) {
-                        row.classList.add('highlight');
-                    } else {
-                        row.classList.remove('highlight');
-                    }
-                });
-            });
-        });
-    </script>
-</head>
-<body>
-<div id="search-container">
-    <input type="text" id="search-box" placeholder="Search hero...">
-</div>
-<h2>Main 22 - All Heroes By Stars & % Utilized of Total Cards</h2>
-    <div class="small-text">
-        <span>Total Decks: {{ rows[0][10] }} | Total Cards: {{ rows[0][11] }}  |  Last updated: {{ latest_score_timestamp }} UTC </span>
-    </div>
-    <div class="sections">
-        {% for stars, records in stars_dict_ownership.items() %}
-        <div class="section">
-            <h2>{{ stars }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hero</th>
-                        <th>Utilization %</th>
-                        <th>Fan Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                    <tr>
-                        <td>
-                            <div class="card">
-                                <img src="{{ record[2] }}" alt="Hero Picture">
-                                <p>{{ record[0] }}</p>
-                            </div>
-                        </td>
-                        <td class="black-text" style="background-color:  {{ get_ownership_color(record[4]) }}">{{ record[4] }}% ({{ record[3] }})</td>
-                        <td style="color: {{ get_fan_score_color(record[5]) }}">{{ round(record[5]) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
-    </div>
+    norm = Normalize(vmin=vmin, vmax=vmax)
+    cmap = plt.get_cmap(cmap_name)
+    rgb = cmap(norm(value))[:3]  # Get RGB values
+    return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+
+# Function to format utilization as percentage with color
+def format_utilization(value, vmin, vmax):
+    if pd.isna(value) or value is None:
+        return '-'
+    color = get_color(value, vmin, vmax)
+    return f'<span style="color: {color}">{float(value):.1%}</span>'
+
+# Function to format utilization as percentage with color and additional text
+def format_utilization_with_count(value, vmin, vmax, numerator, denominator):
+    if pd.isna(value) or value is None:
+        return '-'
+    color = get_color(value, vmin, vmax)
+    return f'<span style="color: {color}">{float(value):.1%}</span><br><span class="small-count">({int(numerator)} of {int(denominator)})</span>'
+
+def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards):
+
+        # Calculate min and max values for each utilization column
+    utilization_columns = {
+        'elite_utilization': df_heroes['elite_utilization'].dropna(),
+        'gold_utilization': df_heroes['gold_utilization'].dropna(),
+        'silver_utilization': df_heroes['silver_utilization'].dropna(),
+        'bronze_utilization': df_heroes['bronze_utilization'].dropna(),
+        'reverse_utilization': df_heroes['reverse_utilization'].dropna(),
+        'total_utilization': df_heroes['total_utilization'].dropna(),
+        'card_supply_utilization': df_heroes['card_supply_utilization'].dropna()
+    }
     
-    
-    <h2>Main 22 - All Heroes By Stars & % Supply In Decks</h2>
-    <div class="sections">
-        {% for stars, records in stars_dict_supply_usage.items() %}
-        <div class="section">
-            <h2>{{ stars }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hero</th>
-                        <th>Supply Usage %</th>
-                        <th>Fan Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                    <tr>
-                        <td>
-                            <div class="card">
-                                <img src="{{ record[2] }}" alt="Hero Picture">
-                                <p>{{ record[0] }}</p>
-                            </div>
-                        </td>
-                        <td class="black-text" style="background-color: {{ get_supplyusage_color(record[13]) }}">{{ record[13] }}% ({{ record[3] }})</td>
-                        <td style="color: {{ get_fan_score_color(record[5]) }}">{{ round(record[5]) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
-    </div>
+    league_min_max = {
+        column: (values.min(), values.max()) 
+        for column, values in utilization_columns.items()
+    }
 
-    <h2>Main 22 - Heros by Stars & Highest Fan Score</h2>
-    <div class="sections">
-        {% for stars, records in stars_dict_fan_score.items() %}
-        <div class="section">
-            <h2>{{ stars }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hero</th>
-                        <th>Fan Score</th>
-                        <th>Views | Posts | Reach</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                    <tr>
-                        <td>
-                            <div class="card">
-                                <img src="{{ record[2] }}" alt="Hero Picture">
-                                <p>{{ record[0] }}</p>
-                            </div>
-                        </td>
-                        <td class="black-text" style="background-color: {{ get_fan_score_color(record[5]) }}">{{ round(record[5]) }}</td>
-                        <td class="multi-line">
-                            <!--<div style="color: {{ get_views_color(record[7]) }}">👀 - {{ format_number(record[7]) }}</div>-->
-                            <!--<div style="color: {{ get_tweets_color(record[8]) }}">🐦 - {{ format_number(record[8]) }}</div>-->
-                            <!--<div style="color: {{ get_reach_color(record[6]) }}">🫳 - {{ format_number(record[6]) }}</div>-->
-                            <div>👀 - {{ format_number(record[7]) }}</div> 
-                            <div>🐦 - {{ format_number(record[8]) }}</div>
-                            <div>🫳 - {{ format_number(record[6]) }}</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
-    </div>
-</body>
-</html>
-"""
-
-# # Render the template with data
-# template = Template(html_template)
-# html_content = template.render(
-#     stars_dict_ownership=stars_dict_ownership, 
-#     stars_dict_fan_score=stars_dict_fan_score, 
-#     stars_dict_supply_usage=stars_dict_supply_usage,
-#     get_ownership_color=get_ownership_color, 
-#     get_supplyusage_color=get_supplyusage_color,
-#     get_fan_score_color=get_fan_score_color, 
-#     get_views_color=get_views_color, 
-#     get_tweets_color=get_tweets_color, 
-#     get_reach_color=get_reach_color, 
-#     round=round, 
-#     format_number=format_number,  # Pass format_number function here
-#     latest_score_timestamp=latest_score_timestamp_formatted,  # Pass the formatted timestamp
-#     time_diff_minutes=time_diff_minutes,
-#     rows=rows  # Pass the rows to access total_decks and total_cards
-# )
-
-# # Write the HTML content to a file with UTF-8 encoding
-# with open("player_data.html", "w", encoding="utf-8") as file:
-#     file.write(html_content)
-
-# print("HTML file has been generated.")
-
-def create_html_content(title, data_dict, main_color_func, main_value_index, count_index, fan_score_color_func, additional_columns=None, include_percentage=True):
-    # Calculate min and max values for the main data
-    all_main_values = [record[main_value_index] for records in data_dict.values() for record in records]
-    min_main_value = min(all_main_values)
-    max_main_value = max(all_main_values)
-
-    # Calculate min and max values for fan score
-    all_fan_scores = [record[5] for records in data_dict.values() for record in records]
-    min_fan_score = min(all_fan_scores)
-    max_fan_score = max(all_fan_scores)
-
-    # Create specific color functions
-    def get_specific_main_color(value):
-        return main_color_func(value, min_main_value, max_main_value)
-
-    def get_specific_fan_score_color(value):
-        return fan_score_color_func(value, min_fan_score, max_fan_score)
-    
-    html_template = """
+    html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ title }}</title>
-        <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #000; color: #fff; }
-        .sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .section { width: 12%; margin-bottom: 20px; }
-        .section h2 { text-align: center; color: #FFD700; font-size: 0.9em; margin: 5px 0; }  /* Reduced margin-bottom */
-        h1 { font-size: 1.5em; }  /* Smaller font size for h1 tag */
-        h2 { text-align: center; }  /* Center-align h2 elements */
-        .timestamp { font-size: 0.5em; color: #aaa; text-align: center; margin: 5px 0; }  /* Reduced margin-bottom */
-        .small-text { font-size: 0.7em; color: #aaa; text-align: center; margin: 5px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.7em; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 8px; color: #fff; text-align: center; }
-        th { background-color: #141515; border-bottom: 1px solid #fff; text-transform: uppercase; }
-        td { background-color: #141515; border-top: 1px solid #ddd; font-size: 1em; }
-        td { border-bottom: 1px solid #444; } /* finer grey line */
-        .card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
-        .card p { font-size: 0.6em; text-align: center; }
-        table tr:last-child td { border-bottom: none; } /* No horizontal line at the bottom */
-        .black-text { color: #000; }
-        .multi-line div { margin: 5px 0; }
-        #search-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        #search-box {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .highlight td {
-            border: none;
-        }
-        .highlight td:first-child {
-            border-left: 3px solid white;
-        }
-        .highlight td:last-child {
-            border-right: 3px solid white;
-        }
-        .highlight {
-            border-top: 3px solid white;
-            border-bottom: 3px solid white;
-        }
-        </style>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const searchBox = document.getElementById('search-box');
-                const rows = document.querySelectorAll('table tr');
+        <title>Hero Utilization</title>
+        <link rel="icon" type="image/png" href="favicon.png">
+        <link rel="stylesheet" href="./styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </head>
+    <body>
+        <div class="title-container">
+            <h1>
+                <a href="home.html" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                Hero Utilization
+            </h1>
+            <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
+        </div>
+        <div id="search-container">
+            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+        </div>
+        <div class="small-text">
+            <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC &nbsp;|</span>
+            <div class="color-legend">
+                <span>min</span>
+                <div class="gradient-bar"></div>
+                <span>max</span>
+            </div>
+        </div>
+        <!-- Main Hero Table -->
+        <table id="heroesTable">
+            <tr>
+                <th>Rank</th>
+                <th style="text-align: left;">Hero</th>
+                <th class="rank-columns" data-sort="hero_fantasy_score">Score <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+                <th class="rank-columns" data-sort="card_supply_utilization">🔒 Supply <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="elite_utilization"><img src="{LEAGUE_IMAGES['elite']}" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="gold_utilization"><img src="{LEAGUE_IMAGES['gold']}" class="league-icon" alt="Gold"> Gold <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="silver_utilization"><img src="{LEAGUE_IMAGES['silver']}" class="league-icon" alt="Silver"> Silver <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="bronze_utilization"><img src="{LEAGUE_IMAGES['bronze']}" class="league-icon" alt="Bronze"> Bronze <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="reverse_utilization">Reverse <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+                <th class="rank-columns" data-sort="total_utilization">Total Utilization <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
+            </tr>
+    """
 
-                searchBox.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
-                    rows.forEach(row => {
-                        const heroName = row.querySelector('.card p')?.textContent.toLowerCase();
-                        if (heroName) {
-                            if (searchTerm && heroName.includes(searchTerm)) {
-                                row.classList.add('highlight');
+    for _, row in df_heroes.iterrows():
+        fan_score_color = get_color(row['hero_fantasy_score'], min_fan_score, max_fan_score,'RdYlGn')  # Calculate color
+        html_content += f"""
+            <tr>
+                <td class="rank">{row['rank']}</td>
+                <td class="hero-cell">
+                    <img src="{row['hero_pfp_url']}" class="hero-image" alt="{row['hero_handle']}">
+                    <span>{row['hero_handle']}</span>
+                </td>
+                <td data-value="{row['hero_fantasy_score'] or 0}" style="color: {fan_score_color};">{int(row['hero_fantasy_score'])}</td> 
+                <td data-value="{row['card_supply_utilization'] or 0}">{format_utilization_with_count(row['card_supply_utilization'], *league_min_max['card_supply_utilization'], row['hero_usage_count'], row['card_supply'])}</td>
+                <td data-value="{row['elite_utilization'] or 0}">{format_utilization(row['elite_utilization'], *league_min_max['elite_utilization'])}</td>
+                <td data-value="{row['gold_utilization'] or 0}">{format_utilization(row['gold_utilization'], *league_min_max['gold_utilization'])}</td>
+                <td data-value="{row['silver_utilization'] or 0}">{format_utilization(row['silver_utilization'], *league_min_max['silver_utilization'])}</td>
+                <td data-value="{row['bronze_utilization'] or 0}">{format_utilization(row['bronze_utilization'], *league_min_max['bronze_utilization'])}</td>
+                <td data-value="{row['reverse_utilization'] or 0}">{format_utilization(row['reverse_utilization'], *league_min_max['reverse_utilization'])}</td>
+                <td data-value="{row['total_utilization'] or 0}">{format_utilization_with_count(row['total_utilization'], *league_min_max['total_utilization'], row['hero_usage_count'], row['unique_decks'])}</td>
+            </tr>
+        """
+
+    html_content += """
+            </tbody>
+            </table>
+            <script>
+            // Function to search
+            function searchHeroes() {
+                document.getElementById('hero-search-box').addEventListener('input', function() {
+                    var searchTerm = this.value.toLowerCase();
+                    var rows = document.querySelectorAll('#heroesTable tr');
+                    rows.forEach(function(row, index) {
+                        if (index === 0) return; // Skip the header row
+                        var playerHandleCell = row.querySelector('td:nth-child(2)');
+                        if (playerHandleCell) {
+                            var playerHandle = playerHandleCell.textContent.toLowerCase();
+                            if (playerHandle.includes(searchTerm)) {
+                                row.style.display = '';
                             } else {
-                                row.classList.remove('highlight');
+                                row.style.display = 'none';
                             }
                         }
                     });
                 });
+            }
+
+            function sortTable(column, descending) {
+                var table = document.getElementById("heroesTable");
+                var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
+                
+                // Find the column index based on the data-sort attribute
+                var headerCells = table.rows[0].cells;
+                var columnIndex = Array.from(headerCells).findIndex(cell => cell.getAttribute('data-sort') === column);
+                
+                if (columnIndex === -1) return; // Exit if column not found
+
+                // Remove the special case for hero_fantasy_score
+                const ascending = !descending;
+
+                rows.sort((a, b) => {
+                    let aCell = a.cells[columnIndex];
+                    let bCell = b.cells[columnIndex];
+                    
+                    // Use the raw values stored in data-value
+                    let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
+                    let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
+
+                    return ascending ? aValue - bValue : bValue - aValue;
+                });
+
+                // Reinsert rows in new order
+                rows.forEach(row => table.appendChild(row));
+                
+                updateRanks(); // Call to update ranks after sorting
+            }
+
+            // Ensure that the ranking is based on hero_fantasy_score
+            function updateRanks() {
+                var rows = document.querySelectorAll('#heroesTable tr');
+                let currentRank = 1; // Start ranking from 1
+                let lastValue = null; // To track the last value for skipping identical ranks
+                let lastRank = 1; // To track the last assigned rank
+
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    var rankCell = row.querySelector('td.rank');
+                    if (rankCell) {
+                        let currentValue = parseFloat(row.querySelector('td[data-value]').getAttribute('data-value')) || 0;
+
+                        // If the current value is the same as the last value, keep the same rank
+                        if (currentValue === lastValue) {
+                            rankCell.textContent = lastRank; // Same rank for identical values
+                        } else {
+                            rankCell.textContent = currentRank; // Assign new rank
+                            lastRank = currentRank; // Update lastRank to current
+                        }
+                        lastValue = currentValue; // Update lastValue to current
+                        currentRank++; // Increment rank for next unique value
+                    }
+                });
+            }
+
+            // Add click event listeners to the headers
+            document.addEventListener('DOMContentLoaded', function() {
+                const headers = document.querySelectorAll('th[data-sort]');
+                headers.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const column = this.getAttribute('data-sort');
+                        
+                        // Find current sort direction
+                        const currentArrow = this.querySelector('.sort-arrow.active');
+                        const isDescending = currentArrow && currentArrow.classList.contains('down');
+                        
+                        // Reset all arrows in all headers
+                        document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                            arrow.classList.remove('active');
+                        });
+                        
+                        // Toggle between ascending and descending
+                        const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
+                        if (newArrow) {
+                            newArrow.classList.add('active');
+                        }
+                        
+                        // For hero_fantasy_score, we want to maintain descending as default
+                        const descending = (column === 'hero_fantasy_score') 
+                            ? (isDescending ? false : true)  // Toggle between true/false
+                            : (isDescending ? false : true); // Toggle between true/false
+
+                        sortTable(column, descending);
+                    });
+                });
             });
-        </script>
-    </head>
-    <body>
-    <div class="title-container">
-        <h1>
-            <a href="home.html" class="home-link">
-                <i class="fas fa-home"></i>
-            </a>
-            {{ title }}
-        </h1>
-        <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
-    </div>
-    <div id="search-container">
-        <input type="text" id="player-search-box" class="search-box" placeholder="Search Players">
-    </div>
-    <div class="small-text">
-        <span>Total Decks: {{ rows[0][10] }} | Total Cards: {{ rows[0][11] }}  |  Last updated: {{ latest_score_timestamp }} UTC </span>
-    </div>
-    <div class="sections">
-        {% for stars, records in data_dict.items() %}
-        <div class="section">
-            <h2>{{ stars }}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hero</th>
-                        <th>{{ additional_columns[0] if additional_columns else 'Value' }}</th>
-                        {% if additional_columns and additional_columns|length > 1 %}
-                            <th>{{ additional_columns[1] }}</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in records %}
-                    <tr>
-                        <td>
-                            <div class="card">
-                                <img src="{{ record[2] }}" alt="Hero Picture">
-                                <p>{{ record[0] }}</p>
-                            </div>
-                        </td>
-                        <td class="black-text" style="background-color: {{ get_specific_main_color(record[main_value_index]) }}">
-                            {% if include_percentage %}
-                                {{ record[main_value_index] }}% {% if count_index is not none %}({{ record[count_index] }}){% endif %}
-                            {% else %}
-                                {{ round(record[main_value_index]) }}
-                            {% endif %}
-                        </td>
-                        {% if additional_columns and additional_columns|length > 1 %}
-                            <td class="multi-line">
-                                <div>👀 - {{ format_number(record[7]) }}</div> 
-                                <div>🐦 - {{ format_number(record[8]) }}</div>
-                                <div>🫳 - {{ format_number(record[6]) }}</div>
-                            </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
-    </div>
-    </body>
-    </html>
-    """
-    template = Template(html_template)
-    return template.render(
-        title=title,
-        data_dict=data_dict,
-        get_specific_main_color=get_specific_main_color,
-        get_specific_fan_score_color=get_specific_fan_score_color,
-        additional_columns=additional_columns,
-        round=round,
-        format_number=format_number,
-        latest_score_timestamp=latest_score_timestamp_formatted,
-        rows=rows,
-        main_value_index=main_value_index,
-        count_index=count_index,
-        include_percentage=include_percentage
-    )
 
-# Generate HTML for ownership by star
-ownership_html = create_html_content(
-    "Main 22 - All Heroes By Stars & % Utilized of Total Cards",
-    stars_dict_ownership,
-    get_ownership_color,
-    4,  # main_value_index
-    3,  # count_index
-    get_fan_score_color,
-    ["Utilization %", "Fan Score"],
-    include_percentage=True
-)
+            // Initialize search functionality
+            searchHeroes();
+            </script>
+        </body>
+        </html>
+        """
 
-# Generate HTML for supply utilization by star
-supply_html = create_html_content(
-    "Main 22 - All Heroes By Stars & % Supply In Decks",
-    stars_dict_supply_usage,
-    get_supplyusage_color,
-    13,  # main_value_index
-    3,  # count_index
-    get_fan_score_color,
-    ["Supply Usage %", "Fan Score"],
-    include_percentage=True
-)
+    with open("pages/hero_utilization.html", "w", encoding="utf-8") as file:
+        file.write(html_content)
 
-# Generate HTML for scores by star
-scores_html = create_html_content(
-    "Main 22 - Heroes by Stars & Highest Fan Score",
-    stars_dict_fan_score,
-    get_fan_score_color,
-    5,  # main_value_index
-    None,  # count_index
-    get_fan_score_color,
-    ["Fan Score", "Views | Posts | Reach"],
-    include_percentage=False
-)
+    print("HTML file generated successfully!")
 
-# Write the HTML content to separate files
-with open("hero_deck_utilization.html", "w", encoding="utf-8") as file:
-    file.write(ownership_html)
+if __name__ == "__main__":
+    # Update the unpacking of return values
+    df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards = get_heroes_data()
+    
+    # Calculate min and max fan scores based on your data
+    min_fan_score = df_heroes['hero_fantasy_score'].min()  # Calculate minimum score
+    max_fan_score = df_heroes['hero_fantasy_score'].max()  # Calculate maximum score
 
-with open("hero_supply_utilization.html", "w", encoding="utf-8") as file:
-    file.write(supply_html)
-
-with open("hero_analytics.html", "w", encoding="utf-8") as file:
-    file.write(scores_html)
-
-print("Three separate HTML files have been generated.")
+    generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards)

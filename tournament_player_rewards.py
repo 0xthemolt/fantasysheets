@@ -135,7 +135,7 @@ def generate_html(df_players,latest_score_timestamp):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Player Total Rewards Leaders</title>
+        <title>Player Rewards Leaders</title>
         <link rel="icon" type="image/png" href="favicon.png">
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -146,7 +146,7 @@ def generate_html(df_players,latest_score_timestamp):
                 <a href="home.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
-                Player Total Rewards Leaders
+                Player Rewards Leaders
                 <span class="tournament-badge">Main {TOURNAMENT_NUMBER}</span>
             </h1>
         </div>
@@ -292,7 +292,7 @@ def generate_html(df_players,latest_score_timestamp):
         </html>
         """
 
-    with open("pages/player_rankings.html", "w", encoding="utf-8") as file:
+    with open("pages/player_rewards.html", "w", encoding="utf-8") as file:
         file.write(html_content)
 
     print("HTML file generated successfully!")

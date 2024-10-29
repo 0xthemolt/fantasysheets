@@ -262,8 +262,21 @@ table tr:last-child td {
 
 
 /*score center*/
-.sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
+.sections {
+    overflow-x: auto; /* Allow horizontal scrolling */
+    width: 100%; /* Ensure it takes full width */
+    display: flex; 
+    justify-content: space-between; 
+    flex-wrap: wrap; 
+}
 
+/* Center the sections on larger screens */
+@media (min-width: 601px) {
+    .sections {
+        display: flex; /* Enable flexbox for larger screens */
+        justify-content: center; /* Center the sections */
+    }
+}
 .card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
 .card p { font-size: 0.7em; text-align: center; } /*hero name*/
 
@@ -295,3 +308,4 @@ table tr:last-child td {
 .tooltip-trigger:hover {
     color: #333;
 }
+

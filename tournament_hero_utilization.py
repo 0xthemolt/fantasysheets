@@ -189,7 +189,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     <body>
         <div class="title-container">
             <h1 class="title-header">
-                <a href="home.html" class="home-link">
+                <a href="index.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
                 Hero Utilization

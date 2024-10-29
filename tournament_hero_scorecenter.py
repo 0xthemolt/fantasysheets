@@ -128,6 +128,26 @@ def get_heroes_data():
 
     return df_heroes, latest_score_timestamp
 
+# Function to get color based on value
+def get_color(value, vmin, vmax, cmap_name='viridis'):
+    # Convert Decimal to float if necessary
+    value = float(value) if isinstance(value, Decimal) else value
+    vmin = float(vmin) if isinstance(vmin, Decimal) else vmin
+    vmax = float(vmax) if isinstance(vmax, Decimal) else vmax
+
+    norm = Normalize(vmin=vmin, vmax=vmax)
+    cmap = plt.get_cmap(cmap_name)
+    rgb = cmap(norm(value))[:3]  # Get RGB values
+    return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+
+# Helper function to format numbers
+def format_number(value):
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    elif value >= 1_000:
+        return f"{value / 1_000:.1f}K"
+    else:
+        return str(value)
 
 def format_percentage(value):
     """Helper function to format utilization percentages"""
@@ -143,6 +163,11 @@ def generate_html(df_heroes, latest_score_timestamp):
     total_heroes = len(df_heroes)
     total_decks = df_heroes['total_decks'].iloc[0]
     total_cards = df_heroes['total_cards'].iloc[0]
+
+    # Group heroes by star rating into a dictionary
+    stars_dict = {star: df_heroes[df_heroes['hero_stars'] == star] 
+                 for star in range(8, 0, -1)}
+
 
     html_content = f"""
     <!DOCTYPE html>
@@ -164,52 +189,61 @@ def generate_html(df_heroes, latest_score_timestamp):
             </h1>
             <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>
-        <div id="search-container">
-            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
-        </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC</span>
         </div>
-        <table id="heroesTable">
-            <tr>
-                <th>Rank</th>
-                <th style="text-align: left;">Hero</th>
-                <th class="rank-columns" data-sort="hero_fantasy_score">Score</th>
-                <th class="rank-columns" data-sort="card_utilization">Utilization</th>
-                <th>Stars</th>
-                <th>Reach</th>
-                <th>Views</th>
-                <th>Tweets</th>
-            </tr>
+    <div class="sections">
+            <div class="star-columns">
     """
 
-    # Add rows for each hero
-    for _, row in df_heroes.iterrows():
-        # Calculate color based on fantasy score
-        score_percentage = (row['hero_fantasy_score'] - min_score) / (max_score - min_score)
-        score_color = f"hsl({int(120 * score_percentage)}, 70%, 50%)"
-
-        # Generate stars HTML
-        stars_html = "⭐" * int(row['current_hero_stars']) if pd.notna(row['current_hero_stars']) else ""
-
+    # Create columns for each star rating
+    for star, heroes in stars_dict.items():
         html_content += f"""
-            <tr>
-                <td class="rank">{row['rank']}</td>
-                <td class="hero-cell">
-                    <img src="{row['hero_pfp_url']}" class="hero-image" alt="{row['hero_handle']}">
-                    <span>{row['hero_handle']}</span>
-                </td>
-                <td style="color: {score_color};">{int(row['hero_fantasy_score'])}</td>
-                <td>{format_percentage(row['card_utilization'])}</td>
-                <td>{stars_html}</td>
-                <td>{int(row['reach']):,}</td>
-                <td>{int(row['views']):,}</td>
-                <td>{int(row['tweets']):,}</td>
-            </tr>
+            <div class="star-column">
+                <h2>{"⭐" * star}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>Stats</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        """
+
+        for _, row in heroes.iterrows():
+            # score_percentage = (row['hero_fantasy_score'] - min_score) / (max_score - min_score)
+            # score_color = f"hsl({int(120 * score_percentage)}, 70%, 50%)"
+            background_color = get_color(row['hero_fantasy_score'], min_score, max_score, cmap_name='RdYlGn')
+            
+            html_content += f"""
+                <tr>
+                    <td>
+                        <div class="card">
+                            <img src="{row['hero_pfp_url']}" class="hero-image" alt="{row['hero_handle']}">
+                            <p>{row['hero_handle']}</p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: {background_color};">{int(row['hero_fantasy_score'])}</td>
+
+                    <td class="multi-line smaller-stats">
+                        <div>👀 {format_number(int(row['views']))}</div>
+                        <div>🐦 {format_number(int(row['tweets']))}</div>
+                        <div>🫳 {format_number(int(row['reach']))}</div>
+                    </td>
+                </tr>
+            """
+        
+        html_content += """
+                    </tbody>
+                </table>
+            </div>
         """
 
     html_content += """
-        </table>
+            </div>
+        </div>
         <script src="./script.js"></script>
     </body>
     </html>

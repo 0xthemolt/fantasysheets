@@ -146,8 +146,11 @@ table tr:last-child td {
     border-radius: 15px;
     font-size: 0.7em;
     font-weight: bold;
-    align-self: flex-star;
+    align-self: flex-start;
     margin-left: 10px; /* Adds space between title and badge */
+    white-space: nowrap;      /* Prevents breaking between words */
+    word-wrap: break-word;   /* Breaks long words if necessary */
+    max-width: 100%;         /* Ensures the badge doesn't overflow its container */
 }
 
 .small-count {

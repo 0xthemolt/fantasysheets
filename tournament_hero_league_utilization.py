@@ -199,11 +199,11 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
         </div>
         <div class="small-text">
-            <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC &nbsp;|&nbsp; </span>
+            <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC &nbsp;|</span>
             <div class="color-legend">
-                <span>0%</span>
+                <span>min</span>
                 <div class="gradient-bar"></div>
-                <span>100%</span>
+                <span>max</span>
             </div>
         </div>
         <!-- Main Hero Table -->
@@ -361,7 +361,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         </html>
         """
 
-    with open("pages/hero_league_utilization.html", "w", encoding="utf-8") as file:
+    with open("pages/hero_utilization.html", "w", encoding="utf-8") as file:
         file.write(html_content)
 
     print("HTML file generated successfully!")

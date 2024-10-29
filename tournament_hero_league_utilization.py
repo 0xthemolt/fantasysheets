@@ -90,6 +90,8 @@ def get_heroes_data():
             s.pct_total silver_utilization,
             b.pct_total bronze_utilization,
             r.pct_total as reverse_utilization,
+            hero_usage_count::NUMERIC/sup.aggregate_cards AS card_supply_utilization, 
+            sup.aggregate_cards as card_supply,
             coalesce(ghwss.hero_pfp_image_url, 'https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/neutral/' || ghwss.hero_handle || '.png') as hero_pfp_url,
             ah.db_updated_cst::timestamp AS score_timestamp
         from all_heroes ah
@@ -102,6 +104,9 @@ def get_heroes_data():
         left join silver s on ah.hero_id = s.hero_id
         left join gold g on ah.hero_id = g.hero_id
         left join elite e on ah.hero_id = e.hero_id
+        left join flatten.get_supply_PER_HERO_ID sup
+			on ah.hero_id  = sup.hero_id 
+			and sup.snapshot_rank  = 1
         order by 5 desc
     """
     df_heroes = pd.read_sql(query, conn)
@@ -127,14 +132,14 @@ def get_heroes_data():
 
 
 # Function to get color based on value
-def get_color(value, vmin, vmax):
+def get_color(value, vmin, vmax, cmap_name='viridis'):
     # Convert Decimal to float if necessary
     value = float(value) if isinstance(value, Decimal) else value
     vmin = float(vmin) if isinstance(vmin, Decimal) else vmin
     vmax = float(vmax) if isinstance(vmax, Decimal) else vmax
 
     norm = Normalize(vmin=vmin, vmax=vmax)
-    cmap = plt.get_cmap('viridis')
+    cmap = plt.get_cmap(cmap_name)
     rgb = cmap(norm(value))[:3]  # Get RGB values
     return '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
 
@@ -146,16 +151,11 @@ def format_utilization(value, vmin, vmax):
     return f'<span style="color: {color}">{float(value):.1%}</span>'
 
 # Function to format utilization as percentage with color and additional text
-def format_utilization_with_count(value, vmin, vmax, hero_usage_count, unique_decks):
+def format_utilization_with_count(value, vmin, vmax, numerator, denominator):
     if pd.isna(value) or value is None:
         return '-'
     color = get_color(value, vmin, vmax)
-    return f'<span style="color: {color}">{float(value):.1%}</span><br><span class="small-count">({hero_usage_count} of {unique_decks})</span>'
-
-def get_fan_score_color(score, min_score, max_score):
-    norm = Normalize(min_score, max_score)
-    rgba = plt.get_cmap('RdYlGn')(norm(score))  # Use RdYlGn colormap instead of viridis
-    return f"rgba({int(rgba[0]*255)}, {int(rgba[1]*255)}, {int(rgba[2]*255)}, {rgba[3]})"
+    return f'<span style="color: {color}">{float(value):.1%}</span><br><span class="small-count">({int(numerator)} of {int(denominator)})</span>'
 
 def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, total_cards):
 
@@ -166,7 +166,8 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         'silver_utilization': df_heroes['silver_utilization'].dropna(),
         'bronze_utilization': df_heroes['bronze_utilization'].dropna(),
         'reverse_utilization': df_heroes['reverse_utilization'].dropna(),
-        'total_utilization': df_heroes['total_utilization'].dropna()
+        'total_utilization': df_heroes['total_utilization'].dropna(),
+        'card_supply_utilization': df_heroes['card_supply_utilization'].dropna()
     }
     
     league_min_max = {
@@ -180,7 +181,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hero Utilization by League</title>
+        <title>Hero Utilization</title>
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </head>
@@ -190,7 +191,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 <a href="home.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
-                Hero Utilization by League
+                Hero Utilization
             </h1>
             <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>
@@ -206,6 +207,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                 <th>Rank</th>
                 <th style="text-align: left;">Hero</th>
                 <th class="rank-columns" data-sort="hero_fantasy_score">Score <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
+                <th class="rank-columns" data-sort="card_supply_utilization">🔒 Supply <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="elite_utilization"><img src="{LEAGUE_IMAGES['elite']}" class="league-icon" alt="Elite"> Elite <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="gold_utilization"><img src="{LEAGUE_IMAGES['gold']}" class="league-icon" alt="Gold"> Gold <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns" data-sort="silver_utilization"><img src="{LEAGUE_IMAGES['silver']}" class="league-icon" alt="Silver"> Silver <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
@@ -216,7 +218,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     """
 
     for _, row in df_heroes.iterrows():
-        fan_score_color = get_fan_score_color(row['hero_fantasy_score'], min_fan_score, max_fan_score)  # Calculate color
+        fan_score_color = get_color(row['hero_fantasy_score'], min_fan_score, max_fan_score,'RdYlGn')  # Calculate color
         html_content += f"""
             <tr>
                 <td class="rank">{row['rank']}</td>
@@ -225,6 +227,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
                     <span>{row['hero_handle']}</span>
                 </td>
                 <td data-value="{row['hero_fantasy_score'] or 0}" style="color: {fan_score_color};">{int(row['hero_fantasy_score'])}</td> 
+                <td data-value="{row['card_supply_utilization'] or 0}">{format_utilization_with_count(row['card_supply_utilization'], *league_min_max['card_supply_utilization'], row['hero_usage_count'], row['card_supply'])}</td>
                 <td data-value="{row['elite_utilization'] or 0}">{format_utilization(row['elite_utilization'], *league_min_max['elite_utilization'])}</td>
                 <td data-value="{row['gold_utilization'] or 0}">{format_utilization(row['gold_utilization'], *league_min_max['gold_utilization'])}</td>
                 <td data-value="{row['silver_utilization'] or 0}">{format_utilization(row['silver_utilization'], *league_min_max['silver_utilization'])}</td>

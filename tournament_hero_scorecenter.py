@@ -191,7 +191,11 @@ def generate_html(df_heroes, latest_score_timestamp):
         </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC</span>
-            <i class="fas fa-info-circle tooltip-trigger" title="🔥 Tournament score is 2+ star tiers above last star update&#10;❄️ Tournament score is 2+ star tiers below last star update"></i>
+            <i class="fas fa-info-circle tooltip-trigger"></i>
+            <div class="tooltip-content" style="display: none;">
+                🔥 Tournament score is 2+ star tiers above last star update<br>
+                ❄️ Tournament score is 2+ star tiers below last star update
+            </div>
         </div>
         <div id="search-container">
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">

@@ -304,11 +304,39 @@ table tr:last-child td {
 
 .tooltip-trigger {
     margin-left: 5px;
-    cursor: help;
+    cursor: pointer;  /* Changed to pointer to indicate clickability */
     color: #666;
+    touch-action: manipulation;  /* Improves touch response on mobile */
+    position: relative;  /* Ensure the tooltip content is positioned correctly */
 }
 
-.tooltip-trigger:hover {
+.tooltip-content {
+    background-color: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 1000;
+    display: none;  /* Initially hidden */
+    top: 100%;  /* Position below the trigger */
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;  /* Prevents text from wrapping */
+}
+
+/* Show the tooltip content on hover */
+.tooltip-trigger:hover + .tooltip-content {
+    display: block;
+}
+
+.tooltip-trigger:hover,
+.tooltip-trigger:active,
+.tooltip-trigger:focus {
     color: #333;
 }
 
+/* Optional: if you want to prevent text selection on mobile */
+.tooltip-trigger {
+    -webkit-tap-highlight-color: transparent;  /* Removes default mobile tap highlight */
+    user-select: none;  /* Prevents text selection on tap */
+}

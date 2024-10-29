@@ -144,8 +144,9 @@ table tr:last-child td {
     color: black;
     padding: 5px 10px;
     border-radius: 15px;
-    font-size: 0.6em;
+    font-size: 0.7em;
     font-weight: bold;
+    align-self: flex-star;
     margin-left: 10px; /* Adds space between title and badge */
 }
 

@@ -201,3 +201,39 @@ table tr:last-child td {
     background-color: #141515;  /* dark grey background on hover */
     border-radius: 50%;
 }
+
+.color-legend {
+    display: inline-block;
+    margin-left: 20px;
+    vertical-align: middle;
+}
+/*viridis legend*/
+.legend-text {
+    font-size: 0.9em;
+    margin-right: 8px;
+}
+
+.gradient-bar {
+    display: inline-block;
+    width: 100px;
+    height: 10px;
+    background: linear-gradient(to right, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725);
+    border-radius: 2px;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+
+.gradient-labels {
+    display: inline-block;
+    font-size: 0.8em;
+    width: 100px;
+    margin-left: 5px;
+}
+
+.gradient-labels span {
+    display: inline-block;
+}
+
+.gradient-labels span:last-child {
+    float: right;
+}

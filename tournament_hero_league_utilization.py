@@ -199,7 +199,12 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
         </div>
         <div class="small-text">
-            <span>Total Heroes: {total_heroes} | Total Decks: {total_decks} | Total Cards: {total_cards} | Last updated: {latest_score_timestamp} UTC</span>
+            <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC &nbsp;|&nbsp; </span>
+            <div class="color-legend">
+                <span>0%</span>
+                <div class="gradient-bar"></div>
+                <span>100%</span>
+            </div>
         </div>
         <!-- Main Hero Table -->
         <table id="heroesTable">

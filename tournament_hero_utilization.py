@@ -208,7 +208,8 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
             </div>
         </div>
         <!-- Main Hero Table -->
-        <table id="heroesTable">
+        <div class="table-container">
+            <table id="heroesTable">
             <tr>
                 <th>Rank</th>
                 <th style="text-align: left;">Hero</th>
@@ -228,7 +229,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         html_content += f"""
             <tr>
                 <td class="rank">{row['rank']}</td>
-                <td class="hero-cell">
+                <td class="hero-column">
                     <img src="{row['hero_pfp_url']}" class="hero-image" alt="{row['hero_handle']}">
                     <span>{row['hero_handle']}</span>
                 </td>
@@ -246,6 +247,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     html_content += """
             </tbody>
             </table>
+        </div>
             <script>
             // Function to search
             function searchHeroes() {

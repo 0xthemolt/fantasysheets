@@ -157,6 +157,7 @@ def generate_html(df_players,latest_score_timestamp):
             <span>Last updated: {latest_score_timestamp} UTC</span>
         </div>
         <!-- Main Player Table -->
+        <div class="table-container">
         <table id="playersTable">
             <tr>
                 <th class="player-columns">Rank</th>
@@ -177,7 +178,7 @@ def generate_html(df_players,latest_score_timestamp):
         html_content += f"""
             <tr>
                 <td class="rank">{row['rank']}</td>
-                <td class="player-handle">
+                <td class="player-column">
                     <img src="{row['player_pic']}" class="player-image" alt="{row['player_handle']}"
                         onerror="this.onerror=null; this.src='ft_logo.jpg';">
                     <span>{row['player_handle']}</span>
@@ -197,6 +198,7 @@ def generate_html(df_players,latest_score_timestamp):
     html_content += """
             </tbody>
             </table>
+        </div>
             <script>
             // Function to search players
             function searchPlayers() {

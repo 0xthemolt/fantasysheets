@@ -94,7 +94,7 @@ def get_heroes_data():
                 MAX(ROUND(COALESCE(ghst.tweet_count,0), 0)) AS tweets, --8
                 MAX(total_decks) AS total_decks, --10
                 MAX(total_cards) as total_cards, --11
-                MIN(a.db_updated_cst)::timestamp AS score_timestamp  --12
+                MIN(a.db_updated_cst + interval '5 hour')::timestamp AS score_timestamp  --12
             FROM agg.TournamentOwnership a
             JOIN tournament_base ghst
                 on a.hero_id = ghst.hero_id

@@ -93,7 +93,7 @@ def get_heroes_data():
             hero_usage_count::NUMERIC/sup.aggregate_cards AS card_supply_utilization, 
             sup.aggregate_cards as card_supply,
             coalesce(ghwss.hero_pfp_image_url, 'https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/neutral/' || ghwss.hero_handle || '.png') as hero_pfp_url,
-            ah.db_updated_cst::timestamp AS score_timestamp
+            ah.db_updated_cst::timestamp + interval '5 hour' AS score_timestamp
         from all_heroes ah
         JOIN flatten.get_heros_with_stats_snapshot ghwss 
             ON ah.hero_id = ghwss.hero_id 
@@ -185,6 +185,30 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         <link rel="icon" type="image/png" href="favicon.png">
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <style>
+             /* Mobile styles */
+            @media screen and (max-width: 768px) {{
+                body {{
+                    margin: 0;
+                    padding: 0 10px;
+                    max-width: 100%;
+                }}
+                
+                table {{
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                    width: 100%;
+                }}
+                
+                .title-container, #search-container, .small-text {{
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                }}
+            }}
+        </style>
+        </style>
     </head>
     <body>
         <div class="title-container">

@@ -20,11 +20,10 @@
         </div>
         <div class="small-text">
             <span>Heroes: 180 &nbsp;|&nbsp; Decks: 16,844 &nbsp;|&nbsp; Cards: 84,220 &nbsp;|&nbsp; Updated: 2024-10-29 15:48 UTC</span>
-            <i class="fas fa-info-circle tooltip-trigger"></i>
-            <div class="tooltip-content" style="display: none;">
-                🔥 Tournament score is 2+ star tiers above last star update<br>
-                ❄️ Tournament score is 2+ star tiers below last star update
-            </div>
+            <i class="fas fa-info-circle tooltip-trigger">
+            <div class="tooltip-content">🔥 Tournament score is 2+ star tier above last star update<br>
+                                        ❄️ Tournament score is 2+ star tiers below last star update</div>
+                                        </i>
         </div>
         <div id="search-container">
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
@@ -3583,7 +3582,28 @@
             }
             
             document.addEventListener('DOMContentLoaded', function() {
+                // Initialize search functionality
                 searchHeroes();
+                
+                // Initialize tooltip functionality
+                const tooltips = document.querySelectorAll('.tooltip-trigger');
+                
+                tooltips.forEach(tooltip => {
+                    tooltip.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Close all other tooltips
+                        tooltips.forEach(t => {
+                            if (t !== tooltip) t.classList.remove('active');
+                        });
+                        // Toggle current tooltip
+                        this.classList.toggle('active');
+                    });
+                });
+
+                // Close tooltip when clicking anywhere else on the page
+                document.addEventListener('click', function() {
+                    tooltips.forEach(tooltip => tooltip.classList.remove('active'));
+                });
             });
         </script>
     </body>

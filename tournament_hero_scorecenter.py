@@ -191,11 +191,10 @@ def generate_html(df_heroes, latest_score_timestamp):
         </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC</span>
-            <i class="fas fa-info-circle tooltip-trigger"></i>
-            <div class="tooltip-content" style="display: none;">
-                🔥 Tournament score is 2+ star tiers above last star update<br>
-                ❄️ Tournament score is 2+ star tiers below last star update
-            </div>
+            <i class="fas fa-info-circle tooltip-trigger">
+            <div class="tooltip-content">🔥 Tournament score is 2+ star tier above last star update<br>
+                                        ❄️ Tournament score is 2+ star tiers below last star update</div>
+                                        </i>
         </div>
         <div id="search-container">
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
@@ -275,7 +274,28 @@ def generate_html(df_heroes, latest_score_timestamp):
             }
             
             document.addEventListener('DOMContentLoaded', function() {
+                // Initialize search functionality
                 searchHeroes();
+                
+                // Initialize tooltip functionality
+                const tooltips = document.querySelectorAll('.tooltip-trigger');
+                
+                tooltips.forEach(tooltip => {
+                    tooltip.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // Close all other tooltips
+                        tooltips.forEach(t => {
+                            if (t !== tooltip) t.classList.remove('active');
+                        });
+                        // Toggle current tooltip
+                        this.classList.toggle('active');
+                    });
+                });
+
+                // Close tooltip when clicking anywhere else on the page
+                document.addEventListener('click', function() {
+                    tooltips.forEach(tooltip => tooltip.classList.remove('active'));
+                });
             });
         </script>
     </body>

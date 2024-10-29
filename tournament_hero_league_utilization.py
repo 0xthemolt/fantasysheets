@@ -182,6 +182,7 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hero Utilization</title>
+        <link rel="icon" type="image/png" href="favicon.png">
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </head>

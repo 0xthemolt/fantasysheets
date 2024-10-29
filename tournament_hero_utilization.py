@@ -188,13 +188,13 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
     </head>
     <body>
         <div class="title-container">
-            <h1>
+            <h1 class="title-header">
                 <a href="home.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
                 Hero Utilization
+                <span class="tournament-badge">Main {TOURNAMENT_NUMBER}</span>
             </h1>
-            <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>
         <div id="search-container">
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">

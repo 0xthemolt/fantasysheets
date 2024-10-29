@@ -142,19 +142,19 @@ def generate_html(df_players,latest_score_timestamp):
     </head>
     <body>
         <div class="title-container">
-            <h1>
+            <h1 class="title-header">
                 <a href="home.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
                 Player Total Rewards Leaders
+                <span class="tournament-badge">Main {TOURNAMENT_NUMBER}</span>
             </h1>
-            <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>
         <div id="search-container">
             <input type="text" id="player-search-box" class="search-box" placeholder="Search Players">
         </div>
         <div class="small-text">
-            <span>Last updated: {latest_score_timestamp} UTC</span>
+            <span>Updated: {latest_score_timestamp} UTC</span>
         </div>
         <!-- Main Player Table -->
         <div class="table-container">

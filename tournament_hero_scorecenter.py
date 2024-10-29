@@ -191,6 +191,10 @@ def generate_html(df_heroes, latest_score_timestamp):
         </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC</span>
+            <i class="fas fa-info-circle tooltip-trigger" title="🔥 Tournament score is 2+ star tiers above last star update&#10;❄️ Tournament score is 2+ star tiers below last star update"></i>
+        </div>
+        <div id="search-container">
+            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
         </div>
     <div class="sections">
             <div class="star-columns">
@@ -225,7 +229,10 @@ def generate_html(df_heroes, latest_score_timestamp):
                             <p>{row['hero_handle']}</p>
                         </div>
                     </td>
-                    <td class="black-text" style="background-color: {background_color};">{int(row['hero_fantasy_score'])}</td>
+                    <td class="black-text" style="background-color: {background_color};">
+                        {int(row['hero_fantasy_score'])}
+                        {" 🔥" if row['current_hero_stars'] - row['hero_stars'] >= 2 else " ❄️" if row['current_hero_stars'] - row['hero_stars'] <= -2 else " &nbsp;"}
+                    </td>
 
                     <td class="multi-line smaller-stats">
                         <div>👀 {format_number(int(row['views']))}</div>
@@ -244,7 +251,29 @@ def generate_html(df_heroes, latest_score_timestamp):
     html_content += """
             </div>
         </div>
-        <script src="./script.js"></script>
+        <script>
+            function searchHeroes() {
+                document.getElementById('hero-search-box').addEventListener('input', function() {
+                    var searchTerm = this.value.toLowerCase();
+                    var cards = document.querySelectorAll('.card');
+                    
+                    cards.forEach(function(card) {
+                        var heroName = card.querySelector('p').textContent.toLowerCase();
+                        var row = card.closest('tr');
+                        
+                        if (heroName.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                searchHeroes();
+            });
+        </script>
     </body>
     </html>
     """

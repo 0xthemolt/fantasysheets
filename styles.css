@@ -245,7 +245,7 @@ table tr:last-child td {
 .sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
 
 .card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
-.card p { font-size: 0.7em; text-align: center; }
+.card p { font-size: 0.7em; text-align: center; } /*hero name*/
 
 .star-columns {
     display: flex;
@@ -262,6 +262,16 @@ table tr:last-child td {
     text-align: center; font-size: 0.9em; margin: 5px 0;
 }
 .smaller-stats {
-    font-size: 0.7em;  /* This makes the font 20% smaller */
+    font-size: 0.7em; /*post stats*/
 }
-.black-text { color: #000;font-size: .9em; }
+.black-text { color: #000;font-size: .9em; } /*fantasy score*/
+
+.tooltip-trigger {
+    margin-left: 5px;
+    cursor: help;
+    color: #666;
+}
+
+.tooltip-trigger:hover {
+    color: #333;
+}

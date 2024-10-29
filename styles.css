@@ -260,13 +260,38 @@ table tr:last-child td {
     white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-    .title-container, .star-columns {
-        flex-direction: column; /* Stack items vertically on smaller screens */
-    }
-    
-    .home-link {
-        position: static; /* Allow it to flow with the document */
-        margin: 10px 0; /* Add some margin for spacing */
-    }
+
+/*score center*/
+.sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
+
+.card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
+.card p { font-size: 0.7em; text-align: center; } /*hero name*/
+
+.star-columns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    overflow-x: auto;
+}
+.star-column {
+    flex: 1;
+    min-width: 200px;
+}
+.star-column h2{
+    text-align: center; font-size: 0.9em; margin: 5px 0;
+}
+.smaller-stats {
+    font-size: 0.7em; /*post stats*/
+}
+.black-text { color: #000;font-size: .9em; } /*fantasy score*/
+
+.tooltip-trigger {
+    margin-left: 5px;
+    cursor: help;
+    color: #666;
+}
+
+.tooltip-trigger:hover {
+    color: #333;
 }

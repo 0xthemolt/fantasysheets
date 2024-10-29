@@ -186,8 +186,8 @@ def generate_html(df_heroes, latest_score_timestamp):
                     <i class="fas fa-home"></i>
                 </a>
                 Hero Score Center
+                <span class="tournament-badge">Main {TOURNAMENT_NUMBER}</span>
             </h1>
-            <div class="tournament-badge">Main {TOURNAMENT_NUMBER}</div>
         </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC</span>

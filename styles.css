@@ -61,8 +61,9 @@ table tr:last-child td {
 }
 
 .hero-image {
-    width: 30px;
-    height: 30px;
+    width: 100%;
+    max-width: 30px; /* Maintain a reasonable size */
+    height: auto; /* Maintain aspect ratio */
     border-radius: 50%;
     vertical-align: middle;
     margin-right: 10px;
@@ -99,7 +100,8 @@ table tr:last-child td {
     border: 1px solid white;
     background-color: #141515;
     color: #fff;
-    width: 200px;
+    width: 100%; /* Use full width on smaller screens */
+    max-width: 200px; /* Limit the maximum width */
 }
 
 .title-container {
@@ -216,62 +218,35 @@ table tr:last-child td {
     margin-right: 8px;
 }
 
+.gradient-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 200px; /* Adjust as needed */
+    margin: 0 auto; /* Center the container */
+}
+
 .gradient-bar {
-    display: inline-block;
-    width: 100px;
+    flex-grow: 1;
     height: 10px;
     background: linear-gradient(to right, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725);
     border-radius: 2px;
-    vertical-align: middle;
     margin: 0 5px;
 }
 
-.gradient-labels {
-    display: inline-block;
+.gradient-label {
     font-size: 0.8em;
-    width: 100px;
-    margin-left: 5px;
+    white-space: nowrap;
 }
 
-.gradient-labels span {
-    display: inline-block;
-}
-
-.gradient-labels span:last-child {
-    float: right;
-}
-
-/*score center*/
-.sections { display: flex; justify-content: space-between; flex-wrap: wrap; }
-
-.card img { width: 30px; height: 30px; border-radius: 50%; display: block; margin: 0 auto; }
-.card p { font-size: 0.7em; text-align: center; } /*hero name*/
-
-.star-columns {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 10px;
-    overflow-x: auto;
-}
-.star-column {
-    flex: 1;
-    min-width: 200px;
-}
-.star-column h2{
-    text-align: center; font-size: 0.9em; margin: 5px 0;
-}
-.smaller-stats {
-    font-size: 0.7em; /*post stats*/
-}
-.black-text { color: #000;font-size: .9em; } /*fantasy score*/
-
-.tooltip-trigger {
-    margin-left: 5px;
-    cursor: help;
-    color: #666;
-}
-
-.tooltip-trigger:hover {
-    color: #333;
+@media (max-width: 600px) {
+    .title-container, .star-columns {
+        flex-direction: column; /* Stack items vertically on smaller screens */
+    }
+    
+    .home-link {
+        position: static; /* Allow it to flow with the document */
+        margin: 10px 0; /* Add some margin for spacing */
+    }
 }

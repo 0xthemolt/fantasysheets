@@ -185,30 +185,6 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         <link rel="icon" type="image/png" href="favicon.png">
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <style>
-             /* Mobile styles */
-            @media screen and (max-width: 768px) {{
-                body {{
-                    margin: 0;
-                    padding: 0 10px;
-                    max-width: 100%;
-                }}
-                
-                table {{
-                    margin-left: 0 !important;
-                    margin-right: 0 !important;
-                    width: 100%;
-                }}
-                
-                .title-container, #search-container, .small-text {{
-                    margin-left: 0 !important;
-                    margin-right: 0 !important;
-                    padding-left: 0 !important;
-                    padding-right: 0 !important;
-                }}
-            }}
-        </style>
-        </style>
     </head>
     <body>
         <div class="title-container">
@@ -225,10 +201,10 @@ def generate_html(df_heroes, latest_score_timestamp, total_heroes, total_decks, 
         </div>
         <div class="small-text">
             <span>Heroes: {total_heroes} &nbsp;|&nbsp; Decks: {total_decks:,} &nbsp;|&nbsp; Cards: {total_cards:,} &nbsp;|&nbsp; Updated: {latest_score_timestamp} UTC &nbsp;|</span>
-            <div class="color-legend">
-                <span>min</span>
+            <div class="gradient-container">
+                <span class="gradient-label">Min</span>
                 <div class="gradient-bar"></div>
-                <span>max</span>
+                <span class="gradient-label">Max</span>
             </div>
         </div>
         <!-- Main Hero Table -->

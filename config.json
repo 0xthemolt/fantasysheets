@@ -6,10 +6,23 @@
         "silver": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/3.png",
         "bronze": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/leagues/4.png"
     },
+    "league_colors": {
+        "elite": "#a8ccde",
+        "gold": "#dacc86",
+        "silver": "#8b8b8b",
+        "bronze": "#a97e48"
+    },
+    "league_colors_gradient": {
+        "elite": ["#FF0000", "#FF6B6B"],
+        "gold": ["#FFD700", "#FFA500"],
+        "silver": ["#8b8b8b", "#b5b5b5"],
+        "bronze": ["#a97e48", "#d4a373"]
+    },
     "reward_images": {
         "eth": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/eth.png",
         "pack": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/pack-v2.png",
-        "fan": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/fCoin.png"
+        "fan": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/fCoin.png",
+        "blast": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/blastb.png"
     }
 }
 

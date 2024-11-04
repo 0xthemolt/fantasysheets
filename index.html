@@ -16,12 +16,37 @@
             align-items: center;
         }
 
-        h1 {
+        /* h1 {
             color: #fff;
             font-size: 1.7em;
             text-align: center;
             border-bottom: 2px solid #444;
             padding-bottom: 0.5rem;
+        } */
+        h1 {
+            background: linear-gradient(90deg, 
+                #a50026, /* dark red */
+                #d73027, /* red */
+                #f46d43, /* light red-orange */
+                #fdae61, /* orange */
+                #fee08b, /* light yellow */
+                #ffffbf, /* pale yellow */
+                #d9ef8b, /* light yellow-green */
+                #a6d96a, /* light green */
+                #66bd63, /* green */
+                #1a9850, /* medium green */
+                #006837  /* dark green */
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradient 3s linear infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% center; }
+            100% { background-position: -200% center; }
         }
         .nav-container {
             background: black;

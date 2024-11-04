@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Favorites</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .hero-columns {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex: 3;
+        }
+        
+        .favorites-section {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: #141515;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .favorites-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .favorites-count {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        #heroList, #favoritesList {
+            list-style: none;
+            padding: 0;
+        }
+        
+        #heroList li, #favoritesList li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hero-pfp {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Your Favorite Heroes</h1>
+    <div class="container">
+        <div class="hero-columns">
+            <div class="column">
+                <ul id="heroList">
+                    <li>
+                        <input type="checkbox" value="0xBreadguy" data-pfp="https://pbs.twimg.com/profile_images/1814298715194097664/O2y4pHt3_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1814298715194097664/O2y4pHt3_normal.jpg" class="hero-pfp" alt="0xBreadguy">
+                        0xBreadguy
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xDamien" data-pfp="https://pbs.twimg.com/profile_images/1734910308072955904/Mj2t7aAs_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1734910308072955904/Mj2t7aAs_normal.jpg" class="hero-pfp" alt="0xDamien">
+                        0xDamien
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xENAS" data-pfp="https://pbs.twimg.com/profile_images/1663505820833955842/anBwGtM2_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1663505820833955842/anBwGtM2_normal.jpg" class="hero-pfp" alt="0xENAS">
+                        0xENAS
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xfoobar" data-pfp="https://pbs.twimg.com/profile_images/1745824328594214912/-P4ZBCue_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1745824328594214912/-P4ZBCue_normal.jpg" class="hero-pfp" alt="0xfoobar">
+                        0xfoobar
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xgaut" data-pfp="https://pbs.twimg.com/profile_images/1604808218135314432/3J-ABo1I_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1604808218135314432/3J-ABo1I_normal.jpg" class="hero-pfp" alt="0xgaut">
+                        0xgaut
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xjaypeg" data-pfp="https://pbs.twimg.com/profile_images/1769485822686867456/rskxivL-_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1769485822686867456/rskxivL-_normal.jpg" class="hero-pfp" alt="0xjaypeg">
+                        0xjaypeg
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xJim" data-pfp="https://pbs.twimg.com/profile_images/1830676952551751680/oFCRRO05_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1830676952551751680/oFCRRO05_normal.jpg" class="hero-pfp" alt="0xJim">
+                        0xJim
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xKipit" data-pfp="https://pbs.twimg.com/profile_images/1828372853000908800/N5lpVhlQ_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1828372853000908800/N5lpVhlQ_normal.jpg" class="hero-pfp" alt="0xKipit">
+                        0xKipit
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xLawliette" data-pfp="https://pbs.twimg.com/profile_images/1849100419513135104/aWCjsfkF_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1849100419513135104/aWCjsfkF_normal.jpg" class="hero-pfp" alt="0xLawliette">
+                        0xLawliette
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xMakesy" data-pfp="https://pbs.twimg.com/profile_images/1557078856753942530/KyKHxE38_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1557078856753942530/KyKHxE38_normal.jpg" class="hero-pfp" alt="0xMakesy">
+                        0xMakesy
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xMerp" data-pfp="https://pbs.twimg.com/profile_images/1776459365161238528/myBWpmT5_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1776459365161238528/myBWpmT5_normal.jpg" class="hero-pfp" alt="0xMerp">
+                        0xMerp
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xMert_" data-pfp="https://pbs.twimg.com/profile_images/1775535430835863552/zgFeCArT_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1775535430835863552/zgFeCArT_normal.jpg" class="hero-pfp" alt="0xMert_">
+                        0xMert_
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xMikado" data-pfp="https://pbs.twimg.com/profile_images/1794086017193906179/w-WNT6jm_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1794086017193906179/w-WNT6jm_normal.jpg" class="hero-pfp" alt="0xMikado">
+                        0xMikado
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xPajke" data-pfp="https://pbs.twimg.com/profile_images/1801434183543197696/nIkDz_Z1_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1801434183543197696/nIkDz_Z1_normal.jpg" class="hero-pfp" alt="0xPajke">
+                        0xPajke
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xprerich" data-pfp="https://pbs.twimg.com/profile_images/1843081960199278592/Cgiv-vGS_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843081960199278592/Cgiv-vGS_normal.jpg" class="hero-pfp" alt="0xprerich">
+                        0xprerich
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xPrismatic" data-pfp="https://pbs.twimg.com/profile_images/1822948258752442368/rqjcPBNB_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1822948258752442368/rqjcPBNB_normal.jpg" class="hero-pfp" alt="0xPrismatic">
+                        0xPrismatic
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xRamonos" data-pfp="https://pbs.twimg.com/profile_images/1778954511349903360/kBSJNkBx_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1778954511349903360/kBSJNkBx_normal.jpg" class="hero-pfp" alt="0xRamonos">
+                        0xRamonos
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xrwu" data-pfp="https://pbs.twimg.com/profile_images/1689026858728181760/1qOfYkDa_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1689026858728181760/1qOfYkDa_normal.jpg" class="hero-pfp" alt="0xrwu">
+                        0xrwu
+                    </li>
+                    <li>
+                        <input type="checkbox" value="0xSisyphus" data-pfp="https://pbs.twimg.com/profile_images/1749647387247693825/IGD_vcy6_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1749647387247693825/IGD_vcy6_normal.jpg" class="hero-pfp" alt="0xSisyphus">
+                        0xSisyphus
+                    </li>
+                    <li>
+                        <input type="checkbox" value="a1lon9" data-pfp="https://pbs.twimg.com/profile_images/1698011995578961920/haUv3SQy_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1698011995578961920/haUv3SQy_normal.jpg" class="hero-pfp" alt="a1lon9">
+                        a1lon9
+                    </li>
+                    <li>
+                        <input type="checkbox" value="adamscochran" data-pfp="https://pbs.twimg.com/profile_images/1790533676809203712/x04Hb9ZT_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1790533676809203712/x04Hb9ZT_normal.jpg" class="hero-pfp" alt="adamscochran">
+                        adamscochran
+                    </li>
+                    <li>
+                        <input type="checkbox" value="AltcoinPsycho" data-pfp="https://pbs.twimg.com/profile_images/1550148855852834816/L6xlDzwf_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1550148855852834816/L6xlDzwf_normal.jpg" class="hero-pfp" alt="AltcoinPsycho">
+                        AltcoinPsycho
+                    </li>
+                    <li>
+                        <input type="checkbox" value="andy8052" data-pfp="https://pbs.twimg.com/profile_images/1749873563304067072/NkgDwXBn_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1749873563304067072/NkgDwXBn_normal.jpg" class="hero-pfp" alt="andy8052">
+                        andy8052
+                    </li>
+                    <li>
+                        <input type="checkbox" value="apixtwts" data-pfp="https://pbs.twimg.com/profile_images/1663128307393519621/leQ2uGee_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1663128307393519621/leQ2uGee_normal.jpg" class="hero-pfp" alt="apixtwts">
+                        apixtwts
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Arthur_0x" data-pfp="https://pbs.twimg.com/profile_images/1680184510510669825/fmWRG1f-_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1680184510510669825/fmWRG1f-_normal.jpg" class="hero-pfp" alt="Arthur_0x">
+                        Arthur_0x
+                    </li>
+                    <li>
+                        <input type="checkbox" value="artsch00lreject" data-pfp="https://pbs.twimg.com/profile_images/1654073228426629120/uxDUcLH6_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1654073228426629120/uxDUcLH6_normal.jpg" class="hero-pfp" alt="artsch00lreject">
+                        artsch00lreject
+                    </li>
+                    <li>
+                        <input type="checkbox" value="banditxbt" data-pfp="https://pbs.twimg.com/profile_images/1851339875087175680/tLErhwd__normal.png" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1851339875087175680/tLErhwd__normal.png" class="hero-pfp" alt="banditxbt">
+                        banditxbt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="barneytheboi" data-pfp="https://pbs.twimg.com/profile_images/1831735812586668032/sv3E_lBU_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1831735812586668032/sv3E_lBU_normal.jpg" class="hero-pfp" alt="barneytheboi">
+                        barneytheboi
+                    </li>
+                    <li>
+                        <input type="checkbox" value="based16z" data-pfp="https://pbs.twimg.com/profile_images/1797820768396402688/stXcDcyP_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1797820768396402688/stXcDcyP_normal.jpg" class="hero-pfp" alt="based16z">
+                        based16z
+                    </li>
+                    <li>
+                        <input type="checkbox" value="based_d0m" data-pfp="https://pbs.twimg.com/profile_images/1762364859084361728/QY1KxjDw_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1762364859084361728/QY1KxjDw_normal.jpg" class="hero-pfp" alt="based_d0m">
+                        based_d0m
+                    </li>
+                    <li>
+                        <input type="checkbox" value="basedkarbon" data-pfp="https://pbs.twimg.com/profile_images/1841863624412864512/Tt8_R1-m_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1841863624412864512/Tt8_R1-m_normal.jpg" class="hero-pfp" alt="basedkarbon">
+                        basedkarbon
+                    </li>
+                    <li>
+                        <input type="checkbox" value="beaniemaxi" data-pfp="https://pbs.twimg.com/profile_images/1695773404064796672/KYJYUFuo_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1695773404064796672/KYJYUFuo_normal.jpg" class="hero-pfp" alt="beaniemaxi">
+                        beaniemaxi
+                    </li>
+                    <li>
+                        <input type="checkbox" value="beast_ico" data-pfp="https://pbs.twimg.com/profile_images/1610827135978987522/qGWbuvec_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1610827135978987522/qGWbuvec_normal.jpg" class="hero-pfp" alt="beast_ico">
+                        beast_ico
+                    </li>
+                    <li>
+                        <input type="checkbox" value="BigDickBull69" data-pfp="https://pbs.twimg.com/profile_images/1793351020946276352/Iw6yyWXS_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1793351020946276352/Iw6yyWXS_normal.jpg" class="hero-pfp" alt="BigDickBull69">
+                        BigDickBull69
+                    </li>
+                    <li>
+                        <input type="checkbox" value="blknoiz06" data-pfp="https://pbs.twimg.com/profile_images/1847482699805597696/ZhvERGEx_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1847482699805597696/ZhvERGEx_normal.jpg" class="hero-pfp" alt="blknoiz06">
+                        blknoiz06
+                    </li>
+                    <li>
+                        <input type="checkbox" value="boldleonidas" data-pfp="https://pbs.twimg.com/profile_images/1795636010442985473/zxOfI_KX_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1795636010442985473/zxOfI_KX_normal.jpg" class="hero-pfp" alt="boldleonidas">
+                        boldleonidas
+                    </li>
+                    <li>
+                        <input type="checkbox" value="bsol_x" data-pfp="https://pbs.twimg.com/profile_images/1840730660740419584/DeHLI4Bu_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1840730660740419584/DeHLI4Bu_normal.jpg" class="hero-pfp" alt="bsol_x">
+                        bsol_x
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Cbb0fe" data-pfp="https://pbs.twimg.com/profile_images/1749792005251620864/Af6z5kSC_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1749792005251620864/Af6z5kSC_normal.jpg" class="hero-pfp" alt="Cbb0fe">
+                        Cbb0fe
+                    </li>
+                    <li>
+                        <input type="checkbox" value="CharlotteFang77" data-pfp="https://pbs.twimg.com/profile_images/1851283403112628224/Jj-U2uFa_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1851283403112628224/Jj-U2uFa_normal.jpg" class="hero-pfp" alt="CharlotteFang77">
+                        CharlotteFang77
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ChartFuMonkey" data-pfp="https://pbs.twimg.com/profile_images/1842622314086612993/3t9rhUn7_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1842622314086612993/3t9rhUn7_normal.jpg" class="hero-pfp" alt="ChartFuMonkey">
+                        ChartFuMonkey
+                    </li>
+                    <li>
+                        <input type="checkbox" value="chiefingza" data-pfp="https://pbs.twimg.com/profile_images/1759256121905233920/O4ZSkOm6_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1759256121905233920/O4ZSkOm6_normal.jpg" class="hero-pfp" alt="chiefingza">
+                        chiefingza
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Chilearmy123" data-pfp="https://pbs.twimg.com/profile_images/1676401842815901696/rO62w0Cr_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1676401842815901696/rO62w0Cr_normal.jpg" class="hero-pfp" alt="Chilearmy123">
+                        Chilearmy123
+                    </li>
+                    <li>
+                        <input type="checkbox" value="chooserich" data-pfp="https://pbs.twimg.com/profile_images/1673530491750719488/zjB5OMTf_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1673530491750719488/zjB5OMTf_normal.jpg" class="hero-pfp" alt="chooserich">
+                        chooserich
+                    </li>
+                    <li>
+                        <input type="checkbox" value="chumbawamba22" data-pfp="https://pbs.twimg.com/profile_images/1843424781980389376/K63epjc3_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843424781980389376/K63epjc3_normal.jpg" class="hero-pfp" alt="chumbawamba22">
+                        chumbawamba22
+                    </li>
+                    <li>
+                        <input type="checkbox" value="CirrusNFT" data-pfp="https://pbs.twimg.com/profile_images/1804179452114456577/bRIFqky0_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1804179452114456577/bRIFqky0_normal.jpg" class="hero-pfp" alt="CirrusNFT">
+                        CirrusNFT
+                    </li>
+                    <li>
+                        <input type="checkbox" value="CL207" data-pfp="https://pbs.twimg.com/profile_images/1779799324341473280/AwP2plSz_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1779799324341473280/AwP2plSz_normal.jpg" class="hero-pfp" alt="CL207">
+                        CL207
+                    </li>
+                    <li>
+                        <input type="checkbox" value="CoinGurruu" data-pfp="https://pbs.twimg.com/profile_images/1584989392132866086/36z_WjdM_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1584989392132866086/36z_WjdM_normal.jpg" class="hero-pfp" alt="CoinGurruu">
+                        CoinGurruu
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ColdBloodShill" data-pfp="https://pbs.twimg.com/profile_images/1718767209957171200/rZ6-U7l8_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1718767209957171200/rZ6-U7l8_normal.jpg" class="hero-pfp" alt="ColdBloodShill">
+                        ColdBloodShill
+                    </li>
+                    <li>
+                        <input type="checkbox" value="cozymaximalist" data-pfp="https://pbs.twimg.com/profile_images/1816831656180736001/VtvLbE8N_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1816831656180736001/VtvLbE8N_normal.jpg" class="hero-pfp" alt="cozymaximalist">
+                        cozymaximalist
+                    </li>
+                    <li>
+                        <input type="checkbox" value="CryptoKaleo" data-pfp="https://pbs.twimg.com/profile_images/1606041732004593664/JxLZNWsq_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1606041732004593664/JxLZNWsq_normal.jpg" class="hero-pfp" alt="CryptoKaleo">
+                        CryptoKaleo
+                    </li>
+                    <li>
+                        <input type="checkbox" value="cryptoleon_xyz" data-pfp="https://pbs.twimg.com/profile_images/1847009423853563904/Rk8-dNNf_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1847009423853563904/Rk8-dNNf_normal.jpg" class="hero-pfp" alt="cryptoleon_xyz">
+                        cryptoleon_xyz
+                    </li>
+                    <li>
+                        <input type="checkbox" value="crypto_linn" data-pfp="https://pbs.twimg.com/profile_images/1654487711653265410/9Fzvqbhr_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1654487711653265410/9Fzvqbhr_normal.jpg" class="hero-pfp" alt="crypto_linn">
+                        crypto_linn
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Crypto_McKenna" data-pfp="https://pbs.twimg.com/profile_images/1843257265685458944/z-IqKBQF_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843257265685458944/z-IqKBQF_normal.jpg" class="hero-pfp" alt="Crypto_McKenna">
+                        Crypto_McKenna
+                    </li>
+                    <li>
+                        <input type="checkbox" value="dabit3" data-pfp="https://pbs.twimg.com/profile_images/1795944646754861056/BvLWDVYq_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1795944646754861056/BvLWDVYq_normal.jpg" class="hero-pfp" alt="dabit3">
+                        dabit3
+                    </li>
+                    <li>
+                        <input type="checkbox" value="dcfgod" data-pfp="https://pbs.twimg.com/profile_images/1546301678994874371/tcdVqsPP_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1546301678994874371/tcdVqsPP_normal.jpg" class="hero-pfp" alt="dcfgod">
+                        dcfgod
+                    </li>
+                    <li>
+                        <input type="checkbox" value="DeeZe" data-pfp="https://pbs.twimg.com/profile_images/1833184180722597888/cCc5A3sj_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1833184180722597888/cCc5A3sj_normal.jpg" class="hero-pfp" alt="DeeZe">
+                        DeeZe
+                    </li>
+                    <li>
+                        <input type="checkbox" value="DefiIgnas" data-pfp="https://pbs.twimg.com/profile_images/1572199012790603778/GF4NXSKr_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1572199012790603778/GF4NXSKr_normal.jpg" class="hero-pfp" alt="DefiIgnas">
+                        DefiIgnas
+                    </li>
+                    <li>
+                        <input type="checkbox" value="divine_economy" data-pfp="https://pbs.twimg.com/profile_images/1735741854459514880/CX7vO79Y_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1735741854459514880/CX7vO79Y_normal.jpg" class="hero-pfp" alt="divine_economy">
+                        divine_economy
+                    </li>
+                    <li>
+                        <input type="checkbox" value="djenn" data-pfp="https://pbs.twimg.com/profile_images/1724493543010619392/VfZB8Tjr_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1724493543010619392/VfZB8Tjr_normal.jpg" class="hero-pfp" alt="djenn">
+                        djenn
+                    </li>
+                    <li>
+                        <input type="checkbox" value="EasyEatsBodega" data-pfp="https://pbs.twimg.com/profile_images/1670794831428304904/rV3aLfpH_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1670794831428304904/rV3aLfpH_normal.jpg" class="hero-pfp" alt="EasyEatsBodega">
+                        EasyEatsBodega
+                    </li>
+                </ul>
+            </div>
+            <div class="column">
+                <ul id="heroList">
+                    <li>
+                        <input type="checkbox" value="elliotrades" data-pfp="https://pbs.twimg.com/profile_images/1838924181532221440/GvZgQ855_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1838924181532221440/GvZgQ855_normal.jpg" class="hero-pfp" alt="elliotrades">
+                        elliotrades
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ercwl" data-pfp="https://pbs.twimg.com/profile_images/1837393560942854144/TJf2HW5H_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1837393560942854144/TJf2HW5H_normal.jpg" class="hero-pfp" alt="ercwl">
+                        ercwl
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Evan_ss6" data-pfp="https://pbs.twimg.com/profile_images/1544887512455188480/NTlA57Iu_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1544887512455188480/NTlA57Iu_normal.jpg" class="hero-pfp" alt="Evan_ss6">
+                        Evan_ss6
+                    </li>
+                    <li>
+                        <input type="checkbox" value="evan_van_ness" data-pfp="https://pbs.twimg.com/profile_images/1543128738145222656/mnP7hq3t_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1543128738145222656/mnP7hq3t_normal.jpg" class="hero-pfp" alt="evan_van_ness">
+                        evan_van_ness
+                    </li>
+                    <li>
+                        <input type="checkbox" value="farokh" data-pfp="https://pbs.twimg.com/profile_images/1826092771590934528/YGIm2aCM_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1826092771590934528/YGIm2aCM_normal.jpg" class="hero-pfp" alt="farokh">
+                        farokh
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Fiskantes" data-pfp="https://pbs.twimg.com/profile_images/1811694187038789633/FTiNGz0B_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1811694187038789633/FTiNGz0B_normal.jpg" class="hero-pfp" alt="Fiskantes">
+                        Fiskantes
+                    </li>
+                    <li>
+                        <input type="checkbox" value="frankdegods" data-pfp="https://pbs.twimg.com/profile_images/1850139901863563265/07lhNxdz_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850139901863563265/07lhNxdz_normal.jpg" class="hero-pfp" alt="frankdegods">
+                        frankdegods
+                    </li>
+                    <li>
+                        <input type="checkbox" value="franklinisbored" data-pfp="https://pbs.twimg.com/profile_images/1788435723625914368/rBRnT7h-_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1788435723625914368/rBRnT7h-_normal.jpg" class="hero-pfp" alt="franklinisbored">
+                        franklinisbored
+                    </li>
+                    <li>
+                        <input type="checkbox" value="free_electron0" data-pfp="https://pbs.twimg.com/profile_images/1845432462974865408/SCV0OkEm_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1845432462974865408/SCV0OkEm_normal.jpg" class="hero-pfp" alt="free_electron0">
+                        free_electron0
+                    </li>
+                    <li>
+                        <input type="checkbox" value="functi0nZer0" data-pfp="https://pbs.twimg.com/profile_images/1679262771697926145/r3qk5Ycf_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1679262771697926145/r3qk5Ycf_normal.jpg" class="hero-pfp" alt="functi0nZer0">
+                        functi0nZer0
+                    </li>
+                    <li>
+                        <input type="checkbox" value="gabrielhaines" data-pfp="https://pbs.twimg.com/profile_images/1684331571795443713/5S3Ocdxm_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1684331571795443713/5S3Ocdxm_normal.jpg" class="hero-pfp" alt="gabrielhaines">
+                        gabrielhaines
+                    </li>
+                    <li>
+                        <input type="checkbox" value="gianinaskarlett" data-pfp="https://pbs.twimg.com/profile_images/1819103197648011264/HNvdkG6y_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1819103197648011264/HNvdkG6y_normal.jpg" class="hero-pfp" alt="gianinaskarlett">
+                        gianinaskarlett
+                    </li>
+                    <li>
+                        <input type="checkbox" value="glebble" data-pfp="https://pbs.twimg.com/profile_images/1849413886673326081/ZyZJ6V52_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1849413886673326081/ZyZJ6V52_normal.jpg" class="hero-pfp" alt="glebble">
+                        glebble
+                    </li>
+                    <li>
+                        <input type="checkbox" value="gmoneyNFT" data-pfp="https://pbs.twimg.com/profile_images/1626216945698881541/kF6xM_Cb_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1626216945698881541/kF6xM_Cb_normal.jpg" class="hero-pfp" alt="gmoneyNFT">
+                        gmoneyNFT
+                    </li>
+                    <li>
+                        <input type="checkbox" value="greg16676935420" data-pfp="https://pbs.twimg.com/profile_images/1581014308397502464/NPogKMyk_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1581014308397502464/NPogKMyk_normal.jpg" class="hero-pfp" alt="greg16676935420">
+                        greg16676935420
+                    </li>
+                    <li>
+                        <input type="checkbox" value="GwartyGwart" data-pfp="https://pbs.twimg.com/profile_images/1692517757055537152/MTqwUteH_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1692517757055537152/MTqwUteH_normal.jpg" class="hero-pfp" alt="GwartyGwart">
+                        GwartyGwart
+                    </li>
+                    <li>
+                        <input type="checkbox" value="heartereum" data-pfp="https://pbs.twimg.com/profile_images/1804118307118694400/mW6yS3Ai_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1804118307118694400/mW6yS3Ai_normal.jpg" class="hero-pfp" alt="heartereum">
+                        heartereum
+                    </li>
+                    <li>
+                        <input type="checkbox" value="HerroCrypto" data-pfp="https://pbs.twimg.com/profile_images/1806352489840852992/WDJq36zj_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1806352489840852992/WDJq36zj_normal.jpg" class="hero-pfp" alt="HerroCrypto">
+                        HerroCrypto
+                    </li>
+                    <li>
+                        <input type="checkbox" value="honey_xbt" data-pfp="https://pbs.twimg.com/profile_images/1789254181997694976/iSzH5TDD_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1789254181997694976/iSzH5TDD_normal.jpg" class="hero-pfp" alt="honey_xbt">
+                        honey_xbt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="HugoMartingale" data-pfp="https://pbs.twimg.com/profile_images/1794879828673404928/QXoysakL_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1794879828673404928/QXoysakL_normal.jpg" class="hero-pfp" alt="HugoMartingale">
+                        HugoMartingale
+                    </li>
+                    <li>
+                        <input type="checkbox" value="icebergy_" data-pfp="https://pbs.twimg.com/profile_images/1758646426840584192/x0ZLPgjw_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1758646426840584192/x0ZLPgjw_normal.jpg" class="hero-pfp" alt="icebergy_">
+                        icebergy_
+                    </li>
+                    <li>
+                        <input type="checkbox" value="IcedKnife" data-pfp="https://pbs.twimg.com/profile_images/1650746818798444544/OaAb9GI0_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1650746818798444544/OaAb9GI0_normal.jpg" class="hero-pfp" alt="IcedKnife">
+                        IcedKnife
+                    </li>
+                    <li>
+                        <input type="checkbox" value="idrawline" data-pfp="https://pbs.twimg.com/profile_images/1774942228630134784/tzr1yvLR_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1774942228630134784/tzr1yvLR_normal.jpg" class="hero-pfp" alt="idrawline">
+                        idrawline
+                    </li>
+                    <li>
+                        <input type="checkbox" value="intern" data-pfp="https://pbs.twimg.com/profile_images/1742947102953512976/DO-YOUbV_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1742947102953512976/DO-YOUbV_normal.jpg" class="hero-pfp" alt="intern">
+                        intern
+                    </li>
+                    <li>
+                        <input type="checkbox" value="intuitio_" data-pfp="https://pbs.twimg.com/profile_images/1850569503437991937/XWfDWBxH_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850569503437991937/XWfDWBxH_normal.jpg" class="hero-pfp" alt="intuitio_">
+                        intuitio_
+                    </li>
+                    <li>
+                        <input type="checkbox" value="inversebrah" data-pfp="https://pbs.twimg.com/profile_images/1812298915661623296/P0Yj0Xgq_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1812298915661623296/P0Yj0Xgq_normal.jpg" class="hero-pfp" alt="inversebrah">
+                        inversebrah
+                    </li>
+                    <li>
+                        <input type="checkbox" value="izebel_eth" data-pfp="https://pbs.twimg.com/profile_images/1831212713638334464/BO9u6xxl_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1831212713638334464/BO9u6xxl_normal.jpg" class="hero-pfp" alt="izebel_eth">
+                        izebel_eth
+                    </li>
+                    <li>
+                        <input type="checkbox" value="JasonYanowitz" data-pfp="https://pbs.twimg.com/profile_images/1845475643292614670/xisSeeyl_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1845475643292614670/xisSeeyl_normal.jpg" class="hero-pfp" alt="JasonYanowitz">
+                        JasonYanowitz
+                    </li>
+                    <li>
+                        <input type="checkbox" value="jdubzW" data-pfp="https://pbs.twimg.com/profile_images/1826444445006626816/xC2LvU7N_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1826444445006626816/xC2LvU7N_normal.jpg" class="hero-pfp" alt="jdubzW">
+                        jdubzW
+                    </li>
+                    <li>
+                        <input type="checkbox" value="kaiynne" data-pfp="https://pbs.twimg.com/profile_images/1813094420809719809/dzOsbCvF_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1813094420809719809/dzOsbCvF_normal.jpg" class="hero-pfp" alt="kaiynne">
+                        kaiynne
+                    </li>
+                    <li>
+                        <input type="checkbox" value="KeyboardMonkey3" data-pfp="https://pbs.twimg.com/profile_images/1600235674585686019/Em6jTVS8_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1600235674585686019/Em6jTVS8_normal.jpg" class="hero-pfp" alt="KeyboardMonkey3">
+                        KeyboardMonkey3
+                    </li>
+                    <li>
+                        <input type="checkbox" value="kirbxbt" data-pfp="https://pbs.twimg.com/profile_images/1710969844034650112/cZkdOHxX_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1710969844034650112/cZkdOHxX_normal.jpg" class="hero-pfp" alt="kirbxbt">
+                        kirbxbt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="kmoney_69" data-pfp="https://pbs.twimg.com/profile_images/1831209728459866112/_jWUnCci_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1831209728459866112/_jWUnCci_normal.jpg" class="hero-pfp" alt="kmoney_69">
+                        kmoney_69
+                    </li>
+                    <li>
+                        <input type="checkbox" value="knowerofmarkets" data-pfp="https://pbs.twimg.com/profile_images/1788723968783851520/xzeMFEkG_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1788723968783851520/xzeMFEkG_normal.jpg" class="hero-pfp" alt="knowerofmarkets">
+                        knowerofmarkets
+                    </li>
+                    <li>
+                        <input type="checkbox" value="knveth" data-pfp="https://pbs.twimg.com/profile_images/1812147308449939456/TyGeo5fJ_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1812147308449939456/TyGeo5fJ_normal.jpg" class="hero-pfp" alt="knveth">
+                        knveth
+                    </li>
+                    <li>
+                        <input type="checkbox" value="KookCapitalLLC" data-pfp="https://pbs.twimg.com/profile_images/1724383779307843584/YiFv8ORd_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1724383779307843584/YiFv8ORd_normal.jpg" class="hero-pfp" alt="KookCapitalLLC">
+                        KookCapitalLLC
+                    </li>
+                    <li>
+                        <input type="checkbox" value="larpalt" data-pfp="https://pbs.twimg.com/profile_images/1762664342359576576/apkS1dmD_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1762664342359576576/apkS1dmD_normal.jpg" class="hero-pfp" alt="larpalt">
+                        larpalt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="LarpVonTrier" data-pfp="https://pbs.twimg.com/profile_images/1741228410397999104/hSup_xwc_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1741228410397999104/hSup_xwc_normal.jpg" class="hero-pfp" alt="LarpVonTrier">
+                        LarpVonTrier
+                    </li>
+                    <li>
+                        <input type="checkbox" value="lex_node" data-pfp="https://pbs.twimg.com/profile_images/1850176577956651008/_tcJdizK_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850176577956651008/_tcJdizK_normal.jpg" class="hero-pfp" alt="lex_node">
+                        lex_node
+                    </li>
+                    <li>
+                        <input type="checkbox" value="lilclearpill" data-pfp="https://pbs.twimg.com/profile_images/1850403458731417600/pqsx3UAv_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850403458731417600/pqsx3UAv_normal.jpg" class="hero-pfp" alt="lilclearpill">
+                        lilclearpill
+                    </li>
+                    <li>
+                        <input type="checkbox" value="LilMoonLambo" data-pfp="https://pbs.twimg.com/profile_images/1694151089904312320/1QNDNd_f_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1694151089904312320/1QNDNd_f_normal.jpg" class="hero-pfp" alt="LilMoonLambo">
+                        LilMoonLambo
+                    </li>
+                    <li>
+                        <input type="checkbox" value="lmrankhan" data-pfp="https://pbs.twimg.com/profile_images/1773988714462461952/woSArAj4_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1773988714462461952/woSArAj4_normal.jpg" class="hero-pfp" alt="lmrankhan">
+                        lmrankhan
+                    </li>
+                    <li>
+                        <input type="checkbox" value="loomdart" data-pfp="https://pbs.twimg.com/profile_images/1844106950298017792/1_aP3vaK_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1844106950298017792/1_aP3vaK_normal.jpg" class="hero-pfp" alt="loomdart">
+                        loomdart
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Loopifyyy" data-pfp="https://pbs.twimg.com/profile_images/1766117510221307904/z7IRFqRq_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1766117510221307904/z7IRFqRq_normal.jpg" class="hero-pfp" alt="Loopifyyy">
+                        Loopifyyy
+                    </li>
+                    <li>
+                        <input type="checkbox" value="LucaNetz" data-pfp="https://pbs.twimg.com/profile_images/1849498278255071232/drdvg74U_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1849498278255071232/drdvg74U_normal.jpg" class="hero-pfp" alt="LucaNetz">
+                        LucaNetz
+                    </li>
+                    <li>
+                        <input type="checkbox" value="machibigbrother" data-pfp="https://pbs.twimg.com/profile_images/1610342982187900928/84eyMoam_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1610342982187900928/84eyMoam_normal.jpg" class="hero-pfp" alt="machibigbrother">
+                        machibigbrother
+                    </li>
+                    <li>
+                        <input type="checkbox" value="mattomattik" data-pfp="https://pbs.twimg.com/profile_images/1831727040686329856/Y9BC1ijJ_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1831727040686329856/Y9BC1ijJ_normal.jpg" class="hero-pfp" alt="mattomattik">
+                        mattomattik
+                    </li>
+                    <li>
+                        <input type="checkbox" value="max_the_plug" data-pfp="https://pbs.twimg.com/profile_images/1771189756463894528/c-9wYzAu_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1771189756463894528/c-9wYzAu_normal.jpg" class="hero-pfp" alt="max_the_plug">
+                        max_the_plug
+                    </li>
+                    <li>
+                        <input type="checkbox" value="maybectrlfreak" data-pfp="https://pbs.twimg.com/profile_images/1747525526145699840/8MluaGAV_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1747525526145699840/8MluaGAV_normal.jpg" class="hero-pfp" alt="maybectrlfreak">
+                        maybectrlfreak
+                    </li>
+                    <li>
+                        <input type="checkbox" value="mdudas" data-pfp="https://pbs.twimg.com/profile_images/1853507651574849536/FLBZsuk5_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1853507651574849536/FLBZsuk5_normal.jpg" class="hero-pfp" alt="mdudas">
+                        mdudas
+                    </li>
+                    <li>
+                        <input type="checkbox" value="mememe69696969" data-pfp="https://pbs.twimg.com/profile_images/1596041341380997120/8dy91BAl_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1596041341380997120/8dy91BAl_normal.jpg" class="hero-pfp" alt="mememe69696969">
+                        mememe69696969
+                    </li>
+                    <li>
+                        <input type="checkbox" value="mikadontlouz" data-pfp="https://pbs.twimg.com/profile_images/1846209791363846144/oJ5K-_IL_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1846209791363846144/oJ5K-_IL_normal.jpg" class="hero-pfp" alt="mikadontlouz">
+                        mikadontlouz
+                    </li>
+                    <li>
+                        <input type="checkbox" value="MINHxDYNASTY" data-pfp="https://pbs.twimg.com/profile_images/1832943105051631616/7KNFTcNW_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1832943105051631616/7KNFTcNW_normal.jpg" class="hero-pfp" alt="MINHxDYNASTY">
+                        MINHxDYNASTY
+                    </li>
+                    <li>
+                        <input type="checkbox" value="MoonOverlord" data-pfp="https://pbs.twimg.com/profile_images/1725249311816941569/V-VuS0Lv_normal.png" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1725249311816941569/V-VuS0Lv_normal.png" class="hero-pfp" alt="MoonOverlord">
+                        MoonOverlord
+                    </li>
+                    <li>
+                        <input type="checkbox" value="mrjasonchoi" data-pfp="https://pbs.twimg.com/profile_images/1711399954164674560/hgBradso_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1711399954164674560/hgBradso_normal.jpg" class="hero-pfp" alt="mrjasonchoi">
+                        mrjasonchoi
+                    </li>
+                    <li>
+                        <input type="checkbox" value="muzzyvermillion" data-pfp="https://pbs.twimg.com/profile_images/1852599624390803456/8Xo5tkcX_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1852599624390803456/8Xo5tkcX_normal.jpg" class="hero-pfp" alt="muzzyvermillion">
+                        muzzyvermillion
+                    </li>
+                    <li>
+                        <input type="checkbox" value="naniXBT" data-pfp="https://pbs.twimg.com/profile_images/1843728522226929665/TkG1PpB1_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843728522226929665/TkG1PpB1_normal.jpg" class="hero-pfp" alt="naniXBT">
+                        naniXBT
+                    </li>
+                    <li>
+                        <input type="checkbox" value="NBA__trey" data-pfp="https://pbs.twimg.com/profile_images/1815929669683707904/5jsa2HB9_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1815929669683707904/5jsa2HB9_normal.jpg" class="hero-pfp" alt="NBA__trey">
+                        NBA__trey
+                    </li>
+                    <li>
+                        <input type="checkbox" value="NewsyJohnson" data-pfp="https://pbs.twimg.com/profile_images/1814439350702084096/eZbXeWJ__normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1814439350702084096/eZbXeWJ__normal.jpg" class="hero-pfp" alt="NewsyJohnson">
+                        NewsyJohnson
+                    </li>
+                    <li>
+                        <input type="checkbox" value="NotChaseColeman" data-pfp="https://pbs.twimg.com/profile_images/1851023688692387840/hJM9Izbv_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1851023688692387840/hJM9Izbv_normal.jpg" class="hero-pfp" alt="NotChaseColeman">
+                        NotChaseColeman
+                    </li>
+                </ul>
+            </div>
+            <div class="column">
+                <ul id="heroList">
+                    <li>
+                        <input type="checkbox" value="notsofast" data-pfp="https://pbs.twimg.com/profile_images/1828805788334182400/SNSMfhh2_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1828805788334182400/SNSMfhh2_normal.jpg" class="hero-pfp" alt="notsofast">
+                        notsofast
+                    </li>
+                    <li>
+                        <input type="checkbox" value="notthreadguy" data-pfp="https://pbs.twimg.com/profile_images/1766155710432526336/cXUlVP1F_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1766155710432526336/cXUlVP1F_normal.jpg" class="hero-pfp" alt="notthreadguy">
+                        notthreadguy
+                    </li>
+                    <li>
+                        <input type="checkbox" value="optimizoor" data-pfp="https://pbs.twimg.com/profile_images/1851109730875564032/VvwBsIol_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1851109730875564032/VvwBsIol_normal.jpg" class="hero-pfp" alt="optimizoor">
+                        optimizoor
+                    </li>
+                    <li>
+                        <input type="checkbox" value="orangie" data-pfp="https://pbs.twimg.com/profile_images/1843439709571219456/iNRM1482_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843439709571219456/iNRM1482_normal.jpg" class="hero-pfp" alt="orangie">
+                        orangie
+                    </li>
+                    <li>
+                        <input type="checkbox" value="osf_rekt" data-pfp="https://pbs.twimg.com/profile_images/1843252624386048001/VfQjPTzf_normal.png" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843252624386048001/VfQjPTzf_normal.png" class="hero-pfp" alt="osf_rekt">
+                        osf_rekt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="OX_DAO" data-pfp="https://pbs.twimg.com/profile_images/1838751656227565568/7TyIqfNW_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1838751656227565568/7TyIqfNW_normal.jpg" class="hero-pfp" alt="OX_DAO">
+                        OX_DAO
+                    </li>
+                    <li>
+                        <input type="checkbox" value="PacmanBlur" data-pfp="https://pbs.twimg.com/profile_images/1499571704753901569/wLAcCdsu_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1499571704753901569/wLAcCdsu_normal.jpg" class="hero-pfp" alt="PacmanBlur">
+                        PacmanBlur
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ParallelAiRev" data-pfp="https://pbs.twimg.com/profile_images/1842023420281663489/2TcYoTFL_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1842023420281663489/2TcYoTFL_normal.jpg" class="hero-pfp" alt="ParallelAiRev">
+                        ParallelAiRev
+                    </li>
+                    <li>
+                        <input type="checkbox" value="patty_fi" data-pfp="https://pbs.twimg.com/profile_images/1841622195639914496/hWg9ydbm_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1841622195639914496/hWg9ydbm_normal.jpg" class="hero-pfp" alt="patty_fi">
+                        patty_fi
+                    </li>
+                    <li>
+                        <input type="checkbox" value="penguin_curator" data-pfp="https://pbs.twimg.com/profile_images/1850888386665439232/T63S9NDe_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850888386665439232/T63S9NDe_normal.jpg" class="hero-pfp" alt="penguin_curator">
+                        penguin_curator
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Pentosh1" data-pfp="https://pbs.twimg.com/profile_images/1767366822309855232/YJCVbrQl_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1767366822309855232/YJCVbrQl_normal.jpg" class="hero-pfp" alt="Pentosh1">
+                        Pentosh1
+                    </li>
+                    <li>
+                        <input type="checkbox" value="punk9059" data-pfp="https://pbs.twimg.com/profile_images/1638374572247646209/K5ikWE9__normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1638374572247646209/K5ikWE9__normal.jpg" class="hero-pfp" alt="punk9059">
+                        punk9059
+                    </li>
+                    <li>
+                        <input type="checkbox" value="QwQiao" data-pfp="https://pbs.twimg.com/profile_images/1774497511987724289/qIqYZUu__normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1774497511987724289/qIqYZUu__normal.jpg" class="hero-pfp" alt="QwQiao">
+                        QwQiao
+                    </li>
+                    <li>
+                        <input type="checkbox" value="rasmr_eth" data-pfp="https://pbs.twimg.com/profile_images/1831904183001247744/ALdr5oD1_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1831904183001247744/ALdr5oD1_normal.jpg" class="hero-pfp" alt="rasmr_eth">
+                        rasmr_eth
+                    </li>
+                    <li>
+                        <input type="checkbox" value="rektmando" data-pfp="https://pbs.twimg.com/profile_images/1593307551457738752/xT7UmPH0_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1593307551457738752/xT7UmPH0_normal.jpg" class="hero-pfp" alt="rektmando">
+                        rektmando
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Route2FI" data-pfp="https://pbs.twimg.com/profile_images/1469588644088451073/VEu0DKDG_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1469588644088451073/VEu0DKDG_normal.jpg" class="hero-pfp" alt="Route2FI">
+                        Route2FI
+                    </li>
+                    <li>
+                        <input type="checkbox" value="safetyth1rd" data-pfp="https://pbs.twimg.com/profile_images/1545356330122166272/d-FiFFm2_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1545356330122166272/d-FiFFm2_normal.jpg" class="hero-pfp" alt="safetyth1rd">
+                        safetyth1rd
+                    </li>
+                    <li>
+                        <input type="checkbox" value="santiagoroel" data-pfp="https://pbs.twimg.com/profile_images/1492672526656446467/uH5PD24j_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1492672526656446467/uH5PD24j_normal.jpg" class="hero-pfp" alt="santiagoroel">
+                        santiagoroel
+                    </li>
+                    <li>
+                        <input type="checkbox" value="SCHIZO_FREQ" data-pfp="https://pbs.twimg.com/profile_images/1708404723169087488/MY0bWMA0_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1708404723169087488/MY0bWMA0_normal.jpg" class="hero-pfp" alt="SCHIZO_FREQ">
+                        SCHIZO_FREQ
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ScizRtrading" data-pfp="https://pbs.twimg.com/profile_images/1772065807901532161/VQa4zFxU_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1772065807901532161/VQa4zFxU_normal.jpg" class="hero-pfp" alt="ScizRtrading">
+                        ScizRtrading
+                    </li>
+                    <li>
+                        <input type="checkbox" value="screentimes" data-pfp="https://pbs.twimg.com/profile_images/1836969001051729920/4X-dVvQD_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1836969001051729920/4X-dVvQD_normal.jpg" class="hero-pfp" alt="screentimes">
+                        screentimes
+                    </li>
+                    <li>
+                        <input type="checkbox" value="sershokunin" data-pfp="https://pbs.twimg.com/profile_images/1766167563661168640/iSJO6z8K_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1766167563661168640/iSJO6z8K_normal.jpg" class="hero-pfp" alt="sershokunin">
+                        sershokunin
+                    </li>
+                    <li>
+                        <input type="checkbox" value="sherlock_hodles" data-pfp="https://pbs.twimg.com/profile_images/1512588351592882185/-b1tizOG_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1512588351592882185/-b1tizOG_normal.jpg" class="hero-pfp" alt="sherlock_hodles">
+                        sherlock_hodles
+                    </li>
+                    <li>
+                        <input type="checkbox" value="SHL0MS" data-pfp="https://pbs.twimg.com/profile_images/1847789420306366464/IaUqlG51_normal.png" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1847789420306366464/IaUqlG51_normal.png" class="hero-pfp" alt="SHL0MS">
+                        SHL0MS
+                    </li>
+                    <li>
+                        <input type="checkbox" value="SmokeyTheBera" data-pfp="https://pbs.twimg.com/profile_images/1838579532539760640/gtUopAGU_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1838579532539760640/gtUopAGU_normal.jpg" class="hero-pfp" alt="SmokeyTheBera">
+                        SmokeyTheBera
+                    </li>
+                    <li>
+                        <input type="checkbox" value="SolJakey" data-pfp="https://pbs.twimg.com/profile_images/1850414854307209216/it7ofQkk_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850414854307209216/it7ofQkk_normal.jpg" class="hero-pfp" alt="SolJakey">
+                        SolJakey
+                    </li>
+                    <li>
+                        <input type="checkbox" value="stoicsavage" data-pfp="https://pbs.twimg.com/profile_images/1752187877453389824/CijSSkyY_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1752187877453389824/CijSSkyY_normal.jpg" class="hero-pfp" alt="stoicsavage">
+                        stoicsavage
+                    </li>
+                    <li>
+                        <input type="checkbox" value="sumfattytuna" data-pfp="https://pbs.twimg.com/profile_images/1833898219173969920/N56UKPdf_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1833898219173969920/N56UKPdf_normal.jpg" class="hero-pfp" alt="sumfattytuna">
+                        sumfattytuna
+                    </li>
+                    <li>
+                        <input type="checkbox" value="surfcoderepeat" data-pfp="https://pbs.twimg.com/profile_images/1707558009776242688/Mu8g3JM2_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1707558009776242688/Mu8g3JM2_normal.jpg" class="hero-pfp" alt="surfcoderepeat">
+                        surfcoderepeat
+                    </li>
+                    <li>
+                        <input type="checkbox" value="TaikiMaeda2" data-pfp="https://pbs.twimg.com/profile_images/1681431804434153476/PuTSFblP_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1681431804434153476/PuTSFblP_normal.jpg" class="hero-pfp" alt="TaikiMaeda2">
+                        TaikiMaeda2
+                    </li>
+                    <li>
+                        <input type="checkbox" value="thecexoffender" data-pfp="https://pbs.twimg.com/profile_images/1849041036665864192/0tMY52_E_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1849041036665864192/0tMY52_E_normal.jpg" class="hero-pfp" alt="thecexoffender">
+                        thecexoffender
+                    </li>
+                    <li>
+                        <input type="checkbox" value="TheFlowHorse" data-pfp="https://pbs.twimg.com/profile_images/1609924605421944836/veyUE6Qs_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1609924605421944836/veyUE6Qs_normal.jpg" class="hero-pfp" alt="TheFlowHorse">
+                        TheFlowHorse
+                    </li>
+                    <li>
+                        <input type="checkbox" value="theunipcs" data-pfp="https://pbs.twimg.com/profile_images/1755899881783185408/Mtp0uwfM_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1755899881783185408/Mtp0uwfM_normal.jpg" class="hero-pfp" alt="theunipcs">
+                        theunipcs
+                    </li>
+                    <li>
+                        <input type="checkbox" value="tier10k" data-pfp="https://pbs.twimg.com/profile_images/1416723334683893767/HvpCjb43_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1416723334683893767/HvpCjb43_normal.jpg" class="hero-pfp" alt="tier10k">
+                        tier10k
+                    </li>
+                    <li>
+                        <input type="checkbox" value="tomhschmidt" data-pfp="https://pbs.twimg.com/profile_images/1773721481899393024/c2ANpCMq_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1773721481899393024/c2ANpCMq_normal.jpg" class="hero-pfp" alt="tomhschmidt">
+                        tomhschmidt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Tradermayne" data-pfp="https://pbs.twimg.com/profile_images/1833549033643905028/b4xBD8iP_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1833549033643905028/b4xBD8iP_normal.jpg" class="hero-pfp" alt="Tradermayne">
+                        Tradermayne
+                    </li>
+                    <li>
+                        <input type="checkbox" value="TraderMercury" data-pfp="https://pbs.twimg.com/profile_images/1609578914371846144/fzeCeUMd_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1609578914371846144/fzeCeUMd_normal.jpg" class="hero-pfp" alt="TraderMercury">
+                        TraderMercury
+                    </li>
+                    <li>
+                        <input type="checkbox" value="trading_axe" data-pfp="https://pbs.twimg.com/profile_images/1850446155240390656/ADeJP12S_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1850446155240390656/ADeJP12S_normal.jpg" class="hero-pfp" alt="trading_axe">
+                        trading_axe
+                    </li>
+                    <li>
+                        <input type="checkbox" value="travisbickle0x" data-pfp="https://pbs.twimg.com/profile_images/1843305528866320384/MZHmV4Pt_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1843305528866320384/MZHmV4Pt_normal.jpg" class="hero-pfp" alt="travisbickle0x">
+                        travisbickle0x
+                    </li>
+                    <li>
+                        <input type="checkbox" value="truth_terminal" data-pfp="https://pbs.twimg.com/profile_images/1808816849620250625/AQIUpfL3_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1808816849620250625/AQIUpfL3_normal.jpg" class="hero-pfp" alt="truth_terminal">
+                        truth_terminal
+                    </li>
+                    <li>
+                        <input type="checkbox" value="twobitidiot" data-pfp="https://pbs.twimg.com/profile_images/1815190821882179585/3YFSh1dZ_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1815190821882179585/3YFSh1dZ_normal.jpg" class="hero-pfp" alt="twobitidiot">
+                        twobitidiot
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Tyler_Did_It" data-pfp="https://pbs.twimg.com/profile_images/1561354964534018049/T9lKN_2c_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1561354964534018049/T9lKN_2c_normal.jpg" class="hero-pfp" alt="Tyler_Did_It">
+                        Tyler_Did_It
+                    </li>
+                    <li>
+                        <input type="checkbox" value="TylerDurden" data-pfp="https://pbs.twimg.com/profile_images/1824291487355637762/aTHlX07H_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1824291487355637762/aTHlX07H_normal.jpg" class="hero-pfp" alt="TylerDurden">
+                        TylerDurden
+                    </li>
+                    <li>
+                        <input type="checkbox" value="vers_laLune" data-pfp="https://pbs.twimg.com/profile_images/1790827449682403328/V2xmp0PI_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1790827449682403328/V2xmp0PI_normal.jpg" class="hero-pfp" alt="vers_laLune">
+                        vers_laLune
+                    </li>
+                    <li>
+                        <input type="checkbox" value="vohvohh" data-pfp="https://pbs.twimg.com/profile_images/1739414823396356096/EgeEiZUV_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1739414823396356096/EgeEiZUV_normal.jpg" class="hero-pfp" alt="vohvohh">
+                        vohvohh
+                    </li>
+                    <li>
+                        <input type="checkbox" value="vydamo_" data-pfp="https://pbs.twimg.com/profile_images/1800635357886894080/77abqSRA_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1800635357886894080/77abqSRA_normal.jpg" class="hero-pfp" alt="vydamo_">
+                        vydamo_
+                    </li>
+                    <li>
+                        <input type="checkbox" value="wabdoteth" data-pfp="https://pbs.twimg.com/profile_images/1787697051058278400/kT_Ct6Mj_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1787697051058278400/kT_Ct6Mj_normal.jpg" class="hero-pfp" alt="wabdoteth">
+                        wabdoteth
+                    </li>
+                    <li>
+                        <input type="checkbox" value="waleswoosh" data-pfp="https://pbs.twimg.com/profile_images/1700199367511064576/v-3PNyPw_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1700199367511064576/v-3PNyPw_normal.jpg" class="hero-pfp" alt="waleswoosh">
+                        waleswoosh
+                    </li>
+                    <li>
+                        <input type="checkbox" value="wallstreetbets" data-pfp="https://pbs.twimg.com/profile_images/1840815824367407104/8BavYHyT_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1840815824367407104/8BavYHyT_normal.jpg" class="hero-pfp" alt="wallstreetbets">
+                        wallstreetbets
+                    </li>
+                    <li>
+                        <input type="checkbox" value="WazzCrypto" data-pfp="https://pbs.twimg.com/profile_images/1386091770312802305/83V7DZ4B_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1386091770312802305/83V7DZ4B_normal.jpg" class="hero-pfp" alt="WazzCrypto">
+                        WazzCrypto
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Web3Quant" data-pfp="https://pbs.twimg.com/profile_images/1779597396940312576/jz-QfeDO_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1779597396940312576/jz-QfeDO_normal.jpg" class="hero-pfp" alt="Web3Quant">
+                        Web3Quant
+                    </li>
+                    <li>
+                        <input type="checkbox" value="wizardofsoho" data-pfp="https://pbs.twimg.com/profile_images/1748136011417161728/2AVT6Js__normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1748136011417161728/2AVT6Js__normal.jpg" class="hero-pfp" alt="wizardofsoho">
+                        wizardofsoho
+                    </li>
+                    <li>
+                        <input type="checkbox" value="wrld_sol" data-pfp="https://pbs.twimg.com/profile_images/1835888983768797184/lsojQUkd_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1835888983768797184/lsojQUkd_normal.jpg" class="hero-pfp" alt="wrld_sol">
+                        wrld_sol
+                    </li>
+                    <li>
+                        <input type="checkbox" value="wsbmod" data-pfp="https://pbs.twimg.com/profile_images/1815785917111562241/neCEJ099_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1815785917111562241/neCEJ099_normal.jpg" class="hero-pfp" alt="wsbmod">
+                        wsbmod
+                    </li>
+                    <li>
+                        <input type="checkbox" value="WuWei113" data-pfp="https://pbs.twimg.com/profile_images/1517222273039708161/98wNOFut_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1517222273039708161/98wNOFut_normal.jpg" class="hero-pfp" alt="WuWei113">
+                        WuWei113
+                    </li>
+                    <li>
+                        <input type="checkbox" value="zacxbt" data-pfp="https://pbs.twimg.com/profile_images/1760942755545800704/wFBpdSgp_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1760942755545800704/wFBpdSgp_normal.jpg" class="hero-pfp" alt="zacxbt">
+                        zacxbt
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ZAGABOND" data-pfp="https://pbs.twimg.com/profile_images/1605984553310437376/Du3FX-og_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1605984553310437376/Du3FX-og_normal.jpg" class="hero-pfp" alt="ZAGABOND">
+                        ZAGABOND
+                    </li>
+                    <li>
+                        <input type="checkbox" value="Zeneca" data-pfp="https://pbs.twimg.com/profile_images/1696580524599398400/YIbEmus7_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1696580524599398400/YIbEmus7_normal.jpg" class="hero-pfp" alt="Zeneca">
+                        Zeneca
+                    </li>
+                    <li>
+                        <input type="checkbox" value="zhusu" data-pfp="https://pbs.twimg.com/profile_images/1642482315602395138/7g4NNyuA_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1642482315602395138/7g4NNyuA_normal.jpg" class="hero-pfp" alt="zhusu">
+                        zhusu
+                    </li>
+                    <li>
+                        <input type="checkbox" value="ZoomerOracle" data-pfp="https://pbs.twimg.com/profile_images/1809546800774189057/81CmmOb1_normal.jpg" onchange="updateFavorites(this)">
+                        <img src="https://pbs.twimg.com/profile_images/1809546800774189057/81CmmOb1_normal.jpg" class="hero-pfp" alt="ZoomerOracle">
+                        ZoomerOracle
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="favorites-section">
+            <div class="favorites-header">
+                <h2>Favorited Heroes</h2>
+                <span class="favorites-count">(0)</span>
+            </div>
+            <ul id="favoritesList"></ul>
+        </div>
+    </div>
+    <button onclick="saveFavorites()">Save Favorites</button>
+
+    <script>
+        function updateFavorites(checkbox) {
+            const favoritesList = document.getElementById('favoritesList');
+            const heroName = checkbox.value;
+            const heroPfp = checkbox.dataset.pfp;
+            
+            if (checkbox.checked) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <img src="${heroPfp}" class="hero-pfp" alt="${heroName}">
+                    ${heroName}
+                `;
+                li.setAttribute('data-hero', heroName);
+                favoritesList.appendChild(li);
+            } else {
+                const existingItem = favoritesList.querySelector(`li[data-hero="${heroName}"]`);
+                if (existingItem) {
+                    existingItem.remove();
+                }
+            }
+            
+            // Update favorites count
+            const favoritesCount = favoritesList.children.length;
+            document.querySelector('.favorites-count').textContent = `(${favoritesCount})`;
+        }
+
+        function saveFavorites() {
+            const checkboxes = document.querySelectorAll('#heroList input[type="checkbox"]');
+            const selectedHeroes = [];
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedHeroes.push(checkbox.value);
+                }
+            });
+            localStorage.setItem('favoriteHeroes', JSON.stringify(selectedHeroes));
+            alert('Favorites saved!');
+        }
+
+        // Load saved favorites on page load
+        window.onload = function() {
+            const savedFavorites = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+            const checkboxes = document.querySelectorAll('#heroList input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (savedFavorites.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                    updateFavorites(checkbox);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

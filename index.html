@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FantasySheets - Tournament Analytics</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -98,28 +99,38 @@
             { filename: 'player_rewards.html', title: 'Player Rewards Leaders' },
             { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
+            { filename: 'settings.html', title: 'Settings', icon: 'fas fa-cog' },
+            
             // Add more pages as needed
         ];
 
         function loadPages() {
-            const pageList = document.getElementById('pageList');
+        const pageList = document.getElementById('pageList');
+        
+        pages.forEach(page => {
+            const li = document.createElement('li');
+            li.className = 'nav-item';
             
-            pages.forEach(page => {
-                const li = document.createElement('li');
-                li.className = 'nav-item';
-                
-                const link = document.createElement('a');
-                link.href = page.filename;  // Removed the /pages/ prefix
-                link.className = 'nav-link';
-                link.textContent = page.title;
-                
-                li.appendChild(link);
-                pageList.appendChild(li);
-            });
-        }
+            const link = document.createElement('a');
+            link.href = page.filename;
+            link.className = 'nav-link';
+            
+            // Add icon if specified
+            if (page.icon) {
+                const icon = document.createElement('i');
+                icon.className = page.icon;
+                link.appendChild(icon);
+            }
+            
+            link.appendChild(document.createTextNode(page.title));
+            
+            li.appendChild(link);
+            pageList.appendChild(li);
+        });
+    }
 
-        // Load pages when the document is ready
-        document.addEventListener('DOMContentLoaded', loadPages);
-    </script>
+    // Load pages when the document is ready
+    document.addEventListener('DOMContentLoaded', loadPages);
+</script>
 </body>
 </html>

@@ -25,7 +25,9 @@
                                         ❄️ Tournament score is 2+ star tiers below last star update</div>
                                         </i>
         </div>
-        <div id="search-container">
+        <div id="search-container" style="display: flex; align-items: center;">
+            <span style="margin-right: 2px;">Favorites:</span>
+            <i class="far fa-star favorite-star" id="favorite-star" style="color: #FFD700; cursor: pointer; margin-right: 2px;"></i>
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
         </div>
     <div class="sections">
@@ -3582,6 +3584,45 @@
             </div>
         </div>
         <script>
+
+                // Add this new event listener for the star
+                document.addEventListener('DOMContentLoaded', function() {
+                    const starIcon = document.getElementById('favorite-star');
+                    starIcon.addEventListener('click', function() {
+                        if (this.classList.contains('far')) {
+                            // Switching to filled star - show only favorites
+                            this.classList.remove('far');
+                            this.classList.add('fas');
+                            filterFavorites(true);
+                        } else {
+                            // Switching to outline star - show all
+                            this.classList.remove('fas');
+                            this.classList.add('far');
+                            filterFavorites(false);
+                        }
+                    });
+                });
+
+                function filterFavorites(showOnlyFavorites) {
+                    // Get favorites from localStorage
+                    const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+                    const rows = document.querySelectorAll('.star-column table tr');
+
+                    rows.forEach(function(row) {
+                        if (!row.querySelector('.card')) return; // Skip header rows
+                        
+                        const heroHandle = row.querySelector('.card p').textContent;
+                        
+                        if (showOnlyFavorites) {
+                            // Show row only if hero is in favorites
+                            row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                        } else {
+                            // Show all rows
+                            row.style.display = '';
+                        }
+                    });
+                }
+
             function searchHeroes() {
                 document.getElementById('hero-search-box').addEventListener('input', function() {
                     var searchTerm = this.value.toLowerCase();

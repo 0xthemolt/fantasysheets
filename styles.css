@@ -24,7 +24,7 @@ h2 {text-align: center;}
 }
 
 table {
-    border-collapse: separate;
+    border-collapse: collapse; /*before separate*/
     border-spacing: 0;
     margin-top: 10px;
     font-size: 0.8em;
@@ -59,7 +59,6 @@ td:first-child {
 table tr:last-child td {
     border-bottom: none;
 }
-
 
 .rank {
     font-weight: bold;
@@ -128,8 +127,10 @@ table tr:last-child td {
 }
 
 .table-container {
-    overflow-x: auto; /* Allow horizontal scrolling */
-    width: 100%; /* Ensure it takes full width */
+    overflow-x: auto;
+    position: relative;
+    width: 100%;
+    -webkit-overflow-scrolling: touch; /* for smoother scrolling on iOS */
 }
 
 /* Center the table on larger screens */

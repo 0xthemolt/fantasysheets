@@ -94,9 +94,9 @@
     <script>
         const pages = [
             { filename: 'hero_scorecenter.html', title: 'Hero Score Center' },
-            { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking' },
+            { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking', isNew: true },  // Added isNew property
             { filename: 'hero_utilization.html', title: 'Hero Utilization' },
-            { filename: 'player_decks.html', title: 'Player Decks (BETA)' },
+            { filename: 'player_decks.html', title: 'Player Decks (BETA)', isNew: true  },
             { filename: 'player_rewards.html', title: 'Player Rewards Leaders' },
             { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
@@ -125,6 +125,20 @@
             
             link.appendChild(document.createTextNode(page.title));
             
+            // Add NEW label if isNew is true
+            if (page.isNew) {
+            const newLabel = document.createElement('img');
+            newLabel.src = 'new.png';  // Removed 'pages/' since we're already in that directory
+            newLabel.style.position = 'absolute';
+            newLabel.style.right = '0px';  // Adjust position as needed
+            newLabel.style.top = '50%';
+            newLabel.style.transform = 'translateY(-70%)';
+            newLabel.style.height = '30px';  // Adjust size as needed
+            newLabel.style.width = 'auto';
+            link.style.position = 'relative'; // Make the link a positioning context
+                link.appendChild(newLabel);
+            }
+
             li.appendChild(link);
             pageList.appendChild(li);
         });

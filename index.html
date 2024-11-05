@@ -43,7 +43,10 @@
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
             animation: gradient 3s linear infinite;
-            margin-bottom: 2rem; /* Add this line to ensure consistent spacing below the title */
+            margin-bottom: 1rem; /* Reduce bottom margin of h1 */
+            text-align: center;  /* Add this to ensure centering */
+            width: 100%;  /* Add this to ensure full width */
+            padding: 0 1rem;  /* Add padding for smaller screens */
         }
 
         @keyframes gradient {
@@ -55,7 +58,7 @@
             border-radius: 8px;
             padding: 2rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 0;  /* Replace negative margin with 0 */
+            margin-top: 0.5rem;  /* Add small top margin */
         }
 
         .nav-list {

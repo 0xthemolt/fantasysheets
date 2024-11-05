@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tournament Player Decks</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="playerSearch" placeholder="Enter player handle...">
+        <button onclick="searchPlayers()">Search</button>
+    </div>
+    
+    <div id="playerDecks">
+        <!-- Results will be dynamically loaded here -->
+    </div>
+
+    <script>
+    async function searchPlayers() {
+        const input = document.getElementById("playerSearch");
+        const playerHandle = input.value.trim();
+        
+        if (playerHandle === "") {
+            alert("Please enter a player handle");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/search_player/${playerHandle}`);
+            const data = await response.json();
+            
+            const playerDecksDiv = document.getElementById("playerDecks");
+            
+            if (!data.player_deck) {
+                playerDecksDiv.innerHTML = "<p>No player found with that handle.</p>";
+                return;
+            }
+
+            const deck = data.player_deck;
+            playerDecksDiv.innerHTML = `
+                <div class="deck-container">
+                    <div class="player-info">
+                        <img src="${deck.player_pic}" alt="${deck.player_name}" class="player-avatar">
+                        <h2>${deck.player_name} (${deck.player_handle})</h2>
+                    </div>
+                    <table class="deck-table">
+                        <tr>
+                            <th>Rank</th>
+                            <th>Score</th>
+                            <th>Card</th>
+                            <th>Fantasy Score</th>
+                        </tr>
+                        <tr>
+                            <td rowspan="5">${deck.player_rank}</td>
+                            <td rowspan="5">${deck.player_score}</td>
+                            <td><img src="${deck.card1_picture_url}" alt="Card 1" class="card-image"></td>
+                            <td>${deck.card1_fantasy_score}</td>
+                        </tr>
+                        <tr>
+                            <td><img src="${deck.card2_picture_url}" alt="Card 2" class="card-image"></td>
+                            <td>${deck.card2_fantasy_score}</td>
+                        </tr>
+                        <tr>
+                            <td><img src="${deck.card3_picture_url}" alt="Card 3" class="card-image"></td>
+                            <td>${deck.card3_fantasy_score}</td>
+                        </tr>
+                        <tr>
+                            <td><img src="${deck.card4_picture_url}" alt="Card 4" class="card-image"></td>
+                            <td>${deck.card4_fantasy_score}</td>
+                        </tr>
+                        <tr>
+                            <td><img src="${deck.card5_picture_url}" alt="Card 5" class="card-image"></td>
+                            <td>${deck.card5_fantasy_score}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById("playerDecks").innerHTML = "<p>Error fetching player data.</p>";
+        }
+    }
+    </script>
+</body>
+</html>

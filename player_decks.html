@@ -1,84 +1,28 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Tournament Player Decks</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Decks</title>
 </head>
 <body>
-    <div class="search-container">
-        <input type="text" id="playerSearch" placeholder="Enter player handle...">
-        <button onclick="searchPlayers()">Search</button>
-    </div>
-    
-    <div id="playerDecks">
-        <!-- Results will be dynamically loaded here -->
-    </div>
-
-    <script>
-    async function searchPlayers() {
-        const input = document.getElementById("playerSearch");
-        const playerHandle = input.value.trim();
-        
-        if (playerHandle === "") {
-            alert("Please enter a player handle");
-            return;
-        }
-
-        try {
-            const response = await fetch(`/search_player/${playerHandle}`);
-            const data = await response.json();
-            
-            const playerDecksDiv = document.getElementById("playerDecks");
-            
-            if (!data.player_deck) {
-                playerDecksDiv.innerHTML = "<p>No player found with that handle.</p>";
-                return;
-            }
-
-            const deck = data.player_deck;
-            playerDecksDiv.innerHTML = `
-                <div class="deck-container">
-                    <div class="player-info">
-                        <img src="${deck.player_pic}" alt="${deck.player_name}" class="player-avatar">
-                        <h2>${deck.player_name} (${deck.player_handle})</h2>
-                    </div>
-                    <table class="deck-table">
-                        <tr>
-                            <th>Rank</th>
-                            <th>Score</th>
-                            <th>Card</th>
-                            <th>Fantasy Score</th>
-                        </tr>
-                        <tr>
-                            <td rowspan="5">${deck.player_rank}</td>
-                            <td rowspan="5">${deck.player_score}</td>
-                            <td><img src="${deck.card1_picture_url}" alt="Card 1" class="card-image"></td>
-                            <td>${deck.card1_fantasy_score}</td>
-                        </tr>
-                        <tr>
-                            <td><img src="${deck.card2_picture_url}" alt="Card 2" class="card-image"></td>
-                            <td>${deck.card2_fantasy_score}</td>
-                        </tr>
-                        <tr>
-                            <td><img src="${deck.card3_picture_url}" alt="Card 3" class="card-image"></td>
-                            <td>${deck.card3_fantasy_score}</td>
-                        </tr>
-                        <tr>
-                            <td><img src="${deck.card4_picture_url}" alt="Card 4" class="card-image"></td>
-                            <td>${deck.card4_fantasy_score}</td>
-                        </tr>
-                        <tr>
-                            <td><img src="${deck.card5_picture_url}" alt="Card 5" class="card-image"></td>
-                            <td>${deck.card5_fantasy_score}</td>
-                        </tr>
-                    </table>
-                </div>
-            `;
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById("playerDecks").innerHTML = "<p>Error fetching player data.</p>";
-        }
-    }
-    </script>
+    <h1>Player Decks for 0xthemolt</h1>
+    <table border="1">
+  <tr><th>Player Name</th><th>Player Score</th><th>Player Rank</th><th>Cards</th></tr>
+  <tr><td>themolt</td><td>3474.489126077648</td><td>409</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/wizardofsoho_8.png" alt="Card Image" width="50" height="50"> Score: 819.313579496302</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/Web3Quant_5.png" alt="Card Image" width="50" height="50"> Score: 497.05005695315253</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LarpVonTrier_5.png" alt="Card Image" width="50" height="50"> Score: 590.9289808179798</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/CL207_4.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/dcfgod_3.png" alt="Card Image" width="50" height="50"> Score: 409.03346678433087</li></ul></td></tr>
+  <tr><td>themolt</td><td>3335.767089165082</td><td>300</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png" alt="Card Image" width="50" height="50"> Score: 739.7491666062937</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/a1lon9_5.png" alt="Card Image" width="50" height="50"> Score: 877.1755873954669</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mememe69696969_4.png" alt="Card Image" width="50" height="50"> Score: 423.1627645378098</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/apixtwts_3.png" alt="Card Image" width="50" height="50"> Score: 645.5103946588732</li></ul></td></tr>
+  <tr><td>themolt</td><td>3148.9828174371887</td><td>599</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/MINHxDYNASTY_6.png" alt="Card Image" width="50" height="50"> Score: 571.8588075639312</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/Tyler_Did_It_6.png" alt="Card Image" width="50" height="50"> Score: 689.5506749403498</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/punk9059_6.png" alt="Card Image" width="50" height="50"> Score: 428.8789290028473</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/CL207_4.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/dcfgod_3.png" alt="Card Image" width="50" height="50"> Score: 409.03346678433087</li></ul></td></tr>
+  <tr><td>themolt</td><td>3075.7796818549896</td><td>639</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/lex_node_6.png" alt="Card Image" width="50" height="50"> Score: 364.74434363215994</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mattomattik_5.png" alt="Card Image" width="50" height="50"> Score: 493.33487810651945</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/rektmando_4.png" alt="Card Image" width="50" height="50"> Score: 849.9248302686493</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LucaNetz_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/banditxbt_3.png" alt="Card Image" width="50" height="50"> Score: 342.5157358959976</li></ul></td></tr>
+  <tr><td>themolt</td><td>3055.4266779872823</td><td>13</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Cbb0fe_5.png" alt="Card Image" width="50" height="50"> Score: 698.8049671812518</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/waleswoosh_5.png" alt="Card Image" width="50" height="50"> Score: 946.5282229539623</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/beaniemaxi_4.png" alt="Card Image" width="50" height="50"> Score: 608.3358445523263</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/dcfgod_3.png" alt="Card Image" width="50" height="50"> Score: 409.03346678433087</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Crypto_McKenna_1.png" alt="Card Image" width="50" height="50"> Score: 392.72417651541105</li></ul></td></tr>
+  <tr><td>themolt</td><td>2997.659609735543</td><td>700</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/CryptoKaleo_7.png" alt="Card Image" width="50" height="50"> Score: 799.792275172226</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/adamscochran_7.png" alt="Card Image" width="50" height="50"> Score: 312.58841002953915</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/QwQiao_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mattomattik_5.png" alt="Card Image" width="50" height="50"> Score: 493.33487810651945</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/Crypto_McKenna_1.png" alt="Card Image" width="50" height="50"> Score: 392.72417651541105</li></ul></td></tr>
+  <tr><td>themolt</td><td>2992.161543514923</td><td>671</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/greg16676935420_8.png" alt="Card Image" width="50" height="50"> Score: 981.9173859559927</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/intuitio__7.png" alt="Card Image" width="50" height="50"> Score: 687.5442413718613</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mememe69696969_4.png" alt="Card Image" width="50" height="50"> Score: 423.1627645378098</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/bsol_x_2.png" alt="Card Image" width="50" height="50"> Score: 344.18364869442337</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CoinGurruu_2.png" alt="Card Image" width="50" height="50"> Score: None</li></ul></td></tr>
+  <tr><td>themolt</td><td>2931.6258022048014</td><td>750</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/intuitio__7.png" alt="Card Image" width="50" height="50"> Score: 687.5442413718613</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/MINHxDYNASTY_6.png" alt="Card Image" width="50" height="50"> Score: 571.8588075639312</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mememe69696969_4.png" alt="Card Image" width="50" height="50"> Score: 423.1627645378098</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/dcfgod_3.png" alt="Card Image" width="50" height="50"> Score: 409.03346678433087</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/banditxbt_3.png" alt="Card Image" width="50" height="50"> Score: 342.5157358959976</li></ul></td></tr>
+  <tr><td>themolt</td><td>2232.2185354504045</td><td>1454</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/screentimes_4.png" alt="Card Image" width="50" height="50"> Score: 685.9949903792394</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/banditxbt_3.png" alt="Card Image" width="50" height="50"> Score: 342.5157358959976</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/0xjaypeg_3.png" alt="Card Image" width="50" height="50"> Score: 253.00067812190784</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/0xLawliette_2.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/jenndefer_3.png" alt="Card Image" width="50" height="50"> Score: 206.63428590312495</li></ul></td></tr>
+  <tr><td>themolt</td><td>1921.7840662489277</td><td>2628</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ColdBloodShill_6.png" alt="Card Image" width="50" height="50"> Score: 737.2647501304712</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/stoicsavage_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mememe69696969_4.png" alt="Card Image" width="50" height="50"> Score: 423.1627645378098</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Crypto_McKenna_1.png" alt="Card Image" width="50" height="50"> Score: 392.72417651541105</li></ul></td></tr>
+  <tr><td>themolt</td><td>1878.9173158375083</td><td>2714</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/lmrankhan_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/screentimes_4.png" alt="Card Image" width="50" height="50"> Score: 685.9949903792394</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/rektmando_4.png" alt="Card Image" width="50" height="50"> Score: 849.9248302686493</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CirrusNFT_4.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/HugoMartingale_1.png" alt="Card Image" width="50" height="50"> Score: None</li></ul></td></tr>
+  <tr><td>themolt</td><td>1663.9109882022424</td><td>2447</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/vydamo__6.png" alt="Card Image" width="50" height="50"> Score: 571.0359951886544</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/chooserich_4.png" alt="Card Image" width="50" height="50"> Score: 349.0037395585267</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/beaniemaxi_4.png" alt="Card Image" width="50" height="50"> Score: 608.3358445523263</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/optimizoor_3.png" alt="Card Image" width="50" height="50"> Score: 135.5354089027349</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/HugoMartingale_1.png" alt="Card Image" width="50" height="50"> Score: None</li></ul></td></tr>
+  <tr><td>themolt</td><td>805.9232881360585</td><td>4455</td><td><ul><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/adamscochran_7.png" alt="Card Image" width="50" height="50"> Score: 312.58841002953915</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mattomattik_5.png" alt="Card Image" width="50" height="50"> Score: 493.33487810651945</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/CirrusNFT_4.png" alt="Card Image" width="50" height="50"> Score: None</li><li><img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/HugoMartingale_1.png" alt="Card Image" width="50" height="50"> Score: None</li></ul></td></tr>
+</table>
 </body>
 </html>

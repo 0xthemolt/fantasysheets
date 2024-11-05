@@ -85,6 +85,16 @@ table tr:last-child td {
     white-space: nowrap;
 }
 
+.player-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.player-link:hover {
+    text-decoration: underline;
+    color: #fff;  /* or any color you prefer */
+}
+
 .player-column img {
     width: 100%;
     max-width: 30px; /* Maintain a reasonable size */

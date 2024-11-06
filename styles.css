@@ -138,18 +138,12 @@ table tr:last-child td {
 
 .table-container {
     overflow-x: auto;
-    position: relative;
     width: 100%;
     -webkit-overflow-scrolling: touch; /* for smoother scrolling on iOS */
+    margin: 0;
+    justify-content: flex-start;  /* Left align instead of center */
 }
 
-/* Center the table on larger screens */
-@media (min-width: 601px) {
-    .table-container {
-        display: flex; /* Enable flexbox for larger screens */
-        justify-content: center; /* Center the table */
-    }
-}
 .tournament-badge {
     background-color: white;
     color: black;

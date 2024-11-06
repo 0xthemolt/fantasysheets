@@ -147,7 +147,8 @@ table tr:last-child td {
 @media (min-width: 768px) {  /* For desktop screens */
     .table-container {
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;  /* Changed from center to flex-start */
+        padding: 0 20px;  /* Optional: Add some padding on the sides */
     }
 }
 
@@ -370,20 +371,38 @@ table tr:last-child td {
 
 /*rewards itm grid*/
 .tables-grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Reduced from 250px */
-    gap: 10px; /* Reduced from 20px */
-    padding: 10px; /* Reduced from 20px */
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
     box-sizing: border-box;
+    justify-content: flex-start;  /* Default left alignment for mobile */
+}
+
+@media (min-width: 768px) {  /* For desktop screens */
+    .tables-grid-container {
+        margin: 0 auto;  /* Center on desktop */
+        justify-content: center;
+    }
 }
 
 .table-wrapper {
     width: 100%;
     min-width: 0;
     overflow-x: auto;
+    margin: 0;  /* Match container's margin */
+    justify-content: flex-start;  /* Default left alignment for mobile */
+}
+
+@media (min-width: 768px) {
+    .table-wrapper {
+        margin: 0 auto;  /* Center on desktop */
+        justify-content: center;
+    }
 }
 
 .table-wrapper table {

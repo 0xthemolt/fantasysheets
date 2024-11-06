@@ -139,9 +139,16 @@ table tr:last-child td {
 .table-container {
     overflow-x: auto;
     width: 100%;
-    -webkit-overflow-scrolling: touch; /* for smoother scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
     margin: 0;
-    justify-content: flex-start;  /* Left align instead of center */
+    justify-content: flex-start;  /* Default for mobile */
+}
+
+@media (min-width: 768px) {  /* For desktop screens */
+    .table-container {
+        display: flex;
+        justify-content: center;
+    }
 }
 
 .tournament-badge {

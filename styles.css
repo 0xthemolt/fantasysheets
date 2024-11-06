@@ -149,7 +149,7 @@ table tr:last-child td {
 @media (min-width: 768px) {  /* For desktop screens */
     .table-container {
         display: flex;
-        justify-content: flex-start;  /* Changed from center to flex-start */
+        justify-content: center; 
         padding: 0 20px;  /* Optional: Add some padding on the sides */
     }
 }

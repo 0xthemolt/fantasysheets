@@ -142,6 +142,8 @@ table tr:last-child td {
     -webkit-overflow-scrolling: touch;
     margin: 0;
     justify-content: flex-start;  /* Default for mobile */
+    user-select: none; /* Prevents text selection while dragging */
+    cursor: grab;
 }
 
 @media (min-width: 768px) {  /* For desktop screens */
@@ -150,6 +152,10 @@ table tr:last-child td {
         justify-content: flex-start;  /* Changed from center to flex-start */
         padding: 0 20px;  /* Optional: Add some padding on the sides */
     }
+}
+
+.table-container:active {
+    cursor: grabbing;
 }
 
 .tournament-badge {

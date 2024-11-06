@@ -132,6 +132,47 @@ table tr:last-child td {
     max-width: 150px; /* Limit the maximum width */
 }
 
+.search-box:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.clear-search {
+    position: absolute;
+    right: 8px; /* Moved inside the box */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffebee; /* light red background */
+    cursor: pointer;
+    display: none; /* hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 2; /* Ensure it's above the input */
+}
+
+.clear-search::before,
+.clear-search::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 2px;
+    background-color: #f44336; /* solid red X */
+    top: 50%;
+    left: 50%;
+}
+
+.clear-search::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.clear-search::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
 .title-container {
     display: flex;
     align-items: center;

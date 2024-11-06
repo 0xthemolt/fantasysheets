@@ -111,9 +111,15 @@ table tr:last-child td {
     margin-right: 5px;
 }
 
-#search-container {
+/* #search-container {
     margin: 10px 0;
     text-align: center;
+} */
+
+#search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .search-box {
@@ -423,3 +429,13 @@ table tr:last-child td {
     cursor: pointer;
 }
 
+.my-decks-text {
+    cursor: pointer;
+    color: #5B5C5C;
+    text-decoration: none;
+}
+
+.my-decks-text:hover {
+    color: #333;
+    text-decoration: underline;
+}

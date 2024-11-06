@@ -120,16 +120,20 @@ table tr:last-child td {
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative;
+    width: fit-content; /* Add this to contain the width */
+    margin-top: 10px;  /* Added this line to create padding above */
 }
 
 .search-box {
-    padding: 5px;
+    padding: 5px 25px 5px 5px; /* Increase right padding to make room for the clear button */
     border-radius: 5px;
     border: 1px solid white;
     background-color: #141515;
     color: #fff;
     width: 100%; /* Use full width on smaller screens */
     max-width: 150px; /* Limit the maximum width */
+    position: relative; /* Make the search box the positioning context */
 }
 
 .search-box:focus {
@@ -140,26 +144,27 @@ table tr:last-child td {
 
 .clear-search {
     position: absolute;
-    right: 8px; /* Moved inside the box */
+    /* right: calc(100% - 150px - 25px); Position relative to search box width */
+    right: 8px; /* Distance from right edge, inside the box */
     top: 50%;
     transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background-color: #ffebee; /* light red background */
+    background-color: #ffebee;
     cursor: pointer;
-    display: none; /* hidden by default */
+    display: none;
     align-items: center;
     justify-content: center;
-    z-index: 2; /* Ensure it's above the input */
+    z-index: 2;
 }
 
 .clear-search::before,
 .clear-search::after {
     content: '';
     position: absolute;
-    width: 8px;
-    height: 2px;
+    width: 6px;
+    height: 1px;
     background-color: #f44336; /* solid red X */
     top: 50%;
     left: 50%;

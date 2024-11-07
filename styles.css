@@ -139,7 +139,6 @@ table tr:last-child td {
     100% { transform: rotate(0deg) scale(1.1); }
 }
 
-
 #search-container {
     display: flex;
     align-items: center;
@@ -163,8 +162,8 @@ table tr:last-child td {
 .search-box:focus {
     outline: none;
     border-color: #80bdff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
+
 
 .clear-search {
     position: absolute;
@@ -516,3 +515,19 @@ table tr:last-child td {
     text-decoration: underline;
 }
 
+/* Add these styles for autocomplete */
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1000 !important;
+}
+
+.ui-menu-item {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.ui-menu-item:hover {
+    background-color: #f0f0f0;
+}

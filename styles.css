@@ -12,6 +12,10 @@ body {
 h1 {
     font-size: 1.4em;
     text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
 }
 
 h2 {text-align: center;}
@@ -179,11 +183,15 @@ table tr:last-child td {
 }
 
 .title-container {
+    position: relative;
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: wrap;
 }
 
+.title-text {
+    margin: 0 10px;
+}
 .title-header {
     margin: 0; /* Removes default margin from h1 */
 }
@@ -217,7 +225,7 @@ table tr:last-child td {
     border-radius: 15px;
     font-size: 0.7em;
     font-weight: bold;
-    align-self: flex-start;
+    align-self: center;
     margin-left: 10px; /* Adds space between title and badge */
     white-space: nowrap;      /* Prevents breaking between words */
     word-wrap: break-word;   /* Breaks long words if necessary */
@@ -281,9 +289,11 @@ table tr:last-child td {
 }
 
 .home-link {
+    display: flex;  /* Makes the link a flex container */
+    align-items: center;   /* Vertically centers the icon inside the link */
     text-decoration: none;
     color: inherit;
-    position: absolute;
+    position: static;
     top: 20px;
     left: 20px;
 }

@@ -14,7 +14,7 @@
                 <a href="index.html" class="home-link">
                     <i class="fas fa-home"></i>
                 </a>
-                Hero Score Center
+                <span class="title-text">Hero Score Center</span>
                 <span class="tournament-badge">Main 24</span>
             </h1>
         </div>
@@ -24,7 +24,9 @@
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
         </div>
         <div class="small-text">
-            <span>Heroes: 180 &nbsp;|&nbsp; Decks: 16,736 &nbsp;|&nbsp; Cards: 83,680 &nbsp;|&nbsp; Updated: 2024-11-07 03:46 UTC</span>
+            <span>2024-11-07 03:46 UTC</span>
+            <span id="timeAgo"></span>
+            <span class="info-text"> | Heroes: 180</span>
             <i class="fas fa-info-circle tooltip-trigger">
             <div class="tooltip-content">🔥 Tournament score is 2+ star tier above last star update<br>
                                         ❄️ Tournament score is 2+ star tiers below last star update</div>
@@ -244,7 +246,7 @@
                     </td>
                     <td class="black-text" style="background-color: #89cc66;">
                         734
-                         &nbsp;
+                         ❄️
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -583,7 +585,7 @@
                     </td>
                     <td class="black-text" style="background-color: #c7e77f;">
                         625
-                         &nbsp;
+                         ❄️
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -713,7 +715,7 @@
                     </td>
                     <td class="black-text" style="background-color: #4baf5c;">
                         822
-                         🔥
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -1185,7 +1187,7 @@
                     </td>
                     <td class="black-text" style="background-color: #95d168;">
                         714
-                         🔥
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -1204,7 +1206,7 @@
                     </td>
                     <td class="black-text" style="background-color: #a7d96a;">
                         688
-                         🔥
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -1223,7 +1225,7 @@
                     </td>
                     <td class="black-text" style="background-color: #abdb6d;">
                         680
-                         🔥
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2265,7 +2267,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fdb063;">
                         302
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2284,7 +2286,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fa9856;">
                         263
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2303,7 +2305,7 @@
                     </td>
                     <td class="black-text" style="background-color: #f89053;">
                         253
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2775,7 +2777,7 @@
                     </td>
                     <td class="black-text" style="background-color: #f46f44;">
                         204
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2794,7 +2796,7 @@
                     </td>
                     <td class="black-text" style="background-color: #ed5e3c;">
                         175
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2813,7 +2815,7 @@
                     </td>
                     <td class="black-text" style="background-color: #ed5e3c;">
                         174
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2832,7 +2834,7 @@
                     </td>
                     <td class="black-text" style="background-color: #e75236;">
                         155
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2851,7 +2853,7 @@
                     </td>
                     <td class="black-text" style="background-color: #e54d34;">
                         149
-                         ❄️
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -3076,7 +3078,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fdce7c;">
                         359
-                         &nbsp;
+                         🔥
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -3095,7 +3097,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fdca78;">
                         353
-                         &nbsp;
+                         🔥
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -3415,7 +3417,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fa9a58;">
                         268
-                         &nbsp;
+                         🔥
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -3584,6 +3586,40 @@
             </div>
         </div>
         <script>
+                function updateTimeAgo() {
+                    // Get the timestamp text and parse it more carefully
+                    const timestampText = document.querySelector('.small-text span').textContent;
+                    // Split the timestamp into components
+                    const [date, time] = timestampText.split(' ');
+                    // Create a proper ISO timestamp
+                    const isoTimestamp = `${date}T${time}Z`; // Adding T between date/time and Z for UTC
+                    const timestampUTC = new Date(isoTimestamp);
+                    const now = new Date();
+                    
+                    // Check if the date is valid before proceeding
+                    if (isNaN(timestampUTC.getTime())) {
+                        console.error('Invalid timestamp:', timestampText);
+                        document.getElementById('timeAgo').textContent = '';
+                        return;
+                    }
+
+                    const diffMinutes = Math.floor((now - timestampUTC) / (1000 * 60));
+                    
+                    let timeAgoText = '';
+                    if (diffMinutes < 60) {
+                        timeAgoText = `(${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago)`;
+                    } else {
+                        const hours = Math.floor(diffMinutes / 60);
+                        const minutes = diffMinutes % 60;
+                        timeAgoText = `(${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''} ago)`;
+                    }
+                    
+                    document.getElementById('timeAgo').textContent = ' ' + timeAgoText;
+                }
+
+                // Update immediately and then every minute
+                updateTimeAgo();
+                setInterval(updateTimeAgo, 60000);
 
                 // Add this new event listener for the star
                 document.addEventListener('DOMContentLoaded', function() {

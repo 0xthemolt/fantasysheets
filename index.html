@@ -15,6 +15,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-align: center; /* Add this */
+            padding: 0; /* Add this */
+            width: 100%; /* Add this */
+            box-sizing: border-box; /* Add this */
         }
 
         /* h1 {
@@ -43,28 +47,59 @@
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
             animation: gradient 3s linear infinite;
-            margin-bottom: .1rem; /* Reduce bottom margin of h1 */
-            text-align: center;  /* Add this to ensure centering */
-            width: 100%;  /* Add this to ensure full width */
-            padding: 0 1rem;  /* Add padding for smaller screens */
+            margin-bottom: .1rem;
+            text-align: center;
+            width: 100%;
+            display: block;
+            padding: 0;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         @keyframes gradient {
             0% { background-position: 0% center; }
             100% { background-position: -200% center; }
         }
+
         .nav-container {
-            background: black;
-            border-radius: 8px;
+            width: 100%;  /* Default width for mobile */
+            max-width: 1200px;
             padding: 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .grid-layout {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;  /* Default mobile layout */
+        }
+
+        .column-container {
+            background: #292828;
+            border-radius: 8px;
+            padding: .75rem .75rem 0.25rem .75rem;  /* top right bottom left */
+            /* or alternatively: */
+            /* padding-top: 1rem; */
+            /* padding-right: 1rem; */
+            /* padding-bottom: 0.5rem; */  /* reduced bottom padding */
+            /* padding-left: 1rem; */
+            min-width: 0;
+        }
+
+        .column-title {
+            color: #fff;
+            font-size: 1.3em;
+            margin-bottom: .5rem;
+            margin-top: 0;
+            padding-bottom: 0.2rem;
+            border-bottom: 2px solid #444;
+            text-align: center;
         }
 
         .nav-list {
             list-style: none;
             padding: 0;
-            max-width: 400px;  /* Add this to control button width */
-            margin: 0 auto;  /* Center the list */
+            margin: 0;
         }
 
         .nav-item {
@@ -86,71 +121,108 @@
             transform: translateX(5px);
             color: #444;
         }
+
+        /* Desktop layout */
+        @media (min-width: 768px) {
+            .nav-container {
+                width: 40%;  /* More compact width on desktop */
+                min-width: 700px;  /* Prevents containers from getting too narrow */
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>FantasySheets - Tournament Analytics</h1>
     <div class="nav-container">
-        <ul class="nav-list" id="pageList">
-            <!-- Links will be dynamically inserted here -->
-        </ul>
+        <div class="grid-layout">
+            <div class="column-container">
+                <h2 class="column-title">Heroes</h2>
+                <ul class="nav-list" id="heroList"></ul>
+            </div>
+            <div class="column-container">
+                <h2 class="column-title">Players</h2>
+                <ul class="nav-list" id="playerList"></ul>
+            </div>
+            <div class="column-container full-width">
+                <h2 class="column-title">Other</h2>
+                <ul class="nav-list" id="otherList"></ul>
+            </div>
+        </div>
         <p style="font-size: 0.5em; color: grey; text-align: center;">Best viewed on wide screen desktop, but works on mobile.</p>
     </div>
 
     <script>
-        const pages = [
+    const pages = {
+        heroes: [
             { filename: 'hero_scorecenter.html', title: 'Hero Score Center' },
-            { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking', isNew: true },  // Added isNew property
+            { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking', isNew: true },
             { filename: 'hero_utilization.html', title: 'Hero Utilization' },
-            { filename: 'player_decks.html', title: 'Player Decks (BETA)', isNew: true  },
+        ],
+        players: [
+            { filename: 'player_decks.html', title: 'Player Decks (BETA)', isNew: true },
             { filename: 'player_rewards.html', title: 'Player Rewards Leaders' },
-            { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
+            { title: 'Player Rewards History (COMING SOON)' },
+        ],
+        other: [
+        { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
             { filename: 'settings.html', title: 'Settings', icon: 'fas fa-cog' },
-            
-            // Add more pages as needed
-        ];
+        ]
+    };
 
-        function loadPages() {
-        const pageList = document.getElementById('pageList');
+    function loadPages() {
+        const heroList = document.getElementById('heroList');
+        const playerList = document.getElementById('playerList');
+        const otherList = document.getElementById('otherList');  // Add this line
         
-        pages.forEach(page => {
-            const li = document.createElement('li');
-            li.className = 'nav-item';
-            
-            const link = document.createElement('a');
-            link.href = page.filename;
-            link.className = 'nav-link';
-            
-            // Add icon if specified
-            if (page.icon) {
-                const icon = document.createElement('i');
-                icon.className = page.icon;
-                link.appendChild(icon);
-            }
-            
-            link.appendChild(document.createTextNode(page.title));
-            
-            // Add NEW label if isNew is true
-            if (page.isNew) {
-            const newLabel = document.createElement('img');
-            newLabel.src = 'new.png';  // Removed 'pages/' since we're already in that directory
-            newLabel.style.position = 'absolute';
-            newLabel.style.right = '0px';  // Adjust position as needed
-            newLabel.style.top = '50%';
-            newLabel.style.transform = 'translateY(-70%)';
-            newLabel.style.height = '30px';  // Adjust size as needed
-            newLabel.style.width = 'auto';
-            link.style.position = 'relative'; // Make the link a positioning context
-                link.appendChild(newLabel);
-            }
+        function createLinks(pageArray, container) {
+            pageArray.forEach(page => {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                
+                const link = document.createElement('a');
+                link.href = page.filename;
+                link.className = 'nav-link';
+                
+                if (page.icon) {
+                    const icon = document.createElement('i');
+                    icon.className = page.icon;
+                    link.appendChild(icon);
+                }
+                
+                link.appendChild(document.createTextNode(page.title));
+                
+                if (page.isNew) {
+                    const newLabel = document.createElement('img');
+                    newLabel.src = 'new.png';
+                    newLabel.style.position = 'absolute';
+                    newLabel.style.right = '0px';
+                    newLabel.style.top = '50%';
+                    newLabel.style.transform = 'translateY(-70%)';
+                    newLabel.style.height = '30px';
+                    newLabel.style.width = 'auto';
+                    link.style.position = 'relative';
+                    link.appendChild(newLabel);
+                }
 
-            li.appendChild(link);
-            pageList.appendChild(li);
-        });
+                li.appendChild(link);
+                container.appendChild(li);
+            });
+        }
+
+        createLinks(pages.heroes, heroList);
+        createLinks(pages.players, playerList);
+        createLinks(pages.other, otherList);  // Add this line
     }
 
-    // Load pages when the document is ready
     document.addEventListener('DOMContentLoaded', loadPages);
 </script>
 </body>

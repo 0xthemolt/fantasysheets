@@ -72,6 +72,7 @@ table tr:last-child td {
 .hero-column {
     text-align: left;
     white-space: nowrap;
+    width: fit-content;  /* or use min-width: max-content */
 }
 
 .hero-image {

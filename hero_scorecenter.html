@@ -5,8 +5,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hero Score Center</title>
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
         <link rel="stylesheet" href="./styles.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     </head>
     <body>
         <div class="title-container">
@@ -19,9 +20,9 @@
             </h1>
         </div>
         <div id="search-container" style="display: flex; align-items: center;">
-            <span style="margin-right: 5px; font-size: 0.7em;">Only Favorites </span>
-            <button class="icon-button" id="my-favorites-button">
-                <i class="far fa-star favorite-star" id="favorite-star" style="color: #FFD700"></i>
+            <button class="button-group button-group--yellow" id="my-favorites-group">
+                <span class="button-label">My Favorites</span>
+                <i class="fa-regular fa-star"></i>
             </button>
             <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
             <span class="clear-search"></span>
@@ -563,7 +564,7 @@
                 <tr>
                     <td>
                         <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1853979742711541760/Hz8UuEVX_normal.jpg" class="hero-image" alt="muzzyvermillion">
+                            <img src="https://pbs.twimg.com/profile_images/1854572262399131665/sqhU7_2D_normal.jpg" class="hero-image" alt="muzzyvermillion">
                             <p>muzzyvermillion</p>
                         </div>
                     </td>
@@ -826,7 +827,7 @@
                 <tr>
                     <td>
                         <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1851283403112628224/Jj-U2uFa_normal.jpg" class="hero-image" alt="CharlotteFang77">
+                            <img src="https://pbs.twimg.com/profile_images/1854581947210817536/3kQwBV5H_normal.jpg" class="hero-image" alt="CharlotteFang77">
                             <p>CharlotteFang77</p>
                         </div>
                     </td>
@@ -1035,7 +1036,7 @@
                 <tr>
                     <td>
                         <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1851023688692387840/hJM9Izbv_normal.jpg" class="hero-image" alt="NotChaseColeman">
+                            <img src="https://pbs.twimg.com/profile_images/1854587321028419600/SGP8dAEf_normal.jpg" class="hero-image" alt="NotChaseColeman">
                             <p>NotChaseColeman</p>
                         </div>
                     </td>
@@ -2476,7 +2477,7 @@
                     </td>
                     <td class="black-text" style="background-color: #fefdbb;">
                         486
-                         🔥
+                         &nbsp;
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -2856,7 +2857,7 @@
                     </td>
                     <td class="black-text" style="background-color: #df412f;">
                         129
-                         &nbsp;
+                         ❄️
                     </td>
 
                     <td class="multi-line smaller-stats">
@@ -3626,17 +3627,19 @@
 
                 // Add this new event listener for the star
                 document.addEventListener('DOMContentLoaded', function() {
-                    const starIcon = document.getElementById('favorite-star');
-                    starIcon.addEventListener('click', function() {
-                        if (this.classList.contains('far')) {
+                    const buttonGroup = document.querySelector('#my-favorites-group');
+                    const icon = buttonGroup.querySelector('i');
+                    
+                    buttonGroup.addEventListener('click', function() {
+                        if (icon.classList.contains('fa-regular')) {
                             // Switching to filled star - show only favorites
-                            this.classList.remove('far');
-                            this.classList.add('fas');
+                            icon.className = 'fa-solid fa-star';
+                            buttonGroup.classList.add('selected');
                             filterFavorites(true);
                         } else {
                             // Switching to outline star - show all
-                            this.classList.remove('fas');
-                            this.classList.add('far');
+                            icon.className = 'fa-regular fa-star';
+                            buttonGroup.classList.remove('selected');
                             filterFavorites(false);
                         }
                     });

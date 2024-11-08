@@ -537,13 +537,13 @@ table tr:last-child td {
     background-color: #f0f0f0;
 }
 
-
 .button-group {
+    --button-color: #F287DF; /* Default color */
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    border: 1px solid #F287DF;
+    border: 1px solid var(--button-color);
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -552,26 +552,35 @@ table tr:last-child td {
 
 .button-label {
     font-size: 0.8em;
-    color: #F287DF;
+    color: var(--button-color);
     user-select: none;
 }
 
 .button-group i {
-    color: #F287DF;
+    color: var(--button-color);
     font-size: 14px;
     transition: all 0.2s ease;
 }
 
 .button-group:hover {
-    background-color: rgba(242, 135, 223, 0.1);
+    background-color: color-mix(in srgb, var(--button-color) 10%, transparent);
 }
 
 .button-group.selected {
-    background-color: #F287DF;
+    background-color: var(--button-color);
 }
 
 .button-group.selected i,
 .button-group.selected .button-label {
     color: white;
+}
+
+/* Different color variations */
+.button-group--pink {
+    --button-color: #F287DF;
+}
+
+.button-group--yellow {
+    --button-color: #FDE047;
 }
 

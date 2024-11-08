@@ -122,6 +122,8 @@ table tr:last-child td {
     text-align: center;
 } */
 
+
+
 .icon-button {
     background: none;
     border: none;
@@ -534,3 +536,42 @@ table tr:last-child td {
 .ui-menu-item:hover {
     background-color: #f0f0f0;
 }
+
+
+.button-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid #F287DF;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.button-label {
+    font-size: 0.8em;
+    color: #F287DF;
+    user-select: none;
+}
+
+.button-group i {
+    color: #F287DF;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.button-group:hover {
+    background-color: rgba(242, 135, 223, 0.1);
+}
+
+.button-group.selected {
+    background-color: #F287DF;
+}
+
+.button-group.selected i,
+.button-group.selected .button-label {
+    color: white;
+}
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        #search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border: 2px solid #F287DF;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+
+        .button-label {
+            font-size: 0.8em;
+            color: #666;
+            user-select: none;
+        }
+
+        .button-group i {
+            color: #F287DF;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .button-group:hover {
+            background-color: rgba(242, 135, 223, 0.1);
+        }
+
+        .button-group.selected {
+            background-color: #F287DF;
+        }
+
+        .button-group.selected i,
+        .button-group.selected .button-label {
+            color: white;
+        }
+
+        .search-box {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="search-container">
+        <button class="button-group" id="my-decks-group">
+            <span class="button-label">My Decks</span>
+            <i class="fa-regular fa-user"></i>
+        </button>
+        <input type="text" id="player_handle" class="search-box" placeholder="Search Player Handle">
+    </div>
+
+    <script>
+        // Simulate having a selected player handle in localStorage
+        localStorage.setItem('selectedPlayerHandle', '0xthemolt');
+
+        function handleMyDecksClick() {
+            const buttonGroup = document.querySelector('#my-decks-group');
+            const icon = buttonGroup.querySelector('i');
+            const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
+            const searchBox = document.getElementById('player_handle');
+            
+            if (searchBox.value === selectedPlayerHandle) {
+                icon.className = 'fa-regular fa-user';
+                buttonGroup.classList.remove('selected');
+                searchBox.value = '';
+            } else {
+                icon.className = 'fa-solid fa-user';
+                buttonGroup.classList.add('selected');
+                searchBox.value = selectedPlayerHandle;
+            }
+        }
+
+        // Initialize
+        document.getElementById('my-decks-group').addEventListener('click', handleMyDecksClick);
+    </script>
+</body>
+</html>

@@ -1228,7 +1228,7 @@
             }
 
             try {
-                const response = await fetch('{API_BASE_URL}/player_decks.json');
+                const response = await fetch(`${API_BASE_URL}/player_decks.json`);  // Fixed string interpolation
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
                 const decks = await response.json();

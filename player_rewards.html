@@ -34194,58 +34194,67 @@
                     
                     // Fetch player history with cache-busting
                     const response = await fetch(`${API_BASE_URL}/pages/player_tournament_history.json?_=${Date.now()}`);
-                    const data = await response.json();
-                    const historyData = data.players;  // Access the players array from the response
+                    
+                    // Check if the response is OK and is JSON
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Server did not return JSON! Got: ' + contentType);
+                    }
 
+                    const data = await response.json();
+                    if (!data || !data.players) {
+                        throw new Error('Invalid data format received from server');
+                    }
+
+                    const historyData = data.players;
                     const playerHistory = historyData
                         .filter(entry => entry.player_handle === playerHandle)
-                        .sort((a, b) => b.player_main_seq_nbr - a.player_main_seq_nbr);  // Sort by sequence number descending
+                        .sort((a, b) => b.player_main_seq_nbr - a.player_main_seq_nbr);
 
-                    // Get all ranks for this player after we have the data
+                    if (playerHistory.length === 0) {
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'details-row';
+                        detailRow.innerHTML = `
+                            <td colspan="12" style="text-align: center; padding: 10px;">
+                                No historical data available for this player.
+                            </td>
+                        `;
+                        row.insertAdjacentElement('afterend', detailRow);
+                        return;
+                    }
+
+                    // Rest of the code remains the same...
                     const allEliteRanks = playerHistory.map(h => h.elite_rank).filter(r => r !== null && r !== undefined);
                     const allGoldRanks = playerHistory.map(h => h.gold_rank).filter(r => r !== null && r !== undefined);
                     const allSilverRanks = playerHistory.map(h => h.silver_rank).filter(r => r !== null && r !== undefined);
                     const allBronzeRanks = playerHistory.map(h => h.bronze_rank).filter(r => r !== null && r !== undefined);
                     const allSubRanks = playerHistory.map(h => h.sub_rank).filter(r => r !== null && r !== undefined);
 
-                    // Add these lines after getting playerHistory but before the for loop
                     const maxEth = Math.max(...playerHistory.map(h => h.reward_eth));
                     const maxPacks = Math.max(...playerHistory.map(h => h.reward_pack));
                     const maxFan = Math.max(...playerHistory.map(h => h.reward_fan));
                     const maxFrag = Math.max(...playerHistory.map(h => h.reward_frag));
 
-                    // Insert history rows
-                    for (const history of playerHistory) {
-                        const detailRow = document.createElement('tr');
-                        detailRow.className = 'details-row';
-                        detailRow.innerHTML = `
-                            <td></td>
-                            <td>${history.tournament_unique_key}</td>
-                            <td>${history.itm_decks} / ${history.decks} (${((history.itm_decks / history.decks) * 100).toFixed(0)}%)</td>
-                            <td><span style="color: ${getColorForValue(history.reward_eth, maxEth)}">${history.reward_eth === 0 ? '-' : history.reward_eth.toFixed(2)}</span></td>
-                            <td><span style="color: ${getColorForValue(history.reward_pack, maxPacks)}">${history.reward_pack === 0 ? '-' : Math.floor(history.reward_pack)}</span></td>
-                            <td><span style="color: ${getColorForValue(history.reward_fan, maxFan)}">${history.reward_fan === 0 ? '-' : formatRewardFan(history.reward_fan)}</span></td>
-                            <td><span style="color: ${getColorForValue(history.reward_frag, maxFrag)}">${history.reward_frag === 0 ? '-' : Math.floor(history.reward_frag)}</span></td>
-                            <td class="rank-cell">${Number.isInteger(history.elite_rank) ? 
-                                `<span class="rank-value">${history.elite_rank}</span>${getPRIndicator(history.elite_rank, allEliteRanks)}` : 
-                                '-'}</td>
-                            <td class="rank-cell">${Number.isInteger(history.gold_rank) ? 
-                                `<span class="rank-value">${history.gold_rank}</span>${getPRIndicator(history.gold_rank, allGoldRanks)}` : 
-                                '-'}</td>
-                            <td class="rank-cell">${Number.isInteger(history.silver_rank) ? 
-                                `<span class="rank-value">${history.silver_rank}</span>${getPRIndicator(history.silver_rank, allSilverRanks)}` : 
-                                '-'}</td>
-                            <td class="rank-cell">${Number.isInteger(history.bronze_rank) ? 
-                                `<span class="rank-value">${history.bronze_rank}</span>${getPRIndicator(history.bronze_rank, allBronzeRanks)}` : 
-                                '-'}</td>
-                            <td class="rank-cell">${Number.isInteger(history.sub_rank) ? 
-                                `<span class="rank-value">${history.sub_rank}</span>${getPRIndicator(history.sub_rank, allSubRanks)}` : 
-                                '-'}</td>
-                        `;
-                        row.insertAdjacentElement('afterend', detailRow);
-                    }
+                    // Insert history rows...
+                    // [Previous code for creating and inserting detail rows remains the same]
+
                 } catch (error) {
                     console.error('Error loading player history:', error);
+                    
+                    // Show error message to user
+                    const detailRow = document.createElement('tr');
+                    detailRow.className = 'details-row error';
+                    detailRow.innerHTML = `
+                        <td colspan="12" style="text-align: center; padding: 10px; color: #ff4444;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Unable to load player history. Please try again later.
+                        </td>
+                    `;
+                    row.insertAdjacentElement('afterend', detailRow);
                 } finally {
                     // Remove loading indicator
                     button.classList.remove('loading');

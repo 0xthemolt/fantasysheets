@@ -34193,7 +34193,7 @@
                     button.classList.add('loading');
                     
                     // Fetch player history with cache-busting
-                    const response = await fetch(`${API_BASE_URL}/pages/player_tournament_history.json?_=${Date.now()}`);
+                    const response = await fetch(`${API_BASE_URL}/player_tournament_history.json?_=${Date.now()}`);
                     
                     // Check if the response is OK and is JSON
                     if (!response.ok) {

@@ -136,6 +136,10 @@ table tr:last-child td {
     cursor: pointer;
     
 }
+.pr-medal {
+    margin-left: 4px;
+    vertical-align: middle;
+}
 
 .icon-button:hover {
     animation: wiggle 0.5s ease;

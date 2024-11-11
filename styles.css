@@ -122,7 +122,12 @@ table tr:last-child td {
     text-align: center;
 } */
 
-
+.reward-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
 
 .icon-button {
     background: none;
@@ -312,6 +317,7 @@ table tr:last-child td {
 .itm-decks-column {
     padding-left: 30px; /* Adjust the value as needed */
 }
+
 
 .home-link {
     display: flex;  /* Makes the link a flex container */
@@ -547,6 +553,28 @@ table tr:last-child td {
 
 .chevron-icon {
     transition: transform 0.2s;
+}
+
+.pr-medal {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.rank-cell {
+    position: relative;
+    text-align: center;
+}
+
+.rank-value {
+    display: inline-block;
+    min-width: 20px; /* Adjust this value based on your needs */
+}
+
+.pr-medal {
+    position: absolute;
+    margin-left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .expand-button[aria-expanded="true"] .chevron-icon {

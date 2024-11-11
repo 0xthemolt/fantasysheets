@@ -34122,7 +34122,7 @@
         </div>
          <script>
         // Add API_BASE_URL as a global variable
-        const API_BASE_URL = 'http://localhost:8080';
+        const API_BASE_URL = '';
 
         
         // Add this function near the top of the script section, after API_BASE_URL declaration
@@ -34193,7 +34193,8 @@
                     button.classList.add('loading');
                     
                     // Fetch player history with cache-busting
-                    const response = await fetch(`${API_BASE_URL}/pages/player_tournament_history.json?_=${Date.now()}`);
+                    const jsonPath = API_BASE_URL ? '/pages/player_tournament_history.json' : '/player_tournament_history.json';
+                    const response = await fetch(`${API_BASE_URL}${jsonPath}?_=${Date.now()}`);
                     const data = await response.json();
                     const historyData = data.players;  // Access the players array from the response
 

@@ -559,9 +559,21 @@ table tr:last-child td {
     transition: transform 0.2s;
 }
 
+.medal-column {
+    text-align: center;
+    width: 40px;
+}
+
 .pr-medal {
+    display: inline-block;
     vertical-align: middle;
     margin-left: 4px;
+    font-size: 0.8em; /* Make the icon slightly smaller */
+}
+
+.rank-columns {
+    text-align: center; /* Center the content in the cell */
+    position: relative;
 }
 
 .rank-cell {

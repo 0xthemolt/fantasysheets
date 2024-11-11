@@ -504,6 +504,16 @@ table tr:last-child td {
     white-space: nowrap;
 }
 
+.expand-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #666;
+    transition: transform 0.3s ease;
+}
+
+
 .trend-container {
     position: relative;
     cursor: pointer;

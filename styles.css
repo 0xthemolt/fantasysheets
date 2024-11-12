@@ -520,21 +520,9 @@ table tr:last-child td {
     width: 40px;
 }
 
-
 .rank-cell {
     position: relative;
     text-align: center;
-}
-
-.rank-columns {
-    text-align: center;
-    white-space: nowrap;
-    position: relative;
-    min-width: 80px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .rank-value {
@@ -543,11 +531,12 @@ table tr:last-child td {
 }
 
 .pr-medal {
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 4px;
-    font-size: 0.8em; /* Make the icon slightly smaller */
+    position: absolute;
+    margin-left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
 }
+
 
 .pr-medal i {
     font-size: 14px;

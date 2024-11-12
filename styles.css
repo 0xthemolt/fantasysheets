@@ -471,63 +471,6 @@ table tr:last-child td {
     border-color: transparent #444 transparent transparent;
 }
 
-/*rewards itm grid*/
-.tables-grid-container {
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0;
-    box-sizing: border-box;
-    justify-content: flex-start;  /* Default left alignment for mobile */
-}
-
-@media (min-width: 768px) {  /* For desktop screens */
-    .tables-grid-container {
-        margin: 0 auto;  /* Center on desktop */
-        justify-content: center;
-    }
-}
-
-.tables-column {
-    flex: 1;
-    max-width: 50%;
-}
-
-.main-tables {
-    width: 100%;
-}
-
-.placeholder-tables {
-    width: 100%;
-}
-
-
-.table-wrapper {
-    width: 100%;
-    min-width: 0;
-    overflow-x: auto;
-    margin: 0;  /* Match container's margin */
-    justify-content: flex-start;  /* Default left alignment for mobile */
-}
-
-@media (min-width: 768px) {
-    .table-wrapper {
-        margin: 0 auto;  /* Center on desktop */
-        justify-content: center;
-    }
-}
-
-.table-wrapper table {
-    width: auto;  /* Changed from 100% to allow natural table width */
-    font-size: 0.8em;
-    table-layout: fixed;
-    white-space: nowrap;
-}
-
 .details-row {
     transition: all 0.3s ease;
     color: #666;  /* Set color for entire row */
@@ -582,11 +525,6 @@ table tr:last-child td {
     vertical-align: middle;
     margin-left: 4px;
     font-size: 0.8em; /* Make the icon slightly smaller */
-}
-
-.rank-columns {
-    text-align: center; /* Center the content in the cell */
-    position: relative;
 }
 
 .rank-cell {
@@ -737,12 +675,8 @@ table tr:last-child td {
 }
 
 .filters-content.expanded {
-    max-height: 400px;
-    padding: 12px;
-}
-
-.filter-group {
-    margin-bottom: 10px;
+    max-height: 200px;
+    padding: 8px;
 }
 
 .filter-group label {
@@ -778,3 +712,79 @@ table tr:last-child td {
 .checkbox-group input[type="checkbox"] {
     cursor: pointer;
 }
+
+
+/*start itm v2*/
+.leagues-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+    max-width: 100%;
+}
+
+.league-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.league-table {
+    width: auto;
+    table-layout: auto;
+}
+
+.caps-row {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.caps-label {
+    text-align: right;
+    padding: 4px;
+    color: #aaa;
+    font-size: 0.7em;
+}
+
+.caps-value {
+    padding: 4px;
+    color: #aaa;
+    font-size: 0.7em;
+}
+.data-row td {
+    padding: 4px;
+}
+
+.reward {
+    font-weight: 500;
+}
+
+.itm-score-columns {
+    width: auto;
+    min-width: fit-content;
+    max-width: none;
+}
+
+.itm-rate-columns {
+    width: auto;
+    min-width: fit-content;
+    max-width: none;
+}
+
+.itm-reward-columns {
+    width: auto;
+    min-width: fit-content;
+    max-width: none;
+}
+
+.reward.gold { color: #FCFC02; }
+.reward.eth { color: #5B7FF2; }
+.reward.pack { color: #F97DFD; }
+.reward.fragment { color: #6CDAAC; }
+
+@media (max-width: 1300px) {
+    .league-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+}
+/*end itm v2*/

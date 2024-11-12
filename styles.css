@@ -482,7 +482,8 @@ table tr:last-child td {
     max-width: 1200px;
     margin: 0;
     box-sizing: border-box;
-    justify-content: flex-start;  /* Default left alignment for mobile */
+    /* justify-content: flex-start;  Default left alignment for mobile */
+    justify-content: space-between;
 }
 
 @media (min-width: 768px) {  /* For desktop screens */
@@ -491,6 +492,20 @@ table tr:last-child td {
         justify-content: center;
     }
 }
+
+.tables-column {
+    flex: 1;
+    max-width: 50%;
+}
+
+.main-tables {
+    width: 100%;
+}
+
+.placeholder-tables {
+    width: 100%;
+}
+
 
 .table-wrapper {
     width: 100%;

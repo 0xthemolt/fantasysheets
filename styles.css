@@ -640,12 +640,46 @@ table tr:last-child td {
 }
 
 /*filters for itm*/
+.filters-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.8em;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-item input {
+    width: 60px;
+}
+
+.caps-display {
+    color: #888;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+    .filter-item {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+    
+    .caps-display {
+        flex-basis: 100%;
+    }
+}
 
 .filters-section {
     background: #2a2a2a;
     border-radius: 8px;
     margin: 10px auto;
-    max-width: 800px;
+    min-width: 50vw; /* Minimum width set to 40% of the viewport width */
+    max-width: 50vw; /* Maximum width set to 40% of the viewport width */
     overflow: hidden;
 }
 

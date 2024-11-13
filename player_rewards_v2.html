@@ -13931,6 +13931,7 @@
 
                     // Insert history rows
                     for (const history of playerHistory) {
+                        const combinedPacks = history.reward_pack + (history.reward_frag / 100);  // Calculate combinedPacks here
                         const detailRow = document.createElement('tr');
                         detailRow.className = 'details-row';
                         detailRow.innerHTML = `
@@ -14202,11 +14203,7 @@
                         for (const [filterName, filters] of Object.entries(activeFilters)) {
                             const attributeName = `data-${filterName.replace(/\s+/g, '-')}`;
                             const rowValue = row.getAttribute(attributeName);
-                            
-                            // Debug logging
-                            console.log(`Checking row ${playerHandle} for ${attributeName}:`, rowValue);
-                            console.log('Active filters:', filters);
-                            
+                                                        
                             if (rowValue) {
                                 showRow = showRow && filters.includes(rowValue);
                             }

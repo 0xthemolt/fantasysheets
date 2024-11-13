@@ -439,7 +439,7 @@ table tr:last-child td {
     font-family: Arial, sans-serif;
     display: none;
     position: absolute;
-    background-color: #141515;
+    background-color: rgb(20, 21, 21);
     color: #fff;
     padding: 8px 12px;
     border-radius: 4px;
@@ -448,15 +448,23 @@ table tr:last-child td {
     width: max-content;
     max-width: 200px;
     z-index: 1000;
-    left: 100%; /* Position to the right of the trigger */
-    top: 50%; /* Align with middle of trigger */
-    transform: translateY(-50%); /* Center vertically */
+    left: calc(100% + 5px); /* Position to the right with 5px gap */
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%); /* Ensure perfect vertical centering */
     margin-top: 5px;
     border: 1px solid #444;
+    backdrop-filter: none; /* Add this to prevent any transparency effects */
 }
 
 .tooltip-trigger.active .tooltip-content {
     display: block;
+}
+
+/* Desktop hover behavior */
+@media (min-width: 1024px) {
+    .tooltip-trigger:hover .tooltip-content {
+        display: block;
+    }
 }
 
 /* Optional: Add a small arrow */

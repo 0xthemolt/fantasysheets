@@ -1,6 +1,6 @@
 // Pagination state
 let currentPage = 1;
-const defaultItemsPerPage = 100;
+const defaultItemsPerPage = 50;
 let itemsPerPage = defaultItemsPerPage;
 
 // Wait for DOM to be fully loaded

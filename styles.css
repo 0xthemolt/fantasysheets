@@ -920,12 +920,13 @@ table tr:last-child td {
     display: flex;
     gap: 10px;
     align-items: center;
+    font-size: 0.8em; /* Changed from 14px to 0.8em for better scaling */
 }
 .page-link {
     padding: 8px 16px;
     border: 1px solid #444;
     background-color: #222;
-    color: #00d9fb;
+    color: #80bdff;
     cursor: pointer;
     border-radius: 4px;
 }
@@ -941,6 +942,7 @@ table tr:last-child td {
 }
 .items-per-page {
     color: #fff;
+    font-size: 0.8em; /* Changed from 14px to 0.8em for better scaling */
 }
 .items-per-page select {
     background-color: #222;
@@ -948,6 +950,19 @@ table tr:last-child td {
     border: 1px solid #444;
     padding: 5px;
     margin: 0 5px;
+}
+
+/* Add these new styles */
+.items-per-page select option {
+    background-color: #222;  /* Background color for options */
+    color: #fff;            /* Text color for options */
+}
+
+.items-per-page select option:hover,
+.items-per-page select option:focus,
+.items-per-page select option:checked {
+    background-color: #80bdff;  /* Background color when selected/hovered */
+    color: #fff;            /* Text color when selected/hovered */
 }
 
 .page-numbers {
@@ -968,17 +983,17 @@ table tr:last-child td {
     align-items: center;
     justify-content: center;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 0.8em; /* Changed from 14px to 0.8em for better scaling */
 }
 
 .page-link:hover:not(:disabled) {
     background-color: #2c2c2c;
-    border-color: #00d9fb;
+    border-color: #80bdff;
 }
 
 .page-link.active {
-    background-color: #00d9fb;
-    border-color: #00d9fb;
+    background-color: #80bdff;
+    border-color: #80bdff;
     color: #000;
 }
 

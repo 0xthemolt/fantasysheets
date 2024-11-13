@@ -13965,20 +13965,27 @@
                 const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
                 const searchBox = document.getElementById('player_handle');
                 
+                // Check if we have a valid selectedPlayerHandle
+                if (!selectedPlayerHandle) {
+                    // Redirect to settings page if no player handle is set
+                    window.location.href = 'settings.html';
+                    return;
+                }
+                
                 if (searchBox.value === selectedPlayerHandle) {
                     icon.className = 'fa-regular fa-user';
                     buttonGroup.classList.remove('selected');
                     searchBox.value = '';
                     searchBox.style.color = '';  // Reset to default color
                     searchBox.readOnly = false;  // Make editable again
-                    filterTable('');
+                    applyFilters();  // Use applyFilters instead of filterTable
                 } else {
                     icon.className = 'fa-solid fa-user';
                     buttonGroup.classList.add('selected');
                     searchBox.value = selectedPlayerHandle;
                     searchBox.style.color = '#F287DF';  // Set to pink color
                     searchBox.readOnly = true;  // Make read-only
-                    filterTable(selectedPlayerHandle);
+                    applyFilters();  // Use applyFilters instead of filterTable
                 }
             }
 
@@ -14123,7 +14130,7 @@
             });
 
         </script>
-        <script src="js/main.js" async defer></script>
+        <script src="js/tooltips.js" async defer></script>
         </body>
         </html>
         

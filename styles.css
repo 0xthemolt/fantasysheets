@@ -50,6 +50,10 @@ th {
     text-transform: uppercase;
 }
 
+th[data-sort] {
+    cursor: default;
+}
+
 td {
     background-color: #141515;
     font-size: 1em;
@@ -429,7 +433,7 @@ table tr:last-child td {
 
 .tooltip-trigger {
     margin-left: 5px;
-    cursor: pointer;
+    cursor: help;
     color: #666;
     position: relative;
     display: inline-block; /* Add this to ensure proper positioning */

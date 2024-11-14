@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePagination();
 });
 
+let isFiltered = false; // Track if the table is filtered
+
 function updatePagination() {
     const table = document.getElementById('playersTable');
     if (!table) {

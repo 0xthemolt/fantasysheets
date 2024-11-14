@@ -1,12 +1,17 @@
 function updateTimeAgo() {
     // Get the timestamp text and parse it more carefully
     const timestampText = document.querySelector('.small-text span').textContent;
+    console.log('Timestamp Text:', timestampText); // Log the raw timestamp text
     // Split the timestamp into components
     const [date, time] = timestampText.split(' ');
+    console.log('Date:', date, 'Time:', time); // Log the split date and time
     // Create a proper ISO timestamp
     const isoTimestamp = `${date}T${time}Z`; // Adding T between date/time and Z for UTC
+    console.log('ISO Timestamp:', isoTimestamp); // Log the ISO formatted timestamp
     const timestampUTC = new Date(isoTimestamp);
+    console.log('Timestamp UTC:', timestampUTC); // Log the UTC timestamp
     const now = new Date();
+    console.log('Current Time:', now); // Log the current time
     
     // Check if the date is valid before proceeding
     if (isNaN(timestampUTC.getTime())) {
@@ -16,6 +21,7 @@ function updateTimeAgo() {
     }
 
     const diffMinutes = Math.floor((now - timestampUTC) / (1000 * 60));
+    console.log('Difference in Minutes:', diffMinutes); // Log the difference in minutes
     
     let timeAgoText = '';
     if (diffMinutes < 60) {
@@ -26,11 +32,12 @@ function updateTimeAgo() {
         timeAgoText = `(${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''} ago)`;
     }
     
+    console.log('Time Ago Text:', timeAgoText); // Log the final time ago text
     document.getElementById('timeAgo').textContent = ' ' + timeAgoText;
 }
 
-// Start updating time ago when the document is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed'); // Add this line
     updateTimeAgo();
     setInterval(updateTimeAgo, 60000); // Update every minute
 });

@@ -14251,10 +14251,8 @@
         </div>
     
         <script>
-        // Global Variables
-        const API_BASE_URL = '';
+        const jsonPath = '/player_tournament_history.json';
 
-        
         // Add this function near the top of the script section, colors the rewards columns in details
         function getColorForValue(value, maxValue) {
             if (value === 0) return '';  // No color for zero values
@@ -14322,8 +14320,7 @@
                     button.classList.add('loading');
                     
                     // Fetch player history with cache-busting
-                    const jsonPath = API_BASE_URL ? '/pages/player_tournament_history.json' : '/player_tournament_history.json';
-                    const response = await fetch(`${API_BASE_URL}${jsonPath}?_=${Date.now()}`);
+                    const response = await fetch(`${jsonPath}?_=${Date.now()}`);
                     const data = await response.json();
                     const historyData = data.players;  // Access the players array from the response
 
@@ -14644,9 +14641,9 @@
             });
 
         </script>
-        <script src="../js/tooltips.js" async defer></script>
-        <script src="../js/pagination.js" async defer></script>
-        <script src="../js/timeUtils.js" async defer></script>
+        <script src="js/tooltips.js" async defer></script>
+        <script src="js/pagination.js" async defer></script>
+        <script src="js/timeUtils.js" async defer></script>
         </body>
         </html>
         

@@ -1,27 +1,29 @@
 function updateTimeAgo() {
+    const enableLogging = false; // Set this to true to enable logging
+
     // Get the timestamp text and parse it more carefully
     const timestampText = document.getElementById('timestamp').textContent;
-    console.log('Timestamp Text:', timestampText); // Log the raw timestamp text
+    if (enableLogging) console.log('Timestamp Text:', timestampText); // Log the raw timestamp text
     // Split the timestamp into components
     const [date, time] = timestampText.split(' ');
-    console.log('Date:', date, 'Time:', time); // Log the split date and time
+    if (enableLogging) console.log('Date:', date, 'Time:', time); // Log the split date and time
     // Create a proper ISO timestamp
     const isoTimestamp = `${date}T${time}Z`; // Adding T between date/time and Z for UTC
-    console.log('ISO Timestamp:', isoTimestamp); // Log the ISO formatted timestamp
+    if (enableLogging) console.log('ISO Timestamp:', isoTimestamp); // Log the ISO formatted timestamp
     const timestampUTC = new Date(isoTimestamp);
-    console.log('Timestamp UTC:', timestampUTC); // Log the UTC timestamp
+    if (enableLogging) console.log('Timestamp UTC:', timestampUTC); // Log the UTC timestamp
     const now = new Date();
-    console.log('Current Time:', now); // Log the current time
+    if (enableLogging) console.log('Current Time:', now); // Log the current time
     
     // Check if the date is valid before proceeding
     if (isNaN(timestampUTC.getTime())) {
-        console.error('Invalid timestamp:', timestampText);
+        if (enableLogging) console.error('Invalid timestamp:', timestampText);
         document.getElementById('timeAgo').textContent = '';
         return;
     }
 
     const diffMinutes = Math.floor((now - timestampUTC) / (1000 * 60));
-    console.log('Difference in Minutes:', diffMinutes); // Log the difference in minutes
+    if (enableLogging) console.log('Difference in Minutes:', diffMinutes); // Log the difference in minutes
     
     let timeAgoText = '';
     if (diffMinutes < 60) {
@@ -32,12 +34,12 @@ function updateTimeAgo() {
         timeAgoText = `(${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''} ago)`;
     }
     
-    console.log('Time Ago Text:', timeAgoText); // Log the final time ago text
+    if (enableLogging) console.log('Time Ago Text:', timeAgoText); // Log the final time ago text
     document.getElementById('timeAgo').textContent = ' ' + timeAgoText;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM fully loaded and parsed'); // Add this line
+    if (enableLogging) console.log('DOM fully loaded and parsed'); // Add this line
     updateTimeAgo();
     setInterval(updateTimeAgo, 60000); // Update every minute
 });

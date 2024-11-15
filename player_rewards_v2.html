@@ -70,7 +70,7 @@
     
         </div>
         <div class="small-text">
-            <span>2024-11-14 15:20 UTC</span>
+            <span id="timestamp">2024-11-14 15:20 UTC</span>
             <span id="timeAgo"></span>
             <span class="info-text"> | Click                         <svg class="chevron-icon" viewBox="0 0 448 512" width="12" height="12">
                             <path fill="#00d9fb" d="M224 416c-8.188 0-16.38-3.125-22.62-9.375l-192-192c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L224 338.8l169.4-169.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-192 192C240.4 412.9 232.2 416 224 416z"/>
@@ -15524,6 +15524,7 @@
                     const maxPacks = Math.max(...playerHistory.map(h => h.reward_pack));
                     const maxFrag = Math.max(...playerHistory.map(h => h.reward_frag));
                     const maxFan = Math.max(...playerHistory.map(h => h.reward_fan));
+                    const maxGold = Math.max(...playerHistory.map(h => h.reward_gold));
 
                     // Insert history rows
                     for (const history of playerHistory) {
@@ -15826,9 +15827,9 @@
             });
 
         </script>
-        <script src="js/tooltips.js" async defer></script>
-        <script src="js/pagination.js" async defer></script>
-        <script src="js/timeUtils.js" async defer></script>
+        <script src="/js/pagination.js" defer></script>
+        <script src="/js/timeUtils.js" defer></script>
+        <script src="/js/tooltips.js" defer></script>
         </body>
         </html>
         

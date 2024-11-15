@@ -1,4 +1,3 @@
-const enableLogging = false; // Set this to true to enable logging
 function updateTimeAgo() {
    
     // Get the timestamp text and parse it more carefully

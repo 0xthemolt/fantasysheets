@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Ago Example</title>
+    <script src="js/timeUtils.js"></script>
+</head>
+<body>
+    <div class="small-text">
+        <span id="timestamp">
+            <!-- Set the timestamp to 45 minutes ago -->
+            <script>
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - 45);
+                const formattedDate = now.getFullYear() + '-' +
+                                      ('0' + (now.getMonth() + 1)).slice(-2) + '-' +
+                                      ('0' + now.getDate()).slice(-2) + ' ' +
+                                      ('0' + now.getHours()).slice(-2) + ':' +
+                                      ('0' + now.getMinutes()).slice(-2) + ':' +
+                                      ('0' + now.getSeconds()).slice(-2);
+                document.getElementById('timestamp').textContent = formattedDate;
+            </script>
+        </span>
+        <span id="timeAgoLabel">Time ago: </span>
+        <span id="timeAgo"></span>
+    </div>
+</body>
+</html>

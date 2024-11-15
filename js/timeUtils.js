@@ -1,6 +1,6 @@
 function updateTimeAgo() {
     // Get the timestamp text and parse it more carefully
-    const timestampText = document.querySelector('.small-text span').textContent;
+    const timestampText = document.getElementById('timestamp').textContent;
     console.log('Timestamp Text:', timestampText); // Log the raw timestamp text
     // Split the timestamp into components
     const [date, time] = timestampText.split(' ');

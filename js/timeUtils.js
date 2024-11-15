@@ -1,6 +1,6 @@
+const enableLogging = false; // Set this to true to enable logging
 function updateTimeAgo() {
-    const enableLogging = false; // Set this to true to enable logging
-
+   
     // Get the timestamp text and parse it more carefully
     const timestampText = document.getElementById('timestamp').textContent;
     if (enableLogging) console.log('Timestamp Text:', timestampText); // Log the raw timestamp text

@@ -422,46 +422,12 @@ table tr:last-child td {
 }
 .black-text { color: #000;font-size: .9em; } /*fantasy score*/
 
-/* 
-.tooltip-trigger {
-    margin-left: 5px;
-    cursor: help;
-    color: #444;
-    position: relative;
-    display: inline-block; 
+.rank-columns {
+    /* Example styles */
+    text-align: center;
 }
 
-.tooltip-content {
-    display: none;
-    position: absolute;
-    background-color: #444;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    z-index: 9999;
-
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 100%;
-    margin-bottom: 5px;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        border-width: 5px;
-        border-style: solid;
-        border-color: #444 transparent transparent transparent;
-    }
-}
-
-.tooltip-trigger.active .tooltip-content {
-    display: block;
-}  */
-
+/*start tool tip*/
 
 .tooltip {
     position: relative;
@@ -483,9 +449,10 @@ table tr:last-child td {
     left: 50%;
     margin-left: -100px;
     opacity: 0;
-    transition: opacity 0.3s, visibility 0.3s;
+    transform: translateX(40%);
     font-size: .8em;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease;
   }
   
   .tooltip .top::after {
@@ -493,6 +460,7 @@ table tr:last-child td {
     position: absolute;
     bottom: 100%;
     left: 50%;
+    transform: translateX(-50%); 
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
@@ -502,8 +470,9 @@ table tr:last-child td {
   .tooltip:hover .top {
     visibility: visible;
     opacity: 1;
-  }
 
+}
+/*end tool tip*/
   
 .details-row {
     transition: all 0.3s ease;

@@ -427,7 +427,7 @@ table tr:last-child td {
     text-align: center;
 }
 
-/*start tool tip*/
+/*start tool tip 11.17 asked for improvements*/
 
 .tooltip {
     position: relative;
@@ -447,12 +447,13 @@ table tr:last-child td {
     z-index: 1;
     top: 125%;
     left: 50%;
-    margin-left: -100px;
+    transform: translateX(-50%);
     opacity: 0;
-    transform: translateX(40%);
-    font-size: .8em;
+    font-size: 0.7em;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 200px;
+    word-wrap: break-word;
   }
   
   .tooltip .top::after {
@@ -460,18 +461,25 @@ table tr:last-child td {
     position: absolute;
     bottom: 100%;
     left: 50%;
-    transform: translateX(-50%); 
-    margin-left: -5px;
+    transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: transparent transparent #333 transparent;
   }
   
-  .tooltip:hover .top {
+  .tooltip:hover .top,
+  .tooltip:focus .top {
     visibility: visible;
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 
-}
+  @media (max-width: 600px) {
+    .tooltip .top {
+        font-size: 0.6em;
+        padding: 8px;
+    }
+  }
 /*end tool tip*/
   
 .details-row {

@@ -34,7 +34,16 @@ function updateTimeAgo() {
     }
     
     if (enableLogging) console.log('Time Ago Text:', timeAgoText); // Log the final time ago text
-    document.getElementById('timeAgo').textContent = ' ' + timeAgoText;
+
+    const timeAgoElement = document.getElementById('timeAgo');
+    if (!timeAgoElement) {
+        if (enableLogging) console.error('Element with ID "timeAgo" not found');
+        return;
+    } else {
+        if (enableLogging) console.log('Element with ID "timeAgo" found');
+    }
+
+    timeAgoElement.textContent = ' ' + timeAgoText;
 }
 
 document.addEventListener('DOMContentLoaded', function() {

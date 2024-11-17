@@ -94,33 +94,33 @@
                 <th class="reward-columns rewards-section" data-sort="reward_fan"><img src="icons/fan.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="reward_gold"><img src="icons/blast.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="rank-columns ranks-section">
-                    <span class="tooltip-trigger" style="color: white;">
+                    <span class="tooltip" style="color: white;">
                         <img src="icons/elite.webp" class="league-icon" alt="Elite">
-                        <div class="tooltip-content" style="text-transform: none;">Best rank achieved</div>
+                        <span class="top">Best rank achieved</span>
                     </span>
                 </th>
                 <th class="rank-columns ranks-section">
-                    <span class="tooltip-trigger" style="color: white;">
+                    <span class="tooltip" style="color: white;">
                         <img src="icons/gold.webp" class="league-icon" alt="Gold">
-                        <div class="tooltip-content" style="text-transform: none;">Best rank achieved</div>
+                        <span class="top">Best rank achieved</span>
                     </span>
                 </th>
                 <th class="rank-columns ranks-section">
-                    <span class="tooltip-trigger" style="color: white;">
+                    <span class="tooltip" style="color: white;">
                         <img src="icons/silver.webp" class="league-icon" alt="Silver">
-                        <div class="tooltip-content" style="text-transform: none;">Best rank achieved</div>
+                        <span class="top">Best rank achieved</span>
                     </span>
                 </th>
                 <th class="rank-columns ranks-section">
-                    <span class="tooltip-trigger" style="color: white;">
+                    <span class="tooltip" style="color: white;">
                         <img src="icons/bronze.webp" class="league-icon" alt="Bronze">
-                        <div class="tooltip-content" style="text-transform: none;">Best rank achieved</div>
+                        <span class="top">Best rank achieved</span>
                     </span>
                 </th>
                 <th class="rank-columns ranks-section">
-                    <span class="tooltip-trigger" style="color: white;">
-                        <img src="icons/reverse.webp" class="league-icon" alt="Reverse"">
-                        <div class="tooltip-content" style="text-transform: none;">Best rank achieved</div>
+                    <span class="tooltip" style="color: white;">
+                        <img src="icons/reverse.webp" class="league-icon" alt="Reverse">
+                        <span class="top">Best rank achieved</span>
                     </span>
                 </th>
             </tr>
@@ -15831,6 +15831,12 @@
         <script src="/js/pagination.js" defer></script>
         <script src="/js/timeUtils.js" defer></script>
         <script src="/js/tooltips.js" defer></script>
+        <style>
+            /* Add this CSS rule to change the cursor style */
+            .rank-columns {
+                cursor: default;
+            }
+        </style>
         </body>
         </html>
         

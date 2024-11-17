@@ -241,7 +241,6 @@ table tr:last-child td {
     justify-content: flex-start;  /* Default for mobile */
     user-select: none; /* Prevents text selection while dragging */
     cursor: grab;
-    position: relative;  /* Add this */
 }
 
 @media (min-width: 768px) {  /* For desktop screens */
@@ -472,7 +471,7 @@ table tr:last-child td {
   
   .tooltip .top {
     visibility: hidden;
-    width: 200px;
+    width: auto;
     background-color: #333;
     color: #fff;
     text-align: center;
@@ -480,24 +479,24 @@ table tr:last-child td {
     padding: 10px;
     position: absolute;
     z-index: 1;
-    bottom: 125%;
+    top: 125%;
     left: 50%;
     margin-left: -100px;
     opacity: 0;
     transition: opacity 0.3s, visibility 0.3s;
-    font-size: 14px;
+    font-size: .8em;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   }
   
   .tooltip .top::after {
     content: "";
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: #333 transparent transparent transparent;
+    border-color: transparent transparent #333 transparent;
   }
   
   .tooltip:hover .top {
@@ -505,7 +504,7 @@ table tr:last-child td {
     opacity: 1;
   }
 
-
+  
 .details-row {
     transition: all 0.3s ease;
     color: #666;  /* Set color for entire row */

@@ -854,6 +854,25 @@ table tr:last-child td {
     color: #fff;
 }
 
+.fa-filter {
+    color: #00d9fb; /* default color */
+}
+
+.fa-filter.active {
+    color: #F287DF; /* selected color */
+}
+
+/* Add these new styles */
+.filter-button.has-selection {
+    color: white;
+    background-color: #80bdff;
+}
+
+.filter-dropdown:has(input:checked) .filter-button {
+    color: white;
+    background-color: #80bdff;
+}
+
 .filter-button:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: #80bdff;

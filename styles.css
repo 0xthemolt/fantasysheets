@@ -120,21 +120,6 @@ table tr:last-child td {
     margin-right: 5px;
 }
 
-.rank-icon {
-    margin-left: 14px;
-    transition: all 0.3s ease;
-    font-size: 4px; /*size of the star icon*/
-}
-
-.rank-icon:hover {
-    transform: scale(1.1);
-}
-
-.rank-icon:hover:before {
-    font-family: "Font Awesome 6 Free";
-    content: "\f884";
-    font-weight: 900;
-}
 /* #search-container {
     margin: 10px 0;
     text-align: center;
@@ -1029,3 +1014,4 @@ table tr:last-child td {
     background-color: transparent;
 }
 /*end pagination*/
+

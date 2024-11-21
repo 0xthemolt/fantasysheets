@@ -3,6 +3,12 @@ window.initializePagination = function({ tableId, itemsPerPageId, prevPageId, ne
     let currentPage = 1;
     const table = document.getElementById(tableId);
     const itemsPerPageSelect = document.getElementById(itemsPerPageId);
+    
+    // Set default value for items per page if not already selected
+    if (!itemsPerPageSelect.value) {
+        itemsPerPageSelect.value = '50'; // Change this number to your desired default
+    }
+    
     const prevPageButton = document.getElementById(prevPageId);
     const nextPageButton = document.getElementById(nextPageId);
     const pageNumbersDiv = document.getElementById(pageNumbersId);

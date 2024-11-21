@@ -41,33 +41,32 @@
             </button>
             <div style="position: relative; display: flex; align-items: center; flex-grow: 1;">
                 <input type="text" id="player_handle" class="search-box" placeholder="Search Player Handle">
-                <span class="clear-search"></span>
             </div>
             
-        <div class="filter-dropdown debug-dropdown">
-            <button class="filter-button debug-button">
+        <div class="filter-dropdown">
+            <button class="filter-button">
                 <i class="fas fa-filter"></i>
                 <span class="filter-label">Player Type</span>
             </button>
-            <div class="filter-content debug-content">
+            <div class="filter-content">
     
-                <label class="filter-option debug-option">
-                    <input type="checkbox" class="debug-checkbox" value="current-hero">
+                <label class="filter-option">
+                    <input type="checkbox" value="current-hero">
                     <span>Current Hero</span>
                 </label>
         
-                <label class="filter-option debug-option">
-                    <input type="checkbox" class="debug-checkbox" value="former-hero">
+                <label class="filter-option">
+                    <input type="checkbox" value="former-hero">
                     <span>Former Hero</span>
                 </label>
         
-                <label class="filter-option debug-option">
-                    <input type="checkbox" class="debug-checkbox" value="new-blast-city">
+                <label class="filter-option">
+                    <input type="checkbox" value="new-blast-city">
                     <span>New Blast City</span>
                 </label>
         
-                <label class="filter-option debug-option">
-                    <input type="checkbox" class="debug-checkbox" value="player">
+                <label class="filter-option">
+                    <input type="checkbox" value="player">
                     <span>Player</span>
                 </label>
         
@@ -99,31 +98,31 @@
                 <th class="reward-columns rewards-section" data-sort="combined_packs"><img src="icons/pack.webp" class="reward-icon">+<img src="icons/fragment.webp" class="reward-icon" style="padding-left: 2px;"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="reward_fan"><img src="icons/fan.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="reward_gold"><img src="icons/blast.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-                <th class="rank-columns ranks-section" style="min-width: 37px;">
+                <th class="rank-columns ranks-section">
                     <span class="tooltip" style="color: white; cursor: default;">
                         <img src="icons/elite.webp" class="league-icon" alt="Elite">
                         <span class="top">Best rank achieved</span>
                     </span>
                 </th>
-                <th class="rank-columns ranks-section" style="min-width: 37px;">
+                <th class="rank-columns ranks-section">
                     <span class="tooltip" style="color: white; cursor: default;">
                         <img src="icons/gold.webp" class="league-icon" alt="Gold">
                         <span class="top">Best rank achieved</span>
                     </span>
                 </th>
-                <th class="rank-columns ranks-section" style="min-width: 37px;">
+                <th class="rank-columns ranks-section">
                     <span class="tooltip" style="color: white; cursor: default;">
                         <img src="icons/silver.webp" class="league-icon" alt="Silver">
                         <span class="top">Best rank achieved</span>
                     </span>
                 </th>
-                <th class="rank-columns ranks-section" style="min-width: 37px;">
+                <th class="rank-columns ranks-section">
                     <span class="tooltip" style="color: white; cursor: default;">
                         <img src="icons/bronze.webp" class="league-icon" alt="Bronze">
                         <span class="top">Best rank achieved</span>
                     </span>
                 </th>
-                <th class="rank-columns ranks-section" style="min-width: 37px;">
+                <th class="rank-columns ranks-section">
                     <span class="tooltip" style="color: white; cursor: default;">
                         <img src="icons/reverse.webp" class="league-icon" alt="Reverse">
                         <span class="top">Best rank achieved</span>
@@ -25546,7 +25545,7 @@
         </div>
     
         <div style="text-align: center; margin: 10px 0; font-size: 8px;">
-            Total Records: <span id="recordCount">0 (only players with 2+ cards won, heroes or nbc wallets included)</span> 
+            Total Records: <span id="recordCount">0</span> 
         </div>
         <div class="pagination-controls">
             <div class="pagination">
@@ -25566,645 +25565,431 @@
         </div>
     
         <script>
-            const jsonPath = 'player_tournament_history.json';
+        const jsonPath = 'pages/player_tournament_history.json';
 
-            // Add this function near the top of the script section, colors the rewards columns in details
-            function getColorForValue(value, maxValue) {
-                if (value === 0) return '';  // No color for zero values
-                
-                // Create a normalized value between 0 and 1
-                const ratio = value / maxValue;
-                
-                // Define colors from RdYlGn colormap (red -> yellow -> green)
-                const colors = [
-                    [215, 48, 39],   // red
-                    [244, 109, 67],  // red-orange
-                    [253, 174, 97],  // light orange
-                    [254, 224, 139], // pale yellow
-                    [255, 255, 191], // yellow
-                    [217, 239, 139], // light yellow-green
-                    [166, 217, 106], // light green
-                    [102, 189, 99],  // green
-                    [26, 152, 80]    // dark green
-                ];
+        // Add this function near the top of the script section, colors the rewards columns in details
+        function getColorForValue(value, maxValue) {
+            if (value === 0) return '';  // No color for zero values
+            
+            // Create a normalized value between 0 and 1
+            const ratio = value / maxValue;
+            
+            // Define colors from RdYlGn colormap (red -> yellow -> green)
+            const colors = [
+                [215, 48, 39],   // red
+                [244, 109, 67],  // red-orange
+                [253, 174, 97],  // light orange
+                [254, 224, 139], // pale yellow
+                [255, 255, 191], // yellow
+                [217, 239, 139], // light yellow-green
+                [166, 217, 106], // light green
+                [102, 189, 99],  // green
+                [26, 152, 80]    // dark green
+            ];
 
-                // Find the position in the color array
-                const position = ratio * (colors.length - 1);
-                const index = Math.floor(position);
-                
-                // If we're exactly on a color, return it
-                if (index === position) {
-                    const [r, g, b] = colors[index];
-                    return `rgba(${r}, ${g}, ${b}, 0.7)`;
-                }
-                
-                // Otherwise interpolate between two colors
-                const [r1, g1, b1] = colors[index];
-                const [r2, g2, b2] = colors[index + 1];
-                const fraction = position - index;
-                
-                const r = Math.round(r1 + (r2 - r1) * fraction);
-                const g = Math.round(g1 + (g2 - g1) * fraction);
-                const b = Math.round(b1 + (b2 - b1) * fraction);
-                
+            // Find the position in the color array
+            const position = ratio * (colors.length - 1);
+            const index = Math.floor(position);
+            
+            // If we're exactly on a color, return it
+            if (index === position) {
+                const [r, g, b] = colors[index];
                 return `rgba(${r}, ${g}, ${b}, 0.7)`;
             }
+            
+            // Otherwise interpolate between two colors
+            const [r1, g1, b1] = colors[index];
+            const [r2, g2, b2] = colors[index + 1];
+            const fraction = position - index;
+            
+            const r = Math.round(r1 + (r2 - r1) * fraction);
+            const g = Math.round(g1 + (g2 - g1) * fraction);
+            const b = Math.round(b1 + (b2 - b1) * fraction);
+            
+            return `rgba(${r}, ${g}, ${b}, 0.7)`;
+        }
 
 
-            async function toggleDetails(button) {
-                const medalSvg = `<i class="fas fa-medal pr-medal" style="color: gold;"></i>`; 
-                const row = button.closest('tr');
-                const playerHandle = button.getAttribute('data-player');
-                const isExpanded = button.getAttribute('aria-expanded') === 'true';
-                
-                // Remove existing detail rows for this player
-                let next = row.nextElementSibling;
-                while (next && next.classList.contains('details-row')) {
-                    const toRemove = next;
-                    next = next.nextElementSibling;
-                    toRemove.remove();
+        async function toggleDetails(button) {
+            const medalSvg = `<i class="fas fa-medal pr-medal" style="color: gold;"></i>`; 
+            const row = button.closest('tr');
+            const playerHandle = button.getAttribute('data-player');
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            
+            // Remove existing detail rows for this player
+            let next = row.nextElementSibling;
+            while (next && next.classList.contains('details-row')) {
+                const toRemove = next;
+                next = next.nextElementSibling;
+                toRemove.remove();
+            }
+            
+            const getPRIndicator = (currentRank, allRanks) => {
+                return currentRank === Math.min(...allRanks.filter(r => r !== null && r !== undefined)) ? medalSvg : '';
+            };
+
+            if (!isExpanded) {
+                try {
+                    // Show loading indicator
+                    button.classList.add('loading');
+                    
+                    // Fetch player history with cache-busting
+                    const response = await fetch(`${jsonPath}?_=${Date.now()}`);
+                    const data = await response.json();
+                    const historyData = data.players;  // Access the players array from the response
+
+                    const playerHistory = historyData
+                        .filter(entry => entry.player_handle === playerHandle)
+                        .sort((a, b) => b.tournament_seq_nbr - a.tournament_seq_nbr);  // Sort by sequence number descending
+
+                    // Get all ranks for this player after we have the data
+                    const allEliteRanks = playerHistory.map(h => h.elite_rank).filter(r => r !== null && r !== undefined);
+                    const allGoldRanks = playerHistory.map(h => h.gold_rank).filter(r => r !== null && r !== undefined);
+                    const allSilverRanks = playerHistory.map(h => h.silver_rank).filter(r => r !== null && r !== undefined);
+                    const allBronzeRanks = playerHistory.map(h => h.bronze_rank).filter(r => r !== null && r !== undefined);
+                    const allSubRanks = playerHistory.map(h => h.sub_rank).filter(r => r !== null && r !== undefined);
+
+                    // Add these lines after getting playerHistory but before the for loop
+                    const maxEth = Math.max(...playerHistory.map(h => h.reward_eth));
+                    const maxPacks = Math.max(...playerHistory.map(h => h.reward_pack));
+                    const maxFrag = Math.max(...playerHistory.map(h => h.reward_frag));
+                    const maxFan = Math.max(...playerHistory.map(h => h.reward_fan));
+                    const maxGold = Math.max(...playerHistory.map(h => h.reward_gold));
+
+                    // Insert history rows
+                    for (const history of playerHistory) {
+                        const combinedPacks = history.reward_pack + (history.reward_frag / 100);  // Calculate combinedPacks here
+                        const detailRow = document.createElement('tr');
+                        detailRow.className = 'details-row';
+                        detailRow.innerHTML = `
+                            <td></td>
+                            <td>${history.tournament_unique_key}</td>
+                            <td>${history.decks > 0 ? `${history.itm_decks} / ${history.decks} (${((history.itm_decks / history.decks) * 100).toFixed(0)}%)` : '-'}</td>
+                            <td><span style="color: ${getColorForValue(history.reward_eth, maxEth)}">${history.reward_eth === 0 ? '-' : history.reward_eth.toFixed(3)}</span></td>
+                            <td><span style="color: ${getColorForValue(history.reward_pack, maxPacks)}">${history.reward_pack === 0 ? '-' : Math.floor(history.reward_pack)}</span></td>
+                            <td><span style="color: ${getColorForValue(history.reward_frag, maxFrag)}">${history.reward_frag === 0 ? '-' : Math.floor(history.reward_frag)}</span></td>
+                            <td><span style="color: ${getColorForValue(combinedPacks, maxPacks + maxFrag/100)}">${combinedPacks === 0 ? '-' : combinedPacks.toFixed(1)}</span></td>
+                            <td><span style="color: ${getColorForValue(history.reward_fan, maxFan)}">${history.reward_fan === 0 ? '-' : formatRewardFan(history.reward_fan)}</span></td>
+                            <td><span style="color: ${getColorForValue(history.reward_gold, maxGold)}">${history.reward_gold === 0 ? '-' : Math.floor(history.reward_gold)}</span></td>
+                            <td class="rank-cell">${Number.isInteger(history.elite_rank) ? 
+                                `<span class="rank-value">${history.elite_rank}</span>${getPRIndicator(history.elite_rank, allEliteRanks)}` : 
+                                '-'}</td>
+                            <td class="rank-cell">${Number.isInteger(history.gold_rank) ? 
+                                `<span class="rank-value">${history.gold_rank}</span>${getPRIndicator(history.gold_rank, allGoldRanks)}` : 
+                                '-'}</td>
+                            <td class="rank-cell">${Number.isInteger(history.silver_rank) ? 
+                                `<span class="rank-value">${history.silver_rank}</span>${getPRIndicator(history.silver_rank, allSilverRanks)}` : 
+                                '-'}</td>
+                            <td class="rank-cell">${Number.isInteger(history.bronze_rank) ? 
+                                `<span class="rank-value">${history.bronze_rank}</span>${getPRIndicator(history.bronze_rank, allBronzeRanks)}` : 
+                                '-'}</td>
+                            <td class="rank-cell">${Number.isInteger(history.sub_rank) ? 
+                                `<span class="rank-value">${history.sub_rank}</span>${getPRIndicator(history.sub_rank, allSubRanks)}` : 
+                                '-'}</td>
+                        `;
+                        row.insertAdjacentElement('afterend', detailRow);
+                    }
+                } catch (error) {
+                    console.error('Error loading player history:', error);
+                } finally {
+                    // Remove loading indicator
+                    button.classList.remove('loading');
                 }
+            }
+            
+            button.setAttribute('aria-expanded', !isExpanded);
+        }
+
+        // Add helper function for fan rewards formatting
+        function formatRewardFan(value) {
+            if (value >= 1_000_000) {
+                return `${(value / 1_000_000).toFixed(0)}M`;
+            } else if (value >= 1_000) {
+                return `${(value / 1_000).toFixed(0)}k`;
+            }
+            return value.toString();
+        }
+            
+        // Main search functionality improved 11.03.24 with generic request
+        function filterTable(searchText) {
+            const table = document.getElementById('playersTable');
+            const rows = table.getElementsByTagName('tr');
+            const searchValue = searchText.toLowerCase().trim(); // Added trim()
+            
+            // Start from 1 to skip the header row
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                // Skip detail rows if they exist
+                if (row.classList.contains('details-row')) continue;
                 
-                const getPRIndicator = (currentRank, allRanks) => {
-                    return currentRank === Math.min(...allRanks.filter(r => r !== null && r !== undefined)) ? medalSvg : '';
-                };
-
-                if (!isExpanded) {
-                    try {
-                        // Show loading indicator
-                        button.classList.add('loading');
-                        
-                        // Fetch player history with cache-busting
-                        const response = await fetch(`${jsonPath}?_=${Date.now()}`);
-                        const data = await response.json();
-                        const historyData = data.players;  // Access the players array from the response
-
-                        const playerHistory = historyData
-                            .filter(entry => entry.player_handle === playerHandle)
-                            .sort((a, b) => b.tournament_seq_nbr - a.tournament_seq_nbr);  // Sort by sequence number descending
-
-                        // Get all ranks for this player after we have the data
-                        const allEliteRanks = playerHistory.map(h => h.elite_rank).filter(r => r !== null && r !== undefined);
-                        const allGoldRanks = playerHistory.map(h => h.gold_rank).filter(r => r !== null && r !== undefined);
-                        const allSilverRanks = playerHistory.map(h => h.silver_rank).filter(r => r !== null && r !== undefined);
-                        const allBronzeRanks = playerHistory.map(h => h.bronze_rank).filter(r => r !== null && r !== undefined);
-                        const allSubRanks = playerHistory.map(h => h.sub_rank).filter(r => r !== null && r !== undefined);
-
-                        // Add these lines after getting playerHistory but before the for loop
-                        const maxEth = Math.max(...playerHistory.map(h => h.reward_eth));
-                        const maxPacks = Math.max(...playerHistory.map(h => h.reward_pack));
-                        const maxFrag = Math.max(...playerHistory.map(h => h.reward_frag));
-                        const maxFan = Math.max(...playerHistory.map(h => h.reward_fan));
-                        const maxGold = Math.max(...playerHistory.map(h => h.reward_gold));
-
-                        // Insert history rows
-                        for (const history of playerHistory) {
-                            const combinedPacks = history.reward_pack + (history.reward_frag / 100);  // Calculate combinedPacks here
-                            const detailRow = document.createElement('tr');
-                            detailRow.className = 'details-row';
-                            detailRow.innerHTML = `
-                                <td></td>
-                                <td>${history.tournament_unique_key}</td>
-                                <td>${history.decks > 0 ? `${history.itm_decks} / ${history.decks} (${((history.itm_decks / history.decks) * 100).toFixed(0)}%)` : '-'}</td>
-                                <td><span style="color: ${getColorForValue(history.reward_eth, maxEth)}">${history.reward_eth === 0 ? '-' : history.reward_eth.toFixed(3)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_pack, maxPacks)}">${history.reward_pack === 0 ? '-' : Math.floor(history.reward_pack)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_frag, maxFrag)}">${history.reward_frag === 0 ? '-' : Math.floor(history.reward_frag)}</span></td>
-                                <td><span style="color: ${getColorForValue(combinedPacks, maxPacks + maxFrag/100)}">${combinedPacks === 0 ? '-' : combinedPacks.toFixed(1)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_fan, maxFan)}">${history.reward_fan === 0 ? '-' : formatRewardFan(history.reward_fan)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_gold, maxGold)}">${history.reward_gold === 0 ? '-' : Math.floor(history.reward_gold)}</span></td>
-                                <td class="rank-cell">${Number.isInteger(history.elite_rank) ? 
-                                    `<span class="rank-value">${history.elite_rank}</span>${getPRIndicator(history.elite_rank, allEliteRanks)}` : 
-                                    '-'}</td>
-                                <td class="rank-cell">${Number.isInteger(history.gold_rank) ? 
-                                    `<span class="rank-value">${history.gold_rank}</span>${getPRIndicator(history.gold_rank, allGoldRanks)}` : 
-                                    '-'}</td>
-                                <td class="rank-cell">${Number.isInteger(history.silver_rank) ? 
-                                    `<span class="rank-value">${history.silver_rank}</span>${getPRIndicator(history.silver_rank, allSilverRanks)}` : 
-                                    '-'}</td>
-                                <td class="rank-cell">${Number.isInteger(history.bronze_rank) ? 
-                                    `<span class="rank-value">${history.bronze_rank}</span>${getPRIndicator(history.bronze_rank, allBronzeRanks)}` : 
-                                    '-'}</td>
-                                <td class="rank-cell">${Number.isInteger(history.sub_rank) ? 
-                                    `<span class="rank-value">${history.sub_rank}</span>${getPRIndicator(history.sub_rank, allSubRanks)}` : 
-                                    '-'}</td>
-                            `;
-                            row.insertAdjacentElement('afterend', detailRow);
-                        }
-                    } catch (error) {
-                        console.error('Error loading player history:', error);
-                    } finally {
-                        // Remove loading indicator
-                        button.classList.remove('loading');
+                const playerCell = row.querySelector('.player-link');
+                if (playerCell) {
+                    const playerHandle = playerCell.textContent.toLowerCase();
+                    const showRow = playerHandle.includes(searchValue);
+                    row.style.display = showRow ? '' : 'none';
+                    
+                    // Hide/show any associated detail rows
+                    let next = row.nextElementSibling;
+                    while (next && next.classList.contains('details-row')) {
+                        next.style.display = showRow ? '' : 'none';
+                        next = next.nextElementSibling;
                     }
                 }
+            }
+        }
+
+        // Sorting functionality improved 11.03.24 to handle pagination
+        function sortTable(column, ascending) {
+            var table = document.getElementById("playersTable");
+            var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
+            
+            // Filter out detail rows before sorting
+            rows = rows.filter(row => !row.classList.contains('details-row'));
+            
+            var headerCells = table.rows[0].cells;
+            var columnIndex = Array.from(headerCells).findIndex(cell => cell.getAttribute('data-sort') === column);
+            
+            if (columnIndex === -1) return;
+
+            // Sort all rows, not just visible ones
+            rows.sort((a, b) => {
+                let aCell = a.cells[columnIndex];
+                let bCell = b.cells[columnIndex];
                 
-                button.setAttribute('aria-expanded', !isExpanded);
+                let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
+                let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
+
+                return ascending ? aValue - bValue : bValue - aValue;
+            });
+
+            // Clear the table body except for header
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
             }
 
-            // Sorting functionality improved 11.03.24 to handle pagination
-            function sortTable(column, ascending) {
-                var table = document.getElementById("playersTable");
-                var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
-                
-                // Filter out detail rows before sorting
-                rows = rows.filter(row => !row.classList.contains('details-row'));
-                
-                var headerCells = table.rows[0].cells;
-                var columnIndex = Array.from(headerCells).findIndex(cell => cell.getAttribute('data-sort') === column);
-                
-                if (columnIndex === -1) return;
+            // Add all sorted rows back to the table
+            rows.forEach(row => table.appendChild(row));
 
-                // Sort all rows, not just visible ones
-                rows.sort((a, b) => {
-                    let aCell = a.cells[columnIndex];
-                    let bCell = b.cells[columnIndex];
-                    
-                    let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
-                    let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
+            // Reset to first page and update pagination
+            window.currentPage = 1;
+            updatePagination();
+            updateRanks();
+        }
 
-                    return ascending ? aValue - bValue : bValue - aValue;
-                });
-
-                // Clear the table body except for header
-                while (table.rows.length > 1) {
-                    table.deleteRow(1);
+        // Main update ranks function
+        function updateRanks() {
+            const rows = document.querySelectorAll('#playersTable tr');
+            let rank = 1;
+            
+            rows.forEach(row => {
+                if (row.classList.contains('details-row')) return;
+                if (row.style.display === 'none') return;
+                if (row.querySelector('th')) return; // Skip header row
+                
+                const rankCell = row.querySelector('td.rank');
+                if (rankCell) {
+                    rankCell.textContent = rank++;
                 }
+            });
+        }
 
-                // Add all sorted rows back to the table
-                rows.forEach(row => table.appendChild(row));
-
-                // Reset to first page and update pagination
-                window.currentPage = 1;
-                updatePagination();
+        // My Decks functionality
+        function handleMyDecksClick() {
+            const buttonGroup = document.querySelector('#my-decks-group');
+            const icon = buttonGroup.querySelector('i');
+            const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
+            const searchBox = document.getElementById('player_handle');
+            
+                // Clear all filter checkboxes and their button backgrounds
+       
+            if (searchBox.value === selectedPlayerHandle) {
+                icon.className = 'fa-regular fa-user';
+                buttonGroup.classList.remove('selected');
+                searchBox.value = '';
+                searchBox.style.color = '';  // Reset to default color
+                searchBox.readOnly = false;  // Make editable again
+                filterTable('');
+                window.currentPage = 1;  // Reset to first page
+            } else {
+                icon.className = 'fa-solid fa-user';
+                buttonGroup.classList.add('selected');
+                searchBox.value = selectedPlayerHandle;
+                searchBox.style.color = '#F287DF';  // Set to pink color
+                searchBox.readOnly = true;  // Make read-only
+                filterTable(selectedPlayerHandle);
                 updateRanks();
             }
+        }
 
+        // Remove the input event listener since we're handling everything through the button now
+        document.getElementById('player_handle').addEventListener('input', function(e) {
+            if (!this.readOnly) {  // Only filter if the box is editable
+                filterTable(e.target.value);
+            }
+        });
+
+        // DOM Ready Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
             
-            // Main update ranks function
-            function updateRanks() {
-                const rows = document.querySelectorAll('#playersTable tr');
-                let rank = 1;
-                
-                rows.forEach(row => {
-                    if (row.classList.contains('details-row')) return;
-                    if (row.style.display === 'none') return;
-                    if (row.querySelector('th')) return; // Skip header row
-                    
-                    const rankCell = row.querySelector('td.rank');
-                    if (rankCell) {
-                        rankCell.textContent = rank++;
-                    }
-                });
-            }
-
-            // Add helper function for fan rewards formatting
-            function formatRewardFan(value) {
-                if (value >= 1_000_000) {
-                    return `${(value / 1_000_000).toFixed(0)}M`;
-                } else if (value >= 1_000) {
-                    return `${(value / 1_000).toFixed(0)}k`;
-                }
-                return value.toString();
-            }
-                
-            // Main search functionality improved 11.03.24 with generic request
-            function filterTable(searchText) {
-                const table = document.getElementById('playersTable');
-                const rows = table.getElementsByTagName('tr');
-                const searchValue = searchText.toLowerCase().trim(); // Added trim()
-                
-                // Start from 1 to skip the header row
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    // Skip detail rows if they exist
-                    if (row.classList.contains('details-row')) continue;
-                    
-                    const playerCell = row.querySelector('.player-link');
-                    if (playerCell) {
-                        const playerHandle = playerCell.textContent.toLowerCase();
-                        const showRow = playerHandle.includes(searchValue);
-                        row.style.display = showRow ? '' : 'none';
-                        
-                        // Hide/show any associated detail rows
-                        let next = row.nextElementSibling;
-                        while (next && next.classList.contains('details-row')) {
-                            next.style.display = showRow ? '' : 'none';
-                            next = next.nextElementSibling;
-                        }
-                    }
-                }
-            }
-
-            // My Decks functionality
-            function handleMyDecksClick() {
-                const buttonGroup = document.querySelector('#my-decks-group');
-                const icon = buttonGroup.querySelector('i');
-                const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
-                const searchBox = document.getElementById('player_handle');
-                const clearButton = document.querySelector('.clear-search');
-                const paginationControls = document.querySelector('.pagination-controls');
-                const itemsPerPageContainer = document.querySelector('.items-per-page');
-
-                // Clear all filter checkboxes and their button backgrounds
-                const filterDropdowns = document.querySelectorAll('.filter-dropdown');
-                filterDropdowns.forEach(dropdown => {
-                    const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = false;
-                    });
-                    const filterButton = dropdown.querySelector('.filter-button');
-                    filterButton.style.backgroundColor = '';
-                });
-                
-                if (searchBox.value === selectedPlayerHandle) {
-                    // Resetting My Decks
-                    icon.className = 'fa-regular fa-user';
-                    buttonGroup.classList.remove('selected');
-                    searchBox.value = '';
-                    searchBox.style.color = '';
-                    searchBox.readOnly = false;
-                    filterTable('');
-                    updateRanks();
-                    updateRecordCount();
-                    window.currentPage = 1;
-                    // Show pagination controls
-                    if (paginationControls) paginationControls.style.display = 'flex';
-                    if (itemsPerPageContainer) itemsPerPageContainer.style.display = 'block';
-                } else {
-                    // Enabling My Decks
-                    icon.className = 'fa-solid fa-user';
-                    buttonGroup.classList.add('selected');
-                    searchBox.value = selectedPlayerHandle;
-                    searchBox.style.color = '#F287DF';
-                    searchBox.readOnly = true;
-                    filterTable(selectedPlayerHandle);
-                    updateRanks();
-                    updateRecordCount();
-                    // Hide pagination controls
-                    if (paginationControls) paginationControls.style.display = 'none';
-                    if (itemsPerPageContainer) itemsPerPageContainer.style.display = 'none';
-                }
-            }
-
-            // Add this to ensure the script runs after DOM is loaded
-            document.addEventListener('DOMContentLoaded', function() {
-
-                // Setup filter options - consolidated event listeners
-                const filterOptions = document.querySelectorAll('.filter-option input[type="checkbox"]');
-                console.log('Found filter options:', filterOptions.length);
-                
-                if (filterOptions.length === 0) {
-                    console.warn('No filter options found - check class names and HTML structure');
-                } else {
-                    filterOptions.forEach(checkbox => {
-                        checkbox.addEventListener('change', function() {
-                            // Update filter button background
-                            const filterButton = this.closest('.filter-dropdown').querySelector('.filter-button');
-                            filterButton.style.backgroundColor = this.checked ? '#80bdff' : '';
-                            
-                            // Apply filters and update ranks
-                            applyFilters();
-                            updateRanks();
-                            updateRecordCount();
-                        });
-                    });
-                }
-                
-                // Set default values
-                window.currentPage = 1;
-                const itemsPerPage = parseInt(document.getElementById('itemsPerPage').value) || 50;
-
-                // Set initial data-filtered attribute for all rows
-                const table = document.getElementById('playersTable');
-                const allRows = Array.from(table.querySelectorAll('tr:not(:first-child)'));
-                allRows.forEach(row => {
-                    row.setAttribute('data-filtered', 'show');
-                });
-
-                // Initialize pagination display
-                updatePaginationDisplay(allRows, window.currentPage, itemsPerPage);
-
-                // Add event listener for items per page dropdown
-                document.getElementById('itemsPerPage').addEventListener('change', function() {
-                    const newItemsPerPage = parseInt(this.value);
-                    window.currentPage = 1; // Reset to first page when changing items per page
-                    updatePaginationDisplay(allRows, window.currentPage, newItemsPerPage);
-                });
-                
-                // Setup My Decks button
-                const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
-                const myDecksGroup = document.getElementById('my-decks-group');
-
-                if (selectedPlayerHandle) {
-                    myDecksGroup.innerHTML = `
-                        <span class="button-label">My Decks</span>
-                        <i class="fa-regular fa-user"></i>
-                    `;
-                    // Add click event listener to the button
-                    myDecksGroup.addEventListener('click', handleMyDecksClick);
-                } else {
-                    myDecksGroup.innerHTML = `
-                        <span class="button-label">Add Player</span>
-                        <a href="settings.html" style="text-decoration: none;">
-                            <i class="fa-regular fa-user"></i>
-                        </a>
-                    `;
-                }
-
-                // Setup search functionality with clear button
-                const searchBox = document.getElementById('player_handle');
-                const clearButton = document.querySelector('.clear-search');
-
-                searchBox.addEventListener('input', function(e) {
-                    // Only show clear button if not in My Decks mode
-                    const myDecksButton = document.getElementById('my-decks-group');
-                    const isMyDecksMode = myDecksButton.classList.contains('selected');
-                    
-                    if (!isMyDecksMode) {
-                        clearButton.style.display = e.target.value ? 'block' : 'none';
-                    }
-
-                    // Hide/show pagination based on search text
-                    const paginationControls = document.querySelector('.pagination-controls');
-                    const itemsPerPageContainer = document.querySelector('.items-per-page');
-                    if (paginationControls) paginationControls.style.display = e.target.value ? 'none' : 'flex';
-                    if (itemsPerPageContainer) itemsPerPageContainer.style.display = e.target.value ? 'none' : 'block';
-                    
-                    filterTable(e.target.value);
-                    updateRecordCount();
-                });
-
-                // Setup clear button functionality
-                clearButton.addEventListener('click', function() {
-                    const myDecksButton = document.getElementById('my-decks-group');
-                    const isMyDecksMode = myDecksButton.classList.contains('selected');
-                    
-                    // Only process clear if not in My Decks mode
-                    if (!isMyDecksMode) {
-                        searchBox.value = '';
-                        filterTable('');
-                        this.style.display = 'none';
-                        searchBox.focus();
-                    }
-                });
-
-                // Setup sorting
-                const headers = document.querySelectorAll('th[data-sort]');
-                headers.forEach(header => {
-                    header.addEventListener('click', function() {
-                        const column = this.getAttribute('data-sort');
-                        const currentArrow = this.querySelector('.sort-arrow.active');
-                        const isAscending = currentArrow ? currentArrow.classList.contains('up') : true;
-                        
-                        document.querySelectorAll('.sort-arrow').forEach(arrow => {
-                            arrow.classList.remove('active');
-                        });
-                        
-                        const newArrow = this.querySelector(isAscending ? '.sort-arrow.down' : '.sort-arrow.up');
-                        if (newArrow) {
-                            newArrow.classList.add('active');
-                        }
-                        
-                        sortTable(column, !isAscending);
-                    });
-                });
-
-                // Handle URL parameters
-                const urlParams = new URLSearchParams(window.location.search);
-                const playerParam = urlParams.get('player');
-                if (playerParam) {
-                    const searchBox = document.getElementById('player_handle');
-                    searchBox.value = playerParam;
-                    filterTable(playerParam);
-                }       
-                
-                // Initialize filters
-                initializeFilters();
-                updateRecordCount();
-            });
-
-            function initializeFilters() {
-                // Add click handlers to filter buttons
-                document.querySelectorAll('.filter-button').forEach(button => {
-                    button.addEventListener('click', function(event) {
-                        event.stopPropagation();
-                        const content = this.nextElementSibling;
-                        content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                    });
-                });
-
-                // Add change handlers to checkboxes
-                document.querySelectorAll('.filter-content input[type="checkbox"]').forEach(checkbox => {
+            // Setup filter options - consolidated event listeners
+            const filterOptions = document.querySelectorAll('.filter-option input[type="checkbox"]');
+            console.log('Found filter options:', filterOptions.length);
+            
+            if (filterOptions.length === 0) {
+                console.warn('No filter options found - check class names and HTML structure');
+            } else {
+                filterOptions.forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
-                        // Clear the search box
-                        const searchBox = document.getElementById('player_handle');
-                        if (searchBox) {
-                            searchBox.value = '';
-                            // Reset My Decks button if it's selected
-                            const myDecksButton = document.getElementById('my-decks-group');
-                            if (myDecksButton && myDecksButton.classList.contains('selected')) {
-                                const icon = myDecksButton.querySelector('i');
-                                icon.className = 'fa-regular fa-user';
-                                myDecksButton.classList.remove('selected');
-                                searchBox.style.color = '';
-                                searchBox.readOnly = false;
-                            }
-                        }
+                        // Update filter button background
+                        const filterButton = this.closest('.filter-dropdown').querySelector('.filter-button');
+                        filterButton.style.backgroundColor = this.checked ? '#80bdff' : '';
+                        
+                        // Apply filters and update ranks
                         applyFilters();
-                        updateRecordCount();
                         updateRanks();
+                        updateRecordCount();
                     });
                 });
             }
+            
+            // Setup My Decks button
+            const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
+            const myDecksGroup = document.getElementById('my-decks-group');
 
-            function applyFilters() {
-                const table = document.getElementById('playersTable');
-                if (!table) {
-                    console.error('Table not found!');
-                    return;
-                }
+            if (selectedPlayerHandle) {
+                myDecksGroup.innerHTML = `
+                    <span class="button-label">My Decks</span>
+                    <i class="fa-regular fa-user"></i>
+                `;
+                // Add click event listener to the button
+                myDecksGroup.addEventListener('click', handleMyDecksClick);
+            } else {
+                myDecksGroup.innerHTML = `
+                    <span class="button-label">Add Player</span>
+                    <a href="settings.html" style="text-decoration: none;">
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+                `;
+            }       
 
-                // Get all data rows (excluding header)
-                const allRows = Array.from(table.querySelectorAll('tr:not(:first-child)'));
-
-                // Get selected filters
-                const selectedPlayerTypes = Array.from(document.querySelectorAll('.filter-content input:checked'))
-                    .map(checkbox => checkbox.value);
-
-                // First, mark all rows with a custom attribute for filtering
-                allRows.forEach(row => {
-                    const playerType = row.getAttribute('data-player-type');
-                    const shouldShow = selectedPlayerTypes.length === 0 || selectedPlayerTypes.includes(playerType);
-                    row.setAttribute('data-filtered', shouldShow ? 'show' : 'hide');
-                });
-
-                // Count visible rows
-                const visibleRows = allRows.filter(row => row.getAttribute('data-filtered') === 'show');
-
-                // Show/hide rows based on filters
-                allRows.forEach(row => {
-                    row.style.display = row.getAttribute('data-filtered') === 'show' ? '' : 'none';
-                });
-
-                // Handle pagination elements
-                const paginationControls = document.querySelector('.pagination-controls');
-                const itemsPerPageContainer = document.querySelector('.items-per-page');
-
-                if (selectedPlayerTypes.length > 0) {
-                    // Hide pagination when filters are active
-                    if (paginationControls) paginationControls.style.display = 'none';
-                    if (itemsPerPageContainer) itemsPerPageContainer.style.display = 'none';
-                } else {
-                    // Show pagination when no filters are active
-                    if (paginationControls) paginationControls.style.display = 'flex';
-                    if (itemsPerPageContainer) itemsPerPageContainer.style.display = 'block';
-                    
-                    // Reinitialize pagination
-                    const itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
-                    const currentPage = 1; // Reset to first page
-                    updatePaginationDisplay(visibleRows, currentPage, itemsPerPage);
-                }
-
-            }
- 
-            function updateRecordCount() {
-                const table = document.getElementById('playersTable');
-                const searchBox = document.getElementById('player_handle');
-                const hasActiveSearch = searchBox && searchBox.value.trim().length > 0;
-                const hasActiveFilters = document.querySelectorAll('.filter-content input:checked').length > 0;
-                
-                const allRows = Array.from(table.querySelectorAll('tr:not(:first-child)'))
-                    .filter(row => {
-                        // Exclude detail rows
-                        if (row.classList.contains('details-row')) {
-                            return false;
-                        }
-                        
-                        // If there are active filters or search, check visibility
-                        if (hasActiveSearch || hasActiveFilters) {
-                            return row.getAttribute('data-filtered') !== 'hide' && 
-                                   row.style.display !== 'none';
-                        }
-                        
-                        // Otherwise, count all non-detail rows regardless of visibility
-                        return true;
-                    });
-                
-                const recordCountElement = document.getElementById('recordCount');
-                if (recordCountElement) {
-                    recordCountElement.textContent = allRows.length;
-                }
-            }
-
-
-            function updatePaginationDisplay(visibleRows, currentPage, itemsPerPage) {
-
-                // Calculate start and end indices for current page
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const endIndex = startIndex + itemsPerPage;
-
-                // Show only rows for current page
-                visibleRows.forEach((row, index) => {
-                    row.style.display = (index >= startIndex && index < endIndex) ? '' : 'none';
-                });
-
-                // Update pagination controls
-                updatePaginationControls(visibleRows.length, currentPage, itemsPerPage);
-            }
-
-            function updatePaginationControls(totalRows, currentPage, itemsPerPage) {
-                const totalPages = Math.ceil(totalRows / itemsPerPage);
-                const pageNumbers = document.getElementById('pageNumbers');
-                const prevButton = document.getElementById('prevPage');
-                const nextButton = document.getElementById('nextPage');
-                
-                // Clear existing page numbers
-                pageNumbers.innerHTML = '';
-                
-                // Determine range of page numbers to show
-                let startPage = Math.max(1, currentPage - 2);
-                let endPage = Math.min(totalPages, startPage + 4);
-                
-                // Adjust start if we're near the end
-                if (endPage - startPage < 4) {
-                    startPage = Math.max(1, endPage - 4);
-                }
-                
-                // Add first page if not in range
-                if (startPage > 1) {
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = '1';
-                    pageButton.className = 'page-number';
-                    pageButton.addEventListener('click', () => {
-                        window.currentPage = 1;
-                        updatePaginationDisplay(Array.from(document.querySelectorAll('tr:not(:first-child)')).filter(row => !row.classList.contains('details-row')), 1, itemsPerPage);
-                    });
-                    pageNumbers.appendChild(pageButton);
-                    
-                    if (startPage > 2) {
-                        const ellipsis = document.createElement('span');
-                        ellipsis.textContent = '...';
-                        ellipsis.className = 'ellipsis';
-                        pageNumbers.appendChild(ellipsis);
-                    }
-                }
-                
-                // Add page numbers
-                for (let i = startPage; i <= endPage; i++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = i;
-                    pageButton.className = 'page-number';
-                    if (i === currentPage) {
-                        pageButton.classList.add('active');
-                    }
-                    pageButton.addEventListener('click', () => {
-                        window.currentPage = i;
-                        updatePaginationDisplay(Array.from(document.querySelectorAll('tr:not(:first-child)')).filter(row => !row.classList.contains('details-row')), i, itemsPerPage);
-                    });
-                    pageNumbers.appendChild(pageButton);
-                }
-                
-                // Add last page if not in range
-                if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) {
-                        const ellipsis = document.createElement('span');
-                        ellipsis.textContent = '...';
-                        ellipsis.className = 'ellipsis';
-                        pageNumbers.appendChild(ellipsis);
-                    }
-                    
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = totalPages;
-                    pageButton.className = 'page-number';
-                    pageButton.addEventListener('click', () => {
-                        window.currentPage = totalPages;
-                        updatePaginationDisplay(Array.from(document.querySelectorAll('tr:not(:first-child)')).filter(row => !row.classList.contains('details-row')), totalPages, itemsPerPage);
-                    });
-                    pageNumbers.appendChild(pageButton);
-                }
-                
-                // Update prev/next buttons
-                prevButton.disabled = currentPage === 1;
-                nextButton.disabled = currentPage === totalPages;
-            }
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.filter-dropdown')) {
-                    document.querySelectorAll('.filter-content').forEach(content => {
-                        content.style.display = 'none';
-                    });
-                }
+            // Setup search functionality
+            document.getElementById('player_handle').addEventListener('input', function(e) {
+                filterTable(e.target.value);
             });
 
-            console.log('Script loaded');
+            // Setup sorting
+            const headers = document.querySelectorAll('th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.getAttribute('data-sort');
+                    const currentArrow = this.querySelector('.sort-arrow.active');
+                    const isAscending = currentArrow ? currentArrow.classList.contains('up') : true;
+                    
+                    document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                        arrow.classList.remove('active');
+                    });
+                    
+                    const newArrow = this.querySelector(isAscending ? '.sort-arrow.down' : '.sort-arrow.up');
+                    if (newArrow) {
+                        newArrow.classList.add('active');
+                    }
+                    
+                    sortTable(column, !isAscending);
+                });
+            });
 
+            // Handle URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const playerParam = urlParams.get('player');
+            if (playerParam) {
+                const searchBox = document.getElementById('player_handle');
+                searchBox.value = playerParam;
+                filterTable(playerParam);
+            }
+
+            // Add this line to initialize record count
+            updateRecordCount();
+        });
+
+        function applyFilters() {
+            const table = document.getElementById('playersTable');
+            const rows = table.getElementsByTagName('tr');
+            const searchText = document.getElementById('player_handle').value.toLowerCase();
+            
+            // Get all filter dropdowns
+            const filterGroups = document.querySelectorAll('.filter-dropdown');
+            const activeFilters = {};
+            
+            // Collect active filters from each dropdown
+            filterGroups.forEach(group => {
+                const filterName = group.querySelector('.filter-label').textContent.toLowerCase();  // Convert to lowercase
+                const checkedFilters = Array.from(group.querySelectorAll('input:checked'))
+                    .map(input => input.value);
+                if (checkedFilters.length > 0) {
+                    activeFilters[filterName] = checkedFilters;
+                }
+            });
+            
+            // Start from 1 to skip the header row
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.classList.contains('details-row')) continue;
+                
+                const playerCell = row.querySelector('.player-link');
+                if (!playerCell) continue;
+                
+                const playerHandle = playerCell.textContent.toLowerCase();
+                let showRow = playerHandle.includes(searchText);
+                
+                // Check each filter group
+                if (Object.keys(activeFilters).length > 0) {  // Only apply filters if there are active ones
+                    for (const [filterName, filters] of Object.entries(activeFilters)) {
+                        const attributeName = `data-${filterName.replace(/\s+/g, '-')}`;
+                        const rowValue = row.getAttribute(attributeName);
+                                                            
+                        if (rowValue) {
+                            showRow = showRow && filters.includes(rowValue);
+                        }
+                    }
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+                
+                // Hide any detail rows associated with hidden parent rows
+                let next = row.nextElementSibling;
+                while (next && next.classList.contains('details-row')) {
+                    next.style.display = showRow ? '' : 'none';
+                    next = next.nextElementSibling;
+                }
+            }
+        }
+
+        function updateRecordCount() {
+            const table = document.getElementById('playersTable');
+            const visibleRows = Array.from(table.querySelectorAll('tr:not(:first-child)'))
+                .filter(row => row.style.display !== 'none');
+            const recordCountElement = document.getElementById('recordCount');
+            if (recordCountElement) {
+                recordCountElement.textContent = visibleRows.length;
+            }
+            debugLog(`Record count updated: ${visibleRows.length}`);
+        }
+
+        // Also update the search box to use applyFilters
+        document.getElementById('player_handle').addEventListener('input', function(e) {
+            if (!this.readOnly) {  // Only filter if the box is editable
+                applyFilters();  // Replace filterTable with applyFilters 
+                updateRecordCount();
+                updateRanks();
+            }
+        });
 
         </script>
-        <script src="/js/pagination.js?v=1.0.0"></script>
-        <script src="/js/config.js?v=1.0.0"></script>
-        <script src="/js/timeUtils.js?v=1.0.0"></script>
-        <script src="/js/toolTip.js?v=1.0.0"></script>
+        <script src="/js/config.js" defer></script>
+        <script src="/js/pagination.js" defer></script>
+        <script src="/js/timeUtils.js" defer></script>
+        <script src="/js/toolTip.js" defer></script>
         </body>
         </html>
         

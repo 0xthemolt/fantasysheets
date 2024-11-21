@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hero Utilization Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .hero-image {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        #loading {
+            display: none;
+            margin: 20px;
+        }
+        .number-cell {
+            text-align: right;
+        }
+        .percentage-cell {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hero Utilization Data</h1>
+    <div id="loading">Loading...</div>
+    <div id="table-container"></div>
+
+    <script>
+        async function fetchData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                const response = await fetch('/stats/tournament/hero_utilization/main_26_hero_utilization.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                renderData(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('table-container').innerHTML = 'Error loading data';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+
+        function formatPercentage(num) {
+            return (num * 100).toFixed(2) + '%';
+        }
+
+        function renderData(data) {
+            const table = document.createElement('table');
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            const headers = [
+                'Rank', 
+                'Hero', 
+                'Fantasy Score', 
+                'Usage Count',
+                'Total Util',
+                'Elite Util',
+                'Gold Util',
+                'Silver Util',
+                'Bronze Util',
+                'Reverse Util',
+                'Supply Util',
+                'Card Supply'
+            ];
+            
+            headers.forEach(headerText => {
+                const header = document.createElement('th');
+                header.textContent = headerText;
+                headerRow.appendChild(header);
+            });
+            table.appendChild(headerRow);
+
+            // Sort data by fantasy score
+            data.sort((a, b) => b.hero_fantasy_score - a.hero_fantasy_score);
+
+            // Create data rows
+            data.forEach((hero, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="number-cell">${index + 1}</td>
+                    <td>
+                        <img src="${hero.hero_pfp_url}" class="hero-image" alt="${hero.hero_handle}">
+                        ${hero.hero_handle}
+                    </td>
+                    <td class="number-cell">${formatNumber(hero.hero_fantasy_score)}</td>
+                    <td class="number-cell">${formatNumber(hero.hero_usage_count)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.total_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.elite_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.gold_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.silver_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.bronze_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.reverse_utilization)}</td>
+                    <td class="percentage-cell">${formatPercentage(hero.card_supply_utilization)}</td>
+                    <td class="number-cell">${formatNumber(hero.card_supply)}</td>
+                `;
+                table.appendChild(row);
+            });
+
+            document.getElementById('table-container').innerHTML = '';
+            document.getElementById('table-container').appendChild(table);
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+</html>
+    

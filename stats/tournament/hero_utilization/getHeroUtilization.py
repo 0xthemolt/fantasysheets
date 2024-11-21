@@ -1,6 +1,8 @@
 import psycopg2
 import pandas as pd
 import json
+import os
+
 def get_db_connection():
     return psycopg2.connect(
         dbname="0xthemolt",
@@ -130,11 +132,21 @@ def get_hero_utilization_data(tournament_unique_key):
     return df_hero_utilization
 
 tournament_df = get_tournament_info()
+
+# Get the directory containing the script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+print(f"Script directory: {script_dir}")
+print(f"Current working directory: {os.getcwd()}")
+
 for _, tournament in tournament_df.iterrows():
     utilization_data = get_hero_utilization_data(tournament['tournament_unique_key'])
     
     # Format filename: lowercase and replace spaces with underscores
     filename = f"{tournament['tournament_unique_key'].lower().replace(' ', '_')}_hero_utilization.json"
     
+    # Create full path in script directory
+    filepath = os.path.join(script_dir, filename)
+    print(f"Creating file at: {filepath}")
+    
     # Convert DataFrame to JSON and save to file
-    utilization_data.to_json(filename, orient='records')
+    utilization_data.to_json(filepath, orient='records')

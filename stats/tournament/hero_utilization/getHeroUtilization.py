@@ -18,10 +18,10 @@ def get_tournament_info():
     # Query the database
     query = f"""select tournament_unique_key,max(tournament_status),min(tournament_seq_nbr) tournament_seq_nbr
         from flatten.get_tournaments gt 
-        where tournament_status in ('live','finished')
+        where start_timestamp >= '2024-07-01'
+        and tournament_status in ('live','finished')
         group by tournament_unique_key 
         order by 3 asc
-        limit 2
         """
 
     # Execute query and store results in DataFrame
@@ -152,7 +152,7 @@ for _, tournament in tournament_df.iterrows():
     
     # Create metadata section
     metadata = {
-        "timestamp": utilization_data['timestamp'].max(),
+        "timestamp": utilization_data['timestamp'].max().strftime("%Y-%m-%d %H:%M"),
         "total_decks": int(utilization_data['unique_decks'].iloc[0]),
         "total_cards": int(utilization_data['unique_decks'].iloc[0] * 5),
         "total_heroes": len(utilization_data['hero_handle'].unique()),

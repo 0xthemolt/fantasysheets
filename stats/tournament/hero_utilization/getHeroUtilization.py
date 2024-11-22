@@ -20,7 +20,6 @@ def get_tournament_info():
         from flatten.get_tournaments gt 
         group by tournament_unique_key 
         order by 3 asc
-                limit 2
         """
 
     # Execute query and store results in DataFrame

@@ -36,19 +36,42 @@
         .percentage-cell {
             text-align: right;
         }
+        select {
+            padding: 8px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <h1>Hero Utilization Data</h1>
+    <select id="tournamentSelect">
+        <!-- Will be populated dynamically -->
+    </select>
     <div id="loading">Loading...</div>
     <div id="table-container"></div>
 
     <script>
+        // Add tournament data to be accessed by JavaScript
+        const tournaments = [{"tournament_unique_key": "Main 27", "max": "not started", "tournament_seq_nbr": 1}, {"tournament_unique_key": "Main 26", "max": "finished", "tournament_seq_nbr": 2}, {"tournament_unique_key": "Main 25", "max": "finished", "tournament_seq_nbr": 3}, {"tournament_unique_key": "Main 24", "max": "finished", "tournament_seq_nbr": 4}, {"tournament_unique_key": "Main 23", "max": "finished", "tournament_seq_nbr": 5}, {"tournament_unique_key": "Main 22", "max": "finished", "tournament_seq_nbr": 6}, {"tournament_unique_key": "Main 21", "max": "finished", "tournament_seq_nbr": 7}, {"tournament_unique_key": "Main 20", "max": "finished", "tournament_seq_nbr": 8}, {"tournament_unique_key": "Main 19", "max": "finished", "tournament_seq_nbr": 9}, {"tournament_unique_key": "Main 18", "max": "finished", "tournament_seq_nbr": 10}, {"tournament_unique_key": "Main 17", "max": "finished", "tournament_seq_nbr": 11}, {"tournament_unique_key": "Main 16", "max": "finished", "tournament_seq_nbr": 12}, {"tournament_unique_key": "Main 15", "max": "finished", "tournament_seq_nbr": 13}, {"tournament_unique_key": "Main 14", "max": "finished", "tournament_seq_nbr": 14}, {"tournament_unique_key": "Main 13", "max": "finished", "tournament_seq_nbr": 15}, {"tournament_unique_key": "Main 12", "max": "finished", "tournament_seq_nbr": 16}, {"tournament_unique_key": "Main 11", "max": "finished", "tournament_seq_nbr": 17}, {"tournament_unique_key": "Main 10", "max": "finished", "tournament_seq_nbr": 18}, {"tournament_unique_key": "Main 9", "max": "finished", "tournament_seq_nbr": 19}, {"tournament_unique_key": "Main 8", "max": "finished", "tournament_seq_nbr": 20}, {"tournament_unique_key": "Main 7", "max": "finished", "tournament_seq_nbr": 21}, {"tournament_unique_key": "Main 6", "max": "finished", "tournament_seq_nbr": 22}, {"tournament_unique_key": "Main 5", "max": "finished", "tournament_seq_nbr": 23}, {"tournament_unique_key": "Main 4", "max": "finished", "tournament_seq_nbr": 24}, {"tournament_unique_key": "Main 3", "max": "finished", "tournament_seq_nbr": 25}, {"tournament_unique_key": "All Rarities | 22 days", "max": "finished", "tournament_seq_nbr": 26}, {"tournament_unique_key": "Common Only \u2733\ufe0f Capped 15 \ud83c\udf1f", "max": "finished", "tournament_seq_nbr": 27}, {"tournament_unique_key": "Rare Only \ud83d\udca0", "max": "finished", "tournament_seq_nbr": 28}, {"tournament_unique_key": "Common Only \u2733\ufe0f Capped 20 \ud83c\udf1f ", "max": "finished", "tournament_seq_nbr": 29}, {"tournament_unique_key": "Main 2", "max": "finished", "tournament_seq_nbr": 30}, {"tournament_unique_key": "Main 1", "max": "finished", "tournament_seq_nbr": 31}, {"tournament_unique_key": "Flash Tournament", "max": "finished", "tournament_seq_nbr": 32}];
+
+        function populateDropdown() {
+            const select = document.getElementById('tournamentSelect');
+            tournaments.forEach(tournament => {
+                const option = document.createElement('option');
+                option.value = tournament.tournament_unique_key;
+                option.textContent = tournament.tournament_unique_key;
+                select.appendChild(option);
+            });
+        }
+
         async function fetchData() {
             try {
                 document.getElementById('loading').style.display = 'block';
+                const tournamentKey = document.getElementById('tournamentSelect').value;
+                const formattedKey = tournamentKey.toLowerCase().replace(/\s+/g, '_');
                 
-                const response = await fetch('/stats/tournament/hero_utilization/main_26_hero_utilization.json');
+                const response = await fetch(`/stats/tournament/hero_utilization/${formattedKey}_hero_utilization.json`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -62,6 +85,15 @@
                 document.getElementById('loading').style.display = 'none';
             }
         }
+
+        // Add event listener for dropdown changes
+        document.getElementById('tournamentSelect').addEventListener('change', fetchData);
+
+        // Modified page load handler
+        document.addEventListener('DOMContentLoaded', () => {
+            populateDropdown();
+            fetchData();
+        });
 
         function formatNumber(num) {
             return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
@@ -127,9 +159,6 @@
             document.getElementById('table-container').innerHTML = '';
             document.getElementById('table-container').appendChild(table);
         }
-
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', fetchData);
     </script>
 </body>
 </html>

@@ -68,12 +68,55 @@
             </table>
         </div>
         <script type="module">
-            // Utility functions for formatting
-            function getColor(value, vmin, vmax) {
-                if (!value) return '#808080'; // Default gray for null/undefined
+            const COLORMAPS = {
+                Spectral: [
+                    [0.0, [0.62, 0.00, 0.26]],  // Dark red
+                    [0.25, [0.99, 0.55, 0.24]], // Orange
+                    [0.5, [1.00, 1.00, 0.75]],  // Light yellow
+                    [0.75, [0.67, 0.85, 0.91]], // Light blue
+                    [1.0, [0.37, 0.31, 0.64]]   // Dark blue
+                ],
+                RdYlGn: [
+                    [0.0, [0.65, 0.00, 0.15]],  // Dark red
+                    [0.25, [0.95, 0.50, 0.50]], // Light red
+                    [0.5, [1.00, 1.00, 0.75]],  // Light yellow
+                    [0.75, [0.50, 0.90, 0.50]], // Light green
+                    [1.0, [0.00, 0.40, 0.00]]   // Dark green
+                ]
+            };
+
+            function getColor(value, vmin, vmax, cmapName = 'Spectral') {
+                if (value === null || value === undefined) return '#808080';
+                
+                // Normalize the value between 0 and 1
                 const norm = (value - vmin) / (vmax - vmin);
-                const hue = norm * 240; // Blue (240) to Red (0)
-                return `hsl(${hue}, 70%, 50%)`;
+                
+                // Get the colormap
+                const cmap = COLORMAPS[cmapName] || COLORMAPS.Spectral;
+                
+                // Find the color stops we're between
+                let lower = cmap[0];
+                let upper = cmap[cmap.length - 1];
+                
+                for (let i = 0; i < cmap.length - 1; i++) {
+                    if (norm >= cmap[i][0] && norm <= cmap[i + 1][0]) {
+                        lower = cmap[i];
+                        upper = cmap[i + 1];
+                        break;
+                    }
+                }
+                
+                // Interpolate between the two colors
+                const range = upper[0] - lower[0];
+                const normalizedPos = range === 0 ? 0 : (norm - lower[0]) / range;
+                
+                const rgb = lower[1].map((start, i) => {
+                    const end = upper[1][i];
+                    const color = start + (end - start) * normalizedPos;
+                    return Math.round(color * 255);
+                });
+                
+                return `#${rgb.map(x => x.toString(16).padStart(2, '0')).join('')}`;
             }
 
             function formatUtilization(value, vmin, vmax) {
@@ -125,7 +168,7 @@
             }
 
             function renderTable(data) {
-                // Sort the data by hero_fantasy_score in descending order first
+                        // Sort the data by hero_fantasy_score in descending order first
                 data.heroes.sort((a, b) => (b.hero_fantasy_score || 0) - (a.hero_fantasy_score || 0));
 
                 const table = document.getElementById('heroesTable');
@@ -151,7 +194,9 @@
                             <img src="${hero.hero_pfp_url}" class="hero-image" alt="${hero.hero_handle}">
                             <span>${hero.hero_handle}</span>
                         </td>
-                        <td data-value="${hero.hero_fantasy_score || 0}">${Math.round(hero.hero_fantasy_score)}</td>
+                        <td data-value="${hero.hero_fantasy_score || 0}">
+                            <span style="color: ${getColor(hero.hero_fantasy_score, fanScoreRange.min, fanScoreRange.max, 'RdYlGn')}">${Math.round(hero.hero_fantasy_score)}</span>
+                        </td>
                         <td data-value="${hero.card_supply_utilization || 0}">
                             ${formatUtilizationWithCount(hero.card_supply_utilization, 
                                 utilizationRanges.card_supply.min, 

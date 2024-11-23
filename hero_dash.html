@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero Dashboard</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <h1>Hero Dashboard</h1>
+    <div class="view-controls">
+        <select id="viewSelector">
+            <option value="single">Single Table</option>
+            <option value="split">Split by Stars</option>
+        </select>
+    </div>
+    <div id="tableContainer"></div>
+
+    <script>
+        // Add this color mapping function at the top of your script
+        function getStarColor(number) {
+            const colorMap = {
+                1: '#E1D0BC', 2: '#FFFFCC', 3: '#FFFF99',
+                4: '#FFFF66', 5: '#FFFF33', 6: '#FFFF00',
+                7: '#FFC300', 8: '#ADB7F6'
+            };
+            return colorMap[number] || 'grey';
+        }
+
+        // Add this new color mapping function for the numeric columns
+        function getHeatmapColor(value, min, max) {
+            // Plasma-like colors from low to high
+            const colors = [
+                '#0C0786', '#40039C', '#6A00A7', '#8F0DA3', '#B02A8F',
+                '#CA4678', '#E16462', '#F1834B', '#FCA636', '#FCCE25'
+            ];
+            
+            if (value === null || isNaN(value)) return '#ffffff';
+            const normalizedValue = (value - min) / (max - min);
+            const colorIndex = Math.min(Math.floor(normalizedValue * colors.length), colors.length - 1);
+            return colors[colorIndex];
+        }
+
+        function sortHeroData(data) {
+            return data.sort((a, b) => {
+                // Sort by stars descending
+                if (b.stars !== a.stars) {
+                    return b.stars - a.stars;
+                }
+                // Then by last 7d score
+                return b['last 7d'] - a['last 7d'];
+            });
+        }
+
+        // Add filter controls above the table
+        function createRarityFilter() {
+            const filterDiv = document.createElement('div');
+            filterDiv.className = 'rarity-filter';
+            filterDiv.style.marginBottom = '15px';
+            
+            const label = document.createElement('label');
+            label.textContent = 'Rarity: ';
+            label.style.marginRight = '10px';
+            
+            const select = document.createElement('select');
+            select.id = 'rarityFilter';
+            select.style.padding = '5px';
+            
+            const options = [
+                { value: 'all', text: 'All' },
+                { value: 'common', text: 'Common' },
+                { value: 'rare', text: 'Rare' }
+            ];
+            
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.text;
+                select.appendChild(option);
+            });
+            
+            select.addEventListener('change', () => {
+                const selectedRarity = select.value;
+                filterTableByRarity(selectedRarity);
+            });
+            
+            filterDiv.appendChild(label);
+            filterDiv.appendChild(select);
+            return filterDiv;
+        }
+
+        function filterTableByRarity(rarity) {
+            const rows = document.querySelectorAll('table tr');
+            rows.forEach((row, index) => {
+                if (index === 0) return; // Skip header row
+                const heroData = row.getAttribute('data-rarity');
+                if (rarity === 'all' || heroData === rarity) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function createTable(data, headers) {
+            const table = document.createElement('table');
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                if (header !== 'rarity' && header !== 'hero_pfp_image_url') { // Skip rarity and image URL headers
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                }
+            });
+            table.appendChild(headerRow);
+            
+            // Create data rows
+            data.forEach(hero => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-rarity', hero.rarity); // Store rarity for filtering
+                
+                headers.forEach(header => {
+                    if (header !== 'rarity' && header !== 'hero_pfp_image_url') { // Skip rarity and image URL columns
+                        const td = document.createElement('td');
+                        if (header === 'hero_handle') {
+                            // Create a container div for image and text
+                            const containerDiv = document.createElement('div');
+                            containerDiv.style.display = 'flex';
+                            containerDiv.style.alignItems = 'center';
+                            containerDiv.style.gap = '10px'; // Space between image and text
+
+                            // Create and style the image
+                            const img = document.createElement('img');
+                            img.src = hero.hero_pfp_image_url;
+                            img.style.width = '24px';
+                            img.style.height = '24px';
+                            img.style.borderRadius = '50%';
+                            img.style.objectFit = 'cover';
+
+                            // Create span for hero handle text
+                            const span = document.createElement('span');
+                            span.textContent = hero[header];
+                            span.style.color = hero.rarity === 'common' ? '#4AF54E' : '#02E5E8';
+                            span.style.fontWeight = 'bold';
+
+                            // Combine elements
+                            containerDiv.appendChild(img);
+                            containerDiv.appendChild(span);
+                            td.appendChild(containerDiv);
+                        } else if (header === 'stars') {
+                            td.innerHTML = `
+                                <div style="
+                                    display: inline-block;
+                                    width: 24px;
+                                    height: 24px;
+                                    line-height: 24px;
+                                    border-radius: 50%;
+                                    background-color: ${getStarColor(hero[header])};
+                                    color: black;
+                                    text-align: center;
+                                    font-weight: bold;
+                                    margin-right: 5px;">
+                                    ${hero[header]}
+                                </div>`;
+                        } else if (header.includes('main_') || header.includes('last_7d') || 
+                                 header.includes('last_30d') || header === 'ceiling') {
+                            const value = parseFloat(hero[header]);
+                            // Get min/max for this column
+                            const values = data.map(h => parseFloat(h[header])).filter(v => !isNaN(v));
+                            const min = Math.min(...values);
+                            const max = Math.max(...values);
+                            
+                            td.textContent = value ? Math.round(value) : '';
+                            td.style.backgroundColor = getHeatmapColor(value, min, max);
+                            td.style.color = 'black';  // Change to black text
+                            td.style.textAlign = 'center';  // Center align numbers
+                            td.style.fontWeight = '500';  // Slightly bold for better readability
+                        } else {
+                            td.textContent = hero[header] || '';
+                        }
+                        row.appendChild(td);
+                    }
+                });
+                table.appendChild(row);
+            });
+            
+            return table;
+        }
+
+        function displaySplitTables(data, headers) {
+            const container = document.getElementById('tableContainer');
+            container.innerHTML = '';
+            
+            // Group heroes by star count
+            const groupedHeroes = {};
+            data.forEach(hero => {
+                if (!groupedHeroes[hero.stars]) {
+                    groupedHeroes[hero.stars] = [];
+                }
+                groupedHeroes[hero.stars].push(hero);
+            });
+            
+            // Create a table for each star level
+            Object.keys(groupedHeroes)
+                .sort((a, b) => b - a)
+                .forEach(starLevel => {
+                    const section = document.createElement('div');
+                    section.className = 'star-section';
+                    
+                    const heading = document.createElement('h2');
+                    heading.style.textAlign = 'left';  // Left align the heading
+                    heading.innerHTML = `<span style="
+                        display: inline-block;
+                        width: 32px;
+                        height: 32px;
+                        line-height: 32px;
+                        border-radius: 50%;
+                        background-color: ${getStarColor(parseInt(starLevel))};
+                        color: black;
+                        text-align: center;
+                        font-weight: bold;
+                        margin-right: 10px;">
+                        ${starLevel}
+                    </span> Star Heroes`;
+                    section.appendChild(heading);
+                    
+                    const tableData = sortHeroData(groupedHeroes[starLevel]);
+                    section.appendChild(createTable(tableData, headers));
+                    container.appendChild(section);
+                });
+        }
+
+        async function loadHeroData() {
+            try {
+                const response = await fetch('hero_dash.json');
+                const data = await response.json();
+                const headers = Object.keys(data[0]);
+                const sortedData = sortHeroData(data);
+
+                // Handle view changes
+                const viewSelector = document.getElementById('viewSelector');
+                const container = document.getElementById('tableContainer');
+
+                function updateView() {
+                    container.innerHTML = '';
+                    // Add rarity filter before the table
+                    container.appendChild(createRarityFilter());
+                    
+                    if (viewSelector.value === 'single') {
+                        container.appendChild(createTable(sortedData, headers));
+                    } else {
+                        displaySplitTables(data, headers);
+                    }
+                }
+
+                viewSelector.addEventListener('change', updateView);
+                updateView(); // Initial display
+                
+            } catch (error) {
+                console.error('Error loading hero data:', error);
+                document.getElementById('tableContainer').innerHTML = 'Error loading data';
+            }
+        }
+
+        // Load data when page loads
+        window.onload = loadHeroData;
+    </script>
+</body>
+</html>

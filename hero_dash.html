@@ -100,13 +100,200 @@
             });
         }
 
+        function createPriceRangeSlider(minPrice, maxPrice, bestBid, floorPrice, trend, rarity, fullData) {
+            // Calculate min/max floor_or_last_price per rarity
+            const rarityPriceRange = fullData.reduce((acc, hero) => {
+                if (hero.rarity === rarity && hero.floor_or_last_price != null) {
+                    acc.min = Math.min(acc.min, hero.floor_or_last_price);
+                    acc.max = Math.max(acc.max, hero.floor_or_last_price);
+                }
+                return acc;
+            }, { min: Infinity, max: -Infinity });
+
+            // Normalize the floor price for color calculation
+            const normalizedPrice = (floorPrice - rarityPriceRange.min) / (rarityPriceRange.max - rarityPriceRange.min);
+            
+            // Generate color from RdYlGn_r colormap (red = expensive, green = cheap)
+            const getColor = (value) => {
+                const colors = {
+                    0: '#1a9850',    // green (cheap)
+                    0.25: '#91cf60',
+                    0.5: '#ffffbf',
+                    0.75: '#fc8d59',
+                    1: '#d73027'     // red (expensive)
+                };
+                
+                // Find the two closest color points
+                const points = Object.keys(colors).map(Number).sort((a, b) => a - b);
+                let lower = points[0];
+                let upper = points[points.length - 1];
+                
+                for (let i = 0; i < points.length - 1; i++) {
+                    if (value >= points[i] && value <= points[i + 1]) {
+                        lower = points[i];
+                        upper = points[i + 1];
+                        break;
+                    }
+                }
+                
+                // Interpolate between the two colors
+                const lowerColor = colors[lower];
+                const upperColor = colors[upper];
+                const ratio = (value - lower) / (upper - lower);
+                
+                // Convert hex to RGB and interpolate
+                const lowerRGB = hexToRgb(lowerColor);
+                const upperRGB = hexToRgb(upperColor);
+                const resultRGB = {
+                    r: Math.round(lowerRGB.r + (upperRGB.r - lowerRGB.r) * ratio),
+                    g: Math.round(lowerRGB.g + (upperRGB.g - lowerRGB.g) * ratio),
+                    b: Math.round(lowerRGB.b + (upperRGB.b - lowerRGB.b) * ratio)
+                };
+                
+                return `rgb(${resultRGB.r}, ${resultRGB.g}, ${resultRGB.b})`;
+            };
+
+            // Helper function to convert hex to RGB
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            };
+
+            // Add safety check for null/undefined values
+            if (minPrice === null || maxPrice === null || 
+                minPrice === undefined || maxPrice === undefined) {
+                const container = document.createElement('div');
+                container.style.width = '120px';
+                container.textContent = 'No price data';
+                container.style.fontSize = '10px';
+                container.style.color = '#666';
+                return container;
+            }
+
+            const container = document.createElement('div');
+            container.style.width = '150px';  // Increased width by 25%
+            container.style.position = 'relative';
+            container.style.height = '4px';
+            container.style.margin = '4px 0';
+            
+            // Background track
+            const track = document.createElement('div');
+            track.style.position = 'absolute';
+            track.style.width = '100%';
+            track.style.height = '100%';
+            track.style.backgroundColor = getColor(normalizedPrice);
+            track.style.borderRadius = '2px';
+            
+            // Best bid dot
+            const bidDot = document.createElement('div');
+            bidDot.style.position = 'absolute';
+            bidDot.style.width = '8px';
+            bidDot.style.height = '8px';
+            bidDot.style.backgroundColor = '#007bff';
+            bidDot.style.borderRadius = '50%';
+            bidDot.style.top = '-2px';
+            bidDot.style.transform = 'translateX(-50%)';
+            
+            // Updated trend arrow
+            const trendArrow = document.createElement('div');
+            trendArrow.style.position = 'absolute';
+            trendArrow.style.width = '0';
+            trendArrow.style.height = '0';
+            trendArrow.style.border = '5px solid transparent'; // Slightly bigger arrow
+            trendArrow.style.transform = 'translateX(-50%)';
+
+            if (trend === 'up') {
+                trendArrow.style.borderBottom = '8px solid #22c55e'; // Bigger green arrow
+                trendArrow.style.top = '-4px'; // Positioned on the line
+            } else if (trend === 'down') {
+                trendArrow.style.borderTop = '8px solid #ef4444'; // Bigger red arrow
+                trendArrow.style.top = '0px'; // Positioned on the line
+            }
+
+            // Price labels with only 2 intermediate points
+            const priceContainer = document.createElement('div');
+            priceContainer.style.display = 'flex';
+            priceContainer.style.justifyContent = 'space-between';
+            priceContainer.style.fontSize = '10px';
+            priceContainer.style.color = '#666';
+            priceContainer.style.marginTop = '4px';
+            priceContainer.style.position = 'relative';
+            
+            const formatPrice = (price) => {
+                if (price >= 1) {
+                    return Number(price).toFixed(1);
+                } else {
+                    return Number(price).toFixed(3).slice(1);
+                }
+            };
+
+            // Calculate intermediate points (now only 2)
+            const priceRange = maxPrice - minPrice;
+            const intermediatePoints = [
+                minPrice,
+                minPrice + (priceRange * 0.33),  // First third
+                minPrice + (priceRange * 0.67),  // Second third
+                maxPrice
+            ];
+
+            // Create labels for all points
+            intermediatePoints.forEach((price, index) => {
+                const label = document.createElement('span');
+                label.textContent = formatPrice(price);
+                label.style.position = 'absolute';
+                label.style.left = `${index * 33.3}%`;
+                label.style.transform = 'translateX(-50%)';
+                priceContainer.appendChild(label);
+            });
+
+            // Calculate positions
+            const allPricesRange = fullData.reduce((acc, hero) => {
+                if (hero.min_price != null) {
+                    acc.min = Math.min(acc.min, hero.min_price);
+                }
+                if (hero.max_price != null) {
+                    acc.max = Math.max(acc.max, hero.max_price);
+                }
+                return acc;
+            }, { min: Infinity, max: -Infinity });
+            
+            const leftPos = ((minPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
+            const rightPos = ((maxPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
+            const bidPos = ((bestBid - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
+            const floorPos = ((floorPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
+            
+            bidDot.style.left = `${bidPos}%`;
+            trendArrow.style.left = `${floorPos}%`;
+            
+            container.appendChild(track);
+            container.appendChild(bidDot);
+            container.appendChild(trendArrow);
+            container.appendChild(priceContainer);
+            
+            return container;
+        }
+
         function createTable(data, headers) {
             const table = document.createElement('table');
+            
+            // Filter out the price-related columns
+            const columnsToSkip = [
+                'floor_price', 'l3_avg_price', 'min_price', 'max_price',
+                'floor_or_last_price', 'is_floor_above_max_trade',
+                'trend', 'best_bid', 'rare_floor_as_common'
+            ];
             
             // Create header row
             const headerRow = document.createElement('tr');
             headers.forEach(header => {
-                if (header !== 'rarity' && header !== 'hero_pfp_image_url') { // Skip rarity and image URL headers
+                // Skip both the original columns to skip and the price-related columns
+                if (!columnsToSkip.includes(header) && 
+                    header !== 'rarity' && 
+                    header !== 'hero_pfp_image_url') {
                     const th = document.createElement('th');
                     th.textContent = header;
                     headerRow.appendChild(th);
@@ -117,17 +304,26 @@
             // Create data rows
             data.forEach(hero => {
                 const row = document.createElement('tr');
-                row.setAttribute('data-rarity', hero.rarity); // Store rarity for filtering
+                row.setAttribute('data-rarity', hero.rarity);
                 
                 headers.forEach(header => {
-                    if (header !== 'rarity' && header !== 'hero_pfp_image_url') { // Skip rarity and image URL columns
+                    // Skip both the original columns to skip and the price-related columns
+                    if (!columnsToSkip.includes(header) && 
+                        header !== 'rarity' && 
+                        header !== 'hero_pfp_image_url') {
                         const td = document.createElement('td');
                         if (header === 'hero_handle') {
-                            // Create a container div for image and text
+                            // Create a container div for all elements
                             const containerDiv = document.createElement('div');
                             containerDiv.style.display = 'flex';
-                            containerDiv.style.alignItems = 'center';
-                            containerDiv.style.gap = '10px'; // Space between image and text
+                            containerDiv.style.flexDirection = 'column';
+                            containerDiv.style.gap = '4px';
+
+                            // Create the existing hero handle container
+                            const heroInfoDiv = document.createElement('div');
+                            heroInfoDiv.style.display = 'flex';
+                            heroInfoDiv.style.alignItems = 'center';
+                            heroInfoDiv.style.gap = '10px';
 
                             // Create and style the image
                             const img = document.createElement('img');
@@ -143,9 +339,22 @@
                             span.style.color = hero.rarity === 'common' ? '#4AF54E' : '#02E5E8';
                             span.style.fontWeight = 'bold';
 
-                            // Combine elements
-                            containerDiv.appendChild(img);
-                            containerDiv.appendChild(span);
+                            // Update the createPriceRangeSlider call to include floor price and trend
+                            const slider = createPriceRangeSlider(
+                                hero.min_price, 
+                                hero.max_price, 
+                                hero.best_bid,
+                                hero.floor_or_last_price,
+                                hero.trend,
+                                hero.rarity,
+                                data
+                            );
+
+                            // Combine all elements
+                            heroInfoDiv.appendChild(img);
+                            heroInfoDiv.appendChild(span);
+                            containerDiv.appendChild(heroInfoDiv);
+                            containerDiv.appendChild(slider);
                             td.appendChild(containerDiv);
                         } else if (header === 'stars') {
                             td.innerHTML = `
@@ -175,6 +384,20 @@
                             td.style.color = 'black';  // Change to black text
                             td.style.textAlign = 'center';  // Center align numbers
                             td.style.fontWeight = '500';  // Slightly bold for better readability
+                        } else if (header === 'post_counts') {
+                            // Create a container for both visualizations
+                            const visualContainer = document.createElement('div');
+                            visualContainer.style.display = 'flex';
+                            visualContainer.style.gap = '10px';
+                            visualContainer.style.alignItems = 'center';
+                            
+                            // Add mini bar chart
+                            visualContainer.appendChild(createMiniBarChart(hero[header]));
+                            
+                            // Add circle visualization
+                            visualContainer.appendChild(createCircleVisualization(hero[header], data));
+                            
+                            td.appendChild(visualContainer);
                         } else {
                             td.textContent = hero[header] || '';
                         }
@@ -185,6 +408,97 @@
             });
             
             return table;
+        }
+
+        function createMiniBarChart(postCounts) {
+            // Split the post counts and convert to numbers
+            const counts = postCounts.split('|').map(n => parseInt(n.trim()));
+            const maxCount = Math.max(...counts);
+            
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.alignItems = 'flex-end';
+            container.style.gap = '2px';
+            container.style.height = '30px';
+            container.style.padding = '2px';
+            
+            counts.forEach(count => {
+                const bar = document.createElement('div');
+                const height = (count / maxCount) * 100;
+                bar.style.width = '4px';
+                bar.style.height = `${height}%`;
+                bar.style.backgroundColor = '#4a5568';
+                bar.style.borderRadius = '1px';
+                container.appendChild(bar);
+            });
+            
+            return container;
+        }
+
+        function createCircleVisualization(postCounts, fullData) {
+            // Get all unique post count values across all heroes
+            const allCounts = fullData.flatMap(hero => 
+                hero.post_counts.split('|').map(n => parseInt(n.trim()))
+            );
+            const minCount = Math.min(...allCounts);
+            const maxCount = Math.max(...allCounts);
+            
+            // Spectral colormap colors (from matplotlib)
+            const spectralColors = [
+                '#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b',
+                '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
+            ];
+            
+            // Helper function to get color based on normalized value
+            const getSpectralColor = (value) => {
+                const normalizedValue = (value - minCount) / (maxCount - minCount);
+                const colorIndex = Math.min(Math.floor(normalizedValue * spectralColors.length), spectralColors.length - 1);
+                return spectralColors[colorIndex];
+            };
+            
+            const counts = postCounts.split('|').map(n => parseInt(n.trim()));
+            const localMaxCount = Math.max(...counts);
+            
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.gap = '10px';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            
+            counts.forEach(count => {
+                const circleContainer = document.createElement('div');
+                circleContainer.style.position = 'relative';
+                circleContainer.style.width = '30px';
+                circleContainer.style.height = '30px';
+                circleContainer.style.display = 'flex';
+                circleContainer.style.alignItems = 'center';
+                circleContainer.style.justifyContent = 'center';
+                
+                const circle = document.createElement('div');
+                circle.style.position = 'absolute';
+                circle.style.borderRadius = '50%';
+                circle.style.backgroundColor = getSpectralColor(count);
+                circle.style.opacity = '0.8';  // Slightly reduced opacity for better text visibility
+                
+                // Size based on count relative to local max
+                const size = Math.max(15, Math.min(30, 15 + (count / localMaxCount * 15)));
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                
+                const label = document.createElement('span');
+                label.textContent = count;
+                label.style.color = 'white';
+                label.style.fontSize = '9px';
+                label.style.fontWeight = 'bold';
+                label.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
+                label.style.zIndex = '1';
+                
+                circleContainer.appendChild(circle);
+                circleContainer.appendChild(label);
+                container.appendChild(circleContainer);
+            });
+            
+            return container;
         }
 
         function displaySplitTables(data, headers) {

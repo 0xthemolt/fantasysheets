@@ -138,17 +138,34 @@
                     const formattedKey = tournamentKey.toLowerCase().replace(/\s+/g, '_');
                     const response = await fetch(`/stats/tournament/hero_utilization/${formattedKey}_hero_utilization.json`);
                     if (!response.ok) throw new Error('Network response was not ok');
-                    const heroesData = await response.json();
+                    const data = await response.json();
                     
-                    // Validate that we received an array
-                    if (!Array.isArray(heroesData)) {
-                        throw new Error('Expected array of heroes data');
+                    // Validate the data structure
+                    if (!data.heroes || !Array.isArray(data.heroes)) {
+                        throw new Error('Invalid heroes data format');
+                    }
+
+                    // Update metadata if present
+                    if (data.metadata) {
+                        const { timestamp, total_decks, total_cards, total_heroes, tournament_status } = data.metadata;
+                        document.getElementById('timestamp').textContent = timestamp + ' UTC';
+                        document.querySelector('.info-text').innerHTML = 
+                            `| Heroes: ${total_heroes} | Decks: ${total_decks.toLocaleString()} | Cards: ${total_cards.toLocaleString()} |`;
+                        
+                        // Update tournament status if needed
+                        if (tournament_status === 'finished') {
+                            const statusElement = document.getElementById('timeAgo');
+                            if (statusElement) {
+                                statusElement.textContent = '(Tournament End)';
+                            }
+                        }
                     }
                     
-                    renderTable({ heroes: heroesData });
+                    renderTable({ heroes: data.heroes });
                 } catch (error) {
                     console.error('Error:', error);
-                    document.getElementById('heroesTable').innerHTML = `<tr><td colspan="10">Error loading data: ${error.message}</td></tr>`;
+                    document.getElementById('heroesTable').innerHTML = 
+                        `<tr><td colspan="10">Error loading data: ${error.message}</td></tr>`;
                 }
             }
 

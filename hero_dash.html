@@ -277,16 +277,133 @@
             return container;
         }
 
+        function parseViewCount(viewStr) {
+            const multiplier = viewStr.endsWith('M') ? 1000000 : (viewStr.endsWith('K') ? 1000 : 1);
+            return parseFloat(viewStr.replace(/[MK]/g, '')) * multiplier;
+        }
+
+        function formatViewCount(value) {
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(1).replace('.0', '') + 'M';
+            }
+            if (value >= 1000) {
+                return (value / 1000).toFixed(0) + 'K';
+            }
+            return value.toString();
+        }
+
+        function calculateTrend(values) {
+            // Use linear regression to determine overall trend
+            const n = values.length;
+            const x = Array.from({length: n}, (_, i) => i);
+            const y = values;
+            
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
+            const sumXX = x.reduce((a, b) => a + b * b, 0);
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            return slope;
+        }
+
+        function createSparkline(viewsData) {
+            const container = document.createElement('div');
+            container.style.position = 'relative';
+            container.style.width = '150px';
+            container.style.height = '40px';
+            container.style.padding = '5px';
+            
+            // Parse view counts and reverse the array
+            const views = viewsData.split('|')
+                .map(v => parseViewCount(v.trim()))
+                .reverse();
+            const maxView = Math.max(...views);
+            const minView = Math.min(...views);
+            const trend = calculateTrend(views);
+            
+            // Create SVG
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.style.overflow = 'visible';
+            
+            // Calculate points
+            const width = 150;
+            const height = 30;
+            const points = views.map((view, i) => {
+                const x = (i / (views.length - 1)) * width;
+                const y = height - ((view - minView) / (maxView - minView)) * height;
+                return `${x},${y}`;
+            }).join(' ');
+            
+            // Create polyline
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            line.setAttribute('points', points);
+            line.setAttribute('fill', 'none');
+            line.setAttribute('stroke', trend > 0 ? '#22c55e' : '#ef4444');
+            line.setAttribute('stroke-width', '2');
+            
+            // Add value labels
+            views.forEach((view, i) => {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const x = (i / (views.length - 1)) * width;
+                const y = height - ((view - minView) / (maxView - minView)) * height;
+                text.setAttribute('x', x);
+                text.setAttribute('y', y - 8);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '8px');
+                text.setAttribute('fill', '#666');
+                text.textContent = formatViewCount(view);
+                svg.appendChild(text);
+            });
+            
+            svg.appendChild(line);
+            container.appendChild(svg);
+            
+            return container;
+        }
+
+        function normalizeAndColorPrice(price, minPrice, maxPrice) {
+            // RdYlGn_r colormap colors from matplotlib
+            const colors = [
+                '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf',
+                '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850'
+            ].reverse();  // Reverse to make red for high values
+            
+            const normalizedValue = (price - minPrice) / (maxPrice - minPrice);
+            const colorIndex = Math.min(Math.floor(normalizedValue * colors.length), colors.length - 1);
+            return colors[colorIndex];
+        }
+
+        function formatPrice(price) {
+            return price ? price.toFixed(3).replace(/^0+/, '') : '-';
+        }
+
+        function createPriceCell(price, minPrice, maxPrice) {
+            const container = document.createElement('div');
+            container.style.padding = '4px 8px';
+            container.style.backgroundColor = normalizeAndColorPrice(price, minPrice, maxPrice);
+            container.style.color = 'white';
+            container.style.fontWeight = 'bold';
+            container.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
+            container.style.borderRadius = '4px';
+            container.textContent = formatPrice(price);
+            return container;
+        }
+
         function createTable(data, headers) {
             const table = document.createElement('table');
             
-            // Filter out the price-related columns
+            // Filter out the columns we want to skip
             const columnsToSkip = [
-                'floor_price', 'l3_avg_price', 'min_price', 'max_price',
+                'min_price', 'max_price',
                 'floor_or_last_price', 'is_floor_above_max_trade',
-                'trend', 'best_bid', 'rare_floor_as_common'
+                'trend', 'rare_floor_as_common',
+                // Add the quantity columns to skip
+                'avail_card_qty', 'card_qty', 'own_card', 'deck_qty', 'com_qty'
             ];
-            
+    
             // Create header row
             const headerRow = document.createElement('tr');
             headers.forEach(header => {
@@ -295,7 +412,16 @@
                     header !== 'rarity' && 
                     header !== 'hero_pfp_image_url') {
                     const th = document.createElement('th');
-                    th.textContent = header;
+                    // Map column headers to shorter names
+                    if (header === 'floor_price') {
+                        th.textContent = 'floor';
+                    } else if (header === 'l3_avg_price') {
+                        th.textContent = 'l3';
+                    } else if (header === 'best_bid') {
+                        th.textContent = 'bid';
+                    } else {
+                        th.textContent = header;
+                    }
                     headerRow.appendChild(th);
                 }
             });
@@ -307,12 +433,25 @@
                 row.setAttribute('data-rarity', hero.rarity);
                 
                 headers.forEach(header => {
-                    // Skip both the original columns to skip and the price-related columns
                     if (!columnsToSkip.includes(header) && 
                         header !== 'rarity' && 
                         header !== 'hero_pfp_image_url') {
                         const td = document.createElement('td');
-                        if (header === 'hero_handle') {
+                        
+                        if (header === 'floor_price' || header === 'l3_avg_price' || header === 'best_bid') {
+                            // Get min/max prices for the hero's rarity
+                            const rarityPrices = data
+                                .filter(h => h.rarity === hero.rarity)
+                                .map(h => h[header])
+                                .filter(p => p !== null && p !== undefined && !isNaN(p));
+                            
+                            const minPrice = Math.min(...rarityPrices);
+                            const maxPrice = Math.max(...rarityPrices);
+                            
+                            // Create colored price cell
+                            const priceCell = createPriceCell(hero[header], minPrice, maxPrice);
+                            td.appendChild(priceCell);
+                        } else if (header === 'hero_handle') {
                             // Create a container div for all elements
                             const containerDiv = document.createElement('div');
                             containerDiv.style.display = 'flex';
@@ -395,9 +534,12 @@
                             visualContainer.appendChild(createMiniBarChart(hero[header]));
                             
                             // Add circle visualization
-                            visualContainer.appendChild(createCircleVisualization(hero[header], data));
+                            visualContainer.appendChild(createCircleVisualization(hero[header]));
                             
                             td.appendChild(visualContainer);
+                        } else if (header === 'views') {
+                            const sparkline = createSparkline(hero[header]);
+                            td.appendChild(sparkline);
                         } else {
                             td.textContent = hero[header] || '';
                         }
@@ -435,29 +577,9 @@
             return container;
         }
 
-        function createCircleVisualization(postCounts, fullData) {
-            // Get all unique post count values across all heroes
-            const allCounts = fullData.flatMap(hero => 
-                hero.post_counts.split('|').map(n => parseInt(n.trim()))
-            );
-            const minCount = Math.min(...allCounts);
-            const maxCount = Math.max(...allCounts);
-            
-            // Spectral colormap colors (from matplotlib)
-            const spectralColors = [
-                '#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b',
-                '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
-            ];
-            
-            // Helper function to get color based on normalized value
-            const getSpectralColor = (value) => {
-                const normalizedValue = (value - minCount) / (maxCount - minCount);
-                const colorIndex = Math.min(Math.floor(normalizedValue * spectralColors.length), spectralColors.length - 1);
-                return spectralColors[colorIndex];
-            };
-            
+        function createCircleVisualization(postCounts) {
             const counts = postCounts.split('|').map(n => parseInt(n.trim()));
-            const localMaxCount = Math.max(...counts);
+            const maxCount = Math.max(...counts);
             
             const container = document.createElement('div');
             container.style.display = 'flex';
@@ -468,8 +590,8 @@
             counts.forEach(count => {
                 const circleContainer = document.createElement('div');
                 circleContainer.style.position = 'relative';
-                circleContainer.style.width = '30px';
-                circleContainer.style.height = '30px';
+                circleContainer.style.width = '30px';  // Reduced from 40px
+                circleContainer.style.height = '30px';  // Reduced from 40px
                 circleContainer.style.display = 'flex';
                 circleContainer.style.alignItems = 'center';
                 circleContainer.style.justifyContent = 'center';
@@ -477,18 +599,17 @@
                 const circle = document.createElement('div');
                 circle.style.position = 'absolute';
                 circle.style.borderRadius = '50%';
-                circle.style.backgroundColor = getSpectralColor(count);
-                circle.style.opacity = '0.8';  // Slightly reduced opacity for better text visibility
+                circle.style.backgroundColor = 'rgba(99, 102, 241, 0.4)';
                 
-                // Size based on count relative to local max
-                const size = Math.max(15, Math.min(30, 15 + (count / localMaxCount * 15)));
+                // Size based on count relative to max (min 15px, max 30px)
+                const size = Math.max(15, Math.min(30, 15 + (count / maxCount * 15))); // Adjusted ranges
                 circle.style.width = `${size}px`;
                 circle.style.height = `${size}px`;
                 
                 const label = document.createElement('span');
                 label.textContent = count;
                 label.style.color = 'white';
-                label.style.fontSize = '9px';
+                label.style.fontSize = '9px';  // Reduced from 12px
                 label.style.fontWeight = 'bold';
                 label.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
                 label.style.zIndex = '1';

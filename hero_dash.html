@@ -28,7 +28,7 @@
 
         // Add this new color mapping function for the numeric columns
         function getHeatmapColor(value, min, max) {
-            if (value === null || isNaN(value)) return '#ffffff';
+            if (value === null || value === '' || isNaN(value)) return 'transparent';
 
             const plasmaColors = [
                 '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b',
@@ -108,6 +108,7 @@
             filterDiv.appendChild(select);
             return filterDiv;
         }
+        
 
         function filterTableByRarity(rarity) {
             const rows = document.querySelectorAll('table tr');
@@ -119,6 +120,27 @@
                 } else {
                     row.style.display = 'none';
                 }
+            });
+        }
+
+        function filterTablesByStars() {
+            const selectedButtons = document.querySelectorAll('.star-selector button[data-selected="true"]');
+            const selectedStars = Array.from(selectedButtons).map(btn => parseInt(btn.dataset.stars));
+            
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    
+                    const starCell = row.querySelector('td[data-stars]');
+                    if (starCell) {
+                        const stars = parseInt(starCell.dataset.stars);
+                        const shouldShow = (selectedStars.length === 0 || selectedStars.includes(stars));
+                        row.style.display = shouldShow ? '' : 'none';
+                    }
+                });
             });
         }
 
@@ -652,6 +674,7 @@
                             containerDiv.appendChild(slider);
                             td.appendChild(containerDiv);
                         } else if (header === 'stars') {
+                            td.setAttribute('data-stars', hero[header]);
                             td.innerHTML = `
                                 <div style="
                                     display: inline-block;
@@ -835,6 +858,206 @@
             addSortListeners();
         }
 
+        function createStarFilter() {
+            const filterDiv = document.createElement('div');
+            filterDiv.className = 'star-selector';
+            filterDiv.style.marginBottom = '15px';
+            filterDiv.style.display = 'flex';
+            filterDiv.style.gap = '8px';
+            
+            const label = document.createElement('label');
+            label.textContent = 'Stars: ';
+            label.style.marginRight = '10px';
+            
+            filterDiv.appendChild(label);
+            
+            // Add "All" button first
+            const allButton = document.createElement('button');
+            allButton.textContent = 'All';
+            allButton.style.backgroundColor = '#ffffff';
+            allButton.style.border = '2px solid #ccc';
+            allButton.style.borderRadius = '15px'; // More rounded for the All button
+            allButton.style.padding = '0 10px';    // Wider padding for text
+            allButton.style.cursor = 'pointer';
+            allButton.style.height = '30px';
+            
+            allButton.addEventListener('click', () => {
+                // Reset all star buttons
+                filterDiv.querySelectorAll('button[data-stars]').forEach(btn => {
+                    btn.dataset.selected = 'false';
+                    btn.style.border = 'none';
+                });
+                filterTablesByStars();
+            });
+            
+            filterDiv.appendChild(allButton);
+            
+            // Create buttons for stars 1-8
+            for (let i = 1; i <= 8; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.dataset.stars = i;
+                button.style.backgroundColor = getStarColor(i);
+                button.style.border = 'none';
+                button.style.borderRadius = '50%';
+                button.style.width = '30px';
+                button.style.height = '30px';
+                button.style.cursor = 'pointer';
+                button.dataset.selected = 'false';
+                
+                button.addEventListener('click', () => {
+                    button.dataset.selected = button.dataset.selected === 'true' ? 'false' : 'true';
+                    // Toggle white border
+                    button.style.border = button.dataset.selected === 'true' ? '2px solid white' : 'none';
+                    filterTablesByStars();
+                });
+                
+                filterDiv.appendChild(button);
+            }
+            
+            return filterDiv;
+        }
+
+        function createPriceSliders() {
+            const sliderContainer = document.createElement('div');
+            sliderContainer.style.marginBottom = '15px';
+            sliderContainer.style.display = 'flex';
+            sliderContainer.style.gap = '20px';
+
+            // Create sliders for both l3_avg_price and bid
+            const sliders = [
+                { name: 'L3 Avg Price', column: 'l3_avg_price' },
+                { name: 'Bid', column: 'best_bid' }
+            ].map(createPriceSlider);
+
+            sliders.forEach(slider => sliderContainer.appendChild(slider));
+            return sliderContainer;
+        }
+
+        function createPriceSlider({ name, column }) {
+            const wrapper = document.createElement('div');
+            wrapper.style.flex = '1';
+            
+            const label = document.createElement('div');
+            label.textContent = `${name}: `;
+            label.style.marginBottom = '5px';
+            
+            const rangeContainer = document.createElement('div');
+            rangeContainer.style.display = 'flex';
+            rangeContainer.style.alignItems = 'center';
+            rangeContainer.style.gap = '10px';
+            
+            const minValue = document.createElement('span');
+            const maxValue = document.createElement('span');
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.style.flex = '1';
+            slider.dataset.column = column;
+            
+            // Add display for current value
+            const currentValue = document.createElement('span');
+            currentValue.style.minWidth = '60px';
+            
+            rangeContainer.appendChild(minValue);
+            rangeContainer.appendChild(slider);
+            rangeContainer.appendChild(maxValue);
+            rangeContainer.appendChild(currentValue);
+            
+            wrapper.appendChild(label);
+            wrapper.appendChild(rangeContainer);
+            
+            // Update slider values based on visible rows
+            function updateSliderRange() {
+                const visibleRows = Array.from(document.querySelectorAll('table tr:not([style*="display: none"]):not(:first-child)'));
+                const values = visibleRows
+                    .map(row => parseFloat(row.querySelector(`td[data-${column}]`)?.dataset[column]))
+                    .filter(val => !isNaN(val));
+                    
+                if (values.length === 0) return;
+                
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                
+                slider.min = min;
+                slider.max = max;
+                slider.step = (max - min) / 100; // 100 steps between min and max
+                
+                minValue.textContent = min.toFixed(3);
+                maxValue.textContent = max.toFixed(3);
+                
+                // Set initial value to max (no filtering)
+                slider.value = max;
+                currentValue.textContent = max.toFixed(3);
+            }
+            
+            // Add event listener for slider changes
+            slider.addEventListener('input', (e) => {
+                currentValue.textContent = parseFloat(e.target.value).toFixed(3);
+                filterTablesByPrice();
+            });
+            
+            // Store updateRange function for external access
+            slider.updateRange = updateSliderRange;
+            
+            return wrapper;
+        }
+
+        function filterTablesByPrice() {
+            const sliders = document.querySelectorAll('input[type="range"][data-column]');
+            const tables = document.querySelectorAll('table');
+            
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    
+                    let shouldShow = true;
+                    
+                    sliders.forEach(slider => {
+                        const cell = row.querySelector(`td[data-${slider.dataset.column}]`);
+                        if (cell) {
+                            const value = parseFloat(cell.dataset[slider.dataset.column]);
+                            if (value > parseFloat(slider.value)) {
+                                shouldShow = false;
+                            }
+                        }
+                    });
+                    
+                    if (row.style.display !== 'none') { // Only modify visible rows
+                        row.style.display = shouldShow ? '' : 'none';
+                    }
+                });
+            });
+            
+            // Update slider ranges after filtering
+            sliders.forEach(slider => slider.updateRange());
+        }
+
+        // Modify your existing table creation to add data attributes
+        function createCell(header, value) {
+            const td = document.createElement('td');
+            
+            if (header === 'l3_avg_price' || header === 'best_bid') {
+                td.dataset[header] = value;
+                td.textContent = parseFloat(value).toFixed(3);
+            } else {
+                // ... your existing cell creation logic ...
+            }
+            
+            return td;
+        }
+
+        // Add this to your initialization code
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterSection = document.querySelector('.filter-section');
+            filterSection.appendChild(createPriceSliders());
+            
+            // Update ranges initially
+            document.querySelectorAll('input[type="range"][data-column]')
+                .forEach(slider => slider.updateRange());
+        });
+
         async function loadHeroData() {
             try {
                 const response = await fetch('hero_dash.json');
@@ -842,14 +1065,20 @@
                 const headers = Object.keys(data[0]);
                 const sortedData = sortHeroData(data);
 
-                // Handle view changes
                 const viewSelector = document.getElementById('viewSelector');
                 const container = document.getElementById('tableContainer');
 
                 function updateView() {
                     container.innerHTML = '';
-                    // Add rarity filter before the table
-                    container.appendChild(createRarityFilter());
+                    // Add both filters
+                    const filtersDiv = document.createElement('div');
+                    filtersDiv.style.display = 'flex';
+                    filtersDiv.style.gap = '20px';
+                    filtersDiv.style.marginBottom = '20px';
+                    
+                    filtersDiv.appendChild(createRarityFilter());
+                    filtersDiv.appendChild(createStarFilter());
+                    container.appendChild(filtersDiv);
                     
                     if (viewSelector.value === 'single') {
                         container.appendChild(createTable(sortedData, headers));
@@ -859,7 +1088,7 @@
                 }
 
                 viewSelector.addEventListener('change', updateView);
-                updateView(); // Initial display
+                updateView();
                 
             } catch (error) {
                 console.error('Error loading hero data:', error);

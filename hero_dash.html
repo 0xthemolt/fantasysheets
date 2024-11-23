@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Hero Dashboard</title>
     <link rel="stylesheet" href="./styles.css">
 </head>
@@ -27,16 +28,37 @@
 
         // Add this new color mapping function for the numeric columns
         function getHeatmapColor(value, min, max) {
-            // Plasma-like colors from low to high
-            const colors = [
-                '#0C0786', '#40039C', '#6A00A7', '#8F0DA3', '#B02A8F',
-                '#CA4678', '#E16462', '#F1834B', '#FCA636', '#FCCE25'
-            ];
-            
             if (value === null || isNaN(value)) return '#ffffff';
+
+            const plasmaColors = [
+                '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b',
+                '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'
+            ];
+
             const normalizedValue = (value - min) / (max - min);
-            const colorIndex = Math.min(Math.floor(normalizedValue * colors.length), colors.length - 1);
-            return colors[colorIndex];
+            const index = normalizedValue * (plasmaColors.length - 1);
+            const lowerIndex = Math.floor(index);
+            const upperIndex = Math.ceil(index);
+
+            if (lowerIndex === upperIndex) return plasmaColors[lowerIndex];
+
+            const t = index - lowerIndex;
+            return interpolateColor(plasmaColors[lowerIndex], plasmaColors[upperIndex], t);
+        }
+
+        function interpolateColor(color1, color2, t) {
+            const r1 = parseInt(color1.slice(1, 3), 16);
+            const g1 = parseInt(color1.slice(3, 5), 16);
+            const b1 = parseInt(color1.slice(5, 7), 16);
+            const r2 = parseInt(color2.slice(1, 3), 16);
+            const g2 = parseInt(color2.slice(3, 5), 16);
+            const b2 = parseInt(color2.slice(5, 7), 16);
+
+            const r = Math.round(r1 * (1 - t) + r2 * t);
+            const g = Math.round(g1 * (1 - t) + g2 * t);
+            const b = Math.round(b1 * (1 - t) + b2 * t);
+
+            return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
         }
 
         function sortHeroData(data) {
@@ -46,7 +68,7 @@
                     return b.stars - a.stars;
                 }
                 // Then by last 7d score
-                return b['last 7d'] - a['last 7d'];
+                return b['last_7d'] - a['last_7d'];
             });
         }
 
@@ -384,15 +406,92 @@
             const container = document.createElement('div');
             container.style.padding = '4px 8px';
             container.style.backgroundColor = normalizeAndColorPrice(price, minPrice, maxPrice);
-            container.style.color = 'white';
+            container.style.color = 'black';
             container.style.fontWeight = 'bold';
-            container.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
+            container.style.textShadow = 'none';
             container.style.borderRadius = '4px';
             container.textContent = formatPrice(price);
             return container;
         }
 
+        // Define these functions first
+        function getColumnIndex(columnName) {
+            const headers = document.querySelector('table thead tr').children;
+            for (let i = 0; i < headers.length; i++) {
+                if (headers[i].getAttribute('data-sort') === columnName) {
+                    return i + 1;
+                }
+            }
+            return -1;
+        }
+
+        function sortTable(column, descending) {
+            console.log('Sorting column:', column, 'descending:', descending); // Debug log
+            
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                rows.sort((a, b) => {
+                    const columnIndex = getColumnIndex(column);
+                    console.log('Column index:', columnIndex); // Debug log
+                    
+                    // Get the cell values
+                    const aCell = a.querySelector(`td:nth-child(${columnIndex})`);
+                    const bCell = b.querySelector(`td:nth-child(${columnIndex})`);
+                    
+                    // Extract numeric values (handle K/M formatting if present)
+                    let aValue = aCell ? parseFloat(aCell.textContent) : -Infinity;
+                    let bValue = bCell ? parseFloat(bCell.textContent) : -Infinity;
+                    
+                    // Handle NaN values
+                    if (isNaN(aValue)) aValue = -Infinity;
+                    if (isNaN(bValue)) bValue = -Infinity;
+                    
+                    return descending ? bValue - aValue : aValue - bValue;
+                });
+                
+                // Clear and re-append sorted rows
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        }
+
+        function addSortListeners() {
+            const headers = document.querySelectorAll('th[data-sort]');
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.getAttribute('data-sort');
+                    
+                    // Find current sort direction
+                    const currentArrow = this.querySelector('.sort-arrow.active');
+                    const isDescending = currentArrow && currentArrow.classList.contains('down');
+                    
+                    // Reset all arrows in all headers
+                    document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                        arrow.classList.remove('active');
+                    });
+                    
+                    // Toggle between ascending and descending
+                    const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
+                    if (newArrow) {
+                        newArrow.classList.add('active');
+                    }
+                    
+                    // Sort the table
+                    sortTable(column, !isDescending);
+                });
+            });
+        }
+
+        // Then your existing createTable function
         function createTable(data, headers) {
+            // Sort data initially by last_7d
+            data = data.sort((a, b) => b['last_7d'] - a['last_7d']);
+            
             const table = document.createElement('table');
             
             // Filter out the columns we want to skip
@@ -407,21 +506,71 @@
             // Create header row
             const headerRow = document.createElement('tr');
             headers.forEach(header => {
-                // Skip both the original columns to skip and the price-related columns
                 if (!columnsToSkip.includes(header) && 
                     header !== 'rarity' && 
                     header !== 'hero_pfp_image_url') {
                     const th = document.createElement('th');
-                    // Map column headers to shorter names
-                    if (header === 'floor_price') {
-                        th.textContent = 'floor';
-                    } else if (header === 'l3_avg_price') {
-                        th.textContent = 'l3';
-                    } else if (header === 'best_bid') {
-                        th.textContent = 'bid';
+
+                    const headerMap = {
+                        'floor_price': 'floor',
+                        'l3_avg_price': 'avg_l3',
+                        'best_bid': 'bid',
+                        'last_7d': '7d',
+                        'last_30d': '30d',
+                        'main_26': 'MT26',
+                        'main_25': 'MT25',
+                        'main_24': 'MT24',
+                        'main_23': 'MT23',
+                        'main_22': 'MT22',
+                        'hero_handle': 'hero',
+                        'post_counts': 'posts',
+                        'views': 'views',
+                        'stars': '⭐', 
+                    };
+                                
+                    // Add data-sort attribute and arrows for sortable columns
+                    const sortableColumns = ['last_7d', 'last_30d', 'main_26', 'main_25', 
+                                           'main_24', 'main_23', 'main_22', 'ceiling'];
+                    
+                    if (sortableColumns.includes(header)) {
+                        th.setAttribute('data-sort', header);
+                        
+                        // Create container for header text and arrows
+                        const headerContent = document.createElement('div');
+                        headerContent.style.display = 'flex';
+                        headerContent.style.alignItems = 'center';
+                        headerContent.style.gap = '4px';
+                        
+                        // Add header text - Use the headerMap here
+                        const headerText = document.createElement('span');
+                        headerText.textContent = headerMap[header] || header;
+                        headerContent.appendChild(headerText);
+                        
+                        // Add sort arrows container
+                        const arrowsDiv = document.createElement('div');
+                        arrowsDiv.className = 'sort-arrows';
+                        
+                        // Add up arrow
+                        const upArrow = document.createElement('span');
+                        upArrow.className = 'sort-arrow up';
+                        arrowsDiv.appendChild(upArrow);
+                        
+                        // Add down arrow
+                        const downArrow = document.createElement('span');
+                        downArrow.className = 'sort-arrow down';
+                        // Set default sort on last_7d
+                        if (header === 'last_7d') {
+                            downArrow.classList.add('active');
+                        }
+                        arrowsDiv.appendChild(downArrow);
+                        
+                        headerContent.appendChild(arrowsDiv);
+                        th.appendChild(headerContent);
                     } else {
-                        th.textContent = header;
+                        // For non-sortable columns, also use the headerMap
+                        th.textContent = headerMap[header] || header;
                     }
+                    
                     headerRow.appendChild(th);
                 }
             });
@@ -457,12 +606,15 @@
                             containerDiv.style.display = 'flex';
                             containerDiv.style.flexDirection = 'column';
                             containerDiv.style.gap = '4px';
+                            containerDiv.style.alignItems = 'center'; // Center everything
 
-                            // Create the existing hero handle container
+                            // Create the hero handle container
                             const heroInfoDiv = document.createElement('div');
                             heroInfoDiv.style.display = 'flex';
                             heroInfoDiv.style.alignItems = 'center';
+                            heroInfoDiv.style.justifyContent = 'center'; // Center horizontally
                             heroInfoDiv.style.gap = '10px';
+                            heroInfoDiv.style.width = '100%'; // Ensure full width
 
                             // Create and style the image
                             const img = document.createElement('img');
@@ -472,11 +624,15 @@
                             img.style.borderRadius = '50%';
                             img.style.objectFit = 'cover';
 
-                            // Create span for hero handle text
-                            const span = document.createElement('span');
-                            span.textContent = hero[header];
-                            span.style.color = hero.rarity === 'common' ? '#4AF54E' : '#02E5E8';
-                            span.style.fontWeight = 'bold';
+                            // Create link for hero handle
+                            const link = document.createElement('a');
+                            link.href = `https://x.com/${hero[header]}`;
+                            link.target = '_blank';
+                            link.style.textDecoration = 'none';
+                            link.style.cursor = 'pointer';
+                            link.style.color = hero.rarity === 'common' ? '#4AF54E' : '#02E5E8';
+                            link.style.fontWeight = 'bold';
+                            link.textContent = hero[header];
 
                             // Update the createPriceRangeSlider call to include floor price and trend
                             const slider = createPriceRangeSlider(
@@ -491,7 +647,7 @@
 
                             // Combine all elements
                             heroInfoDiv.appendChild(img);
-                            heroInfoDiv.appendChild(span);
+                            heroInfoDiv.appendChild(link);
                             containerDiv.appendChild(heroInfoDiv);
                             containerDiv.appendChild(slider);
                             td.appendChild(containerDiv);
@@ -548,6 +704,17 @@
                 });
                 table.appendChild(row);
             });
+            
+            addSortListeners();
+            
+            // Trigger initial sort on last_7d
+            const last7dHeader = table.querySelector('th[data-sort="last_7d"]');
+            if (last7dHeader) {
+                const downArrow = last7dHeader.querySelector('.sort-arrow.down');
+                if (downArrow) {
+                    downArrow.classList.add('active');
+                }
+            }
             
             return table;
         }
@@ -663,6 +830,9 @@
                     section.appendChild(createTable(tableData, headers));
                     container.appendChild(section);
                 });
+            
+            // Add the sort event listeners after table creation
+            addSortListeners();
         }
 
         async function loadHeroData() {

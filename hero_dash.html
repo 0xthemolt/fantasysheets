@@ -334,16 +334,6 @@
             const clampedBidPos = Math.max(0, Math.min(100, bidPos));
             const clampedFloorPos = Math.max(0, Math.min(100, floorPos));
             
-            // Add some debug logging
-            console.log('Price Range:', {
-                minPrice,
-                maxPrice,
-                bestBid,
-                floorPrice,
-                bidPos: clampedBidPos,
-                floorPos: clampedFloorPos
-            });
-            
             bidDot.style.left = `${clampedBidPos}%`;
             trendArrow.style.left = `${clampedFloorPos}%`;
             
@@ -994,6 +984,174 @@
             return filterDiv;
         }
 
+        function createPriceSliderFilter(data) {
+            const filterDiv = document.createElement('div');
+            filterDiv.className = 'price-filter';
+            filterDiv.style.marginBottom = '15px';
+            
+            // Get min and max floor prices from data
+            const prices = data
+                .map(hero => hero.floor_price)
+                .filter(price => price !== null && price !== undefined && !isNaN(price));
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            
+            // Create label
+            const label = document.createElement('label');
+            label.textContent = 'Price Range:';
+            label.style.display = 'block';
+            label.style.marginBottom = '8px';
+            
+            // Create price display
+            const priceDisplay = document.createElement('div');
+            priceDisplay.style.display = 'flex';
+            priceDisplay.style.justifyContent = 'space-between';
+            priceDisplay.style.marginBottom = '8px';
+            priceDisplay.style.fontSize = '12px';
+            priceDisplay.style.color = '#666';
+            
+            const minDisplay = document.createElement('span');
+            const maxDisplay = document.createElement('span');
+            priceDisplay.appendChild(minDisplay);
+            priceDisplay.appendChild(maxDisplay);
+            
+            // Create slider container
+            const sliderContainer = document.createElement('div');
+            sliderContainer.style.position = 'relative';
+            sliderContainer.style.height = '40px';
+            sliderContainer.style.width = '100%';
+            
+            // Create the range input
+            const range = document.createElement('div');
+            range.className = 'price-slider';
+            range.style.position = 'absolute';
+            range.style.top = '50%';
+            range.style.transform = 'translateY(-50%)';
+            range.style.width = '100%';
+            range.style.height = '4px';
+            range.style.backgroundColor = '#333';
+            range.style.borderRadius = '2px';
+            
+            // Create the selected range
+            const selectedRange = document.createElement('div');
+            selectedRange.style.position = 'absolute';
+            selectedRange.style.height = '100%';
+            selectedRange.style.backgroundColor = '#4AF54E';
+            selectedRange.style.borderRadius = '2px';
+            range.appendChild(selectedRange);
+            
+            // Create the handles
+            const minHandle = document.createElement('div');
+            const maxHandle = document.createElement('div');
+            [minHandle, maxHandle].forEach(handle => {
+                handle.style.position = 'absolute';
+                handle.style.width = '16px';
+                handle.style.height = '16px';
+                handle.style.backgroundColor = '#4AF54E';
+                handle.style.borderRadius = '50%';
+                handle.style.top = '50%';
+                handle.style.transform = 'translate(-50%, -50%)';
+                handle.style.cursor = 'pointer';
+                handle.style.zIndex = '1';
+            });
+            
+            range.appendChild(minHandle);
+            range.appendChild(maxHandle);
+            
+            // Initialize positions
+            let minValue = minPrice;
+            let maxValue = maxPrice;
+            
+            function updateHandlePositions() {
+                const percent = (value, min, max) => ((value - min) / (max - min)) * 100;
+                const minPercent = percent(minValue, minPrice, maxPrice);
+                const maxPercent = percent(maxValue, minPrice, maxPrice);
+                
+                minHandle.style.left = `${minPercent}%`;
+                maxHandle.style.left = `${maxPercent}%`;
+                selectedRange.style.left = `${minPercent}%`;
+                selectedRange.style.width = `${maxPercent - minPercent}%`;
+                
+                minDisplay.textContent = `Min: ${minValue.toFixed(3)}`;
+                maxDisplay.textContent = `Max: ${maxValue.toFixed(3)}`;
+                
+                filterTablesByPrice(minValue, maxValue);
+            }
+            
+            // Handle dragging
+            let activeHandle = null;
+            let startX = 0;
+            let startLeft = 0;
+            
+            function onMouseDown(e, handle) {
+                activeHandle = handle;
+                startX = e.clientX;
+                startLeft = parseFloat(handle.style.left);
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+            
+            function onMouseMove(e) {
+                if (!activeHandle) return;
+                
+                const rangeRect = range.getBoundingClientRect();
+                const delta = e.clientX - startX;
+                let newLeft = startLeft + (delta / rangeRect.width) * 100;
+                
+                // Constrain to range bounds and other handle
+                if (activeHandle === minHandle) {
+                    newLeft = Math.max(0, Math.min(parseFloat(maxHandle.style.left), newLeft));
+                    minValue = minPrice + (newLeft / 100) * (maxPrice - minPrice);
+                } else {
+                    newLeft = Math.max(parseFloat(minHandle.style.left), Math.min(100, newLeft));
+                    maxValue = minPrice + (newLeft / 100) * (maxPrice - minPrice);
+                }
+                
+                updateHandlePositions();
+            }
+            
+            function onMouseUp() {
+                activeHandle = null;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            minHandle.addEventListener('mousedown', (e) => onMouseDown(e, minHandle));
+            maxHandle.addEventListener('mousedown', (e) => onMouseDown(e, maxHandle));
+            
+            sliderContainer.appendChild(range);
+            filterDiv.appendChild(label);
+            filterDiv.appendChild(priceDisplay);
+            filterDiv.appendChild(sliderContainer);
+            
+            // Initial update
+            updateHandlePositions();
+            
+            return filterDiv;
+        }
+
+        function filterTablesByPrice(min, max) {
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    
+                    const priceCell = row.querySelector('td div[style*="background-color"]'); // Find the price cell
+                    if (priceCell) {
+                        const price = parseFloat(priceCell.textContent);
+                        const shouldShow = isNaN(price) || (price >= min && price <= max);
+                        
+                        // Only hide if not already hidden by other filters
+                        if (row.style.display !== 'none') {
+                            row.style.display = shouldShow ? '' : 'none';
+                        }
+                    }
+                });
+            });
+        }
+
         // Add these new functions after your existing functions but before loadHeroData()
 
         function createSearchBox(data) {
@@ -1145,6 +1303,7 @@
                     // Add filters to the filter container
                     const rarityFilter = createRarityFilter();
                     const starFilter = createStarFilter();
+                    const priceFilter = createPriceSliderFilter(data);
                     
                     // Add some spacing between filters
                     rarityFilter.style.marginBottom = '15px';
@@ -1152,6 +1311,7 @@
                     
                     filterContainer.appendChild(rarityFilter);
                     filterContainer.appendChild(starFilter);
+                    filterContainer.appendChild(priceFilter);
                     
                     if (viewSelector.value === 'single') {
                         container.appendChild(createTable(sortedData, headers));

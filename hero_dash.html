@@ -566,10 +566,10 @@
             
             // Filter out the columns we want to skip
             const columnsToSkip = [
-                // 'min_price', 'max_price',
-                // 'floor_or_last_price',
-                // 'is_floor_above_max_trade',
-                // 'trend', 
+                 'min_price', 'max_price',
+                'floor_or_last_price',
+                'is_floor_above_max_trade',
+                'trend', 
                 'rare_floor_as_common',
                 // Add the quantity columns to skip
                 'avail_card_qty', 'card_qty', 'own_card', 'deck_qty', 'com_qty'
@@ -594,6 +594,7 @@
                         'trend': 'trend',
                         'last_7d': '7d',
                         'last_30d': '30d',
+                        'ceiling': 'CEIL',
                         'main_26': 'MT26',
                         'main_25': 'MT25',
                         'main_24': 'MT24',
@@ -832,7 +833,7 @@
             
             const container = document.createElement('div');
             container.style.display = 'flex';
-            container.style.gap = '10px';
+            container.style.gap = '7.5px';  // Reduced from 10px (25% reduction)
             container.style.alignItems = 'center';
             container.style.justifyContent = 'center';
             

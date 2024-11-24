@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Hero Dashboard</title>
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <h1>Hero Dashboard</h1>
@@ -32,7 +33,19 @@
             z-index: 1000;
         "></div>
     </div>
-    <div id="tableContainer"></div>
+    <div style="display: flex; gap: 20px;">
+        <div id="filterContainer" style="
+            width: 200px;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+        ">
+            <h3 style="margin-top: 0; margin-bottom: 15px;"><i class="fas fa-sliders" style="margin-right: 8px;"></i>Filters</h3>
+            <!-- Filters will be added here -->
+        </div>
+        <div id="tableContainer" style="flex: 1;"></div>
+    </div>
 
     <script>
         // Add this color mapping function at the top of your script
@@ -923,11 +936,12 @@
             filterDiv.className = 'star-selector';
             filterDiv.style.marginBottom = '15px';
             filterDiv.style.display = 'flex';
-            filterDiv.style.gap = '8px';
+            filterDiv.style.gap = '5px'; // Reduced from 8px
+            filterDiv.style.flexWrap = 'wrap'; // Allow wrapping for smaller container
             
             const label = document.createElement('label');
             label.textContent = 'Stars: ';
-            label.style.marginRight = '10px';
+            label.style.marginRight = '8px'; // Reduced from 10px
             
             filterDiv.appendChild(label);
             
@@ -936,10 +950,11 @@
             allButton.textContent = 'All';
             allButton.style.backgroundColor = '#ffffff';
             allButton.style.border = '2px solid #ccc';
-            allButton.style.borderRadius = '15px'; // More rounded for the All button
-            allButton.style.padding = '0 10px';    // Wider padding for text
+            allButton.style.borderRadius = '12px'; // Reduced from 15px
+            allButton.style.padding = '0 8px';    // Reduced from 10px
             allButton.style.cursor = 'pointer';
-            allButton.style.height = '30px';
+            allButton.style.height = '18px'; // Reduced from 30px
+            allButton.style.fontSize = '11px'; // Added for better proportions
             
             allButton.addEventListener('click', () => {
                 // Reset all star buttons
@@ -960,15 +975,16 @@
                 button.style.backgroundColor = getStarColor(i);
                 button.style.border = 'none';
                 button.style.borderRadius = '50%';
-                button.style.width = '30px';
-                button.style.height = '30px';
+                button.style.width = '18px';  // Reduced from 30px
+                button.style.height = '18px'; // Reduced from 30px
                 button.style.cursor = 'pointer';
+                button.style.fontSize = '11px'; // Added for better proportions
                 button.dataset.selected = 'false';
                 
                 button.addEventListener('click', () => {
                     button.dataset.selected = button.dataset.selected === 'true' ? 'false' : 'true';
-                    // Toggle white border
-                    button.style.border = button.dataset.selected === 'true' ? '2px solid white' : 'none';
+                    // Toggle white border (reduced border width)
+                    button.style.border = button.dataset.selected === 'true' ? '1px solid white' : 'none';
                     filterTablesByStars();
                 });
                 
@@ -1120,18 +1136,22 @@
 
                 const viewSelector = document.getElementById('viewSelector');
                 const container = document.getElementById('tableContainer');
+                const filterContainer = document.getElementById('filterContainer');
                 
                 function updateView() {
                     container.innerHTML = '';
-                    // Add both filters
-                    const filtersDiv = document.createElement('div');
-                    filtersDiv.style.display = 'flex';
-                    filtersDiv.style.gap = '20px';
-                    filtersDiv.style.marginBottom = '20px';
+                    filterContainer.innerHTML = '<h3 style="margin-top: 0; margin-bottom: 15px;"><i class="fas fa-sliders" style="margin-right: 8px;"></i>Filters</h3>';
                     
-                    filtersDiv.appendChild(createRarityFilter());
-                    filtersDiv.appendChild(createStarFilter());
-                    container.appendChild(filtersDiv);
+                    // Add filters to the filter container
+                    const rarityFilter = createRarityFilter();
+                    const starFilter = createStarFilter();
+                    
+                    // Add some spacing between filters
+                    rarityFilter.style.marginBottom = '15px';
+                    starFilter.style.marginBottom = '15px';
+                    
+                    filterContainer.appendChild(rarityFilter);
+                    filterContainer.appendChild(starFilter);
                     
                     if (viewSelector.value === 'single') {
                         container.appendChild(createTable(sortedData, headers));

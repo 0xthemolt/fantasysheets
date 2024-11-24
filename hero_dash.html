@@ -248,7 +248,7 @@
             track.style.position = 'absolute';
             track.style.width = '100%';
             track.style.height = '100%';
-            track.style.backgroundColor = getColor(normalizedPrice);
+            track.style.backgroundColor = '#666'; // Fixed neutral color instead of normalized color
             track.style.borderRadius = '2px';
             
             // Best bid dot
@@ -313,24 +313,26 @@
                 priceContainer.appendChild(label);
             });
 
-            // Calculate positions
-            const allPricesRange = fullData.reduce((acc, hero) => {
-                if (hero.min_price != null) {
-                    acc.min = Math.min(acc.min, hero.min_price);
-                }
-                if (hero.max_price != null) {
-                    acc.max = Math.max(acc.max, hero.max_price);
-                }
-                return acc;
-            }, { min: Infinity, max: -Infinity });
+            // Calculate positions - FIXED VERSION
+            const bidPos = ((bestBid - minPrice) / (maxPrice - minPrice)) * 100;
+            const floorPos = ((floorPrice - minPrice) / (maxPrice - minPrice)) * 100;
             
-            const leftPos = ((minPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
-            const rightPos = ((maxPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
-            const bidPos = ((bestBid - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
-            const floorPos = ((floorPrice - allPricesRange.min) / (allPricesRange.max - allPricesRange.min)) * 100;
+            // Clamp the positions between 0 and 100
+            const clampedBidPos = Math.max(0, Math.min(100, bidPos));
+            const clampedFloorPos = Math.max(0, Math.min(100, floorPos));
             
-            bidDot.style.left = `${bidPos}%`;
-            trendArrow.style.left = `${floorPos}%`;
+            // Add some debug logging
+            console.log('Price Range:', {
+                minPrice,
+                maxPrice,
+                bestBid,
+                floorPrice,
+                bidPos: clampedBidPos,
+                floorPos: clampedFloorPos
+            });
+            
+            bidDot.style.left = `${clampedBidPos}%`;
+            trendArrow.style.left = `${clampedFloorPos}%`;
             
             container.appendChild(track);
             container.appendChild(bidDot);
@@ -377,8 +379,11 @@
             container.style.height = '40px';
             container.style.padding = '5px';
             
+            // Clean the viewsData string by removing leading empty segments
+            const cleanedViewsData = viewsData.replace(/^\|+\s*/, '');
+            
             // Parse view counts and log any issues
-            const views = viewsData.split('|')
+            const views = cleanedViewsData.split('|')
                 .map((v, index) => {
                     const trimmed = v.trim();
                     const parsed = parseViewCount(trimmed);
@@ -392,7 +397,8 @@
                         });
                     }
                     return parsed;
-                });
+                })
+                .filter(v => !isNaN(v)); // Filter out any NaN values
 
             // Log if we have any NaN values
             if (views.some(isNaN)) {
@@ -560,9 +566,11 @@
             
             // Filter out the columns we want to skip
             const columnsToSkip = [
-                'min_price', 'max_price',
-                'floor_or_last_price', 'is_floor_above_max_trade',
-                'trend', 'rare_floor_as_common',
+                // 'min_price', 'max_price',
+                // 'floor_or_last_price',
+                // 'is_floor_above_max_trade',
+                // 'trend', 
+                'rare_floor_as_common',
                 // Add the quantity columns to skip
                 'avail_card_qty', 'card_qty', 'own_card', 'deck_qty', 'com_qty'
             ];
@@ -579,6 +587,11 @@
                         'floor_price': 'floor',
                         'l3_avg_price': 'avg_l3',
                         'best_bid': 'bid',
+                        'min_price': 'min',
+                        'max_price': 'max',
+                        'floor_or_last_price': 'floor',
+                        'is_floor_above_max_trade': 'floor > max',
+                        'trend': 'trend',
                         'last_7d': '7d',
                         'last_30d': '30d',
                         'main_26': 'MT26',

@@ -592,7 +592,6 @@
                         'best_bid': 'bid',
                         'min_price': 'min',
                         'max_price': 'max',
-                        'floor_or_last_price': 'floor',
                         'is_floor_above_max_trade': 'floor > max',
                         'trend': 'trend',
                         'last_7d': '7d',
@@ -1138,9 +1137,14 @@
                 rows.forEach((row, index) => {
                     if (index === 0) return; // Skip header row
                     
-                    const priceCell = row.querySelector('td div[style*="background-color"]'); // Find the price cell
+                    // Update the selector to find the floor_or_last_price cell
+                    const priceCell = row.querySelector('td:nth-child(3)'); // Adjust index if needed
                     if (priceCell) {
-                        const price = parseFloat(priceCell.textContent);
+                        // Extract the price from the cell's content
+                        const priceText = priceCell.textContent.trim();
+                        const price = parseFloat(priceText);
+                        
+                        // Check if price is within range
                         const shouldShow = isNaN(price) || (price >= min && price <= max);
                         
                         // Only hide if not already hidden by other filters

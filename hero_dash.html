@@ -13,6 +13,25 @@
             <option value="split">Split by Stars</option>
         </select>
     </div>
+    <div id="searchContainer" style="margin: 15px 0;">
+        <input type="text" id="heroSearch" placeholder="Search hero handle..." style="
+            padding: 8px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        ">
+        <div id="autocompleteResults" style="
+            display: none;
+            position: absolute;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 200px;
+            z-index: 1000;
+        "></div>
+    </div>
     <div id="tableContainer"></div>
 
     <script>
@@ -358,10 +377,9 @@
             container.style.height = '40px';
             container.style.padding = '5px';
             
-            // Parse view counts and reverse the array
+            // Parse view counts without reversing
             const views = viewsData.split('|')
-                .map(v => parseViewCount(v.trim()))
-                .reverse();
+                .map(v => parseViewCount(v.trim()));
             const maxView = Math.max(...views);
             const minView = Math.min(...views);
             const trend = calculateTrend(views);
@@ -918,146 +936,136 @@
             return filterDiv;
         }
 
-        function createPriceSliders() {
-            const sliderContainer = document.createElement('div');
-            sliderContainer.style.marginBottom = '15px';
-            sliderContainer.style.display = 'flex';
-            sliderContainer.style.gap = '20px';
+        // Add these new functions after your existing functions but before loadHeroData()
 
-            // Create sliders for both l3_avg_price and bid
-            const sliders = [
-                { name: 'L3 Avg Price', column: 'l3_avg_price' },
-                { name: 'Bid', column: 'best_bid' }
-            ].map(createPriceSlider);
+        function createSearchBox(data) {
+            const searchInput = document.getElementById('heroSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+            let currentFocus = -1;
 
-            sliders.forEach(slider => sliderContainer.appendChild(slider));
-            return sliderContainer;
-        }
+            // Create a Set of unique hero handles for faster lookup
+            const heroHandles = new Set(data.map(hero => hero.hero_handle));
 
-        function createPriceSlider({ name, column }) {
-            const wrapper = document.createElement('div');
-            wrapper.style.flex = '1';
-            
-            const label = document.createElement('div');
-            label.textContent = `${name}: `;
-            label.style.marginBottom = '5px';
-            
-            const rangeContainer = document.createElement('div');
-            rangeContainer.style.display = 'flex';
-            rangeContainer.style.alignItems = 'center';
-            rangeContainer.style.gap = '10px';
-            
-            const minValue = document.createElement('span');
-            const maxValue = document.createElement('span');
-            const slider = document.createElement('input');
-            slider.type = 'range';
-            slider.style.flex = '1';
-            slider.dataset.column = column;
-            
-            // Add display for current value
-            const currentValue = document.createElement('span');
-            currentValue.style.minWidth = '60px';
-            
-            rangeContainer.appendChild(minValue);
-            rangeContainer.appendChild(slider);
-            rangeContainer.appendChild(maxValue);
-            rangeContainer.appendChild(currentValue);
-            
-            wrapper.appendChild(label);
-            wrapper.appendChild(rangeContainer);
-            
-            // Update slider values based on visible rows
-            function updateSliderRange() {
-                const visibleRows = Array.from(document.querySelectorAll('table tr:not([style*="display: none"]):not(:first-child)'));
-                const values = visibleRows
-                    .map(row => parseFloat(row.querySelector(`td[data-${column}]`)?.dataset[column]))
-                    .filter(val => !isNaN(val));
-                    
-                if (values.length === 0) return;
+            searchInput.addEventListener('input', function(e) {
+                // Trim the search text and update the input value
+                const searchText = this.value.trim();
+                this.value = searchText; // This will automatically remove spaces
                 
-                const min = Math.min(...values);
-                const max = Math.max(...values);
+                // Rest of the function remains the same
+                autocompleteResults.innerHTML = '';
                 
-                slider.min = min;
-                slider.max = max;
-                slider.step = (max - min) / 100; // 100 steps between min and max
-                
-                minValue.textContent = min.toFixed(3);
-                maxValue.textContent = max.toFixed(3);
-                
-                // Set initial value to max (no filtering)
-                slider.value = max;
-                currentValue.textContent = max.toFixed(3);
-            }
-            
-            // Add event listener for slider changes
-            slider.addEventListener('input', (e) => {
-                currentValue.textContent = parseFloat(e.target.value).toFixed(3);
-                filterTablesByPrice();
+                if (!searchText) {
+                    autocompleteResults.style.display = 'none';
+                    filterTablesByHeroHandle('');
+                    return;
+                }
+
+                // Find matching hero handles
+                const matches = Array.from(heroHandles)
+                    .filter(handle => handle.toLowerCase().includes(searchText))
+                    .slice(0, 10); // Limit to 10 results
+
+                if (matches.length > 0) {
+                    autocompleteResults.style.display = 'block';
+                    matches.forEach((handle, index) => {
+                        const div = document.createElement('div');
+                        div.textContent = handle;
+                        div.style.padding = '8px';
+                        div.style.cursor = 'pointer';
+                        div.style.borderBottom = '1px solid #333';
+
+                        // Highlight matching text
+                        const regex = new RegExp(searchText, 'gi');
+                        div.innerHTML = handle.replace(regex, match => `<strong style="color: #4AF54E">${match}</strong>`);
+
+                        div.addEventListener('mouseover', function() {
+                            this.style.backgroundColor = '#333';
+                        });
+
+                        div.addEventListener('mouseout', function() {
+                            this.style.backgroundColor = '';
+                        });
+
+                        div.addEventListener('click', function() {
+                            searchInput.value = handle;
+                            autocompleteResults.style.display = 'none';
+                            filterTablesByHeroHandle(handle);
+                        });
+
+                        autocompleteResults.appendChild(div);
+                    });
+                } else {
+                    autocompleteResults.style.display = 'none';
+                }
+
+                filterTablesByHeroHandle(searchText);
             });
-            
-            // Store updateRange function for external access
-            slider.updateRange = updateSliderRange;
-            
-            return wrapper;
+
+            // Handle keyboard navigation
+            searchInput.addEventListener('keydown', function(e) {
+                const items = autocompleteResults.getElementsByTagName('div');
+                
+                if (e.key === 'ArrowDown') {
+                    currentFocus++;
+                    addActive(items);
+                    e.preventDefault();
+                } else if (e.key === 'ArrowUp') {
+                    currentFocus--;
+                    addActive(items);
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus > -1 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    }
+                }
+            });
+
+            // Close autocomplete when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                    autocompleteResults.style.display = 'none';
+                }
+            });
+
+            function addActive(items) {
+                if (!items) return;
+
+                removeActive(items);
+                if (currentFocus >= items.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = items.length - 1;
+
+                items[currentFocus].style.backgroundColor = '#333';
+            }
+
+            function removeActive(items) {
+                Array.from(items).forEach(item => {
+                    item.style.backgroundColor = '';
+                });
+            }
         }
 
-        function filterTablesByPrice() {
-            const sliders = document.querySelectorAll('input[type="range"][data-column]');
+        function filterTablesByHeroHandle(searchText) {
             const tables = document.querySelectorAll('table');
-            
+            const searchLower = searchText.trim().toLowerCase();
+
             tables.forEach(table => {
                 const rows = table.querySelectorAll('tr');
                 
                 rows.forEach((row, index) => {
                     if (index === 0) return; // Skip header row
                     
-                    let shouldShow = true;
-                    
-                    sliders.forEach(slider => {
-                        const cell = row.querySelector(`td[data-${slider.dataset.column}]`);
-                        if (cell) {
-                            const value = parseFloat(cell.dataset[slider.dataset.column]);
-                            if (value > parseFloat(slider.value)) {
-                                shouldShow = false;
-                            }
-                        }
-                    });
-                    
-                    if (row.style.display !== 'none') { // Only modify visible rows
+                    const heroCell = row.querySelector('td a'); // Find the hero handle link
+                    if (heroCell) {
+                        const heroHandle = heroCell.textContent.toLowerCase();
+                        const shouldShow = searchText === '' || heroHandle.includes(searchLower);
                         row.style.display = shouldShow ? '' : 'none';
                     }
                 });
             });
-            
-            // Update slider ranges after filtering
-            sliders.forEach(slider => slider.updateRange());
         }
 
-        // Modify your existing table creation to add data attributes
-        function createCell(header, value) {
-            const td = document.createElement('td');
-            
-            if (header === 'l3_avg_price' || header === 'best_bid') {
-                td.dataset[header] = value;
-                td.textContent = parseFloat(value).toFixed(3);
-            } else {
-                // ... your existing cell creation logic ...
-            }
-            
-            return td;
-        }
-
-        // Add this to your initialization code
-        document.addEventListener('DOMContentLoaded', () => {
-            const filterSection = document.querySelector('.filter-section');
-            filterSection.appendChild(createPriceSliders());
-            
-            // Update ranges initially
-            document.querySelectorAll('input[type="range"][data-column]')
-                .forEach(slider => slider.updateRange());
-        });
-
+        // Modify your loadHeroData function to initialize the search box
         async function loadHeroData() {
             try {
                 const response = await fetch('hero_dash.json');
@@ -1065,9 +1073,12 @@
                 const headers = Object.keys(data[0]);
                 const sortedData = sortHeroData(data);
 
+                // Initialize search box with the data
+                createSearchBox(data);
+
                 const viewSelector = document.getElementById('viewSelector');
                 const container = document.getElementById('tableContainer');
-
+                
                 function updateView() {
                     container.innerHTML = '';
                     // Add both filters
@@ -1098,6 +1109,7 @@
 
         // Load data when page loads
         window.onload = loadHeroData;
+
     </script>
 </body>
 </html>

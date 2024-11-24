@@ -370,16 +370,40 @@
             return slope;
         }
 
-        function createSparkline(viewsData) {
+        function createSparkline(viewsData, heroHandle, rarity) {
             const container = document.createElement('div');
             container.style.position = 'relative';
             container.style.width = '150px';
             container.style.height = '40px';
             container.style.padding = '5px';
             
-            // Parse view counts without reversing
+            // Parse view counts and log any issues
             const views = viewsData.split('|')
-                .map(v => parseViewCount(v.trim()));
+                .map((v, index) => {
+                    const trimmed = v.trim();
+                    const parsed = parseViewCount(trimmed);
+                    if (isNaN(parsed)) {
+                        console.error(`Invalid view count found:`, {
+                            heroHandle,
+                            rarity,
+                            rawValue: trimmed,
+                            index,
+                            fullViewsData: viewsData
+                        });
+                    }
+                    return parsed;
+                });
+
+            // Log if we have any NaN values
+            if (views.some(isNaN)) {
+                console.error('NaN values detected:', {
+                    heroHandle,
+                    rarity,
+                    views,
+                    rawData: viewsData
+                });
+            }
+
             const maxView = Math.max(...views);
             const minView = Math.min(...views);
             const trend = calculateTrend(views);
@@ -735,7 +759,11 @@
                             
                             td.appendChild(visualContainer);
                         } else if (header === 'views') {
-                            const sparkline = createSparkline(hero[header]);
+                            const sparkline = createSparkline(
+                                hero[header],
+                                hero.hero_handle,  // Add these parameters
+                                hero.rarity
+                            );
                             td.appendChild(sparkline);
                         } else {
                             td.textContent = hero[header] || '';

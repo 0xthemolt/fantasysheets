@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tier List Maker</title>
+    <style>
+        .tier-container {
+            width: 800px;
+            margin: 20px auto;
+        }
+
+        .tier-row {
+            display: flex;
+            margin-bottom: 4px;
+            min-height: 80px;
+        }
+
+        .tier-label {
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .tier-s { background-color: #ff4444; }
+        .tier-a { background-color: #ff8c1a; }
+        .tier-b { background-color: #ffdd33; }
+        .tier-c { background-color: #44cc44; }
+        .tier-d { background-color: #3399ff; }
+
+        .tier-content {
+            flex-grow: 1;
+            background-color: #333;
+            min-height: 80px;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .item-pool {
+            width: 800px;
+            margin: 20px auto;
+            background-color: #444;
+            min-height: 100px;
+            padding: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .draggable-item {
+            width: 70px;
+            height: 70px;
+            background-color: #666;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .draggable-item img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body style="background-color: #222; color: white;">
+    <div class="tier-container">
+        <div class="tier-row">
+            <div class="tier-label tier-s">S</div>
+            <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label tier-a">A</div>
+            <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label tier-b">B</div>
+            <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label tier-c">C</div>
+            <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+        <div class="tier-row">
+            <div class="tier-label tier-d">D</div>
+            <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+    </div>
+
+    <div class="item-pool" ondrop="drop(event)" ondragover="allowDrop(event)" id="itemPool">
+        <!-- Items will be populated dynamically -->
+    </div>
+
+    <script>
+        async function loadPlayerCards() {
+            try {
+                console.log('Starting to fetch player_decks.json...');
+                const response = await fetch('/player_decks.json');
+                const data = await response.json();
+                console.log('Loaded data:', data);
+                
+                // Filter for 0xthemolt's cards and get unique picture URLs
+                const moltCards = data.filter(deck => deck.hero_handle === '0xthemolt');
+                console.log('Filtered moltCards:', moltCards);
+                
+                const uniqueUrls = [...new Set(moltCards.map(card => card.picture_url))];
+                console.log('Unique URLs found:', uniqueUrls);
+                
+                // Populate the item pool with the images
+                const itemPool = document.getElementById('itemPool');
+                uniqueUrls.forEach((url, index) => {
+                    console.log(`Creating item ${index + 1} with URL:`, url);
+                    const item = document.createElement('div');
+                    item.className = 'draggable-item';
+                    item.draggable = true;
+                    item.id = `item${index + 1}`;
+                    item.ondragstart = drag;
+                    
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.onerror = () => console.error(`Failed to load image: ${url}`);
+                    img.onload = () => console.log(`Successfully loaded image: ${url}`);
+                    
+                    item.appendChild(img);
+                    itemPool.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Detailed error loading player cards:', error);
+                console.error('Stack trace:', error.stack);
+            }
+        }
+
+        // Call the function when the page loads
+        window.addEventListener('load', loadPlayerCards);
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            const dropZone = ev.target.classList.contains('tier-content') 
+                ? ev.target 
+                : ev.target.closest('.tier-content') || ev.target.closest('.item-pool');
+            
+            if (dropZone) {
+                dropZone.appendChild(draggedElement);
+            }
+        }
+    </script>
+</body>
+</html>

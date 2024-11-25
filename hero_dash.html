@@ -119,30 +119,51 @@
             label.textContent = 'Rarity: ';
             label.style.marginRight = '10px';
             
-            const select = document.createElement('select');
-            select.id = 'rarityFilter';
-            select.style.padding = '5px';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.gap = '8px';
             
-            const options = [
-                { value: 'all', text: 'All' },
-                { value: 'common', text: 'Common' },
-                { value: 'rare', text: 'Rare' }
+            const buttons = [
+                { value: 'all', text: 'All', color: '#666666', textColor: '#ffffff' },
+                { value: 'common', text: 'Common', color: '#4AF54E', textColor: '#000000' },
+                { value: 'rare', text: 'Rare', color: '#02E5E8', textColor: '#000000' }
             ];
             
-            options.forEach(opt => {
-                const option = document.createElement('option');
-                option.value = opt.value;
-                option.textContent = opt.text;
-                select.appendChild(option);
-            });
-            
-            select.addEventListener('change', () => {
-                const selectedRarity = select.value;
-                filterTableByRarity(selectedRarity);
+            buttons.forEach(btn => {
+                const button = document.createElement('button');
+                button.textContent = btn.text;
+                button.value = btn.value;
+                button.style.padding = '5px 10px';
+                button.style.border = 'none';
+                button.style.borderRadius = '4px';
+                button.style.backgroundColor = btn.color;
+                button.style.color = btn.textColor;
+                button.style.cursor = 'pointer';
+                button.style.fontWeight = 'bold';
+                
+                // Add hover effect
+                button.addEventListener('mouseenter', () => {
+                    button.style.opacity = '0.8';
+                });
+                button.addEventListener('mouseleave', () => {
+                    button.style.opacity = '1';
+                });
+                
+                button.addEventListener('click', () => {
+                    // Remove active state from all buttons
+                    buttonContainer.querySelectorAll('button').forEach(b => {
+                        b.style.boxShadow = 'none';
+                    });
+                    // Add active state to clicked button
+                    button.style.boxShadow = '0 0 0 2px white';
+                    filterTableByRarity(btn.value);
+                });
+                
+                buttonContainer.appendChild(button);
             });
             
             filterDiv.appendChild(label);
-            filterDiv.appendChild(select);
+            filterDiv.appendChild(buttonContainer);
             return filterDiv;
         }
         
@@ -568,15 +589,8 @@
         function addSortListeners() {
             const headers = document.querySelectorAll('th[data-sort]');
             headers.forEach(header => {
-                // Add visual indicator that header is clickable
-                header.style.cursor = 'pointer';
-                
-                header.addEventListener('click', function(e) {
-                    // Prevent text selection on rapid clicks
-                    e.preventDefault();
-                    
+                header.addEventListener('click', function() {
                     const column = this.getAttribute('data-sort');
-                    if (!column) return; // Safety check
                     
                     // Find current sort direction
                     const currentArrow = this.querySelector('.sort-arrow.active');
@@ -585,44 +599,16 @@
                     // Reset all arrows in all headers
                     document.querySelectorAll('.sort-arrow').forEach(arrow => {
                         arrow.classList.remove('active');
-                        // Remove any lingering hover states
-                        arrow.style.opacity = '0.5';
                     });
                     
                     // Toggle between ascending and descending
                     const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
                     if (newArrow) {
                         newArrow.classList.add('active');
-                        newArrow.style.opacity = '1';
-                        
-                        // Add aria-sort for accessibility
-                        headers.forEach(h => h.removeAttribute('aria-sort'));
-                        this.setAttribute('aria-sort', isDescending ? 'ascending' : 'descending');
-                        
-                        // Optional: Add visual feedback
-                        this.style.backgroundColor = '#333';
-                        setTimeout(() => this.style.backgroundColor = '', 200);
                     }
                     
-                    try {
-                        // Sort the table with error handling
-                        sortTable(column, !isDescending);
-                    } catch (error) {
-                        console.error('Error sorting table:', error);
-                        // Optionally show user feedback
-                        alert('There was an error sorting the table. Please try again.');
-                    }
-                });
-
-                // Add hover states for better UX
-                header.addEventListener('mouseover', function() {
-                    const arrows = this.querySelectorAll('.sort-arrow:not(.active)');
-                    arrows.forEach(arrow => arrow.style.opacity = '0.8');
-                });
-
-                header.addEventListener('mouseout', function() {
-                    const arrows = this.querySelectorAll('.sort-arrow:not(.active)');
-                    arrows.forEach(arrow => arrow.style.opacity = '0.5');
+                    // Sort the table
+                    sortTable(column, !isDescending);
                 });
             });
         }
@@ -1075,6 +1061,53 @@
             filterDiv.className = 'price-filter';
             filterDiv.style.marginBottom = '15px';
             
+            // Create label container to hold both label and reset button
+            const labelContainer = document.createElement('div');
+            labelContainer.style.display = 'flex';
+            labelContainer.style.justifyContent = 'space-between';
+            labelContainer.style.alignItems = 'center';
+            labelContainer.style.marginBottom = '8px';
+            
+            // Create label
+            const label = document.createElement('label');
+            label.textContent = 'Price Range:';
+            
+            // Create reset button
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Reset';
+            resetButton.style.padding = '4px 8px';
+            resetButton.style.backgroundColor = '#333';
+            resetButton.style.border = '1px solid #666';
+            resetButton.style.borderRadius = '4px';
+            resetButton.style.color = 'white';
+            resetButton.style.cursor = 'pointer';
+            resetButton.style.fontSize = '12px';
+            
+            // Add hover effect
+            resetButton.addEventListener('mouseenter', () => {
+                resetButton.style.backgroundColor = '#444';
+            });
+            resetButton.addEventListener('mouseleave', () => {
+                resetButton.style.backgroundColor = '#333';
+            });
+            
+            // Add reset functionality
+            resetButton.addEventListener('click', () => {
+                minValue = minPrice;
+                maxValue = maxPrice;
+                updateHandlePositions();
+            });
+            
+            // Add label and reset button to container
+            labelContainer.appendChild(label);
+            labelContainer.appendChild(resetButton);
+            
+            // Create input boxes container
+            const inputContainer = document.createElement('div');
+            inputContainer.style.display = 'flex';
+            inputContainer.style.justifyContent = 'space-between';
+            inputContainer.style.marginBottom = '8px';
+            
             // Get min and max floor prices from data
             const prices = data
                 .map(hero => hero.floor_price)
@@ -1082,17 +1115,38 @@
             const minPrice = Math.min(...prices);
             const maxPrice = Math.max(...prices);
             
-            // Create label
-            const label = document.createElement('label');
-            label.textContent = 'Price Range:';
-            label.style.display = 'block';
-            label.style.marginBottom = '8px';
+            // Create min input
+            const minInput = document.createElement('input');
+            minInput.type = 'number';
+            minInput.step = '0.001';
+            minInput.style.width = '80px';
+            minInput.style.padding = '4px';
+            minInput.style.backgroundColor = '#333';
+            minInput.style.border = '1px solid #666';
+            minInput.style.borderRadius = '4px';
+            minInput.style.color = 'white';
+            minInput.value = minPrice.toFixed(3);
+
+            // Create max input
+            const maxInput = document.createElement('input');
+            maxInput.type = 'number';
+            maxInput.step = '0.001';
+            maxInput.style.width = '80px';
+            maxInput.style.padding = '4px';
+            maxInput.style.backgroundColor = '#333';
+            maxInput.style.border = '1px solid #666';
+            maxInput.style.borderRadius = '4px';
+            maxInput.style.color = 'white';
+            maxInput.value = maxPrice.toFixed(3);
+
+            inputContainer.appendChild(minInput);
+            inputContainer.appendChild(maxInput);
             
             // Create price display
             const priceDisplay = document.createElement('div');
             priceDisplay.style.display = 'flex';
             priceDisplay.style.justifyContent = 'space-between';
-            priceDisplay.style.marginBottom = '8px';
+            priceDisplay.style.marginTop = '8px';
             priceDisplay.style.fontSize = '12px';
             priceDisplay.style.color = '#666';
             
@@ -1161,6 +1215,10 @@
                 minDisplay.textContent = `Min: ${minValue.toFixed(3)}`;
                 maxDisplay.textContent = `Max: ${maxValue.toFixed(3)}`;
                 
+                // Update input values
+                minInput.value = minValue.toFixed(3);
+                maxInput.value = maxValue.toFixed(3);
+                
                 filterTablesByPrice(minValue, maxValue);
             }
             
@@ -1202,13 +1260,32 @@
                 document.removeEventListener('mouseup', onMouseUp);
             }
             
+            // Add input event listeners
+            minInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value) && value <= maxValue) {
+                    minValue = value;
+                    updateHandlePositions();
+                }
+            });
+
+            maxInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value) && value >= minValue) {
+                    maxValue = value;
+                    updateHandlePositions();
+                }
+            });
+            
             minHandle.addEventListener('mousedown', (e) => onMouseDown(e, minHandle));
             maxHandle.addEventListener('mousedown', (e) => onMouseDown(e, maxHandle));
             
-            sliderContainer.appendChild(range);
-            filterDiv.appendChild(label);
-            filterDiv.appendChild(priceDisplay);
+            // Assemble the filter
+            filterDiv.appendChild(labelContainer);
+            filterDiv.appendChild(inputContainer);
             filterDiv.appendChild(sliderContainer);
+            filterDiv.appendChild(priceDisplay);
+            sliderContainer.appendChild(range);
             
             // Initial update
             updateHandlePositions();
@@ -1219,20 +1296,27 @@
         function filterTablesByPrice(min, max) {
             const tables = document.querySelectorAll('table');
             tables.forEach(table => {
-                const rows = table.querySelectorAll('tr');
+                // First find the index of the floor_price column in the header
+                const headerRow = table.querySelector('tr');
+                const floorPriceIndex = Array.from(headerRow.children).findIndex(
+                    th => th.getAttribute('data-sort') === 'floor_price'
+                );
                 
+                if (floorPriceIndex === -1) return; // Column not found
+                
+                const rows = table.querySelectorAll('tr');
                 rows.forEach((row, index) => {
                     if (index === 0) return; // Skip header row
                     
-                    // Update the selector to find the floor_or_last_price cell
-                    const priceCell = row.querySelector('td:nth-child(3)'); // Adjust index if needed
+                    // Use the found index to get the correct cell
+                    const priceCell = row.querySelector(`td:nth-child(${floorPriceIndex + 1})`);
                     if (priceCell) {
                         // Extract the price from the cell's content
                         const priceText = priceCell.textContent.trim();
                         const price = parseFloat(priceText);
                         
-                        // Check if price is within range
-                        const shouldShow = isNaN(price) || (price >= min && price <= max);
+                        // Check if price exists and is within range
+                        const shouldShow = !isNaN(price) && price >= min && price <= max;
                         
                         // Only hide if not already hidden by other filters
                         if (row.style.display !== 'none') {

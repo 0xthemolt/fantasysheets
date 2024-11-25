@@ -67,39 +67,9 @@
         function getHeatmapColor(value, min, max) {
             if (value === null || value === '' || isNaN(value)) return 'transparent';
 
-            const x_plasmaColors = [
-                '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b',
-                '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'
-            ];
-
-            const y_plasmaColors = [
-                '#08306B', '#08519C', '#2171B5', '#4292C6', '#6BAED6',
-                '#9ECAE1', '#C6DBEF', '#DEEBF7', '#2CA25F', '#66C2A4'
-            ]
-
             const plasmaColors = [
-                '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786',
-                '#d8576b', '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'
-            ]
-
-            const c_plasmaColors = [
-                '#0000FF', // Deep Blue
-                '#0020FF', 
-                '#0040FF',
-                '#0060FF',
-                '#0080FF',
-                '#00A0FF',
-                '#00C0FF',
-                '#00E0FF',
-                '#00FFFF', // Cyan
-                '#00FFE0',
-                '#00FFC0',
-                '#00FFA0',
-                '#00FF80',
-                '#00FF60',
-                '#00FF40',
-                '#00FF20',
-                '#00FF00'  // Green
+                '#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b',
+                '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
             ];
 
             const normalizedValue = (value - min) / (max - min);
@@ -534,8 +504,6 @@
         }
 
         function sortTable(column, descending) {
-            console.log('Sorting column:', column, 'descending:', descending); // Debug log
-            
             const tables = document.querySelectorAll('table');
             tables.forEach(table => {
                 const tbody = table.querySelector('tbody');
@@ -543,36 +511,72 @@
                 
                 rows.sort((a, b) => {
                     const columnIndex = getColumnIndex(column);
-                    console.log('Column index:', columnIndex); // Debug log
-                    
-                    // Get the cell values
                     const aCell = a.querySelector(`td:nth-child(${columnIndex})`);
                     const bCell = b.querySelector(`td:nth-child(${columnIndex})`);
                     
-                    // Extract numeric values (handle K/M formatting if present)
-                    let aValue = aCell ? parseFloat(aCell.textContent) : -Infinity;
-                    let bValue = bCell ? parseFloat(bCell.textContent) : -Infinity;
+                    // Get raw text content
+                    const aContent = aCell ? aCell.textContent.trim() : '';
+                    const bContent = bCell ? bCell.textContent.trim() : '';
                     
-                    // Handle NaN values
-                    if (isNaN(aValue)) aValue = -Infinity;
-                    if (isNaN(bValue)) bValue = -Infinity;
-                    
-                    return descending ? bValue - aValue : aValue - bValue;
+                    // Try to determine the data type and parse accordingly
+                    if (isNumericWithUnit(aContent) || isNumericWithUnit(bContent)) {
+                        // Handle K/M formatted numbers (e.g., "1.2K", "3M")
+                        const aValue = parseValueWithUnit(aContent);
+                        const bValue = parseValueWithUnit(bContent);
+                        return descending ? bValue - aValue : aValue - bValue;
+                    } else if (!isNaN(aContent) && !isNaN(bContent)) {
+                        // Handle plain numbers
+                        return descending ? 
+                            parseFloat(bContent) - parseFloat(aContent) : 
+                            parseFloat(aContent) - parseFloat(bContent);
+                    } else {
+                        // Handle strings (case-insensitive)
+                        return descending ? 
+                            bContent.toLowerCase().localeCompare(aContent.toLowerCase()) : 
+                            aContent.toLowerCase().localeCompare(bContent.toLowerCase());
+                    }
                 });
                 
-                // Clear and re-append sorted rows
-                while (tbody.firstChild) {
-                    tbody.removeChild(tbody.firstChild);
-                }
+                // Re-append sorted rows
+                tbody.innerHTML = '';
                 rows.forEach(row => tbody.appendChild(row));
             });
+        }
+
+        // Helper functions
+        function isNumericWithUnit(str) {
+            return /^-?\d*\.?\d+[KMB]?$/.test(str);
+        }
+
+        function parseValueWithUnit(str) {
+            if (!str) return -Infinity;
+            
+            const matches = str.match(/^(-?\d*\.?\d+)([KMB])?$/);
+            if (!matches) return -Infinity;
+            
+            const [, num, unit] = matches;
+            const value = parseFloat(num);
+            
+            switch (unit) {
+                case 'K': return value * 1000;
+                case 'M': return value * 1000000;
+                case 'B': return value * 1000000000;
+                default: return value;
+            }
         }
 
         function addSortListeners() {
             const headers = document.querySelectorAll('th[data-sort]');
             headers.forEach(header => {
-                header.addEventListener('click', function() {
+                // Add visual indicator that header is clickable
+                header.style.cursor = 'pointer';
+                
+                header.addEventListener('click', function(e) {
+                    // Prevent text selection on rapid clicks
+                    e.preventDefault();
+                    
                     const column = this.getAttribute('data-sort');
+                    if (!column) return; // Safety check
                     
                     // Find current sort direction
                     const currentArrow = this.querySelector('.sort-arrow.active');
@@ -581,16 +585,44 @@
                     // Reset all arrows in all headers
                     document.querySelectorAll('.sort-arrow').forEach(arrow => {
                         arrow.classList.remove('active');
+                        // Remove any lingering hover states
+                        arrow.style.opacity = '0.5';
                     });
                     
                     // Toggle between ascending and descending
                     const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
                     if (newArrow) {
                         newArrow.classList.add('active');
+                        newArrow.style.opacity = '1';
+                        
+                        // Add aria-sort for accessibility
+                        headers.forEach(h => h.removeAttribute('aria-sort'));
+                        this.setAttribute('aria-sort', isDescending ? 'ascending' : 'descending');
+                        
+                        // Optional: Add visual feedback
+                        this.style.backgroundColor = '#333';
+                        setTimeout(() => this.style.backgroundColor = '', 200);
                     }
                     
-                    // Sort the table
-                    sortTable(column, !isDescending);
+                    try {
+                        // Sort the table with error handling
+                        sortTable(column, !isDescending);
+                    } catch (error) {
+                        console.error('Error sorting table:', error);
+                        // Optionally show user feedback
+                        alert('There was an error sorting the table. Please try again.');
+                    }
+                });
+
+                // Add hover states for better UX
+                header.addEventListener('mouseover', function() {
+                    const arrows = this.querySelectorAll('.sort-arrow:not(.active)');
+                    arrows.forEach(arrow => arrow.style.opacity = '0.8');
+                });
+
+                header.addEventListener('mouseout', function() {
+                    const arrows = this.querySelectorAll('.sort-arrow:not(.active)');
+                    arrows.forEach(arrow => arrow.style.opacity = '0.5');
                 });
             });
         }

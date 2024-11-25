@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tier List Maker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
     <style>
         .tier-container {
             width: 800px;
@@ -13,7 +14,7 @@
         .tier-row {
             display: flex;
             margin-bottom: 4px;
-            min-height: 80px;
+            height: 120px;
         }
 
         .tier-label {
@@ -21,24 +22,52 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 24px;
             color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
         }
 
-        .tier-s { background-color: #ff4444; }
-        .tier-a { background-color: #ff8c1a; }
-        .tier-b { background-color: #ffdd33; }
-        .tier-c { background-color: #44cc44; }
-        .tier-d { background-color: #3399ff; }
+        /* Vibrant gradients with reduced shadow */
+        .tier-s { 
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            box-shadow: 0 0 10px rgba(255, 8, 68, 0.3);
+        }
+        
+        .tier-a { 
+            background: linear-gradient(135deg, #ff4e00 0%, #fff200 100%);
+            box-shadow: 0 0 10px rgba(255, 78, 0, 0.3);
+        }
+        
+        .tier-b { 
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            box-shadow: 0 0 10px rgba(247, 151, 30, 0.3);
+        }
+        
+        .tier-c { 
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            box-shadow: 0 0 10px rgba(0, 176, 155, 0.3);
+        }
+        
+        .tier-d { 
+            background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
+        }
 
         .tier-content {
             flex-grow: 1;
-            background-color: #333;
-            min-height: 80px;
-            padding: 8px;
+            background-color: rgba(51, 51, 51, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 4px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 4px;
+            align-items: center;
+            border-radius: 4px;
+            margin-left: 4px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .item-pool {
@@ -46,25 +75,44 @@
             margin: 20px auto;
             background-color: #444;
             min-height: 100px;
-            padding: 16px;
+            padding: 8px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 4px;
         }
 
         .draggable-item {
-            width: 70px;
-            height: 70px;
-            background-color: #666;
+            height: 110px;
+            aspect-ratio: 1;
             cursor: move;
+            padding: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            background: none;
+        }
+
+        .rarity-score {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, currentColor 0%, rgba(255,255,255,0.8) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .draggable-item img {
-            max-width: 100%;
-            max-height: 100%;
+            height: calc(100% - 16px);
+            width: 100%;
+            object-fit: contain;
+            display: block;
         }
     </style>
 </head>
@@ -102,25 +150,57 @@
                 console.log('Starting to fetch player_decks.json...');
                 const response = await fetch('/player_decks.json');
                 const data = await response.json();
-                console.log('Loaded data:', data);
                 
-                // Filter for 0xthemolt's cards and get unique picture URLs
-                const moltCards = data.filter(deck => deck.hero_handle === '0xthemolt');
-                console.log('Filtered moltCards:', moltCards);
+                const moltDecks = data.filter(deck => deck.player_handle === '0xthemolt');
+                const allMoltCards = moltDecks.flatMap(deck => deck.cards);
                 
-                const uniqueUrls = [...new Set(moltCards.map(card => card.picture_url))];
-                console.log('Unique URLs found:', uniqueUrls);
+                // Create a Map to store unique cards with their scores
+                const uniqueCards = new Map();
+                allMoltCards.forEach(card => {
+                    uniqueCards.set(card.picture_url, {
+                        rarity_score: card.rarity_score,
+                        fantasy_score: card.fantasy_score
+                    });
+                });
                 
-                // Populate the item pool with the images
+                // Find min and max fantasy scores for color scaling
+                const fantasyScores = [...uniqueCards.values()].map(card => card.fantasy_score);
+                const minScore = Math.min(...fantasyScores);
+                const maxScore = Math.max(...fantasyScores);
+                
+                // Function to get gradient style based on score
+                const getScoreGradient = (score) => {
+                    const normalized = (score - minScore) / (maxScore - minScore);
+                    // Calculate gradient colors
+                    const startRed = Math.round(255 * (1 - normalized));
+                    const startGreen = Math.round(255 * normalized);
+                    const endRed = Math.min(255, startRed + 40);
+                    const endGreen = Math.min(255, startGreen + 40);
+                    return `linear-gradient(135deg, 
+                        rgb(${startRed}, ${startGreen}, 0) 0%,
+                        rgb(${endRed}, ${endGreen}, 100) 100%)`;
+                };
+                
                 const itemPool = document.getElementById('itemPool');
-                uniqueUrls.forEach((url, index) => {
-                    console.log(`Creating item ${index + 1} with URL:`, url);
+                [...uniqueCards.entries()].forEach(([url, scores], index) => {
                     const item = document.createElement('div');
                     item.className = 'draggable-item';
                     item.draggable = true;
                     item.id = `item${index + 1}`;
                     item.ondragstart = drag;
                     
+                    // Add rarity score with color based on fantasy score
+                    const scoreDiv = document.createElement('div');
+                    scoreDiv.className = 'rarity-score';
+                    scoreDiv.textContent = Math.round(scores.rarity_score);
+                    scoreDiv.style.background = getScoreGradient(scores.fantasy_score);
+                    scoreDiv.style.webkitBackgroundClip = 'text';
+                    scoreDiv.style.webkitTextFillColor = 'transparent';
+                    scoreDiv.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+                    
+                    item.appendChild(scoreDiv);
+                    
+                    // Add image
                     const img = document.createElement('img');
                     img.src = url;
                     img.onerror = () => console.error(`Failed to load image: ${url}`);
@@ -143,7 +223,8 @@
         }
 
         function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
+            const draggableItem = ev.target.closest('.draggable-item');
+            ev.dataTransfer.setData("text", draggableItem.id);
         }
 
         function drop(ev) {
@@ -154,7 +235,7 @@
                 ? ev.target 
                 : ev.target.closest('.tier-content') || ev.target.closest('.item-pool');
             
-            if (dropZone) {
+            if (dropZone && draggedElement) {
                 dropZone.appendChild(draggedElement);
             }
         }

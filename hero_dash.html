@@ -51,9 +51,14 @@
         // Add this color mapping function at the top of your script
         function getStarColor(number) {
             const colorMap = {
-                1: '#E1D0BC', 2: '#FFFFCC', 3: '#FFFF99',
-                4: '#FFFF66', 5: '#FFFF33', 6: '#FFFF00',
-                7: '#FFC300', 8: '#ADB7F6'
+                1: '#808080', // Gray
+                2: '#FFFDD0', // Cream
+                3: '#FFFAA0', // Pastel Yellow
+                4: '#FFFF8F', // Canary Yellow
+                5: '#FAFA33', // Lemon Yellow
+                6: '#FFEA00', // Golden Yellow
+                7: '#FFD700', // Bright Yellow
+                8: '#FFC000'  // Gold
             };
             return colorMap[number] || 'grey';
         }
@@ -62,9 +67,39 @@
         function getHeatmapColor(value, min, max) {
             if (value === null || value === '' || isNaN(value)) return 'transparent';
 
-            const plasmaColors = [
+            const x_plasmaColors = [
                 '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786', '#d8576b',
                 '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'
+            ];
+
+            const y_plasmaColors = [
+                '#08306B', '#08519C', '#2171B5', '#4292C6', '#6BAED6',
+                '#9ECAE1', '#C6DBEF', '#DEEBF7', '#2CA25F', '#66C2A4'
+            ]
+
+            const plasmaColors = [
+                '#0d0887', '#46039f', '#7201a8', '#9c179e', '#bd3786',
+                '#d8576b', '#ed7953', '#fb9f3a', '#fdca26', '#f0f921'
+            ]
+
+            const c_plasmaColors = [
+                '#0000FF', // Deep Blue
+                '#0020FF', 
+                '#0040FF',
+                '#0060FF',
+                '#0080FF',
+                '#00A0FF',
+                '#00C0FF',
+                '#00E0FF',
+                '#00FFFF', // Cyan
+                '#00FFE0',
+                '#00FFC0',
+                '#00FFA0',
+                '#00FF80',
+                '#00FF60',
+                '#00FF40',
+                '#00FF20',
+                '#00FF00'  // Green
             ];
 
             const normalizedValue = (value - min) / (max - min);
@@ -610,7 +645,9 @@
                                 
                     // Add data-sort attribute and arrows for sortable columns
                     const sortableColumns = ['last_7d', 'last_30d', 'main_26', 'main_25', 
-                                           'main_24', 'main_23', 'main_22', 'ceiling'];
+                                           'main_24', 'main_23', 'main_22', 'ceiling',
+                                           'floor_price', 'l3_avg_price', 'best_bid'
+                                        ];
                     
                     if (sortableColumns.includes(header)) {
                         th.setAttribute('data-sort', header);
@@ -766,12 +803,13 @@
                             visualContainer.style.display = 'flex';
                             visualContainer.style.gap = '10px';
                             visualContainer.style.alignItems = 'center';
+                            visualContainer.style.justifyContent = 'center';
                             
                             // Add mini bar chart
                             visualContainer.appendChild(createMiniBarChart(hero[header]));
                             
-                            // Add circle visualization
-                            visualContainer.appendChild(createCircleVisualization(hero[header]));
+                            // Style the td element
+                            td.style.textAlign = 'center';
                             
                             td.appendChild(visualContainer);
                         } else if (header === 'views') {
@@ -811,19 +849,36 @@
             
             const container = document.createElement('div');
             container.style.display = 'flex';
-            container.style.alignItems = 'flex-end';
             container.style.gap = '2px';
             container.style.height = '30px';
             container.style.padding = '2px';
             
             counts.forEach(count => {
+                // Create a wrapper div for each bar and its label
+                const barWrapper = document.createElement('div');
+                barWrapper.style.display = 'flex';
+                barWrapper.style.flexDirection = 'column';
+                barWrapper.style.alignItems = 'center';
+                barWrapper.style.height = '100%';
+                barWrapper.style.justifyContent = 'flex-end';
+                
+                // Create label
+                const label = document.createElement('div');
+                label.textContent = count;
+                label.style.color = '#666';
+                label.style.fontSize = '8px';
+                
+                // Create bar
                 const bar = document.createElement('div');
                 const height = (count / maxCount) * 100;
                 bar.style.width = '4px';
                 bar.style.height = `${height}%`;
                 bar.style.backgroundColor = '#4a5568';
                 bar.style.borderRadius = '1px';
-                container.appendChild(bar);
+                
+                barWrapper.appendChild(label);
+                barWrapper.appendChild(bar);
+                container.appendChild(barWrapper);
             });
             
             return container;

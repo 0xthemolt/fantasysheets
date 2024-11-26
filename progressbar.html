@@ -1,113 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Block Progress</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Courier New', monospace;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
+            background-color: #000000;
+            color: white;
+            padding: 40px;
+            font-size: 32px;
+        }
+        
+        .font-preview {
+            margin: 50px 0;
+            padding: 30px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a1a);
+        }
+        
+        .label {
+            font-size: 14px;
+            color: #888;
+            font-family: monospace;
+            margin-bottom: 20px;
         }
 
-        .code-blocks {
-            display: flex;
-            gap: 3px;
-            height: 40px;
-            width: 300px;
-            position: relative;
+        /* Base Cyberpunk Style */
+        .cyber-1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #F6FE76;
+            text-shadow: 2px 2px #7EFBCB80, -2px -2px #EA79D780;
+            letter-spacing: 2px;
+            animation: flicker 2s infinite;
         }
 
-        .gradient-background {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to right, #F6FE76, #7EFBCB, #EA79D7);
-            transform-origin: left;
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-            z-index: 0;
+        .cyber-2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #7EFBCB;
+            text-shadow: 2px 2px #EA79D780, -2px -2px #F6FE7680;
+            letter-spacing: 2px;
+            animation: flicker 2s infinite;
         }
 
-        .code-block {
-            flex: 1;
-            position: relative;
-            background: #2d2d2d;
-            border: 1px solid #3d3d3d;
-            z-index: 1;
+        .cyber-3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #EA79D7;
+            text-shadow: 2px 2px #F6FE7680, -2px -2px #7EFBCB80;
+            letter-spacing: 2px;
+            animation: flicker 2s infinite;
         }
 
-        .code-block.active {
-            background: transparent;
+        .cyber-4 {
+            font-family: 'Orbitron', sans-serif;
+            color: #F6FE76;
+            text-shadow: 2px 2px #EA79D780, -2px -2px #7EFBCB80;
+            letter-spacing: 2px;
+            animation: flicker 2s infinite;
         }
 
-        .controls {
-            margin-top: 15px;
+        .cyber-5 {
+            font-family: 'Orbitron', sans-serif;
+            color: #7EFBCB;
+            text-shadow: 2px 2px #F6FE7680, -2px -2px #EA79D780;
+            letter-spacing: 2px;
+            animation: flicker 2s infinite;
         }
 
-        input[type="range"] {
-            width: 300px;
-        }
-
-        .value {
-            color: #569cd6;
-            margin-left: 10px;
+        @keyframes flicker {
+            0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+                opacity: 1;
+            }
+            20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+                opacity: 0.4;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="code-progress" class="code-blocks">
-        <div class="gradient-background"></div>
-        <!-- Blocks added by JS -->
-    </div>
-    <div class="controls">
-        <input type="range" min="0" max="100" value="70" 
-               oninput="updateProgress(this.value)">
-        <span id="code-value" class="value">70%</span>
+    <div class="font-preview">
+        <div class="label">Cyberpunk Style 1 (Yellow/Mint/Pink)</div>
+        <div class="cyber-1">Main Tournament 27</div>
     </div>
 
-    <script>
-        function initializeProgressBar() {
-            const container = document.getElementById('code-progress');
-            
-            // Create 30 blocks
-            for (let i = 0; i < 30; i++) {
-                const block = document.createElement('div');
-                block.className = 'code-block';
-                container.appendChild(block);
-            }
-            
-            // Set initial progress
-            updateProgress(70);
-        }
+    <div class="font-preview">
+        <div class="label">Cyberpunk Style 2 (Mint/Pink/Yellow)</div>
+        <div class="cyber-2">Main Tournament 27</div>
+    </div>
 
-        function updateProgress(value) {
-            const blocks = document.querySelectorAll('.code-block');
-            const activeBlocks = Math.floor((value / 100) * blocks.length);
-            const gradientEl = document.querySelector('.gradient-background');
-            
-            // Update the gradient width
-            gradientEl.style.transform = `scaleX(${value / 100})`;
-            
-            blocks.forEach((block, index) => {
-                if (index < activeBlocks) {
-                    block.classList.add('active');
-                } else {
-                    block.classList.remove('active');
-                }
-            });
+    <div class="font-preview">
+        <div class="label">Cyberpunk Style 3 (Pink/Yellow/Mint)</div>
+        <div class="cyber-3">Main Tournament 27</div>
+    </div>
 
-            document.getElementById('code-value').textContent = value + '%';
-        }
+    <div class="font-preview">
+        <div class="label">Cyberpunk Style 4 (Yellow/Pink/Mint)</div>
+        <div class="cyber-4">Main Tournament 27</div>
+    </div>
 
-        // Initialize on page load
-        initializeProgressBar();
-    </script>
+    <div class="font-preview">
+        <div class="label">Cyberpunk Style 5 (Mint/Yellow/Pink)</div>
+        <div class="cyber-5">Main Tournament 27</div>
+    </div>
 </body>
 </html>

@@ -57,7 +57,7 @@
 
     <style>
         .tier-container {
-            width: 850px;
+            width: 900px;
             margin: 20px auto;
             height: auto;
             overflow: visible;
@@ -146,7 +146,7 @@
         }
 
         .item-pool {
-            width: 850px;
+            width: 900px;
             margin: 20px auto;
             background-color: #444;
             min-height: 100px;
@@ -343,8 +343,8 @@
         }
 
         .search-controls {
-            width: 850px;
-            margin: 0 auto 20px;
+            width: 900px;
+            margin: 20px auto;
             display: flex;
             gap: 8px;
             align-items: center;
@@ -359,16 +359,12 @@
             font-family: 'Inter', sans-serif;
             font-size: 12px;
             min-width: 150px;
+            width: auto;
             cursor: pointer;
         }
 
-        .player-select:focus {
-            outline: none;
-            border-color: #EA79D7;
-        }
-
-        .download-btn {
-            background: linear-gradient(135deg, #86E8E0 0%, #EA79D7 100%);
+        .clear-tiers-btn {
+            background: linear-gradient(135deg, #EA79D7 0%, #86E8E0 100%);
             color: white;
             border: none;
             padding: 4px 12px;
@@ -378,17 +374,10 @@
             font-weight: 600;
             transition: opacity 0.2s ease;
             height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .download-btn:hover {
+        .clear-tiers-btn:hover {
             opacity: 0.9;
-        }
-
-        .download-btn i {
-            font-size: 16px;
         }
     </style>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -441,9 +430,12 @@
         </div>
     </div>
 
-    <select id="playerSelect" class="player-select" style="width: 850px; margin: 20px auto; display: block;">
-        <option value="">Select Player</option>
-    </select>
+    <div class="search-controls">
+        <button id="clearTiers" class="clear-tiers-btn">Clear Tiers</button>
+        <select id="playerSelect" class="player-select">
+            <option value="">Select Player</option>
+        </select>
+    </div>
 
     <div class="item-pool" ondrop="drop(event)" ondragover="allowDrop(event)" id="itemPool">
         <!-- Items will be populated dynamically -->
@@ -849,6 +841,58 @@
                 console.error('Error generating tier list image:', error);
                 alert('There was an error generating the tier list image. Please try again.');
             }
+        }
+
+        document.getElementById('clearTiers').addEventListener('click', function() {
+            const itemPool = document.getElementById('itemPool');
+            const tiers = document.querySelectorAll('.tier-content');
+            
+            // Move all items back to the item pool
+            tiers.forEach(tier => {
+                const items = Array.from(tier.getElementsByClassName('draggable-item'));
+                items.forEach(item => {
+                    itemPool.appendChild(item);
+                });
+            });
+        });
+
+        // Update the player select event listener
+        document.getElementById('playerSelect').addEventListener('change', function(e) {
+            const selectedPlayer = e.target.value;
+            
+            // Clear all tiers first
+            const tiers = document.querySelectorAll('.tier-content');
+            tiers.forEach(tier => {
+                tier.innerHTML = '';
+            });
+
+            // Clear and update item pool with new player's cards
+            updateItemPool(selectedPlayer, window.playerData);
+        });
+
+        // Update the updateItemPool function to ensure proper clearing
+        function updateItemPool(playerHandle, data) {
+            if (!data || !data.league_results) {
+                console.error('No data available for updating item pool');
+                return;
+            }
+
+            const itemPool = document.getElementById('itemPool');
+            
+            // Save the Auto Complete button if it exists
+            const autoCompleteBtn = itemPool.querySelector('.auto-complete-btn');
+            
+            // Clear everything from the item pool
+            itemPool.innerHTML = '';
+            
+            // Restore the Auto Complete button
+            if (autoCompleteBtn) {
+                itemPool.appendChild(autoCompleteBtn);
+            }
+
+            if (!playerHandle) return;
+
+            // Rest of the updateItemPool function remains the same...
         }
     </script>
 </body>

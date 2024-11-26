@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twitter Analytics Treemaps Comparison</title>
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- Highcharts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/treemap.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+        .treemap {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin-bottom: 30px;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>D3.js Treemap</h2>
+        <div class="controls">
+            <label>Filter by min followers:</label>
+            <input type="range" id="d3Slider" min="0" max="1000000" value="0" step="10000">
+            <span id="d3SliderValue">0</span>
+        </div>
+        <div id="d3-treemap" class="treemap"></div>
+
+        <h2>ECharts Treemap</h2>
+        <div id="echarts-treemap" class="treemap"></div>
+
+        <h2>Highcharts Treemap</h2>
+        <div id="highcharts-treemap" class="treemap"></div>
+    </div>
+
+    <script>
+        // Dummy data
+        const twitterData = [
+            { name: "@elonmusk", views: 5000000, followers: 800000, category: "Tech" },
+            { name: "@NASA", views: 3000000, followers: 600000, category: "Science" },
+            { name: "@NBA", views: 2500000, followers: 500000, category: "Sports" },
+            { name: "@CNN", views: 2000000, followers: 400000, category: "News" },
+            { name: "@BBCNews", views: 1800000, followers: 350000, category: "News" },
+            { name: "@Google", views: 1500000, followers: 300000, category: "Tech" },
+            { name: "@Microsoft", views: 1200000, followers: 250000, category: "Tech" },
+            { name: "@NFL", views: 1000000, followers: 200000, category: "Sports" },
+            { name: "@SpaceX", views: 800000, followers: 150000, category: "Tech" },
+            { name: "@Reuters", views: 600000, followers: 100000, category: "News" }
+        ];
+
+        // D3.js Treemap
+        function renderD3Treemap(minFollowers) {
+            const filteredData = twitterData.filter(d => d.followers >= minFollowers);
+            
+            const width = document.getElementById('d3-treemap').offsetWidth;
+            const height = 500;
+
+            d3.select("#d3-treemap").selectAll("*").remove();
+
+            const svg = d3.select("#d3-treemap")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const root = d3.hierarchy({children: filteredData})
+                .sum(d => d.views);
+
+            d3.treemap()
+                .size([width, height])
+                .padding(2)
+                (root);
+
+            const cell = svg.selectAll("g")
+                .data(root.leaves())
+                .join("g")
+                .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+            cell.append("rect")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
+                .attr("fill", (d, i) => d3.schemeCategory10[i % 10])
+                .attr("opacity", 0.8);
+
+            cell.append("text")
+                .attr("x", 5)
+                .attr("y", 20)
+                .text(d => d.data.name)
+                .attr("font-size", "12px")
+                .attr("fill", "white");
+        }
+
+        // ECharts Treemap
+        function renderEChartsTreemap() {
+            const chart = echarts.init(document.getElementById('echarts-treemap'));
+            
+            const option = {
+                tooltip: {
+                    formatter: function(info) {
+                        return [
+                            info.name,
+                            'Views: ' + info.value.toLocaleString(),
+                            'Followers: ' + twitterData.find(d => d.name === info.name).followers.toLocaleString()
+                        ].join('<br/>');
+                    }
+                },
+                series: [{
+                    type: 'treemap',
+                    data: twitterData.map(d => ({
+                        name: d.name,
+                        value: d.views,
+                        category: d.category
+                    })),
+                    label: {
+                        show: true,
+                        formatter: '{b}'
+                    },
+                    levels: [
+                        {
+                            itemStyle: {
+                                borderColor: '#fff',
+                                borderWidth: 2,
+                                gapWidth: 2
+                            }
+                        }
+                    ]
+                }]
+            };
+            
+            chart.setOption(option);
+        }
+
+        // Highcharts Treemap
+        function renderHighchartsTreemap() {
+            Highcharts.chart('highcharts-treemap', {
+                series: [{
+                    type: "treemap",
+                    layoutAlgorithm: 'squarified',
+                    data: twitterData.map(d => ({
+                        name: d.name,
+                        value: d.views,
+                        colorValue: d.followers
+                    }))
+                }],
+                title: {
+                    text: 'Twitter Views (size) and Followers (color)'
+                },
+                tooltip: {
+                    pointFormat: 'Views: {point.value}<br/>Followers: {point.colorValue}'
+                }
+            });
+        }
+
+        // Initialize all treemaps
+        renderD3Treemap(0);
+        renderEChartsTreemap();
+        renderHighchartsTreemap();
+
+        // Add slider functionality for D3 treemap
+        const slider = document.getElementById('d3Slider');
+        const sliderValue = document.getElementById('d3SliderValue');
+        
+        slider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            sliderValue.textContent = value.toLocaleString();
+            renderD3Treemap(value);
+        });
+    </script>
+</body>
+</html>

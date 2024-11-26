@@ -462,7 +462,7 @@
                 const progressPercent = Math.round((data.metadata.tournament_progress_hours / data.metadata.tournament_duration_hours) * 100);
                 
                 // Update the percentage text with "ot" suffix
-                document.querySelector('.percentage').textContent = `${progressPercent}ot`;
+                document.querySelector('.percentage').textContent = `${progressPercent}%`;
                 
                 // Update the progress circle
                 const circle = document.querySelector('.progress');

@@ -743,7 +743,11 @@
 
         // Keep these core drag-and-drop functions
         function allowDrop(ev) {
-            ev.preventDefault();
+            // Only allow drop if the target is or is within a tier-content or item-pool
+            const dropZone = ev.target.closest('.tier-content, .item-pool');
+            if (dropZone) {
+                ev.preventDefault();
+            }
         }
 
         function drag(ev) {
@@ -756,11 +760,10 @@
             const data = ev.dataTransfer.getData("text");
             const draggedElement = document.getElementById(data);
             
-            // Use closest once and cache the result
+            // Only allow dropping in tier-content or item-pool
             const dropZone = ev.target.closest('.tier-content, .item-pool');
             
             if (dropZone && draggedElement) {
-                // Use more efficient DOM manipulation
                 requestAnimationFrame(() => {
                     dropZone.appendChild(draggedElement);
                 });

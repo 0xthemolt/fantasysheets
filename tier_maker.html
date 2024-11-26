@@ -57,7 +57,7 @@
 
     <style>
         .tier-container {
-            width: 900px;
+            width: 1200px;
             margin: 20px auto;
             height: auto;
             overflow: visible;
@@ -400,6 +400,42 @@
             min-width: 150px;
             width: auto;
             cursor: pointer;
+            position: relative;
+        }
+
+        /* Style for the datalist dropdown */
+        input::-webkit-calendar-picker-indicator {
+            opacity: 0;
+        }
+
+        /* Modern browsers */
+        input[list]::-webkit-list-button,
+        input[list]::-webkit-calendar-picker-indicator {
+            display: none !important;
+        }
+
+        datalist {
+            position: absolute;
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            background: #333;
+            border: 1px solid #86E8E0;
+            border-radius: 4px;
+        }
+
+        /* Style for the options in the datalist */
+        option {
+            padding: 4px 8px;
+            background: #333;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        option:hover {
+            background: #444;
         }
 
     </style>
@@ -454,9 +490,10 @@
     </div>
 
     <div class="search-controls">
-        <select id="playerSelect" class="player-select">
+        <input list="playerList" id="playerSelect" class="player-select">
+        <datalist id="playerList">
             <option value="">Select Player</option>
-        </select>
+        </datalist>
         <button id="autoComplete" class="button">Auto Complete</button>
         <button id="clearTiers" class="button">Clear Tiers</button>
     </div>
@@ -492,15 +529,14 @@
                 circle.style.strokeDashoffset = offset;
                 
                 // Populate player select
-                const playerSelect = document.getElementById('playerSelect');
+                const playerList = document.getElementById('playerList');
                 const uniquePlayers = [...new Set(data.league_results.map(deck => deck.player_handle))];
                 uniquePlayers.sort((a, b) => a.localeCompare(b)); // Sort alphabetically
                 
                 uniquePlayers.forEach(player => {
                     const option = document.createElement('option');
                     option.value = player;
-                    option.textContent = player;
-                    playerSelect.appendChild(option);
+                    playerList.appendChild(option);
                 });
                 
                 // Filter decks and get player picture
@@ -559,20 +595,29 @@
                 
                 const itemPool = document.getElementById('itemPool');
 
-                // Add click handler for auto-complete button
+                // Update the auto-complete button event listener
                 document.getElementById('autoComplete').addEventListener('click', () => {
                     const itemPool = document.getElementById('itemPool');
                     const items = Array.from(itemPool.getElementsByClassName('draggable-item'));
                     const tiers = Array.from(document.getElementsByClassName('tier-content'));
                     
                     items.forEach(item => {
+                        // Get the selected player's handle
+                        const selectedPlayer = document.getElementById('playerSelect').value;
+                        if (!selectedPlayer || !window.playerData) return;
+
+                        // Find the card data from the player's decks
+                        const playerDecks = window.playerData.league_results.filter(deck => deck.player_handle === selectedPlayer);
                         const imgUrl = item.querySelector('img').src;
-                        const cardData = Array.from(uniqueCards.values())
+                        
+                        // Find the card data by matching the image URL
+                        const cardData = playerDecks
+                            .flatMap(deck => deck.cards)
                             .find(card => card.picture_url === imgUrl);
+
                         if (!cardData) return;
                         
                         const { hero_stars, new_hero_stars, fantasy_score } = cardData;
-                        
                         let targetTierRule1 = null;
 
                         // Rule 0: Fantasy score check
@@ -885,23 +930,126 @@
                 tier.innerHTML = '';
             });
 
+            // Update player profile picture
+            if (window.playerData && selectedPlayer) {
+                const playerDeck = window.playerData.league_results.find(deck => deck.player_handle === selectedPlayer);
+                if (playerDeck && playerDeck.player_pic) {
+                    document.getElementById('playerPic').src = playerDeck.player_pic;
+                }
+            }
+
             // Clear and update item pool with new player's cards
             updateItemPool(selectedPlayer, window.playerData);
         });
 
         // Update the updateItemPool function to ensure proper clearing
         function updateItemPool(playerHandle, data) {
+            console.log('Updating item pool for player:', playerHandle);
+            
             if (!data || !data.league_results) {
                 console.error('No data available for updating item pool');
                 return;
             }
 
             const itemPool = document.getElementById('itemPool');
-            itemPool.innerHTML = ''; // Simply clear the item pool
+            itemPool.innerHTML = ''; // Clear the item pool
 
             if (!playerHandle) return;
 
-            // Rest of the updateItemPool function remains the same...
+            // Filter decks for selected player
+            const playerDecks = data.league_results.filter(deck => deck.player_handle === playerHandle);
+            console.log(`Found ${playerDecks.length} decks for player ${playerHandle}`);
+
+            // Get all cards from player's decks
+            const allPlayerCards = playerDecks.flatMap(deck => deck.cards);
+            console.log(`Total cards found: ${allPlayerCards.length}`);
+
+            // Create a Map to store unique cards by hero_handle with their highest rarity score
+            const uniqueCards = new Map();
+            allPlayerCards.forEach(card => {
+                const existingCard = uniqueCards.get(card.hero_handle);
+                if (!existingCard || card.rarity_score > existingCard.rarity_score) {
+                    uniqueCards.set(card.hero_handle, {
+                        picture_url: card.picture_url,
+                        rarity_score: card.rarity_score,
+                        fantasy_score: card.fantasy_score || 0,
+                        hero_stars: card.hero_stars,
+                        new_hero_stars: card.new_hero_stars,
+                        hero_handle: card.hero_handle
+                    });
+                }
+            });
+
+            console.log(`Unique cards found: ${uniqueCards.size}`);
+
+            // Convert to array and sort by fantasy_score descending
+            const sortedCards = [...uniqueCards.entries()]
+                .sort((a, b) => (b[1].fantasy_score || 0) - (a[1].fantasy_score || 0))
+                .map(([_, card]) => card);
+
+            // Find min and max fantasy scores for color scaling
+            const fantasyScores = sortedCards.map(card => card.fantasy_score);
+            const minScore = Math.min(...fantasyScores);
+            const maxScore = Math.max(...fantasyScores);
+
+            // Function to get gradient style based on score
+            const getScoreGradient = (score) => {
+                const normalized = (score - minScore) / (maxScore - minScore);
+                const startRed = Math.round(255 * (1 - normalized));
+                const startGreen = Math.round(255 * normalized);
+                const endRed = Math.min(255, startRed + 40);
+                const endGreen = Math.min(255, startGreen + 40);
+                return `linear-gradient(135deg, 
+                    rgb(${startRed}, ${startGreen}, 0) 0%,
+                    rgb(${endRed}, ${endGreen}, 100) 100%)`;
+            };
+
+            // Create and append items
+            sortedCards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'draggable-item';
+                item.draggable = true;
+                item.id = `item${index + 1}`;
+                item.ondragstart = drag;
+
+                const scoreDivContainer = document.createElement('div');
+                scoreDivContainer.className = 'rarity-score-container';
+
+                const scoreDiv = document.createElement('div');
+                scoreDiv.className = 'rarity-score';
+                scoreDiv.textContent = Math.round(card.rarity_score);
+                scoreDiv.style.background = getScoreGradient(card.fantasy_score);
+                scoreDiv.style.webkitBackgroundClip = 'text';
+                scoreDiv.style.webkitTextFillColor = 'transparent';
+
+                const starDiff = document.createElement('div');
+                starDiff.className = 'star-diff';
+                const starDifference = card.new_hero_stars - card.hero_stars;
+
+                if (starDifference > 0) {
+                    starDiff.classList.add('positive');
+                    starDiff.innerHTML = `↗ ${starDifference}`;
+                } else if (starDifference < 0) {
+                    starDiff.classList.add('negative');
+                    starDiff.innerHTML = `↙ ${Math.abs(starDifference)}`;
+                } else {
+                    starDiff.classList.add('equal');
+                    starDiff.innerHTML = `${card.hero_stars}`;
+                }
+
+                scoreDivContainer.appendChild(scoreDiv);
+                scoreDivContainer.appendChild(starDiff);
+
+                const img = document.createElement('img');
+                img.src = card.picture_url;
+                img.onerror = () => console.error(`Failed to load image: ${card.picture_url}`);
+
+                item.appendChild(scoreDivContainer);
+                item.appendChild(img);
+                itemPool.appendChild(item);
+            });
+
+            console.log(`Added ${sortedCards.length} items to the pool`);
         }
     </script>
 </body>

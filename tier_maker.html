@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
     <style>
         .tier-container {
-            width: 800px;
+            width: 1000px;
             margin: 20px auto;
         }
 
@@ -18,16 +18,33 @@
         }
 
         .tier-label {
-            width: 80px;
+            width: 140px;
+            min-width: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
-            font-size: 24px;
             color: white;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             border-radius: 4px;
+            outline: none;
+            transition: box-shadow 0.2s ease;
+            padding: 10px;
+            font-size: 48px;
+            line-height: 1;
+            text-align: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .tier-label:hover {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .tier-label:focus {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
         }
 
         /* Vibrant gradients with reduced shadow */
@@ -66,12 +83,12 @@
             gap: 4px;
             align-items: center;
             border-radius: 4px;
-            margin-left: 4px;
+            margin-left: 8px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .item-pool {
-            width: 800px;
+            width: 1000px;
             margin: 20px auto;
             background-color: #444;
             min-height: 100px;
@@ -150,23 +167,23 @@
 <body style="background-color: #222; color: white;">
     <div class="tier-container">
         <div class="tier-row">
-            <div class="tier-label tier-s">S</div>
+            <div class="tier-label tier-s" contenteditable="true">S</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-a">A</div>
+            <div class="tier-label tier-a" contenteditable="true">A</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-b">B</div>
+            <div class="tier-label tier-b" contenteditable="true">B</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-c">C</div>
+            <div class="tier-label tier-c" contenteditable="true">C</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-d">D</div>
+            <div class="tier-label tier-d" contenteditable="true">D</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
     </div>
@@ -307,6 +324,20 @@
                 dropZone.appendChild(draggedElement);
             }
         }
+
+        document.querySelectorAll('.tier-label').forEach(label => {
+            label.addEventListener('input', function() {
+                const maxWidth = this.offsetWidth - 20; // Account for padding
+                let fontSize = 48; // Start with maximum font size
+                this.style.fontSize = fontSize + 'px';
+                
+                // Reduce font size until content fits
+                while (this.scrollWidth > maxWidth && fontSize > 12) {
+                    fontSize -= 2;
+                    this.style.fontSize = fontSize + 'px';
+                }
+            });
+        });
     </script>
 </body>
 </html>

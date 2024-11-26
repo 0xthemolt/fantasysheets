@@ -490,7 +490,7 @@
     </div>
 
     <div class="search-controls">
-        <input list="playerList" id="playerSelect" class="player-select">
+        <input list="playerList" id="playerSelect" class="player-select" placeholder="Search player handle">
         <datalist id="playerList">
             <option value="">Select Player</option>
         </datalist>
@@ -504,7 +504,8 @@
 
     <div class="pool-description">
         Info: Only unique heroes (at highest rarity) in your decks will be shown. Score = rarity score (0 to 2500). Color = gradient based on common score (0 to 1000).<br><br>
-        Stars: Difference between 7D card stars and live tournament stars (using same bell curve distribution %). ↗ = star increase, ↘ = star decrease. Yellow = no change.
+        Stars: Difference between 7D card stars and live tournament stars (using same bell curve distribution %). ↗ = star increase, ↘ = star decrease. Yellow = no change.<br><br>
+        Auto Complete: Auto populates ALL cards in a suggested tier based on their live tournament stars AND/OR change from 7D to live tournament stars.
     </div>
 
     <script>

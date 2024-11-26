@@ -5,8 +5,8 @@
     <!-- D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     
     <!-- Highcharts -->
     <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -41,15 +41,15 @@
         </div>
         <div id="d3-treemap" class="treemap"></div>
 
-        <h2>ECharts Treemap</h2>
-        <div id="echarts-treemap" class="treemap"></div>
+        <h2>Plotly Treemap</h2>
+        <div id="plotly-treemap" class="treemap"></div>
 
         <h2>Highcharts Treemap</h2>
         <div id="highcharts-treemap" class="treemap"></div>
     </div>
 
     <script>
-        // Dummy data
+        // Updated dummy data with more explicit categories
         const twitterData = [
             { name: "@elonmusk", views: 5000000, followers: 800000, category: "Tech" },
             { name: "@NASA", views: 3000000, followers: 600000, category: "Science" },
@@ -60,7 +60,11 @@
             { name: "@Microsoft", views: 1200000, followers: 250000, category: "Tech" },
             { name: "@NFL", views: 1000000, followers: 200000, category: "Sports" },
             { name: "@SpaceX", views: 800000, followers: 150000, category: "Tech" },
-            { name: "@Reuters", views: 600000, followers: 100000, category: "News" }
+            { name: "@Reuters", views: 600000, followers: 100000, category: "News" },
+            // Adding more accounts to better show grouping
+            { name: "@ESA", views: 750000, followers: 180000, category: "Science" },
+            { name: "@CERN", views: 550000, followers: 120000, category: "Science" },
+            { name: "@MLB", views: 900000, followers: 190000, category: "Sports" }
         ];
 
         // D3.js Treemap
@@ -104,44 +108,66 @@
                 .attr("fill", "white");
         }
 
-        // ECharts Treemap
-        function renderEChartsTreemap() {
-            const chart = echarts.init(document.getElementById('echarts-treemap'));
-            
-            const option = {
-                tooltip: {
-                    formatter: function(info) {
-                        return [
-                            info.name,
-                            'Views: ' + info.value.toLocaleString(),
-                            'Followers: ' + twitterData.find(d => d.name === info.name).followers.toLocaleString()
-                        ].join('<br/>');
+        // Updated Plotly Treemap with grouping
+        function renderPlotlyTreemap() {
+            // Create arrays for the hierarchical structure
+            const labels = [];
+            const parents = [];
+            const values = [];
+            const customdata = [];
+
+            // Add category nodes
+            const categories = [...new Set(twitterData.map(d => d.category))];
+            categories.forEach(category => {
+                labels.push(category);
+                parents.push("");
+                values.push(0);  // Will be summed up by Plotly
+                customdata.push(0);
+            });
+
+            // Add account nodes with their parents (categories)
+            twitterData.forEach(d => {
+                labels.push(d.name);
+                parents.push(d.category);
+                values.push(d.views);
+                customdata.push(d.followers);
+            });
+
+            const data = [{
+                type: "treemap",
+                labels: labels,
+                parents: parents,
+                values: values,
+                textinfo: "label+value",
+                hovertemplate: '<b>%{label}</b><br>' +
+                    'Views: %{value:,.0f}<br>' +
+                    'Followers: %{customdata:,.0f}<br>' +
+                    '<extra></extra>',
+                customdata: customdata,
+                marker: {
+                    colors: values,
+                    colorscale: 'Viridis',
+                    pad: 0,
+                    line: {
+                        width: 0
                     }
                 },
-                series: [{
-                    type: 'treemap',
-                    data: twitterData.map(d => ({
-                        name: d.name,
-                        value: d.views,
-                        category: d.category
-                    })),
-                    label: {
-                        show: true,
-                        formatter: '{b}'
-                    },
-                    levels: [
-                        {
-                            itemStyle: {
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                                gapWidth: 2
-                            }
-                        }
-                    ]
-                }]
+                pathbar: {visible: true}
+            }];
+
+            const layout = {
+                width: document.getElementById('plotly-treemap').offsetWidth,
+                height: 500,
+                margin: {t: 0, l: 0, r: 0, b: 0}
             };
-            
-            chart.setOption(option);
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['resetScale2d']
+            };
+
+            Plotly.newPlot('plotly-treemap', data, layout, config);
         }
 
         // Highcharts Treemap
@@ -167,7 +193,7 @@
 
         // Initialize all treemaps
         renderD3Treemap(0);
-        renderEChartsTreemap();
+        renderPlotlyTreemap();
         renderHighchartsTreemap();
 
         // Add slider functionality for D3 treemap

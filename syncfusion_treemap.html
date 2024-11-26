@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twitter Analytics TreeMap</title>
+    <!-- Syncfusion CSS and JavaScript dependencies -->
+    <link href="https://cdn.syncfusion.com/ej2/material.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        // Sample data
+        const twitterData = [
+            // Tech Accounts
+            { handle: '@TechGuru', category: 'Tech', views: 1500000, followers: 500000 },
+            { handle: '@CodeMaster', category: 'Tech', views: 900000, followers: 300000 },
+            { handle: '@DevTips', category: 'Tech', views: 750000, followers: 250000 },
+            
+            // News Accounts
+            { handle: '@NewsFlash', category: 'News', views: 2000000, followers: 800000 },
+            { handle: '@GlobalUpdate', category: 'News', views: 1800000, followers: 600000 },
+            { handle: '@TrendingNow', category: 'News', views: 1200000, followers: 400000 },
+            
+            // Sports Accounts
+            { handle: '@SportsCenter', category: 'Sports', views: 2500000, followers: 1000000 },
+            { handle: '@GameDay', category: 'Sports', views: 1600000, followers: 550000 },
+            { handle: '@AthleteLife', category: 'Sports', views: 1100000, followers: 350000 },
+            
+            // Science Accounts
+            { handle: '@ScienceDaily', category: 'Science', views: 800000, followers: 400000 },
+            { handle: '@SpaceExplorer', category: 'Science', views: 950000, followers: 320000 },
+            { handle: '@LabInsights', category: 'Science', views: 600000, followers: 200000 }
+        ];
+
+        // Initialize TreeMap
+        var treemap = new ej.treemap.TreeMap({
+            width: '900px',
+            height: '600px',
+            dataSource: twitterData,
+            weightValuePath: 'views',
+            levels: [{
+                groupPath: 'category',
+                fill: '#336699',
+                headerHeight: 25,
+                headerStyle: {
+                    color: '#FFFFFF'
+                }
+            }],
+            leafItemSettings: {
+                labelPath: 'handle',
+                showLabels: true,
+                labelStyle: {
+                    color: '#FFFFFF'
+                }
+            },
+            tooltipSettings: {
+                visible: true,
+                template: '${handle}<br/>Views: ${views}<br/>Followers: ${followers}'
+            }
+        });
+
+        // Render TreeMap
+        treemap.appendTo('#container');
+    </script>
+</body>
+</html>

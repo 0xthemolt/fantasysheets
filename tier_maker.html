@@ -91,6 +91,7 @@
             align-items: center;
             justify-content: center;
             background: none;
+            position: relative;
         }
 
         .rarity-score {
@@ -113,6 +114,36 @@
             width: 100%;
             object-fit: contain;
             display: block;
+        }
+
+        .hero-stars {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            bottom: 4px;
+        }
+
+        .current-stars {
+            left: 4px;
+        }
+
+        .projected-stars {
+            right: 4px;
+        }
+
+        .star-icon {
+            color: #ffd700;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
+        }
+
+        .star-value {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: #ffd700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.8);
         }
     </style>
 </head>
@@ -159,7 +190,8 @@
                 allMoltCards.forEach(card => {
                     uniqueCards.set(card.picture_url, {
                         rarity_score: card.rarity_score,
-                        fantasy_score: card.fantasy_score
+                        fantasy_score: card.fantasy_score,
+                        hero_stars: card.hero_stars
                     });
                 });
                 
@@ -189,7 +221,7 @@
                     item.id = `item${index + 1}`;
                     item.ondragstart = drag;
                     
-                    // Add rarity score with color based on fantasy score
+                    // Add rarity score
                     const scoreDiv = document.createElement('div');
                     scoreDiv.className = 'rarity-score';
                     scoreDiv.textContent = Math.round(scores.rarity_score);
@@ -198,15 +230,51 @@
                     scoreDiv.style.webkitTextFillColor = 'transparent';
                     scoreDiv.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
                     
+                    // Add current hero stars container
+                    const currentStarsDiv = document.createElement('div');
+                    currentStarsDiv.className = 'hero-stars current-stars';
+                    
+                    // Add current star icon
+                    const currentStarIcon = document.createElement('span');
+                    currentStarIcon.className = 'star-icon';
+                    currentStarIcon.innerHTML = '★';
+                    
+                    // Add current star value
+                    const currentStarValue = document.createElement('span');
+                    currentStarValue.className = 'star-value';
+                    currentStarValue.textContent = scores.hero_stars;
+                    
+                    currentStarsDiv.appendChild(currentStarIcon);
+                    currentStarsDiv.appendChild(currentStarValue);
+
+                    // Add projected hero stars container
+                    const projectedStarsDiv = document.createElement('div');
+                    projectedStarsDiv.className = 'hero-stars projected-stars';
+                    
+                    // Add projected star icon
+                    const projectedStarIcon = document.createElement('span');
+                    projectedStarIcon.className = 'star-icon';
+                    projectedStarIcon.innerHTML = '★';
+                    
+                    // Add projected star value
+                    const projectedStarValue = document.createElement('span');
+                    projectedStarValue.className = 'star-value';
+                    projectedStarValue.textContent = scores.hero_stars; // For now, same as current
+                    
+                    projectedStarsDiv.appendChild(projectedStarIcon);
+                    projectedStarsDiv.appendChild(projectedStarValue);
+                    
+                    // Add all elements
                     item.appendChild(scoreDiv);
                     
-                    // Add image
                     const img = document.createElement('img');
                     img.src = url;
                     img.onerror = () => console.error(`Failed to load image: ${url}`);
                     img.onload = () => console.log(`Successfully loaded image: ${url}`);
                     
                     item.appendChild(img);
+                    item.appendChild(currentStarsDiv);
+                    item.appendChild(projectedStarsDiv);
                     itemPool.appendChild(item);
                 });
             } catch (error) {

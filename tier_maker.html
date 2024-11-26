@@ -90,6 +90,13 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
+            pointer-events: none;  /* Disable drag-and-drop events */
+        }
+
+        /* But allow pointer events for text editing */
+        .tier-label[contenteditable] {
+            pointer-events: auto;
+            user-select: text;
         }
 
         .tier-label:hover {
@@ -468,23 +475,23 @@
     </div>
     <div class="tier-container">
         <div class="tier-row">
-            <div class="tier-label tier-s" contenteditable="true">S</div>
+            <div class="tier-label tier-s" contenteditable="true" ondragover="return false" ondrop="return false">S</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-a" contenteditable="true">A</div>
+            <div class="tier-label tier-a" contenteditable="true" ondragover="return false" ondrop="return false">A</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-b" contenteditable="true">B</div>
+            <div class="tier-label tier-b" contenteditable="true" ondragover="return false" ondrop="return false">B</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-c" contenteditable="true">C</div>
+            <div class="tier-label tier-c" contenteditable="true" ondragover="return false" ondrop="return false">C</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
         <div class="tier-row">
-            <div class="tier-label tier-d" contenteditable="true">D</div>
+            <div class="tier-label tier-d" contenteditable="true" ondragover="return false" ondrop="return false">D</div>
             <div class="tier-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
         </div>
     </div>
@@ -743,10 +750,18 @@
 
         // Keep these core drag-and-drop functions
         function allowDrop(ev) {
+            // Explicitly prevent dropping on tier-label elements
+            if (ev.target.closest('.tier-label')) {
+                ev.preventDefault();  // Need this to handle the dragover event
+                ev.dataTransfer.dropEffect = "none";  // Show "not allowed" cursor
+                return;
+            }
+            
             // Only allow drop if the target is or is within a tier-content or item-pool
             const dropZone = ev.target.closest('.tier-content, .item-pool');
             if (dropZone) {
                 ev.preventDefault();
+                ev.dataTransfer.dropEffect = "move";  // Show "move" cursor
             }
         }
 
@@ -756,6 +771,12 @@
         }
 
         function drop(ev) {
+            // Don't process drops on tier labels at all
+            if (ev.target.closest('.tier-label')) {
+                ev.preventDefault();
+                return;
+            }
+            
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text");
             const draggedElement = document.getElementById(data);

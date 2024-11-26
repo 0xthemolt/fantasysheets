@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tier List Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
     <style>
@@ -152,6 +156,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            contain: layout style;
         }
 
         .title-wrapper {
@@ -160,6 +165,7 @@
             gap: 20px;
             justify-content: center;
             height: 100%;
+            will-change: transform;
         }
 
         h1 {
@@ -173,11 +179,21 @@
             line-height: 1;
             display: flex;
             align-items: center;
+            font-display: swap;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+            0%, 100% { 
+                opacity: 1;
+                transform: translateZ(0);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: translateZ(0);
+            }
         }
 
         .progress-wrapper {
@@ -281,6 +297,13 @@
             color: #ffff00;
         }
     </style>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" as="style">
+    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v29/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nyGy6BoWgz.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 </head>
 <body style="background-color: #000000; color: white;">
     <div class="title-section">
@@ -331,9 +354,11 @@
     </div>
 
     <script>
+        // Keep only the essential DOMContentLoaded listener
+        document.addEventListener('DOMContentLoaded', loadPlayerCards);
+
         async function loadPlayerCards() {
             try {
-                console.log('Starting to fetch player_decks.json...');
                 const response = await fetch('/player_decks.json');
                 const data = await response.json();
                 
@@ -350,13 +375,7 @@
                 
                 // Calculate and update tournament progress percentage
                 if (data.metadata) {
-                    console.log('Metadata:', data.metadata); // Debug log
                     const progress = (data.metadata.tournament_progress_hours / data.metadata.tournament_duration_hours) * 100;
-                    console.log('Progress calculation:', {
-                        progress_hours: data.metadata.tournament_progress_hours,
-                        duration_hours: data.metadata.tournament_duration_hours,
-                        calculated_progress: progress
-                    }); // Debug log
                     const roundedProgress = Math.round(progress);
                     
                     // Update percentage text
@@ -367,8 +386,6 @@
                     const circumference = 528;
                     const offset = circumference - (progress / 100) * circumference;
                     circle.style.strokeDashoffset = offset;
-                } else {
-                    console.log('No metadata found:', data.metadata); // Debug log
                 }
                 
                 // Create a Map to store unique cards with their scores
@@ -382,12 +399,6 @@
                     });
                 });
                 
-                // Debug log before sorting
-                console.log('Before sorting:', [...uniqueCards.entries()].map(([url, card]) => ({
-                    url: url.slice(-20), // Just show end of URL for brevity
-                    fantasy_score: card.fantasy_score
-                })));
-                
                 // Convert to array and sort by fantasy_score descending
                 const sortedCards = [...uniqueCards.entries()]
                     .sort((a, b) => {
@@ -395,12 +406,6 @@
                         const scoreB = b[1].fantasy_score || 0;
                         return scoreB - scoreA;
                     });
-                
-                // Debug log after sorting
-                console.log('After sorting:', sortedCards.map(([url, card]) => ({
-                    url: url.slice(-20), // Just show end of URL for brevity
-                    fantasy_score: card.fantasy_score
-                })));
                 
                 // Find min and max fantasy scores for color scaling
                 const fantasyScores = sortedCards.map(([_, card]) => card.fantasy_score);
@@ -431,12 +436,6 @@
                     const items = Array.from(itemPool.getElementsByClassName('draggable-item'));
                     const tiers = Array.from(document.getElementsByClassName('tier-content'));
                     
-                    // Debug log to verify tiers
-                    console.log('Found tiers:', tiers.length);
-                    tiers.forEach((tier, index) => {
-                        console.log(`Tier ${index}:`, tier);
-                    });
-                    
                     items.forEach(item => {
                         if (item === autoCompleteBtn) return;
                         
@@ -445,78 +444,63 @@
                         if (!cardData) return;
                         
                         const { hero_stars, new_hero_stars, fantasy_score } = cardData;
+                        
                         let targetTierRule1 = null;
-                        let targetTierRule2 = null;
 
-                        // New Rule 0: Fantasy score = 0 goes to tier D
+                        // Rule 0: Fantasy score check
                         if (fantasy_score === 0) {
-                            const targetTier = tiers[4]; // D tier (index 4)
+                            const targetTier = tiers[4];
                             if (targetTier) {
                                 if (item.parentNode) {
                                     item.parentNode.removeChild(item);
                                 }
                                 targetTier.appendChild(item);
-                                return; // Skip other rules if this one matches
+                                return;
                             }
                         }
 
-                        // Rule 1: Based on absolute star values
-                        if (hero_stars === new_hero_stars) {  // First check if stars are equal
-                            if (hero_stars >= 8) {
-                                targetTierRule1 = 0;        // S tier
-                            } else if (hero_stars === 7) {
-                                targetTierRule1 = 1;        // A tier
-                            } else if (hero_stars >= 5) {   // Combines 5 and 6
-                                targetTierRule1 = 2;        // B tier
-                            } else if (hero_stars >= 3) {   // Combines 3 and 4
-                                targetTierRule1 = 3;        // C tier
-                            } else {                        // 1 and 2
-                                targetTierRule1 = 4;        // D tier
-                            }
-                        }
-                        // No else clause - if no condition matches, targetTierRule1 remains null
-
-                        // Rule 2: Based on star difference
+                        // Combined rules for tier placement
                         const starDiff = new_hero_stars - hero_stars;
+                        
+                        // Determine tier based on star difference
                         if (starDiff >= 4) {
-                            targetTierRule2 = 0; // S tier
+                            targetTierRule1 = 0; // S tier
                         } else if (starDiff >= 3) {
-                            targetTierRule2 = 1; // A tier
+                            targetTierRule1 = 1; // A tier
                         } else if (starDiff >= -2 && starDiff <= 2) {
-                            targetTierRule2 = 2; // B tier
+                            // For equal stars (starDiff = 0), use absolute star value
+                            if (starDiff === 0) {
+                                if (hero_stars >= 8) {
+                                    targetTierRule1 = 0; // S tier
+                                } else if (hero_stars === 7) {
+                                    targetTierRule1 = 1; // A tier
+                                } else if (hero_stars >= 5) {
+                                    targetTierRule1 = 2; // B tier
+                                } else if (hero_stars >= 3) {
+                                    targetTierRule1 = 3; // C tier
+                                } else {
+                                    targetTierRule1 = 4; // D tier
+                                }
+                            } else {
+                                targetTierRule1 = 2; // B tier for small differences
+                            }
                         } else if (starDiff <= -3) {
-                            targetTierRule2 = 3; // C tier
+                            targetTierRule1 = 3; // C tier
                         } else if (starDiff <= -4) {
-                            targetTierRule2 = 4; // D tier
+                            targetTierRule1 = 4; // D tier
                         }
-                        // No else clause needed as we only move items that match conditions
 
-                        // Only move the item if at least one rule matched
-                        if (targetTierRule1 !== null || targetTierRule2 !== null) {
-                            const finalTierIndex = Math.min(
-                                targetTierRule1 === null ? Infinity : targetTierRule1,
-                                targetTierRule2 === null ? Infinity : targetTierRule2
-                            );
-                            
-                            // Debug log
-                            console.log('Moving item to tier:', finalTierIndex);
-                            
+                        const finalTierIndex = targetTierRule1;
+
+                        if (targetTierRule1 !== null) {
                             const targetTier = tiers[finalTierIndex];
                             if (targetTier) {
-                                // Remove the item from its current parent first
                                 if (item.parentNode) {
                                     item.parentNode.removeChild(item);
                                 }
-                                // Then append to new tier
                                 targetTier.appendChild(item);
-                                
-                                // Debug log
-                                console.log('Item moved to:', targetTier);
-                            } else {
-                                console.error('Target tier not found:', finalTierIndex);
                             }
                         }
-                        // If neither rule matched, item stays in pool
                     });
                 };
                 itemPool.appendChild(autoCompleteBtn);
@@ -568,14 +552,15 @@
                     itemPool.appendChild(item);
                 });
             } catch (error) {
-                console.error('Detailed error loading player cards:', error);
-                console.error('Stack trace:', error.stack);
+                // Only log actual errors, not the extension connection message
+                if (!error.message.includes("Could not establish connection")) {
+                    console.error('Detailed error loading player cards:', error);
+                    console.error('Stack trace:', error.stack);
+                }
             }
         }
 
-        // Call the function when the page loads
-        window.addEventListener('load', loadPlayerCards);
-
+        // Keep these core drag-and-drop functions
         function allowDrop(ev) {
             ev.preventDefault();
         }
@@ -598,6 +583,7 @@
             }
         }
 
+        // Keep the tier label font size adjustment code
         document.querySelectorAll('.tier-label').forEach(label => {
             function adjustFontSize() {
                 // Force layout recalculation by accessing offsetHeight
@@ -631,17 +617,14 @@
                 }
             }
 
-            // Use requestAnimationFrame for smoother updates
             function delayedAdjust() {
                 requestAnimationFrame(adjustFontSize);
             }
 
-            // Add event listeners
             ['input', 'blur', 'paste'].forEach(event => {
                 label.addEventListener(event, delayedAdjust);
             });
             
-            // Initial adjustment
             adjustFontSize();
         });
     </script>

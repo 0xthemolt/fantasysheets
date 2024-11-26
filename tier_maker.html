@@ -350,7 +350,7 @@
             font-size: 12px;
             width: auto;
             min-width: 100px;
-            white-space: normal;
+            white-space: nowrap;
             line-height: 1.2;
         }
 
@@ -445,6 +445,13 @@
             background: #444;
         }
 
+        .help-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            color: #ccc;
+            margin-left: 10px;
+        }
+
     </style>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -503,6 +510,7 @@
         </datalist>
         <button id="autoComplete" class="button">Auto Complete</button>
         <button id="clearTiers" class="button">Clear Tiers</button>
+        <span class="help-text">Use search box to find and populate your cards. Use Auto Complete or manually drag and drop heroes into tiers. Tier labels are editable.</span>
     </div>
 
     <div class="item-pool" ondrop="drop(event)" ondragover="allowDrop(event)" id="itemPool">

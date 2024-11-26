@@ -14,96 +14,75 @@
             padding: 20px;
         }
 
-        .container {
-            background: #2d2d2d;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #3d3d3d;
-        }
-
-        h2 {
-            color: #569cd6;
-            margin-bottom: 15px;
-        }
-
         .code-blocks {
             display: flex;
-            gap: 2px;
-            height: 30px;
-            background: #1e1e1e;
-            padding: 3px;
-            border-radius: 4px;
+            gap: 3px;
+            height: 40px;
+            width: 300px;
             position: relative;
-            overflow: hidden;
+        }
+
+        .gradient-background {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to right, #F6FE76, #7EFBCB, #EA79D7);
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            z-index: 0;
         }
 
         .code-block {
             flex: 1;
+            position: relative;
             background: #2d2d2d;
             border: 1px solid #3d3d3d;
-            transition: all 0.3s ease;
-            position: relative;
             z-index: 1;
-        }
-
-        .gradient-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(to right, #F6FE76, #7EFBCB, #EA79D7);
-            transition: width 0.3s ease;
-            z-index: 0;
         }
 
         .code-block.active {
             background: transparent;
-            border-color: transparent;
         }
 
         .controls {
-            margin: 15px 0;
+            margin-top: 15px;
         }
 
         input[type="range"] {
-            width: 200px;
-            background: #2d2d2d;
+            width: 300px;
         }
 
         .value {
             color: #569cd6;
-            font-family: monospace;
             margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Code Block Progress</h1>
-
-    <div class="container">
-        <h2>Code Block Progress</h2>
-        <div id="code-progress" class="code-blocks">
-            <div class="gradient-overlay"></div>
-            <!-- Blocks added by JS -->
-        </div>
-        <div class="controls">
-            <input type="range" min="0" max="100" value="70" 
-                   oninput="updateProgress(this.value)">
-            <span id="code-value" class="value">70%</span>
-        </div>
+    <div id="code-progress" class="code-blocks">
+        <div class="gradient-background"></div>
+        <!-- Blocks added by JS -->
+    </div>
+    <div class="controls">
+        <input type="range" min="0" max="100" value="70" 
+               oninput="updateProgress(this.value)">
+        <span id="code-value" class="value">70%</span>
     </div>
 
     <script>
         function initializeProgressBar() {
             const container = document.getElementById('code-progress');
-            // Create 20 blocks
-            for (let i = 0; i < 20; i++) {
+            
+            // Create 30 blocks
+            for (let i = 0; i < 30; i++) {
                 const block = document.createElement('div');
                 block.className = 'code-block';
                 container.appendChild(block);
             }
+            
             // Set initial progress
             updateProgress(70);
         }
@@ -111,7 +90,10 @@
         function updateProgress(value) {
             const blocks = document.querySelectorAll('.code-block');
             const activeBlocks = Math.floor((value / 100) * blocks.length);
-            const gradientOverlay = document.querySelector('.gradient-overlay');
+            const gradientEl = document.querySelector('.gradient-background');
+            
+            // Update the gradient width
+            gradientEl.style.transform = `scaleX(${value / 100})`;
             
             blocks.forEach((block, index) => {
                 if (index < activeBlocks) {
@@ -121,7 +103,6 @@
                 }
             });
 
-            gradientOverlay.style.width = value + '%';
             document.getElementById('code-value').textContent = value + '%';
         }
 

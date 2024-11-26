@@ -3,241 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress Bar Examples</title>
+    <title>Code Block Progress</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
             max-width: 800px;
             margin: 40px auto;
             padding: 20px;
-            background-color: #f5f5f5;
         }
 
         .container {
-            background: white;
+            background: #2d2d2d;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            border: 1px solid #3d3d3d;
         }
 
         h2 {
-            color: #333;
+            color: #569cd6;
             margin-bottom: 15px;
         }
 
-        /* 1. Basic HTML5 Progress Bar */
-        progress {
-            width: 300px;
-            height: 20px;
-        }
-
-        /* 2. Animated Striped Bootstrap-Style Progress Bar */
-        .progress-bar {
-            width: 300px;
-            height: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            width: 70%;
-            height: 100%;
-            background: linear-gradient(45deg,
-                rgba(255,255,255,.15) 25%,
-                transparent 25%,
-                transparent 50%,
-                rgba(255,255,255,.15) 50%,
-                rgba(255,255,255,.15) 75%,
-                transparent 75%);
-            background-color: #0d6efd;
-            background-size: 1rem 1rem;
-            animation: progress-animation 1s linear infinite;
-        }
-
-        @keyframes progress-animation {
-            0% { background-position: 0 0; }
-            100% { background-position: 1rem 0; }
-        }
-
-        /* 3. Circular Progress Bar */
-        .circular-progress {
-            transform: rotate(-90deg);
-        }
-
-        .background {
-            fill: none;
-            stroke: #f0f0f0;
-            stroke-width: 12;
-        }
-
-        .progress {
-            fill: none;
-            stroke: #00ff00;
-            stroke-width: 12;
-            stroke-dasharray: 339.292;
-            stroke-dashoffset: 101.788;
-            transition: stroke-dashoffset 0.5s;
-        }
-
-        /* 4. Material Design Progress */
-        .material-progress {
+        .code-blocks {
+            display: flex;
+            gap: 2px;
+            height: 30px;
+            background: #1e1e1e;
+            padding: 3px;
+            border-radius: 4px;
             position: relative;
-            height: 4px;
-            width: 300px;
-            background-color: #e0e0e0;
             overflow: hidden;
         }
 
-        .indeterminate {
-            background-color: #3f51b5;
+        .code-block {
+            flex: 1;
+            background: #2d2d2d;
+            border: 1px solid #3d3d3d;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .gradient-overlay {
             position: absolute;
             top: 0;
             left: 0;
-            bottom: 0;
-            will-change: left, right;
-            animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
-        }
-
-        @keyframes indeterminate {
-            0% {
-                left: -35%;
-                right: 100%;
-            }
-            60% {
-                left: 100%;
-                right: -90%;
-            }
-            100% {
-                left: 100%;
-                right: -90%;
-            }
-        }
-
-        /* 5. Gradient Progress Bar */
-        .gradient-progress {
-            width: 300px;
-            height: 25px;
-            background: #f0f0f0;
-            border-radius: 20px;
-            padding: 3px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
-        }
-
-        .gradient-fill {
-            display: flex;
-            align-items: center;
-            justify-content: center;
             height: 100%;
-            width: 70%;
-            background: linear-gradient(to right, #00b4db, #0083b0);
-            border-radius: 20px;
-            transition: width 0.5s ease-in-out;
+            width: 0%;
+            background: linear-gradient(to right, #F6FE76, #7EFBCB, #EA79D7);
+            transition: width 0.3s ease;
+            z-index: 0;
         }
 
-        .progress-text {
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
+        .code-block.active {
+            background: transparent;
+            border-color: transparent;
         }
 
-        /* Controls */
         .controls {
-            margin: 10px 0;
+            margin: 15px 0;
         }
 
         input[type="range"] {
             width: 200px;
+            background: #2d2d2d;
+        }
+
+        .value {
+            color: #569cd6;
+            font-family: monospace;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Progress Bar Examples</h1>
+    <h1>Code Block Progress</h1>
 
     <div class="container">
-        <h2>1. Basic HTML5 Progress Bar</h2>
-        <progress id="basic-progress" value="70" max="100"></progress>
-        <div class="controls">
-            <input type="range" min="0" max="100" value="70" 
-                   oninput="updateBasicProgress(this.value)">
-            <span id="basic-value">70%</span>
-        </div>
-    </div>
-
-    <div class="container">
-        <h2>2. Animated Striped Bootstrap-Style Progress Bar</h2>
-        <div class="progress-bar">
-            <div id="bootstrap-progress" class="progress-fill"></div>
+        <h2>Code Block Progress</h2>
+        <div id="code-progress" class="code-blocks">
+            <div class="gradient-overlay"></div>
+            <!-- Blocks added by JS -->
         </div>
         <div class="controls">
             <input type="range" min="0" max="100" value="70" 
-                   oninput="updateBootstrapProgress(this.value)">
-            <span id="bootstrap-value">70%</span>
-        </div>
-    </div>
-
-    <div class="container">
-        <h2>3. Circular SVG Progress Bar</h2>
-        <svg class="circular-progress" width="120" height="120">
-            <circle class="background" cx="60" cy="60" r="54" />
-            <circle id="circular-progress" class="progress" cx="60" cy="60" r="54" />
-        </svg>
-        <div class="controls">
-            <input type="range" min="0" max="100" value="70" 
-                   oninput="updateCircularProgress(this.value)">
-            <span id="circular-value">70%</span>
-        </div>
-    </div>
-
-    <div class="container">
-        <h2>4. Material Design Progress Bar</h2>
-        <div class="material-progress">
-            <div class="indeterminate"></div>
-        </div>
-        <p><em>Note: This is an indeterminate progress bar that animates continuously</em></p>
-    </div>
-
-    <div class="container">
-        <h2>5. Gradient Progress Bar with Text</h2>
-        <div class="gradient-progress">
-            <div id="gradient-progress" class="gradient-fill">
-                <span id="gradient-text" class="progress-text">70%</span>
-            </div>
-        </div>
-        <div class="controls">
-            <input type="range" min="0" max="100" value="70" 
-                   oninput="updateGradientProgress(this.value)">
-            <span id="gradient-value">70%</span>
+                   oninput="updateProgress(this.value)">
+            <span id="code-value" class="value">70%</span>
         </div>
     </div>
 
     <script>
-        function updateBasicProgress(value) {
-            document.getElementById('basic-progress').value = value;
-            document.getElementById('basic-value').textContent = value + '%';
+        function initializeProgressBar() {
+            const container = document.getElementById('code-progress');
+            // Create 20 blocks
+            for (let i = 0; i < 20; i++) {
+                const block = document.createElement('div');
+                block.className = 'code-block';
+                container.appendChild(block);
+            }
+            // Set initial progress
+            updateProgress(70);
         }
 
-        function updateBootstrapProgress(value) {
-            document.getElementById('bootstrap-progress').style.width = value + '%';
-            document.getElementById('bootstrap-value').textContent = value + '%';
+        function updateProgress(value) {
+            const blocks = document.querySelectorAll('.code-block');
+            const activeBlocks = Math.floor((value / 100) * blocks.length);
+            const gradientOverlay = document.querySelector('.gradient-overlay');
+            
+            blocks.forEach((block, index) => {
+                if (index < activeBlocks) {
+                    block.classList.add('active');
+                } else {
+                    block.classList.remove('active');
+                }
+            });
+
+            gradientOverlay.style.width = value + '%';
+            document.getElementById('code-value').textContent = value + '%';
         }
 
-        function updateCircularProgress(value) {
-            const circle = document.getElementById('circular-progress');
-            const circumference = 2 * Math.PI * 54;
-            const offset = circumference * (1 - value / 100);
-            circle.style.strokeDasharray = circumference;
-            circle.style.strokeDashoffset = offset;
-            document.getElementById('circular-value').textContent = value + '%';
-        }
-
-        function updateGradientProgress(value) {
-            document.getElementById('gradient-progress').style.width = value + '%';
-            document.getElementById('gradient-text').textContent = value + '%';
-            document.getElementById('gradient-value').textContent = value + '%';
-        }
+        // Initialize on page load
+        initializeProgressBar();
     </script>
 </body>
 </html>

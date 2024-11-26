@@ -10,12 +10,15 @@
         .tier-container {
             width: 850px;
             margin: 20px auto;
+            height: auto;
+            overflow: visible;
         }
 
         .tier-row {
             display: flex;
             margin-bottom: 4px;
-            height: 102px;
+            min-height: 102px;
+            height: auto;
         }
 
         .tier-label {
@@ -82,10 +85,15 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1px;
-            align-items: center;
+            align-items: flex-start;
             border-radius: 4px;
             margin-left: 8px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            min-height: 102px;
+            height: auto;
+            overflow: visible;
         }
 
         .item-pool {
@@ -101,7 +109,7 @@
 
         .draggable-item {
             height: 100px;
-            width: 50px;
+            width: 55px;
             cursor: move;
             padding: 0;
             margin: 0;
@@ -111,15 +119,15 @@
             justify-content: flex-start;
             background: none;
             position: relative;
+            z-index: 2;
+            flex-shrink: 0;
         }
 
         .rarity-score {
             font-family: 'Inter', sans-serif;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 600;
             color: white;
-            margin-bottom: 2px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             padding: 2px 4px;
             border-radius: 4px;
             background: linear-gradient(135deg, currentColor 0%, rgba(255,255,255,0.8) 100%);
@@ -241,6 +249,36 @@
 
         .auto-complete-btn:hover {
             opacity: 0.9;
+        }
+
+        .rarity-score-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 2px;
+        }
+
+        .star-diff {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: flex-start;
+            gap: 2px;
+            padding: 2px 0;
+        }
+
+        .star-diff.positive {
+            color: #00ff00;
+        }
+
+        .star-diff.negative {
+            color: #ff0000;
+        }
+
+        .star-diff.equal {
+            color: #ffff00;
         }
     </style>
 </head>
@@ -389,21 +427,96 @@
                 autoCompleteBtn.className = 'auto-complete-btn';
                 autoCompleteBtn.textContent = 'Auto Complete';
                 autoCompleteBtn.onclick = () => {
-                    // Get all items from the pool
                     const itemPool = document.getElementById('itemPool');
                     const items = Array.from(itemPool.getElementsByClassName('draggable-item'));
-                    
-                    // Get all tier content containers
                     const tiers = Array.from(document.getElementsByClassName('tier-content'));
                     
-                    // Randomly distribute items to tiers
+                    // Debug log to verify tiers
+                    console.log('Found tiers:', tiers.length);
+                    tiers.forEach((tier, index) => {
+                        console.log(`Tier ${index}:`, tier);
+                    });
+                    
                     items.forEach(item => {
-                        if (item !== autoCompleteBtn) {  // Skip the button itself
-                            // Pick a random tier (0-4)
-                            const randomTierIndex = Math.floor(Math.random() * tiers.length);
-                            // Move item to the selected tier
-                            tiers[randomTierIndex].appendChild(item);
+                        if (item === autoCompleteBtn) return;
+                        
+                        const imgUrl = item.querySelector('img').src;
+                        const cardData = uniqueCards.get(imgUrl);
+                        if (!cardData) return;
+                        
+                        const { hero_stars, new_hero_stars, fantasy_score } = cardData;
+                        let targetTierRule1 = null;
+                        let targetTierRule2 = null;
+
+                        // New Rule 0: Fantasy score = 0 goes to tier D
+                        if (fantasy_score === 0) {
+                            const targetTier = tiers[4]; // D tier (index 4)
+                            if (targetTier) {
+                                if (item.parentNode) {
+                                    item.parentNode.removeChild(item);
+                                }
+                                targetTier.appendChild(item);
+                                return; // Skip other rules if this one matches
+                            }
                         }
+
+                        // Rule 1: Based on absolute star values
+                        if (hero_stars === new_hero_stars) {  // First check if stars are equal
+                            if (hero_stars >= 8) {
+                                targetTierRule1 = 0;        // S tier
+                            } else if (hero_stars === 7) {
+                                targetTierRule1 = 1;        // A tier
+                            } else if (hero_stars >= 5) {   // Combines 5 and 6
+                                targetTierRule1 = 2;        // B tier
+                            } else if (hero_stars >= 3) {   // Combines 3 and 4
+                                targetTierRule1 = 3;        // C tier
+                            } else {                        // 1 and 2
+                                targetTierRule1 = 4;        // D tier
+                            }
+                        }
+                        // No else clause - if no condition matches, targetTierRule1 remains null
+
+                        // Rule 2: Based on star difference
+                        const starDiff = new_hero_stars - hero_stars;
+                        if (starDiff >= 4) {
+                            targetTierRule2 = 0; // S tier
+                        } else if (starDiff >= 3) {
+                            targetTierRule2 = 1; // A tier
+                        } else if (starDiff >= -2 && starDiff <= 2) {
+                            targetTierRule2 = 2; // B tier
+                        } else if (starDiff <= -3) {
+                            targetTierRule2 = 3; // C tier
+                        } else if (starDiff <= -4) {
+                            targetTierRule2 = 4; // D tier
+                        }
+                        // No else clause needed as we only move items that match conditions
+
+                        // Only move the item if at least one rule matched
+                        if (targetTierRule1 !== null || targetTierRule2 !== null) {
+                            const finalTierIndex = Math.min(
+                                targetTierRule1 === null ? Infinity : targetTierRule1,
+                                targetTierRule2 === null ? Infinity : targetTierRule2
+                            );
+                            
+                            // Debug log
+                            console.log('Moving item to tier:', finalTierIndex);
+                            
+                            const targetTier = tiers[finalTierIndex];
+                            if (targetTier) {
+                                // Remove the item from its current parent first
+                                if (item.parentNode) {
+                                    item.parentNode.removeChild(item);
+                                }
+                                // Then append to new tier
+                                targetTier.appendChild(item);
+                                
+                                // Debug log
+                                console.log('Item moved to:', targetTier);
+                            } else {
+                                console.error('Target tier not found:', finalTierIndex);
+                            }
+                        }
+                        // If neither rule matched, item stays in pool
                     });
                 };
                 itemPool.appendChild(autoCompleteBtn);
@@ -416,22 +529,41 @@
                     item.id = `item${index + 1}`;
                     item.ondragstart = drag;
                     
-                    // Add rarity score
+                    const scoreDivContainer = document.createElement('div');
+                    scoreDivContainer.className = 'rarity-score-container';
+
                     const scoreDiv = document.createElement('div');
                     scoreDiv.className = 'rarity-score';
                     scoreDiv.textContent = Math.round(scores.rarity_score);
                     scoreDiv.style.background = getScoreGradient(scores.fantasy_score);
                     scoreDiv.style.webkitBackgroundClip = 'text';
                     scoreDiv.style.webkitTextFillColor = 'transparent';
-                    scoreDiv.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
-                    
+
+                    const starDiff = document.createElement('div');
+                    starDiff.className = 'star-diff';
+                    const starDifference = scores.new_hero_stars - scores.hero_stars;
+
+                    if (starDifference > 0) {
+                        starDiff.classList.add('positive');
+                        starDiff.innerHTML = `↗ ${starDifference}`;
+                    } else if (starDifference < 0) {
+                        starDiff.classList.add('negative');
+                        starDiff.innerHTML = `↙ ${Math.abs(starDifference)}`;
+                    } else {
+                        starDiff.classList.add('equal');
+                        starDiff.innerHTML = `${scores.hero_stars}`;
+                    }
+
+                    scoreDivContainer.appendChild(scoreDiv);
+                    scoreDivContainer.appendChild(starDiff);
+
                     // Add image
                     const img = document.createElement('img');
                     img.src = url;
                     img.onerror = () => console.error(`Failed to load image: ${url}`);
                     
                     // Add elements to item
-                    item.appendChild(scoreDiv);
+                    item.appendChild(scoreDivContainer);
                     item.appendChild(img);
                     itemPool.appendChild(item);
                 });

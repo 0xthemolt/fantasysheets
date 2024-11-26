@@ -4,12 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tier List Maker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <!-- Add this inline font loading script in the head -->
+    <script>
+        // Inline the font-face declarations
+        const fontStyles = `
+            @font-face {
+                font-family: 'Inter';
+                font-style: normal;
+                font-weight: 600;
+                font-display: swap;
+                src: url(https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2) format('woff2');
+            }
+            @font-face {
+                font-family: 'Orbitron';
+                font-style: normal;
+                font-weight: 600;
+                font-display: swap;
+                src: url(https://fonts.gstatic.com/s/orbitron/v29/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nyGy6BoWgz.woff2) format('woff2');
+            }
+        `;
+
+        // Create and inject the style element
+        const style = document.createElement('style');
+        style.textContent = fontStyles;
+        document.head.appendChild(style);
+
+        // Load the fonts asynchronously
+        const loadFonts = () => {
+            const fontLinks = [
+                'https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap',
+                'https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap'
+            ];
+
+            fontLinks.forEach(href => {
+                const link = document.createElement('link');
+                link.href = href;
+                link.rel = 'stylesheet';
+                link.media = 'print';
+                link.onload = () => { link.media = 'all'; };
+                document.head.appendChild(link);
+            });
+        };
+
+        // Load fonts after the page has started rendering
+        if (window.requestIdleCallback) {
+            requestIdleCallback(loadFonts);
+        } else {
+            // Fallback for browsers that don't support requestIdleCallback
+            setTimeout(loadFonts, 1);
+        }
+    </script>
+
     <style>
         .tier-container {
             width: 850px;
@@ -296,14 +341,87 @@
         .star-diff.equal {
             color: #ffff00;
         }
+
+        .search-controls {
+            width: 850px;
+            margin: 0 auto 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .player-select {
+            background: #333;
+            color: white;
+            border: 1px solid #86E8E0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            min-width: 150px;
+            cursor: pointer;
+        }
+
+        .player-select:focus {
+            outline: none;
+            border-color: #EA79D7;
+        }
+
+        .select2-container {
+            min-width: 200px !important;
+        }
+
+        .select2-container--default .select2-selection--single {
+            background-color: #333 !important;
+            border: 1px solid #86E8E0 !important;
+            border-radius: 4px !important;
+            height: 32px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: white !important;
+            line-height: 32px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 12px !important;
+        }
+
+        .select2-dropdown {
+            background-color: #333 !important;
+            border: 1px solid #86E8E0 !important;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background-color: #444 !important;
+            color: white !important;
+            border: 1px solid #86E8E0 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .select2-container--default .select2-results__option {
+            color: white !important;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 12px !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #86E8E0 !important;
+            color: #333 !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 30px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #86E8E0 transparent transparent transparent !important;
+        }
     </style>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" as="style">
-    <link rel="preload" href="https://fonts.gstatic.com/s/orbitron/v29/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nyGy6BoWgz.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body style="background-color: #000000; color: white;">
     <div class="title-section">
@@ -325,6 +443,12 @@
                 <div class="percentage">0%</div>
             </div>
         </div>
+    </div>
+    <div class="search-controls">
+        <select id="playerSelect" class="player-select">
+            <option value="">Select Player</option>
+        </select>
+        <button class="auto-complete-btn">Auto Complete</button>
     </div>
     <div class="tier-container">
         <div class="tier-row">
@@ -362,197 +486,36 @@
                 const response = await fetch('/player_decks.json');
                 const data = await response.json();
                 
-                // Filter decks and get player picture
-                const moltDecks = data.league_results.filter(deck => deck.player_handle === '0xthemolt');
-                if (moltDecks.length > 0) {
-                    const playerPic = moltDecks[0].player_pic;
-                    if (playerPic) {
-                        document.getElementById('playerPic').src = playerPic;
-                    }
-                }
+                // Get unique player handles and sort them
+                const uniquePlayers = [...new Set(data.league_results.map(deck => deck.player_handle))].sort();
                 
-                const allMoltCards = moltDecks.flatMap(deck => deck.cards);
-                
-                // Calculate and update tournament progress percentage
-                if (data.metadata) {
-                    const progress = (data.metadata.tournament_progress_hours / data.metadata.tournament_duration_hours) * 100;
-                    const roundedProgress = Math.round(progress);
-                    
-                    // Update percentage text
-                    document.querySelector('.percentage').textContent = `${roundedProgress}%`;
-                    
-                    // Update progress circle
-                    const circle = document.querySelector('.progress');
-                    const circumference = 528;
-                    const offset = circumference - (progress / 100) * circumference;
-                    circle.style.strokeDashoffset = offset;
-                }
-                
-                // Create a Map to store unique cards with their scores
-                const uniqueCards = new Map();
-                allMoltCards.forEach(card => {
-                    uniqueCards.set(card.picture_url, {
-                        rarity_score: card.rarity_score,
-                        fantasy_score: card.fantasy_score || 0,
-                        hero_stars: card.hero_stars,
-                        new_hero_stars: card.new_hero_stars
-                    });
+                // Populate select element
+                const playerSelect = document.getElementById('playerSelect');
+                uniquePlayers.forEach(handle => {
+                    const option = document.createElement('option');
+                    option.value = handle;
+                    option.textContent = handle;
+                    if (handle === '0xthemolt') option.selected = true;
+                    playerSelect.appendChild(option);
                 });
-                
-                // Convert to array and sort by fantasy_score descending
-                const sortedCards = [...uniqueCards.entries()]
-                    .sort((a, b) => {
-                        const scoreA = a[1].fantasy_score || 0;
-                        const scoreB = b[1].fantasy_score || 0;
-                        return scoreB - scoreA;
-                    });
-                
-                // Find min and max fantasy scores for color scaling
-                const fantasyScores = sortedCards.map(([_, card]) => card.fantasy_score);
-                const minScore = Math.min(...fantasyScores);
-                const maxScore = Math.max(...fantasyScores);
-                
-                // Function to get gradient style based on score
-                const getScoreGradient = (score) => {
-                    const normalized = (score - minScore) / (maxScore - minScore);
-                    // Calculate gradient colors
-                    const startRed = Math.round(255 * (1 - normalized));
-                    const startGreen = Math.round(255 * normalized);
-                    const endRed = Math.min(255, startRed + 40);
-                    const endGreen = Math.min(255, startGreen + 40);
-                    return `linear-gradient(135deg, 
-                        rgb(${startRed}, ${startGreen}, 0) 0%,
-                        rgb(${endRed}, ${endGreen}, 100) 100%)`;
-                };
-                
-                const itemPool = document.getElementById('itemPool');
 
-                // Add the Auto Complete button
-                const autoCompleteBtn = document.createElement('button');
-                autoCompleteBtn.className = 'auto-complete-btn';
-                autoCompleteBtn.textContent = 'Auto Complete';
-                autoCompleteBtn.onclick = () => {
-                    const itemPool = document.getElementById('itemPool');
-                    const items = Array.from(itemPool.getElementsByClassName('draggable-item'));
-                    const tiers = Array.from(document.getElementsByClassName('tier-content'));
-                    
-                    items.forEach(item => {
-                        if (item === autoCompleteBtn) return;
-                        
-                        const imgUrl = item.querySelector('img').src;
-                        const cardData = uniqueCards.get(imgUrl);
-                        if (!cardData) return;
-                        
-                        const { hero_stars, new_hero_stars, fantasy_score } = cardData;
-                        
-                        let targetTierRule1 = null;
-
-                        // Rule 0: Fantasy score check
-                        if (fantasy_score === 0) {
-                            const targetTier = tiers[4];
-                            if (targetTier) {
-                                if (item.parentNode) {
-                                    item.parentNode.removeChild(item);
-                                }
-                                targetTier.appendChild(item);
-                                return;
-                            }
-                        }
-
-                        // Combined rules for tier placement
-                        const starDiff = new_hero_stars - hero_stars;
-                        
-                        // Determine tier based on star difference
-                        if (starDiff >= 4) {
-                            targetTierRule1 = 0; // S tier
-                        } else if (starDiff >= 3) {
-                            targetTierRule1 = 1; // A tier
-                        } else if (starDiff >= -2 && starDiff <= 2) {
-                            // For equal stars (starDiff = 0), use absolute star value
-                            if (starDiff === 0) {
-                                if (hero_stars >= 8) {
-                                    targetTierRule1 = 0; // S tier
-                                } else if (hero_stars === 7) {
-                                    targetTierRule1 = 1; // A tier
-                                } else if (hero_stars >= 5) {
-                                    targetTierRule1 = 2; // B tier
-                                } else if (hero_stars >= 3) {
-                                    targetTierRule1 = 3; // C tier
-                                } else {
-                                    targetTierRule1 = 4; // D tier
-                                }
-                            } else {
-                                targetTierRule1 = 2; // B tier for small differences
-                            }
-                        } else if (starDiff <= -3) {
-                            targetTierRule1 = 3; // C tier
-                        } else if (starDiff <= -4) {
-                            targetTierRule1 = 4; // D tier
-                        }
-
-                        const finalTierIndex = targetTierRule1;
-
-                        if (targetTierRule1 !== null) {
-                            const targetTier = tiers[finalTierIndex];
-                            if (targetTier) {
-                                if (item.parentNode) {
-                                    item.parentNode.removeChild(item);
-                                }
-                                targetTier.appendChild(item);
-                            }
-                        }
-                    });
-                };
-                itemPool.appendChild(autoCompleteBtn);
-
-                // Then continue with your existing code for adding the cards
-                sortedCards.forEach(([url, scores], index) => {
-                    const item = document.createElement('div');
-                    item.className = 'draggable-item';
-                    item.draggable = true;
-                    item.id = `item${index + 1}`;
-                    item.ondragstart = drag;
-                    
-                    const scoreDivContainer = document.createElement('div');
-                    scoreDivContainer.className = 'rarity-score-container';
-
-                    const scoreDiv = document.createElement('div');
-                    scoreDiv.className = 'rarity-score';
-                    scoreDiv.textContent = Math.round(scores.rarity_score);
-                    scoreDiv.style.background = getScoreGradient(scores.fantasy_score);
-                    scoreDiv.style.webkitBackgroundClip = 'text';
-                    scoreDiv.style.webkitTextFillColor = 'transparent';
-
-                    const starDiff = document.createElement('div');
-                    starDiff.className = 'star-diff';
-                    const starDifference = scores.new_hero_stars - scores.hero_stars;
-
-                    if (starDifference > 0) {
-                        starDiff.classList.add('positive');
-                        starDiff.innerHTML = `↗ ${starDifference}`;
-                    } else if (starDifference < 0) {
-                        starDiff.classList.add('negative');
-                        starDiff.innerHTML = `↙ ${Math.abs(starDifference)}`;
-                    } else {
-                        starDiff.classList.add('equal');
-                        starDiff.innerHTML = `${scores.hero_stars}`;
-                    }
-
-                    scoreDivContainer.appendChild(scoreDiv);
-                    scoreDivContainer.appendChild(starDiff);
-
-                    // Add image
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.onerror = () => console.error(`Failed to load image: ${url}`);
-                    
-                    // Add elements to item
-                    item.appendChild(scoreDivContainer);
-                    item.appendChild(img);
-                    itemPool.appendChild(item);
+                // Initialize select2
+                $('#playerSelect').select2({
+                    placeholder: 'Select Player',
+                    allowClear: true,
+                    theme: 'default',
+                    width: '200px'
                 });
+
+                // Add change event listener to select
+                $('#playerSelect').on('change', function(e) {
+                    updatePlayerCards(e.target.value);
+                });
+
+                // Initial load with default player
+                updatePlayerCards('0xthemolt');
+
             } catch (error) {
-                // Only log actual errors, not the extension connection message
                 if (!error.message.includes("Could not establish connection")) {
                     console.error('Detailed error loading player cards:', error);
                     console.error('Stack trace:', error.stack);
@@ -574,12 +537,15 @@
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text");
             const draggedElement = document.getElementById(data);
-            const dropZone = ev.target.classList.contains('tier-content') 
-                ? ev.target 
-                : ev.target.closest('.tier-content') || ev.target.closest('.item-pool');
+            
+            // Use closest once and cache the result
+            const dropZone = ev.target.closest('.tier-content, .item-pool');
             
             if (dropZone && draggedElement) {
-                dropZone.appendChild(draggedElement);
+                // Use more efficient DOM manipulation
+                requestAnimationFrame(() => {
+                    dropZone.appendChild(draggedElement);
+                });
             }
         }
 

@@ -664,11 +664,11 @@
                         else if (new_hero_stars === 7) {
                             targetTierRule1 = 1; // D tier
                         }
-                        else if (starDiff >= 4) {
+                        else if (starDiff >= 3) {
                             targetTierRule1 = 0; // S tier
-                        } else if (starDiff >= 3) {
+                        } else if (starDiff >= 2) {
                             targetTierRule1 = 1; // A tier
-                        } else if (starDiff >= -2 && starDiff <= 2) {
+                        } else if (starDiff >= -1 && starDiff <= 1) {
                             // For equal stars (starDiff = 0), use absolute star value
                             if (starDiff === 0) {
                                 if (hero_stars >= 8) {
@@ -685,9 +685,9 @@
                             } else {
                                 targetTierRule1 = 2; // B tier for small differences
                             }
-                        } else if (starDiff <= -3) {
+                        } else if (starDiff <= -2) {
                             targetTierRule1 = 3; // C tier
-                        } else if (starDiff <= -4) {
+                        } else if (starDiff <= -3) {
                             targetTierRule1 = 4; // D tier
                         }
 

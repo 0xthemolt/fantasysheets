@@ -104,7 +104,7 @@
 
         .column-title {
             color: #fff;
-            font-size: 1.3em;
+            font-size: 1em;
             margin-bottom: .5rem;
             margin-top: 0;
             padding-bottom: 0.2rem;
@@ -130,6 +130,7 @@
             border-radius: 4px;
             transition: all 0.2s ease;
             background-color: #f8f9fa;
+            font-size: 0.75em;
         }
 
         .nav-link:hover {
@@ -142,19 +143,33 @@
         @media (min-width: 768px) {
             .nav-container {
                 width: 60%;
-                min-width: 600px;  /* Reduced from 700px */
-                max-width: 800px;  /* Added max-width to prevent too wide layout */
+                min-width: 600px;
+                max-width: 800px;
             }
 
             .grid-layout {
-                grid-template-columns: repeat(2, 1fr);  /* Creates two equal columns */
-                grid-template-rows: repeat(2, auto);    /* Creates two rows */
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: auto;
             }
             
-            /* Remove the full-width class styles since we want all items to be equal size */
-            .column-container {
-                grid-column: span 1;  /* Each container takes up one column */
+            /* Add specific grid positioning */
+            .column-container:nth-child(1) { /* Scout */
+                grid-column: 1 / -1;  /* Full width */
             }
+            
+            /* Heroes and Players remain as 2 columns */
+            
+            /* Rewards and Fun remain as 2 columns */
+            
+            .column-container:last-child { /* Other */
+                grid-column: 1 / -1;  /* Full width */
+            }
+        }
+
+        p {
+            font-size: 0.38em;
+            color: grey;
+            text-align: center;
         }
     </style>
 </head>
@@ -162,6 +177,10 @@
     <h1>FantasySheets - Tournament Analytics</h1>
     <div class="nav-container">
         <div class="grid-layout">
+            <div class="column-container">
+                <h2 class="column-title">FantasyScout</h2>
+                <ul class="nav-list" id="scoutList"></ul>
+            </div>
             <div class="column-container">
                 <h2 class="column-title">Heroes</h2>
                 <ul class="nav-list" id="heroList"></ul>
@@ -188,6 +207,9 @@
 
     <script>
     const pages = {
+        scout: [ 
+            { filename: 'index.html', title: 'FantasyScout (in development)' },
+        ],
         heroes: [
             { filename: 'hero_scorecenter.html', title: 'Hero Score Center' },
             { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking'},
@@ -214,6 +236,7 @@
     };
 
     function loadPages() {
+        const scoutList = document.getElementById('scoutList');
         const heroList = document.getElementById('heroList');
         const playerList = document.getElementById('playerList');
         const rewardList = document.getElementById('rewardList');
@@ -255,6 +278,7 @@
             });
         }
 
+        createLinks(pages.scout, scoutList);
         createLinks(pages.heroes, heroList);
         createLinks(pages.players, playerList);
         createLinks(pages.rewards, rewardList);

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="./styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scout Cards</title>
     <style>
@@ -42,16 +43,17 @@
             flex-wrap: wrap;
             gap: 5px;
             padding: 10px;
-            border: 1px solid #eee;
             border-radius: 8px;
             min-height: 50px;
+            background-color: #292828;
+            border: none;
         }
         .card-image {
             width: 80px;
             height: 120px;
             object-fit: cover;
             border-radius: 8px;
-            border: 2px solid #ddd;
+            border: none;
         }
         .card-wrapper {
             position: relative;
@@ -133,16 +135,17 @@
                 flex-wrap: wrap;
                 gap: 5px;
                 padding: 10px;
-                border: 1px solid #eee;
                 border-radius: 8px;
                 min-height: 50px;
+                background-color: #292828;
+                border: none;
             }
             .card-image {
                 width: 80px;
                 height: 120px;
                 object-fit: cover;
                 border-radius: 8px;
-                border: 2px solid #ddd;
+                border: none;
             }
             .card-wrapper {
                 position: relative;
@@ -299,7 +302,11 @@
             header.className = 'matrix-header';
             header.innerHTML = `
                 <div>Stars</div>
-                ${activeRarities.map(rarity => `<div>${rarity}</div>`).join('')}
+                ${activeRarities.map(rarity => `
+                    <div style="color: ${getRarityColor(rarity)}">
+                        ${rarity}
+                    </div>
+                `).join('')}
             `;
             
             // Update grid template columns based on number of active rarities
@@ -612,6 +619,16 @@
 
         // Initial load
         fetchCardData();
+
+        const getRarityColor = (rarity) => {
+            const colorMap = {
+                'Common': '#48EE4B',
+                'Rare': '#02E0F4',
+                'Epic': '#CD2FD7',
+                'Legendary': '#7F76F5'
+            };
+            return colorMap[rarity] || '#666666';
+        };
     </script>
 </body>
 </html>

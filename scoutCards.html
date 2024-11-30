@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Cards</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scout Cards</h1>
+    <div id="loading">Loading...</div>
+    <table id="cardsTable" style="display: none;">
+        <thead>
+            <tr id="headerRow">
+                <!-- Headers will be dynamically added -->
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data rows will be dynamically added -->
+        </tbody>
+    </table>
+
+    <script>
+        const myHeaders = new Headers();
+        myHeaders.append("accept", "application/json");
+        myHeaders.append("accept-language", "en-US,en;q=0.9");
+        myHeaders.append("origin", "https://fantasy-top.redoc.ly");
+        myHeaders.append("priority", "u=1, i");
+        myHeaders.append("referer", "https://fantasy-top.redoc.ly/");
+        myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
+        myHeaders.append("sec-ch-ua-mobile", "?0");
+        myHeaders.append("sec-ch-ua-platform", "\"Windows\"");
+        myHeaders.append("sec-fetch-dest", "empty");
+        myHeaders.append("sec-fetch-mode", "cors");
+        myHeaders.append("sec-fetch-site", "cross-site");
+        myHeaders.append("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+        myHeaders.append("x-api-key", "7ecbff33-d82e-4a4e-8b53-004446914dd6");
+        myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIweDE2MkY5NWE5MzY0Yzg5MTAyOGQyNTU0NjdGNjE2OTAyQTQ3OTY4MWEiLCJpYXQiOjE3MTYxMzk0NzEsImV4cCI6MTcxNjE4MjY3MSwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIiwieC1oYXN1cmEtdXNlci1pZCI6IjB4MTYyRjk1YTkzNjRjODkxMDI4ZDI1NTQ2N0Y2MTY5MDJBNDc5NjgxYSJ9fQ.jQqSiDScZl6nP2UBKIo_pNd9-fdeVkS7N8umbSAqeKI");
+
+        const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+        };
+
+        // Add this helper function before the fetch call
+        const extractHeroStars = (pictureUrl) => {
+            const match = pictureUrl.match(/(\d+)\.png$/);
+            return match ? parseInt(match[1]) : 0;
+        };
+
+        fetch("https://portal.fantasy.top/card?%24limit=50&%24skip=0&owner=0x162F95a9364c891028d255467F616902A479681a", requestOptions)
+            .then((response) => response.json())
+            .then((data) => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('cardsTable').style.display = 'table';
+                
+                // Transform the data to add heroStars
+                if (data.data && data.data.length > 0) {
+                    data.data = data.data.map(item => ({
+                        ...item,
+                        heroStars: extractHeroStars(item.picture)
+                    }));
+
+                    // Create table headers
+                    const headers = Object.keys(data.data[0]);
+                    const headerRow = document.getElementById('headerRow');
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        // Improve header display for heroStars
+                        th.textContent = header === 'heroStars' ? 'Stars' : header;
+                        headerRow.appendChild(th);
+                    });
+
+                    // Create table rows
+                    const tableBody = document.getElementById('tableBody');
+                    data.data.forEach(item => {
+                        const row = document.createElement('tr');
+                        headers.forEach(header => {
+                            const td = document.createElement('td');
+                            // Special formatting for heroStars
+                            if (header === 'heroStars') {
+                                td.textContent = '⭐'.repeat(item[header]);
+                            } else {
+                                td.textContent = item[header] || '';
+                            }
+                            row.appendChild(td);
+                        });
+                        tableBody.appendChild(row);
+                    });
+                }
+            })
+            .catch((error) => {
+                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+                console.error(error);
+            });
+    </script>
+</body>
+</html>

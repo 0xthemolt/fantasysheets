@@ -170,6 +170,26 @@
     </div>
 
     <script>
+        // Add these global variables at the top of the script
+        let heroMetadata = [];
+        let heroesData = [];
+
+        // Add this function to load the JSON data
+        async function loadHeroData() {
+            try {
+                const response = await fetch('/hero_stats.json');
+                const data = await response.json();
+                
+                // Store the data globally
+                heroMetadata = data.metadata || [];
+                heroesData = data.heroes || [];
+                
+                console.log(`Loaded ${heroMetadata.length} metadata entries and ${heroesData.length} hero entries`);
+            } catch (error) {
+                console.error('Error loading hero data:', error);
+            }
+        }
+
         // Helper functions
         const extractHeroStars = (pictureUrl) => {
             const match = pictureUrl.match(/(\d+)\.png$/);
@@ -618,8 +638,14 @@
             }
         });
 
+        // Modify the initial load section at the bottom of the script
         // Initial load
-        fetchCardData();
+        Promise.all([
+            loadHeroData(),
+            fetchCardData()
+        ]).catch(error => {
+            console.error('Error during initial load:', error);
+        });
 
         const getRarityColor = (rarity) => {
             const colorMap = {
@@ -630,6 +656,15 @@
             };
             return colorMap[rarity] || '#666666';
         };
+
+        // Add these helper functions where convenient
+        function getHeroMetadata(heroId) {
+            return heroMetadata.find(meta => meta.hero_id === heroId);
+        }
+
+        function getHeroStats(heroId) {
+            return heroesData.find(hero => hero.hero_id === heroId);
+        }
     </script>
 </body>
 </html>

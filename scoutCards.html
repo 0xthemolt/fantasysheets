@@ -76,7 +76,31 @@
             font-size: 8px;
             color: white;
             margin-top: 4px;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.2;
+        }
+        .score-gauge {
+            margin: 2px 0;
+        }
+        .gauge-bar {
+            position: relative;
+            height: 3px;
+            background: #444;
+            border-radius: 1.5px;
+            margin: 2px 0;
+        }
+        .gauge-fill {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+        .gauge-value {
+            font-size: 8px;
+            color: white;
+            text-align: center;
         }
     </style>
 </head>
@@ -172,10 +196,11 @@
                 z-index: 1;
             }
             .score-diff {
-                font-size: 3px;
+                font-size: 8px;
                 color: white;
                 margin-top: 4px;
-                white-space: nowrap;
+                white-space: normal;
+                line-height: 1.2;
             }
         </style>
     </div>
@@ -410,7 +435,37 @@
                         if (heroStats && heroStats.seven_day_score_diff !== undefined) {
                             const scoreDiff = document.createElement('div');
                             scoreDiff.className = 'score-diff';
-                            scoreDiff.textContent = `7D: ${Math.round(heroStats.seven_day_score_diff)}`;
+                            
+                            const ranges = findScoreRanges();
+                            
+                            // 7D label and gauge
+                            const sevenDayLabel = document.createElement('div');
+                            sevenDayLabel.style.fontSize = '8px';
+                            sevenDayLabel.style.color = 'white';
+                            sevenDayLabel.textContent = '7D';
+                            scoreDiff.appendChild(sevenDayLabel);
+                            
+                            const sevenDayGauge = createScoreGauge(
+                                heroStats.seven_day_score_diff,
+                                ranges.sevenDayRange.min,
+                                ranges.sevenDayRange.max
+                            );
+                            scoreDiff.appendChild(sevenDayGauge);
+                            
+                            // L3MT label and gauge
+                            const l3mtLabel = document.createElement('div');
+                            l3mtLabel.style.fontSize = '8px';
+                            l3mtLabel.style.color = 'white';
+                            l3mtLabel.textContent = 'L3MT';
+                            scoreDiff.appendChild(l3mtLabel);
+                            
+                            const l3mtGauge = createScoreGauge(
+                                heroStats.l3_main_score_diff,
+                                ranges.l3mtRange.min,
+                                ranges.l3mtRange.max
+                            );
+                            scoreDiff.appendChild(l3mtGauge);
+                            
                             wrapper.appendChild(scoreDiff);
                         }
 
@@ -601,7 +656,37 @@
                         if (heroStats && heroStats.seven_day_score_diff !== undefined) {
                             const scoreDiff = document.createElement('div');
                             scoreDiff.className = 'score-diff';
-                            scoreDiff.textContent = `7D: ${Math.round(heroStats.seven_day_score_diff)}`;
+                            
+                            const ranges = findScoreRanges();
+                            
+                            // 7D label and gauge
+                            const sevenDayLabel = document.createElement('div');
+                            sevenDayLabel.style.fontSize = '8px';
+                            sevenDayLabel.style.color = 'white';
+                            sevenDayLabel.textContent = '7D';
+                            scoreDiff.appendChild(sevenDayLabel);
+                            
+                            const sevenDayGauge = createScoreGauge(
+                                heroStats.seven_day_score_diff,
+                                ranges.sevenDayRange.min,
+                                ranges.sevenDayRange.max
+                            );
+                            scoreDiff.appendChild(sevenDayGauge);
+                            
+                            // L3MT label and gauge
+                            const l3mtLabel = document.createElement('div');
+                            l3mtLabel.style.fontSize = '8px';
+                            l3mtLabel.style.color = 'white';
+                            l3mtLabel.textContent = 'L3MT';
+                            scoreDiff.appendChild(l3mtLabel);
+                            
+                            const l3mtGauge = createScoreGauge(
+                                heroStats.l3_main_score_diff,
+                                ranges.l3mtRange.min,
+                                ranges.l3mtRange.max
+                            );
+                            scoreDiff.appendChild(l3mtGauge);
+                            
                             wrapper.appendChild(scoreDiff);
                         }
 
@@ -713,6 +798,43 @@
 
         function getHeroStats(heroId) {
             return heroesData.find(hero => hero.hero_id === heroId);
+        }
+
+        // Add these helper functions at the top of your script section
+        function findScoreRanges() {
+            let sevenDayRange = { min: 0, max: 0 };
+            let l3mtRange = { min: 0, max: 0 };
+            
+            heroesData.forEach(hero => {
+                if (hero.seven_day_score_diff !== undefined) {
+                    sevenDayRange.min = Math.min(sevenDayRange.min, hero.seven_day_score_diff);
+                    sevenDayRange.max = Math.max(sevenDayRange.max, hero.seven_day_score_diff);
+                }
+                if (hero.l3_main_score_diff !== undefined) {
+                    l3mtRange.min = Math.min(l3mtRange.min, hero.l3_main_score_diff);
+                    l3mtRange.max = Math.max(l3mtRange.max, hero.l3_main_score_diff);
+                }
+            });
+            
+            return { sevenDayRange, l3mtRange };
+        }
+
+        function createScoreGauge(value, minValue, maxValue) {
+            const gauge = document.createElement('div');
+            gauge.className = 'score-gauge';
+            
+            // Calculate the position (0-100) with 50 being the middle (0 value)
+            const range = Math.max(Math.abs(minValue), Math.abs(maxValue));
+            const position = ((value + range) / (range * 2)) * 100;
+            
+            gauge.innerHTML = `
+                <div class="gauge-bar">
+                    <div class="gauge-fill" style="left: ${position}%"></div>
+                </div>
+                <div class="gauge-value">${Math.round(value)}</div>
+            `;
+            
+            return gauge;
         }
     </script>
 </body>

@@ -58,6 +58,7 @@
         .card-wrapper {
             position: relative;
             display: inline-block;
+            text-align: center;
         }
         .card-count {
             position: absolute;
@@ -70,6 +71,12 @@
             font-size: 12px;
             font-weight: bold;
             z-index: 1;
+        }
+        .score-diff {
+            font-size: 8px;
+            color: white;
+            margin-top: 4px;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -150,6 +157,7 @@
             .card-wrapper {
                 position: relative;
                 display: inline-block;
+                text-align: center;
             }
             .card-count {
                 position: absolute;
@@ -162,6 +170,12 @@
                 font-size: 12px;
                 font-weight: bold;
                 z-index: 1;
+            }
+            .score-diff {
+                font-size: 3px;
+                color: white;
+                margin-top: 4px;
+                white-space: nowrap;
             }
         </style>
     </div>
@@ -391,6 +405,15 @@
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
 
+                        // Add the score difference
+                        const heroStats = getHeroStats(card.hero_id);
+                        if (heroStats && heroStats.seven_day_score_diff !== undefined) {
+                            const scoreDiff = document.createElement('div');
+                            scoreDiff.className = 'score-diff';
+                            scoreDiff.textContent = `7D: ${Math.round(heroStats.seven_day_score_diff)}`;
+                            wrapper.appendChild(scoreDiff);
+                        }
+
                         cell.appendChild(wrapper);
                     });
 
@@ -570,8 +593,17 @@
                         const img = document.createElement('img');
                         img.src = card.picture;
                         img.className = 'card-image';
-                        img.title = `Score: ${card.score}`;
+                        img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
+
+                        // Add the score difference
+                        const heroStats = getHeroStats(card.hero_id);
+                        if (heroStats && heroStats.seven_day_score_diff !== undefined) {
+                            const scoreDiff = document.createElement('div');
+                            scoreDiff.className = 'score-diff';
+                            scoreDiff.textContent = `7D: ${Math.round(heroStats.seven_day_score_diff)}`;
+                            wrapper.appendChild(scoreDiff);
+                        }
 
                         cell.appendChild(wrapper);
                     });
@@ -600,7 +632,7 @@
             const myHeaders = new Headers();
             myHeaders.append("accept", "application/json");
             myHeaders.append("accept-language", "en-US,en;q=0.9");
-            myHeaders.append("origin", "https://fantasy-top.redoc.ly");
+            myHeaders.append("origin", "https://fantasy.top");
             myHeaders.append("priority", "u=1, i");
             myHeaders.append("referer", "https://fantasy-top.redoc.ly/");
             myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");

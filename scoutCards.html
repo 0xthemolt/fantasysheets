@@ -344,11 +344,28 @@
                 // Star label cell
                 const starLabel = document.createElement('div');
                 starLabel.className = 'star-label';
+                starLabel.style.flexDirection = 'column';
+                starLabel.style.alignItems = 'center';
+
                 const starCircle = document.createElement('div');
                 starCircle.className = 'star-circle';
                 starCircle.style.backgroundColor = getStarColor(row.stars);
                 starCircle.textContent = row.stars;
+
+                const rangeInfo = document.createElement('div');
+                rangeInfo.style.fontSize = '12px';
+                rangeInfo.style.marginTop = '4px';
+                rangeInfo.style.color = '#666';
+
+                const starMetadata = heroMetadata.find(meta => meta.stars === row.stars);
+                if (starMetadata) {
+                    const topRange = Math.floor(starMetadata.top_range);
+                    const bottomRange = Math.floor(starMetadata.bottom_range);
+                    rangeInfo.textContent = `Range: ${topRange} - ${bottomRange}`;
+                }
+
                 starLabel.appendChild(starCircle);
+                starLabel.appendChild(rangeInfo);
                 matrixRow.appendChild(starLabel);
 
                 // Only render cells for active rarities

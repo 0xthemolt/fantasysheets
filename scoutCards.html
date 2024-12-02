@@ -84,18 +84,28 @@
         }
         .gauge-bar {
             position: relative;
-            height: 3px;
-            background: #444;
-            border-radius: 1.5px;
+            height: 12px;
+            background: rgba(51, 51, 51, 0.3);
+            border-radius: 2px;
             margin: 2px 0;
+            overflow: hidden;
         }
-        .gauge-fill {
+        .gauge-range {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #fff;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            top: 0;
+        }
+        .gauge-indicator {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FF5F1F;  /* Neon orange */
             border-radius: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 3px #FF5F1F;  /* Glow effect */
+            z-index: 1;
         }
         .gauge-value {
             font-size: 8px;
@@ -216,7 +226,11 @@
         // Add this function to load the JSON data
         async function loadHeroData() {
             try {
+                console.log('Starting to load hero data...');
                 const response = await fetch('/hero_stats.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 
                 // Store the data globally
@@ -224,8 +238,12 @@
                 heroesData = data.heroes || [];
                 
                 console.log(`Loaded ${heroMetadata.length} metadata entries and ${heroesData.length} hero entries`);
+                
+                // After loading data, trigger the initial card fetch
+                fetchCardData();
             } catch (error) {
                 console.error('Error loading hero data:', error);
+                document.getElementById('loading').textContent = 'Error loading hero data: ' + error.message;
             }
         }
 
@@ -432,37 +450,49 @@
 
                         // Add the score difference
                         const heroStats = getHeroStats(card.hero_id);
-                        if (heroStats && heroStats.seven_day_score_diff !== undefined) {
+                        if (heroStats) {
+                            console.log('Hero Stats:', heroStats); // Debug log
+                            
                             const scoreDiff = document.createElement('div');
                             scoreDiff.className = 'score-diff';
                             
                             const ranges = findScoreRanges();
                             
-                            // 7D label and gauge
+                            // 7D Fantasy Score
                             const sevenDayLabel = document.createElement('div');
                             sevenDayLabel.style.fontSize = '8px';
                             sevenDayLabel.style.color = 'white';
                             sevenDayLabel.textContent = '7D';
                             scoreDiff.appendChild(sevenDayLabel);
                             
+                            // Debug log for 7D score
+                            console.log('7D Score:', heroStats.seven_day_fantasy_score);
+                            
+                            // Always create gauge even if value is 0
                             const sevenDayGauge = createScoreGauge(
-                                heroStats.seven_day_score_diff,
+                                heroStats.seven_day_fantasy_score || 0,
                                 ranges.sevenDayRange.min,
-                                ranges.sevenDayRange.max
+                                ranges.sevenDayRange.max,
+                                row.stars
                             );
                             scoreDiff.appendChild(sevenDayGauge);
                             
-                            // L3MT label and gauge
+                            // L3MT Median
                             const l3mtLabel = document.createElement('div');
                             l3mtLabel.style.fontSize = '8px';
                             l3mtLabel.style.color = 'white';
                             l3mtLabel.textContent = 'L3MT';
                             scoreDiff.appendChild(l3mtLabel);
                             
+                            // Debug log for L3MT score
+                            console.log('L3MT Score:', heroStats.l3_main_median);
+                            
+                            // Always create gauge even if value is 0
                             const l3mtGauge = createScoreGauge(
-                                heroStats.l3_main_score_diff,
+                                heroStats.l3_main_median || 0,
                                 ranges.l3mtRange.min,
-                                ranges.l3mtRange.max
+                                ranges.l3mtRange.max,
+                                row.stars
                             );
                             scoreDiff.appendChild(l3mtGauge);
                             
@@ -653,37 +683,49 @@
 
                         // Add the score difference
                         const heroStats = getHeroStats(card.hero_id);
-                        if (heroStats && heroStats.seven_day_score_diff !== undefined) {
+                        if (heroStats) {
+                            console.log('Hero Stats:', heroStats); // Debug log
+                            
                             const scoreDiff = document.createElement('div');
                             scoreDiff.className = 'score-diff';
                             
                             const ranges = findScoreRanges();
                             
-                            // 7D label and gauge
+                            // 7D Fantasy Score
                             const sevenDayLabel = document.createElement('div');
                             sevenDayLabel.style.fontSize = '8px';
                             sevenDayLabel.style.color = 'white';
                             sevenDayLabel.textContent = '7D';
                             scoreDiff.appendChild(sevenDayLabel);
                             
+                            // Debug log for 7D score
+                            console.log('7D Score:', heroStats.seven_day_fantasy_score);
+                            
+                            // Always create gauge even if value is 0
                             const sevenDayGauge = createScoreGauge(
-                                heroStats.seven_day_score_diff,
+                                heroStats.seven_day_fantasy_score || 0,
                                 ranges.sevenDayRange.min,
-                                ranges.sevenDayRange.max
+                                ranges.sevenDayRange.max,
+                                row.stars
                             );
                             scoreDiff.appendChild(sevenDayGauge);
                             
-                            // L3MT label and gauge
+                            // L3MT Median
                             const l3mtLabel = document.createElement('div');
                             l3mtLabel.style.fontSize = '8px';
                             l3mtLabel.style.color = 'white';
                             l3mtLabel.textContent = 'L3MT';
                             scoreDiff.appendChild(l3mtLabel);
                             
+                            // Debug log for L3MT score
+                            console.log('L3MT Score:', heroStats.l3_main_median);
+                            
+                            // Always create gauge even if value is 0
                             const l3mtGauge = createScoreGauge(
-                                heroStats.l3_main_score_diff,
+                                heroStats.l3_main_median || 0,
                                 ranges.l3mtRange.min,
-                                ranges.l3mtRange.max
+                                ranges.l3mtRange.max,
+                                row.stars
                             );
                             scoreDiff.appendChild(l3mtGauge);
                             
@@ -702,67 +744,70 @@
             return container;
         }
 
-        function fetchCardData() {
-            const ownerAddress = document.getElementById('ownerSearch').value.trim();
-            const loadingDiv = document.getElementById('loading');
-            const starView = document.getElementById('cardsByStars');
-            const scoreView = document.getElementById('cardsByScore');
-            
-            loadingDiv.style.display = 'block';
-            starView.style.display = 'none';
-            scoreView.style.display = 'none';
-            starView.innerHTML = '';
-            scoreView.innerHTML = '';
+        // Update fetchCardData to include error handling
+        async function fetchCardData() {
+            try {
+                const ownerAddress = document.getElementById('ownerSearch').value.trim();
+                const loadingDiv = document.getElementById('loading');
+                const starView = document.getElementById('cardsByStars');
+                const scoreView = document.getElementById('cardsByScore');
+                
+                if (!heroMetadata || !heroesData) {
+                    throw new Error('Hero data not loaded yet');
+                }
+                
+                loadingDiv.style.display = 'block';
+                starView.style.display = 'none';
+                scoreView.style.display = 'none';
+                
+                const myHeaders = new Headers();
+                myHeaders.append("accept", "application/json");
+                myHeaders.append("accept-language", "en-US,en;q=0.9");
+                myHeaders.append("origin", "https://fantasy.top");
+                myHeaders.append("priority", "u=1, i");
+                myHeaders.append("referer", "https://fantasy-top.redoc.ly/");
+                myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
+                myHeaders.append("sec-ch-ua-mobile", "?0");
+                myHeaders.append("sec-ch-ua-platform", "\"Windows\"");
+                myHeaders.append("sec-fetch-dest", "empty");
+                myHeaders.append("sec-fetch-mode", "cors");
+                myHeaders.append("sec-fetch-site", "cross-site");
+                myHeaders.append("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+                myHeaders.append("x-api-key", "7ecbff33-d82e-4a4e-8b53-004446914dd6");
+                myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIweDE2MkY5NWE5MzY0Yzg5MTAyOGQyNTU0NjdGNjE2OTAyQTQ3OTY4MWEiLCJpYXQiOjE3MTYxMzk0NzEsImV4cCI6MTcxNjE4MjY3MSwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIiwieC1oYXN1cmEtdXNlci1pZCI6IjB4MTYyRjk1YTkzNjRjODkxMDI4ZDI1NTQ2N0Y2MTY5MDJBNDc5NjgxYSJ9fQ.jQqSiDScZl6nP2UBKIo_pNd9-fdeVkS7N8umbSAqeKI");
 
-            const myHeaders = new Headers();
-            myHeaders.append("accept", "application/json");
-            myHeaders.append("accept-language", "en-US,en;q=0.9");
-            myHeaders.append("origin", "https://fantasy.top");
-            myHeaders.append("priority", "u=1, i");
-            myHeaders.append("referer", "https://fantasy-top.redoc.ly/");
-            myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
-            myHeaders.append("sec-ch-ua-mobile", "?0");
-            myHeaders.append("sec-ch-ua-platform", "\"Windows\"");
-            myHeaders.append("sec-fetch-dest", "empty");
-            myHeaders.append("sec-fetch-mode", "cors");
-            myHeaders.append("sec-fetch-site", "cross-site");
-            myHeaders.append("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
-            myHeaders.append("x-api-key", "7ecbff33-d82e-4a4e-8b53-004446914dd6");
-            myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIweDE2MkY5NWE5MzY0Yzg5MTAyOGQyNTU0NjdGNjE2OTAyQTQ3OTY4MWEiLCJpYXQiOjE3MTYxMzk0NzEsImV4cCI6MTcxNjE4MjY3MSwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIiwieC1oYXN1cmEtdXNlci1pZCI6IjB4MTYyRjk1YTkzNjRjODkxMDI4ZDI1NTQ2N0Y2MTY5MDJBNDc5NjgxYSJ9fQ.jQqSiDScZl6nP2UBKIo_pNd9-fdeVkS7N8umbSAqeKI");
+                const requestOptions = {
+                    method: "GET",
+                    headers: myHeaders,
+                    redirect: "follow"
+                };
 
-            const requestOptions = {
-                method: "GET",
-                headers: myHeaders,
-                redirect: "follow"
-            };
-
-            fetchAllCardData(ownerAddress, requestOptions)
-                .then((allCards) => {
-                    window.currentCardData = allCards; // Store globally
-                    loadingDiv.style.display = 'none';
-                    
-                    if (allCards.length > 0) {
-                        const viewToggle = document.getElementById('viewToggle');
-                        if (viewToggle.checked) {
-                            cardsByScore.style.display = 'block';
-                            renderScoreView();
-                        } else {
-                            cardsByStars.style.display = 'block';
-                            const matrix = organizeCardsIntoMatrix(allCards);
-                            const matrixElement = renderMatrix(matrix);
-                            cardsByStars.innerHTML = '';
-                            cardsByStars.appendChild(matrixElement);
-                        }
+                const allCards = await fetchAllCardData(ownerAddress, requestOptions);
+                console.log(`Fetched ${allCards.length} cards`);
+                
+                window.currentCardData = allCards;
+                loadingDiv.style.display = 'none';
+                
+                if (allCards.length > 0) {
+                    const viewToggle = document.getElementById('viewToggle');
+                    if (viewToggle.checked) {
+                        scoreView.style.display = 'block';
+                        renderScoreView();
                     } else {
-                        loadingDiv.textContent = 'No cards found for this address';
-                        loadingDiv.style.display = 'block';
+                        starView.style.display = 'block';
+                        const matrix = organizeCardsIntoMatrix(allCards);
+                        const matrixElement = renderMatrix(matrix);
+                        starView.innerHTML = '';
+                        starView.appendChild(matrixElement);
                     }
-                })
-                .catch((error) => {
-                    loadingDiv.textContent = 'Error loading data: ' + error.message;
+                } else {
+                    loadingDiv.textContent = 'No cards found for this address';
                     loadingDiv.style.display = 'block';
-                    console.error(error);
-                });
+                }
+            } catch (error) {
+                console.error('Error in fetchCardData:', error);
+                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+            }
         }
 
         // Add event listener for Enter key
@@ -772,13 +817,10 @@
             }
         });
 
-        // Modify the initial load section at the bottom of the script
-        // Initial load
-        Promise.all([
-            loadHeroData(),
-            fetchCardData()
-        ]).catch(error => {
-            console.error('Error during initial load:', error);
+        // Update the initial load section
+        // Remove the Promise.all and just call loadHeroData
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHeroData();
         });
 
         const getRarityColor = (rarity) => {
@@ -801,38 +843,53 @@
         }
 
         // Add these helper functions at the top of your script section
-        function findScoreRanges() {
-            let sevenDayRange = { min: 0, max: 0 };
-            let l3mtRange = { min: 0, max: 0 };
-            
-            heroesData.forEach(hero => {
-                if (hero.seven_day_score_diff !== undefined) {
-                    sevenDayRange.min = Math.min(sevenDayRange.min, hero.seven_day_score_diff);
-                    sevenDayRange.max = Math.max(sevenDayRange.max, hero.seven_day_score_diff);
-                }
-                if (hero.l3_main_score_diff !== undefined) {
-                    l3mtRange.min = Math.min(l3mtRange.min, hero.l3_main_score_diff);
-                    l3mtRange.max = Math.max(l3mtRange.max, hero.l3_main_score_diff);
-                }
-            });
-            
-            return { sevenDayRange, l3mtRange };
+        function findScoreRanges(stars) {
+            // Fixed ranges for both metrics
+            return {
+                sevenDayRange: { min: 0, max: 1000 },
+                l3mtRange: { min: 0, max: 1000 }
+            };
         }
 
-        function createScoreGauge(value, minValue, maxValue) {
+        function createScoreGauge(value, minValue, maxValue, stars) {
             const gauge = document.createElement('div');
             gauge.className = 'score-gauge';
             
-            // Calculate the position (0-100) with 50 being the middle (0 value)
-            const range = Math.max(Math.abs(minValue), Math.abs(maxValue));
-            const position = ((value + range) / (range * 2)) * 100;
+            const gaugeBar = document.createElement('div');
+            gaugeBar.className = 'gauge-bar';
             
-            gauge.innerHTML = `
-                <div class="gauge-bar">
-                    <div class="gauge-fill" style="left: ${position}%"></div>
-                </div>
-                <div class="gauge-value">${Math.round(value)}</div>
-            `;
+            // Get star metadata for range
+            const starMetadata = heroMetadata.find(meta => meta.stars === stars);
+            if (starMetadata) {
+                // Create range fill
+                const rangeElement = document.createElement('div');
+                rangeElement.className = 'gauge-range';
+                
+                // Calculate positions as percentages of the max value (1000)
+                const startPercent = (starMetadata.bottom_range / maxValue) * 100;
+                const endPercent = (starMetadata.top_range / maxValue) * 100;
+                const width = endPercent - startPercent;
+                
+                rangeElement.style.left = `${startPercent}%`;
+                rangeElement.style.width = `${width}%`;
+                gaugeBar.appendChild(rangeElement);
+            }
+            
+            // Calculate position percentage for the indicator
+            const percentage = value / maxValue;
+            
+            // Add the orange dot indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'gauge-indicator';
+            indicator.style.left = `${percentage * 100}%`;
+            gaugeBar.appendChild(indicator);
+            
+            const valueDisplay = document.createElement('div');
+            valueDisplay.className = 'gauge-value';
+            valueDisplay.textContent = Math.round(value);
+            
+            gauge.appendChild(gaugeBar);
+            gauge.appendChild(valueDisplay);
             
             return gauge;
         }

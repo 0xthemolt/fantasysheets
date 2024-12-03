@@ -145,6 +145,28 @@
             const allTables = [];
             leagueOrder.forEach(leagueName => {
                 if (leagues[leagueName]) {
+                    // Find the top deck in this league
+                    const topDeck = leagues[leagueName]
+                        .sort((a, b) => (b.player_score || 0) - (a.player_score || 0))[0];
+                    
+                    // Create the cards display HTML for the top deck
+                    let topDeckCardsHtml = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="font-weight: bold; color: #fff;">#${topDeck.player_rank}</span>
+                                <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">${topDeck.player_score.toFixed(1)}</span>
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                    `;
+                    
+                    topDeck.cards.forEach(card => {
+                        topDeckCardsHtml += `
+                            <img src="${card.picture_url}" alt="Card" style="width: 40px; height: 52px; border-radius: 4px;">
+                        `;
+                    });
+                    
+                    topDeckCardsHtml += `</div></div>`;
+
                     // Aggregate data for each league
                     const totalEth = leagues[leagueName].reduce((sum, deck) => sum + (deck.eth || 0), 0);
                     const totalPacks = leagues[leagueName].reduce((sum, deck) => sum + (deck.packs || 0), 0);
@@ -153,6 +175,7 @@
                     const totalGold = leagues[leagueName].reduce((sum, deck) => sum + (deck.gold || 0), 0);
                     const totalPacksFrags = totalPacks + (totalFrags / 100);
 
+                    // Add the league header with the existing stats
                     const leagueHeader = `
                         <div class="league-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleTable('${leagueName}')">
                             <div style="display: flex; align-items: center;">
@@ -186,7 +209,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="table-container-${leagueName}" class="table-container" style="display: none;"><table>`;
+                        <div id="league-summary-${leagueName}" style="display: block; padding: 10px; background-color: #222; margin-top: 5px; border-radius: 4px;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <div style="color: #666;">Top Ranked Deck</div>
+                                ${topDeckCardsHtml}
+                            </div>
+                        </div>
+                    `;
                     
                     // Initialize html variable for this league
                     let html = `${leagueHeader}<div id="table-container-${leagueName}" class="table-container" style="display: none;"><table>`;
@@ -485,12 +514,16 @@
         function toggleTable(leagueName) {
             const tableContainer = document.getElementById(`table-container-${leagueName}`);
             const arrowIcon = document.getElementById(`arrow-${leagueName}`);
+            const summaryDiv = document.getElementById(`league-summary-${leagueName}`);
+            
             if (tableContainer.style.display === "none") {
                 tableContainer.style.display = "block";
+                summaryDiv.style.display = "none";
                 arrowIcon.classList.remove('fa-chevron-down');
                 arrowIcon.classList.add('fa-chevron-up');
             } else {
                 tableContainer.style.display = "none";
+                summaryDiv.style.display = "block";
                 arrowIcon.classList.remove('fa-chevron-up');
                 arrowIcon.classList.add('fa-chevron-down');
             }
@@ -502,10 +535,15 @@
             const buttonIcon = button.querySelector('i');
             const isCollapsed = buttonText.textContent === "Expand All";
             const tableContainers = document.querySelectorAll('.table-container');
+            const summaryDivs = document.querySelectorAll('[id^="league-summary-"]');
             const arrowIcons = document.querySelectorAll('.league-header i');
 
             tableContainers.forEach(container => {
                 container.style.display = isCollapsed ? "block" : "none";
+            });
+
+            summaryDivs.forEach(div => {
+                div.style.display = isCollapsed ? "none" : "block";
             });
 
             arrowIcons.forEach(icon => {
@@ -513,18 +551,8 @@
                 icon.classList.toggle('fa-chevron-up', isCollapsed);
             });
 
-            // Update button text and icon
             buttonText.textContent = isCollapsed ? "Collapse All" : "Expand All";
             buttonIcon.className = isCollapsed ? "fas fa-chevron-up" : "fas fa-chevron-down";
-            
-            // Add hover effect
-            button.style.backgroundColor = "#333";
-            button.addEventListener('mouseover', function() {
-                this.style.backgroundColor = "#444";
-            });
-            button.addEventListener('mouseout', function() {
-                this.style.backgroundColor = "#333";
-            });
         }
     </script>
     <script src="/js/config.js" defer></script>

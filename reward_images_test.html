@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Images Dashboard</title>
+    <style>
+        .kpi-card {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .kpi-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kpi-card" data-color="#627eea">
+        <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/eth.png" alt="ETH Icon">
+        <div class="kpi-number">#1</div>
+    </div>
+
+    <div class="kpi-card" data-color="#f7931a">
+        <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/pack-v2.png" alt="Pack Icon">
+        <div class="kpi-number">#2</div>
+    </div>
+
+    <div class="kpi-card" data-color="#fbb034">
+        <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/fCoin.png" alt="Fan Coin Icon">
+        <div class="kpi-number">#3</div>
+    </div>
+
+    <div class="kpi-card" data-color="#ff4500">
+        <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/blastb.png" alt="Blast Icon">
+        <div class="kpi-number">#4</div>
+    </div>
+
+    <div class="kpi-card" data-color="#4caf50">
+        <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/assets/fragment.png" alt="Fragment Icon">
+        <div class="kpi-number">#5</div>
+    </div>
+
+    <script>
+        const kpiCards = document.querySelectorAll('.kpi-card');
+        kpiCards.forEach(card => {
+            const randomNumber = Math.floor(Math.random() * 100) + 1; // Random number between 1 and 100
+            const numberElement = card.querySelector('.kpi-number');
+            numberElement.textContent = `#${randomNumber}`;
+
+            // Set the color of the number to match the icon's primary color
+            const color = card.getAttribute('data-color');
+            numberElement.style.color = color;
+        });
+    </script>
+
+</body>
+</html>

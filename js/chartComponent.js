@@ -26,6 +26,8 @@ function createHeroChart(containerId, jsonUrl, heroName) {
             const views = scores.map(d => d.views);
 
             const ctx = document.getElementById(containerId).getContext('2d');
+            ctx.canvas.style.backgroundColor = 'transparent';
+            
             const chartGradient = ctx.createLinearGradient(0, 0, 0, 400);
             chartGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
             chartGradient.addColorStop(0.5, 'rgba(75, 192, 192, 0.2)');
@@ -127,6 +129,7 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         mode: 'index',
                         intersect: false
                     },
+                    backgroundColor: 'transparent',
                     scales: {
                         x: {
                             type: 'time',

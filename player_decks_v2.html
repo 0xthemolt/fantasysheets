@@ -151,17 +151,16 @@
                     
                     // Create the cards display HTML for the top deck
                     let topDeckCardsHtml = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <span style="font-weight: bold; color: #fff;">#${topDeck.player_rank}</span>
-                                <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">${topDeck.player_score.toFixed(1)}</span>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="color: #666; font-size: 0.5em;">Best Deck:</div>
+                            <span style="font-weight: bold; color: #fff; font-size: 0.6em;">#${topDeck.player_rank}</span>
+                            <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}; font-size: 0.6em;">${Math.round(topDeck.player_score)}</span>
+                            <div style="display: flex; gap: 2px; margin-left: 5px;">
                     `;
                     
                     topDeck.cards.forEach(card => {
                         topDeckCardsHtml += `
-                            <img src="${card.picture_url}" alt="Card" style="width: 40px; height: 52px; border-radius: 4px;">
+                            <img src="${card.picture_url}" alt="Card" style="width: 30px; height: 39px; border-radius: 3px;">
                         `;
                     });
                     
@@ -174,46 +173,49 @@
                     const totalFan = leagues[leagueName].reduce((sum, deck) => sum + (deck.fan || 0), 0);
                     const totalGold = leagues[leagueName].reduce((sum, deck) => sum + (deck.gold || 0), 0);
                     const totalPacksFrags = totalPacks + (totalFrags / 100);
-
+                    const REWARD_COLORS = {
+                        "eth": "#5A7FF2",
+                        "pack": "#86B7A8",
+                        "fan": "#6BA725",
+                        "blast": "#FCFC03",
+                        "fragment": "#BC96B2"
+                    };
                     // Add the league header with the existing stats
                     const leagueHeader = `
                         <div class="league-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleTable('${leagueName}')">
                             <div style="display: flex; align-items: center;">
-                                <h2>
+                                <h2 style="margin: 5px 0;">
                                     <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
                                     ${leagueName}
                                     <i class="fas fa-chevron-down" id="arrow-${leagueName}" style="margin-left: 10px;"></i>
                                 </h2>
                             </div>
-                            <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                            <div style="display: flex; gap: 5.5px; justify-content: center; width: 100%; margin-left: 10px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.eth}; font-size: 0.75em; color: ${REWARD_COLORS.eth}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.eth}10 100%);">
                                     ${totalEth} <img src="./icons/eth.webp" alt="ETH" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.pack}; font-size: 0.75em; color: ${REWARD_COLORS.pack}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
                                     ${totalPacks} <img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fragment}; font-size: 0.75em; color: ${REWARD_COLORS.fragment}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fragment}10 100%);">
                                     ${totalFrags} <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.pack}; font-size: 0.75em; color: ${REWARD_COLORS.pack}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
                                     ${totalPacksFrags.toFixed(2)} 
                                     (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                     <span style="margin: 0 2px;">+</span>
                                     <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px;">)
                                 </div>
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fan}; font-size: 0.75em; color: ${REWARD_COLORS.fan}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fan}10 100%);">
                                     ${formatRewardFan(totalFan)} <img src="./icons/fan.webp" alt="Fan" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>
-                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.blast}; font-size: 0.75em; color: ${REWARD_COLORS.blast}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.blast}10 100%);">
                                     ${totalGold} <img src="./icons/blast.webp" alt="Gold" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>
                             </div>
                         </div>
-                        <div id="league-summary-${leagueName}" style="display: block; padding: 10px; background-color: #222; margin-top: 5px; border-radius: 4px;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <div style="color: #666;">Top Ranked Deck</div>
-                                ${topDeckCardsHtml}
-                            </div>
+                        <div id="league-summary-${leagueName}" style="display: block; padding: 5px; background-color: #222; margin-top: 2px; border-radius: 4px;">
+                            ${topDeckCardsHtml}
                         </div>
                     `;
                     

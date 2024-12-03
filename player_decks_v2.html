@@ -12,6 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Decks (BETA)</title>
     <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -23,6 +24,26 @@
         .loading { text-align: center; padding: 20px; }
         .league-header { margin: 20px 0 10px 0; }
         .league-header h2 { display: flex; align-items: center; gap: 10px; }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
     </style>
     <script>
         const LEAGUE_COLORS = {"elite": "#a8ccde", "gold": "#dacc86", "silver": "#8b8b8b", "bronze": "#a97e48", "reverse": "#82EA89"};
@@ -290,11 +311,84 @@
         });
 
         function showScoreTrend(heroHandle) {
+            console.log('showScoreTrend called with hero:', heroHandle);
+
             const modal = document.getElementById('scoreTrendModal');
             const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
             modalTitle.textContent = `Score Trend for ${heroHandle}`;
             modal.style.display = "block";
-            // Here you would populate the table with score trend data
+
+            fetch('/hero_score_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Raw data received:', data);
+                    
+                    // Get hero image URL
+                    const heroImageUrl = data.heroes[heroHandle];
+                    
+                    // Clear previous content
+                    modalContent.innerHTML = '';
+
+                    // Add hero image
+                    if (heroImageUrl) {
+                        const heroImageElement = document.createElement('img');
+                        heroImageElement.src = heroImageUrl;
+                        heroImageElement.style.borderRadius = '50%';
+                        heroImageElement.style.width = '100px';
+                        heroImageElement.style.height = '100px';
+                        modalContent.appendChild(heroImageElement);
+                    }
+
+                    // Get hero scores - now accessing the correct structure
+                    const heroScores = data.hero_scores[heroHandle];
+                    
+                    if (!heroScores || heroScores.length === 0) {
+                        modalContent.appendChild(
+                            document.createTextNode('No score data available for this hero')
+                        );
+                        return;
+                    }
+
+                    const fanScores = heroScores.map(score => score.fan_score);
+                    const startDatetimes = heroScores.map(score => score.start_datetime);
+
+                    // Create chart
+                    const canvas = document.createElement('canvas');
+                    modalContent.appendChild(canvas);
+                    
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: startDatetimes,
+                            datasets: [{
+                                label: 'Fan Score',
+                                data: fanScores,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 2,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'day'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching hero data:', error);
+                    modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
+                });
         }
 
         function closeScoreTrendModal() {

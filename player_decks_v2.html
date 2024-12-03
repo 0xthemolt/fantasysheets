@@ -40,10 +40,11 @@
 
         .modal-content {
             background-color: #1a1a1a;
-            margin: 15% auto;
-            padding: 20px;
+            margin: 5% auto;
+            padding: 10px;
             border: 1px solid #888;
-            width: 80%;
+            width: auto;
+            max-width: 80%;
             color: #fff;
         }
         .chart-container {
@@ -324,18 +325,24 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
             
-            modalTitle.textContent = `Score Trend for ${heroHandle}`;
-            modal.style.display = "block";
-
             // First, clear the modal content and show loading state
             modalContent.innerHTML = '<p>Loading...</p>';
 
-            // Get hero data and create chart
+            // Fetch hero data to get the image URL
             fetch('/hero_score_data.json')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Hero data received:', data);  // Debug log
-                    
+                    const heroData = data.heroes[heroHandle];
+                    const heroImageUrl = heroData.pfp_url;
+                    modalTitle.innerHTML = `
+                        <div style="text-align: center; margin-bottom: 2px; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
+                            <span>Score Trend for </span>
+                            <img src="${heroImageUrl}" alt="${heroHandle}" style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: -8px;">
+                            <span>${heroHandle}</span>
+                        </div>
+                    `;
+                    modal.style.display = "block";
+
                     // Clear previous content
                     modalContent.innerHTML = '';
 
@@ -346,14 +353,13 @@
                         </div>
                     `;
 
-                    // Debugging: Log data before creating chart
-                    console.log('Creating chart with data:', data.hero_scores[heroHandle]);
-
-                    // Now create the chart with the data we already have
+                    // Create the chart with the data we already have
                     createHeroChart('heroChart', '/hero_score_data.json', heroHandle);
                 })
                 .catch(error => {
                     console.error('Error fetching hero data:', error);
+                    modalTitle.textContent = `Score Trend for ${heroHandle}`;
+                    modal.style.display = "block";
                     modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
                 });
         }

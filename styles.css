@@ -241,7 +241,6 @@ table tr:last-child td {
     margin: 0;
     justify-content: flex-start;  /* Default for mobile */
     user-select: none; /* Prevents text selection while dragging */
-    cursor: grab;
 }
 
 @media (min-width: 768px) {  /* For desktop screens */
@@ -251,11 +250,6 @@ table tr:last-child td {
         padding: 0 20px;  /* Optional: Add some padding on the sides */
     }
 }
-
-.table-container:active {
-    cursor: grabbing;
-}
-
 
 .tournament-badge {
     background-color: white;

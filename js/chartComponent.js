@@ -53,6 +53,9 @@ function createHeroChart(containerId, jsonUrl, heroName) {
 
             Chart.register(postCountPlugin);
 
+            const priorMainScore = data.heroes[heroName].prior_main_score;
+            const sevenDayScore = data.heroes[heroName].seven_day_score;
+
             return new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -75,6 +78,26 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         borderWidth: 0,
                         barThickness: 12,
                         yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Prior Main Score',
+                        data: Array(timestamps.length).fill(priorMainScore),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '7-Day Score',
+                        data: Array(timestamps.length).fill(sevenDayScore),
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        yAxisID: 'y'
                     }]
                 },
                 options: {
@@ -94,9 +117,9 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                             },
                             display: true,
                             ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
+                                autoSkip: true,
+                                maxRotation: 45,
+                                minRotation: 45,
                                 source: 'data'
                             },
                             distribution: 'linear',
@@ -116,7 +139,10 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                             },
                             grid: {
                                 color: 'rgba(0, 0, 0, 0.05)'
-                            }
+                            },
+                            min: 0,
+                            max: 1000,
+                            beginAtZero: true
                         },
                         y1: {
                             type: 'linear',
@@ -160,18 +186,21 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                                     if (context.dataset.label === 'Fan Score') {
                                         return `Score: ${Math.round(context.raw)}`;
                                     }
-                                    const value = context.raw;
-                                    const dataIndex = context.dataIndex;
-                                    const posts = scores[dataIndex].posts;  // Get posts from the data
-                                    let viewsLabel = '';
-                                    if (value >= 1000000) {
-                                        viewsLabel = `Views: ${(value / 1000000).toFixed(1)}M`;
-                                    } else if (value >= 1000) {
-                                        viewsLabel = `Views: ${(value / 1000).toFixed(1)}K`;
-                                    } else {
-                                        viewsLabel = `Views: ${value}`;
+                                    if (context.dataset.label === 'Views') {
+                                        const value = context.raw;
+                                        const dataIndex = context.dataIndex;
+                                        const posts = scores[dataIndex].posts;
+                                        let viewsLabel = '';
+                                        if (value >= 1000000) {
+                                            viewsLabel = `Views: ${(value / 1000000).toFixed(1)}M`;
+                                        } else if (value >= 1000) {
+                                            viewsLabel = `Views: ${(value / 1000).toFixed(1)}K`;
+                                        } else {
+                                            viewsLabel = `Views: ${value}`;
+                                        }
+                                        return [viewsLabel, `Posts: ${posts}`];
                                     }
-                                    return [viewsLabel, `Posts: ${posts}`];  // Return array of labels
+                                    return null;
                                 }
                             },
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',

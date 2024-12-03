@@ -35,7 +35,7 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             overflow: auto; /* Enable scroll if needed */
-            background-color: #000000
+            background-color: #000000;
         }
 
         .modal-content {
@@ -133,107 +133,112 @@
                 leagues[league].push(deck);
             });
             
-            // Generate HTML for each league
+            // Define league order
+            const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+            
+            // Generate HTML for each league in specified order
             const allTables = [];
-            for (const [leagueName, leagueDecks] of Object.entries(leagues)) {
-                const leagueHeader = `
-                    <div class="league-header">
-                        <h2>
-                            <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
-                            ${leagueName}
-                        </h2>
-                    </div>
-                `;
-                
-                let html = `${leagueHeader}<div class="table-container"><table>`;
-                html += `<tr>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;"></th>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;"></th>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;"></th>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;"></th>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;"></th>
-                    <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}99;">Optimal League / Rewards</th>
-                </tr>`;
-                
-                leagueDecks.forEach(deck => {
-                    const playerInfo = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="text-align: center;">
-                                <img src="${deck.player_pic}" alt="Player" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.src='ft_logo.jpg';">
-                            </div>
+            leagueOrder.forEach(leagueName => {
+                if (leagues[leagueName]) {
+                    const leagueHeader = `
+                        <div class="league-header">
+                            <h2>
+                                <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
+                                ${leagueName}
+                            </h2>
                         </div>
                     `;
                     
-                    const playerScore = deck.player_score != null ? 
-                        deck.player_score.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : 'N/A';
-
-                    const rewardsHtml = `
-                        <div style="display: flex; align-items: center; height: 100%; width: 100%;">
-                            <div style="display: grid; grid-template-columns: 1fr; gap: 5px; width: 120px; margin: 0 auto;"> 
-                            ${deck.fan ? `
-                            <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <span style="text-align: right; padding-right: 8px;">${formatRewardFan(deck.fan)}</span>
-                                <img src="./icons/fan.webp" alt="Fan" class="icon">
-                            </div>` : ''}
-                            ${deck.gold ? `
-                            <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <span style="text-align: right; padding-right: 8px;">${deck.gold}</span>
-                                <img src="./icons/blast.webp" alt="Gold" class="icon">
-                            </div>` : ''}
-                            ${deck.eth ? `
-                            <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <span style="text-align: right; padding-right: 8px;">${deck.eth}</span>
-                                <img src="./icons/eth.webp" alt="ETH" class="icon">
-                            </div>` : ''}
-                            ${deck.packs ? `
-                            <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <span style="text-align: right; padding-right: 8px;">${deck.packs}</span>
-                                <img src="./icons/pack.webp" alt="Packs" class="icon">
-                                </div>` : ''}
-                            ${deck.frag ? `
-                            <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                <span style="text-align: right; padding-right: 8px;">${deck.frag}</span>
-                                <img src="./icons/fragment.webp" alt="Fragment" class="icon">
-                            </div>` : ''}
-                            </div>
-                        </div>
-                    `;
+                    let html = `${leagueHeader}<div class="table-container"><table>`;
+                    html += `<tr>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Optimal League / Rewards</th>
+                    </tr>`;
                     
-                    let cardsHtml = '<div style="display: flex; gap: 10px; justify-content: space-between;">';
-                    deck.cards.forEach(card => {
-                        const rarity_score = card.rarity_score != null ? Math.round(card.rarity_score) : 0;
-                        const scoreColor = getScoreColor(rarity_score);
-                        cardsHtml += `
-                            <div style="text-align: center;">
-                                <div style="margin-bottom: 5px; color: ${scoreColor};">
-                                    ${rarity_score}
-                                </div>
-                                <img src="${card.picture_url}" alt="Card Image" width="70" height="90">
-                                <div style="margin-top: 2px;">
-                                    <a href="https://x.com/${card.hero_handle}" target="_blank" style="text-decoration: none;">
-                                        <img src="./icons/x.svg" alt="X" style="width: 7px; height: 7px;">
-                                    </a>
-                                    <i class="fas fa-chart-line" style="font-size: 8px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none;" 
-                                       onclick="showScoreTrend('${card.hero_handle}')"></i>
+                    leagues[leagueName].forEach(deck => {
+                        const playerInfo = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="text-align: center;">
+                                    <img src="${deck.player_pic}" alt="Player" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" onerror="this.onerror=null; this.src='ft_logo.jpg';">
                                 </div>
                             </div>
                         `;
+                        
+                        const playerScore = deck.player_score != null ? 
+                            deck.player_score.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : 'N/A';
+
+                        const rewardsHtml = `
+                            <div style="display: flex; align-items: center; height: 100%; width: 100%;">
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 5px; width: 120px; margin: 0 auto;"> 
+                                ${deck.fan ? `
+                                <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <span style="text-align: right; padding-right: 8px;">${formatRewardFan(deck.fan)}</span>
+                                    <img src="./icons/fan.webp" alt="Fan" class="icon">
+                                </div>` : ''}
+                                ${deck.gold ? `
+                                <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <span style="text-align: right; padding-right: 8px;">${deck.gold}</span>
+                                    <img src="./icons/blast.webp" alt="Gold" class="icon">
+                                </div>` : ''}
+                                ${deck.eth ? `
+                                <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <span style="text-align: right; padding-right: 8px;">${deck.eth}</span>
+                                    <img src="./icons/eth.webp" alt="ETH" class="icon">
+                                </div>` : ''}
+                                ${deck.packs ? `
+                                <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <span style="text-align: right; padding-right: 8px;">${deck.packs}</span>
+                                    <img src="./icons/pack.webp" alt="Packs" class="icon">
+                                    </div>` : ''}
+                                ${deck.frag ? `
+                                <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
+                                    <span style="text-align: right; padding-right: 8px;">${deck.frag}</span>
+                                    <img src="./icons/fragment.webp" alt="Fragment" class="icon">
+                                </div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        
+                        let cardsHtml = '<div style="display: flex; gap: 10px; justify-content: space-between;">';
+                        deck.cards.forEach(card => {
+                            const rarity_score = card.rarity_score != null ? Math.round(card.rarity_score) : 0;
+                            const scoreColor = getScoreColor(rarity_score);
+                            cardsHtml += `
+                                <div style="text-align: center;">
+                                    <div style="margin-bottom: 5px; color: ${scoreColor};">
+                                        ${rarity_score}
+                                    </div>
+                                    <img src="${card.picture_url}" alt="Card Image" width="70" height="90">
+                                    <div style="margin-top: 2px;">
+                                        <a href="https://x.com/${card.hero_handle}" target="_blank" style="text-decoration: none;">
+                                            <img src="./icons/x.svg" alt="X" style="width: 8px; height: 8px;">
+                                        </a>
+                                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none;" 
+                                           onclick="showScoreTrend('${card.hero_handle}')"></i>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        cardsHtml += '</div>';
+                        
+                        html += `<tr>
+                            <td>${deck.player_rank}</td>
+                            <td>${playerInfo}</td>
+                            <td>${playerScore}</td>
+                            <td>${cardsHtml}</td>
+                            <td>${rewardsHtml}</td>   
+                            <td>COMING SOON</td>  
+                        </tr>`;
                     });
-                    cardsHtml += '</div>';
                     
-                    html += `<tr>
-                        <td>${deck.player_rank}</td>
-                        <td>${playerInfo}</td>
-                        <td>${playerScore}</td>
-                        <td>${cardsHtml}</td>
-                        <td>${rewardsHtml}</td>   
-                        <td>COMING SOON</td>  
-                    </tr>`;
-                });
-                
-                html += '</table></div>';
-                allTables.push(html);
-            }
+                    html += '</table></div>';
+                    allTables.push(html);
+                }
+            });
             
             return allTables.join('\n');
         }
@@ -241,20 +246,25 @@
         let playerHandles = [];
         let allData = [];
 
-        // Fetch data from JSON file
+        // Move showResults to global scope
+        function showResults(playerHandle) {
+            document.getElementById('results').innerHTML = '<div class="loading">Loading...</div>';
+            
+            const playerDecks = allData.filter(deck => 
+                deck.player_handle.toLowerCase() === playerHandle.toLowerCase()
+            );
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = generateHtmlTable(playerDecks);
+        }
+
         fetch('player_decks.json')
             .then(response => response.json())
             .then(data => {
-                // Extract league results
                 allData = data.league_results;
-                
-                // Update timestamp
                 document.getElementById('timestamp').textContent = data.metadata.timestamp;
-                
-                // Create unique list of player handles
                 playerHandles = [...new Set(allData.map(player => player.player_handle))].sort();
                 
-                // Initialize autocomplete after data is loaded
                 $("#player_handle").autocomplete({
                     source: playerHandles,
                     minLength: 2,
@@ -266,7 +276,6 @@
                     }
                 });
 
-                // Check URL parameters after data is loaded
                 const urlParams = new URLSearchParams(window.location.search);
                 const playerParam = urlParams.get('player');
                 if (playerParam) {
@@ -328,20 +337,8 @@
             // Only allow input when searchBox is not readonly
             $("#player_handle").on('input', function() {
                 if (!this.readOnly) {
-                    console.log('Input changed:', $(this).val());
                 }
             });
-
-            function showResults(playerHandle) {
-                document.getElementById('results').innerHTML = '<div class="loading">Loading...</div>';
-                
-                const playerDecks = allData.filter(deck => 
-                    deck.player_handle.toLowerCase() === playerHandle.toLowerCase()
-                );
-                
-                const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = generateHtmlTable(playerDecks);
-            }
         });
 
         function showScoreTrend(heroHandle) {

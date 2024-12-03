@@ -10,16 +10,16 @@ function createHeroChart(containerId, jsonUrl, heroName) {
         }
     }
 
-    console.log('Creating chart for:', { containerId, jsonUrl, heroName });
+    // console.log('Creating chart for:', { containerId, jsonUrl, heroName });
     return fetch(jsonUrl)
         .then(response => response.json())
         .then(data => {
-            console.log('Chart data received:', data);
+            // console.log('Chart data received:', data);
             const scores = data.hero_scores[heroName];
-            console.log('Processed scores:', scores);
+            // console.log('Processed scores:', scores);
             
             const timestamps = scores.map(d => new Date(d.start_datetime));
-            console.log('Processed timestamps:', timestamps);
+            // console.log('Processed timestamps:', timestamps);
             
             const fanScores = scores.map(d => d.fan_score);
             const postIncreases = scores.map(d => d.post_increase);
@@ -92,7 +92,7 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         data: fanScores,
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: chartGradient,
-                        fill: false,
+                        fill: true,
                         tension: 0.1,
                         pointRadius: 0,
                         yAxisID: 'y',

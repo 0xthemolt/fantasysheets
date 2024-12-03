@@ -75,6 +75,11 @@
             height: 450px;
             margin: 20px auto;
         }
+
+        .table-container {
+            display: none;  /* Keep this to maintain the toggle functionality */
+            /* Remove any overflow properties if they exist */
+        }
     </style>
     <script>
         const LEAGUE_COLORS = {"elite": "#a8ccde", "gold": "#dacc86", "silver": "#8b8b8b", "bronze": "#a97e48", "reverse": "#82EA89"};
@@ -140,16 +145,53 @@
             const allTables = [];
             leagueOrder.forEach(leagueName => {
                 if (leagues[leagueName]) {
+                    // Aggregate data for each league
+                    const totalEth = leagues[leagueName].reduce((sum, deck) => sum + (deck.eth || 0), 0);
+                    const totalPacks = leagues[leagueName].reduce((sum, deck) => sum + (deck.packs || 0), 0);
+                    const totalFrags = leagues[leagueName].reduce((sum, deck) => sum + (deck.frag || 0), 0);
+                    const totalFan = leagues[leagueName].reduce((sum, deck) => sum + (deck.fan || 0), 0);
+                    const totalGold = leagues[leagueName].reduce((sum, deck) => sum + (deck.gold || 0), 0);
+                    const totalPacksFrags = totalPacks + (totalFrags / 100);
+
                     const leagueHeader = `
-                        <div class="league-header">
-                            <h2>
-                                <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
-                                ${leagueName}
-                            </h2>
+                        <div class="league-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleTable('${leagueName}')">
+                            <div style="display: flex; align-items: center;">
+                                <h2>
+                                    <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
+                                    ${leagueName}
+                                    <i class="fas fa-chevron-down" id="arrow-${leagueName}" style="margin-left: 10px;"></i>
+                                </h2>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${totalEth} <img src="./icons/eth.webp" alt="ETH" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${totalPacks} <img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${totalFrags} <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${totalPacksFrags.toFixed(2)} 
+                                    (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                    <span style="margin: 0 2px;">+</span>
+                                    <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px;">)
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${formatRewardFan(totalFan)} <img src="./icons/fan.webp" alt="Fan" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 4px 8px; border: 1px solid #333; border-radius: 4px; background-color: #333; font-size: 0.75em;">
+                                    ${totalGold} <img src="./icons/blast.webp" alt="Gold" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                </div>
+                            </div>
                         </div>
-                    `;
+                        <div id="table-container-${leagueName}" class="table-container" style="display: none;"><table>`;
                     
-                    let html = `${leagueHeader}<div class="table-container"><table>`;
+                    // Initialize html variable for this league
+                    let html = `${leagueHeader}<div id="table-container-${leagueName}" class="table-container" style="display: none;"><table>`;
+                    
+                    // Add the table header
                     html += `<tr>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
@@ -254,8 +296,34 @@
                 deck.player_handle.toLowerCase() === playerHandle.toLowerCase()
             );
             
+            // Add toggle button only when we have results
+            const toggleButton = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <button id="toggleAll" 
+                            onclick="toggleAllLeagues()" 
+                            style="
+                                padding: 4px 8px;  /* Reduced padding */
+                                background-color: #333;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 12px;  /* Smaller font */
+                                transition: all 0.3s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 4px;  /* Reduced gap */
+                                margin: 0 auto;
+                                width: fit-content;  /* Allow button to shrink */
+                            ">
+                        <i class="fas fa-chevron-down" style="font-size: 10px;"></i>  <!-- Smaller icon -->
+                        <span>Expand All</span>
+                    </button>
+                </div>
+            `;
+            
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = generateHtmlTable(playerDecks);
+            resultsDiv.innerHTML = toggleButton + generateHtmlTable(playerDecks);
         }
 
         fetch('player_decks.json')
@@ -411,6 +479,52 @@
             if (event.target == modal) {
                 modal.style.display = "none";
             }
+        }
+
+        // Add this function to handle the toggle functionality
+        function toggleTable(leagueName) {
+            const tableContainer = document.getElementById(`table-container-${leagueName}`);
+            const arrowIcon = document.getElementById(`arrow-${leagueName}`);
+            if (tableContainer.style.display === "none") {
+                tableContainer.style.display = "block";
+                arrowIcon.classList.remove('fa-chevron-down');
+                arrowIcon.classList.add('fa-chevron-up');
+            } else {
+                tableContainer.style.display = "none";
+                arrowIcon.classList.remove('fa-chevron-up');
+                arrowIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        function toggleAllLeagues() {
+            const button = document.getElementById('toggleAll');
+            const buttonText = button.querySelector('span');
+            const buttonIcon = button.querySelector('i');
+            const isCollapsed = buttonText.textContent === "Expand All";
+            const tableContainers = document.querySelectorAll('.table-container');
+            const arrowIcons = document.querySelectorAll('.league-header i');
+
+            tableContainers.forEach(container => {
+                container.style.display = isCollapsed ? "block" : "none";
+            });
+
+            arrowIcons.forEach(icon => {
+                icon.classList.toggle('fa-chevron-down', !isCollapsed);
+                icon.classList.toggle('fa-chevron-up', isCollapsed);
+            });
+
+            // Update button text and icon
+            buttonText.textContent = isCollapsed ? "Collapse All" : "Expand All";
+            buttonIcon.className = isCollapsed ? "fas fa-chevron-up" : "fas fa-chevron-down";
+            
+            // Add hover effect
+            button.style.backgroundColor = "#333";
+            button.addEventListener('mouseover', function() {
+                this.style.backgroundColor = "#444";
+            });
+            button.addEventListener('mouseout', function() {
+                this.style.backgroundColor = "#333";
+            });
         }
     </script>
     <script src="/js/config.js" defer></script>

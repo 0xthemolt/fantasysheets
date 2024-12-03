@@ -92,10 +92,11 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         data: fanScores,
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: chartGradient,
-                        fill: true,
+                        fill: false,
                         tension: 0.1,
                         pointRadius: 0,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        order: 2
                     },
                     {
                         label: 'Prior Main Score',
@@ -107,7 +108,8 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         pointRadius: 0,
                         pointHoverRadius: 0,
                         hoverBorderWidth: 0,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        order: 1
                     },
                     {
                         label: '7-Day Score',
@@ -119,7 +121,8 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         pointRadius: 0,
                         pointHoverRadius: 0,
                         hoverBorderWidth: 0,
-                        yAxisID: 'y'
+                        yAxisID: 'y',
+                        order: 1
                     }]
                 },
                 options: {

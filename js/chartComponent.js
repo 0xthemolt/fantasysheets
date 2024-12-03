@@ -1,4 +1,15 @@
+let heroChart; // Declare a variable to hold the chart instance
+let currentPlugin = null; // Track the current plugin instance
+
 function createHeroChart(containerId, jsonUrl, heroName) {
+    // Ensure proper cleanup of the previous chart and plugin
+    if (heroChart) {
+        heroChart.destroy();
+        if (currentPlugin) {
+            Chart.unregister(currentPlugin);
+        }
+    }
+
     console.log('Creating chart for:', { containerId, jsonUrl, heroName });
     return fetch(jsonUrl)
         .then(response => response.json())
@@ -23,6 +34,9 @@ function createHeroChart(containerId, jsonUrl, heroName) {
             const postCountPlugin = {
                 id: 'postCount',
                 afterDraw: (chart) => {
+                    // Only draw if this is the current active chart
+                    if (chart !== heroChart) return;
+                    
                     const ctx = chart.ctx;
                     chart.data.labels.forEach((value, index) => {
                         const increase = postIncreases[index];
@@ -51,16 +65,27 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                 }
             };
 
+            // Update current plugin reference and register
+            currentPlugin = postCountPlugin;
             Chart.register(postCountPlugin);
 
             const priorMainScore = data.heroes[heroName].prior_main_score;
             const sevenDayScore = data.heroes[heroName].seven_day_score;
 
-            return new Chart(ctx, {
+            heroChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: timestamps,
                     datasets: [{
+                        label: 'Views',
+                        data: views,
+                        type: 'bar',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 0,
+                        barThickness: 12,
+                        yAxisID: 'y1'
+                    },
+                    {
                         label: 'Fan Score',
                         data: fanScores,
                         borderColor: 'rgb(75, 192, 192)',
@@ -71,15 +96,6 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         yAxisID: 'y'
                     },
                     {
-                        label: 'Views',
-                        data: views,
-                        type: 'bar',
-                        backgroundColor: 'rgb(54, 162, 235)',
-                        borderWidth: 0,
-                        barThickness: 12,
-                        yAxisID: 'y1'
-                    },
-                    {
                         label: 'Prior Main Score',
                         data: Array(timestamps.length).fill(priorMainScore),
                         borderColor: 'rgba(255, 99, 132, 1)',
@@ -87,6 +103,8 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         borderDash: [5, 5],
                         fill: false,
                         pointRadius: 0,
+                        pointHoverRadius: 0,
+                        hoverBorderWidth: 0,
                         yAxisID: 'y'
                     },
                     {
@@ -97,6 +115,8 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         borderDash: [5, 5],
                         fill: false,
                         pointRadius: 0,
+                        pointHoverRadius: 0,
+                        hoverBorderWidth: 0,
                         yAxisID: 'y'
                     }]
                 },

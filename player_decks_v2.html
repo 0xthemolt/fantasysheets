@@ -225,6 +225,9 @@
                 // Extract league results
                 allData = data.league_results;
                 
+                // Update timestamp
+                document.getElementById('timestamp').textContent = data.metadata.timestamp;
+                
                 // Create unique list of player handles
                 playerHandles = [...new Set(allData.map(player => player.player_handle))].sort();
                 
@@ -412,7 +415,7 @@
         <input type="text" id="player_handle" class="search-box" placeholder="Search Player Handle">
     </div>
     <div class="small-text">
-        <span id="timestamp">2024-12-03 06:46 UTC</span>
+        <span id="timestamp">{latest_score_timestamp} </span>
         <span id="timeAgo"></span>
         <span class="info-text"> | Score color based on common / base score</span>
     </div>

@@ -130,10 +130,13 @@
                                 position: 'right',
                                 title: {
                                     display: true,
-                                    text: 'Views'
+                                    text: 'Views',
+                                    font: {
+                                        weight: 'bold'
+                                    }
                                 },
                                 ticks: {
-                                    display: false,
+                                    display: true,
                                     callback: function(value) {
                                         if (value >= 1000000) {
                                             return (value / 1000000).toFixed(1) + 'M';
@@ -141,11 +144,19 @@
                                             return (value / 1000).toFixed(1) + 'K';
                                         }
                                         return value;
-                                    }
+                                    },
+                                    count: 6,
+                                    stepSize: 'auto'
                                 },
                                 grid: {
                                     drawOnChartArea: false
-                                }
+                                },
+                                max: function(context) {
+                                    const maxViews = Math.max(...views);
+                                    return maxViews * 4;
+                                },
+                                min: 0,
+                                beginAtZero: true
                             }
                         },
                         plugins: {

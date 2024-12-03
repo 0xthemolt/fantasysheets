@@ -13,8 +13,10 @@
     <title>Player Decks (BETA)</title>
     <link rel="icon" type="image/png" href="icons/favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
+    <script src="/js/chartComponent.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -33,16 +35,21 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            background-color: #000000;
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
+            background-color: #1a1a1a;
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
+            width: 80%;
+            color: #fff;
+        }
+        .chart-container {
+            width: 800px;
+            height: 450px;
+            margin: 20px auto;
         }
     </style>
     <script>
@@ -320,70 +327,30 @@
             modalTitle.textContent = `Score Trend for ${heroHandle}`;
             modal.style.display = "block";
 
+            // First, clear the modal content and show loading state
+            modalContent.innerHTML = '<p>Loading...</p>';
+
+            // Get hero data and create chart
             fetch('/hero_score_data.json')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Raw data received:', data);
-                    
-                    // Get hero image URL
-                    const heroImageUrl = data.heroes[heroHandle];
+                    console.log('Hero data received:', data);  // Debug log
                     
                     // Clear previous content
                     modalContent.innerHTML = '';
 
-                    // Add hero image
-                    if (heroImageUrl) {
-                        const heroImageElement = document.createElement('img');
-                        heroImageElement.src = heroImageUrl;
-                        heroImageElement.style.borderRadius = '50%';
-                        heroImageElement.style.width = '100px';
-                        heroImageElement.style.height = '100px';
-                        modalContent.appendChild(heroImageElement);
-                    }
+                    // Add chart container
+                    modalContent.innerHTML += `
+                        <div class="chart-container" style="background-color: black;">
+                            <canvas id="heroChart"></canvas>
+                        </div>
+                    `;
 
-                    // Get hero scores - now accessing the correct structure
-                    const heroScores = data.hero_scores[heroHandle];
-                    
-                    if (!heroScores || heroScores.length === 0) {
-                        modalContent.appendChild(
-                            document.createTextNode('No score data available for this hero')
-                        );
-                        return;
-                    }
+                    // Debugging: Log data before creating chart
+                    console.log('Creating chart with data:', data.hero_scores[heroHandle]);
 
-                    const fanScores = heroScores.map(score => score.fan_score);
-                    const startDatetimes = heroScores.map(score => score.start_datetime);
-
-                    // Create chart
-                    const canvas = document.createElement('canvas');
-                    modalContent.appendChild(canvas);
-                    
-                    new Chart(canvas, {
-                        type: 'line',
-                        data: {
-                            labels: startDatetimes,
-                            datasets: [{
-                                label: 'Fan Score',
-                                data: fanScores,
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                borderWidth: 2,
-                                fill: false
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                x: {
-                                    type: 'time',
-                                    time: {
-                                        unit: 'day'
-                                    }
-                                },
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
+                    // Now create the chart with the data we already have
+                    createHeroChart('heroChart', '/hero_score_data.json', heroHandle);
                 })
                 .catch(error => {
                     console.error('Error fetching hero data:', error);

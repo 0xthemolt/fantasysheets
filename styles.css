@@ -46,6 +46,7 @@ th, td {
 }
 
 th {
+    padding: 1px;
     background-color: #141515;
     text-transform: uppercase;
 }
@@ -470,8 +471,12 @@ table tr:last-child td {
     transition: opacity 0.3s ease, transform 0.3s ease;
     max-width: 200px;
     word-wrap: break-word;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    font-weight: 400;
   }
-  
+
   .tooltip .top::after {
     content: "";
     position: absolute;
@@ -492,7 +497,7 @@ table tr:last-child td {
 
   @media (max-width: 600px) {
     .tooltip .top {
-        font-size: 0.6em;
+        font-size: 11px;
         padding: 8px;
     }
   }
@@ -1108,3 +1113,49 @@ table tr:last-child td {
     margin: 10px 0;
 }
 /*end hero dashboard*/
+
+/*hero score chart modal*/
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: #000000;
+}
+
+.modal-content {
+    background-color: #000000;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    width: fit-content;
+    max-width: 80%;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.close-modal {
+    cursor: pointer;
+    font-size: 24px;
+    color: #fff;
+}
+
+.close-modal:hover {
+    color: #999;
+}
+
+/* Add these styles for the modal title */
+#modalTitle {
+    font-size: 1.2em;  /* Slightly smaller font */
+    margin-top: 0;     /* Remove top margin */
+    margin-bottom: 10px; /* Add space below the title */
+}
+/*end hero score chart modal*/

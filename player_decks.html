@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
-    <script src="/js/chartComponent.js"></script>
+    <script src="/js/chartComponent.js?v=1.0.0""></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -151,10 +151,31 @@
                     
                     // Create the cards display HTML for the top deck
                     let topDeckCardsHtml = `
-                        <div style="display: flex; align-items: center; gap: 5px;">
-                            <div style="color: #666; font-size: 0.7em;">Best Deck:</div>
-                            <span style="font-weight: bold; color: #fff; font-size: 0.7em;">#${topDeck.player_rank}</span>
-                            <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}; font-size: 0.7em;">${Math.round(topDeck.player_score)}</span>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="display: flex; align-items: center;">
+                                <img src="${topDeck.player_pic}" 
+                                     alt="Player" 
+                                     style="width: 32px; 
+                                            height: 32px; 
+                                            border-radius: 50%; 
+                                            object-fit: cover;
+                                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+                                     onerror="this.onerror=null; this.src='ft_logo.jpg';">
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <div style="color: #666; font-size: 0.7em; margin-bottom: 5px;">
+                                    Best Deck
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 3px;">
+                                    <span style="font-weight: bold; color: #fff; font-size: 0.7em;">
+                                        ${topDeck.player_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                                          topDeck.player_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                                          topDeck.player_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
+                                          `#${topDeck.player_rank}`}
+                                    </span>
+                                    <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]}; font-size: 0.7em;">${Math.round(topDeck.player_score).toLocaleString()}</span>
+                                </div>
+                            </div>
                             <div style="display: flex; gap: 2px; margin-left: 5px;">
                     `;
                     
@@ -182,15 +203,15 @@
                     };
                     // Add the league header with the existing stats
                     const leagueHeader = `
-                        <div class="league-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleTable('${leagueName}')">
-                            <div style="display: flex; align-items: center;">
+                        <div class="league-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="league-title-container" style="display: flex; align-items: center; cursor: pointer;" onclick="toggleTable('${leagueName}')">
                                 <h2 style="margin: 5px 0;">
                                     <img src="./icons/${leagueName.toLowerCase()}.webp" alt="${leagueName}" style="width: 30px; height: 30px;">
-                                    ${leagueName}
-                                    <i class="fas fa-chevron-down" id="arrow-${leagueName}" style="margin-left: 10px;"></i>
+                                    <span style="color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">${leagueName}</span>
+                                    <i class="fas fa-chevron-down" id="arrow-${leagueName}" style="margin-left: 3px; font-size: 12px; color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};" data-tooltip="Expand League Decks"></i>
                                 </h2>
                             </div>
-                            <div style="display: flex; gap: 5.5px; justify-content: flex-start; width: 100%; margin-left: 10px; padding-left: 10px;">
+                            <div class="league-rewards-container" style="display: flex; gap: 7.5px; justify-content: flex-end; width: 100%; margin-left: 10px; padding-left: 10px; cursor: default;">
                                 ${totalEth > 0 ? `
                                 <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.eth}; font-size: 0.825em; color: ${REWARD_COLORS.eth}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.eth}10 100%);">
                                     ${formatEth(totalEth)} <img src="./icons/eth.webp" alt="ETH" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
@@ -203,12 +224,12 @@
                                 <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fragment}; font-size: 0.825em; color: ${REWARD_COLORS.fragment}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fragment}10 100%);">
                                     ${totalFrags} <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
                                 </div>` : ''}
-                                ${totalPacksFrags > 0 ? `
+                                ${(totalPacks > 0 && totalFrags > 0) ? `
                                 <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.pack}; font-size: 0.825em; color: ${REWARD_COLORS.pack}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
-                                    ${totalPacksFrags.toFixed(2)} 
-                                    (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
-                                    <span style="margin: 0 2px;">+</span>
-                                    <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px;">)
+                                    ${totalPacksFrags < 1 ? '.' + (totalPacksFrags.toFixed(1) * 10).toString() : totalPacksFrags.toFixed(1)} 
+                                    (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 1px;">
+                                    <span style="margin: 0;">+</span>
+                                    <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin: 0;">)
                                 </div>` : ''}
                                 ${totalFan > 0 ? `
                                 <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fan}; font-size: 0.825em; color: ${REWARD_COLORS.fan}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fan}10 100%);">
@@ -220,7 +241,7 @@
                                 </div>` : ''}
                             </div>
                         </div>
-                        <div id="league-summary-${leagueName}" style="display: block; padding: 5px; background-color: #222; margin-top: 2px; border-radius: 4px;">
+                        <div id="league-summary-${leagueName}" style="display: block; padding: 5px; background-color: #222; margin-top: 2px; border-radius: 4px; display: flex; justify-content: center; align-items: center;">
                             ${topDeckCardsHtml}
                         </div>
                     `;
@@ -567,12 +588,14 @@
             if (value >= 1) {
                 return value.toFixed(1);
             } else {
-                return value.toFixed(3);
+                // Convert to string with 3 decimal places, remove leading "0" and trailing zeros
+                return value.toFixed(3).replace(/^0/, '').replace(/\.?0+$/, '');
             }
         }
     </script>
-    <script src="/js/config.js" defer></script>
-    <script src="/js/timeUtils.js" defer></script>
+    <script src="/js/config.js?v=1.0.0" defer></script>
+    <script src="/js/timeUtils.js?v=1.0.0" defer></script>
+    <script src="/js/toolTip.js?v=1.0.0" defer></script>
 </head>
 <body>
     <div class="title-container">
@@ -580,7 +603,7 @@
             <a href="index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Player Decks (BETA)
+            Player Decks
             <span class="tournament-badge">Main 28</span>
         </h1>
     </div>

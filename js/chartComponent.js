@@ -28,10 +28,16 @@ function createHeroChart(containerId, jsonUrl, heroName) {
             const ctx = document.getElementById(containerId).getContext('2d');
             ctx.canvas.style.backgroundColor = 'transparent';
             
-            const chartGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            chartGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
-            chartGradient.addColorStop(0.5, 'rgba(75, 192, 192, 0.2)');
-            chartGradient.addColorStop(1, 'rgba(75, 192, 192, 0)');
+            // Create gradient after chart initialization
+            let chartGradient;
+            const createGradient = (chart) => {
+                const chartArea = chart.chartArea;
+                chartGradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                chartGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+                chartGradient.addColorStop(0.5, 'rgba(75, 192, 192, 0.2)');
+                chartGradient.addColorStop(1, 'rgba(75, 192, 192, 0)');
+                return chartGradient;
+            };
 
             const postCountPlugin = {
                 id: 'postCount',
@@ -91,7 +97,13 @@ function createHeroChart(containerId, jsonUrl, heroName) {
                         label: 'Fan Score',
                         data: fanScores,
                         borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: chartGradient,
+                        backgroundColor: function(context) {
+                            const chart = context.chart;
+                            if (!chart.chartArea) {
+                                return null;
+                            }
+                            return createGradient(chart);
+                        },
                         fill: true,
                         tension: 0.1,
                         pointRadius: 0,

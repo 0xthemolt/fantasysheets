@@ -96,8 +96,8 @@
             box-sizing: border-box;
             transition: visibility 0s, opacity 0.3s;
             position: absolute;
-            left: calc(33% + 32px);  /* Align with the space after hero-leaderboard */
-            top: 20px;  /* Match the body padding */
+            left: calc(33% + 44px);
+            top: 20px;
         }
 
         #trades.visible {
@@ -162,6 +162,14 @@
         .chart-button:hover {
             background: #f0f0f0;
         }
+
+        .filter-icon {
+            cursor: pointer;
+        }
+        
+        .filter-icon:hover {
+            color: #80bdff;
+        }
     </style>
 </head>
 <body>
@@ -181,12 +189,12 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
-                        <th>Rarity</th>
+                        <th>Rarity <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
                         <th>Date</th>
                         <th>Time Gap</th>
                         <th>Buyer</th>
                         <th>Seller</th>
-                        <th>Price</th>
+                        <th>Price <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
                         <th>Change</th>
                     </tr>
                 </thead>
@@ -382,9 +390,6 @@
                     button.addEventListener('click', function(e) {
                         e.preventDefault();
                         console.log('Button clicked!');
-                        
-                        // Change button color to verify click is working
-                        this.style.backgroundColor = 'red';
                         
                         const heroHandle = this.getAttribute('data-hero');
                         console.log('Hero handle:', heroHandle);

@@ -1159,3 +1159,16 @@ table tr:last-child td {
     margin-bottom: 10px; /* Add space below the title */
 }
 /*end hero score chart modal*/
+
+.chart-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.chart-button:hover {
+    color: #000;
+}

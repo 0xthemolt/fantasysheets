@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade Chart Debug</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="../js/tradeChart.js"></script>
+    <style>
+        .chart-container {
+            width: 800px;
+            height: 400px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="tradeChart"></canvas>
+    </div>
+
+    <script>
+        // Wait for window load to ensure all scripts are loaded
+        window.addEventListener('load', function() {
+            // Clear any existing charts and remove from cache
+            const chartCanvas = document.getElementById('tradeChart');
+            let existingChart = Chart.getChart(chartCanvas);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            // Clear the canvas
+            chartCanvas.getContext('2d').clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            
+            // Load and process trade data
+            fetch('../data/heroes/orangie_trades.json', { 
+                cache: 'no-store'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const chartData = {
+                        labels: data.map(trade => new Date(trade.timestamp)),
+                        values: data.map(trade => trade.price)
+                    };
+                    createLineChart('tradeChart', chartData);
+                })
+                .catch(error => console.error('Error loading trade data:', error));
+        });
+    </script>
+</body>
+</html>

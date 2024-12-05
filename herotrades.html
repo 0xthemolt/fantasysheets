@@ -323,8 +323,7 @@
     </div>
 
     <div id="trades">
-        <div id="trade-chart">
-            <!-- Chart will be rendered here -->
+        <div id="trade-chart" style="height: 400px; width: 100%;">
             <canvas id="tradesCanvas"></canvas>
         </div>
         <div id="trade-details">
@@ -803,23 +802,37 @@
                 const response = await fetch(`/data/heroes/${heroHandle}_trades.json`);
                 const tradesData = await response.json();
                 
-                // Prepare data for the chart
-                const chartData = {
-                    labels: tradesData.map(trade => new Date(trade.timestamp)),
-                    datasets: [{
-                        label: 'Price',
-                        data: tradesData.map(trade => trade.price),
-                        borderColor: '#3b82f6',
-                        tension: 0.1
-                    }]
-                };
-
-                // Create the chart and store the reference
-                currentChart = createLineChart('tradesCanvas', chartData, {
-                    title: `${heroHandle} Trade History`,
-                    yAxisLabel: 'Price',
-                    xAxisLabel: 'Date'
+                // Chart 
+                // Group trades by rarity
+                const tradesByRarity = {};
+                tradesData.forEach(trade => {
+                    if (!tradesByRarity[trade.rarity]) {
+                        tradesByRarity[trade.rarity] = [];
+                    }
+                    tradesByRarity[trade.rarity].push({
+                        timestamp: new Date(trade.timestamp),
+                        price: trade.price
+                    });
                 });
+
+                // Create datasets for each rarity with sorted timestamps
+                const datasets = Object.entries(tradesByRarity).map(([rarity, trades]) => ({
+                    label: rarity,
+                    data: trades
+                        .sort((a, b) => a.timestamp - b.timestamp)  // Sort by timestamp ascending
+                        .map(trade => ({
+                            x: trade.timestamp,
+                            y: trade.price
+                        })),
+                    borderWidth: 1,
+                    fill: false
+                }));
+
+                const chartData = {
+                    datasets: datasets
+                };
+                
+                window.myChart = createLineChart('tradesCanvas', chartData);
 
                 // Sort trades by timestamp in descending order
                 const trades = tradesData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));

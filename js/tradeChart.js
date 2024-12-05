@@ -1,6 +1,7 @@
 // Declare variables at the top of the file to track instances
 let tradeChart = null;
 let currentPlugin = null;
+let annotationPlugin = null;
 
 function createLineChart(containerId, data, options = {}) {
     // Ensure proper cleanup of previous instances
@@ -10,8 +11,12 @@ function createLineChart(containerId, data, options = {}) {
         if (currentPlugin) {
             Chart.unregister(currentPlugin);
         }
+        if (annotationPlugin) {
+            Chart.unregister(annotationPlugin);
+        }
         tradeChart = null;
         currentPlugin = null;
+        annotationPlugin = null;
     }
 
     const canvas = document.getElementById(containerId);
@@ -20,11 +25,21 @@ function createLineChart(containerId, data, options = {}) {
     
     // Define colors for different rarities
     const rarityColors = {
-        'common': { border: 'rgb(169, 169, 169)', background: 'rgba(169, 169, 169, 0.1)' },
-        'uncommon': { border: 'rgb(0, 128, 0)', background: 'rgba(0, 128, 0, 0.1)' },
-        'rare': { border: 'rgb(0, 0, 255)', background: 'rgba(0, 0, 255, 0.1)' },
-        'epic': { border: 'rgb(128, 0, 128)', background: 'rgba(128, 0, 128, 0.1)' },
-        'legendary': { border: 'rgb(255, 165, 0)', background: 'rgba(255, 165, 0, 0.1)' }
+        'common': { border: 'rgb(72, 238, 75)', background: 'rgba(72, 238, 75, 0.1)' },
+        'rare': { border: 'rgb(2, 224, 244)', background: 'rgba(2, 224, 244, 0.1)' },
+        'epic': { border: 'rgb(205, 47, 215)', background: 'rgba(205, 47, 215, 0.1)' },
+        'legendary': { border: 'rgb(127, 118, 245)', background: 'rgba(127, 118, 245, 0.1)' },
+        'all': { border: 'rgb(102, 102, 102)', background: 'rgba(102, 102, 102, 0.1)' }
+    };
+
+    // Get unique labels and determine initial visibility
+    const uniqueLabels = [...new Set(data.datasets.map(ds => ds.label.toLowerCase()))];
+    const getInitialVisibility = (label) => {
+        if (uniqueLabels.length === 1) return true;
+        
+        const priority = ['common', 'rare', 'epic', 'legendary'];
+        const defaultLabel = priority.find(p => uniqueLabels.includes(p)) || uniqueLabels[0];
+        return label.toLowerCase() === defaultLabel;
     };
 
     // Use the datasets directly from the input data
@@ -35,8 +50,72 @@ function createLineChart(containerId, data, options = {}) {
         backgroundColor: rarityColors[dataset.label.toLowerCase()]?.background || 'rgba(0, 0, 0, 0.1)',
         tension: 0.4,
         fill: true,
-        cubicInterpolationMode: 'monotone'
+        cubicInterpolationMode: 'monotone',
+        hidden: !getInitialVisibility(dataset.label)
     }));
+
+    // Before creating the chart config, add the annotation plugin
+    annotationPlugin = {
+        id: 'customAnnotation',
+        afterDraw: (chart) => {
+            const annotations = [
+                { date: new Date('2024-11-27T00:00:00'), label: 'MT27' },
+                { date: new Date('2024-12-01T00:00:00'), label: 'MT28' }
+            ];
+
+            const ctx = chart.ctx;
+            const xAxis = chart.scales.x;
+            const yAxis = chart.scales.y;
+
+            // Debug logging - only once
+            if (!chart._annotationsDrawn) {
+                console.log('Chart dimensions:', {
+                    top: yAxis.top,
+                    bottom: yAxis.bottom,
+                    left: xAxis.left,
+                    right: xAxis.right
+                });
+
+                annotations.forEach(({date, label}) => {
+                    const xPos = xAxis.getPixelForValue(date);
+                    console.log(`Annotation position for ${label}:`, {
+                        date: date,
+                        xPos: xPos,
+                        visible: xPos >= xAxis.left && xPos <= xAxis.right
+                    });
+                });
+                
+                chart._annotationsDrawn = true;
+            }
+
+            annotations.forEach(({date, label}) => {
+                const xPos = xAxis.getPixelForValue(date);
+                
+                // Only draw if the position is within the chart bounds
+                if (xPos >= xAxis.left && xPos <= xAxis.right) {
+                    // Draw vertical line
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeStyle = 'rgba(150, 150, 150, 0.75)';
+                    ctx.lineWidth = 1;
+                    ctx.moveTo(xPos, yAxis.top);
+                    ctx.lineTo(xPos, yAxis.bottom);
+                    ctx.stroke();
+                    
+                    // Draw label
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = 'rgba(150, 150, 150, 0.9)';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(label, xPos, yAxis.top + 20);
+                    ctx.restore();
+                }
+            });
+        }
+    };
+
+    // Register the plugin
+    Chart.register(annotationPlugin);
 
     const chartConfig = {
         type: 'line',
@@ -77,7 +156,11 @@ function createLineChart(containerId, data, options = {}) {
                     },
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toFixed(2);
+                            if (value >= 1) {
+                                return value.toFixed(2);
+                            } else {
+                                return value.toFixed(3);
+                            }
                         }
                     }
                 }

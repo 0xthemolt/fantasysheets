@@ -126,6 +126,12 @@ function createLineChart(containerId, data, options = {}) {
             responsive: true,
             maintainAspectRatio: false,  // Added to ensure proper rendering
             plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
                 title: {
                     display: true,
                     text: options.chartTitle || 'Chart'
@@ -169,8 +175,10 @@ function createLineChart(containerId, data, options = {}) {
     };
 
     console.log('Data being plotted:', {
-        labels: data.labels,
-        values: data.values
+        datasets: data.datasets.map(ds => ({
+            label: ds.label,
+            dataPoints: ds.data
+        }))
     });
 
     console.log('Creating new trade chart with config:', chartConfig);

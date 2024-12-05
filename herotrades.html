@@ -800,7 +800,8 @@
                 }
 
                 const response = await fetch(`/data/heroes/${heroHandle}_trades.json`);
-                const tradesData = await response.json();
+                const data = await response.json();
+                const tradesData = data.trades; // Extract trades array from response
                 
                 // Chart 
                 // Group trades by rarity
@@ -841,18 +842,13 @@
                 tbody.innerHTML = trades.map((trade, index) => {
                     // Get selected player handle from localStorage and log it
                     const selectedPlayer = localStorage.getItem('selectedPlayerHandle');
-                    console.log('Selected Player Handle:', selectedPlayer);
-                    console.log('Current Trade Buyer:', trade.buyer);
-                    console.log('Current Trade Seller:', trade.seller);
                     
                     // Determine row background color based on buyer/seller match
                     let rowClass = '';
                     if (selectedPlayer) {
                         if (trade.buyer === selectedPlayer) {
-                            console.log('Buyer match found!');
                             rowClass = 'buyer-match';
                         } else if (trade.seller === selectedPlayer) {
-                            console.log('Seller match found!');
                             rowClass = 'seller-match';
                         }
                     }

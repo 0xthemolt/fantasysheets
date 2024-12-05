@@ -49,7 +49,7 @@ select ghss.hero_handle,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
 ,ghss.seven_day_fantasy_score  as seven_day_score
 ,gcfs.hero_stars as current_stars
 ,projected_star.stars as projected_stars
-,gcfs.hero_stars - projected_star.stars as projected_stars_diff
+,projected_star.stars - gcfs.hero_stars  as projected_stars_diff
 ,current_star.top_range
 ,ghss.seven_day_fantasy_score
 ,l3_main.l3_main_median

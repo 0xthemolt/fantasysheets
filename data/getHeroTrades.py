@@ -25,6 +25,18 @@ and timestamp >= NOW() at time zone 'UTC' - interval '10 days'
 cursor.execute(trades_query)
 trades_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
 
+
+
+def get_price_db_connection():
+    return psycopg2.connect(
+        dbname="fantasysheets",
+        user="postgres",
+        password="WIKrjPIYtqCWApMIXculsqbMIQcGotEg",
+        host="viaduct.proxy.rlwy.net",
+        port="38391"
+    )
+
+
 # Convert DataFrame to JSON and save to file
 if not trades_df.empty:
     # Convert timestamp to desired format

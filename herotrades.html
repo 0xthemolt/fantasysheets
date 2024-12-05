@@ -150,6 +150,11 @@
             text-align: center;
         }
 
+        /* Add this new style for price column alignment */
+        #tradesTable td:nth-child(7) {
+            text-align: right;
+        }
+
         /* Style for the chart button */
         .chart-button {
             padding: 4px 8px;
@@ -169,6 +174,135 @@
         
         .filter-icon:hover {
             color: #80bdff;
+        }
+
+        /* Add these new styles */
+        .filter-popup {
+            position: absolute;
+            background: var(--background-color, #1a1a1a);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            color: #fff;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .filter-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        .filter-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2a2a2a;
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+        .filter-actions button:hover {
+            background: #3a3a3a;
+        }
+
+        .filter-actions button.apply {
+            background: #3b82f6;
+        }
+
+        .filter-actions button.apply:hover {
+            background: #2563eb;
+        }
+
+        .price-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .price-range input {
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            width: 120px;
+        }
+
+        .price-range input::placeholder {
+            color: #666;
+        }
+
+        .price-range input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .price-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-input-group label {
+            min-width: 40px;
+            color: #fff;
+        }
+
+        .price-input-group input {
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            width: 120px;
+        }
+
+        /* Add these new styles for the active filter state */
+        .filter-icon.active {
+            color: #3b82f6;  /* Same blue as hover */
+        }
+
+        .filter-icon:hover {
+            color: #3b82f6;
+        }
+
+        /* Update the price input styling */
+        .price-input-group input {
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            width: 120px;
+        }
+
+        .price-input-group input::-webkit-inner-spin-button,
+        .price-input-group input::-webkit-outer-spin-button {
+            opacity: 1;
+            background: #2a2a2a;
         }
     </style>
 </head>
@@ -191,7 +325,7 @@
                         <th>Hero</th>
                         <th>Rarity <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
                         <th>Date</th>
-                        <th>Time Gap</th>
+                        <th>Time Ago</th>
                         <th>Buyer</th>
                         <th>Seller</th>
                         <th>Price <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
@@ -202,6 +336,35 @@
                     <!-- Trade data will be populated here -->
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="rarityFilter" class="filter-popup">
+        <div class="filter-options">
+            <!-- Options will be populated dynamically -->
+        </div>
+        <div class="filter-actions">
+            <button class="clear">Clear</button>
+            <button class="apply">Apply</button>
+        </div>
+    </div>
+
+    <div id="priceFilter" class="filter-popup">
+        <div class="filter-options">
+            <div class="price-range">
+                <div class="price-input-group">
+                    <label for="minPrice">Min:</label>
+                    <input type="number" id="minPrice" placeholder="Min Price" step="0.0001">
+                </div>
+                <div class="price-input-group">
+                    <label for="maxPrice">Max:</label>
+                    <input type="number" id="maxPrice" placeholder="Max Price" step="0.0001">
+                </div>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button class="clear">Clear</button>
+            <button class="apply">Apply</button>
         </div>
     </div>
 
@@ -430,16 +593,196 @@
         function formatPrice(price) {
             const numPrice = parseFloat(price);
             if (numPrice >= 1) {
-                return numPrice.toFixed(1).replace(/\.0$/, '');
+                return numPrice.toFixed(4);
             } else {
-                return numPrice.toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+                return numPrice.toFixed(4).replace(/^0/, '');
             }
         }
 
         // Add this variable at the top of your script to track the current chart
         let currentChart = null;
 
-        // Add this function to handle loading and displaying trades
+        // Add these variables at the top of your script
+        let activeFilters = {
+            rarity: new Set(),
+            price: {
+                min: null,
+                max: null
+            }
+        };
+
+        // Add this function to handle filters
+        function setupFilters() {
+            const filterIcons = document.querySelectorAll('.filter-icon');
+            
+            filterIcons.forEach(icon => {
+                const column = icon.closest('th').textContent.trim().toLowerCase().split(' ')[0];
+                
+                icon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rect = icon.getBoundingClientRect();
+                    const filterPopup = document.getElementById(`${column}Filter`);
+                    
+                    if (column === 'rarity') {
+                        // Get unique rarity values from the table
+                        const rarities = new Set(Array.from(document.querySelectorAll('#tradesTable tbody tr'))
+                            .map(row => row.cells[1].textContent.trim()));
+                        
+                        // Populate rarity filter options
+                        const filterOptions = filterPopup.querySelector('.filter-options');
+                        filterOptions.innerHTML = Array.from(rarities)
+                            .map(rarity => `
+                                <div class="filter-option">
+                                    <input type="checkbox" id="rarity-${rarity}" value="${rarity}" 
+                                        ${activeFilters.rarity.has(rarity) ? 'checked' : ''}>
+                                    <label for="rarity-${rarity}" style="color: ${getRarityColor(rarity)}">${rarity}</label>
+                                </div>
+                            `).join('');
+                    } else if (column === 'price') {
+                        // Get min/max prices from current trades
+                        const prices = Array.from(document.querySelectorAll('#tradesTable tbody tr'))
+                            .map(row => parseFloat(row.cells[6].textContent));
+                        const minPrice = Math.min(...prices);
+                        const maxPrice = Math.max(...prices);
+
+                        const minInput = document.getElementById('minPrice');
+                        const maxInput = document.getElementById('maxPrice');
+
+                        // Set step size based on price range
+                        const step = minPrice < 1 ? 0.0001 : 0.01;
+                        minInput.step = step;
+                        maxInput.step = step;
+
+                        // Only set placeholder/value if not already set
+                        if (!minInput.value) {
+                            minInput.value = minPrice.toFixed(4);
+                        }
+                        if (!maxInput.value) {
+                            maxInput.value = maxPrice.toFixed(4);
+                        }
+
+                        // Update icon state
+                        if (activeFilters.price.min !== null || activeFilters.price.max !== null) {
+                            icon.classList.add('active');
+                        } else {
+                            icon.classList.remove('active');
+                        }
+                    }
+
+                    filterPopup.style.display = 'block';
+                    filterPopup.style.top = `${rect.top + window.scrollY - filterPopup.offsetHeight - 5}px`;
+                    filterPopup.style.left = `${rect.left + window.scrollX - 100}px`;
+                });
+            });
+
+            // Setup rarity filter actions
+            const rarityFilter = document.getElementById('rarityFilter');
+            
+            rarityFilter.querySelector('.apply').addEventListener('click', () => {
+                const checkboxes = rarityFilter.querySelectorAll('input[type="checkbox"]');
+                activeFilters.rarity.clear();
+                
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        activeFilters.rarity.add(checkbox.value);
+                    }
+                });
+                
+                const icon = document.querySelector('th:nth-child(2) .filter-icon');
+                if (icon) {
+                    if (activeFilters.rarity.size > 0) {
+                        icon.classList.add('active');
+                    } else {
+                        icon.classList.remove('active');
+                    }
+                }
+                
+                applyFilters();
+                rarityFilter.style.display = 'none';
+            });
+
+            rarityFilter.querySelector('.clear').addEventListener('click', () => {
+                const checkboxes = rarityFilter.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = false);
+                activeFilters.rarity.clear();
+                
+                const icon = document.querySelector('th:nth-child(2) .filter-icon');
+                if (icon) {
+                    icon.classList.remove('active');
+                }
+                
+                applyFilters();
+                rarityFilter.style.display = 'none';
+            });
+
+            // Update price filter actions
+            const priceFilter = document.getElementById('priceFilter');
+            
+            priceFilter.querySelector('.apply').addEventListener('click', () => {
+                const minInput = document.getElementById('minPrice');
+                const maxInput = document.getElementById('maxPrice');
+                const icon = document.querySelector('th:nth-child(7) .filter-icon');
+                
+                activeFilters.price.min = minInput.value ? parseFloat(minInput.value) : null;
+                activeFilters.price.max = maxInput.value ? parseFloat(maxInput.value) : null;
+                
+                if (icon) {
+                    if (activeFilters.price.min !== null || activeFilters.price.max !== null) {
+                        icon.classList.add('active');
+                    } else {
+                        icon.classList.remove('active');
+                    }
+                }
+                
+                applyFilters();
+                priceFilter.style.display = 'none';
+            });
+
+            priceFilter.querySelector('.clear').addEventListener('click', () => {
+                const minInput = document.getElementById('minPrice');
+                const maxInput = document.getElementById('maxPrice');
+                const icon = document.querySelector('th:nth-child(7) .filter-icon');
+                
+                minInput.value = '';
+                maxInput.value = '';
+                activeFilters.price.min = null;
+                activeFilters.price.max = null;
+                
+                if (icon) {
+                    icon.classList.remove('active');
+                }
+                
+                applyFilters();
+                priceFilter.style.display = 'none';
+            });
+
+            // Handle clicks outside the popup
+            document.addEventListener('click', (e) => {
+                const filterPopups = document.querySelectorAll('.filter-popup');
+                filterPopups.forEach(popup => {
+                    if (!popup.contains(e.target) && !e.target.classList.contains('filter-icon')) {
+                        popup.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('#tradesTable tbody tr');
+            
+            rows.forEach(row => {
+                const rarity = row.cells[1].textContent.trim();
+                const price = parseFloat(row.cells[6].textContent);
+                
+                const rarityMatch = activeFilters.rarity.size === 0 || activeFilters.rarity.has(rarity);
+                const priceMatch = (activeFilters.price.min === null || price >= activeFilters.price.min) &&
+                                  (activeFilters.price.max === null || price <= activeFilters.price.max);
+                
+                row.style.display = rarityMatch && priceMatch ? '' : 'none';
+            });
+        }
+
+        // Add this to your loadHeroTrades function after populating the table
         async function loadHeroTrades(heroHandle) {
             try {
                 // Destroy existing chart if it exists
@@ -474,36 +817,38 @@
                 
                 const tbody = document.querySelector('#tradesTable tbody');
                 tbody.innerHTML = trades.map((trade, index) => {
-                    // Calculate price change percentage
+                    // Find the most recent previous trade with the same rarity
                     let priceChange = '';
-                    if (index < trades.length - 1) {
-                        const prevPrice = trades[index + 1].price;
+                    const prevTradeWithSameRarity = trades.slice(index + 1).find(t => t.rarity === trade.rarity);
+                    
+                    if (prevTradeWithSameRarity) {
+                        const prevPrice = prevTradeWithSameRarity.price;
                         const changePercent = ((trade.price - prevPrice) / prevPrice) * 100;
                         const triangle = changePercent >= 0 ? '▲' : '▼';
                         const color = changePercent >= 0 ? '#22c55e' : '#ef4444';
                         priceChange = `<span style="color: ${color}">${triangle} ${Math.abs(Math.round(changePercent))}%</span>`;
                     }
-
+                    
                     return `
                         <tr>
                             <td>
                                 <img src="${trade.card_picture}" alt="${trade.hero_handle}" 
-                                     style="width: 30px; height: 35px; vertical-align: middle; margin-right: 8px;">
+                                     style="width: 30px; height: 40px; vertical-align: middle; margin-right: 8px;">
                                 ${trade.hero_handle}
                             </td>
                             <td style="color: ${getRarityColor(trade.rarity)}">${trade.rarity}</td>
                             <td>${new Date(trade.timestamp).toLocaleString('en-US', {
-                                month: '2-digit',
+                                month: 'short',
                                 day: '2-digit',
                                 hour: '2-digit',
                                 minute: '2-digit',
                                 second: '2-digit',
                                 hour12: false
                             }).replace(',', '')}</td>
-                            <td>${index < trades.length - 1 ? calculateTimeDifference(
-                                new Date(trade.timestamp),
-                                new Date(trades[index + 1].timestamp)
-                            ) : ''}</td>
+                            <td>${calculateTimeDifference(
+                                new Date(),  // Current time
+                                new Date(trade.timestamp)  // Trade timestamp
+                            )}</td>
                             <td>${trade.buyer}</td>
                             <td>${trade.seller}</td>
                             <td>${formatPrice(trade.price)}</td>
@@ -511,26 +856,29 @@
                         </tr>
                     `;
                 }).join('');
+
+                // Add this at the end of the function
+                setupFilters();
             } catch (error) {
                 console.error('Error loading trades:', error);
             }
         }
 
-        function calculateTimeDifference(currentDate, previousDate) {
-            const diffMs = currentDate - previousDate;
+        function calculateTimeDifference(currentDate, tradeDate) {
+            const diffMs = currentDate - tradeDate;
             const diffMinutes = Math.floor(diffMs / (1000 * 60));
             
             if (diffMinutes < 60) {
-                return `${diffMinutes}m`;
+                return `${diffMinutes}m ago`;
             }
             
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
             if (diffHours < 24) {
-                return `${diffHours}h`;
+                return `${diffHours}h ago`;
             }
             
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            return `${diffDays}d`;
+            return `${diffDays}d ago`;
         }
     </script>
 </body>

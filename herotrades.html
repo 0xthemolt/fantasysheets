@@ -313,10 +313,65 @@
         #tradesTable tr.seller-match td {
             background-color: rgba(239, 68, 68, 0.1) !important;
         }
+
+        .hero-autocomplete {
+            background: var(--background-color, #1a1a1a) !important;
+            border: 1px solid #333 !important;
+            border-radius: 4px !important;
+            color: var(--text-color, #fff) !important;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .hero-autocomplete .ui-menu-item-wrapper {
+            padding: 8px 12px !important;
+        }
+        
+        .hero-autocomplete .ui-state-active {
+            background: #3b82f6 !important;
+            border: none !important;
+            color: white !important;
+            margin: 0 !important;
+        }
+        
+        .search-container {
+            flex: 0 0 33%;
+            min-width: 300px;
+            max-width: 33%;
+            padding-right: 8px;
+        }
     </style>
 </head>
 <body>
     <div id="hero-leaderboard">
+        <div class="filter-container" style="
+            position: sticky;
+            top: 20px;
+            z-index: 2;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        ">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="heroSearch" 
+                    placeholder="Search heroes..."
+                    style="
+                        width: 100%;
+                        padding: 8px 12px;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        background: var(--background-color, #1a1a1a);
+                        color: var(--text-color, #fff);
+                    "
+                >
+            </div>
+            <!-- Additional filters can be added here -->
+        </div>
+
         <table id="heroesTable">
             <!-- table content will be populated here -->
         </table>
@@ -330,14 +385,14 @@
             <table id="tradesTable">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Hero</th>
-                        <th>Rarity <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
-                        <th>Date</th>
-                        <th>Time Ago</th>
-                        <th>Buyer</th>
-                        <th>Seller</th>
-                        <th>Price <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
-                        <th>Change</th>
+                        <th data-sort="current_stars">Current ⭐ <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
+                        <th data-sort="projected_stars">Proj ⭐ <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
+                        <th data-sort="seven_day_score">7D <span class="sort-arrow up"></span><span class="sort-arrow down active"></span></th>
+                        <th data-sort="last_main">Last Main <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
+                        <th data-sort="l3_main_median">L3 Main Median <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
+                        <th>Chart</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -488,6 +543,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Script loaded');
             try {
                 const response = await fetch('/hero_stats.json');
                 const data = await response.json();
@@ -503,9 +559,11 @@
                     l3Main: { min: Math.min(...l3MainScores), max: Math.max(...l3MainScores) }
                 };
 
+                // Populate the table first
                 const tableHTML = `
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>Hero</th>
                             <th data-sort="current_stars">Current ⭐ <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
                             <th data-sort="projected_stars">Proj ⭐ <span class="sort-arrow up"></span><span class="sort-arrow down"></span></th>
@@ -519,9 +577,9 @@
                         ${data.heroes.map(hero => `
                             <tr>
                                 <td>
-                                    <img src="${hero.hero_image_url}" alt="" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 8px;">
-                                    ${hero.hero_handle}
+                                    <img src="${hero.hero_image_url}" alt="" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle;">
                                 </td>
+                                <td data-hero-handle="${hero.hero_handle}">${hero.hero_handle}</td>
                                 <td data-value="${hero.current_stars}">${hero.current_stars}</td>
                                 <td data-value="${hero.projected_stars}">
                                     ${hero.projected_stars}
@@ -552,37 +610,67 @@
                 
                 document.getElementById('heroesTable').innerHTML = tableHTML;
                 
-                // Add click event listeners to chart buttons
-                console.log('Setting up chart button listeners...'); // Debug log
-                const chartButtons = document.querySelectorAll('.chart-button');
-                console.log('Found chart buttons:', chartButtons.length); // Debug log
-                
-                chartButtons.forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log('Button clicked!');
-                        
-                        const heroHandle = this.getAttribute('data-hero');
-                        console.log('Hero handle:', heroHandle);
-                        
-                        const tradesDiv = document.getElementById('trades');
-                        // Try both methods of showing the div
-                        tradesDiv.style.visibility = 'visible';
-                        tradesDiv.style.opacity = '1';
-                        
-                        // Debug logs to check computed styles
-                        console.log('Trades div display style:', getComputedStyle(tradesDiv).display);
-                        console.log('Trades div visibility:', getComputedStyle(tradesDiv).visibility);
-                        console.log('Trades div classes:', tradesDiv.classList);
-                        loadHeroTrades(heroHandle);
+                // AFTER the table is populated, set up search functionality
+                console.log('Setting up search functionality...');
+                const heroSearch = document.getElementById('heroSearch');
+                if (!heroSearch) {
+                    console.error('Hero search input not found!');
+                    return;
+                }
+
+                heroSearch.addEventListener('input', function(e) {
+                    console.log('Search input changed:', e.target.value);
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#heroesTable tbody tr');
+                    console.log('Found rows:', rows.length);
+                    
+                    rows.forEach(row => {
+                        const heroCell = row.querySelector('td[data-hero-handle]');
+                        const heroHandle = heroCell.dataset.heroHandle.toLowerCase();
+                        row.style.display = heroHandle.includes(searchTerm) ? '' : 'none';
                     });
+                });
+
+                // Setup autocomplete
+                if (!$) {
+                    console.error('jQuery not loaded!');
+                    return;
+                }
+                
+                console.log('Setting up autocomplete...');
+                $(heroSearch).autocomplete({
+                    source: function(request, response) {
+                        const term = request.term.toLowerCase();
+                        const rows = document.querySelectorAll('#heroesTable tbody tr');
+                        const matches = Array.from(rows)
+                            .map(row => {
+                                const heroCell = row.querySelector('td[data-hero-handle]');
+                                return heroCell.dataset.heroHandle;
+                            })
+                            .filter(handle => handle.toLowerCase().includes(term))
+                            .slice(0, 10); // Limit to 10 results
+                        response(matches);
+                    },
+                    minLength: 1,
+                    select: function(event, ui) {
+                        const selectedHero = ui.item.value.toLowerCase();
+                        const rows = document.querySelectorAll('#heroesTable tbody tr');
+                        
+                        rows.forEach(row => {
+                            const heroCell = row.querySelector('td[data-hero-handle]');
+                            const heroHandle = heroCell.dataset.heroHandle.toLowerCase();
+                            row.style.display = heroHandle === selectedHero ? '' : 'none';
+                        });
+                    },
+                    classes: {
+                        "ui-autocomplete": "hero-autocomplete"
+                    }
                 });
 
                 // Initial sort on 7D Score
                 sortTable('seven_day_score', true);
             } catch (error) {
-                console.error('Error fetching hero stats:', error);
-                document.getElementById('hero-leaderboard').innerHTML = 'Error loading hero stats';
+                console.error('Error in setup:', error);
             }
         });
 
@@ -916,6 +1004,12 @@
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             return `${diffDays}d ago`;
         }
+
+        const rows = document.querySelectorAll('#heroesTable tbody tr');
+        rows.forEach(row => {
+            const heroCell = row.querySelector('td[data-hero-handle]');
+            console.log(heroCell.dataset.heroHandle);
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade Chart Debug</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="../js/tradeChart.js?v=1.0.0"></script>
+    <style>
+        .chart-container {
+            width: 800px;
+            height: 400px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <canvas id="tradeChart"></canvas>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            console.log('Starting chart initialization...');
+            const chartCanvas = document.getElementById('tradeChart');
+            
+            // More aggressive chart cleanup
+            if (window.myChart) {
+                console.log('Destroying existing chart instance...');
+                window.myChart.destroy();
+                window.myChart = null;
+            }
+            
+            let existingChart = Chart.getChart(chartCanvas);
+            if (existingChart) {
+                console.log('Found existing Chart.js instance, destroying...');
+                existingChart.destroy();
+            }
+            
+            // Force garbage collection of any chart instances
+            Chart.helpers.each(Chart.instances, function(instance) {
+                instance.destroy();
+            });
+            
+            fetch('../data/heroes/machibigbrother_trades.json', { 
+                cache: 'no-store'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Data loaded, creating new chart...');
+                    
+                    // Group trades by rarity
+                    const tradesByRarity = {};
+                    data.forEach(trade => {
+                        if (!tradesByRarity[trade.rarity]) {
+                            tradesByRarity[trade.rarity] = [];
+                        }
+                        tradesByRarity[trade.rarity].push({
+                            timestamp: new Date(trade.timestamp),
+                            price: trade.price
+                        });
+                    });
+
+                    // Create datasets for each rarity with sorted timestamps
+                    const datasets = Object.entries(tradesByRarity).map(([rarity, trades]) => ({
+                        label: rarity,
+                        data: trades
+                            .sort((a, b) => a.timestamp - b.timestamp)  // Sort by timestamp ascending
+                            .map(trade => ({
+                                x: trade.timestamp,
+                                y: trade.price
+                            })),
+                        borderWidth: 1,
+                        fill: false
+                    }));
+
+                    const chartData = {
+                        datasets: datasets
+                    };
+                    console.log('Chart Data being sent to createLineChart:', JSON.stringify(chartData, null, 2));
+                    console.log('Datasets length:', datasets.length);
+                    datasets.forEach((dataset, index) => {
+                        console.log(`Dataset ${index} (${dataset.label}):`);
+                        console.log('  Number of points:', dataset.data.length);
+                        console.log('  First point:', dataset.data[0]);
+                        console.log('  Last point:', dataset.data[dataset.data.length - 1]);
+                    });
+                    
+                    window.myChart = createLineChart('tradeChart', chartData);
+                })
+                .catch(error => console.error('Error loading trade data:', error));
+        });
+    </script>
+</body>
+</html>

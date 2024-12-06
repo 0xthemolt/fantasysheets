@@ -392,7 +392,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 6px;
             gap: 16px;
         }
 
@@ -558,6 +558,44 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
+
+        .price-filter-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .price-filter-container label {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .price-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-inputs input {
+            width: 100px;
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .price-inputs span {
+            color: #666;
+        }
+
+        .price-inputs input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
     </style>
 </head>
 <body>
@@ -574,6 +612,14 @@
                 <input type="text" id="heroSearch" placeholder="Search heroes...">
             </div>
             <button class="close-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="price-filter-container">
+            <label>Price:</label>
+            <div class="price-inputs">
+                <input type="number" id="popupMinPrice" placeholder="Min" step="0.0001">
+                <span>to</span>
+                <input type="number" id="popupMaxPrice" placeholder="Max" step="0.0001">
+            </div>
         </div>
         <div class="stars-grid"></div>
     </div>
@@ -1202,6 +1248,52 @@
                     heroSelectorPopup.style.display = 'none';
                     overlay.style.display = 'none';
                 });
+
+                // Find min and max floor prices
+                const allFloorPrices = data.heroes
+                    .map(hero => hero.common_floor)
+                    .filter(price => price !== null && price !== undefined);
+                const minFloor = Math.min(...allFloorPrices);
+                const maxFloor = Math.max(...allFloorPrices);
+
+                // Set default values for price inputs
+                const minPriceInput = document.getElementById('popupMinPrice');
+                const maxPriceInput = document.getElementById('popupMaxPrice');
+                minPriceInput.value = minFloor.toFixed(4);
+                maxPriceInput.value = maxFloor.toFixed(4);
+
+                // Add price filter event listeners
+                function filterHeroes() {
+                    const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
+                    const minPrice = parseFloat(minPriceInput.value) || 0;
+                    const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+
+                    const heroCards = document.querySelectorAll('.hero-card');
+                    heroCards.forEach(card => {
+                        const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                        const floorPriceEl = card.querySelector('.floor-price span[title="Common Floor"]');
+                        const floorPrice = parseFloat(floorPriceEl.textContent);
+                        
+                        const matchesSearch = heroHandle.includes(searchTerm);
+                        const matchesPrice = !isNaN(floorPrice) && floorPrice >= minPrice && floorPrice <= maxPrice;
+                        
+                        card.style.display = matchesSearch && matchesPrice ? 'flex' : 'none';
+                    });
+
+                    // Show/hide star columns based on whether they have visible heroes
+                    const starColumns = document.querySelectorAll('.star-column');
+                    starColumns.forEach(column => {
+                        const visibleHeroes = column.querySelectorAll('.hero-card[style*="display: flex"]').length;
+                        column.style.display = visibleHeroes > 0 ? 'flex' : 'none';
+                    });
+                }
+
+                minPriceInput.addEventListener('input', filterHeroes);
+                maxPriceInput.addEventListener('input', filterHeroes);
+
+                // Update existing search input event listener to also check price
+                const searchInput = document.getElementById('heroSearch');
+                searchInput.addEventListener('input', filterHeroes);
 
             } catch (error) {
                 console.error('Error loading hero stats:', error);

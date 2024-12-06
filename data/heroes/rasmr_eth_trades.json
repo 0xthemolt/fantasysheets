@@ -315,16 +315,6 @@
       "hero_handle": "rasmr_eth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/rasmr_eth_8.png",
-      "timestamp": "2024-10-24 22:57:55",
-      "buyer": "AlexTsvetkovv",
-      "seller": "maggicapital",
-      "price": 0.0865
-    },
-    {
-      "hero_id": "423164349",
-      "hero_handle": "rasmr_eth",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/rasmr_eth_8.png",
       "timestamp": "2024-10-25 01:42:45",
       "buyer": "OttoSuwenNFT",
       "seller": "AlexTsvetkovv",
@@ -369,14 +359,34 @@
       "buyer": "OttoSuwenNFT",
       "seller": "NekiyMy",
       "price": 0.098
+    },
+    {
+      "hero_id": "423164349",
+      "hero_handle": "rasmr_eth",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/rasmr_eth_8.png",
+      "timestamp": "2024-10-24 22:57:55",
+      "buyer": "AlexTsvetkovv",
+      "seller": "maggicapital",
+      "price": 0.0865
     }
   ],
-  "prices": {
-    "hero_id": "423164349",
-    "hero_handle": "rasmr_eth",
-    "common_floor": 0.09,
-    "common_bid": 0.065,
-    "rare_floor": 0.65,
-    "rare_bid": 0.1659
-  }
+  "prices": [
+    {
+      "hero_id": "423164349",
+      "hero_handle": "rasmr_eth",
+      "rarity": "common",
+      "bid": 0.065,
+      "floor": 0.09,
+      "hero": "rasmr_eth"
+    },
+    {
+      "hero_id": "423164349",
+      "hero_handle": "rasmr_eth",
+      "rarity": "rare",
+      "bid": 0.17,
+      "floor": 0.649,
+      "hero": "rasmr_eth"
+    }
+  ]
 }

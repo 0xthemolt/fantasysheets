@@ -645,16 +645,6 @@
       "hero_handle": "heartereum",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/heartereum_5.png",
-      "timestamp": "2024-10-27 09:06:09",
-      "buyer": "CryptoNostraa",
-      "seller": "DaniAl79_10",
-      "price": 0.05201
-    },
-    {
-      "hero_id": "4705209135",
-      "hero_handle": "heartereum",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/heartereum_5.png",
       "timestamp": "2024-10-24 17:24:53",
       "buyer": "arcspace99",
       "seller": "Khallid4397",
@@ -679,14 +669,34 @@
       "buyer": "arcspace99",
       "seller": "enricoi4",
       "price": 0.075
+    },
+    {
+      "hero_id": "4705209135",
+      "hero_handle": "heartereum",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/heartereum_5.png",
+      "timestamp": "2024-10-27 09:06:09",
+      "buyer": "CryptoNostraa",
+      "seller": "DaniAl79_10",
+      "price": 0.05201
     }
   ],
-  "prices": {
-    "hero_id": "4705209135",
-    "hero_handle": "heartereum",
-    "common_floor": 0.0358,
-    "common_bid": 0.02,
-    "rare_floor": 0.24,
-    "rare_bid": 0.088
-  }
+  "prices": [
+    {
+      "hero_id": "4705209135",
+      "hero_handle": "heartereum",
+      "rarity": "rare",
+      "bid": 0.1,
+      "floor": 0.24,
+      "hero": "heartereum"
+    },
+    {
+      "hero_id": "4705209135",
+      "hero_handle": "heartereum",
+      "rarity": "common",
+      "bid": 0.02,
+      "floor": 0.0358,
+      "hero": "heartereum"
+    }
+  ]
 }

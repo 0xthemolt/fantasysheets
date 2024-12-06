@@ -771,12 +771,22 @@
       "price": 0.0275625
     }
   ],
-  "prices": {
-    "hero_id": "79714172",
-    "hero_handle": "zhusu",
-    "common_floor": 0.0148,
-    "common_bid": 0.009620001,
-    "rare_floor": 0.05868,
-    "rare_bid": 0.0258
-  }
+  "prices": [
+    {
+      "hero_id": "79714172",
+      "hero_handle": "zhusu",
+      "rarity": "common",
+      "bid": 0.009620001,
+      "floor": 0.01,
+      "hero": "zhusu"
+    },
+    {
+      "hero_id": "79714172",
+      "hero_handle": "zhusu",
+      "rarity": "rare",
+      "bid": 0.0282447,
+      "floor": 0.0585,
+      "hero": "zhusu"
+    }
+  ]
 }

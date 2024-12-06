@@ -1055,16 +1055,6 @@
       "hero_handle": "Cbb0fe",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Cbb0fe_5.png",
-      "timestamp": "2024-10-31 18:28:07",
-      "buyer": "0xTactic",
-      "seller": "SecondUse11",
-      "price": 0.041
-    },
-    {
-      "hero_id": "1703332734603591680",
-      "hero_handle": "Cbb0fe",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Cbb0fe_5.png",
       "timestamp": "2024-10-28 12:54:19",
       "buyer": "adamzzy7",
       "seller": "Borisateli",
@@ -1095,10 +1085,10 @@
       "hero_handle": "Cbb0fe",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Cbb0fe_5.png",
-      "timestamp": "2024-10-27 11:40:23",
-      "buyer": "arcspace99",
-      "seller": "chubbicorn_ham",
-      "price": 0.058
+      "timestamp": "2024-10-31 18:28:07",
+      "buyer": "0xTactic",
+      "seller": "SecondUse11",
+      "price": 0.041
     },
     {
       "hero_id": "1703332734603591680",
@@ -1213,6 +1203,16 @@
     {
       "hero_id": "1703332734603591680",
       "hero_handle": "Cbb0fe",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Cbb0fe_5.png",
+      "timestamp": "2024-10-27 11:40:23",
+      "buyer": "arcspace99",
+      "seller": "chubbicorn_ham",
+      "price": 0.058
+    },
+    {
+      "hero_id": "1703332734603591680",
+      "hero_handle": "Cbb0fe",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/Cbb0fe_5.png",
       "timestamp": "2024-10-24 14:08:07",
@@ -1241,12 +1241,22 @@
       "price": 0.0701
     }
   ],
-  "prices": {
-    "hero_id": "1703332734603591680",
-    "hero_handle": "Cbb0fe",
-    "common_floor": 0.02,
-    "common_bid": 0.0127050105,
-    "rare_floor": 0.07,
-    "rare_bid": 0.06
-  }
+  "prices": [
+    {
+      "hero_id": "1703332734603591680",
+      "hero_handle": "Cbb0fe",
+      "rarity": "rare",
+      "bid": 0.0601,
+      "floor": 0.07,
+      "hero": "Cbb0fe"
+    },
+    {
+      "hero_id": "1703332734603591680",
+      "hero_handle": "Cbb0fe",
+      "rarity": "common",
+      "bid": 0.0127050105,
+      "floor": 0.018,
+      "hero": "Cbb0fe"
+    }
+  ]
 }

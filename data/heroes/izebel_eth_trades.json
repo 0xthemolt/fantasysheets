@@ -2205,16 +2205,6 @@
       "hero_handle": "izebel_eth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
-      "timestamp": "2024-10-31 17:33:23",
-      "buyer": "Tim__eight",
-      "seller": "macdonald_71534",
-      "price": 0.013
-    },
-    {
-      "hero_id": "815322092627333121",
-      "hero_handle": "izebel_eth",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
       "timestamp": "2024-10-31 08:50:47",
       "buyer": "onliner85",
       "seller": "elric0607",
@@ -2225,10 +2215,10 @@
       "hero_handle": "izebel_eth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
-      "timestamp": "2024-10-28 13:53:39",
-      "buyer": "ZiggySatdust",
-      "seller": "Dino10CARP",
-      "price": 0.0116
+      "timestamp": "2024-10-31 17:33:23",
+      "buyer": "Tim__eight",
+      "seller": "macdonald_71534",
+      "price": 0.013
     },
     {
       "hero_id": "815322092627333121",
@@ -2239,6 +2229,16 @@
       "buyer": "visavi_eth",
       "seller": "314Mysterio",
       "price": 0.02877333
+    },
+    {
+      "hero_id": "815322092627333121",
+      "hero_handle": "izebel_eth",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
+      "timestamp": "2024-10-28 13:53:39",
+      "buyer": "ZiggySatdust",
+      "seller": "Dino10CARP",
+      "price": 0.0116
     },
     {
       "hero_id": "815322092627333121",
@@ -2323,16 +2323,6 @@
     {
       "hero_id": "815322092627333121",
       "hero_handle": "izebel_eth",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
-      "timestamp": "2024-10-27 13:18:01",
-      "buyer": "MutantMatt0x",
-      "seller": "ExitDone1",
-      "price": 0.01260105
-    },
-    {
-      "hero_id": "815322092627333121",
-      "hero_handle": "izebel_eth",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/izebel_eth_5.png",
       "timestamp": "2024-10-27 03:23:59",
@@ -2405,6 +2395,16 @@
       "hero_handle": "izebel_eth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
+      "timestamp": "2024-10-27 13:18:01",
+      "buyer": "MutantMatt0x",
+      "seller": "ExitDone1",
+      "price": 0.01260105
+    },
+    {
+      "hero_id": "815322092627333121",
+      "hero_handle": "izebel_eth",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/izebel_eth_5.png",
       "timestamp": "2024-10-25 08:37:29",
       "buyer": "ZiggySatdust",
       "seller": "100x2fire",
@@ -2431,12 +2431,22 @@
       "price": 0.0139
     }
   ],
-  "prices": {
-    "hero_id": "815322092627333121",
-    "hero_handle": "izebel_eth",
-    "common_floor": 0.008222,
-    "common_bid": 0.00710001,
-    "rare_floor": 0.039,
-    "rare_bid": 0.0252
-  }
+  "prices": [
+    {
+      "hero_id": "815322092627333121",
+      "hero_handle": "izebel_eth",
+      "rarity": "rare",
+      "bid": 0.0252,
+      "floor": 0.039,
+      "hero": "izebel_eth"
+    },
+    {
+      "hero_id": "815322092627333121",
+      "hero_handle": "izebel_eth",
+      "rarity": "common",
+      "bid": 0.0071,
+      "floor": 0.008222,
+      "hero": "izebel_eth"
+    }
+  ]
 }

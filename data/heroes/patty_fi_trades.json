@@ -455,6 +455,16 @@
       "hero_handle": "patty_fi",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png",
+      "timestamp": "2024-10-25 14:07:45",
+      "buyer": "FyO4z",
+      "seller": "VillanelleFcks",
+      "price": 0.0299
+    },
+    {
+      "hero_id": "2760158505",
+      "hero_handle": "patty_fi",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png",
       "timestamp": "2024-10-27 14:14:47",
       "buyer": "Melodkaty",
       "seller": "CryptoNostraa",
@@ -469,16 +479,6 @@
       "buyer": "vb_og_",
       "seller": "DannyTrieu2",
       "price": 0.02999
-    },
-    {
-      "hero_id": "2760158505",
-      "hero_handle": "patty_fi",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png",
-      "timestamp": "2024-10-25 14:07:45",
-      "buyer": "FyO4z",
-      "seller": "VillanelleFcks",
-      "price": 0.0299
     },
     {
       "hero_id": "2760158505",
@@ -515,28 +515,38 @@
       "hero_handle": "patty_fi",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png",
-      "timestamp": "2024-10-24 20:32:15",
-      "buyer": "DannyTrieu2",
-      "seller": "Anonymoux2311",
-      "price": 0.0239
+      "timestamp": "2024-10-24 19:46:45",
+      "buyer": "Pleo_eth",
+      "seller": "dankerwim",
+      "price": 0.0241
     },
     {
       "hero_id": "2760158505",
       "hero_handle": "patty_fi",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/patty_fi_6.png",
-      "timestamp": "2024-10-24 19:46:45",
-      "buyer": "Pleo_eth",
-      "seller": "dankerwim",
-      "price": 0.0241
+      "timestamp": "2024-10-24 20:32:15",
+      "buyer": "DannyTrieu2",
+      "seller": "Anonymoux2311",
+      "price": 0.0239
     }
   ],
-  "prices": {
-    "hero_id": "2760158505",
-    "hero_handle": "patty_fi",
-    "common_floor": 0.028,
-    "common_bid": 0.0202860001,
-    "rare_floor": 0.19,
-    "rare_bid": 0.084
-  }
+  "prices": [
+    {
+      "hero_id": "2760158505",
+      "hero_handle": "patty_fi",
+      "rarity": "rare",
+      "bid": 0.086,
+      "floor": 0.19,
+      "hero": "patty_fi"
+    },
+    {
+      "hero_id": "2760158505",
+      "hero_handle": "patty_fi",
+      "rarity": "common",
+      "bid": 0.021,
+      "floor": 0.028,
+      "hero": "patty_fi"
+    }
+  ]
 }

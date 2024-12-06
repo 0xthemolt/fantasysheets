@@ -565,6 +565,16 @@
       "hero_handle": "Chilearmy123",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Chilearmy123_5.png",
+      "timestamp": "2024-10-30 18:29:35",
+      "buyer": "Cer3bralpauly",
+      "seller": "Menno_vds",
+      "price": 0.035
+    },
+    {
+      "hero_id": "1456142714756468738",
+      "hero_handle": "Chilearmy123",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Chilearmy123_5.png",
       "timestamp": "2024-10-30 00:30:45",
       "buyer": "visavi_eth",
       "seller": "0xDuyTheBip",
@@ -579,16 +589,6 @@
       "buyer": "greatname1234",
       "seller": "dansform",
       "price": 0.1551
-    },
-    {
-      "hero_id": "1456142714756468738",
-      "hero_handle": "Chilearmy123",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Chilearmy123_5.png",
-      "timestamp": "2024-10-30 18:29:35",
-      "buyer": "Cer3bralpauly",
-      "seller": "Menno_vds",
-      "price": 0.035
     },
     {
       "hero_id": "1456142714756468738",
@@ -681,12 +681,22 @@
       "price": 0.03851
     }
   ],
-  "prices": {
-    "hero_id": "1456142714756468738",
-    "hero_handle": "Chilearmy123",
-    "common_floor": 0.0199,
-    "common_bid": 0.01425,
-    "rare_floor": 0.189,
-    "rare_bid": 0.0600306
-  }
+  "prices": [
+    {
+      "hero_id": "1456142714756468738",
+      "hero_handle": "Chilearmy123",
+      "rarity": "common",
+      "bid": 0.01425002,
+      "floor": 0.019989,
+      "hero": "Chilearmy123"
+    },
+    {
+      "hero_id": "1456142714756468738",
+      "hero_handle": "Chilearmy123",
+      "rarity": "rare",
+      "bid": 0.064,
+      "floor": 0.189,
+      "hero": "Chilearmy123"
+    }
+  ]
 }

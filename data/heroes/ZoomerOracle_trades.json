@@ -1485,16 +1485,6 @@
       "hero_handle": "ZoomerOracle",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
-      "timestamp": "2024-11-01 02:28:07",
-      "buyer": "SethA1982",
-      "seller": "JamBhala23",
-      "price": 0.023
-    },
-    {
-      "hero_id": "1297920445979807744",
-      "hero_handle": "ZoomerOracle",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
       "timestamp": "2024-11-01 01:19:01",
       "buyer": "ProdigiousStack",
       "seller": "ZP_12_",
@@ -1505,20 +1495,20 @@
       "hero_handle": "ZoomerOracle",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
-      "timestamp": "2024-10-31 19:45:41",
-      "buyer": "timontimofey23",
-      "seller": "nikolaicornell",
-      "price": 0.02
+      "timestamp": "2024-11-01 02:28:07",
+      "buyer": "SethA1982",
+      "seller": "JamBhala23",
+      "price": 0.023
     },
     {
       "hero_id": "1297920445979807744",
       "hero_handle": "ZoomerOracle",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
-      "timestamp": "2024-10-31 18:20:11",
+      "timestamp": "2024-10-31 19:45:41",
       "buyer": "timontimofey23",
-      "seller": "0xthemolt",
-      "price": 0.023012
+      "seller": "nikolaicornell",
+      "price": 0.02
     },
     {
       "hero_id": "1297920445979807744",
@@ -1545,6 +1535,16 @@
       "hero_handle": "ZoomerOracle",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
+      "timestamp": "2024-10-31 18:20:11",
+      "buyer": "timontimofey23",
+      "seller": "0xthemolt",
+      "price": 0.023012
+    },
+    {
+      "hero_id": "1297920445979807744",
+      "hero_handle": "ZoomerOracle",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/ZoomerOracle_4.png",
       "timestamp": "2024-10-27 18:16:15",
       "buyer": "Sant0sPaulo",
       "seller": "esmec99",
@@ -1559,6 +1559,16 @@
       "buyer": "J6868L",
       "seller": "margin_called",
       "price": 0.03249
+    },
+    {
+      "hero_id": "1297920445979807744",
+      "hero_handle": "ZoomerOracle",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ZoomerOracle_4.png",
+      "timestamp": "2024-10-26 14:05:17",
+      "buyer": "AntonKrutishka",
+      "seller": "SatoshiAndGwei",
+      "price": 0.00662
     },
     {
       "hero_id": "1297920445979807744",
@@ -1589,16 +1599,6 @@
       "buyer": "VasyaSobolev3",
       "seller": "Dripppy2x",
       "price": 0.02901
-    },
-    {
-      "hero_id": "1297920445979807744",
-      "hero_handle": "ZoomerOracle",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ZoomerOracle_4.png",
-      "timestamp": "2024-10-26 14:05:17",
-      "buyer": "AntonKrutishka",
-      "seller": "SatoshiAndGwei",
-      "price": 0.00662
     },
     {
       "hero_id": "1297920445979807744",
@@ -1691,12 +1691,22 @@
       "price": 0.036
     }
   ],
-  "prices": {
-    "hero_id": "1297920445979807744",
-    "hero_handle": "ZoomerOracle",
-    "common_floor": 0.005999,
-    "common_bid": 0.00484,
-    "rare_floor": 0.0288,
-    "rare_bid": 0.0131031111
-  }
+  "prices": [
+    {
+      "hero_id": "1297920445979807744",
+      "hero_handle": "ZoomerOracle",
+      "rarity": "rare",
+      "bid": 0.0131031111,
+      "floor": 0.0288,
+      "hero": "ZoomerOracle"
+    },
+    {
+      "hero_id": "1297920445979807744",
+      "hero_handle": "ZoomerOracle",
+      "rarity": "common",
+      "bid": 0.0048322,
+      "floor": 0.005999,
+      "hero": "ZoomerOracle"
+    }
+  ]
 }

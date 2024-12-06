@@ -491,12 +491,22 @@
       "price": 0.068
     }
   ],
-  "prices": {
-    "hero_id": "1769641180898131968",
-    "hero_handle": "muzzyvermillion",
-    "common_floor": 0.0737,
-    "common_bid": 0.05,
-    "rare_floor": 0.55,
-    "rare_bid": 0.12
-  }
+  "prices": [
+    {
+      "hero_id": "1769641180898131968",
+      "hero_handle": "muzzyvermillion",
+      "rarity": "common",
+      "bid": 0.05,
+      "floor": 0.0737,
+      "hero": "muzzyvermillion"
+    },
+    {
+      "hero_id": "1769641180898131968",
+      "hero_handle": "muzzyvermillion",
+      "rarity": "rare",
+      "bid": 0.125,
+      "floor": 0.55,
+      "hero": "muzzyvermillion"
+    }
+  ]
 }

@@ -315,9 +315,9 @@
       "hero_handle": "based16z",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/based16z_7.png",
-      "timestamp": "2024-10-24 20:13:21",
+      "timestamp": "2024-10-24 21:01:57",
       "buyer": "arcspace99",
-      "seller": "DALEKSPACEMONKY",
+      "seller": "_nepoceda",
       "price": 0.142
     },
     {
@@ -325,18 +325,28 @@
       "hero_handle": "based16z",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/based16z_7.png",
-      "timestamp": "2024-10-24 21:01:57",
+      "timestamp": "2024-10-24 20:13:21",
       "buyer": "arcspace99",
-      "seller": "_nepoceda",
+      "seller": "DALEKSPACEMONKY",
       "price": 0.142
     }
   ],
-  "prices": {
-    "hero_id": "1446541960181858315",
-    "hero_handle": "based16z",
-    "common_floor": 0.0889,
-    "common_bid": 0.0705,
-    "rare_floor": null,
-    "rare_bid": 0.2
-  }
+  "prices": [
+    {
+      "hero_id": "1446541960181858315",
+      "hero_handle": "based16z",
+      "rarity": "rare",
+      "bid": 0.2,
+      "floor": null,
+      "hero": "based16z"
+    },
+    {
+      "hero_id": "1446541960181858315",
+      "hero_handle": "based16z",
+      "rarity": "common",
+      "bid": 0.0705,
+      "floor": 0.0889,
+      "hero": "based16z"
+    }
+  ]
 }

@@ -963,16 +963,6 @@
     {
       "hero_id": "4830383913",
       "hero_handle": "mikadontlouz",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mikadontlouz_4.png",
-      "timestamp": "2024-10-31 17:34:49",
-      "buyer": "bryttany16866",
-      "seller": "Anonymoux2311",
-      "price": 0.09
-    },
-    {
-      "hero_id": "4830383913",
-      "hero_handle": "mikadontlouz",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mikadontlouz_4.png",
       "timestamp": "2024-10-31 18:59:29",
@@ -993,12 +983,12 @@
     {
       "hero_id": "4830383913",
       "hero_handle": "mikadontlouz",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mikadontlouz_4.png",
-      "timestamp": "2024-10-29 16:11:43",
-      "buyer": "visavi_eth",
-      "seller": "0xpurif",
-      "price": 0.0220009
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/mikadontlouz_4.png",
+      "timestamp": "2024-10-31 17:34:49",
+      "buyer": "bryttany16866",
+      "seller": "Anonymoux2311",
+      "price": 0.09
     },
     {
       "hero_id": "4830383913",
@@ -1015,20 +1005,20 @@
       "hero_handle": "mikadontlouz",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mikadontlouz_4.png",
-      "timestamp": "2024-10-28 09:24:47",
+      "timestamp": "2024-10-29 16:11:43",
       "buyer": "visavi_eth",
-      "seller": "loldemort_eth",
-      "price": 0.0168799
+      "seller": "0xpurif",
+      "price": 0.0220009
     },
     {
       "hero_id": "4830383913",
       "hero_handle": "mikadontlouz",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mikadontlouz_4.png",
-      "timestamp": "2024-10-27 10:32:03",
+      "timestamp": "2024-10-28 09:24:47",
       "buyer": "visavi_eth",
-      "seller": "JulietteGarnie",
-      "price": 0.0235022
+      "seller": "loldemort_eth",
+      "price": 0.0168799
     },
     {
       "hero_id": "4830383913",
@@ -1059,14 +1049,34 @@
       "buyer": "CryptoNostraa",
       "seller": "nexttorant70355",
       "price": 0.03101
+    },
+    {
+      "hero_id": "4830383913",
+      "hero_handle": "mikadontlouz",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/mikadontlouz_4.png",
+      "timestamp": "2024-10-27 10:32:03",
+      "buyer": "visavi_eth",
+      "seller": "JulietteGarnie",
+      "price": 0.0235022
     }
   ],
-  "prices": {
-    "hero_id": "4830383913",
-    "hero_handle": "mikadontlouz",
-    "common_floor": 0.019,
-    "common_bid": 0.0146,
-    "rare_floor": 0.1,
-    "rare_bid": 0.055
-  }
+  "prices": [
+    {
+      "hero_id": "4830383913",
+      "hero_handle": "mikadontlouz",
+      "rarity": "common",
+      "bid": 0.0147,
+      "floor": 0.019,
+      "hero": "mikadontlouz"
+    },
+    {
+      "hero_id": "4830383913",
+      "hero_handle": "mikadontlouz",
+      "rarity": "rare",
+      "bid": 0.066,
+      "floor": 0.1,
+      "hero": "mikadontlouz"
+    }
+  ]
 }

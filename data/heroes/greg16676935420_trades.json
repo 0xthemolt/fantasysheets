@@ -121,12 +121,22 @@
       "price": 0.3
     }
   ],
-  "prices": {
-    "hero_id": "1356434353623093249",
-    "hero_handle": "greg16676935420",
-    "common_floor": 0.185,
-    "common_bid": 0.14,
-    "rare_floor": null,
-    "rare_bid": 0.22
-  }
+  "prices": [
+    {
+      "hero_id": "1356434353623093249",
+      "hero_handle": "greg16676935420",
+      "rarity": "rare",
+      "bid": 0.22,
+      "floor": null,
+      "hero": "greg16676935420"
+    },
+    {
+      "hero_id": "1356434353623093249",
+      "hero_handle": "greg16676935420",
+      "rarity": "common",
+      "bid": 0.14,
+      "floor": 0.185,
+      "hero": "greg16676935420"
+    }
+  ]
 }

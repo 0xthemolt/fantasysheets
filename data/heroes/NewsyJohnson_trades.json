@@ -515,16 +515,6 @@
       "hero_handle": "NewsyJohnson",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/NewsyJohnson_5.png",
-      "timestamp": "2024-10-27 07:26:59",
-      "buyer": "0xh00d",
-      "seller": "captive1337",
-      "price": 0.16
-    },
-    {
-      "hero_id": "1681911869424926720",
-      "hero_handle": "NewsyJohnson",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/NewsyJohnson_5.png",
       "timestamp": "2024-10-27 17:30:31",
       "buyer": "Habarik86",
       "seller": "Perepelica_nft",
@@ -619,14 +609,34 @@
       "buyer": "DannyTrieu2",
       "seller": "0xDMI_",
       "price": 0.031605
+    },
+    {
+      "hero_id": "1681911869424926720",
+      "hero_handle": "NewsyJohnson",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/NewsyJohnson_5.png",
+      "timestamp": "2024-10-27 07:26:59",
+      "buyer": "0xh00d",
+      "seller": "captive1337",
+      "price": 0.16
     }
   ],
-  "prices": {
-    "hero_id": "1681911869424926720",
-    "hero_handle": "NewsyJohnson",
-    "common_floor": 0.03699,
-    "common_bid": 0.02201,
-    "rare_floor": 0.169,
-    "rare_bid": 0.0685
-  }
+  "prices": [
+    {
+      "hero_id": "1681911869424926720",
+      "hero_handle": "NewsyJohnson",
+      "rarity": "common",
+      "bid": 0.02201,
+      "floor": 0.03699,
+      "hero": "NewsyJohnson"
+    },
+    {
+      "hero_id": "1681911869424926720",
+      "hero_handle": "NewsyJohnson",
+      "rarity": "rare",
+      "bid": 0.0685,
+      "floor": 0.169,
+      "hero": "NewsyJohnson"
+    }
+  ]
 }

@@ -49,27 +49,24 @@ and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '45 days'
 """
 
-prices_query = f"""select ghwss.hero_id , ghwss.hero_handle 
-,common_bids.floor common_floor,common_bids.bid common_bid
-,rare_bids.floor rare_floor,rare_bids.bid rare_bid
-FROM flatten.get_heros_with_stats_snapshot ghwss 
-left join flatten.vwhero_stats_bids common_bids
-    on ghwss.hero_handle = common_bids.hero
-    and common_bids.rarity = 'common'
-left join flatten.vwhero_stats_bids rare_bids
-    on ghwss.hero_handle = rare_bids.hero
-    and rare_bids.rarity = 'rare'
- where   ghwss.snapshot_rank = 1
-    AND ghwss.is_deleted = 0
+prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor ,prices.hero
+FROM flatten.vwhero_stats_bids  prices
+left join flatten.herohandlehistory handles
+on prices.hero = handles.hero_handle
+left join flatten.get_heros_with_stats_snapshot ghwss 
+on handles.current_hero_handle  = ghwss.hero_handle 
+and ghwss.is_deleted  = 0
+and ghwss.snapshot_rank  = 1
+and ghwss.start_datetime  >= NOW() - interval '5 days'
+where rarity in ('rare','common')
+order by 1 asc
 """
-
 
 
 def process_hero_trades():
     # Fetch trades and prices data
     trades_df = fetch_dataframe(trades_query, 'main')
     prices_df = fetch_dataframe(prices_query, 'prices')
-    
     # Ensure timestamp is formatted correctly
     if not trades_df.empty:
         trades_df['timestamp'] = trades_df['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -86,7 +83,7 @@ def process_hero_trades():
             # Create combined dictionary
             hero_data = {
                 'trades': json.loads(hero_trades.to_json(orient='records')),
-                'prices': json.loads(hero_prices.to_json(orient='records'))[0] if not hero_prices.empty else None
+                'prices': json.loads(hero_prices.to_json(orient='records')) if not hero_prices.empty else None
             }
             
             # Save to JSON file

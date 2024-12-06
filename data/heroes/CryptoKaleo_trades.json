@@ -765,16 +765,6 @@
       "hero_handle": "CryptoKaleo",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CryptoKaleo_6.png",
-      "timestamp": "2024-10-31 17:46:15",
-      "buyer": "GalleryNerd",
-      "seller": "iblastoff",
-      "price": 0.0405
-    },
-    {
-      "hero_id": "906234475604037637",
-      "hero_handle": "CryptoKaleo",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CryptoKaleo_6.png",
       "timestamp": "2024-10-31 15:05:39",
       "buyer": "visavi_eth",
       "seller": "unueth",
@@ -795,20 +785,20 @@
       "hero_handle": "CryptoKaleo",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CryptoKaleo_6.png",
-      "timestamp": "2024-10-27 03:24:13",
-      "buyer": "visavi_eth",
-      "seller": "Denigma_",
-      "price": 0.0432329
+      "timestamp": "2024-10-31 17:46:15",
+      "buyer": "GalleryNerd",
+      "seller": "iblastoff",
+      "price": 0.0405
     },
     {
       "hero_id": "906234475604037637",
       "hero_handle": "CryptoKaleo",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CryptoKaleo_6.png",
-      "timestamp": "2024-10-27 08:22:33",
-      "buyer": "NikiTheKiD47",
-      "seller": "AkiraReloaded",
-      "price": 0.0517
+      "timestamp": "2024-10-27 03:24:13",
+      "buyer": "visavi_eth",
+      "seller": "Denigma_",
+      "price": 0.0432329
     },
     {
       "hero_id": "906234475604037637",
@@ -949,14 +939,34 @@
       "buyer": "NikiTheKiD47",
       "seller": "GalleryNerd",
       "price": 0.049
+    },
+    {
+      "hero_id": "906234475604037637",
+      "hero_handle": "CryptoKaleo",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CryptoKaleo_6.png",
+      "timestamp": "2024-10-27 08:22:33",
+      "buyer": "NikiTheKiD47",
+      "seller": "AkiraReloaded",
+      "price": 0.0517
     }
   ],
-  "prices": {
-    "hero_id": "906234475604037637",
-    "hero_handle": "CryptoKaleo",
-    "common_floor": 0.0444,
-    "common_bid": 0.0336,
-    "rare_floor": 0.39,
-    "rare_bid": 0.16
-  }
+  "prices": [
+    {
+      "hero_id": "906234475604037637",
+      "hero_handle": "CryptoKaleo",
+      "rarity": "common",
+      "bid": 0.0336,
+      "floor": 0.0444,
+      "hero": "CryptoKaleo"
+    },
+    {
+      "hero_id": "906234475604037637",
+      "hero_handle": "CryptoKaleo",
+      "rarity": "rare",
+      "bid": 0.161,
+      "floor": 0.39,
+      "hero": "CryptoKaleo"
+    }
+  ]
 }

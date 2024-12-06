@@ -205,10 +205,10 @@
       "hero_handle": "TylerDurden",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/TylerDurden_6.png",
-      "timestamp": "2024-10-27 08:38:05",
-      "buyer": "YuriiTop1GG",
-      "seller": "leeyates42",
-      "price": 0.0481
+      "timestamp": "2024-10-25 00:04:57",
+      "buyer": "NFTWorldno1",
+      "seller": "BitsBlazar",
+      "price": 0.0642069
     },
     {
       "hero_id": "1469851247133945856",
@@ -225,18 +225,28 @@
       "hero_handle": "TylerDurden",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/TylerDurden_6.png",
-      "timestamp": "2024-10-25 00:04:57",
-      "buyer": "NFTWorldno1",
-      "seller": "BitsBlazar",
-      "price": 0.0642069
+      "timestamp": "2024-10-27 08:38:05",
+      "buyer": "YuriiTop1GG",
+      "seller": "leeyates42",
+      "price": 0.0481
     }
   ],
-  "prices": {
-    "hero_id": "1469851247133945856",
-    "hero_handle": "TylerDurden",
-    "common_floor": 0.089,
-    "common_bid": 0.042,
-    "rare_floor": 0.35,
-    "rare_bid": 0.1823
-  }
+  "prices": [
+    {
+      "hero_id": "1469851247133945856",
+      "hero_handle": "TylerDurden",
+      "rarity": "rare",
+      "bid": 0.1823,
+      "floor": 0.35,
+      "hero": "TylerDurden"
+    },
+    {
+      "hero_id": "1469851247133945856",
+      "hero_handle": "TylerDurden",
+      "rarity": "common",
+      "bid": 0.042,
+      "floor": 0.089,
+      "hero": "TylerDurden"
+    }
+  ]
 }

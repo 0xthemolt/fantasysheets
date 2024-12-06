@@ -1565,20 +1565,20 @@
       "hero_handle": "icebergy_",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/icebergy__3.png",
-      "timestamp": "2024-11-01 02:08:41",
-      "buyer": "visavi_eth",
-      "seller": "namtt7",
-      "price": 0.005704
+      "timestamp": "2024-11-01 01:36:25",
+      "buyer": "710josh",
+      "seller": "CryptoNostraa",
+      "price": 0.00697
     },
     {
       "hero_id": "239518063",
       "hero_handle": "icebergy_",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/icebergy__3.png",
-      "timestamp": "2024-11-01 01:36:25",
-      "buyer": "710josh",
-      "seller": "CryptoNostraa",
-      "price": 0.00697
+      "timestamp": "2024-11-01 02:08:41",
+      "buyer": "visavi_eth",
+      "seller": "namtt7",
+      "price": 0.005704
     },
     {
       "hero_id": "239518063",
@@ -1673,22 +1673,22 @@
     {
       "hero_id": "239518063",
       "hero_handle": "icebergy_",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/icebergy__3.png",
-      "timestamp": "2024-10-26 08:25:29",
-      "buyer": "Hombreai",
-      "seller": "AkiraReloaded",
-      "price": 0.03675
-    },
-    {
-      "hero_id": "239518063",
-      "hero_handle": "icebergy_",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/icebergy__3.png",
       "timestamp": "2024-10-26 14:12:13",
       "buyer": "Bartomiej1805",
       "seller": "justinld252",
       "price": 0.008011
+    },
+    {
+      "hero_id": "239518063",
+      "hero_handle": "icebergy_",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/icebergy__3.png",
+      "timestamp": "2024-10-26 08:25:29",
+      "buyer": "Hombreai",
+      "seller": "AkiraReloaded",
+      "price": 0.03675
     },
     {
       "hero_id": "239518063",
@@ -1801,12 +1801,22 @@
       "price": 0.0109
     }
   ],
-  "prices": {
-    "hero_id": "239518063",
-    "hero_handle": "icebergy_",
-    "common_floor": 0.0056,
-    "common_bid": 0.00433,
-    "rare_floor": 0.025,
-    "rare_bid": 0.01671
-  }
+  "prices": [
+    {
+      "hero_id": "239518063",
+      "hero_handle": "icebergy_",
+      "rarity": "rare",
+      "bid": 0.017,
+      "floor": 0.025,
+      "hero": "icebergy_"
+    },
+    {
+      "hero_id": "239518063",
+      "hero_handle": "icebergy_",
+      "rarity": "common",
+      "bid": 0.00460001,
+      "floor": 0.0056,
+      "hero": "icebergy_"
+    }
+  ]
 }

@@ -675,20 +675,20 @@
       "hero_handle": "stoicsavage",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_7.png",
-      "timestamp": "2024-10-29 18:08:51",
-      "buyer": "bryttany16866",
-      "seller": "dankerwim",
-      "price": 0.015
+      "timestamp": "2024-10-30 16:43:15",
+      "buyer": "douglastaquaral",
+      "seller": "toastedd7",
+      "price": 0.02
     },
     {
       "hero_id": "2922770266",
       "hero_handle": "stoicsavage",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_7.png",
-      "timestamp": "2024-10-30 16:43:15",
-      "buyer": "douglastaquaral",
-      "seller": "toastedd7",
-      "price": 0.02
+      "timestamp": "2024-10-29 18:08:51",
+      "buyer": "bryttany16866",
+      "seller": "dankerwim",
+      "price": 0.015
     },
     {
       "hero_id": "2922770266",
@@ -709,16 +709,6 @@
       "buyer": "onliner85",
       "seller": "EezerNFT",
       "price": 0.0159
-    },
-    {
-      "hero_id": "2922770266",
-      "hero_handle": "stoicsavage",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_7.png",
-      "timestamp": "2024-10-27 12:48:49",
-      "buyer": "qTerr",
-      "seller": "blastoisez3",
-      "price": 0.019
     },
     {
       "hero_id": "2922770266",
@@ -775,18 +765,38 @@
       "hero_handle": "stoicsavage",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_7.png",
+      "timestamp": "2024-10-27 12:48:49",
+      "buyer": "qTerr",
+      "seller": "blastoisez3",
+      "price": 0.019
+    },
+    {
+      "hero_id": "2922770266",
+      "hero_handle": "stoicsavage",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/stoicsavage_7.png",
       "timestamp": "2024-10-24 20:21:03",
       "buyer": "cryptowriter_ch",
       "seller": "blastoisez3",
       "price": 0.025
     }
   ],
-  "prices": {
-    "hero_id": "2922770266",
-    "hero_handle": "stoicsavage",
-    "common_floor": 0.019,
-    "common_bid": 0.0155,
-    "rare_floor": 0.09999,
-    "rare_bid": 0.077
-  }
+  "prices": [
+    {
+      "hero_id": "2922770266",
+      "hero_handle": "stoicsavage",
+      "rarity": "rare",
+      "bid": 0.078,
+      "floor": 0.09999,
+      "hero": "stoicsavage"
+    },
+    {
+      "hero_id": "2922770266",
+      "hero_handle": "stoicsavage",
+      "rarity": "common",
+      "bid": 0.0156,
+      "floor": 0.019,
+      "hero": "stoicsavage"
+    }
+  ]
 }

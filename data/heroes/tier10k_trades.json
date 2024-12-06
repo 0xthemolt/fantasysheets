@@ -1675,20 +1675,20 @@
       "hero_handle": "tier10k",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
-      "timestamp": "2024-10-25 09:47:39",
-      "buyer": "noedieup",
-      "seller": "elverg232",
-      "price": 0.0509999
+      "timestamp": "2024-10-25 07:43:59",
+      "buyer": "loldemort_eth",
+      "seller": "JeffBourquin",
+      "price": 0.05
     },
     {
       "hero_id": "2361601055",
       "hero_handle": "tier10k",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
-      "timestamp": "2024-10-25 07:43:59",
-      "buyer": "loldemort_eth",
-      "seller": "JeffBourquin",
-      "price": 0.05
+      "timestamp": "2024-10-25 09:47:39",
+      "buyer": "noedieup",
+      "seller": "elverg232",
+      "price": 0.0509999
     },
     {
       "hero_id": "2361601055",
@@ -1855,6 +1855,16 @@
       "hero_handle": "tier10k",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
+      "timestamp": "2024-10-24 14:02:03",
+      "buyer": "cryptomonicax",
+      "seller": "nft2great",
+      "price": 0.04
+    },
+    {
+      "hero_id": "2361601055",
+      "hero_handle": "tier10k",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
       "timestamp": "2024-10-24 15:49:55",
       "buyer": "Crypto_Salad",
       "seller": "pepecripepe",
@@ -1875,28 +1885,28 @@
       "hero_handle": "tier10k",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
-      "timestamp": "2024-10-24 14:02:03",
-      "buyer": "cryptomonicax",
-      "seller": "nft2great",
-      "price": 0.04
-    },
-    {
-      "hero_id": "2361601055",
-      "hero_handle": "tier10k",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/tier10k_7.png",
       "timestamp": "2024-10-24 09:33:29",
       "buyer": "smo_eth",
       "seller": "cryptokano",
       "price": 0.0415
     }
   ],
-  "prices": {
-    "hero_id": "2361601055",
-    "hero_handle": "tier10k",
-    "common_floor": 0.035,
-    "common_bid": 0.0274,
-    "rare_floor": 0.1549,
-    "rare_bid": 0.102
-  }
+  "prices": [
+    {
+      "hero_id": "2361601055",
+      "hero_handle": "tier10k",
+      "rarity": "rare",
+      "bid": 0.102,
+      "floor": 0.1549,
+      "hero": "tier10k"
+    },
+    {
+      "hero_id": "2361601055",
+      "hero_handle": "tier10k",
+      "rarity": "common",
+      "bid": 0.0274,
+      "floor": 0.035,
+      "hero": "tier10k"
+    }
+  ]
 }

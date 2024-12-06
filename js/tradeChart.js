@@ -4,6 +4,8 @@ let currentPlugin = null;
 let annotationPlugin = null;
 
 function createLineChart(containerId, data, options = {}) {
+    console.log('createLineChart called with:', { containerId, data, options });
+
     // Ensure proper cleanup of previous instances
     if (tradeChart) {
         console.log('Destroying existing trade chart');
@@ -19,6 +21,8 @@ function createLineChart(containerId, data, options = {}) {
         annotationPlugin = null;
     }
 
+    console.log('After cleanup, creating new chart');
+    
     const canvas = document.getElementById(containerId);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -43,84 +47,122 @@ function createLineChart(containerId, data, options = {}) {
     };
 
     // Use the datasets directly from the input data
-    const datasets = data.datasets.map(dataset => ({
-        label: dataset.label,
-        data: dataset.data,
-        borderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
-        backgroundColor: rarityColors[dataset.label.toLowerCase()]?.background || 'rgba(0, 0, 0, 0.1)',
-        tension: 0.4,
-        fill: true,
-        cubicInterpolationMode: 'monotone',
-        hidden: !getInitialVisibility(dataset.label),
-        borderWidth: 2.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBorderWidth: 2,
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
-    }));
+    const datasets = data.datasets.map(dataset => {
+        console.log('Creating dataset for:', dataset.label, 'with color:', rarityColors[dataset.label.toLowerCase()]);
+        return {
+            label: dataset.label,
+            data: dataset.data,
+            borderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
+            backgroundColor: rarityColors[dataset.label.toLowerCase()]?.background || 'rgba(0, 0, 0, 0.1)',
+            tension: 0.4,
+            fill: true,
+            cubicInterpolationMode: 'monotone',
+            hidden: !getInitialVisibility(dataset.label),
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointBackgroundColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
+            pointBorderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
+            pointBorderWidth: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
+            pointHoverBorderWidth: 0,
+        };
+    });
 
-    // Before creating the chart config, add the annotation plugin
+    // Create and register the annotation plugin first
     annotationPlugin = {
         id: 'customAnnotation',
         afterDraw: (chart) => {
-            const annotations = [
-                { date: new Date('2024-11-27T00:00:00'), label: 'MT27' },
-                { date: new Date('2024-12-01T00:00:00'), label: 'MT28' }
-            ];
-
+            console.log('Plugin afterDraw called');
             const ctx = chart.ctx;
             const xAxis = chart.scales.x;
             const yAxis = chart.scales.y;
-
-            // Debug logging - only once
-            if (!chart._annotationsDrawn) {
-                console.log('Chart dimensions:', {
-                    top: yAxis.top,
-                    bottom: yAxis.bottom,
-                    left: xAxis.left,
-                    right: xAxis.right
-                });
-
-                annotations.forEach(({date, label}) => {
-                    const xPos = xAxis.getPixelForValue(date);
-                    console.log(`Annotation position for ${label}:`, {
-                        date: date,
-                        xPos: xPos,
-                        visible: xPos >= xAxis.left && xPos <= xAxis.right
-                    });
-                });
+            
+            // Get the current dataset and its last value
+            const currentDataset = chart.data.datasets[0];
+            if (currentDataset && currentDataset.data.length > 0) {
+                const lastPoint = currentDataset.data[currentDataset.data.length - 1];
+                const lastValue = lastPoint.y;
+                const yPos = yAxis.getPixelForValue(lastValue);
                 
-                chart._annotationsDrawn = true;
+                // Draw "Last" label with the same style as bid/floor
+                ctx.save();
+                ctx.textAlign = 'left';
+                ctx.fillStyle = currentDataset.borderColor;
+                ctx.font = 'bold 12px Arial';
+                const labelText = `Last: ${lastValue.toFixed(3)}`;
+                const padding = 4;
+                const textWidth = ctx.measureText(labelText).width;
+                
+                // Draw background rectangle with transparent background
+                ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+                ctx.fillRect(
+                    xAxis.right + 5, 
+                    yPos - 10, 
+                    textWidth + (padding * 2), 
+                    20
+                );
+                
+                // Draw text
+                ctx.fillStyle = currentDataset.borderColor;
+                ctx.fillText(labelText, xAxis.right + 5 + padding, yPos + 4);
+                ctx.restore();
             }
-
-            annotations.forEach(({date, label}) => {
-                const xPos = xAxis.getPixelForValue(date);
-                
-                // Only draw if the position is within the chart bounds
-                if (xPos >= xAxis.left && xPos <= xAxis.right) {
-                    // Draw vertical line
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeStyle = 'rgba(150, 150, 150, 0.75)';
-                    ctx.lineWidth = 1;
-                    ctx.moveTo(xPos, yAxis.top);
-                    ctx.lineTo(xPos, yAxis.bottom);
-                    ctx.stroke();
-                    
-                    // Draw label
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = 'rgba(150, 150, 150, 0.9)';
-                    ctx.font = '12px Arial';
-                    ctx.fillText(label, xPos, yAxis.top + 20);
-                    ctx.restore();
+            
+            // Draw bid and floor lines using values from options
+            const horizontalLines = [
+                { 
+                    value: options.bidPrice || 0.005, 
+                    label: 'Bid', 
+                    color: 'rgba(255, 99, 132, 0.75)' 
+                },
+                { 
+                    value: options.floorPrice || 0.008, 
+                    label: 'Floor', 
+                    color: 'rgba(255, 165, 0, 0.75)' 
                 }
+            ];
+
+            horizontalLines.forEach(({value, label, color}) => {
+                const yPos = yAxis.getPixelForValue(value);
+                
+                // Draw horizontal line
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.moveTo(xAxis.left, yPos);
+                ctx.lineTo(xAxis.right, yPos);
+                ctx.stroke();
+                
+                // Draw label on the right with transparent background
+                ctx.textAlign = 'left';
+                ctx.fillStyle = color;
+                ctx.font = 'bold 12px Arial';
+                const labelText = `${label}: ${value.toFixed(3)}`;
+                const padding = 4;
+                const textWidth = ctx.measureText(labelText).width;
+                
+                // Draw background rectangle with transparent background
+                ctx.fillStyle = 'rgba(255, 255, 255, 0)';
+                ctx.fillRect(
+                    xAxis.right + 5, 
+                    yPos - 10, 
+                    textWidth + (padding * 2), 
+                    20
+                );
+                
+                // Draw text
+                ctx.fillStyle = color;
+                ctx.fillText(labelText, xAxis.right + 5 + padding, yPos + 4);
+                ctx.restore();
             });
         }
     };
 
-    // Register the plugin
+    // Register the plugin explicitly
+    console.log('Registering annotation plugin'); // Debug log
     Chart.register(annotationPlugin);
 
     const chartConfig = {
@@ -131,16 +173,16 @@ function createLineChart(containerId, data, options = {}) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index',
+            layout: {
+                padding: {
+                    right: 100  // Add padding for labels
+                }
             },
             plugins: {
                 legend: {
                     labels: {
                         usePointStyle: true,
-                        pointStyle: 'circle',
-                        padding: 15
+                        pointStyle: 'circle'
                     }
                 },
                 title: {

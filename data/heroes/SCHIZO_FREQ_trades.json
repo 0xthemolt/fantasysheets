@@ -351,12 +351,22 @@
       "price": 0.045
     }
   ],
-  "prices": {
-    "hero_id": "1240784920831762433",
-    "hero_handle": "SCHIZO_FREQ",
-    "common_floor": 0.0367,
-    "common_bid": 0.01901,
-    "rare_floor": 0.27,
-    "rare_bid": 0.0655
-  }
+  "prices": [
+    {
+      "hero_id": "1240784920831762433",
+      "hero_handle": "SCHIZO_FREQ",
+      "rarity": "rare",
+      "bid": 0.08,
+      "floor": 0.27,
+      "hero": "SCHIZO_FREQ"
+    },
+    {
+      "hero_id": "1240784920831762433",
+      "hero_handle": "SCHIZO_FREQ",
+      "rarity": "common",
+      "bid": 0.01901,
+      "floor": 0.036,
+      "hero": "SCHIZO_FREQ"
+    }
+  ]
 }

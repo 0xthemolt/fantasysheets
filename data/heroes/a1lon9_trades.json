@@ -441,12 +441,22 @@
       "price": 0.4
     }
   ],
-  "prices": {
-    "hero_id": "1470958472409792515",
-    "hero_handle": "a1lon9",
-    "common_floor": 0.018,
-    "common_bid": 0.014,
-    "rare_floor": 0.195,
-    "rare_bid": 0.061
-  }
+  "prices": [
+    {
+      "hero_id": "1470958472409792515",
+      "hero_handle": "a1lon9",
+      "rarity": "common",
+      "bid": 0.0141,
+      "floor": 0.018,
+      "hero": "a1lon9"
+    },
+    {
+      "hero_id": "1470958472409792515",
+      "hero_handle": "a1lon9",
+      "rarity": "rare",
+      "bid": 0.0641,
+      "floor": 0.195,
+      "hero": "a1lon9"
+    }
+  ]
 }

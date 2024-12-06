@@ -205,20 +205,20 @@
       "hero_handle": "Evan_ss6",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Evan_ss6_5.png",
-      "timestamp": "2024-10-31 22:27:13",
-      "buyer": "visavi_eth",
-      "seller": "CobraZNN",
-      "price": 0.0412019
+      "timestamp": "2024-10-31 21:30:07",
+      "buyer": "DALEKSPACEMONKY",
+      "seller": "VillanelleFcks",
+      "price": 0.05775
     },
     {
       "hero_id": "279828819",
       "hero_handle": "Evan_ss6",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/Evan_ss6_5.png",
-      "timestamp": "2024-10-31 21:30:07",
-      "buyer": "DALEKSPACEMONKY",
-      "seller": "VillanelleFcks",
-      "price": 0.05775
+      "timestamp": "2024-10-31 22:27:13",
+      "buyer": "visavi_eth",
+      "seller": "CobraZNN",
+      "price": 0.0412019
     },
     {
       "hero_id": "279828819",
@@ -381,12 +381,22 @@
       "price": 0.34
     }
   ],
-  "prices": {
-    "hero_id": "279828819",
-    "hero_handle": "Evan_ss6",
-    "common_floor": 0.059,
-    "common_bid": 0.02410001,
-    "rare_floor": 0.25,
-    "rare_bid": 0.0585
-  }
+  "prices": [
+    {
+      "hero_id": "279828819",
+      "hero_handle": "Evan_ss6",
+      "rarity": "rare",
+      "bid": 0.06,
+      "floor": 0.25,
+      "hero": "Evan_ss6"
+    },
+    {
+      "hero_id": "279828819",
+      "hero_handle": "Evan_ss6",
+      "rarity": "common",
+      "bid": 0.02450001,
+      "floor": 0.05266,
+      "hero": "Evan_ss6"
+    }
+  ]
 }

@@ -835,20 +835,20 @@
       "hero_handle": "QwQiao",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/QwQiao_4.png",
-      "timestamp": "2024-10-24 20:22:01",
-      "buyer": "lesotn775",
-      "seller": "blastoisez3",
-      "price": 0.0125113
+      "timestamp": "2024-10-25 00:15:43",
+      "buyer": "sideponys",
+      "seller": "FreeRogerWilly",
+      "price": 0.0152
     },
     {
       "hero_id": "712457848874086400",
       "hero_handle": "QwQiao",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/QwQiao_4.png",
-      "timestamp": "2024-10-25 00:15:43",
-      "buyer": "sideponys",
-      "seller": "FreeRogerWilly",
-      "price": 0.0152
+      "timestamp": "2024-10-24 20:22:01",
+      "buyer": "lesotn775",
+      "seller": "blastoisez3",
+      "price": 0.0125113
     },
     {
       "hero_id": "712457848874086400",
@@ -871,12 +871,22 @@
       "price": 0.0149
     }
   ],
-  "prices": {
-    "hero_id": "712457848874086400",
-    "hero_handle": "QwQiao",
-    "common_floor": 0.0269,
-    "common_bid": 0.0111,
-    "rare_floor": 0.087,
-    "rare_bid": 0.042
-  }
+  "prices": [
+    {
+      "hero_id": "712457848874086400",
+      "hero_handle": "QwQiao",
+      "rarity": "common",
+      "bid": 0.0112,
+      "floor": 0.025999,
+      "hero": "QwQiao"
+    },
+    {
+      "hero_id": "712457848874086400",
+      "hero_handle": "QwQiao",
+      "rarity": "rare",
+      "bid": 0.042,
+      "floor": 0.087,
+      "hero": "QwQiao"
+    }
+  ]
 }

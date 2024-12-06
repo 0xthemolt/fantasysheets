@@ -635,16 +635,6 @@
       "hero_handle": "MINHxDYNASTY",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/MINHxDYNASTY_6.png",
-      "timestamp": "2024-10-27 10:57:11",
-      "buyer": "Hombreai",
-      "seller": "bee299708419174",
-      "price": 0.036
-    },
-    {
-      "hero_id": "1310378599984148480",
-      "hero_handle": "MINHxDYNASTY",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/MINHxDYNASTY_6.png",
       "timestamp": "2024-10-26 13:34:23",
       "buyer": "TheCriptonomist",
       "seller": "0xace_eth",
@@ -729,14 +719,34 @@
       "buyer": "0xTactic",
       "seller": "farushiyagoat12",
       "price": 0.036
+    },
+    {
+      "hero_id": "1310378599984148480",
+      "hero_handle": "MINHxDYNASTY",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/MINHxDYNASTY_6.png",
+      "timestamp": "2024-10-27 10:57:11",
+      "buyer": "Hombreai",
+      "seller": "bee299708419174",
+      "price": 0.036
     }
   ],
-  "prices": {
-    "hero_id": "1310378599984148480",
-    "hero_handle": "MINHxDYNASTY",
-    "common_floor": 0.0325,
-    "common_bid": 0.021,
-    "rare_floor": 0.16,
-    "rare_bid": 0.094501
-  }
+  "prices": [
+    {
+      "hero_id": "1310378599984148480",
+      "hero_handle": "MINHxDYNASTY",
+      "rarity": "common",
+      "bid": 0.0211,
+      "floor": 0.0325,
+      "hero": "MINHxDYNASTY"
+    },
+    {
+      "hero_id": "1310378599984148480",
+      "hero_handle": "MINHxDYNASTY",
+      "rarity": "rare",
+      "bid": 0.095,
+      "floor": 0.16,
+      "hero": "MINHxDYNASTY"
+    }
+  ]
 }

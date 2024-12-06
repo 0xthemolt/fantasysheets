@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
-    <script src="/js/tradeChart.js?v=1.0.0"></script>
+    <script src="/js/tradeChart.js?v=1.0.2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -694,7 +694,12 @@
                     datasets: datasets
                 };
                 
-                window.myChart = createLineChart('tradesCanvas', chartData);
+                window.myChart = createLineChart('tradesCanvas', chartData,  {chartTitle: 'My Chart',
+                                    xAxisLabel: 'Time',
+                                    yAxisLabel: 'Price',
+                                    bidPrice: 0.0062,    // Add your real bid price here
+                                    floorPrice: 0.0085   // Add your real floor price here
+                                });
                 
                 const tbody = document.querySelector('#tradesTable tbody');
                 tbody.innerHTML = tradesData.map((trade, index) => {
@@ -821,7 +826,7 @@
             // If normalizedValue is 1 or we didn't find a range, use the last color
             if (normalizedValue === 1 || !startColor || !endColor) {
                 const lastColor = colors[colors.length - 1].color;
-                return `rgba(${lastColor[0]}, ${lastColor[1]}, ${lastColor[2]}, 0.2)`;
+                return `rgba(${lastColor[0]}, ${lastColor[1]}, ${lastColor[2]}, 1)`;
             }
             
             // Interpolate between the two colors

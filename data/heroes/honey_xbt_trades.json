@@ -355,20 +355,20 @@
       "hero_handle": "honey_xbt",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/honey_xbt_6.png",
-      "timestamp": "2024-10-26 07:49:21",
-      "buyer": "ilike_eth",
-      "seller": "boredsharky",
-      "price": 0.043
+      "timestamp": "2024-10-26 14:17:27",
+      "buyer": "AHS_fansy",
+      "seller": "AddictBird",
+      "price": 0.04213
     },
     {
       "hero_id": "1304288255253254144",
       "hero_handle": "honey_xbt",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/honey_xbt_6.png",
-      "timestamp": "2024-10-26 14:17:27",
-      "buyer": "AHS_fansy",
-      "seller": "AddictBird",
-      "price": 0.04213
+      "timestamp": "2024-10-26 07:49:21",
+      "buyer": "ilike_eth",
+      "seller": "boredsharky",
+      "price": 0.043
     },
     {
       "hero_id": "1304288255253254144",
@@ -501,12 +501,22 @@
       "price": 0.046
     }
   ],
-  "prices": {
-    "hero_id": "1304288255253254144",
-    "hero_handle": "honey_xbt",
-    "common_floor": 0.024,
-    "common_bid": 0.02161,
-    "rare_floor": 0.18,
-    "rare_bid": 0.0705
-  }
+  "prices": [
+    {
+      "hero_id": "1304288255253254144",
+      "hero_handle": "honey_xbt",
+      "rarity": "rare",
+      "bid": 0.08,
+      "floor": 0.18,
+      "hero": "honey_xbt"
+    },
+    {
+      "hero_id": "1304288255253254144",
+      "hero_handle": "honey_xbt",
+      "rarity": "common",
+      "bid": 0.02161,
+      "floor": 0.024,
+      "hero": "honey_xbt"
+    }
+  ]
 }

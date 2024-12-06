@@ -571,12 +571,22 @@
       "price": 0.0777
     }
   ],
-  "prices": {
-    "hero_id": "1755899659040555009",
-    "hero_handle": "theunipcs",
-    "common_floor": 0.091,
-    "common_bid": 0.055555,
-    "rare_floor": 0.649,
-    "rare_bid": 0.22
-  }
+  "prices": [
+    {
+      "hero_id": "1755899659040555009",
+      "hero_handle": "theunipcs",
+      "rarity": "common",
+      "bid": 0.055555,
+      "floor": 0.091,
+      "hero": "theunipcs"
+    },
+    {
+      "hero_id": "1755899659040555009",
+      "hero_handle": "theunipcs",
+      "rarity": "rare",
+      "bid": 0.22,
+      "floor": 0.649,
+      "hero": "theunipcs"
+    }
+  ]
 }

@@ -441,12 +441,22 @@
       "price": 0.261001
     }
   ],
-  "prices": {
-    "hero_id": "1749286265583722496",
-    "hero_handle": "idrawline",
-    "common_floor": 0.198,
-    "common_bid": 0.1,
-    "rare_floor": 1.0,
-    "rare_bid": 0.35
-  }
+  "prices": [
+    {
+      "hero_id": "1749286265583722496",
+      "hero_handle": "idrawline",
+      "rarity": "rare",
+      "bid": 0.35,
+      "floor": 1.0,
+      "hero": "idrawline"
+    },
+    {
+      "hero_id": "1749286265583722496",
+      "hero_handle": "idrawline",
+      "rarity": "common",
+      "bid": 0.1,
+      "floor": 0.197,
+      "hero": "idrawline"
+    }
+  ]
 }

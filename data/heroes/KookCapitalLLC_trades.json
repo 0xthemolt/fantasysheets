@@ -181,12 +181,22 @@
       "price": 0.1010011
     }
   ],
-  "prices": {
-    "hero_id": "864011281",
-    "hero_handle": "KookCapitalLLC",
-    "common_floor": 0.09588,
-    "common_bid": 0.0573640988,
-    "rare_floor": null,
-    "rare_bid": 0.2
-  }
+  "prices": [
+    {
+      "hero_id": "864011281",
+      "hero_handle": "KookCapitalLLC",
+      "rarity": "rare",
+      "bid": 0.2,
+      "floor": null,
+      "hero": "KookCapitalLLC"
+    },
+    {
+      "hero_id": "864011281",
+      "hero_handle": "KookCapitalLLC",
+      "rarity": "common",
+      "bid": 0.0573640988,
+      "floor": 0.095,
+      "hero": "KookCapitalLLC"
+    }
+  ]
 }

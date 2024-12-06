@@ -595,26 +595,6 @@
       "hero_handle": "NotChaseColeman",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/NotChaseColeman_4.png",
-      "timestamp": "2024-10-27 13:51:55",
-      "buyer": "Bushchild76",
-      "seller": "bricekete",
-      "price": 0.025001
-    },
-    {
-      "hero_id": "1446957013444009991",
-      "hero_handle": "NotChaseColeman",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/NotChaseColeman_4.png",
-      "timestamp": "2024-10-27 09:05:51",
-      "buyer": "KimMengNg2",
-      "seller": "DaniAl79_10",
-      "price": 0.087
-    },
-    {
-      "hero_id": "1446957013444009991",
-      "hero_handle": "NotChaseColeman",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/NotChaseColeman_4.png",
       "timestamp": "2024-10-27 17:05:17",
       "buyer": "Dmitry_alien",
       "seller": "whiteLight_1",
@@ -675,6 +655,16 @@
       "hero_handle": "NotChaseColeman",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/NotChaseColeman_4.png",
+      "timestamp": "2024-10-27 13:51:55",
+      "buyer": "Bushchild76",
+      "seller": "bricekete",
+      "price": 0.025001
+    },
+    {
+      "hero_id": "1446957013444009991",
+      "hero_handle": "NotChaseColeman",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/NotChaseColeman_4.png",
       "timestamp": "2024-10-25 01:17:57",
       "buyer": "Bushchild76",
       "seller": "franklinisbored",
@@ -699,14 +689,34 @@
       "buyer": "EdvinsG",
       "seller": "nft2great",
       "price": 0.027
+    },
+    {
+      "hero_id": "1446957013444009991",
+      "hero_handle": "NotChaseColeman",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/NotChaseColeman_4.png",
+      "timestamp": "2024-10-27 09:05:51",
+      "buyer": "KimMengNg2",
+      "seller": "DaniAl79_10",
+      "price": 0.087
     }
   ],
-  "prices": {
-    "hero_id": "1446957013444009991",
-    "hero_handle": "NotChaseColeman",
-    "common_floor": 0.0088,
-    "common_bid": 0.007351,
-    "rare_floor": 0.045,
-    "rare_bid": 0.0265
-  }
+  "prices": [
+    {
+      "hero_id": "1446957013444009991",
+      "hero_handle": "NotChaseColeman",
+      "rarity": "common",
+      "bid": 0.0073,
+      "floor": 0.0088,
+      "hero": "NotChaseColeman"
+    },
+    {
+      "hero_id": "1446957013444009991",
+      "hero_handle": "NotChaseColeman",
+      "rarity": "rare",
+      "bid": 0.02915,
+      "floor": 0.045,
+      "hero": "NotChaseColeman"
+    }
+  ]
 }

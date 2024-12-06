@@ -895,16 +895,6 @@
       "hero_handle": "knveth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/knveth_6.png",
-      "timestamp": "2024-10-27 06:31:43",
-      "buyer": "Ph03NiX_2201",
-      "seller": "0xzayko",
-      "price": 0.037
-    },
-    {
-      "hero_id": "1466010689726783491",
-      "hero_handle": "knveth",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/knveth_6.png",
       "timestamp": "2024-10-26 18:27:17",
       "buyer": "visavi_eth",
       "seller": "kraskoserg",
@@ -1123,6 +1113,16 @@
     {
       "hero_id": "1466010689726783491",
       "hero_handle": "knveth",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/knveth_6.png",
+      "timestamp": "2024-10-24 23:40:13",
+      "buyer": "etetz15",
+      "seller": "banditxbt",
+      "price": 0.1655
+    },
+    {
+      "hero_id": "1466010689726783491",
+      "hero_handle": "knveth",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/knveth_6.png",
       "timestamp": "2024-10-24 19:52:13",
@@ -1149,16 +1149,6 @@
       "buyer": "NFT_Rockstar",
       "seller": "banditxbt",
       "price": 0.1521
-    },
-    {
-      "hero_id": "1466010689726783491",
-      "hero_handle": "knveth",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/knveth_6.png",
-      "timestamp": "2024-10-24 23:40:13",
-      "buyer": "etetz15",
-      "seller": "banditxbt",
-      "price": 0.1655
     },
     {
       "hero_id": "1466010689726783491",
@@ -1199,14 +1189,34 @@
       "buyer": "chosta_eth",
       "seller": "Cyw23811221",
       "price": 0.04
+    },
+    {
+      "hero_id": "1466010689726783491",
+      "hero_handle": "knveth",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/knveth_6.png",
+      "timestamp": "2024-10-27 06:31:43",
+      "buyer": "Ph03NiX_2201",
+      "seller": "0xzayko",
+      "price": 0.037
     }
   ],
-  "prices": {
-    "hero_id": "1466010689726783491",
-    "hero_handle": "knveth",
-    "common_floor": 0.04499,
-    "common_bid": 0.025,
-    "rare_floor": 0.24,
-    "rare_bid": 0.141
-  }
+  "prices": [
+    {
+      "hero_id": "1466010689726783491",
+      "hero_handle": "knveth",
+      "rarity": "rare",
+      "bid": 0.141,
+      "floor": 0.24,
+      "hero": "knveth"
+    },
+    {
+      "hero_id": "1466010689726783491",
+      "hero_handle": "knveth",
+      "rarity": "common",
+      "bid": 0.025,
+      "floor": 0.0448,
+      "hero": "knveth"
+    }
+  ]
 }

@@ -435,6 +435,16 @@
       "hero_handle": "waleswoosh",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/waleswoosh_8.png",
+      "timestamp": "2024-10-27 15:47:03",
+      "buyer": "AlyssaLct",
+      "seller": "0xTrapdoor",
+      "price": 0.038
+    },
+    {
+      "hero_id": "1501997405755088900",
+      "hero_handle": "waleswoosh",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/waleswoosh_8.png",
       "timestamp": "2024-10-26 22:11:37",
       "buyer": "CryptoNostraa",
       "seller": "0xpurif",
@@ -458,16 +468,6 @@
       "timestamp": "2024-10-26 14:47:05",
       "buyer": "AlexTsvetkovv",
       "seller": "AvendesorusRex",
-      "price": 0.038
-    },
-    {
-      "hero_id": "1501997405755088900",
-      "hero_handle": "waleswoosh",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/waleswoosh_8.png",
-      "timestamp": "2024-10-27 15:47:03",
-      "buyer": "AlyssaLct",
-      "seller": "0xTrapdoor",
       "price": 0.038
     },
     {
@@ -551,12 +551,22 @@
       "price": 0.0336006
     }
   ],
-  "prices": {
-    "hero_id": "1501997405755088900",
-    "hero_handle": "waleswoosh",
-    "common_floor": 0.033,
-    "common_bid": 0.0275625,
-    "rare_floor": 0.19,
-    "rare_bid": 0.1365
-  }
+  "prices": [
+    {
+      "hero_id": "1501997405755088900",
+      "hero_handle": "waleswoosh",
+      "rarity": "common",
+      "bid": 0.0275625,
+      "floor": 0.0329,
+      "hero": "waleswoosh"
+    },
+    {
+      "hero_id": "1501997405755088900",
+      "hero_handle": "waleswoosh",
+      "rarity": "rare",
+      "bid": 0.1365,
+      "floor": 0.2685,
+      "hero": "waleswoosh"
+    }
+  ]
 }

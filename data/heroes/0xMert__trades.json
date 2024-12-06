@@ -313,12 +313,12 @@
     {
       "hero_id": "1309886201944473600",
       "hero_handle": "0xMert_",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/0xMert__8.png",
-      "timestamp": "2024-10-27 12:16:23",
-      "buyer": "NoahCohen697864",
-      "seller": "sarimarcus",
-      "price": 0.0603008
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/0xMert__8.png",
+      "timestamp": "2024-10-27 15:07:11",
+      "buyer": "Intoxicated_Ki",
+      "seller": "dingalingts",
+      "price": 0.35
     },
     {
       "hero_id": "1309886201944473600",
@@ -413,20 +413,30 @@
     {
       "hero_id": "1309886201944473600",
       "hero_handle": "0xMert_",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/0xMert__8.png",
-      "timestamp": "2024-10-27 15:07:11",
-      "buyer": "Intoxicated_Ki",
-      "seller": "dingalingts",
-      "price": 0.35
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/0xMert__8.png",
+      "timestamp": "2024-10-27 12:16:23",
+      "buyer": "NoahCohen697864",
+      "seller": "sarimarcus",
+      "price": 0.0603008
     }
   ],
-  "prices": {
-    "hero_id": "1309886201944473600",
-    "hero_handle": "0xMert_",
-    "common_floor": 0.087,
-    "common_bid": 0.066910725,
-    "rare_floor": 0.495,
-    "rare_bid": 0.3
-  }
+  "prices": [
+    {
+      "hero_id": "1309886201944473600",
+      "hero_handle": "0xMert_",
+      "rarity": "common",
+      "bid": 0.06699,
+      "floor": 0.087,
+      "hero": "0xMert_"
+    },
+    {
+      "hero_id": "1309886201944473600",
+      "hero_handle": "0xMert_",
+      "rarity": "rare",
+      "bid": 0.3,
+      "floor": 0.495,
+      "hero": "0xMert_"
+    }
+  ]
 }

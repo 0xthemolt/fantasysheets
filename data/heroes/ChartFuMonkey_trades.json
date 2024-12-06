@@ -1655,6 +1655,16 @@
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
+      "timestamp": "2024-10-27 15:52:33",
+      "buyer": "Hombreai",
+      "seller": "0xthemolt",
+      "price": 0.0121
+    },
+    {
+      "hero_id": "1056015925667942400",
+      "hero_handle": "ChartFuMonkey",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
       "timestamp": "2024-10-26 17:15:25",
       "buyer": "wolfeypackey",
       "seller": "elverg232",
@@ -1695,9 +1705,9 @@
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
-      "timestamp": "2024-10-27 15:52:33",
-      "buyer": "Hombreai",
-      "seller": "0xthemolt",
+      "timestamp": "2024-10-26 13:58:37",
+      "buyer": "pepecripepe",
+      "seller": "SatoshiAndGwei",
       "price": 0.0121
     },
     {
@@ -1735,16 +1745,6 @@
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
-      "timestamp": "2024-10-26 13:58:37",
-      "buyer": "pepecripepe",
-      "seller": "SatoshiAndGwei",
-      "price": 0.0121
-    },
-    {
-      "hero_id": "1056015925667942400",
-      "hero_handle": "ChartFuMonkey",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
       "timestamp": "2024-10-25 09:56:15",
       "buyer": "CobraZNN",
       "seller": "elverg232",
@@ -1765,6 +1765,16 @@
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
+      "timestamp": "2024-10-25 04:34:39",
+      "buyer": "NoahCohen697864",
+      "seller": "100x2fire",
+      "price": 0.010604
+    },
+    {
+      "hero_id": "1056015925667942400",
+      "hero_handle": "ChartFuMonkey",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
       "timestamp": "2024-10-24 23:23:45",
       "buyer": "NoahCohen697864",
       "seller": "0xlogy",
@@ -1779,16 +1789,6 @@
       "buyer": "Bartomiej1805",
       "seller": "dankerwim",
       "price": 0.010001
-    },
-    {
-      "hero_id": "1056015925667942400",
-      "hero_handle": "ChartFuMonkey",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
-      "timestamp": "2024-10-25 04:34:39",
-      "buyer": "NoahCohen697864",
-      "seller": "100x2fire",
-      "price": 0.010604
     },
     {
       "hero_id": "1056015925667942400",
@@ -1835,28 +1835,38 @@
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
-      "timestamp": "2024-10-22 19:35:35",
-      "buyer": "3NG_IU",
-      "seller": "schen_eth",
-      "price": 0.01322
+      "timestamp": "2024-10-24 09:41:19",
+      "buyer": "hagmanterror",
+      "seller": "Degen__Ape__",
+      "price": 0.016
     },
     {
       "hero_id": "1056015925667942400",
       "hero_handle": "ChartFuMonkey",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ChartFuMonkey_6.png",
-      "timestamp": "2024-10-24 09:41:19",
-      "buyer": "hagmanterror",
-      "seller": "Degen__Ape__",
-      "price": 0.016
+      "timestamp": "2024-10-22 19:35:35",
+      "buyer": "3NG_IU",
+      "seller": "schen_eth",
+      "price": 0.01322
     }
   ],
-  "prices": {
-    "hero_id": "1056015925667942400",
-    "hero_handle": "ChartFuMonkey",
-    "common_floor": 0.012,
-    "common_bid": 0.0093,
-    "rare_floor": 0.058,
-    "rare_bid": 0.041
-  }
+  "prices": [
+    {
+      "hero_id": "1056015925667942400",
+      "hero_handle": "ChartFuMonkey",
+      "rarity": "rare",
+      "bid": 0.0461,
+      "floor": 0.058,
+      "hero": "ChartFuMonkey"
+    },
+    {
+      "hero_id": "1056015925667942400",
+      "hero_handle": "ChartFuMonkey",
+      "rarity": "common",
+      "bid": 0.01,
+      "floor": 0.012,
+      "hero": "ChartFuMonkey"
+    }
+  ]
 }

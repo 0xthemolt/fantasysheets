@@ -235,16 +235,6 @@
       "hero_handle": "WazzCrypto",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/WazzCrypto_8.png",
-      "timestamp": "2024-10-28 13:25:09",
-      "buyer": "cryptowriter_ch",
-      "seller": "whiteLight_1",
-      "price": 0.11
-    },
-    {
-      "hero_id": "869659857590288384",
-      "hero_handle": "WazzCrypto",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/WazzCrypto_8.png",
       "timestamp": "2024-10-29 18:34:47",
       "buyer": "Monkie_Boi_",
       "seller": "TwooneCrypto",
@@ -269,6 +259,16 @@
       "buyer": "thevseinfo",
       "seller": "ilike_eth",
       "price": 0.101
+    },
+    {
+      "hero_id": "869659857590288384",
+      "hero_handle": "WazzCrypto",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/WazzCrypto_8.png",
+      "timestamp": "2024-10-28 13:25:09",
+      "buyer": "cryptowriter_ch",
+      "seller": "whiteLight_1",
+      "price": 0.11
     },
     {
       "hero_id": "869659857590288384",
@@ -371,12 +371,22 @@
       "price": 0.095
     }
   ],
-  "prices": {
-    "hero_id": "869659857590288384",
-    "hero_handle": "WazzCrypto",
-    "common_floor": 0.06089,
-    "common_bid": 0.0472,
-    "rare_floor": 0.299,
-    "rare_bid": 0.1785
-  }
+  "prices": [
+    {
+      "hero_id": "869659857590288384",
+      "hero_handle": "WazzCrypto",
+      "rarity": "common",
+      "bid": 0.0472,
+      "floor": 0.06089,
+      "hero": "WazzCrypto"
+    },
+    {
+      "hero_id": "869659857590288384",
+      "hero_handle": "WazzCrypto",
+      "rarity": "rare",
+      "bid": 0.1785,
+      "floor": 0.299,
+      "hero": "WazzCrypto"
+    }
+  ]
 }

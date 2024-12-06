@@ -845,6 +845,16 @@
       "hero_handle": "franklinisbored",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
+      "timestamp": "2024-10-27 14:30:01",
+      "buyer": "MutantMatt0x",
+      "seller": "LeoKesknn",
+      "price": 0.0735
+    },
+    {
+      "hero_id": "1323747353308835840",
+      "hero_handle": "franklinisbored",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
       "timestamp": "2024-10-26 20:21:29",
       "buyer": "Romantada_",
       "seller": "ScrambledThink",
@@ -925,16 +935,6 @@
       "hero_handle": "franklinisbored",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
-      "timestamp": "2024-10-27 14:30:01",
-      "buyer": "MutantMatt0x",
-      "seller": "LeoKesknn",
-      "price": 0.0735
-    },
-    {
-      "hero_id": "1323747353308835840",
-      "hero_handle": "franklinisbored",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
       "timestamp": "2024-10-25 01:19:49",
       "buyer": "0xTrapdoor",
       "seller": "franklinisbored",
@@ -949,6 +949,16 @@
       "buyer": "eskimocapital",
       "seller": "franklinisbored",
       "price": 0.271
+    },
+    {
+      "hero_id": "1323747353308835840",
+      "hero_handle": "franklinisbored",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
+      "timestamp": "2024-10-24 23:40:01",
+      "buyer": "kolya482821",
+      "seller": "888_bit",
+      "price": 0.069
     },
     {
       "hero_id": "1323747353308835840",
@@ -995,16 +1005,6 @@
       "hero_handle": "franklinisbored",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
-      "timestamp": "2024-10-24 23:40:01",
-      "buyer": "kolya482821",
-      "seller": "888_bit",
-      "price": 0.069
-    },
-    {
-      "hero_id": "1323747353308835840",
-      "hero_handle": "franklinisbored",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/franklinisbored_5.png",
       "timestamp": "2024-10-24 14:10:23",
       "buyer": "eskimocapital",
       "seller": "franklinisbored",
@@ -1031,12 +1031,22 @@
       "price": 0.065
     }
   ],
-  "prices": {
-    "hero_id": "1323747353308835840",
-    "hero_handle": "franklinisbored",
-    "common_floor": 0.043,
-    "common_bid": 0.037485,
-    "rare_floor": 0.16,
-    "rare_bid": 0.15
-  }
+  "prices": [
+    {
+      "hero_id": "1323747353308835840",
+      "hero_handle": "franklinisbored",
+      "rarity": "common",
+      "bid": 0.0375,
+      "floor": 0.043,
+      "hero": "franklinisbored"
+    },
+    {
+      "hero_id": "1323747353308835840",
+      "hero_handle": "franklinisbored",
+      "rarity": "rare",
+      "bid": 0.15,
+      "floor": 0.16,
+      "hero": "franklinisbored"
+    }
+  ]
 }

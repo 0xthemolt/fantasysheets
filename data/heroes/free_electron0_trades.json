@@ -501,12 +501,22 @@
       "price": 0.044699
     }
   ],
-  "prices": {
-    "hero_id": "1357268112110981122",
-    "hero_handle": "free_electron0",
-    "common_floor": 0.02319,
-    "common_bid": 0.015110001,
-    "rare_floor": 0.12,
-    "rare_bid": 0.0450007
-  }
+  "prices": [
+    {
+      "hero_id": "1357268112110981122",
+      "hero_handle": "free_electron0",
+      "rarity": "common",
+      "bid": 0.015130001,
+      "floor": 0.02319,
+      "hero": "free_electron0"
+    },
+    {
+      "hero_id": "1357268112110981122",
+      "hero_handle": "free_electron0",
+      "rarity": "rare",
+      "bid": 0.05111,
+      "floor": 0.12,
+      "hero": "free_electron0"
+    }
+  ]
 }

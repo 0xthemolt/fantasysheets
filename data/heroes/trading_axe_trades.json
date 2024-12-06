@@ -291,12 +291,22 @@
       "price": 0.0701
     }
   ],
-  "prices": {
-    "hero_id": "1398319504975970310",
-    "hero_handle": "trading_axe",
-    "common_floor": 0.0478,
-    "common_bid": 0.028,
-    "rare_floor": 0.29,
-    "rare_bid": 0.1350315
-  }
+  "prices": [
+    {
+      "hero_id": "1398319504975970310",
+      "hero_handle": "trading_axe",
+      "rarity": "common",
+      "bid": 0.028,
+      "floor": 0.0478,
+      "hero": "trading_axe"
+    },
+    {
+      "hero_id": "1398319504975970310",
+      "hero_handle": "trading_axe",
+      "rarity": "rare",
+      "bid": 0.1350315,
+      "floor": 0.29,
+      "hero": "trading_axe"
+    }
+  ]
 }

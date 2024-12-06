@@ -385,16 +385,6 @@
       "hero_handle": "inversebrah",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/inversebrah_6.png",
-      "timestamp": "2024-10-24 22:54:39",
-      "buyer": "J6868L",
-      "seller": "Anonymoux2311",
-      "price": 0.0399
-    },
-    {
-      "hero_id": "1051852534518824960",
-      "hero_handle": "inversebrah",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/inversebrah_6.png",
       "timestamp": "2024-10-25 01:46:01",
       "buyer": "OttoSuwenNFT",
       "seller": "onliner85",
@@ -439,14 +429,34 @@
       "buyer": "OttoSuwenNFT",
       "seller": "JackiLopatin",
       "price": 0.044
+    },
+    {
+      "hero_id": "1051852534518824960",
+      "hero_handle": "inversebrah",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/inversebrah_6.png",
+      "timestamp": "2024-10-24 22:54:39",
+      "buyer": "J6868L",
+      "seller": "Anonymoux2311",
+      "price": 0.0399
     }
   ],
-  "prices": {
-    "hero_id": "1051852534518824960",
-    "hero_handle": "inversebrah",
-    "common_floor": 0.038,
-    "common_bid": 0.034,
-    "rare_floor": 0.35,
-    "rare_bid": 0.11
-  }
+  "prices": [
+    {
+      "hero_id": "1051852534518824960",
+      "hero_handle": "inversebrah",
+      "rarity": "common",
+      "bid": 0.034,
+      "floor": 0.036,
+      "hero": "inversebrah"
+    },
+    {
+      "hero_id": "1051852534518824960",
+      "hero_handle": "inversebrah",
+      "rarity": "rare",
+      "bid": 0.11,
+      "floor": 0.35,
+      "hero": "inversebrah"
+    }
+  ]
 }

@@ -365,16 +365,6 @@
       "hero_handle": "ColdBloodShill",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ColdBloodShill_5.png",
-      "timestamp": "2024-10-27 09:15:51",
-      "buyer": "turkxzz",
-      "seller": "Robingrimonprez",
-      "price": 0.03591
-    },
-    {
-      "hero_id": "987343085251317760",
-      "hero_handle": "ColdBloodShill",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ColdBloodShill_5.png",
       "timestamp": "2024-10-26 10:15:15",
       "buyer": "Xilef_sei",
       "seller": "dankerwim",
@@ -399,14 +389,34 @@
       "buyer": "Perepelica_nft",
       "seller": "0xSo6x",
       "price": 0.046
+    },
+    {
+      "hero_id": "987343085251317760",
+      "hero_handle": "ColdBloodShill",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/ColdBloodShill_5.png",
+      "timestamp": "2024-10-27 09:15:51",
+      "buyer": "turkxzz",
+      "seller": "Robingrimonprez",
+      "price": 0.03591
     }
   ],
-  "prices": {
-    "hero_id": "987343085251317760",
-    "hero_handle": "ColdBloodShill",
-    "common_floor": 0.02599,
-    "common_bid": 0.02101,
-    "rare_floor": 0.28,
-    "rare_bid": 0.077
-  }
+  "prices": [
+    {
+      "hero_id": "987343085251317760",
+      "hero_handle": "ColdBloodShill",
+      "rarity": "rare",
+      "bid": 0.077,
+      "floor": 0.28,
+      "hero": "ColdBloodShill"
+    },
+    {
+      "hero_id": "987343085251317760",
+      "hero_handle": "ColdBloodShill",
+      "rarity": "common",
+      "bid": 0.02101,
+      "floor": 0.02599,
+      "hero": "ColdBloodShill"
+    }
+  ]
 }

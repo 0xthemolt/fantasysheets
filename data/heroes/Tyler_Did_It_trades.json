@@ -481,12 +481,22 @@
       "price": 0.25
     }
   ],
-  "prices": {
-    "hero_id": "40134343",
-    "hero_handle": "Tyler_Did_It",
-    "common_floor": 0.028768,
-    "common_bid": 0.0184,
-    "rare_floor": 0.14,
-    "rare_bid": 0.09765
-  }
+  "prices": [
+    {
+      "hero_id": "40134343",
+      "hero_handle": "Tyler_Did_It",
+      "rarity": "common",
+      "bid": 0.0186,
+      "floor": 0.028768,
+      "hero": "Tyler_Did_It"
+    },
+    {
+      "hero_id": "40134343",
+      "hero_handle": "Tyler_Did_It",
+      "rarity": "rare",
+      "bid": 0.0985,
+      "floor": 0.14,
+      "hero": "Tyler_Did_It"
+    }
+  ]
 }

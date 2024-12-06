@@ -543,16 +543,6 @@
     {
       "hero_id": "1443441794465755138",
       "hero_handle": "gianinaskarlett",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/gianinaskarlett_6.png",
-      "timestamp": "2024-10-27 12:19:31",
-      "buyer": "Kar4Lo",
-      "seller": "FerdinandMedic1",
-      "price": 0.06
-    },
-    {
-      "hero_id": "1443441794465755138",
-      "hero_handle": "gianinaskarlett",
       "rarity": "rare",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/gianinaskarlett_6.png",
       "timestamp": "2024-10-26 14:43:41",
@@ -605,6 +595,16 @@
       "hero_handle": "gianinaskarlett",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/gianinaskarlett_6.png",
+      "timestamp": "2024-10-27 12:19:31",
+      "buyer": "Kar4Lo",
+      "seller": "FerdinandMedic1",
+      "price": 0.06
+    },
+    {
+      "hero_id": "1443441794465755138",
+      "hero_handle": "gianinaskarlett",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/gianinaskarlett_6.png",
       "timestamp": "2024-10-24 18:34:05",
       "buyer": "FerdinandMedic1",
       "seller": "Khallid4397",
@@ -631,12 +631,22 @@
       "price": 0.0709
     }
   ],
-  "prices": {
-    "hero_id": "1443441794465755138",
-    "hero_handle": "gianinaskarlett",
-    "common_floor": 0.0584,
-    "common_bid": 0.03334,
-    "rare_floor": 0.39,
-    "rare_bid": 0.126
-  }
+  "prices": [
+    {
+      "hero_id": "1443441794465755138",
+      "hero_handle": "gianinaskarlett",
+      "rarity": "rare",
+      "bid": 0.128,
+      "floor": 0.39,
+      "hero": "gianinaskarlett"
+    },
+    {
+      "hero_id": "1443441794465755138",
+      "hero_handle": "gianinaskarlett",
+      "rarity": "common",
+      "bid": 0.035,
+      "floor": 0.055,
+      "hero": "gianinaskarlett"
+    }
+  ]
 }

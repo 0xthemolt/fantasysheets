@@ -1191,12 +1191,22 @@
       "price": 0.15
     }
   ],
-  "prices": {
-    "hero_id": "624791024",
-    "hero_handle": "mattomattik",
-    "common_floor": 0.012,
-    "common_bid": 0.00922,
-    "rare_floor": 0.085,
-    "rare_bid": 0.0481990851
-  }
+  "prices": [
+    {
+      "hero_id": "624791024",
+      "hero_handle": "mattomattik",
+      "rarity": "rare",
+      "bid": 0.0481990851,
+      "floor": 0.078,
+      "hero": "mattomattik"
+    },
+    {
+      "hero_id": "624791024",
+      "hero_handle": "mattomattik",
+      "rarity": "common",
+      "bid": 0.00922,
+      "floor": 0.012,
+      "hero": "mattomattik"
+    }
+  ]
 }

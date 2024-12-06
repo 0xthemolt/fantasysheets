@@ -461,12 +461,22 @@
       "price": 0.031
     }
   ],
-  "prices": {
-    "hero_id": "1175781003245191178",
-    "hero_handle": "wizardofsoho",
-    "common_floor": 0.068,
-    "common_bid": 0.039,
-    "rare_floor": 0.2499,
-    "rare_bid": 0.16275
-  }
+  "prices": [
+    {
+      "hero_id": "1175781003245191178",
+      "hero_handle": "wizardofsoho",
+      "rarity": "common",
+      "bid": 0.039,
+      "floor": 0.068,
+      "hero": "wizardofsoho"
+    },
+    {
+      "hero_id": "1175781003245191178",
+      "hero_handle": "wizardofsoho",
+      "rarity": "rare",
+      "bid": 0.16275,
+      "floor": 0.2499,
+      "hero": "wizardofsoho"
+    }
+  ]
 }

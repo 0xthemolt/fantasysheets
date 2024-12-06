@@ -471,12 +471,22 @@
       "price": 0.061
     }
   ],
-  "prices": {
-    "hero_id": "1499585375534206980",
-    "hero_handle": "beast_ico",
-    "common_floor": 0.072,
-    "common_bid": 0.0425,
-    "rare_floor": 0.5,
-    "rare_bid": 0.165375
-  }
+  "prices": [
+    {
+      "hero_id": "1499585375534206980",
+      "hero_handle": "beast_ico",
+      "rarity": "rare",
+      "bid": 0.165375,
+      "floor": 0.5,
+      "hero": "beast_ico"
+    },
+    {
+      "hero_id": "1499585375534206980",
+      "hero_handle": "beast_ico",
+      "rarity": "common",
+      "bid": 0.0425,
+      "floor": 0.072,
+      "hero": "beast_ico"
+    }
+  ]
 }

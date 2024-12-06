@@ -351,12 +351,22 @@
       "price": 0.19001
     }
   ],
-  "prices": {
-    "hero_id": "588569122",
-    "hero_handle": "wallstreetbets",
-    "common_floor": 0.09999,
-    "common_bid": 0.063,
-    "rare_floor": null,
-    "rare_bid": 0.08633333
-  }
+  "prices": [
+    {
+      "hero_id": "588569122",
+      "hero_handle": "wallstreetbets",
+      "rarity": "rare",
+      "bid": null,
+      "floor": null,
+      "hero": "wallstreetbets"
+    },
+    {
+      "hero_id": "588569122",
+      "hero_handle": "wallstreetbets",
+      "rarity": "common",
+      "bid": 0.063,
+      "floor": 0.09999,
+      "hero": "wallstreetbets"
+    }
+  ]
 }

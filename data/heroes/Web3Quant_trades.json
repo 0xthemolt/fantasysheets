@@ -791,12 +791,22 @@
       "price": 0.0355
     }
   ],
-  "prices": {
-    "hero_id": "1518981537307496448",
-    "hero_handle": "Web3Quant",
-    "common_floor": 0.019,
-    "common_bid": 0.0166,
-    "rare_floor": 0.17,
-    "rare_bid": 0.072
-  }
+  "prices": [
+    {
+      "hero_id": "1518981537307496448",
+      "hero_handle": "Web3Quant",
+      "rarity": "rare",
+      "bid": 0.077,
+      "floor": 0.17,
+      "hero": "Web3Quant"
+    },
+    {
+      "hero_id": "1518981537307496448",
+      "hero_handle": "Web3Quant",
+      "rarity": "common",
+      "bid": 0.0168,
+      "floor": 0.019,
+      "hero": "Web3Quant"
+    }
+  ]
 }

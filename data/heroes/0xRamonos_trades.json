@@ -251,12 +251,22 @@
       "price": 0.091
     }
   ],
-  "prices": {
-    "hero_id": "1586054864240525315",
-    "hero_handle": "0xRamonos",
-    "common_floor": 0.1419,
-    "common_bid": 0.07245,
-    "rare_floor": null,
-    "rare_bid": 0.25
-  }
+  "prices": [
+    {
+      "hero_id": "1586054864240525315",
+      "hero_handle": "0xRamonos",
+      "rarity": "common",
+      "bid": 0.0725,
+      "floor": 0.14,
+      "hero": "0xRamonos"
+    },
+    {
+      "hero_id": "1586054864240525315",
+      "hero_handle": "0xRamonos",
+      "rarity": "rare",
+      "bid": 0.25,
+      "floor": null,
+      "hero": "0xRamonos"
+    }
+  ]
 }

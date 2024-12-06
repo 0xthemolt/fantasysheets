@@ -1415,26 +1415,6 @@
       "hero_handle": "LucaNetz",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
-      "timestamp": "2024-10-27 14:04:01",
-      "buyer": "funkingbtc",
-      "seller": "al16071",
-      "price": 0.01499
-    },
-    {
-      "hero_id": "807982663000674305",
-      "hero_handle": "LucaNetz",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LucaNetz_5.png",
-      "timestamp": "2024-10-27 09:07:01",
-      "buyer": "0xDMI_",
-      "seller": "DaniAl79_10",
-      "price": 0.048
-    },
-    {
-      "hero_id": "807982663000674305",
-      "hero_handle": "LucaNetz",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
       "timestamp": "2024-10-27 04:40:07",
       "buyer": "0xzayko",
       "seller": "EshiFromForest_",
@@ -1443,12 +1423,22 @@
     {
       "hero_id": "807982663000674305",
       "hero_handle": "LucaNetz",
-      "rarity": "rare",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LucaNetz_5.png",
-      "timestamp": "2024-10-27 05:10:43",
-      "buyer": "ParallelAiRev",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
+      "timestamp": "2024-10-27 14:40:43",
+      "buyer": "funkingbtc",
+      "seller": "MoonOverlord",
+      "price": 0.0152
+    },
+    {
+      "hero_id": "807982663000674305",
+      "hero_handle": "LucaNetz",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
+      "timestamp": "2024-10-27 14:39:55",
+      "buyer": "funkingbtc",
       "seller": "AkiraReloaded",
-      "price": 0.079
+      "price": 0.015
     },
     {
       "hero_id": "807982663000674305",
@@ -1515,20 +1505,10 @@
       "hero_handle": "LucaNetz",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
-      "timestamp": "2024-10-27 14:40:43",
+      "timestamp": "2024-10-27 14:04:01",
       "buyer": "funkingbtc",
-      "seller": "MoonOverlord",
-      "price": 0.0152
-    },
-    {
-      "hero_id": "807982663000674305",
-      "hero_handle": "LucaNetz",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/LucaNetz_5.png",
-      "timestamp": "2024-10-27 14:39:55",
-      "buyer": "funkingbtc",
-      "seller": "AkiraReloaded",
-      "price": 0.015
+      "seller": "al16071",
+      "price": 0.01499
     },
     {
       "hero_id": "807982663000674305",
@@ -1569,14 +1549,44 @@
       "buyer": "Roansio__",
       "seller": "lawyerDAO",
       "price": 0.0131
+    },
+    {
+      "hero_id": "807982663000674305",
+      "hero_handle": "LucaNetz",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LucaNetz_5.png",
+      "timestamp": "2024-10-27 09:07:01",
+      "buyer": "0xDMI_",
+      "seller": "DaniAl79_10",
+      "price": 0.048
+    },
+    {
+      "hero_id": "807982663000674305",
+      "hero_handle": "LucaNetz",
+      "rarity": "rare",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/rare/LucaNetz_5.png",
+      "timestamp": "2024-10-27 05:10:43",
+      "buyer": "ParallelAiRev",
+      "seller": "AkiraReloaded",
+      "price": 0.079
     }
   ],
-  "prices": {
-    "hero_id": "807982663000674305",
-    "hero_handle": "LucaNetz",
-    "common_floor": null,
-    "common_bid": 0.0075,
-    "rare_floor": 0.054,
-    "rare_bid": 0.0345
-  }
+  "prices": [
+    {
+      "hero_id": "807982663000674305",
+      "hero_handle": "LucaNetz",
+      "rarity": "rare",
+      "bid": 0.035,
+      "floor": 0.054,
+      "hero": "LucaNetz"
+    },
+    {
+      "hero_id": "807982663000674305",
+      "hero_handle": "LucaNetz",
+      "rarity": "common",
+      "bid": 0.0075,
+      "floor": 0.01337,
+      "hero": "LucaNetz"
+    }
+  ]
 }

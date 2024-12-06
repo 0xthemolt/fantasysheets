@@ -995,6 +995,16 @@
       "hero_handle": "CharlotteFang77",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CharlotteFang77_5.png",
+      "timestamp": "2024-10-27 17:34:51",
+      "buyer": "umarkuriaev",
+      "seller": "MoonOverlord",
+      "price": 0.01394
+    },
+    {
+      "hero_id": "1327336243026223104",
+      "hero_handle": "CharlotteFang77",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CharlotteFang77_5.png",
       "timestamp": "2024-10-26 23:24:05",
       "buyer": "oomfielover",
       "seller": "YuriiTop1GG",
@@ -1009,26 +1019,6 @@
       "buyer": "Susan534185701",
       "seller": "incrazy123",
       "price": 0.01393
-    },
-    {
-      "hero_id": "1327336243026223104",
-      "hero_handle": "CharlotteFang77",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CharlotteFang77_5.png",
-      "timestamp": "2024-10-27 17:34:51",
-      "buyer": "umarkuriaev",
-      "seller": "MoonOverlord",
-      "price": 0.01394
-    },
-    {
-      "hero_id": "1327336243026223104",
-      "hero_handle": "CharlotteFang77",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CharlotteFang77_5.png",
-      "timestamp": "2024-10-27 04:57:19",
-      "buyer": "pepecripepe",
-      "seller": "PedroFounder",
-      "price": 0.0115815057
     },
     {
       "hero_id": "1327336243026223104",
@@ -1149,14 +1139,34 @@
       "buyer": "BitrollCFA",
       "seller": "SMBBananaFarmer",
       "price": 0.011011
+    },
+    {
+      "hero_id": "1327336243026223104",
+      "hero_handle": "CharlotteFang77",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/CharlotteFang77_5.png",
+      "timestamp": "2024-10-27 04:57:19",
+      "buyer": "pepecripepe",
+      "seller": "PedroFounder",
+      "price": 0.0115815057
     }
   ],
-  "prices": {
-    "hero_id": "1327336243026223104",
-    "hero_handle": "CharlotteFang77",
-    "common_floor": 0.0109,
-    "common_bid": 0.005525,
-    "rare_floor": 0.06,
-    "rare_bid": 0.0273116
-  }
+  "prices": [
+    {
+      "hero_id": "1327336243026223104",
+      "hero_handle": "CharlotteFang77",
+      "rarity": "rare",
+      "bid": 0.028,
+      "floor": 0.06,
+      "hero": "CharlotteFang77"
+    },
+    {
+      "hero_id": "1327336243026223104",
+      "hero_handle": "CharlotteFang77",
+      "rarity": "common",
+      "bid": 0.0055203,
+      "floor": 0.0109,
+      "hero": "CharlotteFang77"
+    }
+  ]
 }

@@ -201,12 +201,22 @@
       "price": 0.2111
     }
   ],
-  "prices": {
-    "hero_id": "973261472",
-    "hero_handle": "blknoiz06",
-    "common_floor": 0.18999,
-    "common_bid": 0.122,
-    "rare_floor": 0.69,
-    "rare_bid": 0.41
-  }
+  "prices": [
+    {
+      "hero_id": "973261472",
+      "hero_handle": "blknoiz06",
+      "rarity": "common",
+      "bid": 0.122,
+      "floor": null,
+      "hero": "blknoiz06"
+    },
+    {
+      "hero_id": "973261472",
+      "hero_handle": "blknoiz06",
+      "rarity": "rare",
+      "bid": 0.41,
+      "floor": 0.69,
+      "hero": "blknoiz06"
+    }
+  ]
 }

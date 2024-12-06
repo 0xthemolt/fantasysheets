@@ -261,12 +261,22 @@
       "price": 0.053
     }
   ],
-  "prices": {
-    "hero_id": "1502733964808650754",
-    "hero_handle": "SolJakey",
-    "common_floor": 0.05988,
-    "common_bid": 0.0399,
-    "rare_floor": 0.3,
-    "rare_bid": 0.16
-  }
+  "prices": [
+    {
+      "hero_id": "1502733964808650754",
+      "hero_handle": "SolJakey",
+      "rarity": "common",
+      "bid": 0.0399,
+      "floor": 0.05988,
+      "hero": "SolJakey"
+    },
+    {
+      "hero_id": "1502733964808650754",
+      "hero_handle": "SolJakey",
+      "rarity": "rare",
+      "bid": 0.16,
+      "floor": 0.3,
+      "hero": "SolJakey"
+    }
+  ]
 }

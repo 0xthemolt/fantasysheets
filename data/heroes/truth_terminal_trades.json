@@ -285,20 +285,20 @@
       "hero_handle": "truth_terminal",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/truth_terminal_7.png",
-      "timestamp": "2024-10-28 19:00:19",
-      "buyer": "Monkie_Boi_",
-      "seller": "the_crypto_bob",
-      "price": 0.25
+      "timestamp": "2024-10-29 17:12:53",
+      "buyer": "web3tokenomics",
+      "seller": "NightDeatHs",
+      "price": 0.28999
     },
     {
       "hero_id": "1802642686710837249",
       "hero_handle": "truth_terminal",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/truth_terminal_7.png",
-      "timestamp": "2024-10-29 17:12:53",
-      "buyer": "web3tokenomics",
-      "seller": "NightDeatHs",
-      "price": 0.28999
+      "timestamp": "2024-10-28 19:00:19",
+      "buyer": "Monkie_Boi_",
+      "seller": "the_crypto_bob",
+      "price": 0.25
     },
     {
       "hero_id": "1802642686710837249",
@@ -365,16 +365,6 @@
       "hero_handle": "truth_terminal",
       "rarity": "common",
       "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/truth_terminal_7.png",
-      "timestamp": "2024-10-24 20:14:11",
-      "buyer": "Juninh222",
-      "seller": "DALEKSPACEMONKY",
-      "price": 0.225
-    },
-    {
-      "hero_id": "1802642686710837249",
-      "hero_handle": "truth_terminal",
-      "rarity": "common",
-      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/truth_terminal_7.png",
       "timestamp": "2024-10-25 00:23:57",
       "buyer": "arcspace99",
       "seller": "puppetinbio",
@@ -389,14 +379,34 @@
       "buyer": "Juninh222",
       "seller": "web3tool",
       "price": 0.29
+    },
+    {
+      "hero_id": "1802642686710837249",
+      "hero_handle": "truth_terminal",
+      "rarity": "common",
+      "card_picture": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/common/truth_terminal_7.png",
+      "timestamp": "2024-10-24 20:14:11",
+      "buyer": "Juninh222",
+      "seller": "DALEKSPACEMONKY",
+      "price": 0.225
     }
   ],
-  "prices": {
-    "hero_id": "1802642686710837249",
-    "hero_handle": "truth_terminal",
-    "common_floor": 0.0699,
-    "common_bid": 0.042,
-    "rare_floor": 0.194,
-    "rare_bid": 0.1323
-  }
+  "prices": [
+    {
+      "hero_id": "1802642686710837249",
+      "hero_handle": "truth_terminal",
+      "rarity": "common",
+      "bid": 0.042,
+      "floor": 0.0698999,
+      "hero": "truth_terminal"
+    },
+    {
+      "hero_id": "1802642686710837249",
+      "hero_handle": "truth_terminal",
+      "rarity": "rare",
+      "bid": 0.1323,
+      "floor": 0.194,
+      "hero": "truth_terminal"
+    }
+  ]
 }

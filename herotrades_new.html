@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
-    <script src="/js/tradeChart.js?v=1.0.2"></script>
+    <script src="/js/tradeChart.js?v=1.0.3"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -351,13 +351,196 @@
         #trade-chart {
             margin: 0;  /* Remove default margins */
         }
+
+        /* Add these new styles */
+        .hero-select-btn {
+            background: var(--background-color, #1a1a1a);
+            color: #fff;
+            border: 1px solid #333;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 200px;
+        }
+
+        .hero-select-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .hero-selector-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--background-color, #1a1a1a);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 24px;
+            z-index: 1001;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .popup-header h2 {
+            margin: 0;
+            color: #fff;
+        }
+
+        .close-popup {
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 4px;
+        }
+
+        .close-popup:hover {
+            color: #fff;
+        }
+
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .star-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .star-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+            color: #ffd700;
+        }
+
+        .hero-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            font-size: 0.7em;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-2px);
+            background: #333;
+        }
+
+        .hero-image {
+            width: 29px;
+            height: 38px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .hero-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hero-scores {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .seven-day-score {
+            display: inline-block;
+            background: #3b82f6;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .floor-price {
+            color: #22c55e;
+            font-size: 0.85em;
+        }
+
+        .hero-handle {
+            color: #fff;
+            margin-bottom: 2px;
+            font-size: 0.9em;
+        }
+
+        .fantasy-score {
+            display: inline-block;
+            background: #3b82f6;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-right: 4px;
+        }
+
+        .last-main-score {
+            display: inline-block;
+            background: #4b5563;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .score-label {
+            color: #666;
+            margin-right: 2px;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <div id="heroSelectContainer">
-        <select id="heroSelect" style="padding: 8px; border-radius: 4px;">
-            <option value="">Select a Hero</option>
-        </select>
+        <button id="heroSelectButton" class="hero-select-btn">
+            Select a Hero <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div id="heroSelectorPopup" class="hero-selector-popup">
+        <div class="popup-header">
+            <h2>Select Hero</h2>
+            <button class="close-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="stars-grid"></div>
     </div>
 
     <div id="trades">
@@ -379,7 +562,6 @@
                     <tr>
                         <th>Hero</th>
                         <th>Rarity</th>
-                        <th>Date</th>
                         <th>Time Ago</th>
                         <th>Buyer</th>
                         <th>Seller</th>
@@ -463,6 +645,7 @@
 
         // Add this at the top of your script section, outside any functions
         let tradesData = []; // Global variable to store trades
+        let pricesData = []; // Global variable to store prices
 
         // Add this function to handle filters
         function setupFilters() {
@@ -654,6 +837,7 @@
                 });
                 const data = await response.json();
                 tradesData = data.trades; // Store trades in global variable
+                pricesData = data.prices; // Store prices in global variable
                 
                 // Sort trades by timestamp in descending order
                 tradesData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -752,15 +936,15 @@
                                 ${trade.hero_handle}
                             </td>
                             <td style="color: ${getRarityColor(trade.rarity)}">${trade.rarity}</td>
-                            <td>${new Date(trade.timestamp).toLocaleString('en-US', {
-                                month: 'short',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: false
-                            }).replace(',', '')}</td>
-                            <td>${calculateTimeDifference(
+                            <td title="${new Date(trade.timestamp).toLocaleString('en-US', {
+                                month: 'short',    // Jan
+                                day: '2-digit',    // DD
+                                hour: '2-digit',   // HH
+                                minute: '2-digit', // MM
+                                second: '2-digit', // SS
+                                weekday: 'short',  // Mon
+                                hour12: false      // 24-hour format
+                            }).replace(',', '')}">${calculateTimeDifference(
                                 new Date(),
                                 new Date(trade.timestamp)
                             )}</td>
@@ -855,29 +1039,114 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM Content Loaded');
             
-            // Load hero stats and populate dropdown
-            try {
-                const response = await fetch('/hero_stats.json');
-                const data = await response.json();
-                
-                // Get unique hero handles from the heroes array and sort alphabetically
-                const heroes = [...new Set(data.heroes.map(hero => hero.hero_handle))].sort();
-                
-                // Populate dropdown
-                const heroSelect = document.getElementById('heroSelect');
-                heroes.forEach(hero => {
-                    const option = document.createElement('option');
-                    option.value = hero;
-                    option.textContent = hero;
-                    heroSelect.appendChild(option);
-                });
+            // Remove the existing hero select dropdown code and add this:
+            const heroSelectButton = document.getElementById('heroSelectButton');
+            const heroSelectorPopup = document.getElementById('heroSelectorPopup');
+            const closePopupButton = document.querySelector('.close-popup');
+            
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'popup-overlay';
+            document.body.appendChild(overlay);
 
-                // Add change event listener
-                heroSelect.addEventListener('change', (e) => {
-                    if (e.target.value) {
-                        loadHeroTrades(e.target.value);
+            // Load and organize hero data
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/hero_stats.json?t=${timestamp}`, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
                     }
                 });
+                const data = await response.json();
+
+                // Group heroes by stars and sort by fantasy score
+                const heroesByStars = data.heroes.reduce((acc, hero) => {
+                    const stars = hero.current_stars;
+                    if (!acc[stars]) acc[stars] = [];
+                    acc[stars].push(hero);
+                    return acc;
+                }, {});
+
+                // Sort each star group by fantasy score
+                Object.keys(heroesByStars).forEach(stars => {
+                    heroesByStars[stars].sort((a, b) => 
+                        b.seven_day_fantasy_score - a.seven_day_fantasy_score
+                    );
+                });
+
+                // Create star columns
+                const starsGrid = document.querySelector('.stars-grid');
+                const starLevels = Object.keys(heroesByStars)
+                    .map(Number)
+                    .sort((a, b) => b - a); // Sort stars descending
+
+                starLevels.forEach(stars => {
+                    const column = document.createElement('div');
+                    column.className = 'star-column';
+
+                    // Create star header
+                    const header = document.createElement('div');
+                    header.className = 'star-header';
+                    header.innerHTML = `${stars} ⭐`;
+                    column.appendChild(header);
+
+                    // Create hero cards
+                    heroesByStars[stars].forEach(hero => {
+                        const card = document.createElement('div');
+                        card.className = 'hero-card';
+                        card.innerHTML = `
+                            <img src="${hero.hero_image_url}" alt="${hero.hero_handle}" class="hero-image">
+                            <div class="hero-info">
+                                <div class="hero-handle">${hero.hero_handle}</div>
+                                <div class="floor-price">
+                                    <span class="score-label">Floor:</span>
+                                    ${hero.common_floor ? hero.common_floor.toFixed(4) : 'N/A'}
+                                </div>
+                            </div>
+                            <div class="hero-scores">
+                                <span class="seven-day-score">
+                                    <span class="score-label">7D:</span>
+                                    ${Math.round(hero.seven_day_fantasy_score)}
+                                </span>
+                                <span class="last-main-score">
+                                    <span class="score-label">Main:</span>
+                                    ${hero.last_main ? Math.round(hero.last_main) : 'N/A'}
+                                </span>
+                            </div>
+                        `;
+
+                        card.addEventListener('click', () => {
+                            loadHeroTrades(hero.hero_handle);
+                            heroSelectorPopup.style.display = 'none';
+                            overlay.style.display = 'none';
+                        });
+
+                        column.appendChild(card);
+                    });
+
+                    starsGrid.appendChild(column);
+                });
+
+                // Show popup when button is clicked
+                heroSelectButton.addEventListener('click', () => {
+                    heroSelectorPopup.style.display = 'block';
+                    overlay.style.display = 'block';
+                });
+
+                // Close popup when close button is clicked
+                closePopupButton.addEventListener('click', () => {
+                    heroSelectorPopup.style.display = 'none';
+                    overlay.style.display = 'none';
+                });
+
+                // Close popup when clicking overlay
+                overlay.addEventListener('click', () => {
+                    heroSelectorPopup.style.display = 'none';
+                    overlay.style.display = 'none';
+                });
+
             } catch (error) {
                 console.error('Error loading hero stats:', error);
             }
@@ -917,36 +1186,39 @@
                     row.style.display = rowRarity === newState ? '' : 'none';
                 });
 
-                // Find the matching price data for new rarity state
-                const priceData = pricesData.find(p => p.rarity.toLowerCase() === newState);
-                const bidPrice = priceData ? priceData.bid : null;
-                const floorPrice = priceData ? priceData.floor : null;
+                // Only proceed with chart update if we have data
+                if (pricesData && tradesData) {
+                    // Find the matching price data for new rarity state
+                    const priceData = pricesData.find(p => p.rarity.toLowerCase() === newState);
+                    const bidPrice = priceData ? priceData.bid : null;
+                    const floorPrice = priceData ? priceData.floor : null;
 
-                // Update chart with filtered data and new bid/floor prices
-                const filteredTrades = tradesData.filter(trade => trade.rarity.toLowerCase() === newState);
-                const datasets = [{
-                    label: newState,
-                    data: filteredTrades
-                        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-                        .map(trade => ({
-                            x: trade.timestamp,
-                            y: trade.price
-                        })),
-                    borderWidth: 1,
-                    fill: true,
-                    backgroundColor: `${getRarityColor(newState)}33`,
-                    borderColor: getRarityColor(newState)
-                }];
+                    // Update chart with filtered data and new bid/floor prices
+                    const filteredTrades = tradesData.filter(trade => trade.rarity.toLowerCase() === newState);
+                    const datasets = [{
+                        label: newState,
+                        data: filteredTrades
+                            .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+                            .map(trade => ({
+                                x: trade.timestamp,
+                                y: trade.price
+                            })),
+                        borderWidth: 1,
+                        fill: true,
+                        backgroundColor: `${getRarityColor(newState)}33`,
+                        borderColor: getRarityColor(newState)
+                    }];
 
-                if (window.myChart) {
-                    window.myChart.destroy();
-                    window.myChart = createLineChart('tradesCanvas', { datasets }, {
-                        chartTitle: 'My Chart',
-                        xAxisLabel: 'Time',
-                        yAxisLabel: 'Price',
-                        bidPrice: bidPrice,
-                        floorPrice: floorPrice
-                    });
+                    if (window.myChart) {
+                        window.myChart.destroy();
+                        window.myChart = createLineChart('tradesCanvas', { datasets }, {
+                            chartTitle: 'My Chart',
+                            xAxisLabel: 'Time',
+                            yAxisLabel: 'Price',
+                            bidPrice: bidPrice,
+                            floorPrice: floorPrice
+                        });
+                    }
                 }
             });
             

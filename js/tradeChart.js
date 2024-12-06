@@ -183,6 +183,10 @@ function createLineChart(containerId, data, options = {}) {
     console.log('Registering annotation plugin'); // Debug log
     Chart.register(annotationPlugin);
 
+    // Determine the maximum value for the y-axis
+    const maxDataValue = Math.max(...data.datasets.flatMap(ds => ds.data.map(point => point.y)));
+    const maxYAxisValue = Math.max(maxDataValue, options.floorPrice || 0);
+
     const chartConfig = {
         type: 'line',
         data: {
@@ -227,6 +231,7 @@ function createLineChart(containerId, data, options = {}) {
                 },
                 y: {
                     beginAtZero: true,
+                    max: maxYAxisValue, // Set the max y-axis value
                     title: {
                         display: true,
                         text: options.yAxisLabel || ''

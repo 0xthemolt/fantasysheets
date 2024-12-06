@@ -45,6 +45,7 @@ select hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price
 from flatten.get_hero_last_trades 
 where 1=1
 --and hero_handle = 'CoinGurruu'
+and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '45 days'
 """
 

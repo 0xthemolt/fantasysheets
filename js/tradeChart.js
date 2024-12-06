@@ -45,13 +45,19 @@ function createLineChart(containerId, data, options = {}) {
     // Use the datasets directly from the input data
     const datasets = data.datasets.map(dataset => ({
         label: dataset.label,
-        data: dataset.data,  // Data is already in {x, y} format
+        data: dataset.data,
         borderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
         backgroundColor: rarityColors[dataset.label.toLowerCase()]?.background || 'rgba(0, 0, 0, 0.1)',
         tension: 0.4,
         fill: true,
         cubicInterpolationMode: 'monotone',
-        hidden: !getInitialVisibility(dataset.label)
+        hidden: !getInitialVisibility(dataset.label),
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBorderWidth: 2,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: rarityColors[dataset.label.toLowerCase()]?.border || 'rgb(0, 0, 0)',
     }));
 
     // Before creating the chart config, add the annotation plugin
@@ -124,12 +130,17 @@ function createLineChart(containerId, data, options = {}) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,  // Added to ensure proper rendering
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
             plugins: {
                 legend: {
                     labels: {
                         usePointStyle: true,
-                        pointStyle: 'circle'
+                        pointStyle: 'circle',
+                        padding: 15
                     }
                 },
                 title: {

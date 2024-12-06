@@ -73,7 +73,7 @@ with get_db_connection('main') as conn:
     and gt.tournament_seq_nbr  in (select min(tournament_seq_nbr) from flatten.get_tournaments where tournament_status = 'finished' and league = 'Elite')
     and gt.league = 'Elite'
     )
-    select ghss.hero_handle,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
+    select ghss.hero_handle,ghss.hero_name,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
     ,ghss.seven_day_fantasy_score  as seven_day_score
     ,gcfs.hero_stars as current_stars
     ,projected_star.stars as projected_stars

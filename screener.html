@@ -473,6 +473,8 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
             font-size: 0.7em;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .hero-card:hover {
@@ -493,6 +495,8 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .hero-scores {
@@ -500,15 +504,26 @@
             flex-direction: column;
             gap: 4px;
             align-items: flex-end;
+            min-width: 80px;
+            flex-shrink: 0;
         }
 
-        .seven-day-score {
+        .score-value {
             display: inline-block;
-            background: transparent;
-            color: #fff;
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.85em;
+            min-width: 24px;
+            text-align: center;
+            color: white;
+            background-color: #3b82f6;  /* Add this line for default blue background */
+        }
+
+        .score-label {
+            color: #666;
+            margin-right: 4px;
+            font-size: 0.85em;
+            white-space: nowrap;
         }
 
         .floor-price {
@@ -522,6 +537,9 @@
             color: #fff;
             margin-bottom: 2px;
             font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .fantasy-score {
@@ -532,15 +550,6 @@
             border-radius: 4px;
             font-size: 0.85em;
             margin-right: 4px;
-        }
-
-        .last-main-score {
-            display: inline-block;
-            background: transparent;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.85em;
         }
 
         .score-label {
@@ -595,6 +604,27 @@
         .price-inputs input:focus {
             outline: none;
             border-color: #3b82f6;
+        }
+
+        /* Update these score styles */
+        .score-value {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            min-width: 24px;
+            text-align: center;
+            color: white;
+            background-color: #3b82f6;  /* Add this line for default blue background */
+        }
+
+        /* Add specific background colors for each score type */
+        .seven-day-score .score-value {
+            background-color: #3b82f6;  /* Blue for 7-day score */
+        }
+
+        .last-main-score .score-value {
+            background-color: #8b5cf6;  /* Purple for last main score */
         }
     </style>
 </head>
@@ -1200,7 +1230,7 @@
                         card.innerHTML = `
                             <img src="${hero.hero_image_url}" alt="${hero.hero_handle}" class="hero-image">
                             <div class="hero-info">
-                                <div class="hero-handle">${hero.hero_handle}</div>
+                                <div class="hero-handle" data-name="${hero.hero_name || ''}">${hero.hero_handle}</div>
                                 <div class="floor-price">
                                     <span class="score-label"></span>
                                     <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">
@@ -1210,11 +1240,11 @@
                             <div class="hero-scores">
                                 <span class="seven-day-score" title="Seven Day Score">
                                     <span class="score-label">7D:</span>
-                                    ${Math.round(hero.seven_day_fantasy_score)}
+                                    <span class="score-value" style="background-color: ${getScoreColor(hero.seven_day_fantasy_score, 'seven_day')}">${Math.round(hero.seven_day_fantasy_score)}</span>
                                 </span>
                                 <span class="last-main-score" title="Last Main Score">
                                     <span class="score-label">LM:</span>
-                                    ${hero.last_main ? Math.round(hero.last_main) : 'N/A'}
+                                    <span class="score-value" style="background-color: ${getScoreColor(hero.last_main, 'last_main')}">${Math.round(hero.last_main)}</span>
                                 </span>
                             </div>
                         `;
@@ -1270,11 +1300,13 @@
 
                     const heroCards = document.querySelectorAll('.hero-card');
                     heroCards.forEach(card => {
-                        const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                        const heroHandleEl = card.querySelector('.hero-handle');
+                        const heroHandle = heroHandleEl.textContent.toLowerCase();
+                        const heroName = heroHandleEl.dataset.name.toLowerCase();
                         const floorPriceEl = card.querySelector('.floor-price span[title="Common Floor"]');
                         const floorPrice = parseFloat(floorPriceEl.textContent);
                         
-                        const matchesSearch = heroHandle.includes(searchTerm);
+                        const matchesSearch = heroHandle.includes(searchTerm) || heroName.includes(searchTerm);
                         const matchesPrice = !isNaN(floorPrice) && floorPrice >= minPrice && floorPrice <= maxPrice;
                         
                         card.style.display = matchesSearch && matchesPrice ? 'flex' : 'none';
@@ -1389,6 +1421,44 @@
             } else {
                 return price.toFixed(3).replace(/\.?0+$/, '');
             }
+        }
+
+        function getScoreColor(score, type) {
+            // Normalize score between 0 and 1
+            const normalizedScore = Math.min(Math.max(score, 0), 1000) / 1000;
+            
+            // Spectral color stops (from matplotlib, reversed to make purple highest)
+            const colorStops = [
+                { pos: 0, color: [213, 62, 79] },    // Red (lowest)
+                { pos: 0.25, color: [252, 141, 89] }, // Light red-orange
+                { pos: 0.5, color: [254, 224, 139] }, // Light yellow
+                { pos: 0.75, color: [153, 142, 195] }, // Light purple
+                { pos: 1, color: [94, 79, 162] }      // Purple (highest)
+            ];
+            
+            // Find the two colors to interpolate between
+            let startColor, endColor, fraction;
+            for (let i = 0; i < colorStops.length - 1; i++) {
+                if (normalizedScore <= colorStops[i + 1].pos) {
+                    startColor = colorStops[i];
+                    endColor = colorStops[i + 1];
+                    fraction = (normalizedScore - startColor.pos) / (endColor.pos - startColor.pos);
+                    break;
+                }
+            }
+            
+            // If score is at max or we didn't find a range, use the last color
+            if (normalizedScore === 1 || !startColor || !endColor) {
+                const lastColor = colorStops[colorStops.length - 1].color;
+                return `rgb(${lastColor[0]}, ${lastColor[1]}, ${lastColor[2]})`;
+            }
+            
+            // Interpolate between the two colors
+            const r = Math.round(startColor.color[0] + (endColor.color[0] - startColor.color[0]) * fraction);
+            const g = Math.round(startColor.color[1] + (endColor.color[1] - startColor.color[1]) * fraction);
+            const b = Math.round(startColor.color[2] + (endColor.color[2] - startColor.color[2]) * fraction);
+            
+            return `rgb(${r}, ${g}, ${b})`;
         }
     </script>
 </body>

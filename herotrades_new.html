@@ -393,11 +393,40 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            gap: 16px;
         }
 
-        .popup-header h2 {
-            margin: 0;
+        .search-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: #666;
+            pointer-events: none;
+        }
+
+        #heroSearch {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #2a2a2a;
             color: #fff;
+            font-size: 16px;
+        }
+
+        #heroSearch:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        #heroSearch::placeholder {
+            color: #666;
         }
 
         .close-popup {
@@ -456,6 +485,7 @@
             height: 38px;
             border-radius: 6px;
             object-fit: cover;
+            margin-right: 2px;
         }
 
         .hero-info {
@@ -474,7 +504,7 @@
 
         .seven-day-score {
             display: inline-block;
-            background: #3b82f6;
+            background: transparent;
             color: #fff;
             padding: 2px 6px;
             border-radius: 4px;
@@ -484,6 +514,8 @@
         .floor-price {
             color: #22c55e;
             font-size: 0.85em;
+            display: flex;
+            align-items: center;
         }
 
         .hero-handle {
@@ -504,7 +536,7 @@
 
         .last-main-score {
             display: inline-block;
-            background: #4b5563;
+            background: transparent;
             color: #fff;
             padding: 2px 6px;
             border-radius: 4px;
@@ -512,7 +544,7 @@
         }
 
         .score-label {
-            color: #666;
+            color: #fff;
             margin-right: 2px;
         }
 
@@ -537,7 +569,10 @@
 
     <div id="heroSelectorPopup" class="hero-selector-popup">
         <div class="popup-header">
-            <h2>Select Hero</h2>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="heroSearch" placeholder="Search heroes...">
+            </div>
             <button class="close-popup"><i class="fas fa-times"></i></button>
         </div>
         <div class="stars-grid"></div>
@@ -609,6 +644,26 @@
         console.log('Script loaded');
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded');
+
+            // Add search functionality
+            const searchInput = document.getElementById('heroSearch');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const heroCards = document.querySelectorAll('.hero-card');
+                
+                heroCards.forEach(card => {
+                    const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                    const shouldShow = heroHandle.includes(searchTerm);
+                    card.style.display = shouldShow ? 'flex' : 'none';
+                });
+
+                // Show/hide star columns based on whether they have visible heroes
+                const starColumns = document.querySelectorAll('.star-column');
+                starColumns.forEach(column => {
+                    const visibleHeroes = column.querySelectorAll('.hero-card[style*="display: flex"]').length;
+                    column.style.display = visibleHeroes > 0 ? 'flex' : 'none';
+                });
+            });
         });
 
         function getRarityColor(rarity) {
@@ -1101,17 +1156,18 @@
                             <div class="hero-info">
                                 <div class="hero-handle">${hero.hero_handle}</div>
                                 <div class="floor-price">
-                                    <span class="score-label">Floor:</span>
-                                    ${hero.common_floor ? hero.common_floor.toFixed(4) : 'N/A'}
+                                    <span class="score-label"></span>
+                                    <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">
+                                    <span title="Common Floor">${hero.common_floor ? formatFloorPrice(hero.common_floor) : 'N/A'}</span>
                                 </div>
                             </div>
                             <div class="hero-scores">
-                                <span class="seven-day-score">
+                                <span class="seven-day-score" title="Seven Day Score">
                                     <span class="score-label">7D:</span>
                                     ${Math.round(hero.seven_day_fantasy_score)}
                                 </span>
-                                <span class="last-main-score">
-                                    <span class="score-label">Main:</span>
+                                <span class="last-main-score" title="Last Main Score">
+                                    <span class="score-label">LM:</span>
                                     ${hero.last_main ? Math.round(hero.last_main) : 'N/A'}
                                 </span>
                             </div>
@@ -1234,6 +1290,14 @@
                 row.style.display = rowRarity === 'common' ? '' : 'none';
             });
         });
+
+        function formatFloorPrice(price) {
+            if (price >= 1) {
+                return price.toFixed(1);
+            } else {
+                return price.toFixed(3).replace(/\.?0+$/, '');
+            }
+        }
     </script>
 </body>
 </html>

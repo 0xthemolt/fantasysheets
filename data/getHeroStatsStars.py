@@ -45,6 +45,9 @@ with get_db_connection('main') as conn:
     """
     cursor.execute(star_ranges_query)
     star_ranges_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+    print("\n=== Star Ranges DataFrame ===")
+    print(star_ranges_df)
+    print(f"Shape: {star_ranges_df.shape}")
     
     # Get hero stats
     hero_stats_query = f"""
@@ -68,6 +71,7 @@ with get_db_connection('main') as conn:
     where 1=1
     --ghwst.hero_handle  = '0xgaut'
     and gt.tournament_seq_nbr  in (select min(tournament_seq_nbr) from flatten.get_tournaments where tournament_status = 'finished' and league = 'Elite')
+    and gt.league = 'Elite'
     )
     select ghss.hero_handle,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
     ,ghss.seven_day_fantasy_score  as seven_day_score
@@ -97,6 +101,9 @@ with get_db_connection('main') as conn:
     """
     cursor.execute(hero_stats_query)
     hero_stats_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+    print("\n=== Hero Stats DataFrame ===")
+    print(hero_stats_df)
+    print(f"Shape: {hero_stats_df.shape}")
 
 # Use different connection for prices if needed
 with get_db_connection('prices') as conn:
@@ -115,22 +122,26 @@ with get_db_connection('prices') as conn:
     """
     cursor.execute(prices_query)
     prices_df = pd.DataFrame(cursor.fetchall(), columns=[desc[0] for desc in cursor.description])
+    print("\n=== Prices DataFrame ===")
+    print(prices_df)
+    print(f"Shape: {prices_df.shape}")
 
-# Merge hero_stats_df with prices_df for common rarity
-common_merged_df = pd.merge(
-    hero_stats_df,
-    prices_df[prices_df['rarity'] == 'common'][['hero_id', 'floor']],
-    on='hero_id',
-    how='left'
-).rename(columns={'floor': 'common_floor'})
+# Filter prices_df for each rarity before merging
+common_prices = prices_df[prices_df['rarity'] == 'common'][['hero_id', 'floor']].drop_duplicates('hero_id')
+rare_prices = prices_df[prices_df['rarity'] == 'rare'][['hero_id', 'floor']].drop_duplicates('hero_id')
 
-# Merge the result with prices_df for rare rarity
-final_merged_df = pd.merge(
-    common_merged_df,
-    prices_df[prices_df['rarity'] == 'rare'][['hero_id', 'floor']],
-    on='hero_id',
-    how='left'
-).rename(columns={'floor': 'rare_floor'})
+# Merge hero_stats_df with prices_df for both rarities
+final_merged_df = (hero_stats_df
+    .merge(common_prices, on='hero_id', how='left', suffixes=('', '_common'))
+    .rename(columns={'floor': 'common_floor'})
+    .merge(rare_prices, on='hero_id', how='left', suffixes=('', '_rare'))
+    .rename(columns={'floor': 'rare_floor'})
+)
+
+# Add debug print for final merged DataFrame
+print("\n=== Final Merged DataFrame ===")
+print(final_merged_df)
+print(f"Shape: {final_merged_df.shape}")
 
 # Create JSON structure and save to file
 output_data = {

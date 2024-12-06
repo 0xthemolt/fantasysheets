@@ -49,7 +49,7 @@ and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '45 days'
 """
 
-prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor ,prices.hero
+prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor
 FROM flatten.vwhero_stats_bids  prices
 left join flatten.herohandlehistory handles
 on prices.hero = handles.hero_handle

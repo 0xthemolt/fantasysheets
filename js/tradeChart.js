@@ -78,38 +78,23 @@ function createLineChart(containerId, data, options = {}) {
             const xAxis = chart.scales.x;
             const yAxis = chart.scales.y;
             
+            // Initialize array to track label positions
+            const labels = [];
+            
             // Get the current dataset and its last value
             const currentDataset = chart.data.datasets[0];
             if (currentDataset && currentDataset.data.length > 0) {
                 const lastPoint = currentDataset.data[currentDataset.data.length - 1];
                 const lastValue = lastPoint.y;
-                const yPos = yAxis.getPixelForValue(lastValue);
-                
-                // Draw "Last" label with the same style as bid/floor
-                ctx.save();
-                ctx.textAlign = 'left';
-                ctx.fillStyle = currentDataset.borderColor;
-                ctx.font = 'bold 12px Arial';
-                const labelText = `Last: ${lastValue.toFixed(3)}`;
-                const padding = 4;
-                const textWidth = ctx.measureText(labelText).width;
-                
-                // Draw background rectangle with transparent background
-                ctx.fillStyle = 'rgba(255, 255, 255, 0)';
-                ctx.fillRect(
-                    xAxis.right + 5, 
-                    yPos - 10, 
-                    textWidth + (padding * 2), 
-                    20
-                );
-                
-                // Draw text
-                ctx.fillStyle = currentDataset.borderColor;
-                ctx.fillText(labelText, xAxis.right + 5 + padding, yPos + 4);
-                ctx.restore();
+                labels.push({
+                    value: lastValue,
+                    label: `Last: ${lastValue.toFixed(3)}`,
+                    color: currentDataset.borderColor,
+                    yPos: yAxis.getPixelForValue(lastValue)
+                });
             }
             
-            // Draw bid and floor lines using values from options
+            // Add bid and floor labels
             const horizontalLines = [
                 { 
                     value: options.bidPrice || 0.005, 
@@ -124,27 +109,49 @@ function createLineChart(containerId, data, options = {}) {
             ];
 
             horizontalLines.forEach(({value, label, color}) => {
-                const yPos = yAxis.getPixelForValue(value);
+                labels.push({
+                    value: value,
+                    label: `${label}: ${value.toFixed(3)}`,
+                    color: color,
+                    yPos: yAxis.getPixelForValue(value)
+                });
+            });
+
+            // Sort labels by y position (top to bottom)
+            labels.sort((a, b) => a.yPos - b.yPos);
+
+            // Adjust positions to prevent overlap
+            const minSpacing = 25; // Minimum pixels between labels
+            for (let i = 1; i < labels.length; i++) {
+                const prevLabel = labels[i - 1];
+                const currentLabel = labels[i];
                 
-                // Draw horizontal line
+                if (currentLabel.yPos - prevLabel.yPos < minSpacing) {
+                    currentLabel.yPos = prevLabel.yPos + minSpacing;
+                }
+            }
+
+            // Draw the lines and labels
+            labels.forEach(({value, label, color, yPos}) => {
+                const originalYPos = yAxis.getPixelForValue(value);
+                
+                // Draw horizontal line at the original value position
                 ctx.save();
                 ctx.beginPath();
                 ctx.setLineDash([5, 5]);
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 1;
-                ctx.moveTo(xAxis.left, yPos);
-                ctx.lineTo(xAxis.right, yPos);
+                ctx.moveTo(xAxis.left, originalYPos);
+                ctx.lineTo(xAxis.right, originalYPos);
                 ctx.stroke();
                 
-                // Draw label on the right with transparent background
+                // Draw label with adjusted position
                 ctx.textAlign = 'left';
-                ctx.fillStyle = color;
                 ctx.font = 'bold 12px Arial';
-                const labelText = `${label}: ${value.toFixed(3)}`;
                 const padding = 4;
-                const textWidth = ctx.measureText(labelText).width;
+                const textWidth = ctx.measureText(label).width;
                 
-                // Draw background rectangle with transparent background
+                // Draw background rectangle
                 ctx.fillStyle = 'rgba(255, 255, 255, 0)';
                 ctx.fillRect(
                     xAxis.right + 5, 
@@ -155,7 +162,18 @@ function createLineChart(containerId, data, options = {}) {
                 
                 // Draw text
                 ctx.fillStyle = color;
-                ctx.fillText(labelText, xAxis.right + 5 + padding, yPos + 4);
+                ctx.fillText(label, xAxis.right + 5 + padding, yPos + 4);
+
+                // If label position is different from value position, draw a connecting line
+                if (Math.abs(yPos - originalYPos) > 1) {
+                    ctx.beginPath();
+                    ctx.setLineDash([2, 2]);
+                    ctx.strokeStyle = color;
+                    ctx.moveTo(xAxis.right, originalYPos);
+                    ctx.lineTo(xAxis.right + 5, yPos);
+                    ctx.stroke();
+                }
+                
                 ctx.restore();
             });
         }

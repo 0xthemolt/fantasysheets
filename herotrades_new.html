@@ -37,6 +37,7 @@
             visibility: visible;
             opacity: 1;
             flex: 1;
+            max-width: 50vw;
             min-width: 600px;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -674,6 +675,12 @@
                 
                 // Get current toggle state
                 const toggleState = document.querySelector('.toggle-switch').getAttribute('data-state');
+                
+                // Find the matching price data for current rarity
+                const priceData = data.prices.find(p => p.rarity.toLowerCase() === toggleState);
+                const bidPrice = priceData ? priceData.bid : null;
+                const floorPrice = priceData ? priceData.floor : null;
+
                 const filteredTrades = tradesData.filter(trade => trade.rarity.toLowerCase() === toggleState);
 
                 const datasets = [{
@@ -694,12 +701,13 @@
                     datasets: datasets
                 };
                 
-                window.myChart = createLineChart('tradesCanvas', chartData,  {chartTitle: 'My Chart',
-                                    xAxisLabel: 'Time',
-                                    yAxisLabel: 'Price',
-                                    bidPrice: 0.0062,    // Add your real bid price here
-                                    floorPrice: 0.0085   // Add your real floor price here
-                                });
+                window.myChart = createLineChart('tradesCanvas', chartData, {
+                    chartTitle: 'My Chart',
+                    xAxisLabel: 'Time',
+                    yAxisLabel: 'Price',
+                    bidPrice: bidPrice,
+                    floorPrice: floorPrice
+                });
                 
                 const tbody = document.querySelector('#tradesTable tbody');
                 tbody.innerHTML = tradesData.map((trade, index) => {
@@ -909,7 +917,12 @@
                     row.style.display = rowRarity === newState ? '' : 'none';
                 });
 
-                // Update chart with filtered data
+                // Find the matching price data for new rarity state
+                const priceData = pricesData.find(p => p.rarity.toLowerCase() === newState);
+                const bidPrice = priceData ? priceData.bid : null;
+                const floorPrice = priceData ? priceData.floor : null;
+
+                // Update chart with filtered data and new bid/floor prices
                 const filteredTrades = tradesData.filter(trade => trade.rarity.toLowerCase() === newState);
                 const datasets = [{
                     label: newState,
@@ -926,8 +939,14 @@
                 }];
 
                 if (window.myChart) {
-                    window.myChart.data.datasets = datasets;
-                    window.myChart.update();
+                    window.myChart.destroy();
+                    window.myChart = createLineChart('tradesCanvas', { datasets }, {
+                        chartTitle: 'My Chart',
+                        xAxisLabel: 'Time',
+                        yAxisLabel: 'Price',
+                        bidPrice: bidPrice,
+                        floorPrice: floorPrice
+                    });
                 }
             });
             

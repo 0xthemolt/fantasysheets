@@ -392,13 +392,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
-            gap: 16px;
+            margin-bottom: 16px;
+            gap: 24px;
         }
 
         .search-container {
             position: relative;
-            flex: 1;
+            width: 300px;
             display: flex;
             align-items: center;
         }
@@ -406,8 +406,11 @@
         .search-icon {
             position: absolute;
             left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #666;
             pointer-events: none;
+            z-index: 1;
         }
 
         #heroSearch {
@@ -444,14 +447,19 @@
 
         .stars-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, 200px);  /* Changed from auto-fit to auto-fill */
             gap: 24px;
+            justify-content: center;
+            width: 100%;  /* Ensure grid takes full width */
+            margin: 0 auto;  /* Center the grid */
         }
 
         .star-column {
             display: flex;
             flex-direction: column;
             gap: 16px;
+            width: fit-content;  /* Allow column to fit card width */
+            min-width: 200px;  /* Match hero-card width */
         }
 
         .star-header {
@@ -473,7 +481,9 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
             font-size: 0.7em;
-            width: 100%;
+            width: 200px;  /* Reduced fixed width */
+            min-width: 200px;
+            max-width: 200px;
             box-sizing: border-box;
         }
 
@@ -571,29 +581,35 @@
         .price-filter-container {
             display: flex;
             align-items: center;
-            gap: 24px;  /* Increased gap between filter groups */
+            gap: 6px;
             margin-bottom: 12px;
             padding: 6px 0;
             border-bottom: 1px solid #333;
-            flex-wrap: wrap;  /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
+        }
+
+        .price-filter-container > *:not(:first-child) {
+            margin-left: 18px;
         }
 
         .price-filter-container label {
             color: #fff;
             font-weight: 500;
             white-space: nowrap;
+            margin-right: 4px;
         }
 
         .price-inputs {
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-shrink: 0;  /* Prevent inputs from shrinking */
+            flex-shrink: 0;
+            margin-left: 0;
         }
 
         .price-inputs input {
-            width: 80px;  /* Smaller width for score inputs */
-            padding: 6px;
+            width: 60px;
+            padding: 2px;
             border: 1px solid #333;
             border-radius: 4px;
             background: #2a2a2a;
@@ -638,6 +654,143 @@
         .score-per-eth span {
             color: #fff;
         }
+
+        .star-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .star-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .star-btn {
+            background: var(--background-color, #1a1a1a);
+            border: 1px solid #333;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .star-btn:hover {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        .star-btn.active {
+            border-color: #ffd700;
+            color: #ffd700;  /* Keep text/emoji gold */
+            background: var(--background-color, #1a1a1a);  /* Keep original background */
+        }
+
+        /* Update star column to handle fixed-width cards */
+        .star-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: fit-content;  /* Allow column to fit card width */
+            min-width: 200px;  /* Match hero-card width */
+        }
+
+        /* Add these new styles */
+        .star-column.wide {
+            min-width: 424px;  /* 200px * 2 + 24px gap */
+        }
+
+        .star-column.wide .hero-cards-container {
+            display: grid;
+            grid-template-columns: repeat(2, 200px);
+            gap: 24px;
+        }
+
+        /* Ensure the grid doesn't force different widths */
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 200px);  /* Changed from auto-fit to auto-fill */
+            gap: 24px;
+            justify-content: center;
+            width: 100%;  /* Ensure grid takes full width */
+            margin: 0 auto;  /* Center the grid */
+        }
+
+        .stars-grid.wide-columns {
+            grid-template-columns: repeat(auto-fill, 424px);
+        }
+
+        /* Add these new styles for superwide columns */
+        .star-column.superwide {
+            min-width: 848px;  /* 200px * 4 + (24px * 3 gaps) */
+        }
+
+        .star-column.superwide .hero-cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, 200px);
+            gap: 24px;
+        }
+
+        .stars-grid.superwide-columns {
+            grid-template-columns: repeat(auto-fill, 848px);
+        }
+
+        .sort-arrows {
+            cursor: pointer;
+            margin-right: 4px;
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            height: 16px;  /* Fixed height to match text */
+            position: relative;
+            top: -1px;  /* Fine-tune vertical alignment */
+        }
+
+        .sort-arrows i {
+            display: block;
+            height: 8px;
+            color: #666;
+            transition: color 0.2s;
+            line-height: 8px;
+        }
+
+        .sort-arrows .fa-sort-up {
+            margin-bottom: -4px;  /* Adjusted for better spacing */
+        }
+
+        /* Add specific color states */
+        .sort-arrows.asc .fa-sort-up {
+            color: #22c55e;  /* Green for ascending */
+        }
+
+        .sort-arrows.desc .fa-sort-down {
+            color: #ef4444;  /* Red for descending */
+        }
+
+        /* Add default descending state styling */
+        .sort-arrows.default .fa-sort-down {
+            color: #ef4444;  /* Red for descending */
+        }
+
+        /* Add these new styles */
+        .value-filter {
+            margin-left: 24px;
+        }
+
+        .value-btn {
+            color: #666;  /* Matches star-btn color */
+        }
+
+        .value-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .value-btn.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body>
@@ -653,28 +806,68 @@
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="heroSearch" placeholder="Search heroes...">
             </div>
+            <div class="star-filter">
+                <div class="star-buttons">
+                    <button class="star-btn" data-stars="all">All</button>
+                    <button class="star-btn" data-stars="8">8⭐</button>
+                    <button class="star-btn" data-stars="7">7⭐</button>
+                    <button class="star-btn" data-stars="6">6⭐</button>
+                    <button class="star-btn" data-stars="5">5⭐</button>
+                    <button class="star-btn" data-stars="4">4⭐</button>
+                    <button class="star-btn" data-stars="3">3⭐</button>
+                    <button class="star-btn" data-stars="2">2⭐</button>
+                    <button class="star-btn" data-stars="1">1⭐</button>
+                </div>
+            </div>
+            <div class="value-filter">
+                <button class="star-btn value-btn">Best Value 💎</button>
+            </div>
             <button class="close-popup"><i class="fas fa-times"></i></button>
         </div>
         <div class="price-filter-container">
-            <label>Price:</label>
+            <label>
+                <span class="sort-arrows" data-sort="price">
+                    <i class="fas fa-sort-up"></i>
+                    <i class="fas fa-sort-down"></i>
+                </span>
+                Price:
+            </label>
             <div class="price-inputs">
                 <input type="number" id="popupMinPrice" placeholder="Min" step="0.0001">
                 <span>to</span>
                 <input type="number" id="popupMaxPrice" placeholder="Max" step="0.0001">
             </div>
-            <label>7D Score:</label>
+            <label>
+                <span class="sort-arrows" data-sort="7d">
+                    <i class="fas fa-sort-up"></i>
+                    <i class="fas fa-sort-down"></i>
+                </span>
+                7D Score:
+            </label>
             <div class="price-inputs">
                 <input type="number" id="popupMin7DScore" placeholder="Min" step="1" value="0">
                 <span>to</span>
                 <input type="number" id="popupMax7DScore" placeholder="Max" step="1" value="1000">
             </div>
-            <label>LM Score:</label>
+            <label>
+                <span class="sort-arrows" data-sort="lm">
+                    <i class="fas fa-sort-up"></i>
+                    <i class="fas fa-sort-down"></i>
+                </span>
+                LM Score:
+            </label>
             <div class="price-inputs">
                 <input type="number" id="popupMinLMScore" placeholder="Min" step="1" value="0">
                 <span>to</span>
                 <input type="number" id="popupMaxLMScore" placeholder="Max" step="1" value="1000">
             </div>
-            <label>L3M Score:</label>
+            <label>
+                <span class="sort-arrows" data-sort="l3m">
+                    <i class="fas fa-sort-up"></i>
+                    <i class="fas fa-sort-down"></i>
+                </span>
+                L3M Score:
+            </label>
             <div class="price-inputs">
                 <input type="number" id="popupMinL3MScore" placeholder="Min" step="1" value="0">
                 <span>to</span>
@@ -1570,6 +1763,380 @@
             
             return `rgb(${r}, ${g}, ${b})`;
         }
+
+        // Add after your existing DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const starButtons = document.querySelectorAll('.star-btn');
+            const activeStars = new Set(); // Keep track of selected stars
+
+            starButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const stars = button.dataset.stars;
+                    
+                    if (stars === 'all') {
+                        // Toggle all buttons
+                        const allActive = Array.from(starButtons).every(btn => btn.classList.contains('active'));
+                        starButtons.forEach(btn => {
+                            if (allActive) {
+                                btn.classList.remove('active');
+                                activeStars.clear();
+                            } else {
+                                btn.classList.add('active');
+                                if (btn.dataset.stars !== 'all') {
+                                    activeStars.add(btn.dataset.stars);
+                                }
+                            }
+                        });
+                    } else {
+                        // Toggle individual star button
+                        button.classList.toggle('active');
+                        if (activeStars.has(stars)) {
+                            activeStars.delete(stars);
+                        } else {
+                            activeStars.add(stars);
+                        }
+                        
+                        // Update "All" button state
+                        const allButton = document.querySelector('.star-btn[data-stars="all"]');
+                        const allStarButtons = Array.from(starButtons).filter(btn => btn.dataset.stars !== 'all');
+                        const allActive = allStarButtons.every(btn => btn.classList.contains('active'));
+                        allButton.classList.toggle('active', allActive);
+                    }
+
+                    // Filter star columns
+                    const starColumns = document.querySelectorAll('.star-column');
+                    starColumns.forEach(column => {
+                        const columnStars = column.querySelector('.star-header').textContent.split(' ')[0];
+                        if (activeStars.size === 0 || activeStars.has(columnStars)) {
+                            column.style.display = 'flex';
+                        } else {
+                            column.style.display = 'none';
+                        }
+                    });
+
+                    adjustColumnWidths();
+                });
+            });
+        });
+
+        // Update your existing filterHeroes function to include star filtering
+        function filterHeroes() {
+            const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
+            const minPrice = parseFloat(minPriceInput.value) || 0;
+            const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+            const activeStars = new Set(
+                Array.from(document.querySelectorAll('.star-btn.active'))
+                    .map(btn => btn.dataset.stars)
+            );
+
+            // ... existing price and score filtering ...
+
+            // Add star filtering to the visibility check
+            const starColumns = document.querySelectorAll('.star-column');
+            starColumns.forEach(column => {
+                const columnStars = column.querySelector('.star-header').textContent.split(' ')[0];
+                const matchesStars = activeStars.size === 0 || activeStars.has(columnStars);
+                column.style.display = matchesStars ? 'flex' : 'none';
+            });
+
+            // Add this at the end of the function
+            adjustColumnWidths();
+        }
+
+        // Add this function to handle dynamic column sizing
+        function adjustColumnWidths() {
+            const visibleColumns = document.querySelectorAll('.star-column[style*="display: flex"]');
+            const starsGrid = document.querySelector('.stars-grid');
+            
+            // Remove all width-related classes first
+            starsGrid.classList.remove('wide-columns', 'superwide-columns');
+            visibleColumns.forEach(column => {
+                column.classList.remove('wide', 'superwide');
+            });
+
+            if (visibleColumns.length <= 2) {
+                // Make columns super wide (4 cards per row)
+                starsGrid.classList.add('superwide-columns');
+                visibleColumns.forEach(column => {
+                    column.classList.add('superwide');
+                    
+                    // Wrap hero cards in a container if not already wrapped
+                    const cards = Array.from(column.querySelectorAll('.hero-card'));
+                    if (!column.querySelector('.hero-cards-container')) {
+                        const container = document.createElement('div');
+                        container.className = 'hero-cards-container';
+                        cards.forEach(card => {
+                            if (card !== column.querySelector('.star-header')) {
+                                container.appendChild(card);
+                            }
+                        });
+                        column.appendChild(container);
+                    }
+                });
+            } else if (visibleColumns.length <= 3) {
+                // Make columns wide (2 cards per row)
+                starsGrid.classList.add('wide-columns');
+                visibleColumns.forEach(column => {
+                    column.classList.add('wide');
+                    
+                    // Wrap hero cards in a container if not already wrapped
+                    const cards = Array.from(column.querySelectorAll('.hero-card'));
+                    if (!column.querySelector('.hero-cards-container')) {
+                        const container = document.createElement('div');
+                        container.className = 'hero-cards-container';
+                        cards.forEach(card => {
+                            if (card !== column.querySelector('.star-header')) {
+                                container.appendChild(card);
+                            }
+                        });
+                        column.appendChild(container);
+                    }
+                });
+            } else {
+                // Reset to normal width (1 card per row)
+                visibleColumns.forEach(column => {
+                    // Unwrap cards if needed
+                    const container = column.querySelector('.hero-cards-container');
+                    if (container) {
+                        const cards = Array.from(container.querySelectorAll('.hero-card'));
+                        cards.forEach(card => {
+                            container.parentNode.insertBefore(card, container);
+                        });
+                        container.remove();
+                    }
+                });
+            }
+        }
+
+        // Add this new function to handle sorting
+        function setupSorting() {
+            const sortArrows = document.querySelectorAll('.sort-arrows');
+            const sortStates = new Map(); // Track sort state for each column
+
+            // Initialize all sort states to 'none'
+            sortArrows.forEach(arrows => {
+                sortStates.set(arrows.dataset.sort, 'none');
+            });
+
+            // Set initial 7D score sort to descending
+            const sevenDayArrows = document.querySelector('.sort-arrows[data-sort="7d"]');
+            if (sevenDayArrows) {
+                sevenDayArrows.classList.add('desc');
+                sortStates.set('7d', 'desc');
+                sortCards('7d', 'desc');
+            }
+
+            sortArrows.forEach(arrows => {
+                arrows.addEventListener('click', () => {
+                    const sortType = arrows.dataset.sort;
+                    let sortDirection = sortStates.get(sortType);
+
+                    // Reset all other sort arrows
+                    sortArrows.forEach(other => {
+                        if (other !== arrows) {
+                            other.classList.remove('asc', 'desc');
+                            sortStates.set(other.dataset.sort, 'none');
+                        }
+                    });
+
+                    // If not currently sorted, start with descending
+                    if (sortDirection === 'none') {
+                        sortDirection = 'desc';
+                        arrows.classList.add('desc');
+                    } else if (sortDirection === 'desc') {
+                        sortDirection = 'asc';
+                        arrows.classList.add('asc');
+                        arrows.classList.remove('desc');
+                    } else {
+                        sortDirection = 'desc';
+                        arrows.classList.add('desc');
+                        arrows.classList.remove('asc');
+                    }
+
+                    sortStates.set(sortType, sortDirection);
+                    sortCards(sortType, sortDirection);
+                });
+            });
+
+            // Separate sorting logic into its own function
+            function sortCards(sortType, sortDirection) {
+                const heroCards = Array.from(document.querySelectorAll('.hero-card'));
+                heroCards.sort((a, b) => {
+                    let valueA, valueB;
+                    switch (sortType) {
+                        case 'price':
+                            valueA = parseFloat(a.querySelector('.floor-price span').textContent) || 0;
+                            valueB = parseFloat(b.querySelector('.floor-price span').textContent) || 0;
+                            break;
+                        case '7d':
+                            valueA = parseInt(a.querySelector('.seven-day-score .score-value').textContent) || 0;
+                            valueB = parseInt(b.querySelector('.seven-day-score .score-value').textContent) || 0;
+                            break;
+                        case 'lm':
+                            valueA = parseInt(a.querySelector('.last-main-score .score-value').textContent) || 0;
+                            valueB = parseInt(b.querySelector('.last-main-score .score-value').textContent) || 0;
+                            break;
+                        case 'l3m':
+                            valueA = parseInt(a.querySelector('.l3-main-score .score-value').textContent) || 0;
+                            valueB = parseInt(b.querySelector('.l3-main-score .score-value').textContent) || 0;
+                            break;
+                    }
+                    
+                    return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+                });
+
+                // Reinsert cards in new order
+                const starColumns = document.querySelectorAll('.star-column');
+                starColumns.forEach(column => {
+                    const columnStars = column.querySelector('.star-header').textContent.split(' ')[0];
+                    const columnCards = heroCards.filter(card => {
+                        const cardStars = card.closest('.star-column').querySelector('.star-header').textContent.split(' ')[0];
+                        return cardStars === columnStars;
+                    });
+                    
+                    // Remove existing cards
+                    column.querySelectorAll('.hero-card').forEach(card => card.remove());
+                    
+                    // Add sorted cards
+                    columnCards.forEach(card => {
+                        column.appendChild(card);
+                    });
+                });
+            }
+        }
+
+        // Call setupSorting in your DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+            setupSorting();
+        });
+
+        // Add this function to handle best value filtering
+        function setupBestValueFilter() {
+            const valueBtn = document.querySelector('.value-btn');
+            
+            valueBtn.addEventListener('click', () => {
+                valueBtn.classList.toggle('active');
+                
+                if (valueBtn.classList.contains('active')) {
+                    // Show only best value heroes for each star level
+                    const starColumns = document.querySelectorAll('.star-column');
+                    
+                    starColumns.forEach(column => {
+                        const heroCards = Array.from(column.querySelectorAll('.hero-card'));
+                        
+                        // Get score per eth for each card
+                        const cardValues = heroCards.map(card => {
+                            const scorePerEth = parseInt(card.querySelector('.score-per-eth span').textContent);
+                            return { card, scorePerEth };
+                        });
+                        
+                        // Sort by score per eth descending
+                        cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
+                        
+                        // Show only the highest value card, hide others
+                        cardValues.forEach((cardValue, index) => {
+                            if (index === 0) {
+                                cardValue.card.style.display = 'flex';
+                                // Optional: add highlight effect to best value card
+                                cardValue.card.style.border = '2px solid #3b82f6';
+                            } else {
+                                cardValue.card.style.display = 'none';
+                            }
+                        });
+                    });
+                } else {
+                    // Reset display of all cards and remove highlights
+                    const heroCards = document.querySelectorAll('.hero-card');
+                    heroCards.forEach(card => {
+                        card.style.display = 'flex';
+                        card.style.border = 'none';
+                    });
+                    
+                    // Re-apply any existing filters
+                    filterHeroes();
+                }
+            });
+        }
+
+        // Call the setup function when the document loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+            setupBestValueFilter();
+        });
+
+        // Update the existing filterHeroes function to respect the best value filter
+        function filterHeroes() {
+            const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
+            const minPrice = parseFloat(document.getElementById('popupMinPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('popupMaxPrice').value) || Infinity;
+            const min7DScore = parseFloat(document.getElementById('popupMin7DScore').value) || 0;
+            const max7DScore = parseFloat(document.getElementById('popupMax7DScore').value) || Infinity;
+            const minLMScore = parseFloat(document.getElementById('popupMinLMScore').value) || 0;
+            const maxLMScore = parseFloat(document.getElementById('popupMaxLMScore').value) || Infinity;
+            const valueBtn = document.querySelector('.value-btn');
+            
+            const starColumns = document.querySelectorAll('.star-column');
+            starColumns.forEach(column => {
+                const heroCards = Array.from(column.querySelectorAll('.hero-card'));
+                
+                if (valueBtn.classList.contains('active')) {
+                    // If best value is active, only filter among visible cards
+                    const visibleCards = heroCards.filter(card => {
+                        const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                        const floorPrice = parseFloat(card.querySelector('.floor-price span').textContent);
+                        const sevenDayScore = parseInt(card.querySelector('.seven-day-score .score-value').textContent);
+                        const lastMainScore = parseInt(card.querySelector('.last-main-score .score-value').textContent);
+                        
+                        return heroHandle.includes(searchTerm) &&
+                               floorPrice >= minPrice && floorPrice <= maxPrice &&
+                               sevenDayScore >= min7DScore && sevenDayScore <= max7DScore &&
+                               lastMainScore >= minLMScore && lastMainScore <= maxLMScore;
+                    });
+                    
+                    // Show only the highest value card among filtered cards
+                    if (visibleCards.length > 0) {
+                        const cardValues = visibleCards.map(card => {
+                            const scorePerEth = parseInt(card.querySelector('.score-per-eth span').textContent);
+                            return { card, scorePerEth };
+                        });
+                        
+                        cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
+                        
+                        heroCards.forEach(card => {
+                            if (card === cardValues[0].card) {
+                                card.style.display = 'flex';
+                                card.style.border = '2px solid #3b82f6';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+                } else {
+                    // Normal filtering without best value
+                    heroCards.forEach(card => {
+                        const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                        const floorPrice = parseFloat(card.querySelector('.floor-price span').textContent);
+                        const sevenDayScore = parseInt(card.querySelector('.seven-day-score .score-value').textContent);
+                        const lastMainScore = parseInt(card.querySelector('.last-main-score .score-value').textContent);
+                        
+                        const shouldShow = heroHandle.includes(searchTerm) &&
+                                         floorPrice >= minPrice && floorPrice <= maxPrice &&
+                                         sevenDayScore >= min7DScore && sevenDayScore <= max7DScore &&
+                                         lastMainScore >= minLMScore && lastMainScore <= maxLMScore;
+                        
+                        card.style.display = shouldShow ? 'flex' : 'none';
+                        card.style.border = 'none';
+                    });
+                }
+                
+                // Show/hide star columns based on whether they have visible heroes
+                const visibleHeroes = column.querySelectorAll('.hero-card[style*="display: flex"]').length;
+                column.style.display = visibleHeroes > 0 ? 'flex' : 'none';
+            });
+        }
     </script>
 </body>
 </html>
+
+</```rewritten_file>

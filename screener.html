@@ -571,25 +571,28 @@
         .price-filter-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 24px;  /* Increased gap between filter groups */
             margin-bottom: 12px;
             padding: 6px 0;
             border-bottom: 1px solid #333;
+            flex-wrap: wrap;  /* Allow wrapping on smaller screens */
         }
 
         .price-filter-container label {
             color: #fff;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .price-inputs {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;  /* Prevent inputs from shrinking */
         }
 
         .price-inputs input {
-            width: 100px;
+            width: 80px;  /* Smaller width for score inputs */
             padding: 6px;
             border: 1px solid #333;
             border-radius: 4px;
@@ -626,6 +629,15 @@
         .last-main-score .score-value {
             background-color: #8b5cf6;  /* Purple for last main score */
         }
+
+        .score-per-eth {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .score-per-eth span {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -649,6 +661,24 @@
                 <input type="number" id="popupMinPrice" placeholder="Min" step="0.0001">
                 <span>to</span>
                 <input type="number" id="popupMaxPrice" placeholder="Max" step="0.0001">
+            </div>
+            <label>7D Score:</label>
+            <div class="price-inputs">
+                <input type="number" id="popupMin7DScore" placeholder="Min" step="1" value="0">
+                <span>to</span>
+                <input type="number" id="popupMax7DScore" placeholder="Max" step="1" value="1000">
+            </div>
+            <label>LM Score:</label>
+            <div class="price-inputs">
+                <input type="number" id="popupMinLMScore" placeholder="Min" step="1" value="0">
+                <span>to</span>
+                <input type="number" id="popupMaxLMScore" placeholder="Max" step="1" value="1000">
+            </div>
+            <label>L3M Score:</label>
+            <div class="price-inputs">
+                <input type="number" id="popupMinL3MScore" placeholder="Min" step="1" value="0">
+                <span>to</span>
+                <input type="number" id="popupMaxL3MScore" placeholder="Max" step="1" value="1000">
             </div>
         </div>
         <div class="stars-grid"></div>
@@ -1166,6 +1196,49 @@
             return 'inherit';
         }
 
+        function getFloorPriceColor(price, allPrices) {
+            if (!price || price === 'N/A') return 'inherit';
+            
+            // Calculate normalized value (0 to 1)
+            const validPrices = allPrices.filter(p => p !== null && p !== undefined);
+            const minPrice = Math.min(...validPrices);
+            const maxPrice = Math.max(...validPrices);
+            const normalizedValue = (price - minPrice) / (maxPrice - minPrice);
+            
+            // Color stops from green (low) to red (high)
+            const colors = [
+                { pos: 0, color: [39, 174, 96] },    // Green (lowest)
+                { pos: 0.25, color: [119, 194, 116] }, // Light green
+                { pos: 0.5, color: [241, 196, 15] },   // Yellow
+                { pos: 0.75, color: [230, 126, 34] },  // Orange
+                { pos: 1, color: [231, 76, 60] }       // Red (highest)
+            ];
+            
+            // Find the two colors to interpolate between
+            let startColor, endColor, fraction;
+            for (let i = 0; i < colors.length - 1; i++) {
+                if (normalizedValue <= colors[i + 1].pos) {
+                    startColor = colors[i];
+                    endColor = colors[i + 1];
+                    fraction = (normalizedValue - startColor.pos) / (endColor.pos - startColor.pos);
+                    break;
+                }
+            }
+            
+            // If value is 1 or we didn't find a range, use the last color
+            if (normalizedValue === 1 || !startColor || !endColor) {
+                const lastColor = colors[colors.length - 1].color;
+                return `rgb(${lastColor[0]}, ${lastColor[1]}, ${lastColor[2]})`;
+            }
+            
+            // Interpolate between the two colors
+            const r = Math.round(startColor.color[0] + (endColor.color[0] - startColor.color[0]) * fraction);
+            const g = Math.round(startColor.color[1] + (endColor.color[1] - startColor.color[1]) * fraction);
+            const b = Math.round(startColor.color[2] + (endColor.color[2] - startColor.color[2]) * fraction);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
         // Add this to your existing script section, after the DOMContentLoaded event
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM Content Loaded');
@@ -1192,7 +1265,12 @@
                 });
                 const data = await response.json();
 
-                // Group heroes by stars and sort by fantasy score
+                // Calculate allFloorPrices FIRST
+                const allFloorPrices = data.heroes
+                    .map(hero => hero.common_floor)
+                    .filter(price => price !== null && price !== undefined);
+
+                // Then group heroes by stars and continue with the rest of the code
                 const heroesByStars = data.heroes.reduce((acc, hero) => {
                     const stars = hero.current_stars;
                     if (!acc[stars]) acc[stars] = [];
@@ -1231,10 +1309,17 @@
                             <img src="${hero.hero_image_url}" alt="${hero.hero_handle}" class="hero-image">
                             <div class="hero-info">
                                 <div class="hero-handle" data-name="${hero.hero_name || ''}">${hero.hero_handle}</div>
-                                <div class="floor-price">
-                                    <span class="score-label"></span>
-                                    <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px; vertical-align: middle; margin-right: 2px;">
-                                    <span title="Common Floor">${hero.common_floor ? formatFloorPrice(hero.common_floor) : 'N/A'}</span>
+                                <div class="floor-price" style="display: flex; align-items: center;">
+                                    <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px; margin-right: 2px;">
+                                    <span title="Common Floor" style="color: ${getFloorPriceColor(hero.common_floor, allFloorPrices)}">${hero.common_floor ? formatFloorPrice(hero.common_floor) : 'N/A'}</span>
+                                </div>
+                                <div class="score-per-eth" title="Score Per ETH, Higher = more score for the price (better value)
+                             Calc = AVG(7D,LM) / Floor / 100" style="display: flex; align-items: center;">
+                                    <img src="/icons/scale.webp" alt="Score/ETH" style="width: 12px; height: 12px; margin-right: 2px;">
+                                    <span style="color: ${getFloorPriceColor(
+                                        Math.max(...data.heroes.map(h => h.score_per_eth)) - hero.score_per_eth, 
+                                        data.heroes.map(h => Math.max(...data.heroes.map(h2 => h2.score_per_eth)) - h.score_per_eth)
+                                    )}">${Math.round(hero.score_per_eth)}</span>
                                 </div>
                             </div>
                             <div class="hero-scores">
@@ -1245,6 +1330,10 @@
                                 <span class="last-main-score" title="Last Main Score">
                                     <span class="score-label">LM:</span>
                                     <span class="score-value" style="background-color: ${getScoreColor(hero.last_main, 'last_main')}">${Math.round(hero.last_main)}</span>
+                                </span>
+                                <span class="l3-main-score" title="L3 Main Median Score">
+                                    <span class="score-label">L3:</span>
+                                    <span class="score-value" style="background-color: ${getScoreColor(hero.l3_main_median, 'l3_main_median')}">${Math.round(hero.l3_main_median)}</span>
                                 </span>
                             </div>
                         `;
@@ -1280,11 +1369,11 @@
                 });
 
                 // Find min and max floor prices
-                const allFloorPrices = data.heroes
+                const floorPrices = data.heroes
                     .map(hero => hero.common_floor)
                     .filter(price => price !== null && price !== undefined);
-                const minFloor = Math.min(...allFloorPrices);
-                const maxFloor = Math.max(...allFloorPrices);
+                const minFloor = Math.min(...floorPrices);
+                const maxFloor = Math.max(...floorPrices);
 
                 // Set default values for price inputs
                 const minPriceInput = document.getElementById('popupMinPrice');
@@ -1297,6 +1386,12 @@
                     const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
                     const minPrice = parseFloat(minPriceInput.value) || 0;
                     const maxPrice = parseFloat(maxPriceInput.value) || Infinity;
+                    const min7DScore = parseFloat(document.getElementById('popupMin7DScore').value) || 0;
+                    const max7DScore = parseFloat(document.getElementById('popupMax7DScore').value) || Infinity;
+                    const minLMScore = parseFloat(document.getElementById('popupMinLMScore').value) || 0;
+                    const maxLMScore = parseFloat(document.getElementById('popupMaxLMScore').value) || Infinity;
+                    const minL3MScore = parseFloat(document.getElementById('popupMinL3MScore').value) || 0;
+                    const maxL3MScore = parseFloat(document.getElementById('popupMaxL3MScore').value) || Infinity;
 
                     const heroCards = document.querySelectorAll('.hero-card');
                     heroCards.forEach(card => {
@@ -1306,10 +1401,16 @@
                         const floorPriceEl = card.querySelector('.floor-price span[title="Common Floor"]');
                         const floorPrice = parseFloat(floorPriceEl.textContent);
                         
+                        // Get scores from the card
+                        const sevenDayScore = parseInt(card.querySelector('.seven-day-score .score-value').textContent);
+                        const lastMainScore = parseInt(card.querySelector('.last-main-score .score-value').textContent);
+                        
                         const matchesSearch = heroHandle.includes(searchTerm) || heroName.includes(searchTerm);
                         const matchesPrice = !isNaN(floorPrice) && floorPrice >= minPrice && floorPrice <= maxPrice;
+                        const matches7DScore = sevenDayScore >= min7DScore && sevenDayScore <= max7DScore;
+                        const matchesLMScore = lastMainScore >= minLMScore && lastMainScore <= maxLMScore;
                         
-                        card.style.display = matchesSearch && matchesPrice ? 'flex' : 'none';
+                        card.style.display = matchesSearch && matchesPrice && matches7DScore && matchesLMScore ? 'flex' : 'none';
                     });
 
                     // Show/hide star columns based on whether they have visible heroes
@@ -1322,6 +1423,12 @@
 
                 minPriceInput.addEventListener('input', filterHeroes);
                 maxPriceInput.addEventListener('input', filterHeroes);
+                document.getElementById('popupMin7DScore').addEventListener('input', filterHeroes);
+                document.getElementById('popupMax7DScore').addEventListener('input', filterHeroes);
+                document.getElementById('popupMinLMScore').addEventListener('input', filterHeroes);
+                document.getElementById('popupMaxLMScore').addEventListener('input', filterHeroes);
+                document.getElementById('popupMinL3MScore').addEventListener('input', filterHeroes);
+                document.getElementById('popupMaxL3MScore').addEventListener('input', filterHeroes);
 
                 // Update existing search input event listener to also check price
                 const searchInput = document.getElementById('heroSearch');

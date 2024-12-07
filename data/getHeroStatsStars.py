@@ -138,6 +138,12 @@ final_merged_df = (hero_stats_df
     .rename(columns={'floor': 'rare_floor'})
 )
 
+# Calculate score_per_eth
+final_merged_df['score_per_eth'] = (
+    (final_merged_df['seven_day_fantasy_score'] + final_merged_df['last_main']) / 2 / 
+    final_merged_df['common_floor']
+) / 100
+
 # Add debug print for final merged DataFrame
 print("\n=== Final Merged DataFrame ===")
 print(final_merged_df)

@@ -1427,13 +1427,16 @@
             // Normalize score between 0 and 1
             const normalizedScore = Math.min(Math.max(score, 0), 1000) / 1000;
             
-            // Spectral color stops (from matplotlib, reversed to make purple highest)
+            // 8 distinct colors from red (lowest) to purple (highest)
             const colorStops = [
-                { pos: 0, color: [213, 62, 79] },    // Red (lowest)
-                { pos: 0.25, color: [252, 141, 89] }, // Light red-orange
-                { pos: 0.5, color: [254, 224, 139] }, // Light yellow
-                { pos: 0.75, color: [153, 142, 195] }, // Light purple
-                { pos: 1, color: [94, 79, 162] }      // Purple (highest)
+                { pos: 0, color: [220, 20, 60] },    // Crimson red (lowest)
+                { pos: 0.143, color: [199, 21, 133] }, // Medium violet red
+                { pos: 0.286, color: [148, 0, 211] },  // Dark violet
+                { pos: 0.429, color: [138, 43, 226] }, // Blue violet
+                { pos: 0.572, color: [75, 0, 130] },   // Indigo
+                { pos: 0.715, color: [106, 90, 205] }, // Slate blue
+                { pos: 0.858, color: [147, 112, 219] },// Medium purple
+                { pos: 1, color: [128, 0, 128] }      // Purple (highest)
             ];
             
             // Find the two colors to interpolate between

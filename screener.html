@@ -820,7 +820,7 @@
                 </div>
             </div>
             <div class="value-filter">
-                <button class="star-btn value-btn">Best Value 💎</button>
+                <button class="star-btn value-btn" onclick="toggleBestValue()">Best Value 💎</button>
             </div>
             <button class="close-popup"><i class="fas fa-times"></i></button>
         </div>
@@ -1500,19 +1500,23 @@
                         card.className = 'hero-card';
                         card.innerHTML = `
                             <img src="${hero.hero_image_url}" alt="${hero.hero_handle}" class="hero-image">
-                            <div class="hero-info">
+                            <div class="hero-info" data-stars="${hero.current_stars}">
                                 <div class="hero-handle" data-name="${hero.hero_name || ''}">${hero.hero_handle}</div>
                                 <div class="floor-price" style="display: flex; align-items: center;">
                                     <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px; margin-right: 2px;">
-                                    <span title="Common Floor" style="color: ${getFloorPriceColor(hero.common_floor, allFloorPrices)}">${hero.common_floor ? formatFloorPrice(hero.common_floor) : 'N/A'}</span>
+                                    <span title="Common Floor" style="color: ${getFloorPriceColor(hero.common_floor, allFloorPrices)}">
+                                        ${hero.common_floor ? formatFloorPrice(hero.common_floor) : 'N/A'}
+                                    </span>
                                 </div>
                                 <div class="score-per-eth" title="Score Per ETH, Higher = more score for the price (better value)
-                             Calc = AVG(7D,LM) / Floor / 100" style="display: flex; align-items: center;">
+                                    Calc = AVG(7D,LM) / Floor / 100" style="display: flex; align-items: center;">
                                     <img src="/icons/scale.webp" alt="Score/ETH" style="width: 12px; height: 12px; margin-right: 2px;">
                                     <span style="color: ${getFloorPriceColor(
                                         Math.max(...data.heroes.map(h => h.score_per_eth)) - hero.score_per_eth, 
                                         data.heroes.map(h => Math.max(...data.heroes.map(h2 => h2.score_per_eth)) - h.score_per_eth)
-                                    )}">${Math.round(hero.score_per_eth)}</span>
+                                    )}">
+                                        ${Math.round(hero.score_per_eth)}
+                                    </span>
                                 </div>
                             </div>
                             <div class="hero-scores">
@@ -1547,7 +1551,10 @@
                 heroSelectButton.addEventListener('click', () => {
                     heroSelectorPopup.style.display = 'block';
                     overlay.style.display = 'block';
+                    // Add this line to focus the search input
+                    document.getElementById('heroSearch').focus();
                 });
+
 
                 // Close popup when close button is clicked
                 closePopupButton.addEventListener('click', () => {
@@ -1766,15 +1773,16 @@
 
         // Add after your existing DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', function() {
-            const starButtons = document.querySelectorAll('.star-btn');
-            const activeStars = new Set(); // Keep track of selected stars
+            // Change this line to only select star buttons within the star-buttons div
+            const starButtons = document.querySelectorAll('.star-buttons .star-btn');
+            const activeStars = new Set();
 
             starButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const stars = button.dataset.stars;
                     
                     if (stars === 'all') {
-                        // Toggle all buttons
+                        // Toggle all buttons (only within star-buttons)
                         const allActive = Array.from(starButtons).every(btn => btn.classList.contains('active'));
                         starButtons.forEach(btn => {
                             if (allActive) {
@@ -2011,61 +2019,57 @@
             setupSorting();
         });
 
-        // Add this function to handle best value filtering
+        // Replace the existing setupBestValueFilter function with this updated version
         function setupBestValueFilter() {
             const valueBtn = document.querySelector('.value-btn');
             
             valueBtn.addEventListener('click', () => {
                 valueBtn.classList.toggle('active');
                 
-                if (valueBtn.classList.contains('active')) {
-                    // Show only best value heroes for each star level
-                    const starColumns = document.querySelectorAll('.star-column');
+                const starColumns = document.querySelectorAll('.star-column');
+                
+                starColumns.forEach(column => {
+                    // Get all visible hero cards in this column (respecting current filters)
+                    const heroCards = Array.from(column.querySelectorAll('.hero-card[style*="display: flex"]'));
                     
-                    starColumns.forEach(column => {
-                        const heroCards = Array.from(column.querySelectorAll('.hero-card'));
-                        
-                        // Get score per eth for each card
-                        const cardValues = heroCards.map(card => {
-                            const scorePerEth = parseInt(card.querySelector('.score-per-eth span').textContent);
-                            return { card, scorePerEth };
+                    if (valueBtn.classList.contains('active')) {
+                        // If we have visible cards, find the one with highest score per eth
+                        if (heroCards.length > 0) {
+                            // Map cards to their score per eth values
+                            const cardValues = heroCards.map(card => ({
+                                card,
+                                scorePerEth: parseInt(card.querySelector('.score-per-eth span').textContent) ||0
+                            }));
+                            
+                            // Sort by score per eth descending
+                            cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
+                            
+                            // Show only the highest value card, hide others
+                            heroCards.forEach(card => {
+                                const isHighestValue = card === cardValues[0].card;
+                                card.style.display = isHighestValue ? 'flex' : 'none';
+                                card.style.border = isHighestValue ? '2px solid #3b82f6' : 'none';
+                            });
+                        }
+                    } else {
+                        // Reset display of all cards and remove highlights
+                        const allCards = column.querySelectorAll('.hero-card');
+                        allCards.forEach(card => {
+                            card.style.display = 'flex';
+                            card.style.border = 'none';
                         });
                         
-                        // Sort by score per eth descending
-                        cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
-                        
-                        // Show only the highest value card, hide others
-                        cardValues.forEach((cardValue, index) => {
-                            if (index === 0) {
-                                cardValue.card.style.display = 'flex';
-                                // Optional: add highlight effect to best value card
-                                cardValue.card.style.border = '2px solid #3b82f6';
-                            } else {
-                                cardValue.card.style.display = 'none';
-                            }
-                        });
-                    });
-                } else {
-                    // Reset display of all cards and remove highlights
-                    const heroCards = document.querySelectorAll('.hero-card');
-                    heroCards.forEach(card => {
-                        card.style.display = 'flex';
-                        card.style.border = 'none';
-                    });
-                    
-                    // Re-apply any existing filters
-                    filterHeroes();
-                }
+                        // Re-apply any existing filters
+                        filterHeroes();
+                    }
+                });
+                
+                // Adjust column widths after filtering
+                adjustColumnWidths();
             });
         }
 
-        // Call the setup function when the document loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // ... existing code ...
-            setupBestValueFilter();
-        });
-
-        // Update the existing filterHeroes function to respect the best value filter
+        // Update the filterHeroes function to handle best value filtering correctly
         function filterHeroes() {
             const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
             const minPrice = parseFloat(document.getElementById('popupMinPrice').value) || 0;
@@ -2080,40 +2084,36 @@
             starColumns.forEach(column => {
                 const heroCards = Array.from(column.querySelectorAll('.hero-card'));
                 
-                if (valueBtn.classList.contains('active')) {
-                    // If best value is active, only filter among visible cards
-                    const visibleCards = heroCards.filter(card => {
-                        const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
-                        const floorPrice = parseFloat(card.querySelector('.floor-price span').textContent);
-                        const sevenDayScore = parseInt(card.querySelector('.seven-day-score .score-value').textContent);
-                        const lastMainScore = parseInt(card.querySelector('.last-main-score .score-value').textContent);
-                        
-                        return heroHandle.includes(searchTerm) &&
-                               floorPrice >= minPrice && floorPrice <= maxPrice &&
-                               sevenDayScore >= min7DScore && sevenDayScore <= max7DScore &&
-                               lastMainScore >= minLMScore && lastMainScore <= maxLMScore;
-                    });
+                // First apply regular filters
+                const filteredCards = heroCards.filter(card => {
+                    const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
+                    const floorPrice = parseFloat(card.querySelector('.floor-price span').textContent);
+                    const sevenDayScore = parseInt(card.querySelector('.seven-day-score .score-value').textContent);
+                    const lastMainScore = parseInt(card.querySelector('.last-main-score .score-value').textContent);
                     
-                    // Show only the highest value card among filtered cards
-                    if (visibleCards.length > 0) {
-                        const cardValues = visibleCards.map(card => {
-                            const scorePerEth = parseInt(card.querySelector('.score-per-eth span').textContent);
-                            return { card, scorePerEth };
-                        });
-                        
-                        cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
-                        
-                        heroCards.forEach(card => {
-                            if (card === cardValues[0].card) {
-                                card.style.display = 'flex';
-                                card.style.border = '2px solid #3b82f6';
-                            } else {
-                                card.style.display = 'none';
-                            }
-                        });
-                    }
+                    return heroHandle.includes(searchTerm) &&
+                           floorPrice >= minPrice && floorPrice <= maxPrice &&
+                           sevenDayScore >= min7DScore && sevenDayScore <= max7DScore &&
+                           lastMainScore >= minLMScore && lastMainScore <= maxLMScore;
+                });
+
+                if (valueBtn.classList.contains('active') && filteredCards.length > 0) {
+                    // Find the card with highest score-per-eth among filtered cards
+                    const cardValues = filteredCards.map(card => ({
+                        card,
+                        scorePerEth: parseInt(card.querySelector('.score-per-eth span').textContent)
+                    }));
+                    
+                    cardValues.sort((a, b) => b.scorePerEth - a.scorePerEth);
+                    
+                    // Show only the highest value card in this column
+                    heroCards.forEach(card => {
+                        const isHighestValue = card === cardValues[0].card;
+                        card.style.display = isHighestValue ? 'flex' : 'none';
+                        card.style.border = isHighestValue ? '2px solid #3b82f6' : 'none';
+                    });
                 } else {
-                    // Normal filtering without best value
+                    // Show all filtered cards without best value filtering
                     heroCards.forEach(card => {
                         const heroHandle = card.querySelector('.hero-handle').textContent.toLowerCase();
                         const floorPrice = parseFloat(card.querySelector('.floor-price span').textContent);
@@ -2135,8 +2135,65 @@
                 column.style.display = visibleHeroes > 0 ? 'flex' : 'none';
             });
         }
+
+    function toggleBestValue() {
+        const valueBtn = document.querySelector('.value-btn');
+        valueBtn.classList.toggle('active');
+        
+        // Get all hero cards
+        const heroCards = document.querySelectorAll('.hero-card');
+        
+        if (!valueBtn.classList.contains('active')) {
+            // Reset all cards and reapply existing filters
+            heroCards.forEach(card => {
+                card.style.display = 'flex';
+                card.style.border = 'none';
+            });
+            filterHeroes();
+            return;
+        }
+        
+        // Group cards by star rating
+        const cardsByStars = {};
+        heroCards.forEach(card => {
+            const stars = card.querySelector('.hero-info').dataset.stars;
+            if (!cardsByStars[stars]) {
+                cardsByStars[stars] = [];
+            }
+            cardsByStars[stars].push(card);
+        });
+        
+        // Find and show only the best value card for each star rating
+        Object.entries(cardsByStars).forEach(([stars, cards]) => {
+            // Hide all cards initially
+            cards.forEach(card => {
+                card.style.display = 'none';
+                card.style.border = 'none';
+            });
+            
+            // Find card with highest score per ETH
+            const bestCard = cards.reduce((best, current) => {
+                const currentScore = parseInt(current.querySelector('.score-per-eth span').textContent) || 0;
+                const bestScore = parseInt(best.querySelector('.score-per-eth span').textContent) || 0;
+                return currentScore > bestScore ? current : best;
+            }, cards[0]);
+            
+            // Show and highlight the best value card
+            if (bestCard) {
+                bestCard.style.display = 'flex';
+            }
+        });
+        
+        // Adjust column visibility
+        const starColumns = document.querySelectorAll('.star-column');
+        starColumns.forEach(column => {
+            const visibleCards = column.querySelectorAll('.hero-card[style*="display: flex"]').length;
+            column.style.display = visibleCards > 0 ? 'flex' : 'none';
+        });
+        
+        // Adjust column widths after filtering
+        adjustColumnWidths();
+    }
     </script>
 </body>
 </html>
-
-</```rewritten_file>

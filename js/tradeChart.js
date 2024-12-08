@@ -219,14 +219,18 @@ function createLineChart(containerId, data, options = {}) {
                         display: false
                     },
                     time: {
-                        unit: 'minute',
+                        unit: 'day',
                         displayFormats: {
-                            minute: 'MMM d'
+                            day: 'MMM d'
                         }
                     },
                     title: {
                         display: true,
                         text: options.xAxisLabel || ''
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10
                     }
                 },
                 y: {

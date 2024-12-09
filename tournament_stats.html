@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Stats</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" type="image/png" href="icons/favicon.webp">
+</head>
+<body>
+    <div id="tableContainer"></div>
+
+    <script>
+        async function fetchAndDisplayData() {
+            try {
+                const response = await fetch('/data/tournaments/tournaments_stats.json');
+                const data = await response.json();
+                
+                let html = '';
+                
+                // Iterate through each tournament
+                for (const [tournamentKey, tournamentData] of Object.entries(data)) {
+                    html += `
+                        <table>
+                            <tr><th colspan="2">${tournamentKey} (${tournamentData.tournament_unique_key})</th></tr>
+                            
+                            <!-- Leagues Section -->
+                            <tr class="section-header">
+                                <td>League</td>
+                                <td>Deck Count</td>
+                            </tr>`;
+                    
+                    tournamentData.leagues.forEach(league => {
+                        html += `
+                            <tr>
+                                <td>${league.league}</td>
+                                <td>${league.deck_count}</td>
+                            </tr>`;
+                    });
+                    
+                    // Stars Section
+                    html += `
+                        <tr class="section-header">
+                            <td>Hero Stars</td>
+                            <td>Card Count</td>
+                        </tr>`;
+                    
+                    tournamentData.stars.forEach(star => {
+                        html += `
+                            <tr>
+                                <td>${star.hero_stars}</td>
+                                <td>${star.card_count}</td>
+                            </tr>`;
+                    });
+                    
+                    html += '</table><br>';
+                }
+                
+                document.getElementById('tableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching or displaying data:', error);
+                document.getElementById('tableContainer').innerHTML = 'Error loading data';
+            }
+        }
+
+        // Call the function when the page loads
+        fetchAndDisplayData();
+    </script>
+</body>
+</html>

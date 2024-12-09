@@ -86,7 +86,7 @@
 
         .grid-layout {
             display: grid;
-            gap: 2rem;
+            gap: 1.5rem;
             grid-template-columns: 1fr;  /* Default mobile layout */
         }
 
@@ -193,12 +193,12 @@
                 <h2 class="column-title">Rewards</h2>
                 <ul class="nav-list" id="rewardList"></ul>
             </div>
-            <div class="column-container full-width">
-                <h2 class="column-title">Fun</h2>
-                <ul class="nav-list" id="funList"></ul>
+            <div class="column-container">
+                <h2 class="column-title">Cooking / In Progress</h2>
+                <ul class="nav-list" id="previewList"></ul>
             </div>
-            <div class="column-container full-width">
-                <h2 class="column-title">Other</h2>
+            <div class="column-container">
+                <h2 class="column-title">Fun & Other</h2>
                 <ul class="nav-list" id="otherList"></ul>
             </div>
         </div>
@@ -225,14 +225,15 @@
             { filename: 'league_rewards_itm_v2.html', title: 'League Rewards ITM v2'},
             { filename: 'tournament_reward_history.html', title: 'League Reward History'},
         ],
+        preview: [
+            { filename: 'tournaments.html', title: 'Tournament Stats', isNew: true },
+            // { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
+        ],
         other: [
+            { filename: 'tier_maker.html', title: 'Tier Maker', isNew: true },
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
             { filename: 'settings.html', title: 'Settings', icon: 'fas fa-cog' },
         ],
-        fun: [
-            { filename: 'tier_maker.html', title: 'Tier Maker', isNew: true },
-            { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
-        ]
     };
 
     function loadPages() {
@@ -240,8 +241,8 @@
         const heroList = document.getElementById('heroList');
         const playerList = document.getElementById('playerList');
         const rewardList = document.getElementById('rewardList');
-        const funList = document.getElementById('funList');
-        const otherList = document.getElementById('otherList');  // Add this line
+        const previewList = document.getElementById('previewList');
+        const otherList = document.getElementById('otherList');
 
         function createLinks(pageArray, container) {
             pageArray.forEach(page => {
@@ -282,8 +283,8 @@
         createLinks(pages.heroes, heroList);
         createLinks(pages.players, playerList);
         createLinks(pages.rewards, rewardList);
-        createLinks(pages.fun, funList);
-        createLinks(pages.other, otherList);  // Add this line
+        createLinks(pages.preview, previewList);
+        createLinks(pages.other, otherList);
     }
 
     document.addEventListener('DOMContentLoaded', loadPages);

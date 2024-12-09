@@ -37,7 +37,8 @@ cursor = conn.cursor()
 card_stars_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
  gt.tournament_unique_key,
     coalesce(t.hero_stars,1) hero_stars,
-    count(*) card_count
+    count(*) card_count,
+    count(distinct t.player_id) player_count
 from agg.tournamentownership t 
 join   flatten.get_tournaments gt
     on t.tournament_id  = gt.tournament_id 

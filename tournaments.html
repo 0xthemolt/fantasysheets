@@ -77,12 +77,14 @@
             <a href="index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Tournament Stats
+            Tournament Entry Stats
         </h1>
     </div>
     <div id="tableContainer" style="margin-top: 20px;"></div>></div>
 
     <script>
+        let charts = {}; // Add this at the top of your script to store chart instances
+
         async function fetchAndDisplayData() {
             try {
                 const response = await fetch('/data/tournaments/tournaments_stats.json');
@@ -100,7 +102,7 @@
                 
                 // League rows
                 html += `<tr><th colspan="${Object.keys(data).length + 2}">
-                    Leagues
+                    Deck Counts By Leagues
                     <span onclick="openModal()" style="margin-left: 10px;">
                       Chart View:  <button class="modal-button"><i class="fas fa-chart-line"></i></button>
                     </span>
@@ -220,7 +222,7 @@
                 html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;
                 
                 // Stars rows
-                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Hero Stars</th></tr>';
+                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Stars</th></tr>';
                 // Get all unique star values and sort them in descending order
                 const stars = [...new Set(Object.values(data).flatMap(t => t.stars.map(s => s.hero_stars)))];
                 const sortedStars = stars.sort((a, b) => b - a); // Sort in descending order
@@ -287,6 +289,12 @@
 
         async function createLeagueCharts() {
             try {
+                // Destroy existing charts first
+                Object.values(charts).forEach(chart => {
+                    if (chart) chart.destroy();
+                });
+                charts = {}; // Reset the charts object
+
                 const response = await fetch('/data/tournaments/tournaments_stats.json');
                 const data = await response.json();
                 
@@ -322,7 +330,7 @@
                                 padding: { top: 10, bottom: 30 }
                             },
                             legend: {
-                                display: false  // No legend
+                                display: false
                             }
                         },
                         scales: {
@@ -337,7 +345,8 @@
                                 },
                                 grid: {
                                     color: 'rgba(255, 255, 255, 0.1)'
-                                }
+                                },
+                                suggestedMax: Math.max(...chartData) * 1.15
                             }
                         },
                         plugins: [{
@@ -357,7 +366,7 @@
                                     ctx.fillText(
                                         value.toLocaleString(),
                                         bar.x,
-                                        bar.y + 20
+                                        bar.y + (bar.height / 2)
                                     );
 
                                     // Calculate and draw % change
@@ -371,9 +380,9 @@
                                         ctx.fillText(
                                             changeText,
                                             bar.x,
-                                            bar.y - 10
+                                            bar.y - 5
                                         );
-                                        ctx.fillStyle = 'white'; // Reset color for next iteration
+                                        ctx.fillStyle = 'white'; // Reset color
                                     }
                                 });
                                 ctx.restore();
@@ -381,7 +390,8 @@
                         }]
                     };
 
-                    new Chart(ctx, {
+                    // Store the new chart instance
+                    charts[leagueLower] = new Chart(ctx, {
                         type: 'bar',
                         data: {
                             labels: labels,
@@ -403,6 +413,11 @@
 
         function closeModal() {
             document.getElementById('modalOverlay').style.display = 'none';
+            // Optionally destroy charts when modal is closed
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
         }
     </script>
 </body>

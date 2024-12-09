@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Stats</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <style>
+        .total-row {
+            font-weight: bold;
+            border-top: 2px solid #666;
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div id="tableContainer"></div>
+
+    <script>
+        async function fetchAndDisplayData() {
+            try {
+                const response = await fetch('/data/tournaments/tournaments_stats.json');
+                const data = await response.json();
+                
+                let html = '<table class="matrix-table">';
+                
+                // Header row with tournament names
+                html += '<tr><th></th>'; // Empty corner cell
+                Object.keys(data).forEach(tournamentKey => {
+                    const [part1, part2] = tournamentKey.split('|');
+                    html += `<th>${part1}<br>${part2 || ''}</th>`;
+                });
+                html += '<th>Trend</th></tr>';
+                
+                // League rows
+                html += '<tr><th colspan="' + (Object.keys(data).length + 1) + '">Leagues</th></tr>';
+                // Get all unique leagues
+                const leagues = [...new Set(Object.values(data).flatMap(t => t.leagues.map(l => l.league)))];
+                
+                // Replace with manually sorted leagues
+                const sortedLeagues = ["Elite", "Gold", "Silver", "Bronze", "Reverse"];
+                
+                // League color mapping
+                const leagueColors = {
+                    "elite": "#a8ccde",
+                    "gold": "#dacc86",
+                    "silver": "#8b8b8b",
+                    "bronze": "#a97e48",
+                    "reverse": "#82EA89"
+                };
+                
+                sortedLeagues.forEach(league => {
+                    const leagueLower = league.toLowerCase();
+                    html += `<tr><td style="background-color: ${leagueColors[leagueLower]}40">
+                        <img src="/icons/${leagueLower}.webp" alt="${league}" style="height: 20px; vertical-align: middle;">
+                        <span style="color: ${leagueColors[leagueLower]}; margin-left: 5px; font-size: 1.1em; font-weight: bold;">${league}</span>
+                    </td>`;
+                    
+                    let previousCount = null;
+                    const values = []; // Store values for sparkline
+                    Object.values(data).forEach(tournamentData => {
+                        const leagueData = tournamentData.leagues.find(l => l.league === league);
+                        const currentCount = leagueData ? leagueData.deck_count : 0;
+                        values.push(currentCount);
+                        
+                        let changeHtml = '';
+                        if (previousCount !== null) {
+                            const change = currentCount - previousCount;
+                            const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
+                            changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
+                        }
+                        
+                        html += `<td style="background-color: ${leagueColors[leagueLower]}40; vertical-align: top; padding-top: 8px;">
+                            <span style="font-size: 1.1em">${currentCount.toLocaleString()}</span>${changeHtml}
+                        </td>`;
+                        
+                        previousCount = currentCount;
+                    });
+
+                    // Add sparkline
+                    const sparklineWidth = 120;
+                    const sparklineHeight = 30;
+                    const max = Math.max(...values);
+                    const min = Math.min(...values);
+                    const range = max - min;
+                    
+                    let sparkline = `<td style="padding: 0; background-color: ${leagueColors[leagueLower]}40"><svg width="${sparklineWidth}" height="${sparklineHeight}">
+                        <polyline 
+                            points="${values.map((value, index) => {
+                                const x = (index / (values.length - 1)) * (sparklineWidth - 6);
+                                const y = (sparklineHeight - 4) - ((value - min) / range) * (sparklineHeight - 4) + 2;
+                                return `${x},${y}`;
+                            }).join(' ')}"
+                            fill="none"
+                            stroke="${leagueColors[leagueLower]}"
+                            stroke-width="2"
+                        />
+                        <circle 
+                            cx="${sparklineWidth - 6}"
+                            cy="${(sparklineHeight - 4) - ((values[values.length - 1] - min) / range) * (sparklineHeight - 4) + 2}"
+                            r="3"
+                            fill="${leagueColors[leagueLower]}"
+                        />
+                    </svg></td>`;
+                    
+                    html += sparkline + '</tr>';
+                });
+                
+                // Add Leagues Total row with empty sparkline cell
+                html += '<tr class="total-row"><td>Total Decks</td>';
+                let previousTotal = null;
+                Object.values(data).forEach(tournamentData => {
+                    const total = tournamentData.leagues.reduce((sum, league) => sum + league.deck_count, 0);
+                    
+                    let changeHtml = '';
+                    if (previousTotal !== null) {
+                        const change = total - previousTotal;
+                        const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
+                        changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
+                    }
+                    
+                    html += `<td style="vertical-align: top; padding-top: 8px;">
+                        <span style="font-size: 1.1em">${total.toLocaleString()}</span>${changeHtml}
+                    </td>`;
+                    
+                    previousTotal = total;
+                });
+                html += '<td></td></tr>';
+                
+                // Stars rows
+                html += '<tr><th colspan="' + (Object.keys(data).length + 1) + '">Hero Stars</th></tr>';
+                // Get all unique star values
+                const stars = [...new Set(Object.values(data).flatMap(t => t.stars.map(s => s.hero_stars)))];
+                stars.forEach(star => {
+                    html += `<tr><td>${star}</td>`;
+                    Object.values(data).forEach(tournamentData => {
+                        const starData = tournamentData.stars.find(s => s.hero_stars === star);
+                        html += `<td>${starData ? starData.card_count.toLocaleString() : '0'}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                
+                // Add Stars Total row
+                html += '<tr class="total-row"><td>Total Cards</td>';
+                Object.values(data).forEach(tournamentData => {
+                    const total = tournamentData.stars.reduce((sum, star) => sum + star.card_count, 0);
+                    html += `<td>${total.toLocaleString()}</td>`;
+                });
+                html += '</tr>';
+                
+                html += '</table>';
+                
+                document.getElementById('tableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching or displaying data:', error);
+                document.getElementById('tableContainer').innerHTML = 'Error loading data';
+            }
+        }
+
+        fetchAndDisplayData();
+    </script>
+</body>
+</html>

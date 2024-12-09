@@ -51,7 +51,7 @@
                 html += '<th>Trend</th></tr>';
                 
                 // League rows
-                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Leagues</th></tr>';
+                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Leagues</th><th style="width: 30px; cursor: pointer;" onclick="openModal()"><i class="fas fa-chart-line"></i></th></tr>';
                 // Get all unique leagues
                 const leagues = [...new Set(Object.values(data).flatMap(t => t.leagues.map(l => l.league)))];
                 
@@ -199,6 +199,24 @@
         }
 
         fetchAndDisplayData();
+    </script>
+
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>League Statistics</h2>
+            <p>This is some dummy text about league statistics. We can add more detailed information and charts here later.</p>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
     </script>
 </body>
 </html>

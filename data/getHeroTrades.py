@@ -41,7 +41,7 @@ def fetch_dataframe(query, db_type='main'):
     return df
 
 trades_query = f"""
-select hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price
+select hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price,hero_rarity_trade_history_rank
 from flatten.get_hero_last_trades 
 where 1=1
 --and hero_handle = 'CoinGurruu'
@@ -93,6 +93,56 @@ def process_hero_trades():
             
             print(f"JSON file saved for {hero_handle} at: {os.path.abspath(json_filename)}")
 
+def process_marketplace():
+    # Fetch trades and prices data
+    trades_df = fetch_dataframe(trades_query, 'main')
+    prices_df = fetch_dataframe(prices_query, 'prices')
+
+    if not trades_df.empty:
+        # Calculate current timestamp for "last trade" calculation
+        current_time = pd.Timestamp.now()
+        
+        # Get last trades
+        last_trades = trades_df[trades_df['hero_rarity_trade_history_rank'] == 1][['hero_handle', 'rarity', 'price']].rename(columns={'price': 'last_trade'})
+
+        # Group trades and calculate metrics
+        market_stats = trades_df.groupby(['hero_handle', 'rarity']).agg({
+            'hero_id': 'first',  # Keep one hero_id
+            'timestamp': lambda x: (current_time - pd.to_datetime(x.max())).total_seconds() / 3600,  # Hours since last trade
+            'hero_handle': 'count',  # Number of trades
+            'price': 'sum'  # Volume
+        }).rename(columns={
+            'hero_handle': 'trades',
+            'timestamp': 'hours_since_last_trade',
+            'price': 'volume'
+        }).reset_index()
+
+        # Merge with prices data and last trade
+        market_data = pd.merge(
+            market_stats,
+            prices_df[['hero_handle', 'rarity', 'floor', 'bid']],
+            on=['hero_handle', 'rarity'],
+            how='left'
+        ).merge(
+            last_trades,
+            on=['hero_handle', 'rarity'],
+            how='left'
+        )
+
+        # Convert to dictionary/JSON format
+        market_json = json.loads(market_data.to_json(orient='records'))
+
+        # Save to JSON file
+        directory = "pages/data/marketplace"
+        os.makedirs(directory, exist_ok=True)
+        
+        json_filename = os.path.join(directory, "marketplace.json")
+        with open(json_filename, 'w') as f:
+            json.dump(market_json, f, indent=2)
+        
+        print(f"Marketplace JSON file saved at: {os.path.abspath(json_filename)}")
+
 if __name__ == "__main__":
-    process_hero_trades()
+    # process_hero_trades()
+    process_marketplace()
 

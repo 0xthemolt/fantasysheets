@@ -183,102 +183,27 @@
         }
 
         .star-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 10.5px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             background: transparent;
-            border: 2px solid;
+            border: 2px solid #FFD700;
+            color: #FFD700;
             display: flex;
             align-items: center;
-            gap: 6px;
-        }
-
-        .star-btn[data-stars="all"] {
-            border-color: #FFD700;
-            color: #FFD700;
-        }
-
-        .star-btn[data-stars="8"] {
-            border-color: #FF4444;
-            color: #FF4444;
-        }
-
-        .star-btn[data-stars="7"] {
-            border-color: #FF8800;
-            color: #FF8800;
-        }
-
-        .star-btn[data-stars="6"] {
-            border-color: #FFBB33;
-            color: #FFBB33;
-        }
-
-        .star-btn[data-stars="5"] {
-            border-color: #FFDD44;
-            color: #FFDD44;
-        }
-
-        .star-btn[data-stars="4"] {
-            border-color: #FFFF66;
-            color: #FFFF66;
-        }
-
-        .star-btn[data-stars="3"] {
-            border-color: #CCFF66;
-            color: #CCFF66;
-        }
-
-        .star-btn[data-stars="2"] {
-            border-color: #99FF66;
-            color: #99FF66;
-        }
-
-        .star-btn[data-stars="1"] {
-            border-color: #66FF66;
-            color: #66FF66;
+            gap: 4.5px;
         }
 
         .star-btn.selected {
             color: white;
-        }
-
-        .star-btn[data-stars="all"].selected {
             background: #FFD700;
         }
 
-        .star-btn[data-stars="8"].selected {
-            background: #FF4444;
-        }
-
-        .star-btn[data-stars="7"].selected {
-            background: #FF8800;
-        }
-
-        .star-btn[data-stars="6"].selected {
-            background: #FFBB33;
-        }
-
-        .star-btn[data-stars="5"].selected {
-            background: #FFDD44;
-        }
-
-        .star-btn[data-stars="4"].selected {
-            background: #FFFF66;
-        }
-
-        .star-btn[data-stars="3"].selected {
-            background: #CCFF66;
-        }
-
-        .star-btn[data-stars="2"].selected {
-            background: #99FF66;
-        }
-
-        .star-btn[data-stars="1"].selected {
-            background: #66FF66;
+        .star-btn.selected i {
+            color: white;
         }
 
         .star-btn:hover {
@@ -301,10 +226,10 @@
                         <i class="fas fa-crown"></i> Legendary
                     </button>
                     <button class="rarity-button epic" data-rarity="epic">
-                        <i class="fas fa-gem"></i> Epic
+                        <i class="fas fa-shield"></i> Epic
                     </button>
                     <button class="rarity-button rare" data-rarity="rare">
-                        <i class="fas fa-star"></i> Rare
+                        <i class="fas fa-gem"></i> Rare
                     </button>
                     <button class="rarity-button common" data-rarity="common">
                         <i class="fas fa-circle"></i> Common
@@ -313,30 +238,31 @@
             </div>
             <div class="stars-section">
                 <div class="filter-title">Current</div>
-                <div class="star-buttons">
-                    <button class="star-btn" data-stars="all">All</button>
-                    <button class="star-btn" data-stars="8">8⭐</button>
-                    <button class="star-btn" data-stars="7">7⭐</button>
-                    <button class="star-btn" data-stars="6">6⭐</button>
-                    <button class="star-btn" data-stars="5">5⭐</button>
-                    <button class="star-btn" data-stars="4">4⭐</button>
-                    <button class="star-btn" data-stars="3">3⭐</button>
-                    <button class="star-btn" data-stars="2">2⭐</button>
-                    <button class="star-btn" data-stars="1">1⭐</button>
+                <div class="star-buttons current-stars">
+                    <button class="star-btn" data-stars="all"><i class="fa-solid fa-star"></i> All</button>
+                    <button class="star-btn" data-stars="8"><i class="fa-solid fa-star"></i> 8</button>
+                    <button class="star-btn" data-stars="7"><i class="fa-solid fa-star"></i> 7</button>
+                    <button class="star-btn" data-stars="6"><i class="fa-solid fa-star"></i> 6</button>
+                    <button class="star-btn" data-stars="5"><i class="fa-solid fa-star"></i> 5</button>
+                    <button class="star-btn" data-stars="4"><i class="fa-solid fa-star"></i> 4</button>
+                    <button class="star-btn" data-stars="3"><i class="fa-solid fa-star"></i> 3</button>
+                    <button class="star-btn" data-stars="2"><i class="fa-solid fa-star"></i> 2</button>
+                    <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
                 </div>
                 <div class="filter-title">Projected</div>
-                <div class="star-buttons">
-                    <button class="star-btn" data-stars="all">All</button>
-                    <button class="star-btn" data-stars="8">8⭐</button>
-                    <button class="star-btn" data-stars="7">7⭐</button>
-                    <button class="star-btn" data-stars="6">6⭐</button>
-                    <button class="star-btn" data-stars="5">5⭐</button>
-                    <button class="star-btn" data-stars="4">4⭐</button>
-                    <button class="star-btn" data-stars="3">3⭐</button>
-                    <button class="star-btn" data-stars="2">2⭐</button>
-                    <button class="star-btn" data-stars="1">1⭐</button>
+                <div class="star-buttons projected-stars">
+                    <button class="star-btn" data-stars="all"><i class="fa-solid fa-star"></i> All</button>
+                    <button class="star-btn" data-stars="8"><i class="fa-solid fa-star"></i> 8</button>
+                    <button class="star-btn" data-stars="7"><i class="fa-solid fa-star"></i> 7</button>
+                    <button class="star-btn" data-stars="6"><i class="fa-solid fa-star"></i> 6</button>
+                    <button class="star-btn" data-stars="5"><i class="fa-solid fa-star"></i> 5</button>
+                    <button class="star-btn" data-stars="4"><i class="fa-solid fa-star"></i> 4</button>
+                    <button class="star-btn" data-stars="3"><i class="fa-solid fa-star"></i> 3</button>
+                    <button class="star-btn" data-stars="2"><i class="fa-solid fa-star"></i> 2</button>
+                    <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
                 </div>
             </div>
+            <div class="filter-title">Records: <span id="recordCount">0</span></div>
         </div>
         
         <div class="table-container">
@@ -352,9 +278,9 @@
                         <th title="Bid-Ask-Spread">BAS</th>
                         <th>Age</th>
                         <th>Vol</th>
-                        <th>Trades</th>
+                        <th title="Trades">Txn</th>
                         <th>Buyers</th>
-                        <th>Sells</th>
+                        <th title="Sell Orders">SO</th>
                         <th>B5 Avg</th>
                         <th>B5 Sum</th>
                     </tr>
@@ -368,6 +294,8 @@
 
     <script>
         let selectedRarities = new Set();
+        let selectedCurrentStars = new Set();
+        let selectedProjectedStars = new Set();
         let searchTerm = '';
 
         function initializeFilters() {
@@ -380,6 +308,46 @@
                     } else {
                         selectedRarities.add(rarity);
                         button.classList.add('selected');
+                    }
+                    filterData();
+                });
+            });
+
+            // Add event listeners for current star buttons
+            document.querySelectorAll('.current-stars .star-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const stars = button.dataset.stars;
+                    if (stars === 'all') {
+                        selectedCurrentStars.clear();
+                        document.querySelectorAll('.current-stars .star-btn').forEach(btn => btn.classList.remove('selected'));
+                    } else {
+                        if (selectedCurrentStars.has(stars)) {
+                            selectedCurrentStars.delete(stars);
+                            button.classList.remove('selected');
+                        } else {
+                            selectedCurrentStars.add(stars);
+                            button.classList.add('selected');
+                        }
+                    }
+                    filterData();
+                });
+            });
+
+            // Add event listeners for projected star buttons
+            document.querySelectorAll('.projected-stars .star-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const stars = button.dataset.stars;
+                    if (stars === 'all') {
+                        selectedProjectedStars.clear();
+                        document.querySelectorAll('.projected-stars .star-btn').forEach(btn => btn.classList.remove('selected'));
+                    } else {
+                        if (selectedProjectedStars.has(stars)) {
+                            selectedProjectedStars.delete(stars);
+                            button.classList.remove('selected');
+                        } else {
+                            selectedProjectedStars.add(stars);
+                            button.classList.add('selected');
+                        }
                     }
                     filterData();
                 });
@@ -444,11 +412,18 @@
         function filterData() {
             const filteredData = window.fullData.filter(item => {
                 const matchesRarity = selectedRarities.size === 0 || 
-                                    selectedRarities.has(item.rarity.toLowerCase());
+                                      selectedRarities.has(item.rarity.toLowerCase());
                 const matchesSearch = searchTerm === '' || 
-                                    item.hero_handle.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchesRarity && matchesSearch;
+                                      item.hero_handle.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesCurrentStars = selectedCurrentStars.size === 0 || 
+                                          selectedCurrentStars.has(item.current_stars.toString());
+                const matchesProjectedStars = selectedProjectedStars.size === 0 || 
+                                            selectedProjectedStars.has(item.projected_stars.toString());
+                return matchesRarity && matchesSearch && matchesCurrentStars && matchesProjectedStars;
             });
+
+            // Update the record count
+            document.getElementById('recordCount').textContent = filteredData.length;
 
             renderTable(filteredData);
         }
@@ -482,20 +457,65 @@
             }
         }
 
+        function getHeatmapColor(value, min, max) {
+            if (value === null || value === '' || isNaN(value)) return 'transparent';
+
+            const plasmaColors = [
+                '#9e0142', '#d53e4f', '#f46d43', '#fdae61', '#fee08b',
+                '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
+            ];
+
+            const normalizedValue = (value - min) / (max - min);
+            const index = normalizedValue * (plasmaColors.length - 1);
+            const lowerIndex = Math.floor(index);
+            const upperIndex = Math.ceil(index);
+
+            if (lowerIndex === upperIndex) return plasmaColors[lowerIndex];
+
+            const t = index - lowerIndex;
+            return interpolateColor(plasmaColors[lowerIndex], plasmaColors[upperIndex], t);
+        }
+
+        function interpolateColor(color1, color2, t) {
+            const r1 = parseInt(color1.slice(1, 3), 16);
+            const g1 = parseInt(color1.slice(3, 5), 16);
+            const b1 = parseInt(color1.slice(5, 7), 16);
+            const r2 = parseInt(color2.slice(1, 3), 16);
+            const g2 = parseInt(color2.slice(3, 5), 16);
+            const b2 = parseInt(color2.slice(5, 7), 16);
+
+            const r = Math.round(r1 * (1 - t) + r2 * t);
+            const g = Math.round(g1 * (1 - t) + g2 * t);
+            const b = Math.round(b1 * (1 - t) + b2 * t);
+
+            return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+        }
+
         function renderTable(data) {
             const tableBody = document.getElementById('marketplaceData');
             tableBody.innerHTML = '';
             
+            // Calculate min and max for seven_day_score and last_main
+            const allSevenDayScores = data.map(item => item.seven_day_score).filter(score => score !== null && score !== undefined);
+            const allLastMains = data.map(item => item.last_main).filter(main => main !== null && main !== undefined);
+
+            const minSevenDayScore = Math.min(...allSevenDayScores);
+            const maxSevenDayScore = Math.max(...allSevenDayScores);
+            const minLastMain = Math.min(...allLastMains);
+            const maxLastMain = Math.max(...allLastMains);
+
             // Add last_price to the color scaling collections
             const allFloors = data.map(item => item.floor).filter(price => price !== null && price !== undefined);
             const allBids = data.map(item => item.bid).filter(price => price !== null && price !== undefined);
             const allLastPrices = data.map(item => item.last_price).filter(price => price !== null && price !== undefined);
-            
+            const allBuy5 = data.map(item => item.buy_5_avg).filter(price => price !== null && price !== undefined);
+
             data.forEach(item => {
                 const floorColor = item.floor ? getPriceColor(item.floor, allFloors) : null;
                 const bidColor = item.bid ? getPriceColor(item.bid, allBids) : null;
                 const lastPriceColor = item.last_price ? getPriceColor(item.last_price, allLastPrices) : null;
-                
+                const buy5Color = item.buy_5_avg ? getPriceColor(item.buy_5_avg, allBuy5) : null;
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
@@ -516,8 +536,12 @@
                             </div>
                         </div>
                     </td>
-                    <td>${item.seven_day_score ? Math.round(item.seven_day_score) : '-'}</td>
-                    <td>${item.last_main ? Math.round(item.last_main) : '-'}</td>
+                    <td style="background-color: ${getHeatmapColor(item.seven_day_score, minSevenDayScore, maxSevenDayScore)};">
+                        ${item.seven_day_score ? Math.round(item.seven_day_score) : '-'}
+                    </td>
+                    <td style="background-color: ${getHeatmapColor(item.last_main, minLastMain, maxLastMain)};">
+                        ${item.last_main ? Math.round(item.last_main) : '-'}
+                    </td>
                     <td>${item.last_price ? 
                         `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
                         '-'}</td>
@@ -546,7 +570,9 @@
                     <td>${item.trades}</td>
                     <td>${item.buyers || '-'}</td>
                     <td>${item.sell_orders || ''}</td>
-                    <td>${item.buy_5_avg ? item.buy_5_avg.toFixed(3) : ''}</td>
+                    <td>${item.buy_5_avg ? 
+                        `<div style="padding: 4px 8px; background-color: ${buy5Color}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.buy_5_avg.toFixed(3)}</div>` : 
+                        ''}</td>
                     <td>${item.buy_5_sum ? item.buy_5_sum.toFixed(3) : ''}</td>
                 `;
                 tableBody.appendChild(row);

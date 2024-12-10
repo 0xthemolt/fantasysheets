@@ -272,6 +272,7 @@
                         <th>Hero</th>
                         <th>7d</th>
                         <th title="Last Main">LM</th>
+                        <th title="Last 3 Main">L3M</th>
                         <th title="Last Price">Last</th>
                         <th>Floor</th>
                         <th>Bid</th>
@@ -495,15 +496,18 @@
             const tableBody = document.getElementById('marketplaceData');
             tableBody.innerHTML = '';
             
-            // Calculate min and max for seven_day_score and last_main
-            const allSevenDayScores = data.map(item => item.seven_day_score).filter(score => score !== null && score !== undefined);
-            const allLastMains = data.map(item => item.last_main).filter(main => main !== null && main !== undefined);
+            // Calculate min and max for seven_day_score and last_main using fullData
+            const allSevenDayScores = window.fullData.map(item => item.seven_day_score).filter(score => score !== null && score !== undefined);
+            const allLastMains = window.fullData.map(item => item.last_main).filter(main => main !== null && main !== undefined);
+            const allLastThreeMain = window.fullData.map(item => item.l3_main_median).filter(main => main !== null && main !== undefined);
 
             const minSevenDayScore = Math.min(...allSevenDayScores);
             const maxSevenDayScore = Math.max(...allSevenDayScores);
             const minLastMain = Math.min(...allLastMains);
             const maxLastMain = Math.max(...allLastMains);
-
+            const minLastThreeMain = Math.min(...allLastThreeMain);
+            const maxLastThreeMain = Math.max(...allLastThreeMain);
+            
             // Add last_price to the color scaling collections
             const allFloors = data.map(item => item.floor).filter(price => price !== null && price !== undefined);
             const allBids = data.map(item => item.bid).filter(price => price !== null && price !== undefined);
@@ -536,11 +540,14 @@
                             </div>
                         </div>
                     </td>
-                    <td style="background-color: ${getHeatmapColor(item.seven_day_score, minSevenDayScore, maxSevenDayScore)};">
-                        ${item.seven_day_score ? Math.round(item.seven_day_score) : '-'}
+                    <td style="background-color: ${getHeatmapColor(item.seven_day_score, minSevenDayScore, maxSevenDayScore)}; color: black;">
+                        ${item.seven_day_score ? Math.round(item.seven_day_score) : ''}
                     </td>
-                    <td style="background-color: ${getHeatmapColor(item.last_main, minLastMain, maxLastMain)};">
-                        ${item.last_main ? Math.round(item.last_main) : '-'}
+                    <td style="background-color: ${getHeatmapColor(item.last_main, minLastMain, maxLastMain)}; color: black;">
+                        ${item.last_main ? Math.round(item.last_main) : ''}
+                    </td>
+                    <td style="background-color: ${getHeatmapColor(item.l3_main_median, minLastThreeMain, maxLastThreeMain)}; color: black;">
+                        ${item.l3_main_median ? Math.round(item.l3_main_median) : ''}
                     </td>
                     <td>${item.last_price ? 
                         `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 

@@ -167,14 +167,14 @@
             <table class="marketplace-table">
                 <thead>
                     <tr>
-                        <th>Profile</th>
-                        <th>Handle</th>
-                        <th>Last Trade (hrs)</th>
+                        <th>Hero</th>
+                        <th>Age (hrs)</th>
                         <th>Trades</th>
-                        <th>Volume</th>
+                        <th>Vol</th>
                         <th>Floor</th>
                         <th>Bid</th>
-                        <th>Last Price</th>
+                        <th>Last</th>
+                        <th title="Bid-Ask-Spread">BAS</th>
                     </tr>
                 </thead>
                 <tbody id="marketplaceData">
@@ -224,25 +224,85 @@
             renderTable(filteredData);
         }
 
+        function getPriceColor(price, allPrices) {
+            // Filter out null/undefined values
+            const validPrices = allPrices.filter(p => p !== null && p !== undefined);
+            if (validPrices.length === 0) return null;
+
+            const min = Math.min(...validPrices);
+            const max = Math.max(...validPrices);
+            
+            // If min and max are the same, return middle color
+            if (min === max) return 'rgb(255, 255, 0)'; // Yellow for equal values
+            
+            // Normalize price between 0 and 1
+            const normalized = (price - min) / (max - min);
+            
+            // Flip the normalized value to make high prices red and low prices green
+            const flipped = 1 - normalized;
+            
+            // Create color gradient from green (low) to yellow (middle) to red (high)
+            if (flipped <= 0.5) {
+                // Yellow to Red (for higher prices)
+                const factor = flipped * 2;
+                return `rgb(255, ${Math.round(255 * factor)}, 0)`;
+            } else {
+                // Green to Yellow (for lower prices)
+                const factor = (flipped - 0.5) * 2;
+                return `rgb(${Math.round(255 * (1 - factor))}, 255, 0)`;
+            }
+        }
+
         function renderTable(data) {
             const tableBody = document.getElementById('marketplaceData');
             tableBody.innerHTML = '';
             
+            // Add last_price to the color scaling collections
+            const allFloors = data.map(item => item.floor).filter(price => price !== null && price !== undefined);
+            const allBids = data.map(item => item.bid).filter(price => price !== null && price !== undefined);
+            const allLastPrices = data.map(item => item.last_price).filter(price => price !== null && price !== undefined);
+            
             data.forEach(item => {
+                const floorColor = item.floor ? getPriceColor(item.floor, allFloors) : null;
+                const bidColor = item.bid ? getPriceColor(item.bid, allBids) : null;
+                const lastPriceColor = item.last_price ? getPriceColor(item.last_price, allLastPrices) : null;
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
-                        ${item.card_picture ? 
-                            `<img src="${item.card_picture}" class="card-image" alt="${item.hero_handle}">` : 
-                            '<span>No image</span>'}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            ${item.card_picture ? 
+                                `<img src="${item.card_picture}" class="card-image" alt="${item.hero_handle}">` : 
+                                '<span>No image</span>'}
+                            <span>${item.hero_handle}</span>
+                        </div>
                     </td>
-                    <td>${item.hero_handle}</td>
-                    <td>${item.hours_since_last_trade.toFixed(2)}</td>
+                    <td data-hours="${item.hours_since_last_trade}">
+                        ${item.hours_since_last_trade < 1 ? '<1h' : 
+                          item.hours_since_last_trade < 24 ? `${Math.round(item.hours_since_last_trade)}h` :
+                          item.hours_since_last_trade >= 744 ? `${(item.hours_since_last_trade / 24).toFixed(0)}d 🪦` :
+                          item.hours_since_last_trade >= 168 ? `${(item.hours_since_last_trade / 24).toFixed(0)}d 💤` :
+                          `${(item.hours_since_last_trade / 24).toFixed(1)}d`}
+                    </td>
                     <td>${item.trades}</td>
-                    <td>${item.volume.toFixed(3)}</td>
-                    <td>${item.floor ? item.floor.toFixed(4) : '-'}</td>
-                    <td>${item.bid ? item.bid.toFixed(4) : '-'}</td>
-                    <td>${item.last_price.toFixed(4)}</td>
+                    <td>${item.volume > 1 ? 
+                        item.volume.toFixed(1) : 
+                        item.volume.toFixed(2)}</td>
+                    <td>${item.last_price ? 
+                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
+                        '-'}</td>
+                    <td>${item.floor ? 
+                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.floor.toFixed(3)}</div>` : 
+                        '-'}</td>
+                    <td>${item.bid ? 
+                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.bid.toFixed(3)}</div>` : 
+                        '-'}</td>
+                    <td style="text-align: right" title="Bid-Ask-Spread">
+                        ${(item.floor && item.bid) ? 
+                            `${(item.floor - item.bid).toFixed(4)}<br>
+                             ${(((item.floor - item.bid) / ((item.floor + item.bid) / 2)) * 100).toFixed(0)}%` 
+                            : '-'}
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });

@@ -655,37 +655,6 @@
             color: #fff;
         }
 
-        .star-filter {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .star-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .star-btn {
-            background: var(--background-color, #1a1a1a);
-            border: 1px solid #333;
-            color: #666;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .star-btn:hover {
-            border-color: #ffd700;
-            color: #ffd700;
-        }
-
-        .star-btn.active {
-            border-color: #ffd700;
-            color: #ffd700;  /* Keep text/emoji gold */
-            background: var(--background-color, #1a1a1a);  /* Keep original background */
-        }
 
         /* Update star column to handle fixed-width cards */
         .star-column {
@@ -734,6 +703,39 @@
 
         .stars-grid.superwide-columns {
             grid-template-columns: repeat(auto-fill, 848px);
+        }
+
+                
+        .star-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .star-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .star-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }  
+
+        .star-btn:hover {
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+
+        .star-btn.active {
+            border-color: #ffd700;
+            color: #ffd700;  /* Keep text/emoji gold */
+            background: transparent;  /* Ensure background remains transparent */
         }
 
         .sort-arrows {

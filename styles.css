@@ -1103,26 +1103,6 @@ table tr:last-child td {
     flex-wrap: wrap;
 }
 
-.star-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #ADB7F6;
-    background: transparent;
-    color: #ADB7F6;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.star-button.active {
-    background: #ADB7F6;
-    color: black;
-}
-
 .view-toggle {
     margin: 10px 0;
 }

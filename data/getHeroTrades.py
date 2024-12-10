@@ -49,11 +49,11 @@ and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '90 days'
 """
 
-prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor,ghwss.hero_pfp_image_url
+prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor,ghwss.hero_pfp_image_url,ghwss.seven_day_fantasy_score
 FROM flatten.vwhero_stats_bids  prices
 left join flatten.herohandlehistory handles
 on prices.hero = handles.hero_handle
-left join flatten.get_heros_with_stats_snapshot ghwss 
+join flatten.get_heros_with_stats_snapshot ghwss 
 on handles.current_hero_handle  = ghwss.hero_handle 
 and ghwss.is_deleted  = 0
 and ghwss.snapshot_rank  = 1
@@ -67,6 +67,18 @@ SELECT hero_handle, rarity,
        timestamp as last_trade_time
 FROM flatten.get_hero_last_trades
 WHERE hero_rarity_trade_history_rank = 1
+"""
+
+sell_orders_query = """
+with heros_five_listings as (select hero_handle,rarity ,1 has_five from flatten.GET_SELL_ORDERS_BY_HERO_RARITY_INDEX group by 1,2 having max(hero_price_rank_qty) >= 5)
+select base.hero_handle,base.rarity,count(*) as sell_orders
+,avg(case  when hero_price_rank_qty <= 5 and has_five = 1 then price else null end) buy_5_avg
+,suM(case  when hero_price_rank_qty <= 5 and has_five = 1  then price else 0 end) buy_5_sum 
+from flatten.GET_SELL_ORDERS_BY_HERO_RARITY_INDEX base 
+left join heros_five_listings five 
+	on base.hero_handle = five.hero_handle
+	and base.rarity = five.rarity
+group by 1,2
 """
 
 def process_hero_trades():
@@ -103,6 +115,7 @@ def process_marketplace():
     # Fetch trades and prices data
     trades_df = fetch_dataframe(trades_query, 'main')
     prices_df = fetch_dataframe(prices_query, 'prices')
+    sell_orders_df = fetch_dataframe(sell_orders_query, 'prices')
 
     if not trades_df.empty:
         current_time = pd.Timestamp.now()
@@ -121,12 +134,28 @@ def process_marketplace():
             'card_picture': 'first',
             'timestamp': lambda x: (current_time - pd.to_datetime(x.max())).total_seconds() / 3600,
             'hero_handle': 'count',
+            'buyer': 'nunique',
             'price': 'sum'
         }).rename(columns={
             'hero_handle': 'trades',
+            'buyer': 'buyers',
             'timestamp': 'hours_since_last_trade',
             'price': 'volume'
         }).reset_index()
+
+        # Add sell orders data - merge after the initial market_stats calculation
+        market_stats = market_stats.merge(
+            sell_orders_df[['hero_handle', 'rarity', 'sell_orders', 'buy_5_avg', 'buy_5_sum']],
+            on=['hero_handle', 'rarity'],
+            how='left'
+        )
+
+        # Merge with prices_df to get seven_day_fantasy_score before timeframe calculations
+        market_stats = market_stats.merge(
+            prices_df[['hero_handle', 'rarity']],
+            on=['hero_handle', 'rarity'],
+            how='left'
+        )
 
         # Add timeframe_stats as a string column initially
         market_stats['timeframe_stats'] = None

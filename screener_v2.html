@@ -139,19 +139,169 @@
             height: 54.1px;  /* 10% of 541px */
             object-fit: contain;
         }
+
+        .hero-search {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .hero-search:focus {
+            outline: none;
+            border-color: #7F76F5;
+        }
+
+        /* Style for jQuery UI Autocomplete */
+        .ui-autocomplete {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .ui-menu-item {
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .ui-menu-item:hover {
+            background: #333;
+        }
+
+        .star-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .star-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .star-btn[data-stars="all"] {
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+
+        .star-btn[data-stars="8"] {
+            border-color: #FF4444;
+            color: #FF4444;
+        }
+
+        .star-btn[data-stars="7"] {
+            border-color: #FF8800;
+            color: #FF8800;
+        }
+
+        .star-btn[data-stars="6"] {
+            border-color: #FFBB33;
+            color: #FFBB33;
+        }
+
+        .star-btn[data-stars="5"] {
+            border-color: #FFDD44;
+            color: #FFDD44;
+        }
+
+        .star-btn[data-stars="4"] {
+            border-color: #FFFF66;
+            color: #FFFF66;
+        }
+
+        .star-btn[data-stars="3"] {
+            border-color: #CCFF66;
+            color: #CCFF66;
+        }
+
+        .star-btn[data-stars="2"] {
+            border-color: #99FF66;
+            color: #99FF66;
+        }
+
+        .star-btn[data-stars="1"] {
+            border-color: #66FF66;
+            color: #66FF66;
+        }
+
+        .star-btn.selected {
+            color: white;
+        }
+
+        .star-btn[data-stars="all"].selected {
+            background: #FFD700;
+        }
+
+        .star-btn[data-stars="8"].selected {
+            background: #FF4444;
+        }
+
+        .star-btn[data-stars="7"].selected {
+            background: #FF8800;
+        }
+
+        .star-btn[data-stars="6"].selected {
+            background: #FFBB33;
+        }
+
+        .star-btn[data-stars="5"].selected {
+            background: #FFDD44;
+        }
+
+        .star-btn[data-stars="4"].selected {
+            background: #FFFF66;
+        }
+
+        .star-btn[data-stars="3"].selected {
+            background: #CCFF66;
+        }
+
+        .star-btn[data-stars="2"].selected {
+            background: #99FF66;
+        }
+
+        .star-btn[data-stars="1"].selected {
+            background: #66FF66;
+        }
+
+        .star-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="filters-container">
             <div class="filter-section">
+                <div class="filter-title">Search Hero</div>
+                <input type="text" id="heroSearch" class="hero-search" placeholder="Search hero...">
+            </div>
+            <div class="filter-section">
                 <div class="filter-title">Rarity Filter</div>
                 <div class="rarity-buttons">
                     <button class="rarity-button legendary" data-rarity="legendary">
-                        <i class="fas fa-gem"></i> Legendary
+                        <i class="fas fa-crown"></i> Legendary
                     </button>
                     <button class="rarity-button epic" data-rarity="epic">
-                        <i class="fas fa-crown"></i> Epic
+                        <i class="fas fa-gem"></i> Epic
                     </button>
                     <button class="rarity-button rare" data-rarity="rare">
                         <i class="fas fa-star"></i> Rare
@@ -161,6 +311,32 @@
                     </button>
                 </div>
             </div>
+            <div class="stars-section">
+                <div class="filter-title">Current</div>
+                <div class="star-buttons">
+                    <button class="star-btn" data-stars="all">All</button>
+                    <button class="star-btn" data-stars="8">8⭐</button>
+                    <button class="star-btn" data-stars="7">7⭐</button>
+                    <button class="star-btn" data-stars="6">6⭐</button>
+                    <button class="star-btn" data-stars="5">5⭐</button>
+                    <button class="star-btn" data-stars="4">4⭐</button>
+                    <button class="star-btn" data-stars="3">3⭐</button>
+                    <button class="star-btn" data-stars="2">2⭐</button>
+                    <button class="star-btn" data-stars="1">1⭐</button>
+                </div>
+                <div class="filter-title">Projected</div>
+                <div class="star-buttons">
+                    <button class="star-btn" data-stars="all">All</button>
+                    <button class="star-btn" data-stars="8">8⭐</button>
+                    <button class="star-btn" data-stars="7">7⭐</button>
+                    <button class="star-btn" data-stars="6">6⭐</button>
+                    <button class="star-btn" data-stars="5">5⭐</button>
+                    <button class="star-btn" data-stars="4">4⭐</button>
+                    <button class="star-btn" data-stars="3">3⭐</button>
+                    <button class="star-btn" data-stars="2">2⭐</button>
+                    <button class="star-btn" data-stars="1">1⭐</button>
+                </div>
+            </div>
         </div>
         
         <div class="table-container">
@@ -168,13 +344,19 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
-                        <th>Age (hrs)</th>
-                        <th>Trades</th>
-                        <th>Vol</th>
+                        <th>7d</th>
+                        <th title="Last Main">LM</th>
+                        <th title="Last Price">Last</th>
                         <th>Floor</th>
                         <th>Bid</th>
-                        <th>Last</th>
                         <th title="Bid-Ask-Spread">BAS</th>
+                        <th>Age</th>
+                        <th>Vol</th>
+                        <th>Trades</th>
+                        <th>Buyers</th>
+                        <th>Sells</th>
+                        <th>B5 Avg</th>
+                        <th>B5 Sum</th>
                     </tr>
                 </thead>
                 <tbody id="marketplaceData">
@@ -186,6 +368,7 @@
 
     <script>
         let selectedRarities = new Set();
+        let searchTerm = '';
 
         function initializeFilters() {
             document.querySelectorAll('.rarity-button').forEach(button => {
@@ -201,24 +384,70 @@
                     filterData();
                 });
             });
+
+            // Initialize hero search
+            const heroSearch = document.getElementById('heroSearch');
+            const heroes = window.fullData?.map(item => item.hero_handle) || [];
+            
+            $(heroSearch).autocomplete({
+                source: function(request, response) {
+                    const term = request.term.toLowerCase();
+                    const matches = heroes.filter(hero => 
+                        hero.toLowerCase().includes(term)
+                    );
+                    response(matches);
+                },
+                minLength: 1,
+                select: function(event, ui) {
+                    this.value = ui.item.value;
+                    searchTerm = ui.item.value;
+                    filterData();
+                    return false;
+                }
+            });
+
+            heroSearch.addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                filterData();
+            });
         }
 
         async function loadMarketplaceData() {
             try {
-                const response = await fetch('/data/marketplace/marketplace.json');
-                const data = await response.json();
+                const [marketplaceResponse, heroResponse] = await Promise.all([
+                    fetch('/data/marketplace/marketplace.json'),
+                    fetch('/hero_stats.json')
+                ]);
                 
-                window.fullData = data; // Store the full dataset
+                const marketplaceData = await marketplaceResponse.json();
+                const heroData = await heroResponse.json();
+                
+                // Access the heroes array from the response
+                const heroes = heroData.heroes;
+                
+                // Create a map of hero stats for faster lookups
+                const heroMap = new Map(heroes.map(hero => [hero.hero_handle, hero]));
+                
+                // Combine the data
+                window.fullData = marketplaceData.map(item => ({
+                    ...item,
+                    // Merge in hero stats data
+                    ...heroMap.get(item.hero_handle)
+                }));
+                
                 filterData(); // Initial render
             } catch (error) {
-                console.error('Error loading marketplace data:', error);
+                console.error('Error loading data:', error);
             }
         }
 
         function filterData() {
             const filteredData = window.fullData.filter(item => {
-                if (selectedRarities.size === 0) return true; // Show all if none selected
-                return selectedRarities.has(item.rarity.toLowerCase());
+                const matchesRarity = selectedRarities.size === 0 || 
+                                    selectedRarities.has(item.rarity.toLowerCase());
+                const matchesSearch = searchTerm === '' || 
+                                    item.hero_handle.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesRarity && matchesSearch;
             });
 
             renderTable(filteredData);
@@ -274,8 +503,35 @@
                             ${item.card_picture ? 
                                 `<img src="${item.card_picture}" class="card-image" alt="${item.hero_handle}">` : 
                                 '<span>No image</span>'}
-                            <span>${item.hero_handle}</span>
+                            <div>
+                                <div>${item.hero_handle}</div>
+                                <div style="font-size: 0.9em; color: #888; margin-top: 4px;">
+                                    ⭐ <span style="color: #FFD700">${item.current_stars}</span> → 
+                                    <span style="color: ${
+                                        item.projected_stars_diff === 0 ? '#FFD700' : 
+                                        item.projected_stars_diff > 0 ? '#48EE4B' : 
+                                        '#FF4444'
+                                    }">${item.projected_stars}</span>
+                                </div>
+                            </div>
                         </div>
+                    </td>
+                    <td>${item.seven_day_score ? Math.round(item.seven_day_score) : '-'}</td>
+                    <td>${item.last_main ? Math.round(item.last_main) : '-'}</td>
+                    <td>${item.last_price ? 
+                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
+                        '-'}</td>
+                    <td>${item.floor ? 
+                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.floor.toFixed(3)}</div>` : 
+                        ''}</td>
+                    <td>${item.bid ? 
+                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.bid.toFixed(3)}</div>` : 
+                        ''}</td>
+                    <td style="text-align: right" title="Bid-Ask-Spread">
+                        ${(item.floor && item.bid) ? 
+                            `${(item.floor - item.bid).toFixed(4)}<br>
+                             ${(((item.floor - item.bid) / ((item.floor + item.bid) / 2)) * 100).toFixed(0)}%` 
+                            : ''}
                     </td>
                     <td data-hours="${item.hours_since_last_trade}">
                         ${item.hours_since_last_trade < 1 ? '<1h' : 
@@ -284,25 +540,14 @@
                           item.hours_since_last_trade >= 168 ? `${(item.hours_since_last_trade / 24).toFixed(0)}d 💤` :
                           `${(item.hours_since_last_trade / 24).toFixed(1)}d`}
                     </td>
-                    <td>${item.trades}</td>
                     <td>${item.volume > 1 ? 
                         item.volume.toFixed(1) : 
                         item.volume.toFixed(2)}</td>
-                    <td>${item.last_price ? 
-                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
-                        '-'}</td>
-                    <td>${item.floor ? 
-                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.floor.toFixed(3)}</div>` : 
-                        '-'}</td>
-                    <td>${item.bid ? 
-                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.bid.toFixed(3)}</div>` : 
-                        '-'}</td>
-                    <td style="text-align: right" title="Bid-Ask-Spread">
-                        ${(item.floor && item.bid) ? 
-                            `${(item.floor - item.bid).toFixed(4)}<br>
-                             ${(((item.floor - item.bid) / ((item.floor + item.bid) / 2)) * 100).toFixed(0)}%` 
-                            : '-'}
-                    </td>
+                    <td>${item.trades}</td>
+                    <td>${item.buyers || '-'}</td>
+                    <td>${item.sell_orders || ''}</td>
+                    <td>${item.buy_5_avg ? item.buy_5_avg.toFixed(3) : ''}</td>
+                    <td>${item.buy_5_sum ? item.buy_5_sum.toFixed(3) : ''}</td>
                 `;
                 tableBody.appendChild(row);
             });

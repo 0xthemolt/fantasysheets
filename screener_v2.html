@@ -210,18 +210,59 @@
             transform: translateY(-1px);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        .price-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .price-input {
+            width: 100px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 2px solid #333;
+            background: #1a1a1a;
+            color: white;
+            font-size: 14px;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #7F76F5;
+        }
+
+        .price-slider-container {
+            padding: 0 10px;
+        }
+
+        /* Custom jQuery UI Slider styles */
+        .ui-slider {
+            background: #333 !important;
+            border: none !important;
+            height: 4px !important;
+            margin: 10px 0;
+        }
+
+        .ui-slider .ui-slider-handle {
+            width: 16px !important;
+            height: 16px !important;
+            border-radius: 50% !important;
+            background: #666 !important;
+            border: 2px solid #888 !important;
+            cursor: pointer !important;
+        }
+
+        .ui-slider .ui-slider-range {
+            background: #444 !important;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="filters-container">
-            <div class="filter-section">
-                <div class="filter-title">Prices</div>
-                <div class="price-toggle">
-                    <button id="priceETH" class="price-button selected">ETH</button>
-                    <button id="priceUSD" class="price-button">USD</button>
-                </div>
-            </div>
+            
             <div class="filter-section">
                 <div class="filter-title">Search Hero</div>
                 <input type="text" id="heroSearch" class="hero-search" placeholder="Search hero...">
@@ -269,6 +310,18 @@
                     <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
                 </div>
             </div>
+            <div class="filter-section">
+                <div class="filter-title">Floor Price</div>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" class="price-input" placeholder="Min">
+                    <span>-</span>
+                    <input type="number" id="maxPrice" class="price-input" placeholder="Max">
+                </div>
+                <div class="price-slider-container">
+                    <div id="priceSlider"></div>
+                </div>
+            </div>
+            
             <div class="filter-title">Records: <span id="recordCount">0</span></div>
         </div>
         
@@ -301,13 +354,12 @@
     </div>
 
     <script>
-        const USD_ETH = 3724; // Conversion rate
-        let priceInUSD = false; // Track the current price mode
-
         let selectedRarities = new Set();
         let selectedCurrentStars = new Set();
         let selectedProjectedStars = new Set();
         let searchTerm = '';
+        let minFloorPrice = 0;
+        let maxFloorPrice = 1000;
 
         function initializeFilters() {
             document.querySelectorAll('.rarity-button').forEach(button => {
@@ -390,19 +442,33 @@
                 filterData();
             });
 
-            // Add event listeners for price toggle buttons
-            document.getElementById('priceETH').addEventListener('click', () => {
-                priceInUSD = false;
-                document.getElementById('priceETH').classList.add('selected');
-                document.getElementById('priceUSD').classList.remove('selected');
-                filterData();
+            // Initialize price slider
+            const priceSlider = $("#priceSlider").slider({
+                range: true,
+                min: 0,
+                max: 1000,
+                values: [0, 1000],
+                step: 0.1,
+                slide: function(event, ui) {
+                    $("#minPrice").val(ui.values[0]);
+                    $("#maxPrice").val(ui.values[1]);
+                    minFloorPrice = ui.values[0];
+                    maxFloorPrice = ui.values[1];
+                    filterData();
+                }
             });
 
-            document.getElementById('priceUSD').addEventListener('click', () => {
-                priceInUSD = true;
-                document.getElementById('priceUSD').classList.add('selected');
-                document.getElementById('priceETH').classList.remove('selected');
-                filterData();
+            // Initialize price inputs
+            $("#minPrice, #maxPrice").on("input", function() {
+                const min = parseFloat($("#minPrice").val()) || 0;
+                const max = parseFloat($("#maxPrice").val()) || maxFloorPrice;
+                
+                if (min <= max) {
+                    priceSlider.slider("values", [min, max]);
+                    minFloorPrice = min;
+                    maxFloorPrice = max;
+                    filterData();
+                }
             });
         }
 
@@ -430,6 +496,25 @@
                     ...heroMap.get(item.hero_handle)
                 }));
                 
+                // After loading data, set initial price range
+                const allFloorPrices = window.fullData
+                    .map(item => item.floor)
+                    .filter(price => price !== null && price !== undefined);
+                
+                if (allFloorPrices.length > 0) {
+                    minFloorPrice = Math.floor(Math.min(...allFloorPrices));
+                    maxFloorPrice = Math.ceil(Math.max(...allFloorPrices));
+                    
+                    $("#priceSlider").slider("option", {
+                        min: minFloorPrice,
+                        max: maxFloorPrice,
+                        values: [minFloorPrice, maxFloorPrice]
+                    });
+                    
+                    $("#minPrice").val(minFloorPrice);
+                    $("#maxPrice").val(maxFloorPrice);
+                }
+                
                 filterData(); // Initial render
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -446,7 +531,10 @@
                                           selectedCurrentStars.has(item.current_stars.toString());
                 const matchesProjectedStars = selectedProjectedStars.size === 0 || 
                                             selectedProjectedStars.has(item.projected_stars.toString());
-                return matchesRarity && matchesSearch && matchesCurrentStars && matchesProjectedStars;
+                const matchesPrice = item.floor >= minFloorPrice && item.floor <= maxFloorPrice;
+                
+                return matchesRarity && matchesSearch && matchesCurrentStars && 
+                       matchesProjectedStars && matchesPrice;
             });
 
             // Update the record count
@@ -546,11 +634,6 @@
                 const lastPriceColor = item.last_price ? getPriceColor(item.last_price, allLastPrices) : null;
                 const buy5Color = item.buy_5_avg ? getPriceColor(item.buy_5_avg, allBuy5) : null;
 
-                // Ensure conversion is applied to each item
-                const lastPrice = priceInUSD ? Math.round(item.last_price * USD_ETH) : item.last_price.toFixed(3);
-                const floorPrice = priceInUSD ? Math.round(item.floor * USD_ETH) : item.floor.toFixed(3);
-                const bidPrice = priceInUSD ? Math.round(item.bid * USD_ETH) : item.bid.toFixed(3);
-
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
@@ -581,13 +664,13 @@
                         ${item.l3_main_median ? Math.round(item.l3_main_median) : ''}
                     </td>
                     <td>${item.last_price ? 
-                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${lastPrice}</div>` : 
+                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
                         '-'}</td>
                     <td>${item.floor ? 
-                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${floorPrice}</div>` : 
+                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.floor.toFixed(3)}</div>` : 
                         ''}</td>
                     <td>${item.bid ? 
-                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${bidPrice}</div>` : 
+                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.bid.toFixed(3)}</div>` : 
                         ''}</td>
                     <td style="text-align: right" title="Bid-Ask-Spread">
                         ${(item.floor && item.bid) ? 

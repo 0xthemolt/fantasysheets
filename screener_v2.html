@@ -176,41 +176,6 @@
             background: #333;
         }
 
-        .star-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .star-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 10.5px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: transparent;
-            border: 2px solid #FFD700;
-            color: #FFD700;
-            display: flex;
-            align-items: center;
-            gap: 4.5px;
-        }
-
-        .star-btn.selected {
-            color: white;
-            background: #FFD700;
-        }
-
-        .star-btn.selected i {
-            color: white;
-        }
-
-        .star-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
         .price-inputs {
             display: flex;
             gap: 8px;
@@ -258,16 +223,16 @@
             background: #444 !important;
         }
 
-        .selector-container {
+        .star-container {
             display: flex;
             border-radius: 12px;
             overflow: hidden;
             background: #1a1a1a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 2px solid #7F76F5;
+            border: 2px solid #FFD700;
         }
 
-        .selector-option {
+        .star-option {
             flex: 1;
             padding: 8px 0;
             font-size: 14px;
@@ -276,27 +241,27 @@
             transition: all 0.2s ease;
             background: transparent;
             border: none;
-            color: #7F76F5;
+            color: #FFD700;
             position: relative;
         }
 
-        .selector-option:not(:last-child)::after {
+        .star-option:not(:last-child)::after {
             content: '';
             position: absolute;
             right: 0;
             top: 0;
             height: 100%;
             width: 1px;
-            background: #7F76F5;
+            background: #FFD700;
         }
 
-        .selector-option.selected {
-            background: #7F76F5;
+        .star-option.selected {
+            background: #FFD700;
             color: white;
         }
 
-        .selector-option:hover {
-            background: rgba(127, 118, 245, 0.2);
+        .star-option:hover {
+            background: rgba(215, 215, 0, 0.2);
         }
     </style>
 </head>
@@ -326,39 +291,39 @@
                 </div>
             </div>
             <div class="stars-section">
-                <div class="filter-title">Current</div>
-                <div class="star-buttons current-stars">
-                    <button class="star-btn" data-stars="all"><i class="fa-solid fa-star"></i> All</button>
-                    <button class="star-btn" data-stars="8"><i class="fa-solid fa-star"></i> 8</button>
-                    <button class="star-btn" data-stars="7"><i class="fa-solid fa-star"></i> 7</button>
-                    <button class="star-btn" data-stars="6"><i class="fa-solid fa-star"></i> 6</button>
-                    <button class="star-btn" data-stars="5"><i class="fa-solid fa-star"></i> 5</button>
-                    <button class="star-btn" data-stars="4"><i class="fa-solid fa-star"></i> 4</button>
-                    <button class="star-btn" data-stars="3"><i class="fa-solid fa-star"></i> 3</button>
-                    <button class="star-btn" data-stars="2"><i class="fa-solid fa-star"></i> 2</button>
-                    <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
+                <div class="filter-title"><i class="fa-solid fa-star"></i> Current</div>
+                <div class="star-container current-stars">
+                    <button class="star-option" data-stars="all">All</button>
+                    <button class="star-option" data-stars="8">8</button>
+                    <button class="star-option" data-stars="7">7</button>
+                    <button class="star-option" data-stars="6">6</button>
+                    <button class="star-option" data-stars="5">5</button>
+                    <button class="star-option" data-stars="4">4</button>
+                    <button class="star-option" data-stars="3">3</button>
+                    <button class="star-option" data-stars="2">2</button>
+                    <button class="star-option" data-stars="1">1</button>
                 </div>
-                <div class="filter-title">Projected</div>
-                <div class="star-buttons projected-stars">
-                    <button class="star-btn" data-stars="all"><i class="fa-solid fa-star"></i> All</button>
-                    <button class="star-btn" data-stars="8"><i class="fa-solid fa-star"></i> 8</button>
-                    <button class="star-btn" data-stars="7"><i class="fa-solid fa-star"></i> 7</button>
-                    <button class="star-btn" data-stars="6"><i class="fa-solid fa-star"></i> 6</button>
-                    <button class="star-btn" data-stars="5"><i class="fa-solid fa-star"></i> 5</button>
-                    <button class="star-btn" data-stars="4"><i class="fa-solid fa-star"></i> 4</button>
-                    <button class="star-btn" data-stars="3"><i class="fa-solid fa-star"></i> 3</button>
-                    <button class="star-btn" data-stars="2"><i class="fa-solid fa-star"></i> 2</button>
-                    <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
+                <div class="filter-title"><i class="fa-solid fa-star"></i>Projected</div>
+                <div class="star-container projected-stars">
+                    <button class="star-option" data-stars="all">All</button>
+                    <button class="star-option" data-stars="8">8</button>
+                    <button class="star-option" data-stars="7">7</button>
+                    <button class="star-option" data-stars="6">6</button>
+                    <button class="star-option" data-stars="5">5</button>
+                    <button class="star-option" data-stars="4">4</button>
+                    <button class="star-option" data-stars="3">3</button>
+                    <button class="star-option" data-stars="2">2</button>
+                    <button class="star-option" data-stars="1">1</button>
                 </div>
-                <div class="filter-title">Star Change</div>
-                <div class="selector-container">
-                    <button class="selector-option" data-value="-3">-3</button>
-                    <button class="selector-option" data-value="-2">-2</button>
-                    <button class="selector-option" data-value="-1">-1</button>
-                    <button class="selector-option" data-value="0">0</button>
-                    <button class="selector-option" data-value="1">1</button>
-                    <button class="selector-option" data-value="2">2</button>
-                    <button class="selector-option" data-value="3">3</button>
+                <div class="filter-title"><i class="fa-solid fa-star"></i>Change</div>
+                <div class="star-container">
+                    <button class="star-option" data-value="-3">-3</button>
+                    <button class="star-option" data-value="-2">-2</button>
+                    <button class="star-option" data-value="-1">-1</button>
+                    <button class="star-option" data-value="0">0</button>
+                    <button class="star-option" data-value="1">1</button>
+                    <button class="star-option" data-value="2">2</button>
+                    <button class="star-option" data-value="3">3</button>
                 </div>
             </div>
             <div class="filter-section">

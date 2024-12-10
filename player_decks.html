@@ -151,7 +151,7 @@
                     
                     // Create the cards display HTML for the top deck
                     let topDeckCardsHtml = `
-                        <div style="display: flex; align-items: center; gap: 18px; width: 100%; max-width: 800px; justify-content: flex-start;">
+                        <div style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 800px; justify-content: flex-start;">
                             <div style="display: flex; align-items: center; width: 40px; flex-shrink: 0; margin-left: 20px;">
                                 <img src="${topDeck.player_pic}" 
                                      alt="Player" 
@@ -208,33 +208,33 @@
                                     <i class="fas fa-chevron-down" id="arrow-${leagueName}" style="margin-left: 3px; font-size: 12px; color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};" data-tooltip="Expand League Decks"></i>
                                 </h2>
                             </div>
-                            <div class="league-rewards-container" style="display: flex; gap: 7.5px; justify-content: flex-end; width: 100%; margin-left: 10px; padding-left: 10px; cursor: default;">
+                            <div class="league-rewards-container" style="display: flex; gap: 8.25px; justify-content: flex-end; width: 100%; margin-left: 11px; padding-left: 11px; cursor: default;">
                                 ${totalEth > 0 ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.eth}; font-size: 0.825em; color: ${REWARD_COLORS.eth}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.eth}10 100%);">
-                                    ${formatEth(totalEth)} <img src="./icons/eth.webp" alt="ETH" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.eth}; font-size: 0.91em; color: ${REWARD_COLORS.eth}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.eth}10 100%);">
+                                    ${formatEth(totalEth)} <img src="./icons/eth.webp" alt="ETH" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 4.4px;">
                                 </div>` : ''}
                                 ${totalPacks > 0 ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.pack}; font-size: 0.825em; color: ${REWARD_COLORS.pack}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
-                                    ${totalPacks} <img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.pack}; font-size: 0.91em; color: ${REWARD_COLORS.pack}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
+                                    ${totalPacks} <img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 4.4px;">
                                 </div>` : ''}
                                 ${totalFrags > 0 ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fragment}; font-size: 0.825em; color: ${REWARD_COLORS.fragment}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fragment}10 100%);">
-                                    ${totalFrags} <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.fragment}; font-size: 0.91em; color: ${REWARD_COLORS.fragment}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fragment}10 100%);">
+                                    ${totalFrags} <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 4.4px;">
                                 </div>` : ''}
                                 ${(totalPacks > 0 && totalFrags > 0) ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.pack}; font-size: 0.825em; color: ${REWARD_COLORS.pack}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.pack}; font-size: 0.91em; color: ${REWARD_COLORS.pack}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.pack}10 100%);">
                                     ${totalPacksFrags < 1 ? '.' + (totalPacksFrags.toFixed(1) * 10).toString() : totalPacksFrags.toFixed(1)} 
-                                    (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 15px; height: 15px; margin-left: 1px;">
+                                    (<img src="./icons/pack.webp" alt="Packs" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 1.1px;">
                                     <span style="margin: 0;">+</span>
-                                    <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 15px; height: 15px; margin: 0;">)
+                                    <img src="./icons/fragment.webp" alt="Frags" class="icon" style="width: 16.5px; height: 16.5px; margin: 0;">)
                                 </div>` : ''}
                                 ${totalFan > 0 ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.fan}; font-size: 0.825em; color: ${REWARD_COLORS.fan}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fan}10 100%);">
-                                    ${formatRewardFan(totalFan)} <img src="./icons/fan.webp" alt="Fan" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.fan}; font-size: 0.91em; color: ${REWARD_COLORS.fan}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.fan}10 100%);">
+                                    ${formatRewardFan(totalFan)} <img src="./icons/fan.webp" alt="Fan" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 4.4px;">
                                 </div>` : ''}
                                 ${totalGold > 0 ? `
-                                <div style="display: flex; align-items: center; box-shadow: 0 2px 4px -2px ${REWARD_COLORS.blast}; font-size: 0.825em; color: ${REWARD_COLORS.blast}; border-radius: 4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.blast}10 100%);">
-                                    ${totalGold} <img src="./icons/blast.webp" alt="Gold" class="icon" style="width: 15px; height: 15px; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; box-shadow: 0 2.2px 4.4px -2.2px ${REWARD_COLORS.blast}; font-size: 0.91em; color: ${REWARD_COLORS.blast}; border-radius: 4.4px; background: radial-gradient(circle at center, transparent 0%, ${REWARD_COLORS.blast}10 100%);">
+                                    ${totalGold} <img src="./icons/blast.webp" alt="Gold" class="icon" style="width: 16.5px; height: 16.5px; margin-left: 4.4px;">
                                 </div>` : ''}
                             </div>
                         </div>

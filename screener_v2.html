@@ -257,6 +257,47 @@
         .ui-slider .ui-slider-range {
             background: #444 !important;
         }
+
+        .selector-container {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #1a1a1a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #7F76F5;
+        }
+
+        .selector-option {
+            flex: 1;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            color: #7F76F5;
+            position: relative;
+        }
+
+        .selector-option:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background: #7F76F5;
+        }
+
+        .selector-option.selected {
+            background: #7F76F5;
+            color: white;
+        }
+
+        .selector-option:hover {
+            background: rgba(127, 118, 245, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -309,6 +350,16 @@
                     <button class="star-btn" data-stars="2"><i class="fa-solid fa-star"></i> 2</button>
                     <button class="star-btn" data-stars="1"><i class="fa-solid fa-star"></i> 1</button>
                 </div>
+                <div class="filter-title">Star Change</div>
+                <div class="selector-container">
+                    <button class="selector-option" data-value="-3">-3</button>
+                    <button class="selector-option" data-value="-2">-2</button>
+                    <button class="selector-option" data-value="-1">-1</button>
+                    <button class="selector-option" data-value="0">0</button>
+                    <button class="selector-option" data-value="1">1</button>
+                    <button class="selector-option" data-value="2">2</button>
+                    <button class="selector-option" data-value="3">3</button>
+                </div>
             </div>
             <div class="filter-section">
                 <div class="filter-title">Floor Price</div>
@@ -330,6 +381,7 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
+                        <th>Supply</th>
                         <th>7d</th>
                         <th title="Last Main">LM</th>
                         <th title="Last 3 Main">L3M</th>
@@ -653,6 +705,12 @@
                                 </div>
                             </div>
                         </div>
+                    </td>
+                    <td title="Aggregate Cards: ${item.aggregate_cards}">
+                        ${item.rarity === 'common' ? item.common_cards :
+                          item.rarity === 'rare' ? item.rare_cards :
+                          item.rarity === 'epic' ? item.epic_cards :
+                          item.rarity === 'legendary' ? item.legendary_cards : ''}
                     </td>
                     <td style="background-color: ${getHeatmapColor(item.seven_day_score, minSevenDayScore, maxSevenDayScore)}; color: black;">
                         ${item.seven_day_score ? Math.round(item.seven_day_score) : ''}

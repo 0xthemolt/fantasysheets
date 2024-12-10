@@ -51,7 +51,7 @@ with get_db_connection('main') as conn:
     
     # Get hero stats
     hero_stats_query = f"""
-    with l3_main as (
+   with l3_main as (
     select ghwst.hero_id , PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ghwst.fantasy_score_afk) l3_main_median  
     from flatten.get_heros_with_stats_tournament ghwst 
     join flatten.get_tournaments gt 
@@ -82,7 +82,15 @@ with get_db_connection('main') as conn:
     ,ghss.seven_day_fantasy_score
     ,l3_main.l3_main_median
     ,last_main.last_main
+    ,sup.legendary_cards 
+    ,sup.epic_cards 
+    ,sup.rare_cards 
+    ,sup.common_cards 
+    ,sup.aggregate_cards 
     from flatten.GET_HEROS_WITH_STATS_SNAPSHOT ghss
+    left join flatten.get_supply_per_hero_id sup
+    	on ghss.hero_id = sup.hero_id 
+    	and sup.snapshot_rank  = 1
     left join flatten.get_cards_flags_stars gcfs 
         on ghss.hero_id = gcfs.hero_id 
         and gcfs.snapshot_rank = 1

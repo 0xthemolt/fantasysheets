@@ -49,7 +49,7 @@ and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '90 days'
 """
 
-prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor
+prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor,ghwss.hero_pfp_image_url
 FROM flatten.vwhero_stats_bids  prices
 left join flatten.herohandlehistory handles
 on prices.hero = handles.hero_handle
@@ -58,10 +58,16 @@ on handles.current_hero_handle  = ghwss.hero_handle
 and ghwss.is_deleted  = 0
 and ghwss.snapshot_rank  = 1
 and ghwss.start_datetime  >= NOW() - interval '5 days'
-where rarity in ('rare','common')
 order by 1 asc
 """
 
+last_trades_query = """
+SELECT hero_handle, rarity, 
+       price as last_price,
+       timestamp as last_trade_time
+FROM flatten.get_hero_last_trades
+WHERE hero_rarity_trade_history_rank = 1
+"""
 
 def process_hero_trades():
     # Fetch trades and prices data
@@ -99,25 +105,73 @@ def process_marketplace():
     prices_df = fetch_dataframe(prices_query, 'prices')
 
     if not trades_df.empty:
-        # Calculate current timestamp for "last trade" calculation
         current_time = pd.Timestamp.now()
         
-        # Get last trades
-        last_trades = trades_df[trades_df['hero_rarity_trade_history_rank'] == 1][['hero_handle', 'rarity', 'price']].rename(columns={'price': 'last_trade'})
+        # Define timeframes in hours
+        timeframes = {
+            '6h': 6,
+            '24h': 24,
+            '3d': 24 * 3,
+            '7d': 24 * 7
+        }
 
-        # Group trades and calculate metrics
+        # Calculate base stats as before
         market_stats = trades_df.groupby(['hero_handle', 'rarity']).agg({
-            'hero_id': 'first',  # Keep one hero_id
-            'timestamp': lambda x: (current_time - pd.to_datetime(x.max())).total_seconds() / 3600,  # Hours since last trade
-            'hero_handle': 'count',  # Number of trades
-            'price': 'sum'  # Volume
+            'hero_id': 'first',
+            'card_picture': 'first',
+            'timestamp': lambda x: (current_time - pd.to_datetime(x.max())).total_seconds() / 3600,
+            'hero_handle': 'count',
+            'price': 'sum'
         }).rename(columns={
             'hero_handle': 'trades',
             'timestamp': 'hours_since_last_trade',
             'price': 'volume'
         }).reset_index()
 
+        # Add timeframe_stats as a string column initially
+        market_stats['timeframe_stats'] = None
+
+        # Calculate timeframe metrics
+        for hero_handle in trades_df['hero_handle'].unique():
+            for rarity in trades_df[trades_df['hero_handle'] == hero_handle]['rarity'].unique():
+                hero_trades = trades_df[
+                    (trades_df['hero_handle'] == hero_handle) & 
+                    (trades_df['rarity'] == rarity)
+                ]
+                
+                timeframe_stats = []
+                for period, hours in timeframes.items():
+                    cutoff = current_time - pd.Timedelta(hours=hours)
+                    period_trades = hero_trades[pd.to_datetime(hero_trades['timestamp']) >= cutoff]
+                    
+                    if not period_trades.empty:
+                        stats = {
+                            'timeframe': period,
+                            'volume': float(period_trades['price'].sum()),
+                            'avg_price': float(period_trades['price'].mean()),
+                            'med_price': float(period_trades['price'].median()),
+                            'min_price': float(period_trades['price'].min()),
+                            'max_price': float(period_trades['price'].max()),
+                            'buyers': len(period_trades['buyer'].unique())
+                        }
+                    else:
+                        stats = {
+                            'timeframe': period,
+                            'volume': 0,
+                            'avg_price': 0,
+                            'med_price': 0,
+                            'min_price': 0,
+                            'max_price': 0,
+                            'buyers': 0
+                        }
+                    timeframe_stats.append(stats)
+                
+                # Add timeframe_stats to market_stats
+                mask = (market_stats['hero_handle'] == hero_handle) & (market_stats['rarity'] == rarity)
+                market_stats.at[mask.idxmax(), 'timeframe_stats'] = timeframe_stats
+
         # Merge with prices data and last trade
+        last_trades = fetch_dataframe(last_trades_query, 'main')
         market_data = pd.merge(
             market_stats,
             prices_df[['hero_handle', 'rarity', 'floor', 'bid']],

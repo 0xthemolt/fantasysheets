@@ -21,3 +21,237 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters-container {
+            flex: 0 0 250px;
+            padding: 20px;
+            background: #000000;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .table-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .rarity-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .rarity-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rarity-button.common {
+            border-color: #48EE4B;
+            color: #48EE4B;
+        }
+
+        .rarity-button.rare {
+            border-color: #02E0F4;
+            color: #02E0F4;
+        }
+
+        .rarity-button.epic {
+            border-color: #CD2FD7;
+            color: #CD2FD7;
+        }
+
+        .rarity-button.legendary {
+            border-color: #7F76F5;
+            color: #7F76F5;
+        }
+
+        .rarity-button.selected {
+            color: white;
+        }
+
+        .rarity-button.common.selected {
+            background: #48EE4B;
+        }
+
+        .rarity-button.rare.selected {
+            background: #02E0F4;
+        }
+
+        .rarity-button.epic.selected {
+            background: #CD2FD7;
+        }
+
+        .rarity-button.legendary.selected {
+            background: #7F76F5;
+        }
+
+        .rarity-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .filters-container {
+                flex: none;
+                width: auto;
+            }
+
+            .rarity-buttons {
+                justify-content: center;
+            }
+        }
+
+        .card-image {
+            width: 38.2px;   /* 10% of 382px */
+            height: 54.1px;  /* 10% of 541px */
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="filters-container">
+            <div class="filter-section">
+                <div class="filter-title">Rarity Filter</div>
+                <div class="rarity-buttons">
+                    <button class="rarity-button legendary" data-rarity="legendary">
+                        <i class="fas fa-gem"></i> Legendary
+                    </button>
+                    <button class="rarity-button epic" data-rarity="epic">
+                        <i class="fas fa-crown"></i> Epic
+                    </button>
+                    <button class="rarity-button rare" data-rarity="rare">
+                        <i class="fas fa-star"></i> Rare
+                    </button>
+                    <button class="rarity-button common" data-rarity="common">
+                        <i class="fas fa-circle"></i> Common
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="marketplace-table">
+                <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Handle</th>
+                        <th>Last Trade (hrs)</th>
+                        <th>Trades</th>
+                        <th>Volume</th>
+                        <th>Floor</th>
+                        <th>Bid</th>
+                        <th>Last Price</th>
+                    </tr>
+                </thead>
+                <tbody id="marketplaceData">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let selectedRarities = new Set();
+
+        function initializeFilters() {
+            document.querySelectorAll('.rarity-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const rarity = button.dataset.rarity;
+                    if (selectedRarities.has(rarity)) {
+                        selectedRarities.delete(rarity);
+                        button.classList.remove('selected');
+                    } else {
+                        selectedRarities.add(rarity);
+                        button.classList.add('selected');
+                    }
+                    filterData();
+                });
+            });
+        }
+
+        async function loadMarketplaceData() {
+            try {
+                const response = await fetch('/data/marketplace/marketplace.json');
+                const data = await response.json();
+                
+                window.fullData = data; // Store the full dataset
+                filterData(); // Initial render
+            } catch (error) {
+                console.error('Error loading marketplace data:', error);
+            }
+        }
+
+        function filterData() {
+            const filteredData = window.fullData.filter(item => {
+                if (selectedRarities.size === 0) return true; // Show all if none selected
+                return selectedRarities.has(item.rarity.toLowerCase());
+            });
+
+            renderTable(filteredData);
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('marketplaceData');
+            tableBody.innerHTML = '';
+            
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        ${item.card_picture ? 
+                            `<img src="${item.card_picture}" class="card-image" alt="${item.hero_handle}">` : 
+                            '<span>No image</span>'}
+                    </td>
+                    <td>${item.hero_handle}</td>
+                    <td>${item.hours_since_last_trade.toFixed(2)}</td>
+                    <td>${item.trades}</td>
+                    <td>${item.volume.toFixed(3)}</td>
+                    <td>${item.floor ? item.floor.toFixed(4) : '-'}</td>
+                    <td>${item.bid ? item.bid.toFixed(4) : '-'}</td>
+                    <td>${item.last_price.toFixed(4)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFilters();
+            loadMarketplaceData();
+        });
+    </script>
+</body>
+</html>

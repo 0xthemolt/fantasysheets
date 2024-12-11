@@ -295,14 +295,14 @@
 
         .option-container {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            justify-content: flex-end; /* Aligns the buttons to the right */
+            gap: 8px; /* Adds space between buttons */
         }
 
         .option-button {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 10.5px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -317,8 +317,22 @@
         }
 
         .option-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transform: translateY(-0.75px);
+            box-shadow: 0 1.5px 3.75px rgba(0,0,0,0.1);
+        }
+
+        .filter-title {
+            display: inline-block;
+            margin-right: 10px; /* Adds space between the title and the options */
+        }
+
+        .value-container {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background-color: #333; /* Dark background for contrast */
+            color: white; /* White text color */
+            text-align: center;
         }
     </style>
 </head>
@@ -417,6 +431,13 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
+                        <th class="sortable" data-sort="value">
+                            Value
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
                         <th class="sortable" data-sort="supply">
                             Supply
                             <div class="sort-arrows">
@@ -539,6 +560,27 @@
         let searchTerm = '';
         let minFloorPrice = 0;
         let maxFloorPrice = 1000;
+
+        function calculateValue(item) {
+            const selectedScoreOption = document.querySelector('#scoreOptions .option-button.selected');
+            const selectedCostOption = document.querySelector('#costOptions .option-button.selected');
+
+            if (!selectedScoreOption || !selectedCostOption) {
+                return null; // Return null if no options are selected
+            }
+
+            const scoreKey = selectedScoreOption.dataset.value;
+            const costKey = selectedCostOption.dataset.value;
+
+            const score = item[scoreKey];
+            const cost = item[costKey];
+
+            if (score == null || cost == null || cost === 0) {
+                return null; // Avoid division by zero or null values
+            }
+
+            return (score / cost) / 100;
+        }
 
         function initializeFilters() {
             // Initialize price slider
@@ -663,6 +705,26 @@
             heroSearch.addEventListener('input', (e) => {
                 searchTerm = e.target.value;
                 filterData();
+            });
+
+            // Add event listeners for score option buttons
+            document.querySelectorAll('#scoreOptions .option-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('#scoreOptions .option-button').forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    filterData();
+                    sortData('value', 'desc'); // Trigger sortData with "value" column in descending order
+                });
+            });
+
+            // Add event listeners for cost option buttons
+            document.querySelectorAll('#costOptions .option-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('#costOptions .option-button').forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    filterData();
+                    sortData('value', 'desc'); // Trigger sortData with "value" column in descending order
+                });
             });
         }
 
@@ -817,6 +879,8 @@
             const allBuy5 = data.map(item => item.buy_5_avg).filter(price => price !== null && price !== undefined);
 
             data.forEach(item => {
+                const value = calculateValue(item);
+                const valueDisplay = value != null ? value.toFixed(3) : '-';
                 const floorColor = item.floor ? getPriceColor(item.floor, allFloors) : null;
                 const bidColor = item.bid ? getPriceColor(item.bid, allBids) : null;
                 const lastPriceColor = item.last_price ? getPriceColor(item.last_price, allLastPrices) : null;
@@ -842,6 +906,7 @@
                             </div>
                         </div>
                     </td>
+                    <td><div class="value-container">${value != null ? Math.round(value) : '-'}</div></td>
                     <td title="Aggregate Cards: ${item.aggregate_cards}">
                         ${item.rarity === 'common' ? item.common_cards :
                           item.rarity === 'rare' ? item.rare_cards :
@@ -945,8 +1010,27 @@
             }
             
             const sortedData = [...window.fullData].sort((a, b) => {
-                const aValue = a[column] !== undefined ? a[column] : null;
-                const bValue = b[column] !== undefined ? b[column] : null;
+                let aValue, bValue;
+
+                if (column === 'value') {
+                    // Use calculateValue to get the dynamic value
+                    aValue = calculateValue(a);
+                    bValue = calculateValue(b);
+                } else if (column === 'supply') {
+                    // Apply conditional logic for supply
+                    aValue = a.rarity === 'common' ? a.common_cards :
+                             a.rarity === 'rare' ? a.rare_cards :
+                             a.rarity === 'epic' ? a.epic_cards :
+                             a.rarity === 'legendary' ? a.legendary_cards : null;
+
+                    bValue = b.rarity === 'common' ? b.common_cards :
+                             b.rarity === 'rare' ? b.rare_cards :
+                             b.rarity === 'epic' ? b.epic_cards :
+                             b.rarity === 'legendary' ? b.legendary_cards : null;
+                } else {
+                    aValue = a[column] !== undefined ? a[column] : null;
+                    bValue = b[column] !== undefined ? b[column] : null;
+                }
 
                 // Convert values to numbers if they are not null or undefined
                 const aNum = aValue != null ? parseFloat(aValue) : null;

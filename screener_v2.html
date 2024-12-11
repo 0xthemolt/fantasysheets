@@ -346,21 +346,111 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
-                        <th>Supply</th>
-                        <th>7d</th>
-                        <th title="Last Main">LM</th>
-                        <th title="Last 3 Main">L3M</th>
-                        <th title="Last Price">Last</th>
-                        <th>Floor</th>
-                        <th>Bid</th>
-                        <th title="Bid-Ask-Spread">BAS</th>
-                        <th>Age</th>
-                        <th>Vol</th>
-                        <th title="Trades">Txn</th>
-                        <th>Buyers</th>
-                        <th title="Sell Orders">SO</th>
-                        <th>B5 Avg</th>
-                        <th>B5 Sum</th>
+                        <th class="sortable" data-sort="supply">
+                            Supply
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="7d">
+                            7d
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="last-main" title="Last Main">
+                            LM
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="last-3-main" title="Last 3 Main">
+                            L3M
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="last-price" title="Last Price">
+                            Last
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="floor">
+                            Floor
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="bid">
+                            Bid
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="bas" title="Bid-Ask-Spread">
+                            BAS
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="age">
+                            Age
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="vol">
+                            Vol
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="txn" title="Trades">
+                            Txn
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="buyers">
+                            Buyers
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="so" title="Sell Orders">
+                            SO
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="b5-avg">
+                            B5 Avg
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="b5-sum">
+                            B5 Sum
+                            <div class="sort-arrows">
+                                <span class="sort-arrow up"></span>
+                                <span class="sort-arrow down"></span>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="marketplaceData">
@@ -744,7 +834,59 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeFilters();
             loadMarketplaceData();
+            initializeSorting();
         });
+
+        function initializeSorting() {
+            const headers = document.querySelectorAll('.sortable');
+            let currentSortColumn = '7d';
+            let currentSortOrder = 'desc';
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortKey = header.dataset.sort;
+                    const isCurrentColumn = currentSortColumn === sortKey;
+                    currentSortOrder = isCurrentColumn && currentSortOrder === 'desc' ? 'asc' : 'desc';
+                    currentSortColumn = sortKey;
+
+                    console.log(`Sorting by column: ${sortKey}, Order: ${currentSortOrder}`);
+
+                    headers.forEach(h => {
+                        h.querySelector('.sort-arrow.up').classList.remove('active');
+                        h.querySelector('.sort-arrow.down').classList.remove('active');
+                    });
+
+                    if (currentSortOrder === 'asc') {
+                        header.querySelector('.sort-arrow.up').classList.add('active');
+                    } else {
+                        header.querySelector('.sort-arrow.down').classList.add('active');
+                    }
+
+                    sortData(sortKey, currentSortOrder);
+                });
+            });
+
+            // Initial sort on page load
+            sortData(currentSortColumn, currentSortOrder);
+        }
+
+        function sortData(column, order) {
+            const sortedData = [...window.fullData].sort((a, b) => {
+                const aValue = a[column];
+                const bValue = b[column];
+
+                // Handle cases where values might be undefined or null
+                if (aValue == null) return order === 'asc' ? 1 : -1;
+                if (bValue == null) return order === 'asc' ? -1 : 1;
+
+                // Compare values
+                if (aValue < bValue) return order === 'asc' ? -1 : 1;
+                if (aValue > bValue) return order === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTable(sortedData);
+        }
     </script>
 </body>
 </html>

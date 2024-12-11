@@ -263,12 +263,68 @@
         .star-option:hover {
             background: rgba(215, 215, 0, 0.2);
         }
+
+        .sort-arrow {
+            display: none; /* Hide by default */
+            width: 0;
+            height: 0;
+            margin: 2px auto;
+        }
+
+        .sort-arrow.active.up {
+            display: block; /* Show only when active */
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #4CAF50; /* Green */
+        }
+
+        .sort-arrow.active.down {
+            display: block; /* Show only when active */
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #F44336; /* Red */
+        }
+
+        .value-config-container {
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 16px;
+            background: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .option-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .option-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            color: white;
+        }
+
+        .option-button.selected {
+            background: #7F76F5;
+            color: white;
+        }
+
+        .option-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="filters-container">
-            
             <div class="filter-section">
                 <div class="filter-title">Search Hero</div>
                 <input type="text" id="heroSearch" class="hero-search" placeholder="Search hero...">
@@ -326,6 +382,21 @@
                     <button class="star-option" data-value="3">3</button>
                 </div>
             </div>
+            <div class="value-config-container">
+                <div class="filter-title">Value Configuration</div>
+                <div class="filter-title">Score:</div>
+                <div class="option-container" id="scoreOptions">
+                    <button class="option-button" data-value="seven_day_score">7d</button>
+                    <button class="option-button" data-value="last_main">LM</button>
+                    <button class="option-button" data-value="l3_main_median">L3M</button>
+                </div>
+                <div class="filter-title">Cost:</div>
+                <div class="option-container" id="costOptions">
+                    <button class="option-button" data-value="last_price">Last Price</button>
+                    <button class="option-button" data-value="floor">Floor Price</button>
+                    <button class="option-button" data-value="bid">Bid</button>
+                </div>
+            </div>
             <div class="filter-section">
                 <div class="filter-title">Floor Price</div>
                 <div class="price-inputs">
@@ -360,14 +431,14 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="last_main">
+                        <th class="sortable" data-sort="last_main" title="Last Main Tournament Score">
                             LM
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="l3_main_median">
+                        <th class="sortable" data-sort="l3_main_median" title="Median of Last 3 Main Tournament Scores">
                             L3M
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -395,14 +466,14 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="bid_ask_spread">
+                        <th class="sortable" data-sort="bid_ask_spread" title="Bid Ask Spread">
                             BAS
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="age">
+                        <th class="sortable" data-sort="hours_since_last_trade" title="Time Since Last Trade">
                             Age
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -416,7 +487,7 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="trades">
+                        <th class="sortable" data-sort="trades" title="Trades/Transactions">
                             Txn
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -430,7 +501,7 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="sell_orders">
+                        <th class="sortable" data-sort="sell_orders" title="Sell Orders">
                             SO
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -834,10 +905,13 @@
             let currentSortColumn = 'seven_day_score';
             let currentSortOrder = 'desc';
 
-            headers.forEach(header => {
-                // Initially hide all sort arrows
-                header.querySelector('.sort-arrows').style.display = 'none';
+            // Set the default active sort arrow for the default column
+            const defaultHeader = document.querySelector(`.sortable[data-sort="${currentSortColumn}"]`);
+            if (defaultHeader) {
+                defaultHeader.querySelector('.sort-arrow.down').classList.add('active');
+            }
 
+            headers.forEach(header => {
                 header.addEventListener('click', () => {
                     const sortKey = header.dataset.sort;
                     const isCurrentColumn = currentSortColumn === sortKey;
@@ -846,35 +920,22 @@
 
                     console.log(`Sorting by column: ${sortKey}, Order: ${currentSortOrder}`);
 
-                    // Hide sort arrows for all headers
+                    // Remove active class from all sort arrows
                     headers.forEach(h => {
-                        h.querySelector('.sort-arrows').style.display = 'none';
                         h.querySelector('.sort-arrow.up').classList.remove('active');
                         h.querySelector('.sort-arrow.down').classList.remove('active');
                     });
 
-                    // Show sort arrows for the current header
-                    header.querySelector('.sort-arrows').style.display = 'inline-block';
-
+                    // Add active class to the current header's sort arrow
                     if (currentSortOrder === 'asc') {
                         header.querySelector('.sort-arrow.up').classList.add('active');
-                        header.querySelector('.sort-arrow.down').classList.remove('active'); // Ensure down arrow is hidden
                     } else {
                         header.querySelector('.sort-arrow.down').classList.add('active');
-                        header.querySelector('.sort-arrow.up').classList.remove('active'); // Ensure up arrow is hidden
                     }
 
                     sortData(sortKey, currentSortOrder);
                 });
             });
-
-            // Set initial sort arrow state for the default sort column
-            const initialHeader = document.querySelector(`.sortable[data-sort="${currentSortColumn}"]`);
-            if (initialHeader) {
-                initialHeader.querySelector('.sort-arrows').style.display = 'inline-block';
-                initialHeader.querySelector('.sort-arrow.down').classList.add('active');
-                initialHeader.querySelector('.sort-arrow.up').classList.remove('active'); // Ensure up arrow is hidden
-            }
         }
 
         function sortData(column, order) {
@@ -891,9 +952,10 @@
                 const aNum = aValue != null ? parseFloat(aValue) : null;
                 const bNum = bValue != null ? parseFloat(bValue) : null;
 
+                // Handle null or missing values to always be at the end
                 if (aNum == null && bNum == null) return 0; // Both are null, consider them equal
-                if (aNum == null) return order === 'asc' ? 1 : -1;
-                if (bNum == null) return order === 'asc' ? -1 : 1;
+                if (aNum == null) return 1; // a is null, place it at the end
+                if (bNum == null) return -1; // b is null, place it at the end
 
                 if (aNum < bNum) return order === 'asc' ? -1 : 1;
                 if (aNum > bNum) return order === 'asc' ? 1 : -1;

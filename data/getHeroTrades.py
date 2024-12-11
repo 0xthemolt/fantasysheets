@@ -226,6 +226,6 @@ def process_marketplace():
         print(f"Marketplace JSON file saved at: {os.path.abspath(json_filename)}")
 
 if __name__ == "__main__":
-    # process_hero_trades()
+    process_hero_trades()
     process_marketplace()
 

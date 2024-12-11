@@ -312,10 +312,10 @@ table tr:last-child td {
     padding-right: 20px; /* Space for sort arrows */
 }
 
-.sort-arrows {
+/* .sort-arrows {
     display: inline-block;
     vertical-align: middle;
-}
+} */
 
 .sort-arrow {
     display: block;
@@ -324,9 +324,9 @@ table tr:last-child td {
     margin: 2px auto;
 }
 
-.sort-arrow.up {
+/* .sort-arrow.up {
     border-left: 5px solid transparent;
-    border-right: 5px cap solid transparent;
+    border-right: 5px solid transparent;
     border-bottom: 5px solid #ccc;
 }
 
@@ -334,15 +334,22 @@ table tr:last-child td {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 5px solid #ccc;
-}
+} */
 
 .sort-arrow.active.up {
+    display: block; /* Show only when active */
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
     border-bottom-color: #4CAF50; /* Green */
 }
 
 .sort-arrow.active.down {
+    display: block; /* Show only when active */
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
     border-top-color: #F44336; /* Red */
 }
+
 .reward-value {
     display: inline-flex;
     align-items: center;

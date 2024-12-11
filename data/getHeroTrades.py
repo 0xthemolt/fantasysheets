@@ -143,6 +143,9 @@ def process_marketplace():
             'price': 'volume'
         }).reset_index()
 
+        # Count before first merge
+        print("Count before first merge:", market_stats[market_stats['hero_handle'] == 'zagabond'].shape[0])
+
         # Add sell orders data - merge after the initial market_stats calculation
         market_stats = market_stats.merge(
             sell_orders_df[['hero_handle', 'rarity', 'sell_orders', 'buy_5_avg', 'buy_5_sum']],
@@ -150,12 +153,18 @@ def process_marketplace():
             how='left'
         )
 
+        # Count after first merge
+        print("Count after first merge:", market_stats[market_stats['hero_handle'] == 'zagabond'].shape[0])
+
         # Merge with prices_df to get seven_day_fantasy_score before timeframe calculations
         market_stats = market_stats.merge(
             prices_df[['hero_handle', 'rarity']],
             on=['hero_handle', 'rarity'],
             how='left'
         )
+
+        # Count after second merge
+        print("Count after second merge:", market_stats[market_stats['hero_handle'] == 'zagabond'].shape[0])
 
         # Add timeframe_stats as a string column initially
         market_stats['timeframe_stats'] = None

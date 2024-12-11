@@ -53,6 +53,7 @@ prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.
 FROM flatten.vwhero_stats_bids  prices
 left join flatten.herohandlehistory handles
 on prices.hero = handles.hero_handle
+and handles.latest_hero_handle  = 1
 join flatten.get_heros_with_stats_snapshot ghwss 
 on handles.current_hero_handle  = ghwss.hero_handle 
 and ghwss.is_deleted  = 0

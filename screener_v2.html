@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=1.0.1">
     <script src="/js/tradeChart.js?v=1.0.4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -353,28 +353,28 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="7d">
+                        <th class="sortable" data-sort="seven_day_score">
                             7d
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="last-main" title="Last Main">
+                        <th class="sortable" data-sort="last_main">
                             LM
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="last-3-main" title="Last 3 Main">
+                        <th class="sortable" data-sort="l3_main_median">
                             L3M
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="last-price" title="Last Price">
+                        <th class="sortable" data-sort="last_price">
                             Last
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -395,7 +395,7 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="bas" title="Bid-Ask-Spread">
+                        <th class="sortable" data-sort="bid_ask_spread">
                             BAS
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -409,14 +409,14 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="vol">
+                        <th class="sortable" data-sort="volume">
                             Vol
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="txn" title="Trades">
+                        <th class="sortable" data-sort="trades">
                             Txn
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -430,21 +430,21 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="so" title="Sell Orders">
+                        <th class="sortable" data-sort="sell_orders">
                             SO
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="b5-avg">
+                        <th class="sortable" data-sort="buy_5_avg">
                             B5 Avg
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
-                        <th class="sortable" data-sort="b5-sum">
+                        <th class="sortable" data-sort="buy_5_sum">
                             B5 Sum
                             <div class="sort-arrows">
                                 <span class="sort-arrow up"></span>
@@ -831,10 +831,13 @@
 
         function initializeSorting() {
             const headers = document.querySelectorAll('.sortable');
-            let currentSortColumn = '7d';
+            let currentSortColumn = 'seven_day_score';
             let currentSortOrder = 'desc';
 
             headers.forEach(header => {
+                // Initially hide all sort arrows
+                header.querySelector('.sort-arrows').style.display = 'none';
+
                 header.addEventListener('click', () => {
                     const sortKey = header.dataset.sort;
                     const isCurrentColumn = currentSortColumn === sortKey;
@@ -843,23 +846,35 @@
 
                     console.log(`Sorting by column: ${sortKey}, Order: ${currentSortOrder}`);
 
+                    // Hide sort arrows for all headers
                     headers.forEach(h => {
+                        h.querySelector('.sort-arrows').style.display = 'none';
                         h.querySelector('.sort-arrow.up').classList.remove('active');
                         h.querySelector('.sort-arrow.down').classList.remove('active');
                     });
 
+                    // Show sort arrows for the current header
+                    header.querySelector('.sort-arrows').style.display = 'inline-block';
+
                     if (currentSortOrder === 'asc') {
                         header.querySelector('.sort-arrow.up').classList.add('active');
+                        header.querySelector('.sort-arrow.down').classList.remove('active'); // Ensure down arrow is hidden
                     } else {
                         header.querySelector('.sort-arrow.down').classList.add('active');
+                        header.querySelector('.sort-arrow.up').classList.remove('active'); // Ensure up arrow is hidden
                     }
 
                     sortData(sortKey, currentSortOrder);
                 });
             });
 
-            // Initial sort on page load
-            sortData(currentSortColumn, currentSortOrder);
+            // Set initial sort arrow state for the default sort column
+            const initialHeader = document.querySelector(`.sortable[data-sort="${currentSortColumn}"]`);
+            if (initialHeader) {
+                initialHeader.querySelector('.sort-arrows').style.display = 'inline-block';
+                initialHeader.querySelector('.sort-arrow.down').classList.add('active');
+                initialHeader.querySelector('.sort-arrow.up').classList.remove('active'); // Ensure up arrow is hidden
+            }
         }
 
         function sortData(column, order) {
@@ -867,15 +882,16 @@
                 console.error('window.fullData is not an array');
                 return;
             }
-
+            
             const sortedData = [...window.fullData].sort((a, b) => {
-                const aValue = a[column];
-                const bValue = b[column];
+                const aValue = a[column] !== undefined ? a[column] : null;
+                const bValue = b[column] !== undefined ? b[column] : null;
 
                 // Convert values to numbers if they are not null or undefined
                 const aNum = aValue != null ? parseFloat(aValue) : null;
                 const bNum = bValue != null ? parseFloat(bValue) : null;
 
+                if (aNum == null && bNum == null) return 0; // Both are null, consider them equal
                 if (aNum == null) return order === 'asc' ? 1 : -1;
                 if (bNum == null) return order === 'asc' ? -1 : 1;
 

@@ -543,6 +543,7 @@
                                 <span class="sort-arrow down"></span>
                             </div>
                         </th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="marketplaceData">
@@ -954,6 +955,16 @@
                         ${item.buy_5_avg ? item.buy_5_avg.toFixed(3) : '-'}
                     </td>
                     <td>${item.buy_5_sum ? item.buy_5_sum.toFixed(3) : '-'}</td>
+                    <td>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <a href="https://x.com/${item.hero_handle}" target="_blank">
+                                <img src="/icons/x.svg" alt="X" style="width: 16px; height: 16px;">
+                            </a>
+                            <i class="fas fa-chart-bar" style="font-size: 16px; cursor: pointer;"></i>
+                            <i class="far fa-star" style="font-size: 16px; cursor: pointer;"></i>
+                        </div>
+                    </td>
+                    
                 `;
                 tableBody.appendChild(row);
             });

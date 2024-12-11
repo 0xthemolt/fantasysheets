@@ -434,21 +434,16 @@
                 });
             });
 
-            // Add event listeners for projected star buttons
-            document.querySelectorAll('.stars-change .star-option').forEach(button => {
+            // Add event listeners for star change buttons
+            document.querySelectorAll('.star-change .star-option').forEach(button => {
                 button.addEventListener('click', () => {
-                    const stars = button.dataset.stars;
-                    if (stars === 'all') {
-                        selectedStarsChange.clear();
-                        document.querySelectorAll('.stars-change .star-option').forEach(btn => btn.classList.remove('selected'));
+                    const value = button.dataset.value;
+                    if (selectedStarsChange.has(value)) {
+                        selectedStarsChange.delete(value);
+                        button.classList.remove('selected');
                     } else {
-                        if (selectedStarsChange.has(stars)) {
-                            selectedStarsChange.delete(stars);
-                            button.classList.remove('selected');
-                        } else {
-                            selectedStarsChange.add(stars);
-                            button.classList.add('selected');
-                        }
+                        selectedStarsChange.add(value);
+                        button.classList.add('selected');
                     }
                     filterData();
                 });

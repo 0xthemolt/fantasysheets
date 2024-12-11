@@ -334,6 +334,11 @@
             color: white; /* White text color */
             text-align: center;
         }
+
+        .favorite-star {
+            color: #FFD700; /* Yellow color for the filled star */
+            font-weight: bold; /* Optional: make the star appear bolder */
+        }
     </style>
 </head>
 <body>
@@ -342,6 +347,10 @@
             <div class="filter-section">
                 <div class="filter-title">Search Hero</div>
                 <input type="text" id="heroSearch" class="hero-search" placeholder="Search hero...">
+            </div>
+            <div class="filter-section">
+                <div class="filter-title">Only Favorites:</div>
+                <i class="far fa-star" id="onlyFavorites" style="font-size: 16px; cursor: pointer;"></i>
             </div>
             <div class="filter-section">
                 <div class="filter-title">Rarity Filter</div>
@@ -960,20 +969,98 @@
                             <a href="https://x.com/${item.hero_handle}" target="_blank">
                                 <img src="/icons/x.svg" alt="X" style="width: 16px; height: 16px;">
                             </a>
+                            <div class="star-icon-container" style="cursor: pointer; padding: 4px;">
+                                <i class="far fa-star" style="font-size: 16px;"></i>
+                            </div>
                             <i class="fas fa-chart-bar" style="font-size: 16px; cursor: pointer;"></i>
-                            <i class="far fa-star" style="font-size: 16px; cursor: pointer;"></i>
                         </div>
                     </td>
                     
                 `;
+                const starElement = row.querySelector('.star-icon-container');
+                starElement.addEventListener('click', () => toggleFavorite(item.hero_handle, item.rarity, starElement.querySelector('.fa-star')));
                 tableBody.appendChild(row);
             });
         }
 
+        function toggleFavorite(heroHandle, rarity, starElement) {
+            let favorites = JSON.parse(localStorage.getItem('screenerFavoriteHeroes')) || [];
+            const favoriteItem = { hero_handle: heroHandle, rarity: rarity };
+
+            const existingIndex = favorites.findIndex(fav => fav.hero_handle === heroHandle);
+
+            if (existingIndex !== -1) {
+                favorites.splice(existingIndex, 1);
+                starElement.classList.remove('favorite-star');
+                starElement.classList.replace('fas', 'far'); // Change from solid to regular
+                console.log(`Removed from favorites: ${heroHandle} (${rarity})`);
+            } else {
+                favorites.push(favoriteItem);
+                starElement.classList.add('favorite-star');
+                starElement.classList.replace('far', 'fas'); // Change from regular to solid
+                console.log(`Added to favorites: ${heroHandle} (${rarity})`);
+            }
+            localStorage.setItem('screenerFavoriteHeroes', JSON.stringify(favorites));
+        }
+
+        function loadFavorites() {
+            const favorites = JSON.parse(localStorage.getItem('screenerFavoriteHeroes')) || [];
+            console.log('Loaded favorites from localStorage:', favorites); // Debugging line
+
+            document.querySelectorAll('.marketplace-table tbody tr').forEach((row, index) => {
+                const item = window.fullData[index];
+                const heroHandle = item.hero_handle;
+                const rarity = item.rarity.toLowerCase();
+
+                const isFavorite = favorites.some(fav => fav.hero_handle === heroHandle && fav.rarity === rarity);
+
+                const starElement = row.querySelector('.fa-star');
+                if (isFavorite) {
+                    starElement.classList.add('favorite-star');
+                    starElement.classList.replace('far', 'fas'); // Change from regular to solid
+                } else {
+                    starElement.classList.remove('favorite-star');
+                    starElement.classList.replace('fas', 'far'); // Change from solid to regular
+                }
+            });
+        }
+
+        function filterFavorites() {
+            const onlyFavoritesButton = document.getElementById('onlyFavorites');
+            const onlyFavorites = onlyFavoritesButton.classList.toggle('active');
+            const favorites = JSON.parse(localStorage.getItem('screenerFavoriteHeroes')) || [];
+            
+            // Toggle the star icon class
+            if (onlyFavorites) {
+                onlyFavoritesButton.classList.replace('far', 'fas'); // Change from regular to solid
+                onlyFavoritesButton.classList.add('favorite-star');
+            } else {
+                onlyFavoritesButton.classList.replace('fas', 'far'); // Change from solid to regular
+                onlyFavoritesButton.classList.remove('favorite-star');
+            }
+
+            document.querySelectorAll('.marketplace-table tbody tr').forEach((row, index) => {
+                const item = window.fullData[index];
+                const heroHandle = item.hero_handle;
+                const rarity = item.rarity.toLowerCase();
+
+                const isFavorite = favorites.some(fav => fav.hero_handle === heroHandle && fav.rarity === rarity);
+
+                if (onlyFavorites && !isFavorite) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
-            initializeFilters(); // Initialize filters and slider first
-            await loadMarketplaceData(); // Load data after filters are initialized
+            initializeFilters();
+            await loadMarketplaceData();
             initializeSorting();
+            loadFavorites();
+
+            document.getElementById('onlyFavorites').addEventListener('click', filterFavorites);
         });
 
         function initializeSorting() {
@@ -993,9 +1080,6 @@
                     const isCurrentColumn = currentSortColumn === sortKey;
                     currentSortOrder = isCurrentColumn && currentSortOrder === 'desc' ? 'asc' : 'desc';
                     currentSortColumn = sortKey;
-
-                    console.log(`Sorting by column: ${sortKey}, Order: ${currentSortOrder}`);
-
                     // Remove active class from all sort arrows
                     headers.forEach(h => {
                         h.querySelector('.sort-arrow.up').classList.remove('active');

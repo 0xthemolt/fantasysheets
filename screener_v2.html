@@ -374,6 +374,7 @@
         let selectedRarities = new Set();
         let selectedCurrentStars = new Set();
         let selectedProjectedStars = new Set();
+        let selectedStarsChange = new Set();
         let searchTerm = '';
         let minFloorPrice = 0;
         let maxFloorPrice = 1000;
@@ -394,12 +395,12 @@
             });
 
             // Add event listeners for current star buttons
-            document.querySelectorAll('.current-stars .star-btn').forEach(button => {
+            document.querySelectorAll('.current-stars .star-option').forEach(button => {
                 button.addEventListener('click', () => {
                     const stars = button.dataset.stars;
                     if (stars === 'all') {
                         selectedCurrentStars.clear();
-                        document.querySelectorAll('.current-stars .star-btn').forEach(btn => btn.classList.remove('selected'));
+                        document.querySelectorAll('.current-stars .star-option').forEach(btn => btn.classList.remove('selected'));
                     } else {
                         if (selectedCurrentStars.has(stars)) {
                             selectedCurrentStars.delete(stars);
@@ -414,18 +415,38 @@
             });
 
             // Add event listeners for projected star buttons
-            document.querySelectorAll('.projected-stars .star-btn').forEach(button => {
+            document.querySelectorAll('.projected-stars .star-option').forEach(button => {
                 button.addEventListener('click', () => {
                     const stars = button.dataset.stars;
                     if (stars === 'all') {
                         selectedProjectedStars.clear();
-                        document.querySelectorAll('.projected-stars .star-btn').forEach(btn => btn.classList.remove('selected'));
+                        document.querySelectorAll('.projected-stars .star-option').forEach(btn => btn.classList.remove('selected'));
                     } else {
                         if (selectedProjectedStars.has(stars)) {
                             selectedProjectedStars.delete(stars);
                             button.classList.remove('selected');
                         } else {
                             selectedProjectedStars.add(stars);
+                            button.classList.add('selected');
+                        }
+                    }
+                    filterData();
+                });
+            });
+
+            // Add event listeners for projected star buttons
+            document.querySelectorAll('.stars-change .star-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    const stars = button.dataset.stars;
+                    if (stars === 'all') {
+                        selectedStarsChange.clear();
+                        document.querySelectorAll('.stars-change .star-option').forEach(btn => btn.classList.remove('selected'));
+                    } else {
+                        if (selectedStarsChange.has(stars)) {
+                            selectedStarsChange.delete(stars);
+                            button.classList.remove('selected');
+                        } else {
+                            selectedStarsChange.add(stars);
                             button.classList.add('selected');
                         }
                     }
@@ -548,10 +569,12 @@
                                           selectedCurrentStars.has(item.current_stars.toString());
                 const matchesProjectedStars = selectedProjectedStars.size === 0 || 
                                             selectedProjectedStars.has(item.projected_stars.toString());
+                const matchesStarsChange = selectedStarsChange.size === 0 || 
+                                            selectedStarsChange.has(item.projected_stars_diff.toString());
                 const matchesPrice = item.floor >= minFloorPrice && item.floor <= maxFloorPrice;
                 
                 return matchesRarity && matchesSearch && matchesCurrentStars && 
-                       matchesProjectedStars && matchesPrice;
+                       matchesProjectedStars && matchesStarsChange && matchesPrice;
             });
 
             // Update the record count

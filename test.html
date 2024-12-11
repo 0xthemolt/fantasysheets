@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Squares</title>
+    <style>
+        .color-square {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="colorContainer"></div>
+
+    <script>
+        const colors = [
+            '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf',
+            '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850'
+        ];
+
+        const container = document.getElementById('colorContainer');
+
+        colors.forEach(color => {
+            const square = document.createElement('div');
+            square.className = 'color-square';
+            square.style.backgroundColor = color;
+            container.appendChild(square);
+        });
+    </script>
+</body>
+</html>

@@ -470,6 +470,35 @@
         let maxFloorPrice = 1000;
 
         function initializeFilters() {
+            // Initialize price slider
+            const priceSlider = $("#priceSlider").slider({
+                range: true,
+                min: 0,
+                max: 1000,
+                values: [0, 1000],
+                step: 0.1,
+                slide: function(event, ui) {
+                    $("#minPrice").val(ui.values[0]);
+                    $("#maxPrice").val(ui.values[1]);
+                    minFloorPrice = ui.values[0];
+                    maxFloorPrice = ui.values[1];
+                    filterData();
+                }
+            });
+
+            // Initialize price inputs
+            $("#minPrice, #maxPrice").on("input", function() {
+                const min = parseFloat($("#minPrice").val()) || 0;
+                const max = parseFloat($("#maxPrice").val()) || maxFloorPrice;
+                
+                if (min <= max) {
+                    priceSlider.slider("values", [min, max]);
+                    minFloorPrice = min;
+                    maxFloorPrice = max;
+                    filterData();
+                }
+            });
+
             document.querySelectorAll('.rarity-button').forEach(button => {
                 button.addEventListener('click', () => {
                     const rarity = button.dataset.rarity;
@@ -564,80 +593,47 @@
                 searchTerm = e.target.value;
                 filterData();
             });
-
-            // Initialize price slider
-            const priceSlider = $("#priceSlider").slider({
-                range: true,
-                min: 0,
-                max: 1000,
-                values: [0, 1000],
-                step: 0.1,
-                slide: function(event, ui) {
-                    $("#minPrice").val(ui.values[0]);
-                    $("#maxPrice").val(ui.values[1]);
-                    minFloorPrice = ui.values[0];
-                    maxFloorPrice = ui.values[1];
-                    filterData();
-                }
-            });
-
-            // Initialize price inputs
-            $("#minPrice, #maxPrice").on("input", function() {
-                const min = parseFloat($("#minPrice").val()) || 0;
-                const max = parseFloat($("#maxPrice").val()) || maxFloorPrice;
-                
-                if (min <= max) {
-                    priceSlider.slider("values", [min, max]);
-                    minFloorPrice = min;
-                    maxFloorPrice = max;
-                    filterData();
-                }
-            });
         }
 
         async function loadMarketplaceData() {
             try {
-                const timestamp = new Date().getTime(); // Generate a unique timestamp
+                const timestamp = new Date().getTime();
                 const [marketplaceResponse, heroResponse] = await Promise.all([
-                    fetch(`/data/marketplace/marketplace.json?v=${timestamp}`), // Append timestamp
-                    fetch(`/hero_stats.json?v=${timestamp}`) // Append timestamp
+                    fetch(`/data/marketplace/marketplace.json?v=${timestamp}`),
+                    fetch(`/hero_stats.json?v=${timestamp}`)
                 ]);
-                
+
                 const marketplaceData = await marketplaceResponse.json();
                 const heroData = await heroResponse.json();
-                
-                // Access the heroes array from the response
+
                 const heroes = heroData.heroes;
-                
-                // Create a map of hero stats for faster lookups
                 const heroMap = new Map(heroes.map(hero => [hero.hero_handle, hero]));
-                
-                // Combine the data
+
                 window.fullData = marketplaceData.map(item => ({
                     ...item,
-                    // Merge in hero stats data
                     ...heroMap.get(item.hero_handle)
                 }));
-                
-                // After loading data, set initial price range
+
+                // Set initial price range and render data
                 const allFloorPrices = window.fullData
                     .map(item => item.floor)
                     .filter(price => price !== null && price !== undefined);
-                
+
                 if (allFloorPrices.length > 0) {
                     minFloorPrice = Math.floor(Math.min(...allFloorPrices));
                     maxFloorPrice = Math.ceil(Math.max(...allFloorPrices));
-                    
+
+                    // Ensure slider is initialized before setting options
                     $("#priceSlider").slider("option", {
                         min: minFloorPrice,
                         max: maxFloorPrice,
                         values: [minFloorPrice, maxFloorPrice]
                     });
-                    
+
                     $("#minPrice").val(minFloorPrice);
                     $("#maxPrice").val(maxFloorPrice);
                 }
-                
+
                 filterData(); // Initial render
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -675,26 +671,22 @@
 
             const min = Math.min(...validPrices);
             const max = Math.max(...validPrices);
-            
+
             // If min and max are the same, return middle color
-            if (min === max) return 'rgb(255, 255, 0)'; // Yellow for equal values
-            
+            if (min === max) return '#ffffbf'; // Middle color for equal values
+
             // Normalize price between 0 and 1
             const normalized = (price - min) / (max - min);
-            
-            // Flip the normalized value to make high prices red and low prices green
-            const flipped = 1 - normalized;
-            
-            // Create color gradient from green (low) to yellow (middle) to red (high)
-            if (flipped <= 0.5) {
-                // Yellow to Red (for higher prices)
-                const factor = flipped * 2;
-                return `rgb(255, ${Math.round(255 * factor)}, 0)`;
-            } else {
-                // Green to Yellow (for lower prices)
-                const factor = (flipped - 0.5) * 2;
-                return `rgb(${Math.round(255 * (1 - factor))}, 255, 0)`;
-            }
+
+            // Use a static color gradient
+            const colors = [
+                '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf',
+                '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850'
+            ].reverse();  // Reverse to make red for high values
+
+            // Determine the color index
+            const index = Math.floor(normalized * (colors.length - 1));
+            return colors[index];
         }
 
         function getHeatmapColor(value, min, max) {
@@ -794,20 +786,20 @@
                     <td style="background-color: ${getHeatmapColor(item.l3_main_median, minLastThreeMain, maxLastThreeMain)}; color: black;">
                         ${item.l3_main_median ? Math.round(item.l3_main_median) : ''}
                     </td>
-                    <td>${item.last_price ? 
-                        `<div style="padding: 4px 8px; background-color: ${lastPriceColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.last_price.toFixed(3)}</div>` : 
-                        '-'}</td>
-                    <td>${item.floor ? 
-                        `<div style="padding: 4px 8px; background-color: ${floorColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.floor.toFixed(3)}</div>` : 
-                        ''}</td>
-                    <td>${item.bid ? 
-                        `<div style="padding: 4px 8px; background-color: ${bidColor}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.bid.toFixed(3)}</div>` : 
-                        ''}</td>
+                    <td style="background-color: ${lastPriceColor}; color: black;">
+                        ${item.last_price ? item.last_price.toFixed(3) : '-'}
+                    </td>
+                    <td style="background-color: ${floorColor}; color: black;">
+                        ${item.floor ? item.floor.toFixed(3) : '-'}
+                    </td>
+                    <td style="background-color: ${bidColor}; color: black;">
+                        ${item.bid ? item.bid.toFixed(3) : '-'}
+                    </td>
                     <td style="text-align: right" title="Bid-Ask-Spread">
                         ${(item.floor && item.bid) ? 
                             `${(item.floor - item.bid).toFixed(4)}<br>
                              ${(((item.floor - item.bid) / ((item.floor + item.bid) / 2)) * 100).toFixed(0)}%` 
-                            : ''}
+                            : '-'}
                     </td>
                     <td data-hours="${item.hours_since_last_trade}">
                         ${item.hours_since_last_trade < 1 ? '<1h' : 
@@ -821,19 +813,19 @@
                         item.volume.toFixed(2)}</td>
                     <td>${item.trades}</td>
                     <td>${item.buyers || '-'}</td>
-                    <td>${item.sell_orders || ''}</td>
-                    <td>${item.buy_5_avg ? 
-                        `<div style="padding: 4px 8px; background-color: ${buy5Color}; color: black; font-weight: bold; text-shadow: none; border-radius: 4px;">${item.buy_5_avg.toFixed(3)}</div>` : 
-                        ''}</td>
-                    <td>${item.buy_5_sum ? item.buy_5_sum.toFixed(3) : ''}</td>
+                    <td>${item.sell_orders || '-'}</td>
+                    <td style="background-color: ${buy5Color}; color: black;">
+                        ${item.buy_5_avg ? item.buy_5_avg.toFixed(3) : '-'}
+                    </td>
+                    <td>${item.buy_5_sum ? item.buy_5_sum.toFixed(3) : '-'}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeFilters();
-            loadMarketplaceData();
+        document.addEventListener('DOMContentLoaded', async () => {
+            initializeFilters(); // Initialize filters and slider first
+            await loadMarketplaceData(); // Load data after filters are initialized
             initializeSorting();
         });
 
@@ -871,17 +863,24 @@
         }
 
         function sortData(column, order) {
+            if (!Array.isArray(window.fullData)) {
+                console.error('window.fullData is not an array');
+                return;
+            }
+
             const sortedData = [...window.fullData].sort((a, b) => {
                 const aValue = a[column];
                 const bValue = b[column];
 
-                // Handle cases where values might be undefined or null
-                if (aValue == null) return order === 'asc' ? 1 : -1;
-                if (bValue == null) return order === 'asc' ? -1 : 1;
+                // Convert values to numbers if they are not null or undefined
+                const aNum = aValue != null ? parseFloat(aValue) : null;
+                const bNum = bValue != null ? parseFloat(bValue) : null;
 
-                // Compare values
-                if (aValue < bValue) return order === 'asc' ? -1 : 1;
-                if (aValue > bValue) return order === 'asc' ? 1 : -1;
+                if (aNum == null) return order === 'asc' ? 1 : -1;
+                if (bNum == null) return order === 'asc' ? -1 : 1;
+
+                if (aNum < bNum) return order === 'asc' ? -1 : 1;
+                if (aNum > bNum) return order === 'asc' ? 1 : -1;
                 return 0;
             });
 

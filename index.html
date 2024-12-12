@@ -171,15 +171,34 @@
             color: grey;
             text-align: center;
         }
+
+        /* New specific classes for Pro section */
+        .pro-container .pro-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .pro-container .nav-item {
+            margin: 0;
+            flex: 1 1 calc(50% - 0.5rem);
+            min-width: 120px;
+        }
+
+        .pro-container .nav-link {
+            height: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
     <h1>FantasySheets - Tournament Analytics</h1>
     <div class="nav-container">
         <div class="grid-layout">
-            <div class="column-container">
-                <h2 class="column-title">FantasyScout</h2>
-                <ul class="nav-list" id="scoutList"></ul>
+            <div class="column-container pro-container">
+                <h2 class="column-title">Pro (in development) </h2>
+                <ul class="nav-list pro-list" id="proList"></ul>
             </div>
             <div class="column-container">
                 <h2 class="column-title">Heroes</h2>
@@ -207,8 +226,13 @@
 
     <script>
     const pages = {
+        pro: [ 
+            { filename: 'index.html', title: 'FantasyScout' },
+            { filename: 'index.html', title: 'FantasyScreener' },
+        ],
         scout: [ 
             { filename: 'index.html', title: 'FantasyScout (in development)' },
+            { filename: 'index.html', title: 'FantasyScreener (in devleopment)' },
         ],
         heroes: [
             { filename: 'hero_scorecenter.html', title: 'Hero Score Center' },
@@ -218,7 +242,7 @@
         players: [
             { filename: 'player_decks.html', title: 'Player Decks', isNew: true },
             { filename: 'player_rewards.html', title: 'Player Rewards Leaders' },
-            { filename: 'player_rewards_history.html', title: 'Player Rewards Charts/Totals (FUTURE)' },
+            // { filename: 'player_rewards_history.html', title: 'Player Rewards Charts/Totals (FUTURE)' },
         ],
         rewards: [
             { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
@@ -226,7 +250,8 @@
             { filename: 'tournament_reward_history.html', title: 'League Reward History'},
         ],
         preview: [
-            { filename: 'tournaments.html', title: 'Tournament Entry Stats', isNew: true },
+            { filename: 'tournaments.html', title: 'Tournament Entry Stats', isNew: true }, 
+            { filename: 'index.html', title: 'PaperHands (in development)' },
             // { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
         ],
         other: [
@@ -237,7 +262,7 @@
     };
 
     function loadPages() {
-        const scoutList = document.getElementById('scoutList');
+        const proList = document.getElementById('proList');
         const heroList = document.getElementById('heroList');
         const playerList = document.getElementById('playerList');
         const rewardList = document.getElementById('rewardList');
@@ -279,7 +304,7 @@
             });
         }
 
-        createLinks(pages.scout, scoutList);
+        createLinks(pages.pro, proList);
         createLinks(pages.heroes, heroList);
         createLinks(pages.players, playerList);
         createLinks(pages.rewards, rewardList);

@@ -23,6 +23,16 @@
         <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
         <link rel="stylesheet" href="./styles.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <style>
+            .total-row {
+                background-color: rgba(0, 0, 0, 0.1);
+                font-weight: bold;
+            }
+
+            .total-row td {
+                border-top: 2px solid #666;
+            }
+        </style>
     </head>
     <body>
         <div class="title-container">
@@ -89,8 +99,6 @@
                     </span>
                 </th>
                 <th class="reward-columns rewards-section" data-sort="reward_eth"><img src="icons/eth.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down active"></span></div></th>
-                <th class="reward-columns rewards-section" data-sort="reward_pack"><img src="icons/pack.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
-                <th class="reward-columns rewards-section" data-sort="reward_frag"><img src="icons/fragment.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="combined_packs"><img src="icons/pack.webp" class="reward-icon">+<img src="icons/fragment.webp" class="reward-icon" style="padding-left: 2px;"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="reward_fan"><img src="icons/fan.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
                 <th class="reward-columns rewards-section" data-sort="reward_gold"><img src="icons/blast.webp" class="reward-icon"><div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div></th>
@@ -144,8 +152,6 @@
                     (49%)
                 </td>
                 <td class="reward-columns" data-value="0.7900000000000001">0.79</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="8055">8055</td>  
                 <td class="reward-columns" data-value="80.55">80.5</td>
                 <td class="reward-columns" data-value="684433">684k</td>  
                 <td class="reward-columns" data-value="3323">
@@ -186,8 +192,6 @@
                     (19%)
                 </td>
                 <td class="reward-columns" data-value="0.48300000000000004">0.48</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="7217">7217</td>  
                 <td class="reward-columns" data-value="72.17">72.2</td>
                 <td class="reward-columns" data-value="500415">500k</td>  
                 <td class="reward-columns" data-value="2088">
@@ -228,8 +232,6 @@
                     (79%)
                 </td>
                 <td class="reward-columns" data-value="0.4">0.40</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="3850">3850</td>  
                 <td class="reward-columns" data-value="38.5">38.5</td>
                 <td class="reward-columns" data-value="352316">352k</td>  
                 <td class="reward-columns" data-value="1759">
@@ -270,8 +272,6 @@
                     (21%)
                 </td>
                 <td class="reward-columns" data-value="0.27">0.27</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2252">2252</td>  
                 <td class="reward-columns" data-value="22.52">22.5</td>
                 <td class="reward-columns" data-value="194867">195k</td>  
                 <td class="reward-columns" data-value="812">
@@ -312,8 +312,6 @@
                     (20%)
                 </td>
                 <td class="reward-columns" data-value="0.245">0.24</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="4122">4122</td>  
                 <td class="reward-columns" data-value="41.22">41.2</td>
                 <td class="reward-columns" data-value="295242">295k</td>  
                 <td class="reward-columns" data-value="1202">
@@ -354,8 +352,6 @@
                     (12%)
                 </td>
                 <td class="reward-columns" data-value="0.24">0.24</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1893">1893</td>  
                 <td class="reward-columns" data-value="18.93">18.9</td>
                 <td class="reward-columns" data-value="188392">188k</td>  
                 <td class="reward-columns" data-value="781">
@@ -396,8 +392,6 @@
                     (33%)
                 </td>
                 <td class="reward-columns" data-value="0.22">0.22</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2220">2220</td>  
                 <td class="reward-columns" data-value="22.2">22.2</td>
                 <td class="reward-columns" data-value="147800">148k</td>  
                 <td class="reward-columns" data-value="604">
@@ -438,8 +432,6 @@
                     (25%)
                 </td>
                 <td class="reward-columns" data-value="0.145">0.14</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2861">2861</td>  
                 <td class="reward-columns" data-value="28.61">28.6</td>
                 <td class="reward-columns" data-value="199968">200k</td>  
                 <td class="reward-columns" data-value="832">
@@ -480,8 +472,6 @@
                     (27%)
                 </td>
                 <td class="reward-columns" data-value="0.145">0.14</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2257">2257</td>  
                 <td class="reward-columns" data-value="22.57">22.6</td>
                 <td class="reward-columns" data-value="186128">186k</td>  
                 <td class="reward-columns" data-value="801">
@@ -522,8 +512,6 @@
                     (3%)
                 </td>
                 <td class="reward-columns" data-value="0.14">0.14</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="4104">4104</td>  
                 <td class="reward-columns" data-value="41.04">41.0</td>
                 <td class="reward-columns" data-value="199946">200k</td>  
                 <td class="reward-columns" data-value="824">
@@ -564,8 +552,6 @@
                     (21%)
                 </td>
                 <td class="reward-columns" data-value="0.13999999999999999">0.14</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2249">2249</td>  
                 <td class="reward-columns" data-value="22.49">22.5</td>
                 <td class="reward-columns" data-value="122219">122k</td>  
                 <td class="reward-columns" data-value="485">
@@ -606,8 +592,6 @@
                     (11%)
                 </td>
                 <td class="reward-columns" data-value="0.12400000000000001">0.12</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1792">1792</td>  
                 <td class="reward-columns" data-value="17.92">17.9</td>
                 <td class="reward-columns" data-value="131552">132k</td>  
                 <td class="reward-columns" data-value="534">
@@ -648,8 +632,6 @@
                     (18%)
                 </td>
                 <td class="reward-columns" data-value="0.115">0.12</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2854">2854</td>  
                 <td class="reward-columns" data-value="28.54">28.5</td>
                 <td class="reward-columns" data-value="203133">203k</td>  
                 <td class="reward-columns" data-value="918">
@@ -690,8 +672,6 @@
                     (31%)
                 </td>
                 <td class="reward-columns" data-value="0.105">0.10</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1384">1384</td>  
                 <td class="reward-columns" data-value="13.84">13.8</td>
                 <td class="reward-columns" data-value="121381">121k</td>  
                 <td class="reward-columns" data-value="567">
@@ -732,8 +712,6 @@
                     (42%)
                 </td>
                 <td class="reward-columns" data-value="0.1">0.10</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2156">2156</td>  
                 <td class="reward-columns" data-value="21.56">21.6</td>
                 <td class="reward-columns" data-value="160260">160k</td>  
                 <td class="reward-columns" data-value="710">
@@ -774,8 +752,6 @@
                     (23%)
                 </td>
                 <td class="reward-columns" data-value="0.085">0.09</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1614">1614</td>  
                 <td class="reward-columns" data-value="16.14">16.1</td>
                 <td class="reward-columns" data-value="125471">125k</td>  
                 <td class="reward-columns" data-value="604">
@@ -816,8 +792,6 @@
                     (31%)
                 </td>
                 <td class="reward-columns" data-value="0.08">0.08</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2474">2474</td>  
                 <td class="reward-columns" data-value="24.74">24.7</td>
                 <td class="reward-columns" data-value="149090">149k</td>  
                 <td class="reward-columns" data-value="703">
@@ -858,8 +832,6 @@
                     (60%)
                 </td>
                 <td class="reward-columns" data-value="0.075">0.07</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1517">1517</td>  
                 <td class="reward-columns" data-value="15.17">15.2</td>
                 <td class="reward-columns" data-value="120930">121k</td>  
                 <td class="reward-columns" data-value="578">
@@ -900,8 +872,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.075">0.07</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="890">890</td>  
                 <td class="reward-columns" data-value="8.9">8.9</td>
                 <td class="reward-columns" data-value="82100">82k</td>  
                 <td class="reward-columns" data-value="393">
@@ -942,8 +912,6 @@
                     (25%)
                 </td>
                 <td class="reward-columns" data-value="0.07">0.07</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="2105">2105</td>  
                 <td class="reward-columns" data-value="21.05">21.1</td>
                 <td class="reward-columns" data-value="131004">131k</td>  
                 <td class="reward-columns" data-value="599">
@@ -984,8 +952,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.07">0.07</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1675">1675</td>  
                 <td class="reward-columns" data-value="16.75">16.8</td>
                 <td class="reward-columns" data-value="121823">122k</td>  
                 <td class="reward-columns" data-value="610">
@@ -1026,8 +992,6 @@
                     (38%)
                 </td>
                 <td class="reward-columns" data-value="0.07">0.07</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1310">1310</td>  
                 <td class="reward-columns" data-value="13.1">13.1</td>
                 <td class="reward-columns" data-value="76614">77k</td>  
                 <td class="reward-columns" data-value="320">
@@ -1068,8 +1032,6 @@
                     (18%)
                 </td>
                 <td class="reward-columns" data-value="0.06">0.06</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1373">1373</td>  
                 <td class="reward-columns" data-value="13.73">13.7</td>
                 <td class="reward-columns" data-value="89448">89k</td>  
                 <td class="reward-columns" data-value="372">
@@ -1110,8 +1072,6 @@
                     (6%)
                 </td>
                 <td class="reward-columns" data-value="0.05">0.05</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="887">887</td>  
                 <td class="reward-columns" data-value="8.87">8.9</td>
                 <td class="reward-columns" data-value="79761">80k</td>  
                 <td class="reward-columns" data-value="326">
@@ -1152,8 +1112,6 @@
                     (19%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1546">1546</td>  
                 <td class="reward-columns" data-value="15.46">15.5</td>
                 <td class="reward-columns" data-value="105624">106k</td>  
                 <td class="reward-columns" data-value="459">
@@ -1194,8 +1152,6 @@
                     (16%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="776">776</td>  
                 <td class="reward-columns" data-value="7.76">7.8</td>
                 <td class="reward-columns" data-value="60151">60k</td>  
                 <td class="reward-columns" data-value="254">
@@ -1236,8 +1192,6 @@
                     (67%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="690">690</td>  
                 <td class="reward-columns" data-value="6.9">6.9</td>
                 <td class="reward-columns" data-value="37891">38k</td>  
                 <td class="reward-columns" data-value="164">
@@ -1278,8 +1232,6 @@
                     (7%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="673">673</td>  
                 <td class="reward-columns" data-value="6.73">6.7</td>
                 <td class="reward-columns" data-value="54250">54k</td>  
                 <td class="reward-columns" data-value="220">
@@ -1320,8 +1272,6 @@
                     (14%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="571">571</td>  
                 <td class="reward-columns" data-value="5.71">5.7</td>
                 <td class="reward-columns" data-value="33684">34k</td>  
                 <td class="reward-columns" data-value="128">
@@ -1362,8 +1312,6 @@
                     (6%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="514">514</td>  
                 <td class="reward-columns" data-value="5.14">5.1</td>
                 <td class="reward-columns" data-value="45515">46k</td>  
                 <td class="reward-columns" data-value="183">
@@ -1404,8 +1352,6 @@
                     (6%)
                 </td>
                 <td class="reward-columns" data-value="0.04">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="391">391</td>  
                 <td class="reward-columns" data-value="3.91">3.9</td>
                 <td class="reward-columns" data-value="27503">28k</td>  
                 <td class="reward-columns" data-value="99">
@@ -1446,8 +1392,6 @@
                     (32%)
                 </td>
                 <td class="reward-columns" data-value="0.035">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="890">890</td>  
                 <td class="reward-columns" data-value="8.9">8.9</td>
                 <td class="reward-columns" data-value="66161">66k</td>  
                 <td class="reward-columns" data-value="291">
@@ -1488,8 +1432,6 @@
                     (43%)
                 </td>
                 <td class="reward-columns" data-value="0.035">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="750">750</td>  
                 <td class="reward-columns" data-value="7.5">7.5</td>
                 <td class="reward-columns" data-value="54225">54k</td>  
                 <td class="reward-columns" data-value="257">
@@ -1530,8 +1472,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.035">0.04</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="410">410</td>  
                 <td class="reward-columns" data-value="4.1">4.1</td>
                 <td class="reward-columns" data-value="37700">38k</td>  
                 <td class="reward-columns" data-value="189">
@@ -1572,8 +1512,6 @@
                     (44%)
                 </td>
                 <td class="reward-columns" data-value="0.03">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1570">1570</td>  
                 <td class="reward-columns" data-value="15.7">15.7</td>
                 <td class="reward-columns" data-value="77858">78k</td>  
                 <td class="reward-columns" data-value="335">
@@ -1614,8 +1552,6 @@
                     (16%)
                 </td>
                 <td class="reward-columns" data-value="0.03">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1455">1455</td>  
                 <td class="reward-columns" data-value="14.55">14.6</td>
                 <td class="reward-columns" data-value="85750">86k</td>  
                 <td class="reward-columns" data-value="372">
@@ -1656,8 +1592,6 @@
                     (32%)
                 </td>
                 <td class="reward-columns" data-value="0.03">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1055">1055</td>  
                 <td class="reward-columns" data-value="10.55">10.6</td>
                 <td class="reward-columns" data-value="60408">60k</td>  
                 <td class="reward-columns" data-value="248">
@@ -1698,8 +1632,6 @@
                     (19%)
                 </td>
                 <td class="reward-columns" data-value="0.03">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="499">499</td>  
                 <td class="reward-columns" data-value="4.99">5.0</td>
                 <td class="reward-columns" data-value="26114">26k</td>  
                 <td class="reward-columns" data-value="95">
@@ -1740,8 +1672,6 @@
                     (18%)
                 </td>
                 <td class="reward-columns" data-value="0.025">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1260">1260</td>  
                 <td class="reward-columns" data-value="12.6">12.6</td>
                 <td class="reward-columns" data-value="79007">79k</td>  
                 <td class="reward-columns" data-value="336">
@@ -1782,8 +1712,6 @@
                     (5%)
                 </td>
                 <td class="reward-columns" data-value="0.025">0.03</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="656">656</td>  
                 <td class="reward-columns" data-value="6.56">6.6</td>
                 <td class="reward-columns" data-value="47176">47k</td>  
                 <td class="reward-columns" data-value="179">
@@ -1824,8 +1752,6 @@
                     (7%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1034">1034</td>  
                 <td class="reward-columns" data-value="10.34">10.3</td>
                 <td class="reward-columns" data-value="71368">71k</td>  
                 <td class="reward-columns" data-value="299">
@@ -1866,8 +1792,6 @@
                     (33%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1025">1025</td>  
                 <td class="reward-columns" data-value="10.25">10.2</td>
                 <td class="reward-columns" data-value="74511">75k</td>  
                 <td class="reward-columns" data-value="352">
@@ -1908,8 +1832,6 @@
                     (11%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="396">396</td>  
                 <td class="reward-columns" data-value="3.96">4.0</td>
                 <td class="reward-columns" data-value="24920">25k</td>  
                 <td class="reward-columns" data-value="99">
@@ -1950,8 +1872,6 @@
                     (14%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="384">384</td>  
                 <td class="reward-columns" data-value="3.84">3.8</td>
                 <td class="reward-columns" data-value="20320">20k</td>  
                 <td class="reward-columns" data-value="74">
@@ -1992,8 +1912,6 @@
                     (15%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="380">380</td>  
                 <td class="reward-columns" data-value="3.8">3.8</td>
                 <td class="reward-columns" data-value="37750">38k</td>  
                 <td class="reward-columns" data-value="159">
@@ -2034,8 +1952,6 @@
                     (20%)
                 </td>
                 <td class="reward-columns" data-value="0.02">0.02</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="251">251</td>  
                 <td class="reward-columns" data-value="2.51">2.5</td>
                 <td class="reward-columns" data-value="17130">17k</td>  
                 <td class="reward-columns" data-value="67">
@@ -2076,8 +1992,6 @@
                     (25%)
                 </td>
                 <td class="reward-columns" data-value="0.015">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="804">804</td>  
                 <td class="reward-columns" data-value="8.04">8.0</td>
                 <td class="reward-columns" data-value="53534">54k</td>  
                 <td class="reward-columns" data-value="242">
@@ -2118,8 +2032,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.015">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="162">162</td>  
                 <td class="reward-columns" data-value="1.62">1.6</td>
                 <td class="reward-columns" data-value="12100">12k</td>  
                 <td class="reward-columns" data-value="44">
@@ -2160,8 +2072,6 @@
                     (10%)
                 </td>
                 <td class="reward-columns" data-value="0.014">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="324">324</td>  
                 <td class="reward-columns" data-value="3.24">3.2</td>
                 <td class="reward-columns" data-value="24751">25k</td>  
                 <td class="reward-columns" data-value="97">
@@ -2202,8 +2112,6 @@
                     (8%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="840">840</td>  
                 <td class="reward-columns" data-value="8.4">8.4</td>
                 <td class="reward-columns" data-value="58007">58k</td>  
                 <td class="reward-columns" data-value="235">
@@ -2244,8 +2152,6 @@
                     (18%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="829">829</td>  
                 <td class="reward-columns" data-value="8.29">8.3</td>
                 <td class="reward-columns" data-value="69022">69k</td>  
                 <td class="reward-columns" data-value="295">
@@ -2286,8 +2192,6 @@
                     (30%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="666">666</td>  
                 <td class="reward-columns" data-value="6.66">6.7</td>
                 <td class="reward-columns" data-value="33183">33k</td>  
                 <td class="reward-columns" data-value="146">
@@ -2328,8 +2232,6 @@
                     (67%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="595">595</td>  
                 <td class="reward-columns" data-value="5.95">6.0</td>
                 <td class="reward-columns" data-value="33781">34k</td>  
                 <td class="reward-columns" data-value="149">
@@ -2370,8 +2272,6 @@
                     (11%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="471">471</td>  
                 <td class="reward-columns" data-value="4.71">4.7</td>
                 <td class="reward-columns" data-value="30483">30k</td>  
                 <td class="reward-columns" data-value="121">
@@ -2412,8 +2312,6 @@
                     (9%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="420">420</td>  
                 <td class="reward-columns" data-value="4.2">4.2</td>
                 <td class="reward-columns" data-value="30500">30k</td>  
                 <td class="reward-columns" data-value="129">
@@ -2454,8 +2352,6 @@
                     (14%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="400">400</td>  
                 <td class="reward-columns" data-value="4.0">4.0</td>
                 <td class="reward-columns" data-value="26251">26k</td>  
                 <td class="reward-columns" data-value="106">
@@ -2496,8 +2392,6 @@
                     (11%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="359">359</td>  
                 <td class="reward-columns" data-value="3.59">3.6</td>
                 <td class="reward-columns" data-value="25541">26k</td>  
                 <td class="reward-columns" data-value="104">
@@ -2538,8 +2432,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="266">266</td>  
                 <td class="reward-columns" data-value="2.66">2.7</td>
                 <td class="reward-columns" data-value="32530">33k</td>  
                 <td class="reward-columns" data-value="126">
@@ -2580,8 +2472,6 @@
                     (11%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="256">256</td>  
                 <td class="reward-columns" data-value="2.56">2.6</td>
                 <td class="reward-columns" data-value="18042">18k</td>  
                 <td class="reward-columns" data-value="73">
@@ -2622,8 +2512,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="200">200</td>  
                 <td class="reward-columns" data-value="2.0">2.0</td>
                 <td class="reward-columns" data-value="17491">17k</td>  
                 <td class="reward-columns" data-value="70">
@@ -2664,8 +2552,6 @@
                     (50%)
                 </td>
                 <td class="reward-columns" data-value="0.01">0.01</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="160">160</td>  
                 <td class="reward-columns" data-value="1.6">1.6</td>
                 <td class="reward-columns" data-value="12210">12k</td>  
                 <td class="reward-columns" data-value="50">
@@ -2706,8 +2592,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.004">0.00</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="115">115</td>  
                 <td class="reward-columns" data-value="1.15">1.1</td>
                 <td class="reward-columns" data-value="8150">8k</td>  
                 <td class="reward-columns" data-value="29">
@@ -2748,8 +2632,6 @@
                     (27%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1408">1408</td>  
                 <td class="reward-columns" data-value="14.08">14.1</td>
                 <td class="reward-columns" data-value="54899">55k</td>  
                 <td class="reward-columns" data-value="249">
@@ -2790,8 +2672,6 @@
                     (42%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1289">1289</td>  
                 <td class="reward-columns" data-value="12.89">12.9</td>
                 <td class="reward-columns" data-value="62560">63k</td>  
                 <td class="reward-columns" data-value="302">
@@ -2832,8 +2712,6 @@
                     (29%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="1050">1050</td>  
                 <td class="reward-columns" data-value="10.5">10.5</td>
                 <td class="reward-columns" data-value="58129">58k</td>  
                 <td class="reward-columns" data-value="262">
@@ -2874,8 +2752,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="535">535</td>  
                 <td class="reward-columns" data-value="5.35">5.3</td>
                 <td class="reward-columns" data-value="36100">36k</td>  
                 <td class="reward-columns" data-value="176">
@@ -2916,8 +2792,6 @@
                     (50%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="470">470</td>  
                 <td class="reward-columns" data-value="4.7">4.7</td>
                 <td class="reward-columns" data-value="20800">21k</td>  
                 <td class="reward-columns" data-value="104">
@@ -2958,8 +2832,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="409">409</td>  
                 <td class="reward-columns" data-value="4.09">4.1</td>
                 <td class="reward-columns" data-value="56451">56k</td>  
                 <td class="reward-columns" data-value="217">
@@ -3000,8 +2872,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="325">325</td>  
                 <td class="reward-columns" data-value="3.25">3.2</td>
                 <td class="reward-columns" data-value="24700">25k</td>  
                 <td class="reward-columns" data-value="124">
@@ -3042,8 +2912,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="250">250</td>  
                 <td class="reward-columns" data-value="2.5">2.5</td>
                 <td class="reward-columns" data-value="13000">13k</td>  
                 <td class="reward-columns" data-value="65">
@@ -3084,8 +2952,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="250">250</td>  
                 <td class="reward-columns" data-value="2.5">2.5</td>
                 <td class="reward-columns" data-value="13000">13k</td>  
                 <td class="reward-columns" data-value="65">
@@ -3126,8 +2992,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="234">234</td>  
                 <td class="reward-columns" data-value="2.34">2.3</td>
                 <td class="reward-columns" data-value="7973">8k</td>  
                 <td class="reward-columns" data-value="34">
@@ -3168,8 +3032,6 @@
                     (7%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="231">231</td>  
                 <td class="reward-columns" data-value="2.31">2.3</td>
                 <td class="reward-columns" data-value="10043">10k</td>  
                 <td class="reward-columns" data-value="41">
@@ -3210,8 +3072,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="219">219</td>  
                 <td class="reward-columns" data-value="2.19">2.2</td>
                 <td class="reward-columns" data-value="16622">17k</td>  
                 <td class="reward-columns" data-value="69">
@@ -3252,8 +3112,6 @@
                     (25%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="200">200</td>  
                 <td class="reward-columns" data-value="2.0">2.0</td>
                 <td class="reward-columns" data-value="10030">10k</td>  
                 <td class="reward-columns" data-value="43">
@@ -3294,8 +3152,6 @@
                     (25%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="175">175</td>  
                 <td class="reward-columns" data-value="1.75">1.8</td>
                 <td class="reward-columns" data-value="10571">11k</td>  
                 <td class="reward-columns" data-value="46">
@@ -3336,8 +3192,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="175">175</td>  
                 <td class="reward-columns" data-value="1.75">1.8</td>
                 <td class="reward-columns" data-value="7020">7k</td>  
                 <td class="reward-columns" data-value="35">
@@ -3378,8 +3232,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="110">110</td>  
                 <td class="reward-columns" data-value="1.1">1.1</td>
                 <td class="reward-columns" data-value="7120">7k</td>  
                 <td class="reward-columns" data-value="31">
@@ -3420,8 +3272,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="80">80</td>  
                 <td class="reward-columns" data-value="0.8">0.8</td>
                 <td class="reward-columns" data-value="3600">4k</td>  
                 <td class="reward-columns" data-value="17">
@@ -3462,8 +3312,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="60">60</td>  
                 <td class="reward-columns" data-value="0.6">0.6</td>
                 <td class="reward-columns" data-value="7460">7k</td>  
                 <td class="reward-columns" data-value="28">
@@ -3504,8 +3352,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="60">60</td>  
                 <td class="reward-columns" data-value="0.6">0.6</td>
                 <td class="reward-columns" data-value="2970">3k</td>  
                 <td class="reward-columns" data-value="12">
@@ -3546,8 +3392,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="54">54</td>  
                 <td class="reward-columns" data-value="0.54">0.5</td>
                 <td class="reward-columns" data-value="4230">4k</td>  
                 <td class="reward-columns" data-value="15">
@@ -3588,8 +3432,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="50">50</td>  
                 <td class="reward-columns" data-value="0.5">0.5</td>
                 <td class="reward-columns" data-value="2530">3k</td>  
                 <td class="reward-columns" data-value="10">
@@ -3630,8 +3472,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="42">42</td>  
                 <td class="reward-columns" data-value="0.42">0.4</td>
                 <td class="reward-columns" data-value="6380">6k</td>  
                 <td class="reward-columns" data-value="25">
@@ -3672,8 +3512,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="30">30</td>  
                 <td class="reward-columns" data-value="0.3">0.3</td>
                 <td class="reward-columns" data-value="5140">5k</td>  
                 <td class="reward-columns" data-value="20">
@@ -3714,8 +3552,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="25">25</td>  
                 <td class="reward-columns" data-value="0.25">0.2</td>
                 <td class="reward-columns" data-value="3510">4k</td>  
                 <td class="reward-columns" data-value="14">
@@ -3756,8 +3592,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="24">24</td>  
                 <td class="reward-columns" data-value="0.24">0.2</td>
                 <td class="reward-columns" data-value="6210">6k</td>  
                 <td class="reward-columns" data-value="25">
@@ -3798,8 +3632,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="10">10</td>  
                 <td class="reward-columns" data-value="0.1">0.1</td>
                 <td class="reward-columns" data-value="2200">2k</td>  
                 <td class="reward-columns" data-value="9">
@@ -3840,8 +3672,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="10">10</td>  
                 <td class="reward-columns" data-value="0.1">0.1</td>
                 <td class="reward-columns" data-value="2400">2k</td>  
                 <td class="reward-columns" data-value="9">
@@ -3882,8 +3712,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="6">6</td>  
                 <td class="reward-columns" data-value="0.06">0.1</td>
                 <td class="reward-columns" data-value="1300">1k</td>  
                 <td class="reward-columns" data-value="5">
@@ -3924,8 +3752,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="5">5</td>  
                 <td class="reward-columns" data-value="0.05">0.1</td>
                 <td class="reward-columns" data-value="1811">2k</td>  
                 <td class="reward-columns" data-value="7">
@@ -3966,8 +3792,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="5970">6k</td>  
                 <td class="reward-columns" data-value="23">
@@ -4008,8 +3832,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="1170">1k</td>  
                 <td class="reward-columns" data-value="5">
@@ -4050,8 +3872,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="800">800</td>  
                 <td class="reward-columns" data-value="3">
@@ -4092,8 +3912,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="500">500</td>  
                 <td class="reward-columns" data-value="2">
@@ -4134,8 +3952,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4176,8 +3992,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4218,8 +4032,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4260,8 +4072,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4302,8 +4112,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4344,8 +4152,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4386,8 +4192,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4428,8 +4232,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4470,8 +4272,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4512,8 +4312,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4554,8 +4352,6 @@
                     (100%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4596,8 +4392,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4638,8 +4432,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4680,8 +4472,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4722,8 +4512,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4764,8 +4552,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4806,8 +4592,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4848,8 +4632,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4890,8 +4672,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4932,8 +4712,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -4974,8 +4752,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -5016,8 +4792,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -5058,8 +4832,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -5100,8 +4872,6 @@
                     (0%)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -5142,8 +4912,6 @@
                     (N/A)
                 </td>
                 <td class="reward-columns" data-value="0.0">-</td>
-                <td class="reward-columns" data-value="0">-</td>
-                <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0.0">-</td>
                 <td class="reward-columns" data-value="0">-</td>  
                 <td class="reward-columns" data-value="0">
@@ -5292,8 +5060,6 @@
                                 <td>${history.tournament_unique_key}</td>
                                 <td>${history.decks > 0 ? `${history.itm_decks} / ${history.decks} (${((history.itm_decks / history.decks) * 100).toFixed(0)}%)` : '-'}</td>
                                 <td><span style="color: ${getColorForValue(history.reward_eth, maxEth)}">${history.reward_eth === 0 ? '-' : history.reward_eth.toFixed(3)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_pack, maxPacks)}">${history.reward_pack === 0 ? '-' : Math.floor(history.reward_pack)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_frag, maxFrag)}">${history.reward_frag === 0 ? '-' : Math.floor(history.reward_frag)}</span></td>
                                 <td><span style="color: ${getColorForValue(combinedPacks, maxPacks + maxFrag/100)}">${combinedPacks === 0 ? '-' : combinedPacks.toFixed(1)}</span></td>
                                 <td><span style="color: ${getColorForValue(history.reward_fan, maxFan)}">${history.reward_fan === 0 ? '-' : formatRewardFan(history.reward_fan)}</span></td>
                                 <td><span style="color: ${getColorForValue(history.reward_gold, maxGold)}">${history.reward_gold === 0 ? '-' : Math.floor(history.reward_gold)}</span></td>
@@ -5315,6 +5081,32 @@
                             `;
                             row.insertAdjacentElement('afterend', detailRow);
                         }
+
+                        // Calculate totals
+                        const totals = playerHistory.reduce((acc, history) => {
+                            acc.eth += history.reward_eth || 0;
+                            acc.combinedPacks += (history.reward_pack || 0) + ((history.reward_frag || 0) / 100);
+                            acc.fan += history.reward_fan || 0;
+                            acc.gold += history.reward_gold || 0;
+                            return acc;
+                        }, { eth: 0, combinedPacks: 0, fan: 0, gold: 0 });
+
+                        // Create and insert total row
+                        const totalRow = document.createElement('tr');
+                        totalRow.className = 'details-row total-row';
+                        totalRow.innerHTML = `
+                            <td></td>
+                            <td><strong>Total</strong></td>
+                            <td></td>
+                            <td><strong>${totals.eth === 0 ? '-' : totals.eth.toFixed(3)}</strong></td>
+                            <td><strong>${totals.combinedPacks === 0 ? '-' : totals.combinedPacks.toFixed(1)}</strong></td>
+                            <td><strong>${totals.fan === 0 ? '-' : formatRewardFan(totals.fan)}</strong></td>
+                            <td><strong>${totals.gold === 0 ? '-' : Math.floor(totals.gold)}</strong></td>
+                            <td colspan="5"></td>
+                        `;
+                        
+                        // Insert after the last history row
+                        row.parentNode.insertBefore(totalRow, next);
                     } catch (error) {
                         console.error('Error loading player history:', error);
                     } finally {

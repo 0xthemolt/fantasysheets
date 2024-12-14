@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paperhands</title>
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add subtle alternating row colors */
+        #table-body tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Hover effect on rows */
+        #table-body tr {
+            transition: all 0.2s ease;
+        }
+
+        /* Modern cell styling */
+        #paperhands-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth animation when table loads */
+        #table-body tr {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Add stagger effect to rows */
+        #table-body tr:nth-child(1) { animation-delay: 0.1s; }
+        #table-body tr:nth-child(2) { animation-delay: 0.2s; }
+        #table-body tr:nth-child(3) { animation-delay: 0.3s; }
+        /* ... and so on */
+
+        /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        /* Apply your chosen font to the table */
+        #paperhands-table {
+            /* Pick one of these font-family lines: */
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        #player-search {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        #player-search:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #player-search::placeholder {
+            color: #666;
+        }
+
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 30, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-image {
+            border-radius: 0;
+        }
+
+        .player-summary {
+            display: none; /* Hidden by default */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .player-summary img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .player-summary h2 {
+            margin: 10px 0;
+        }
+
+        .player-summary .paperhand-amount {
+            font-size: 1.2em;
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Giga Jeeters</h1>
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Enter your X/Twitter handle" id="player-search">
+            <div id="autocomplete-results" class="autocomplete-results"></div>
+        </div>
+    </div>
+    <div id="player-summary" class="player-summary">
+        <img id="summary-pfp" src="" alt="Player Profile">
+        <h2 id="summary-name"></h2>
+        <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
+    </div>
+    <div class="table-container">
+        <table id="paperhands-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Hero</th>
+                    <th>Sold For</th>
+                    <th>Last Sold Price</th>
+                    <th>Fumbled</th>
+                    <th>Sale Date</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    <!-- Add this before the table-container div -->
+   
+    <script>
+        let currentData = null;
+        let players = [];
+
+        // Centralized data fetching function
+        async function fetchData() {
+            if (!currentData) {
+                try {
+                    const response = await fetch('../data/players/paperhands.json');
+                    currentData = await response.json();
+                    players = Object.keys(currentData.top_10_by_player);
+                    return currentData;
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    throw error;
+                }
+            }
+            return currentData;
+        }
+
+        async function fetchAndDisplayData(period = 'total_all_time') {
+            document.getElementById('player-summary').style.display = 'none';
+            try {
+                const data = await fetchData();
+                const tableBody = document.getElementById('table-body');
+                tableBody.innerHTML = '';
+                
+                const displayData = data[period]
+                    .filter(entry => entry.rank <= 10)
+                    .sort((a, b) => a.rank - b.rank);
+
+                displayData.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="text-align: center;">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
+                        <td>
+                            <div class="hero-column">
+                                <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 35px; height: 50px; object-fit: contain;">
+                                <span>${entry.hero}</span>
+                            </div>
+                        </td>
+                        <td>
+                            ${entry.sale_price.toFixed(3)}
+                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                        </td>
+                        <td>
+                            ${entry.last_sold_price.toFixed(3)}
+                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                        </td>
+                        <td>
+                            ${entry.price_diff.toFixed(3)}
+                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                            <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                        </td>
+                        <td>
+                            ${(() => {
+                                const saleDate = new Date(entry.sale_timestamp);
+                                const [lastBuyer, lastSaleStr] = entry.last_sale_string.split('|');
+                                const lastSaleDate = new Date(lastSaleStr);
+                                const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
+                                return `${lastBuyer} bought ${daysDiff} later`;
+                            })()}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                addStaggeredAnimation();
+            } catch (error) {
+                console.error('Error displaying data:', error);
+            }
+        }
+
+        async function displayPlayerData(playerName) {
+            try {
+                const data = await fetchData();
+                const tableBody = document.getElementById('table-body');
+                tableBody.innerHTML = '';
+
+                const playerData = data.top_10_by_player[playerName];
+                if (playerData && playerData.length > 0) {
+                    // Show and update summary
+                    const summaryContainer = document.getElementById('player-summary');
+                    const summaryPfp = document.getElementById('summary-pfp');
+                    const summaryName = document.getElementById('summary-name');
+                    const summaryAmount = document.getElementById('summary-amount');
+                    
+                    summaryContainer.style.display = 'block';
+                    summaryPfp.src = `https://pbs.twimg.com/profile_images/${playerData[0].player_pfp}`;
+                    summaryName.textContent = playerName;
+                    
+                    // Calculate total paperhanded amount
+                    const totalPaperhanded = data.total_all_time
+                        .filter(entry => entry.player === playerName)
+                        .reduce((sum, entry) => sum + entry.price_diff, 0);
+                    
+                    summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 3700).toLocaleString()})`;
+
+                    playerData.forEach((entry, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td style="text-align: center;">${index + 1}</td>
+                            <td>
+                                <div class="hero-column">
+                                    <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 50px; height: auto;">
+                                    <span>${entry.hero}</span>
+                                </div>
+                            </td>
+                            <td>
+                                ${entry.sale_price.toFixed(3)}
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                            </td>
+                            <td>
+                                ${entry.last_sold_price.toFixed(3)}
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                            </td>
+                            <td>
+                                ${entry.price_diff.toFixed(3)}
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                                <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                            </td>
+                            <td>
+                                ${(() => {
+                                    const saleDate = new Date(entry.sale_timestamp);
+                                    const [lastBuyer, lastSaleStr] = entry.last_sale_string.split('|');
+                                    const lastSaleDate = new Date(lastSaleStr);
+                                    const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
+                                    return `${lastBuyer} bought ${daysDiff} days later`;
+                                })()}
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    
+                    addStaggeredAnimation();
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6">No data found for this player</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error displaying player data:', error);
+            }
+        }
+
+        function addStaggeredAnimation() {
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.05}s`;
+            });
+        }
+
+        // Autocomplete functionality
+        function filterPlayers(searchText) {
+            return players.filter(player => 
+                player.toLowerCase().includes(searchText.toLowerCase())
+            );
+        }
+
+        function showAutocomplete(filteredPlayers, searchInput, autocompleteResults) {
+            if (filteredPlayers.length === 0) {
+                autocompleteResults.style.display = 'none';
+                return;
+            }
+
+            autocompleteResults.innerHTML = '';
+            filteredPlayers.forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                div.textContent = player;
+                div.addEventListener('click', () => {
+                    searchInput.value = player;
+                    autocompleteResults.style.display = 'none';
+                    displayPlayerData(player);
+                });
+                autocompleteResults.appendChild(div);
+            });
+            autocompleteResults.style.display = 'block';
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            const searchInput = document.getElementById('player-search');
+            const autocompleteResults = document.getElementById('autocomplete-results');
+
+            // Initial data load
+            await fetchAndDisplayData();
+
+            // Search input event listeners
+            searchInput.addEventListener('input', (e) => {
+                const searchText = e.target.value.trim();
+                if (searchText.length === 0) {
+                    autocompleteResults.style.display = 'none';
+                    return;
+                }
+                const filteredPlayers = filterPlayers(searchText);
+                showAutocomplete(filteredPlayers, searchInput, autocompleteResults);
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const playerName = searchInput.value.trim();
+                    if (playerName) {
+                        displayPlayerData(playerName);
+                        autocompleteResults.style.display = 'none';
+                    }
+                }
+            });
+
+            // Close autocomplete when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                    autocompleteResults.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

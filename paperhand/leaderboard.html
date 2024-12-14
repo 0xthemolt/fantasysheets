@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paperhands</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add subtle alternating row colors */
+        #table-body tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Hover effect on rows */
+        #table-body tr {
+            transition: all 0.2s ease;
+        }
+
+        /* Modern cell styling */
+        #paperhands-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth animation when table loads */
+        #table-body tr {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Add stagger effect to rows */
+        #table-body tr:nth-child(1) { animation-delay: 0.1s; }
+        #table-body tr:nth-child(2) { animation-delay: 0.2s; }
+        #table-body tr:nth-child(3) { animation-delay: 0.3s; }
+        /* ... and so on */
+
+        /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        /* Apply your chosen font to the table */
+        #paperhands-table {
+            /* Pick one of these font-family lines: */
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .time-toggle {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Giga Jeeters</h1>
+    <!-- Add this before the table-container div -->
+    <div class="time-toggle">
+        <button class="toggle-btn active" data-period="total_all_time">All Time</button>
+        <button class="toggle-btn" data-period="total_30d">Last 30D</button>
+        <button class="toggle-btn" data-period="total_14d">Last 14D</button>
+    </div>
+
+    <div class="table-container">
+        <table id="paperhands-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Paperhanded Value</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentData = null;
+
+        async function fetchAndDisplayData(period = 'total_all_time') {
+            try {
+                // Log the start of the function and the period
+                console.log('Fetching data for period:', period);
+
+                if (!currentData) {
+                    console.log('Fetching from JSON file...');
+                    const response = await fetch('../data/players/paperhands.json');
+                    currentData = await response.json();
+                    console.log('Received data:', currentData); // Log the entire data object
+                }  
+                
+                const tableBody = document.getElementById('table-body');
+                tableBody.innerHTML = ''; // Clear existing data
+                
+                // Log filtered data
+                const displayData = currentData[period]
+                    .filter(entry => entry.rank <= 10)
+                    .sort((a, b) => a.rank - b.rank);
+                displayData.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="text-align: center;">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
+                        <td>
+                            <div class="player-column">
+                                <img src="https://pbs.twimg.com/profile_images/${entry.player_pfp}" alt="${entry.player}" class="player-image">
+                                <span>${entry.player}</span>
+                            </div>
+                        </td>
+                        <td>
+                            ${entry.price_diff.toFixed(2)}
+                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                            <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                addStaggeredAnimation();
+            } catch (error) {
+                console.error('Error details:', error); // More detailed error logging
+                console.error('Error stack:', error.stack); // Log the error stack trace
+            }
+        }
+
+        function addStaggeredAnimation() {
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.05}s`;
+            });
+        }
+
+        // Add event listeners for toggle buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    // Update data based on selected period
+                    fetchAndDisplayData(button.dataset.period);
+                });
+            });
+            
+            // Initial load
+            fetchAndDisplayData();
+        });
+    </script>
+</body>
+</html>

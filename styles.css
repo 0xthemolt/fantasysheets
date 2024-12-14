@@ -1179,3 +1179,11 @@ table tr:last-child td {
 .chart-button:hover {
     color: #000;
 }
+
+.player-image {
+    width: 30px;  /* Fixed width */
+    height: 30px; /* Fixed height to maintain circle shape */
+    border-radius: 50%; /* Makes the image circular */
+    object-fit: cover; /* Ensures image fills the circle without distortion */
+    vertical-align: middle;
+}

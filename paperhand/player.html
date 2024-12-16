@@ -72,37 +72,10 @@
         }
 
         .search-box {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-        }
-
-        #player-search {
-            width: 100%;
-            padding: 12px 20px 12px 45px;
-            font-size: 16px;
-            border: none;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        #player-search:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        #player-search::placeholder {
-            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .autocomplete-results {
@@ -140,7 +113,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 20px;
-            margin: 20px auto;
+            margin: 0 0 20px 0;
             max-width: 600px;
             text-align: center;
         }
@@ -160,45 +133,90 @@
             font-size: 1.2em;
             color: #ff4444;
         }
+
+        .back-button {
+            position: static;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
-    <h1>Top Giga Jeeters</h1>
-    
-    <div class="search-container">
-        <div class="search-box">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" placeholder="Enter your X/Twitter handle" id="player-search">
-            <div id="autocomplete-results" class="autocomplete-results"></div>
+
+    <div style="display: flex; flex-direction: column; padding: 20px; gap: 20px;">
+        <!-- Top navigation bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <!-- Left side - Back button -->
+            <a href="/paperhand/leaderboard.html" class="back-button">
+                <i class="fas fa-ranking-star"></i>
+                Back to Leaderboard
+            </a>
+            
+            <!-- Right side - Search button -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button id="searchButton" class="back-button">
+                    <i class="fas fa-search" style="color: #ff69b4;"></i>
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Player Summary Section -->
+        <div id="player-summary" class="player-summary">
+            <img id="summary-pfp" src="" alt="Player Profile">
+            <h2 id="summary-name"></h2>
+            <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <table id="paperhands-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Hero</th>
+                        <th>Sold For</th>
+                        <th>Last Sold Price</th>
+                        <th>Fumbled</th>
+                        <th>Sale Date</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search Modal -->
+        <div id="searchModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
+            <div class="modal-content" style="background-color: #1a1a1a; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;">
+                <span id="closeModal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                <div class="search-box" style="position: relative;">
+                    <input type="text" id="playerSearch" placeholder="Search players..." style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 4px; background: #2a2a2a; color: white;">
+                    <div id="autocompleteResults" class="autocomplete-results"></div>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="player-summary" class="player-summary">
-        <img id="summary-pfp" src="" alt="Player Profile">
-        <h2 id="summary-name"></h2>
-        <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
-    </div>
-    <div class="table-container">
-        <table id="paperhands-table">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Hero</th>
-                    <th>Sold For</th>
-                    <th>Last Sold Price</th>
-                    <th>Fumbled</th>
-                    <th>Sale Date</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <!-- Data will be populated here -->
-            </tbody>
-        </table>
-    </div>
-    <!-- Add this before the table-container div -->
-   
     <script>
         let currentData = null;
         let players = [];
+        let playersList = [];
+        let searchInput;
 
         // Centralized data fetching function
         async function fetchData() {
@@ -362,34 +380,73 @@
             });
         }
 
-        // Autocomplete functionality
-        function filterPlayers(searchText) {
-            return players.filter(player => 
-                player.toLowerCase().includes(searchText.toLowerCase())
-            );
-        }
-
-        function showAutocomplete(filteredPlayers, searchInput, autocompleteResults) {
-            if (filteredPlayers.length === 0) {
-                autocompleteResults.style.display = 'none';
-                return;
+        async function initializePlayersList() {
+            if (!currentData) {
+                const response = await fetch('../data/players/paperhands.json');
+                currentData = await response.json();
             }
-
-            autocompleteResults.innerHTML = '';
-            filteredPlayers.forEach(player => {
-                const div = document.createElement('div');
-                div.className = 'autocomplete-item';
-                div.textContent = player;
-                div.addEventListener('click', () => {
-                    searchInput.value = player;
-                    autocompleteResults.style.display = 'none';
-                    displayPlayerData(player);
-                });
-                autocompleteResults.appendChild(div);
-            });
-            autocompleteResults.style.display = 'block';
+            
+            // Get unique players from top_10_by_player object keys
+            const uniquePlayers = Object.keys(currentData.top_10_by_player);
+            playersList = uniquePlayers.sort();
         }
 
+        function setupModal() {
+            const modal = document.getElementById('searchModal');
+            const searchButton = document.getElementById('searchButton');
+            const closeButton = document.getElementById('closeModal');
+            const searchInput = document.getElementById('playerSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+
+            searchButton.onclick = () => {
+                modal.style.display = 'block';
+                searchInput.focus();
+            };
+
+            closeButton.onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            searchInput.oninput = () => {
+                const value = searchInput.value.toLowerCase();
+                if (value.length === 0) {
+                    autocompleteResults.style.display = 'none';
+                    return;
+                }
+
+                const matches = playersList.filter(player => 
+                    player.toLowerCase().includes(value)
+                );
+
+                if (matches.length > 0) {
+                    autocompleteResults.innerHTML = matches
+                        .map(player => `
+                            <div class="autocomplete-item" style="
+                                padding: 8px;
+                                cursor: pointer;
+                                hover: background-color: rgba(255, 255, 255, 0.1);
+                                font-family: 'Space Mono', monospace;
+                            " onclick="selectPlayer('${player}')">
+                                ${player}
+                            </div>
+                        `).join('');
+                    autocompleteResults.style.display = 'block';
+                } else {
+                    autocompleteResults.style.display = 'none';
+                }
+            };
+        }
+
+        function selectPlayer(player) {
+            window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
+        }
+        
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -399,8 +456,11 @@
 
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
-            const searchInput = document.getElementById('player-search');
-            const autocompleteResults = document.getElementById('autocomplete-results');
+            searchInput = document.getElementById('playerSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+
+            await initializePlayersList();
+            setupModal();
 
             // Initial data load
             await fetchAndDisplayData();
@@ -412,33 +472,6 @@
                 displayPlayerData(playerParam);
             }
 
-            // Search input event listeners
-            searchInput.addEventListener('input', (e) => {
-                const searchText = e.target.value.trim();
-                if (searchText.length === 0) {
-                    autocompleteResults.style.display = 'none';
-                    return;
-                }
-                const filteredPlayers = filterPlayers(searchText);
-                showAutocomplete(filteredPlayers, searchInput, autocompleteResults);
-            });
-
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const playerName = searchInput.value.trim();
-                    if (playerName) {
-                        displayPlayerData(playerName);
-                        autocompleteResults.style.display = 'none';
-                    }
-                }
-            });
-
-            // Close autocomplete when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
-                    autocompleteResults.style.display = 'none';
-                }
-            });
         });
     </script>
 </body>

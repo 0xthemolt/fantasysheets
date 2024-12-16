@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Stats Viewer</title>
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card-container {
+            position: relative;
+            height: 500px;
+            perspective: 1000px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease;
+            display: flex;
+            background: #1a1a1a;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .card-image {
+            flex: 1;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            flex: 1;
+            padding: 2rem;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .navigation {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .nav-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            background: #4a4a4a;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card-container" id="cardContainer">
+            <!-- Cards will be inserted here dynamically -->
+        </div>
+        <div class="navigation">
+            <button class="nav-button" onclick="previousCard()">Previous</button>
+            <button class="nav-button" onclick="nextCard()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        let playerData = [];
+
+        async function loadPlayerData() {
+            try {
+                const response = await fetch('/data/players/paperhands.json');
+                const data = await response.json();
+                playerData = data.top_10_by_player['0xthemolt'];
+                renderCards();
+            } catch (error) {
+                console.error('Error loading player data:', error);
+            }
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = '';
+
+            playerData.forEach((data, index) => {
+                const card = document.createElement('div');
+                card.className = `card ${index === 0 ? 'active' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="card-image" style="background-image: url('${data.hero_card}')"></div>
+                    <div class="card-content">
+                        <h2>${data.hero}</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <h3>Sale Price</h3>
+                                <p>${data.sale_price} ETH</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>Last Sold Price</h3>
+                                <p>${data.last_sold_price} ETH</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>Price Difference</h3>
+                                <p>${data.price_diff} ETH</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>Rank</h3>
+                                <p>#${data.rank_all_time}</p>
+                            </div>
+                            <div class="stat-item">
+                                <h3>Sale Date</h3>
+                                <p>${data.sale_timestamp}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function showCard(index) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.remove('active'));
+            cards[index].classList.add('active');
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % playerData.length;
+            showCard(currentIndex);
+        }
+
+        function previousCard() {
+            currentIndex = (currentIndex - 1 + playerData.length) % playerData.length;
+            showCard(currentIndex);
+        }
+
+        // Load data when page loads
+        loadPlayerData();
+    </script>
+</body>
+</html>

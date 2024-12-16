@@ -110,7 +110,7 @@ group by 1,2
  )
 ,current_main_itm as (
 /*only players who meet card criteria*/
-select distinct player_id from rewards where tournament_unique_key = 'Main {TOURNAMENT_NUMBER}' group by 1 having sum(coalesce(reward_pack,0)) >= 2 /*current main itm*/
+select distinct player_id from rewards where tournament_unique_key = 'Main {TOURNAMENT_NUMBER}' group by 1 having sum(coalesce(reward_frag,0)) >= 200 /*current main itm*/
 union 
 /*add heroes regardless of rewards*/
 select distinct player_id from base where tournament_unique_key = 'Main {TOURNAMENT_NUMBER}' and player_handle in (select hero_handle from heroes)

@@ -101,8 +101,8 @@
 
         .hero-image {
             border-radius: 0;
-            width: 100px;
-            height: 150px;
+            width: 120px;
+            height: 180px;
             object-fit: cover;
             max-width: none;
             display: block;
@@ -212,28 +212,36 @@
 
         .card {
             flex: 0 0 auto;
-            width: 100%;
+            width: calc(33.33% - 20px);
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
             display: flex;
             flex-direction: row;
-            gap: 15px;
+            gap: 20px;
             position: relative;
+            height: auto;
         }
 
-        .card > div:last-child {
+        .card .trade-details {
             flex: 1;
             min-width: 0;
-            font-size: 0.9em;
+            font-size: 1.2em;
+            line-height: 1.6;
         }
 
         .card .eth-value {
-            font-size: 0.9em;
+            font-size: 1.2em;
         }
 
-        .card span[style*="color: #666"] {
-            font-size: 0.8em;
+        .card .price-info {
+            margin-bottom: 12px;
+        }
+
+        .card .sale-timeline {
+            font-size: 1em;
+            margin-top: 15px;
+            color: #888;
         }
 
         .rank-badge {
@@ -281,332 +289,339 @@
 
         .cards-wrapper {
             position: relative;
-            width: 40%;  /* Set to 40% of viewport width */
-            margin: 0 auto;  /* Center the wrapper horizontally */
+            width: 100%;
+            margin: 0 auto;
         }
     </style>
 </head>
 <body>
 
-    <div style="display: flex; flex-direction: column; padding: 20px; gap: 20px;">
-        <!-- Top navigation bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <!-- Left side - Back button -->
-            <a href="/paperhand/leaderboard.html" class="back-button">
-                <i class="fas fa-ranking-star"></i>
-                Back to Leaderboard
-            </a>
-            
-            <!-- Right side - Search button -->
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <button id="searchButton" class="back-button">
-                    <i class="fas fa-search" style="color: #ff69b4;"></i>
-                    Search
+    <!-- Add this as the outermost container -->
+    <div style="width: 50%; margin: 0 auto; min-width: 600px;">
+        <!-- Main container for all content -->
+        <div style="display: flex; flex-direction: column; padding: 20px; gap: 20px;">
+            <!-- Navigation bar with back button and search -->
+            <div class="navigation-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <!-- Left side - Back button -->
+                <a href="/paperhand/leaderboard.html" class="back-button" aria-label="Back to Leaderboard">
+                    <i class="fas fa-ranking-star"></i>
+                    Back to Leaderboard
+                </a>
+                
+                <!-- Right side - Search button -->
+                <div class="search-controls">
+                    <button id="searchButton" class="back-button" aria-label="Search Players">
+                        <i class="fas fa-search" style="color: #ff69b4;"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Summary Section -->
+            <div id="player-summary" class="player-summary">
+                <img id="summary-pfp" src="" alt="Player Profile">
+                <h2 id="summary-name"></h2>
+                <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
+            </div>
+
+            <!-- Table Container -->
+            <div class="cards-wrapper">
+                <button class="scroll-button scroll-left" onclick="scrollCards('left')" style="display: none;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                
+                <div class="cards-container" id="cards-container">
+                    <!-- Cards will be populated here -->
+                </div>
+
+                <button class="scroll-button scroll-right" onclick="scrollCards('right')">
+                    <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
-        </div>
 
-        <!-- Player Summary Section -->
-        <div id="player-summary" class="player-summary">
-            <img id="summary-pfp" src="" alt="Player Profile">
-            <h2 id="summary-name"></h2>
-            <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
-        </div>
-
-        <!-- Table Container -->
-        <div class="cards-wrapper">
-            <button class="scroll-button scroll-left" onclick="scrollCards('left')" style="display: none;">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            
-            <div class="cards-container" id="cards-container">
-                <!-- Cards will be populated here -->
-            </div>
-
-            <button class="scroll-button scroll-right" onclick="scrollCards('right')">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-
-            <!-- Add the modal structure -->
-        <div id="searchModal" style="
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-        ">
-            <div style="
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #1a1a1a;
-                padding: 20px;
-                border-radius: 8px;
-                width: 90%;
-                max-width: 400px;
+                <!-- Add the modal structure -->
+            <div id="searchModal" style="
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1000;
             ">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
-                    <button id="closeModal" style="
-                        background: none;
-                        border: none;
-                        color: #666;
-                        cursor: pointer;
-                        font-size: 1.5em;
-                    ">&times;</button>
-                </div>
-                <div style="position: relative;">
-                    <input type="text" id="playerSearch" placeholder="Enter player name..." style="
-                        width: 100%;
-                        padding: 8px;
-                        background: rgba(255, 255, 255, 0.1);
-                        border: 1px solid rgba(255, 255, 255, 0.2);
-                        border-radius: 4px;
-                        color: white;
-                        box-sizing: border-box;
-                        font-family: 'Space Mono', monospace;
-                    ">
-                    <div id="autocompleteResults" style="
-                        position: absolute;
-                        top: 100%;
-                        left: 0;
-                        right: 0;
-                        background: #1a1a1a;
-                        border: 1px solid rgba(255, 255, 255, 0.2);
-                        border-radius: 4px;
-                        max-height: 200px;
-                        overflow-y: auto;
-                        display: none;
-                    "></div>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #1a1a1a;
+                    padding: 20px;
+                    border-radius: 8px;
+                    width: 90%;
+                    max-width: 400px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
+                        <button id="closeModal" style="
+                            background: none;
+                            border: none;
+                            color: #666;
+                            cursor: pointer;
+                            font-size: 1.5em;
+                        ">&times;</button>
+                    </div>
+                    <div style="position: relative;">
+                        <input type="text" id="playerSearch" placeholder="Enter player name..." style="
+                            width: 100%;
+                            padding: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 4px;
+                            color: white;
+                            box-sizing: border-box;
+                            font-family: 'Space Mono', monospace;
+                        ">
+                        <div id="autocompleteResults" style="
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            right: 0;
+                            background: #1a1a1a;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 4px;
+                            max-height: 200px;
+                            overflow-y: auto;
+                            display: none;
+                        "></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    <script>
-        let currentData = null;
-        let playersList = [];
+        <script>
+            let currentData = null;
+            let playersList = [];
 
-        // Centralized data fetching function
-        async function fetchData() {
-            if (!currentData) {
+            // Centralized data fetching function
+            async function fetchData() {
+                if (!currentData) {
+                    try {
+                        const response = await fetch('../data/players/paperhands.json');
+                        currentData = await response.json();
+                        return currentData;
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        throw error;
+                    }
+                }
+                return currentData;
+            }
+
+            async function displayPlayerData(playerName) {
                 try {
-                    const response = await fetch('../data/players/paperhands.json');
-                    currentData = await response.json();
-                    return currentData;
+                    const data = await fetchData();
+                    const cardsContainer = document.getElementById('cards-container');
+                    cardsContainer.innerHTML = '';
+
+                    const playerData = data.top_10_by_player[playerName];
+                    if (playerData && playerData.length > 0) {
+                        // Show and update summary
+                        const summaryContainer = document.getElementById('player-summary');
+                        const summaryPfp = document.getElementById('summary-pfp');
+                        const summaryName = document.getElementById('summary-name');
+                        const summaryAmount = document.getElementById('summary-amount');
+                        
+                        summaryContainer.style.display = 'block';
+                        summaryPfp.src = `https://pbs.twimg.com/profile_images/${playerData[0].player_pfp}`;
+                        summaryName.textContent = playerName;
+                        
+                        // Calculate total paperhanded amount
+                        const totalPaperhanded = data.total_all_time
+                            .filter(entry => entry.player === playerName)
+                            .reduce((sum, entry) => sum + entry.price_diff, 0);
+                        
+                        summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 4000).toLocaleString()})`;
+
+                        playerData.forEach((entry, index) => {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.setAttribute('role', 'listitem');
+                            card.setAttribute('aria-label', `Trade Record ${index + 1}`);
+                            card.innerHTML = `
+                                <div class="rank-badge" aria-label="Rank ${index + 1}">${index + 1}</div>
+                                <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" 
+                                     alt="Hero Card: ${entry.hero}" 
+                                     class="hero-image">
+                                <div class="trade-details">
+                                    <div class="price-info" aria-label="Sale Price">
+                                        <span class="label">Sold for:</span>
+                                        <span class="eth-value">${(entry.sale_price || 0).toFixed(2)}</span>
+                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
+                                    </div>
+                                    <div class="price-info" aria-label="Last Sale Price">
+                                        <span class="label">Last sold:</span>
+                                        <span class="eth-value">${(entry.last_sold_price || 0).toFixed(2)}</span>
+                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
+                                    </div>
+                                    <div class="price-info" aria-label="Price Difference">
+                                        <span class="label">Fumbled:</span>
+                                        <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
+                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
+                                        <span class="usd-value">
+                                            ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
+                                        </span>
+                                    </div>
+                                    <div class="sale-timeline" aria-label="Sale Timeline">
+                                        ${(() => {
+                                            try {
+                                                const saleDate = new Date(entry.sale_timestamp);
+                                                const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
+                                                const lastSaleDate = new Date(lastSaleStr);
+                                                const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
+                                                return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
+                                            } catch (e) {
+                                                return 'Date information unavailable';
+                                            }
+                                        })()}
+                                    </div>
+                                </div>
+                            `;
+                            cardsContainer.appendChild(card);
+                        });
+
+                        // Show only first 3 cards initially
+                        const cards = cardsContainer.querySelectorAll('.card');
+                        cards.forEach((card, index) => {
+                            if (index >= 3) {
+                                card.style.opacity = '0.5';
+                            }
+                        });
+                    } else {
+                        cardsContainer.innerHTML = '<div class="card">No data found for this player</div>';
+                    }
                 } catch (error) {
-                    console.error('Error fetching data:', error);
-                    throw error;
+                    console.error('Error displaying player data:', error);
                 }
             }
-            return currentData;
-        }
 
-        async function displayPlayerData(playerName) {
-            try {
+            function addStaggeredAnimation() {
+                const rows = document.querySelectorAll('#table-body tr');
+                rows.forEach((row, index) => {
+                    row.style.animationDelay = `${index * 0.05}s`;
+                });
+            }
+
+            async function initializePlayersList() {
                 const data = await fetchData();
-                const cardsContainer = document.getElementById('cards-container');
-                cardsContainer.innerHTML = '';
-
-                const playerData = data.top_10_by_player[playerName];
-                if (playerData && playerData.length > 0) {
-                    // Show and update summary
-                    const summaryContainer = document.getElementById('player-summary');
-                    const summaryPfp = document.getElementById('summary-pfp');
-                    const summaryName = document.getElementById('summary-name');
-                    const summaryAmount = document.getElementById('summary-amount');
-                    
-                    summaryContainer.style.display = 'block';
-                    summaryPfp.src = `https://pbs.twimg.com/profile_images/${playerData[0].player_pfp}`;
-                    summaryName.textContent = playerName;
-                    
-                    // Calculate total paperhanded amount
-                    const totalPaperhanded = data.total_all_time
-                        .filter(entry => entry.player === playerName)
-                        .reduce((sum, entry) => sum + entry.price_diff, 0);
-                    
-                    summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 4000).toLocaleString()})`;
-
-                    playerData.forEach((entry, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <div class="rank-badge">${index + 1}</div>
-                            <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" 
-                                 alt="${entry.hero}" 
-                                 class="hero-image">
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span style="color: #666;">Sold for:</span>
-                                    <span class="eth-value">${(entry.sale_price || 0).toFixed(2)}</span>
-                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span style="color: #666;">Last sold:</span>
-                                    <span class="eth-value">${(entry.last_sold_price || 0).toFixed(2)}</span>
-                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span style="color: #666;">Fumbled:</span>
-                                    <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
-                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
-                                    <span style="color: #666; font-size: 0.75em;">
-                                        ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
-                                    </span>
-                                </div>
-                                <div style="font-size: 0.8em; color: #666;">
-                                    ${(() => {
-                                        try {
-                                            const saleDate = new Date(entry.sale_timestamp);
-                                            const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
-                                            const lastSaleDate = new Date(lastSaleStr);
-                                            const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
-                                            return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
-                                        } catch (e) {
-                                            return 'Date information unavailable';
-                                        }
-                                    })()}
-                                </div>
-                            </div>
-                        `;
-                        cardsContainer.appendChild(card);
-                    });
-
-                    // Show only first 3 cards initially
-                    const cards = cardsContainer.querySelectorAll('.card');
-                    cards.forEach((card, index) => {
-                        if (index >= 3) {
-                            card.style.opacity = '0.5';
-                        }
-                    });
-                } else {
-                    cardsContainer.innerHTML = '<div class="card">No data found for this player</div>';
-                }
-            } catch (error) {
-                console.error('Error displaying player data:', error);
+                playersList = Object.keys(data.top_10_by_player).sort();
             }
-        }
 
-        function addStaggeredAnimation() {
-            const rows = document.querySelectorAll('#table-body tr');
-            rows.forEach((row, index) => {
-                row.style.animationDelay = `${index * 0.05}s`;
-            });
-        }
+            function setupModal() {
+                const modal = document.getElementById('searchModal');
+                const searchButton = document.getElementById('searchButton');
+                const closeButton = document.getElementById('closeModal');
+                const searchInput = document.getElementById('playerSearch');
+                const autocompleteResults = document.getElementById('autocompleteResults');
 
-        async function initializePlayersList() {
-            const data = await fetchData();
-            playersList = Object.keys(data.top_10_by_player).sort();
-        }
+                searchButton.onclick = () => {
+                    modal.style.display = 'block';
+                    searchInput.focus();
+                };
 
-        function setupModal() {
-            const modal = document.getElementById('searchModal');
-            const searchButton = document.getElementById('searchButton');
-            const closeButton = document.getElementById('closeModal');
-            const searchInput = document.getElementById('playerSearch');
-            const autocompleteResults = document.getElementById('autocompleteResults');
-
-            searchButton.onclick = () => {
-                modal.style.display = 'block';
-                searchInput.focus();
-            };
-
-            closeButton.onclick = () => {
-                modal.style.display = 'none';
-            };
-
-            window.onclick = (event) => {
-                if (event.target === modal) {
+                closeButton.onclick = () => {
                     modal.style.display = 'none';
-                }
-            };
+                };
 
-            searchInput.oninput = () => {
-                const value = searchInput.value.toLowerCase();
-                if (value.length === 0) {
-                    autocompleteResults.style.display = 'none';
-                    return;
-                }
+                window.onclick = (event) => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
 
-                const matches = playersList.filter(player => 
-                    player.toLowerCase().includes(value)
-                );
+                searchInput.oninput = () => {
+                    const value = searchInput.value.toLowerCase();
+                    if (value.length === 0) {
+                        autocompleteResults.style.display = 'none';
+                        return;
+                    }
 
-                if (matches.length > 0) {
-                    autocompleteResults.innerHTML = matches
-                        .map(player => `
-                            <div class="autocomplete-item" onclick="selectPlayer('${player}')">
-                                ${player}
-                            </div>
-                        `).join('');
-                    autocompleteResults.style.display = 'block';
+                    const matches = playersList.filter(player => 
+                        player.toLowerCase().includes(value)
+                    );
+
+                    if (matches.length > 0) {
+                        autocompleteResults.innerHTML = matches
+                            .map(player => `
+                                <div class="autocomplete-item" onclick="selectPlayer('${player}')">
+                                    ${player}
+                                </div>
+                            `).join('');
+                        autocompleteResults.style.display = 'block';
+                    } else {
+                        autocompleteResults.style.display = 'none';
+                    }
+                };
+            }
+
+            function selectPlayer(player) {
+                window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
+            }
+
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                const results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+
+            // Initialize everything when DOM is loaded
+            document.addEventListener('DOMContentLoaded', async () => {
+                await initializePlayersList();
+                setupModal();
+
+                // Check for player parameter in URL
+                const playerParam = getUrlParameter('player');
+                if (playerParam) {
+                    displayPlayerData(playerParam);
                 } else {
-                    autocompleteResults.style.display = 'none';
+                    await displayPlayerData();
                 }
-            };
-        }
+            });
 
-        function selectPlayer(player) {
-            window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
-        }
+            // Add scroll functionality
+            function scrollCards(direction) {
+                const container = document.getElementById('cards-container');
+                const scrollAmount = container.offsetWidth; // Use container width for scroll amount
+                if (direction === 'left') {
+                    container.scrollBy({
+                        left: -scrollAmount,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    container.scrollBy({
+                        left: scrollAmount,
+                        behavior: 'smooth'
+                    });
+                }
 
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            const results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initializePlayersList();
-            setupModal();
-
-            // Check for player parameter in URL
-            const playerParam = getUrlParameter('player');
-            if (playerParam) {
-                displayPlayerData(playerParam);
-            } else {
-                await displayPlayerData();
-            }
-        });
-
-        // Add scroll functionality
-        function scrollCards(direction) {
-            const container = document.getElementById('cards-container');
-            const scrollAmount = container.offsetWidth; // Use container width for scroll amount
-            if (direction === 'left') {
-                container.scrollBy({
-                    left: -scrollAmount,
-                    behavior: 'smooth'
-                });
-            } else {
-                container.scrollBy({
-                    left: scrollAmount,
-                    behavior: 'smooth'
-                });
+                updateScrollButtons();
             }
 
-            updateScrollButtons();
-        }
+            function updateScrollButtons() {
+                const container = document.getElementById('cards-container');
+                const leftButton = document.querySelector('.scroll-left');
+                const rightButton = document.querySelector('.scroll-right');
 
-        function updateScrollButtons() {
-            const container = document.getElementById('cards-container');
-            const leftButton = document.querySelector('.scroll-left');
-            const rightButton = document.querySelector('.scroll-right');
+                leftButton.style.display = container.scrollLeft > 0 ? 'flex' : 'none';
+                rightButton.style.display = 
+                    container.scrollLeft < (container.scrollWidth - container.clientWidth) 
+                    ? 'flex' 
+                    : 'none';
+            }
 
-            leftButton.style.display = container.scrollLeft > 0 ? 'flex' : 'none';
-            rightButton.style.display = 
-                container.scrollLeft < (container.scrollWidth - container.clientWidth) 
-                ? 'flex' 
-                : 'none';
-        }
-
-        // Add scroll event listener
-        document.getElementById('cards-container').addEventListener('scroll', updateScrollButtons);
-    </script>
+            // Add scroll event listener
+            document.getElementById('cards-container').addEventListener('scroll', updateScrollButtons);
+        </script>
+    </div>
+</div>
 </body>
 </html>

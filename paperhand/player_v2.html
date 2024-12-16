@@ -130,6 +130,18 @@
         .rank-other {
             background: #808080; /* Grey */
         }
+
+        .price-with-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .price-with-icon img {
+            height: 1em;
+            width: auto;
+        }
     </style>
 </head>
 <body>
@@ -158,6 +170,10 @@
             }
         }
 
+        function formatPrice(price) {
+            return Number(price).toFixed(2);
+        }
+
         function renderCards() {
             const container = document.getElementById('cardContainer');
             container.innerHTML = '';
@@ -177,17 +193,27 @@
                         <div class="stats-grid">
                             <div class="stat-item">
                                 <h3>Sold for</h3>
-                                <p>${data.sale_price} ETH on ${data.sale_timestamp}</p>
+                                <div class="price-with-icon">
+                                    <span>${formatPrice(data.sale_price)}</span>
+                                    <img src="../icons/eth.webp" alt="ETH">
+                                    <span>on ${new Date(data.sale_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                </div>
                             </div>
                             <div class="stat-item">
                                 <h3>Last Sold</h3>
-                                <p>${data.last_sold_price} ETH</p>
-                                <p>to ${data.last_sale_string.split('|')[0]}</p>
-                                <p>on ${data.last_sale_string.split('|')[1]}</p>
+                                <div class="price-with-icon">
+                                    <span>${formatPrice(data.last_sold_price)}</span>
+                                    <img src="../icons/eth.webp" alt="ETH">
+                                </div>
+                                <span>to ${data.last_sale_string.split('|')[0]}</span>
+                                <span>on ${data.last_sale_string.split('|')[1]}</span>
                             </div>
                             <div class="stat-item">
                                 <h3>Fumbled</h3>
-                                <p>${data.price_diff} ETH</p>
+                                <div class="price-with-icon">
+                                    <span>${formatPrice(data.price_diff)}</span>
+                                    <img src="../icons/eth.webp" alt="ETH">
+                                </div>
                             </div>
                         </div>
                     </div>

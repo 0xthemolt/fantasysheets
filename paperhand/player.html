@@ -57,13 +57,7 @@
 
         /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
         @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-        
-        /* Apply your chosen font to the table */
-        #paperhands-table {
-            /* Pick one of these font-family lines: */
-            font-family: 'Space Mono', monospace;
-            letter-spacing: 0.5px;
-        }
+
 
         .search-container {
             display: flex;
@@ -119,8 +113,8 @@
         }
 
         .player-summary img {
-            width: 80px;
-            height: 80px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             margin-bottom: 10px;
         }
@@ -130,7 +124,7 @@
         }
 
         .player-summary .paperhand-amount {
-            font-size: 1.2em;
+            font-size: 1%;
             color: #ff4444;
         }
 
@@ -152,6 +146,46 @@
 
         .back-button:hover {
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: white;
+        }
+
+        /* Fixed width for sale date column */
+        #paperhands-table th:last-child,
+        #paperhands-table td:last-child {
+            width: 125px; /* adjust this value as needed */
+            max-width: 125px;
+            white-space: normal; /* allows text to wrap */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Apply Space Mono to ranks and ETH values */
+        .rank-value,
+        .eth-value {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Make sure the dollar values don't use Space Mono */
+        .usd-value {
+            font-family: inherit;
         }
     </style>
 </head>
@@ -188,9 +222,9 @@
                 <thead>
                     <tr>
                         <th>Rank</th>
-                        <th>Hero</th>
+                        <th>Card</th>
                         <th>Sold For</th>
-                        <th>Last Sold Price</th>
+                        <th>Last Sold</th>
                         <th>Fumbled</th>
                         <th>Sale Date</th>
                     </tr>
@@ -201,22 +235,67 @@
             </table>
         </div>
 
-        <!-- Search Modal -->
-        <div id="searchModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);">
-            <div class="modal-content" style="background-color: #1a1a1a; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;">
-                <span id="closeModal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-                <div class="search-box" style="position: relative;">
-                    <input type="text" id="playerSearch" placeholder="Search players..." style="width: 100%; padding: 12px; border: 1px solid #444; border-radius: 4px; background: #2a2a2a; color: white;">
-                    <div id="autocompleteResults" class="autocomplete-results"></div>
+            <!-- Add the modal structure -->
+        <div id="searchModal" style="
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        ">
+            <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #1a1a1a;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 400px;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
+                    <button id="closeModal" style="
+                        background: none;
+                        border: none;
+                        color: #666;
+                        cursor: pointer;
+                        font-size: 1.5em;
+                    ">&times;</button>
+                </div>
+                <div style="position: relative;">
+                    <input type="text" id="playerSearch" placeholder="Enter player name..." style="
+                        width: 100%;
+                        padding: 8px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border-radius: 4px;
+                        color: white;
+                        box-sizing: border-box;
+                        font-family: 'Space Mono', monospace;
+                    ">
+                    <div id="autocompleteResults" style="
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        background: #1a1a1a;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border-radius: 4px;
+                        max-height: 200px;
+                        overflow-y: auto;
+                        display: none;
+                    "></div>
                 </div>
             </div>
         </div>
-    </div>
     <script>
         let currentData = null;
-        let players = [];
         let playersList = [];
-        let searchInput;
 
         // Centralized data fetching function
         async function fetchData() {
@@ -224,7 +303,6 @@
                 try {
                     const response = await fetch('../data/players/paperhands.json');
                     currentData = await response.json();
-                    players = Object.keys(currentData.top_10_by_player);
                     return currentData;
                 } catch (error) {
                     console.error('Error fetching data:', error);
@@ -248,7 +326,7 @@
                 displayData.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td style="text-align: center;">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
+                        <td style="text-align: center;" class="rank-value">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
                         <td>
                             <div class="hero-column">
                                 <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 35px; height: 50px; object-fit: contain;">
@@ -256,19 +334,19 @@
                             </div>
                         </td>
                         <td>
-                            ${entry.sale_price.toFixed(3)}
+                            <span class="eth-value">${entry.sale_price.toFixed(2)}</span>
                             <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
                         </td>
                         <td>
-                            ${entry.last_sold_price.toFixed(3)}
+                            <span class="eth-value">${entry.last_sold_price.toFixed(2)}</span>
                             <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 4px;">
-                                <span>${(entry.price_diff || 0).toFixed(3)}</span>
+                                <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
                                 <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
-                                <span style="color: #666; font-size: 0.75em;">
-                                    ($${Math.round((entry.price_diff || 0) * 3700).toLocaleString()})
+                                <span class="usd-value" style="color: #666; font-size: 0.75em;">
+                                    ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
                                 </span>
                             </div>
                         </td>
@@ -314,12 +392,12 @@
                         .filter(entry => entry.player === playerName)
                         .reduce((sum, entry) => sum + entry.price_diff, 0);
                     
-                    summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 3700).toLocaleString()})`;
+                    summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 4000).toLocaleString()})`;
 
                     playerData.forEach((entry, index) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td style="text-align: center;">${index + 1}</td>
+                            <td style="text-align: center;"><span class="eth-value">${index + 1}</span></td>
                             <td>
                                 <div class="hero-column">
                                     <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 50px; height: auto;">
@@ -328,22 +406,22 @@
                             </td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span>${(entry.sale_price || 0).toFixed(3)}</span>
+                                    <span class="eth-value">${(entry.sale_price || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 </div>
                             </td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span>${(entry.last_sold_price || 0).toFixed(3)}</span>
+                                    <span class="eth-value">${(entry.last_sold_price || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 </div>
                             </td>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span>${(entry.price_diff || 0).toFixed(3)}</span>
+                                    <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                     <span style="color: #666; font-size: 0.75em;">
-                                        ($${Math.round((entry.price_diff || 0) * 3700).toLocaleString()})
+                                        ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
                                     </span>
                                 </div>
                             </td>
@@ -381,14 +459,8 @@
         }
 
         async function initializePlayersList() {
-            if (!currentData) {
-                const response = await fetch('../data/players/paperhands.json');
-                currentData = await response.json();
-            }
-            
-            // Get unique players from top_10_by_player object keys
-            const uniquePlayers = Object.keys(currentData.top_10_by_player);
-            playersList = uniquePlayers.sort();
+            const data = await fetchData();
+            playersList = Object.keys(data.top_10_by_player).sort();
         }
 
         function setupModal() {
@@ -427,12 +499,7 @@
                 if (matches.length > 0) {
                     autocompleteResults.innerHTML = matches
                         .map(player => `
-                            <div class="autocomplete-item" style="
-                                padding: 8px;
-                                cursor: pointer;
-                                hover: background-color: rgba(255, 255, 255, 0.1);
-                                font-family: 'Space Mono', monospace;
-                            " onclick="selectPlayer('${player}')">
+                            <div class="autocomplete-item" onclick="selectPlayer('${player}')">
                                 ${player}
                             </div>
                         `).join('');
@@ -446,7 +513,7 @@
         function selectPlayer(player) {
             window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
         }
-        
+
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -456,22 +523,16 @@
 
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
-            searchInput = document.getElementById('playerSearch');
-            const autocompleteResults = document.getElementById('autocompleteResults');
-
             await initializePlayersList();
             setupModal();
-
-            // Initial data load
-            await fetchAndDisplayData();
 
             // Check for player parameter in URL
             const playerParam = getUrlParameter('player');
             if (playerParam) {
-                searchInput.value = playerParam;
                 displayPlayerData(playerParam);
+            } else {
+                await fetchAndDisplayData();
             }
-
         });
     </script>
 </body>

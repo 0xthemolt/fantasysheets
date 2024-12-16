@@ -62,7 +62,6 @@
         /* Apply your chosen font to the table */
         #paperhands-table {
             /* Pick one of these font-family lines: */
-            font-family: 'Space Mono', monospace;
             letter-spacing: 0.5px;
             font-size: 16px; /* Add this line - adjust the value as needed */
         }
@@ -96,6 +95,17 @@
 
         .toggle-btn.active {
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Apply Space Mono to ranks and ETH values */
+        .rank-value,
+        .eth-value {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Make sure the dollar values don't use Space Mono */
+        .usd-value {
+            font-family: inherit;
         }
     </style>
 </head>
@@ -229,7 +239,7 @@
                 displayData.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td style="text-align: center;">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
+                        <td style="text-align: center;"><span class="rank-value">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</span></td>
                         <td>
                             <div class="player-column">
                                 <img src="https://pbs.twimg.com/profile_images/${entry.player_pfp}" alt="${entry.player}" class="player-image">
@@ -238,7 +248,7 @@
                         </td>
                         <td style="white-space: nowrap;">
                             <div style="display: flex; align-items: center; gap: 4px;">
-                                <span>${entry.price_diff.toFixed(1)}</span>
+                                <span class="eth-value">${entry.price_diff.toFixed(1)}</span>
                                 <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 <span style="color: #666; font-size: 0.75em;">
                                     ($${entry.price_diff * 4000 >= 1000 ? 
@@ -248,7 +258,7 @@
                             </div>
                         </td>
                         <td style="text-align: center;">
-                            ${entry.sell_count}
+                            <span class="eth-value">${entry.sell_count}</span>
                         </td>
                     `;
                     tableBody.appendChild(row);

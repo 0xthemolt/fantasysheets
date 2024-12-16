@@ -84,8 +84,9 @@ cursor.close()
 # All-time dataset
 total_df_all_time = paperhands_df.groupby('player').agg({
     'price_diff': 'sum',
-    'player_pfp': 'first'
-}).reset_index()
+    'player_pfp': 'first',
+    'player': 'count'
+}).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_all_time = total_df_all_time.sort_values('price_diff', ascending=False).head(50)
 total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
 
@@ -93,8 +94,9 @@ total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
 df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]  # Filter for trades within 30 days
 total_df_30d = df_30d.groupby('player').agg({
     'price_diff': 'sum',
-    'player_pfp': 'first'
-}).reset_index()
+    'player_pfp': 'first',
+    'player': 'count'
+}).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_30d = total_df_30d.sort_values('price_diff', ascending=False).head(50)
 total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
 
@@ -102,8 +104,9 @@ total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
 df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]  # Filter for trades within 14 days
 total_df_14d = df_14d.groupby('player').agg({
     'price_diff': 'sum',
-    'player_pfp': 'first'
-}).reset_index()
+    'player_pfp': 'first',
+    'player': 'count'
+}).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_14d = total_df_14d.sort_values('price_diff', ascending=False).head(50)
 total_df_14d['rank'] = range(1, len(total_df_14d) + 1)
 

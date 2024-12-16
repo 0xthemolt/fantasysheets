@@ -373,6 +373,13 @@
             autocompleteResults.style.display = 'block';
         }
 
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
             const searchInput = document.getElementById('player-search');
@@ -380,6 +387,13 @@
 
             // Initial data load
             await fetchAndDisplayData();
+
+            // Check for player parameter in URL
+            const playerParam = getUrlParameter('player');
+            if (playerParam) {
+                searchInput.value = playerParam;
+                displayPlayerData(playerParam);
+            }
 
             // Search input event listeners
             searchInput.addEventListener('input', (e) => {

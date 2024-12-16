@@ -114,6 +114,7 @@
                     <th>Rank</th>
                     <th>Player</th>
                     <th>Paperhanded Value</th>
+                    <th>Sell Count</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -151,13 +152,16 @@
                         <td>
                             <div class="player-column">
                                 <img src="https://pbs.twimg.com/profile_images/${entry.player_pfp}" alt="${entry.player}" class="player-image">
-                                <span>${entry.player}</span>
+                                <span><a href="/paperhand/player.html?player=${encodeURIComponent(entry.player)}" style="text-decoration: none; color: inherit;">${entry.player}</a></span>
                             </div>
                         </td>
                         <td>
                             ${entry.price_diff.toFixed(2)}
                             <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
                             <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                        </td>
+                        <td style="text-align: center;">
+                            ${entry.sell_count}
                         </td>
                     `;
                     tableBody.appendChild(row);

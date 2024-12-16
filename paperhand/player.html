@@ -29,6 +29,7 @@
         /* Modern cell styling */
         #paperhands-table td {
             padding: 16px;
+            font-size: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -100,6 +101,11 @@
 
         .hero-image {
             border-radius: 0;
+            width: 100px;
+            height: 150px;
+            object-fit: cover;
+            max-width: none;
+            display: block;
         }
 
         .player-summary {
@@ -107,7 +113,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 20px;
-            margin: 0 0 20px 0;
+            margin: 0 auto 20px auto; /* Center horizontally and add bottom margin */
             max-width: 600px;
             text-align: center;
         }
@@ -175,6 +181,7 @@
             white-space: normal; /* allows text to wrap */
             word-wrap: break-word;
             overflow-wrap: break-word;
+            font-size: 12px;
         }
 
         /* Apply Space Mono to ranks and ETH values */
@@ -186,6 +193,96 @@
         /* Make sure the dollar values don't use Space Mono */
         .usd-value {
             font-family: inherit;
+        }
+
+        /* Add these styles to your existing CSS */
+        .cards-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px 0;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .cards-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .card {
+            flex: 0 0 auto;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            position: relative;
+        }
+
+        .card > div:last-child {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.9em;
+        }
+
+        .card .eth-value {
+            font-size: 0.9em;
+        }
+
+        .card span[style*="color: #666"] {
+            font-size: 0.8em;
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff69b4;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+        }
+
+        .scroll-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .scroll-left {
+            left: 10px;
+        }
+
+        .scroll-right {
+            right: 10px;
+        }
+
+        .scroll-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .cards-wrapper {
+            position: relative;
+            width: 40%;  /* Set to 40% of viewport width */
+            margin: 0 auto;  /* Center the wrapper horizontally */
         }
     </style>
 </head>
@@ -217,22 +314,18 @@
         </div>
 
         <!-- Table Container -->
-        <div class="table-container">
-            <table id="paperhands-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Card</th>
-                        <th>Sold For</th>
-                        <th>Last Sold</th>
-                        <th>Fumbled</th>
-                        <th>Sale Date</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Data will be populated here -->
-                </tbody>
-            </table>
+        <div class="cards-wrapper">
+            <button class="scroll-button scroll-left" onclick="scrollCards('left')" style="display: none;">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="cards-container" id="cards-container">
+                <!-- Cards will be populated here -->
+            </div>
+
+            <button class="scroll-button scroll-right" onclick="scrollCards('right')">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
 
             <!-- Add the modal structure -->
@@ -312,68 +405,11 @@
             return currentData;
         }
 
-        async function fetchAndDisplayData(period = 'total_all_time') {
-            document.getElementById('player-summary').style.display = 'none';
-            try {
-                const data = await fetchData();
-                const tableBody = document.getElementById('table-body');
-                tableBody.innerHTML = '';
-                
-                const displayData = data[period]
-                    .filter(entry => entry.rank <= 10)
-                    .sort((a, b) => a.rank - b.rank);
-
-                displayData.forEach(entry => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td style="text-align: center;" class="rank-value">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</td>
-                        <td>
-                            <div class="hero-column">
-                                <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 35px; height: 50px; object-fit: contain;">
-                                <span>${entry.hero}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="eth-value">${entry.sale_price.toFixed(2)}</span>
-                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
-                        </td>
-                        <td>
-                            <span class="eth-value">${entry.last_sold_price.toFixed(2)}</span>
-                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
-                        </td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
-                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
-                                <span class="usd-value" style="color: #666; font-size: 0.75em;">
-                                    ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            ${(() => {
-                                const saleDate = new Date(entry.sale_timestamp);
-                                const [lastBuyer, lastSaleStr] = entry.last_sale_string.split('|');
-                                const lastSaleDate = new Date(lastSaleStr);
-                                const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
-                                return `${lastBuyer} bought ${daysDiff} later`;
-                            })()}
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-                
-                addStaggeredAnimation();
-            } catch (error) {
-                console.error('Error displaying data:', error);
-            }
-        }
-
         async function displayPlayerData(playerName) {
             try {
                 const data = await fetchData();
-                const tableBody = document.getElementById('table-body');
-                tableBody.innerHTML = '';
+                const cardsContainer = document.getElementById('cards-container');
+                cardsContainer.innerHTML = '';
 
                 const playerData = data.top_10_by_player[playerName];
                 if (playerData && playerData.length > 0) {
@@ -395,56 +431,59 @@
                     summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 4000).toLocaleString()})`;
 
                     playerData.forEach((entry, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td style="text-align: center;"><span class="eth-value">${index + 1}</span></td>
-                            <td>
-                                <div class="hero-column">
-                                    <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" alt="${entry.hero}" class="hero-image" style="width: 50px; height: auto;">
-                                    <span>${entry.hero}</span>
-                                </div>
-                            </td>
-                            <td>
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <div class="rank-badge">${index + 1}</div>
+                            <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" 
+                                 alt="${entry.hero}" 
+                                 class="hero-image">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="color: #666;">Sold for:</span>
                                     <span class="eth-value">${(entry.sale_price || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 </div>
-                            </td>
-                            <td>
                                 <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="color: #666;">Last sold:</span>
                                     <span class="eth-value">${(entry.last_sold_price || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 </div>
-                            </td>
-                            <td>
                                 <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="color: #666;">Fumbled:</span>
                                     <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
                                     <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                     <span style="color: #666; font-size: 0.75em;">
                                         ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
                                     </span>
                                 </div>
-                            </td>
-                            <td>
-                                ${(() => {
-                                    try {
-                                        const saleDate = new Date(entry.sale_timestamp);
-                                        const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
-                                        const lastSaleDate = new Date(lastSaleStr);
-                                        const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
-                                        return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
-                                    } catch (e) {
-                                        return 'Date information unavailable';
-                                    }
-                                })()}
-                            </td>
+                                <div style="font-size: 0.8em; color: #666;">
+                                    ${(() => {
+                                        try {
+                                            const saleDate = new Date(entry.sale_timestamp);
+                                            const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
+                                            const lastSaleDate = new Date(lastSaleStr);
+                                            const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
+                                            return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
+                                        } catch (e) {
+                                            return 'Date information unavailable';
+                                        }
+                                    })()}
+                                </div>
+                            </div>
                         `;
-                        tableBody.appendChild(row);
+                        cardsContainer.appendChild(card);
                     });
-                    
-                    addStaggeredAnimation();
+
+                    // Show only first 3 cards initially
+                    const cards = cardsContainer.querySelectorAll('.card');
+                    cards.forEach((card, index) => {
+                        if (index >= 3) {
+                            card.style.opacity = '0.5';
+                        }
+                    });
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="6">No data found for this player</td></tr>';
+                    cardsContainer.innerHTML = '<div class="card">No data found for this player</div>';
                 }
             } catch (error) {
                 console.error('Error displaying player data:', error);
@@ -531,9 +570,43 @@
             if (playerParam) {
                 displayPlayerData(playerParam);
             } else {
-                await fetchAndDisplayData();
+                await displayPlayerData();
             }
         });
+
+        // Add scroll functionality
+        function scrollCards(direction) {
+            const container = document.getElementById('cards-container');
+            const scrollAmount = container.offsetWidth; // Use container width for scroll amount
+            if (direction === 'left') {
+                container.scrollBy({
+                    left: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            } else {
+                container.scrollBy({
+                    left: scrollAmount,
+                    behavior: 'smooth'
+                });
+            }
+
+            updateScrollButtons();
+        }
+
+        function updateScrollButtons() {
+            const container = document.getElementById('cards-container');
+            const leftButton = document.querySelector('.scroll-left');
+            const rightButton = document.querySelector('.scroll-right');
+
+            leftButton.style.display = container.scrollLeft > 0 ? 'flex' : 'none';
+            rightButton.style.display = 
+                container.scrollLeft < (container.scrollWidth - container.clientWidth) 
+                ? 'flex' 
+                : 'none';
+        }
+
+        // Add scroll event listener
+        document.getElementById('cards-container').addEventListener('scroll', updateScrollButtons);
     </script>
 </body>
 </html>

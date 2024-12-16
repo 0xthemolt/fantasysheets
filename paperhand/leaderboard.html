@@ -13,7 +13,7 @@
     <title>Paperhands</title>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -64,6 +64,7 @@
             /* Pick one of these font-family lines: */
             font-family: 'Space Mono', monospace;
             letter-spacing: 0.5px;
+            font-size: 16px; /* Add this line - adjust the value as needed */
         }
 
         .time-toggle {
@@ -113,8 +114,8 @@
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>Paperhanded Value</th>
-                    <th>Sell Count</th>
+                    <th>Value</th>
+                    <th>Sells</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -123,8 +124,88 @@
         </table>
     </div>
 
+    <!-- Add this new div after the table-container -->
+    <div style="text-align: center; margin-top: 20px;">
+        <span>Diamond hands?</span>
+        <button id="searchButton" style="
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            <i class="fas fa-search" style="color: #ff69b4;"></i>
+            Search
+        </button>
+    </div>
+
+    <!-- Add the modal structure -->
+    <div id="searchModal" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+    ">
+        <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
+                <button id="closeModal" style="
+                    background: none;
+                    border: none;
+                    color: #666;
+                    cursor: pointer;
+                    font-size: 1.5em;
+                ">&times;</button>
+            </div>
+            <div style="position: relative;">
+                <input type="text" id="playerSearch" placeholder="Enter player name..." style="
+                    width: 100%;
+                    padding: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    color: white;
+                    box-sizing: border-box;
+                    font-family: 'Space Mono', monospace;
+                ">
+                <div id="autocompleteResults" style="
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: #1a1a1a;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    display: none;
+                "></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentData = null;
+        let playersList = [];
 
         async function fetchAndDisplayData(period = 'total_all_time') {
             try {
@@ -155,10 +236,16 @@
                                 <span><a href="/paperhand/player.html?player=${encodeURIComponent(entry.player)}" style="text-decoration: none; color: inherit;">${entry.player}</a></span>
                             </div>
                         </td>
-                        <td>
-                            ${entry.price_diff.toFixed(2)}
-                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
-                            <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                        <td style="white-space: nowrap;">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span>${entry.price_diff.toFixed(1)}</span>
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                <span style="color: #666; font-size: 0.75em;">
+                                    ($${entry.price_diff * 4000 >= 1000 ? 
+                                        ((entry.price_diff * 3700)/1000).toFixed(1) + 'k' : 
+                                        Math.round(entry.price_diff * 3700)})
+                                </span>
+                            </div>
                         </td>
                         <td style="text-align: center;">
                             ${entry.sell_count}
@@ -181,9 +268,79 @@
             });
         }
 
+        async function initializePlayersList() {
+            if (!currentData) {
+                const response = await fetch('../data/players/paperhands.json');
+                currentData = await response.json();
+            }
+            
+            // Get unique players from top_10_by_player object keys
+            const uniquePlayers = Object.keys(currentData.top_10_by_player);
+            playersList = uniquePlayers.sort();
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('searchModal');
+            const searchButton = document.getElementById('searchButton');
+            const closeButton = document.getElementById('closeModal');
+            const searchInput = document.getElementById('playerSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+
+            searchButton.onclick = () => {
+                modal.style.display = 'block';
+                searchInput.focus();
+            };
+
+            closeButton.onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            searchInput.oninput = () => {
+                const value = searchInput.value.toLowerCase();
+                if (value.length === 0) {
+                    autocompleteResults.style.display = 'none';
+                    return;
+                }
+
+                const matches = playersList.filter(player => 
+                    player.toLowerCase().includes(value)
+                );
+
+                if (matches.length > 0) {
+                    autocompleteResults.innerHTML = matches
+                        .map(player => `
+                            <div class="autocomplete-item" style="
+                                padding: 8px;
+                                cursor: pointer;
+                                hover: background-color: rgba(255, 255, 255, 0.1);
+                                font-family: 'Space Mono', monospace;
+                            " onclick="selectPlayer('${player}')">
+                                ${player}
+                            </div>
+                        `).join('');
+                    autocompleteResults.style.display = 'block';
+                } else {
+                    autocompleteResults.style.display = 'none';
+                }
+            };
+        }
+
+        function selectPlayer(player) {
+            window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
+        }
+
         // Add event listeners for toggle buttons
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const toggleButtons = document.querySelectorAll('.toggle-btn');
+            
+            await initializePlayersList();
+            setupModal();
             
             toggleButtons.forEach(button => {
                 button.addEventListener('click', () => {

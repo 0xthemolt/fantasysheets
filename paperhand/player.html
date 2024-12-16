@@ -164,6 +164,7 @@
 </head>
 <body>
     <h1>Top Giga Jeeters</h1>
+    
     <div class="search-container">
         <div class="search-box">
             <i class="fas fa-search search-icon"></i>
@@ -245,9 +246,13 @@
                             <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
                         </td>
                         <td>
-                            ${entry.price_diff.toFixed(3)}
-                            <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
-                            <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span>${(entry.price_diff || 0).toFixed(3)}</span>
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                <span style="color: #666; font-size: 0.75em;">
+                                    ($${Math.round((entry.price_diff || 0) * 3700).toLocaleString()})
+                                </span>
+                            </div>
                         </td>
                         <td>
                             ${(() => {
@@ -304,25 +309,37 @@
                                 </div>
                             </td>
                             <td>
-                                ${entry.sale_price.toFixed(3)}
-                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span>${(entry.sale_price || 0).toFixed(3)}</span>
+                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                </div>
                             </td>
                             <td>
-                                ${entry.last_sold_price.toFixed(3)}
-                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span>${(entry.last_sold_price || 0).toFixed(3)}</span>
+                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                </div>
                             </td>
                             <td>
-                                ${entry.price_diff.toFixed(3)}
-                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;">
-                                <span style="color: #666; margin-left: 4px;">($${Math.round(entry.price_diff * 3700).toLocaleString()})</span>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span>${(entry.price_diff || 0).toFixed(3)}</span>
+                                    <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                    <span style="color: #666; font-size: 0.75em;">
+                                        ($${Math.round((entry.price_diff || 0) * 3700).toLocaleString()})
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 ${(() => {
-                                    const saleDate = new Date(entry.sale_timestamp);
-                                    const [lastBuyer, lastSaleStr] = entry.last_sale_string.split('|');
-                                    const lastSaleDate = new Date(lastSaleStr);
-                                    const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
-                                    return `${lastBuyer} bought ${daysDiff} days later`;
+                                    try {
+                                        const saleDate = new Date(entry.sale_timestamp);
+                                        const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
+                                        const lastSaleDate = new Date(lastSaleStr);
+                                        const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
+                                        return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
+                                    } catch (e) {
+                                        return 'Date information unavailable';
+                                    }
                                 })()}
                             </td>
                         `;

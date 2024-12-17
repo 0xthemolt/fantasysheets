@@ -346,9 +346,9 @@
                 </div>
     </div>
     <div class="time-toggle">
-        <button class="toggle-btn active" data-period="total_all_time">All Time</button>
-        <button class="toggle-btn" data-period="total_30d">Last 30D</button>
-        <button class="toggle-btn" data-period="total_14d">Last 14D</button>
+        <button class="toggle-btn active" data-period="all_time">All Time</button>
+        <button class="toggle-btn" data-period="l30d">Last 30D</button>
+        <button class="toggle-btn" data-period="l14d">Last 14D</button>
     </div>
     <div class="container">
         <div class="card-container" id="cardContainer">
@@ -363,6 +363,7 @@
     <script>
         let currentIndex = 0;
         let playerData = [];
+        let currentPeriod = 'all_time';
 
         async function loadPlayerData() {
             try {
@@ -378,7 +379,12 @@
         async function displayPlayerData(playerAddress = '0xthemolt') {
             const data = await loadPlayerData();
             if (data) {
-                playerData = data.top_10_by_player[playerAddress];
+                const allPlayerData = data.top_10_by_player[playerAddress];
+                playerData = allPlayerData.filter(player => {
+                    const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
+                                    currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                    return player[rankField] <= 10;
+                });
                 renderCards();
             }
         }
@@ -410,15 +416,16 @@
                 const card = document.createElement('div');
                 card.className = `card ${index === 0 ? 'active' : ''}`;
                 
-                const rankClass = data.rank_all_time <= 3 
-                    ? `rank-${data.rank_all_time}` 
-                    : 'rank-other';
+                const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
+                                currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                const rank = data[rankField];
+                const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
                 
                 const rarity = getRarity(data.hero_card);
                 const rarityColor = getRarityColor(rarity);
                 
                 card.innerHTML = `
-                    <div class="rank-circle ${rankClass}">#${data.rank_all_time}</div>
+                    <div class="rank-circle ${rankClass}">#${rank}</div>
                     <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
                     <div class="card-content">
                         <div class="stats-grid">
@@ -571,6 +578,21 @@
             } else {
                 await displayPlayerData();
             }
+
+            // Add toggle button handlers
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    // Update current period
+                    currentPeriod = button.dataset.period;
+                    // Refresh the display
+                    displayPlayerData(getUrlParameter('player') || '0xthemolt');
+                });
+            });
         });
 
         // Load data when page loads

@@ -1,11 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Stats Viewer</title>
+    <title>Paperhands</title>
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        .back-button {
+            position: static;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -56,7 +96,7 @@
 
         .card {
             flex: 0 0 350px;
-            height: 250px;
+            height: 210px;
             background: #1a1a1a;
             border-radius: 10px;
             overflow: hidden;
@@ -71,12 +111,15 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
+            margin-top: 10px; /* Adds space from the top of the card */
+            margin-left: 10px; /* Adds space from the top of the card */
         }
 
         .card-content {
             flex: 1;
             padding: 1rem;
             color: white;
+            height: 180px; /* Match the card-image height */
         }
 
         .card-content h2 {
@@ -121,10 +164,18 @@
             text-align: center;
         }
 
+        .stat-item-paperhanded {
+            border: 1px solid transparent; /* Add border for the colored outline */
+        }
+
+        .stat-item-paperhanded {
+            background: none;
+        }
+
         .nav-button {
             padding: 0.5rem 1rem;
             margin: 0 0.5rem;
-            background: #4a4a4a;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 5px;
             color: white;
@@ -133,13 +184,13 @@
         }
 
         .nav-button:hover {
-            background: #666;
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .rank-circle {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 1px;
+            right: 1px;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -188,9 +239,117 @@
             font-size: 1.1em;
             white-space: nowrap;
         }
+
+        .time-toggle {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
+    <div class="navigation-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1400px;">
+        <!-- Left side - Back button -->
+        <a href="/paperhand/leaderboard.html" class="back-button" aria-label="Back to Leaderboard">
+            <i class="fas fa-ranking-star"></i>
+            Back to Leaderboard
+        </a>
+        
+        <!-- Right side - Search button -->
+        <div class="search-controls">
+            <button id="searchButton" class="back-button" aria-label="Search Players">
+                <i class="fas fa-search" style="color: #ff69b4;"></i>
+                Search
+            </button>
+        </div>
+    </div>
+    <div id="searchModal" style="
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 1000;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #1a1a1a;
+                    padding: 20px;
+                    border-radius: 8px;
+                    width: 90%;
+                    max-width: 400px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
+                        <button id="closeModal" style="
+                            background: none;
+                            border: none;
+                            color: #666;
+                            cursor: pointer;
+                            font-size: 1.5em;
+                        ">&times;</button>
+                    </div>
+                    <div style="position: relative;">
+                        <input type="text" id="playerSearch" placeholder="Enter player name..." style="
+                            width: 100%;
+                            padding: 8px;
+                            background: rgba(255, 255, 255, 0.1);
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 4px;
+                            color: white;
+                            box-sizing: border-box;
+                            font-family: 'Space Mono', monospace;
+                        ">
+                        <div id="autocompleteResults" style="
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            right: 0;
+                            background: #1a1a1a;
+                            border: 1px solid rgba(255, 255, 255, 0.2);
+                            border-radius: 4px;
+                            max-height: 200px;
+                            overflow-y: auto;
+                            display: none;
+                        "></div>
+                    </div>
+                </div>
+    </div>
+    <div class="time-toggle">
+        <button class="toggle-btn active" data-period="total_all_time">All Time</button>
+        <button class="toggle-btn" data-period="total_30d">Last 30D</button>
+        <button class="toggle-btn" data-period="total_14d">Last 14D</button>
+    </div>
     <div class="container">
         <div class="card-container" id="cardContainer">
             <!-- Cards will be inserted here dynamically -->
@@ -209,15 +368,38 @@
             try {
                 const response = await fetch('/data/players/paperhands.json');
                 const data = await response.json();
-                playerData = data.top_10_by_player['0xthemolt'];
-                renderCards();
+                return data;
             } catch (error) {
                 console.error('Error loading player data:', error);
+                return null;
+            }
+        }
+
+        async function displayPlayerData(playerAddress = '0xthemolt') {
+            const data = await loadPlayerData();
+            if (data) {
+                playerData = data.top_10_by_player[playerAddress];
+                renderCards();
             }
         }
 
         function formatPrice(price) {
             return Number(price).toFixed(2);
+        }
+
+        function getRarity(heroCard) {
+            return heroCard.split('/')[0];
+        }
+
+        function getRarityColor(rarity) {
+            const rarityColors = {
+                "common": "#93FF01",
+                "rare": "#00FFDF",
+                "epic": "#F1A3FD",
+                "legendary": "#FBE7FF",
+                "all": "#666666"
+            };
+            return rarityColors[rarity] || rarityColors.all;
         }
 
         function renderCards() {
@@ -232,6 +414,9 @@
                     ? `rank-${data.rank_all_time}` 
                     : 'rank-other';
                 
+                const rarity = getRarity(data.hero_card);
+                const rarityColor = getRarityColor(rarity);
+                
                 card.innerHTML = `
                     <div class="rank-circle ${rankClass}">#${data.rank_all_time}</div>
                     <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
@@ -242,8 +427,8 @@
                                 <h3>Bought for</h3>
                                 <div class="price-with-icon">
                                     <span class="eth-price">${formatPrice(data.buy_price)}</span><img src="../icons/eth.webp" alt="ETH">
-                                </div>
-                                <span><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                    <span><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                </div>                            
                             </div>
                             ` : `
                             <div class="stat-item">
@@ -255,9 +440,12 @@
                                 <div class="price-with-icon">
                                     <span class="eth-price">${formatPrice(data.sell_price)}</span> <img src="../icons/eth.webp" alt="ETH">
                                     ${data.buy_tx_hash ? `
-                                    <span style="color: ${data.sell_price - data.buy_price >= 0 ? '#4CAF50' : '#FF5252'}">
-                                        <span class="eth-price">${formatPrice(data.sell_price - data.buy_price)}</span> ETH
-                                        (${((data.sell_price - data.buy_price) / data.buy_price * 100).toFixed(0)}%)
+                                    <span style="color: ${data.trade_profit < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}">
+                                        ${data.trade_profit < 0.001 ? 
+                                            '- (0%)' : 
+                                            `<span class="eth-price">${formatPrice(data.trade_profit)}</span> ETH
+                                            (${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)`
+                                        }
                                     </span>
                                     ` : ''}
                                     <span><a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
@@ -270,10 +458,10 @@
                                     <span><a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>     
                                 </div>                                           
                             </div>
-                            <div class="stat-item">
-                                <h3>Fumbled</h3>
+                            <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
+                                <h3>Paperhanded</h3>
                                 <div class="price-with-icon">
-                                    <span class="eth-price">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH">
                                 </div>
                             </div>
                         </div>
@@ -305,6 +493,85 @@
             currentIndex = (currentIndex - 1 + playerData.length) % playerData.length;
             showCard(currentIndex);
         }
+
+        async function initializePlayersList() {
+            const data = await loadPlayerData();
+            if (data) {
+                playersList = Object.keys(data.top_10_by_player).sort();
+            }
+        }
+
+        function setupModal() {
+                const modal = document.getElementById('searchModal');
+                const searchButton = document.getElementById('searchButton');
+                const closeButton = document.getElementById('closeModal');
+                const searchInput = document.getElementById('playerSearch');
+                const autocompleteResults = document.getElementById('autocompleteResults');
+
+                searchButton.onclick = () => {
+                    modal.style.display = 'block';
+                    searchInput.focus();
+                };
+
+                closeButton.onclick = () => {
+                    modal.style.display = 'none';
+                };
+
+                window.onclick = (event) => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
+
+                searchInput.oninput = () => {
+                    const value = searchInput.value.toLowerCase();
+                    if (value.length === 0) {
+                        autocompleteResults.style.display = 'none';
+                        return;
+                    }
+
+                    const matches = playersList.filter(player => 
+                        player.toLowerCase().includes(value)
+                    );
+
+                    if (matches.length > 0) {
+                        autocompleteResults.innerHTML = matches
+                            .map(player => `
+                                <div class="autocomplete-item" onclick="selectPlayer('${player}')">
+                                    ${player}
+                                </div>
+                            `).join('');
+                        autocompleteResults.style.display = 'block';
+                    } else {
+                        autocompleteResults.style.display = 'none';
+                    }
+                };
+            }
+
+        function selectPlayer(player) {
+            window.location.href = `/paperhand/player_v2.html?player=${encodeURIComponent(player)}`;
+        }
+
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializePlayersList();
+            setupModal();
+
+            // Check for player parameter in URL
+            const playerParam = getUrlParameter('player');
+            if (playerParam) {
+                displayPlayerData(playerParam);
+            } else {
+                await displayPlayerData();
+            }
+        });
 
         // Load data when page loads
         loadPlayerData();

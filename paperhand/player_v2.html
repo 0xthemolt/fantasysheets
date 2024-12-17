@@ -19,6 +19,39 @@
             overflow-x: auto;
             padding: 1rem;
             scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #4a4a4a #1a1a1a;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .card-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+
+        .card-container::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .card-container::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        @media (hover: none) {
+            .card-container {
+                position: relative;
+                scroll-snap-type: x mandatory;
+            }
+
+            .card {
+                scroll-snap-align: center;
+            }
         }
 
         .card {
@@ -234,7 +267,7 @@
                                 <h3>Last Sold</h3>
                                 <div class="price-with-icon">
                                     <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH">
-                                    <span>on ${new Date(data.last_sale_string.split('|')[1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>     
+                                    <span><a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>     
                                 </div>                                           
                             </div>
                             <div class="stat-item">

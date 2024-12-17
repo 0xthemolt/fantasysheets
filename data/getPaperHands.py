@@ -58,8 +58,8 @@ latest_prices AS (
         buyer,
         hero_rarity_id,
         price AS last_sold_price,
-        timestamp AS last_trade_timestamp,
-        tx_hash
+        timestamp AS last_sold_timestamp,
+        tx_hash last_sold_tx_hash
     FROM flatten.get_hero_last_trades
     WHERE hero_rarity_trade_history_rank = 1
 ),
@@ -77,7 +77,8 @@ base AS (
         bs.sell_timestamp,
         bs.sell_price - bs.buy_price as trade_profit,
         lp.last_sold_price,
-        CONCAT(lp.buyer,'|',lp.last_trade_timestamp::date) last_sale_string,
+        lp.last_sold_timestamp,
+        lp.last_sold_tx_hash,
         lp.last_sold_price - bs.sell_price as fumbled,
         ROW_NUMBER() OVER (PARTITION BY bs.seller ORDER BY (lp.last_sold_price - bs.sell_price) DESC)::integer as rank_all_time,
         CASE 
@@ -95,7 +96,7 @@ base AS (
     left join flatten.get_player_basic_data pd
     	on bs.seller_id = pd.player_id
     WHERE lp.last_sold_price > bs.sell_price
-    AND lp.last_trade_timestamp > bs.sell_timestamp
+    AND lp.last_sold_timestamp > bs.sell_timestamp
     ORDER BY fumbled desc
 )
 SELECT * FROM base;

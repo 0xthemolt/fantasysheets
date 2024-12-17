@@ -191,12 +191,29 @@
                     <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
                     <div class="card-content">
                         <div class="stats-grid">
+                            ${data.buy_tx_hash ? `
+                            <div class="stat-item">
+                                <h3>Bought for</h3>
+                                <div class="price-with-icon">
+                                    <span>${formatPrice(data.buy_price)}</span>
+                                    <img src="../icons/eth.webp" alt="ETH">
+                                    <span><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                </div>
+                                <div class="price-with-icon" style="margin-top: 5px;">
+                                    <span style="color: ${data.sell_price - data.buy_price >= 0 ? '#4CAF50' : '#FF5252'}">
+                                        ${formatPrice(data.sell_price - data.buy_price)} ETH
+                                        (${((data.sell_price - data.buy_price) / data.buy_price * 100).toFixed(0)}%)
+                                    </span>
+                                </div>
+                            </div>
+                            ` : ''}
                             <div class="stat-item">
                                 <h3>Sold for</h3>
                                 <div class="price-with-icon">
-                                    <span>${formatPrice(data.sale_price)}</span>
+                                    <span>${formatPrice(data.sell_price)}</span>
                                     <img src="../icons/eth.webp" alt="ETH">
-                                    <span>on ${new Date(data.sale_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                    <span><a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                    
                                 </div>
                             </div>
                             <div class="stat-item">
@@ -211,7 +228,7 @@
                             <div class="stat-item">
                                 <h3>Fumbled</h3>
                                 <div class="price-with-icon">
-                                    <span>${formatPrice(data.price_diff)}</span>
+                                    <span>${formatPrice(data.fumbled)}</span>
                                     <img src="../icons/eth.webp" alt="ETH">
                                 </div>
                             </div>

@@ -21,24 +21,45 @@ query = """WITH active_buyers AS (
 --select count(*) from active_buyers;
 ,player_sales AS (
     SELECT 
-        seller,
-        hero_rarity_id,
-        hero_handle,
-        card_picture,
-        seller_id,
-        price AS sale_price,
-        timestamp AS sale_timestamp
-    FROM flatten.get_hero_last_trades
+        sell.seller,
+        sell.card_id,
+        sell.hero_rarity_id,
+        sell.hero_handle,
+        sell.card_picture,
+        sell.seller_id,
+        sell.price AS sell_price,
+        sell.timestamp::date AS sell_timestamp,
+        sell.tx_hash as sell_tx_hash,
+        FIRST_VALUE(buy.tx_hash) OVER (
+		      PARTITION BY sell.tx_hash 
+		      ORDER BY buy.timestamp DESC
+		    ) as buy_tx_hash,
+	    FIRST_VALUE(buy.timestamp) OVER (
+		      PARTITION BY sell.tx_hash 
+		      ORDER BY buy.timestamp DESC
+		    ) as buy_timestamp,
+	    FIRST_VALUE(buy.price) OVER (
+		      PARTITION BY sell.tx_hash 
+		      ORDER BY buy.price DESC
+		    ) as buy_price
+    FROM flatten.get_hero_last_trades sell
+    left join flatten.get_hero_last_trades buy
+    	on sell.seller_id  = buy.buyer_id
+    	and sell.card_id = buy.card_id
+    	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    --and seller = '0xthemolt'
-    AND seller_id IN (SELECT buyer_id FROM active_buyers)
+    and sell.seller = '0xthemolt'
+    --and sell.hero_handle  ilike '%orangie%'
+    AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
 ),
+--SELECT * from player_sales;
 latest_prices AS (
     SELECT 
         buyer,
         hero_rarity_id,
         price AS last_sold_price,
-        timestamp AS last_trade_timestamp
+        timestamp AS last_trade_timestamp,
+        tx_hash
     FROM flatten.get_hero_last_trades
     WHERE hero_rarity_trade_history_rank = 1
 ),
@@ -48,29 +69,34 @@ base AS (
         REPLACE(pd.profile_picture, 'https://pbs.twimg.com/profile_images/', '') as player_pfp,
         bs.hero_handle as hero,
         SUBSTRING(bs.card_picture FROM '/v[12]/(.*)') as hero_card,
-        bs.sale_price,
+        bs.buy_tx_hash,
+        bs.buy_timestamp,
+        bs.buy_price,
+        bs.sell_tx_hash,
+        bs.sell_price,
+        bs.sell_timestamp,
+        bs.sell_price - bs.buy_price as trade_profit,
         lp.last_sold_price,
-        (lp.last_sold_price - bs.sale_price) as price_diff,
-        ROW_NUMBER() OVER (PARTITION BY bs.seller ORDER BY (lp.last_sold_price - bs.sale_price) DESC) as rank_all_time,
+        CONCAT(lp.buyer,'|',lp.last_trade_timestamp::date) last_sale_string,
+        lp.last_sold_price - bs.sell_price as fumbled,
+        ROW_NUMBER() OVER (PARTITION BY bs.seller ORDER BY (lp.last_sold_price - bs.sell_price) DESC)::integer as rank_all_time,
         CASE 
-            WHEN bs.sale_timestamp >= NOW() - INTERVAL '30 days' 
-            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sale_timestamp >= NOW() - INTERVAL '30 days') 
-                                   ORDER BY (lp.last_sold_price - bs.sale_price) DESC)
-        END as rank_30d,
+            WHEN bs.sell_timestamp >= NOW() - INTERVAL '30 days' 
+            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sell_timestamp >= NOW() - INTERVAL '30 days') 
+                                   ORDER BY (lp.last_sold_price - bs.sell_price) DESC)
+        END::integer as rank_30d,
         CASE 
-            WHEN bs.sale_timestamp >= NOW() - INTERVAL '14 days' 
-            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sale_timestamp >= NOW() - INTERVAL '14 days') 
-                                   ORDER BY (lp.last_sold_price - bs.sale_price) DESC)
-        END as rank_14d,
-        bs.sale_timestamp,
-        CONCAT(lp.buyer,'|',lp.last_trade_timestamp::date) last_sale_string
+            WHEN bs.sell_timestamp >= NOW() - INTERVAL '14 days' 
+            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sell_timestamp >= NOW() - INTERVAL '14 days') 
+                                   ORDER BY (lp.last_sold_price - bs.sell_price) DESC)
+        END::integer as rank_14d
     FROM player_sales bs
     JOIN latest_prices lp ON bs.hero_rarity_id = lp.hero_rarity_id
     left join flatten.get_player_basic_data pd
     	on bs.seller_id = pd.player_id
-    WHERE lp.last_sold_price > bs.sale_price
-    AND lp.last_trade_timestamp > bs.sale_timestamp
-    ORDER BY price_diff desc
+    WHERE lp.last_sold_price > bs.sell_price
+    AND lp.last_trade_timestamp > bs.sell_timestamp
+    ORDER BY fumbled desc
 )
 SELECT * FROM base;
 """
@@ -83,53 +109,70 @@ cursor.close()
 # Create the three total datasets (aggregate by player) with rank and profile picture
 # All-time dataset
 total_df_all_time = paperhands_df.groupby('player').agg({
-    'price_diff': 'sum',
+    'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count'
+    'player': 'count',
+    'rank_all_time': 'first'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_all_time = total_df_all_time.sort_values('price_diff', ascending=False).head(10)
-total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
+total_df_all_time = total_df_all_time.sort_values('fumbled', ascending=False).head(10)
+total_df_all_time['rank_all_time'] = total_df_all_time['rank_all_time'].astype(int)
 
 # 30-day dataset
 df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]  # Filter for trades within 30 days
 total_df_30d = df_30d.groupby('player').agg({
-    'price_diff': 'sum',
+    'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count'
+    'player': 'count',
+    'rank_30d': 'first'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_30d = total_df_30d.sort_values('price_diff', ascending=False).head(10)
-total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
+total_df_30d = total_df_30d.sort_values('fumbled', ascending=False).head(10)
+total_df_30d['rank_30d'] = total_df_30d['rank_30d'].astype(int)
 
 # 14-day dataset
 df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]  # Filter for trades within 14 days
 total_df_14d = df_14d.groupby('player').agg({
-    'price_diff': 'sum',
+    'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count'
+    'player': 'count',
+    'rank_14d': 'first'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_14d = total_df_14d.sort_values('price_diff', ascending=False).head(10)
-total_df_14d['rank'] = range(1, len(total_df_14d) + 1)
+total_df_14d = total_df_14d.sort_values('fumbled', ascending=False).head(10)
+total_df_14d['rank_14d'] = total_df_14d['rank_14d'].astype(int)
 
 # Create the top 10 by player dataset
 top_10_by_player = {}
 for player in paperhands_df['player'].unique():
     player_data = paperhands_df[paperhands_df['player'] == player]
-    # Get top 10 records and drop NaN columns
-    player_top_10 = (player_data.nsmallest(10, 'rank_all_time')
-                    .dropna(axis=1)  # This will remove columns that are all NaN
-                    .to_dict('records'))
-    top_10_by_player[player] = player_top_10
+    # Convert rank columns to int where they're not null
+    for col in ['rank_all_time', 'rank_30d', 'rank_14d']:
+        player_data[col] = player_data[col].astype('Int64')  # Use Int64 to handle NaN values
+    
+    # Add explicit NaN handling for numeric columns
+    numeric_cols = ['buy_price', 'trade_profit']
+    for col in numeric_cols:
+        player_data[col] = player_data[col].where(player_data[col].notna(), None)
+    
+    player_top_trades = player_data[
+        (player_data['rank_all_time'] <= 10) |
+        (player_data['rank_30d'] <= 10) |
+        (player_data['rank_14d'] <= 10)
+    ]
+    player_top_trades = (player_top_trades
+                        .sort_values('fumbled', ascending=False)
+                        .replace({pd.NA: None, float('nan'): None})  # Replace both pd.NA and NaN
+                        .to_dict('records'))
+    top_10_by_player[player] = player_top_trades
 
 # Create a dictionary with all datasets
 combined_data = {
-    'total_all_time': total_df_all_time.to_dict('records'),
-    'total_30d': total_df_30d.to_dict('records'),
-    'total_14d': total_df_14d.to_dict('records'),
-    'top_10_by_player': top_10_by_player
+    'total_all_time': total_df_all_time.replace({float('nan'): None}).to_dict('records'),
+    'total_30d': total_df_30d.replace({float('nan'): None}).to_dict('records'),
+    'total_14d': total_df_14d.replace({float('nan'): None}).to_dict('records'),
+    'top_10_by_player': {player: [record for record in records] for player, records in top_10_by_player.items()}
 }
 
-# Convert to JcSON with datetime handling
-paperhands_json = json.dumps(combined_data, default=str)
+# Convert to JSON with datetime handling
+paperhands_json = json.dumps(combined_data, default=str, indent=4)  # Add indent for pretty printing
 
 # Create directory if it doesn't exist
 output_dir = 'pages/data/players'

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paperhands</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add subtle alternating row colors */
+        #table-body tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Hover effect on rows */
+        #table-body tr {
+            transition: all 0.2s ease;
+        }
+
+        /* Modern cell styling */
+        #paperhands-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth animation when table loads */
+        #table-body tr {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Add stagger effect to rows */
+        #table-body tr:nth-child(1) { animation-delay: 0.1s; }
+        #table-body tr:nth-child(2) { animation-delay: 0.2s; }
+        #table-body tr:nth-child(3) { animation-delay: 0.3s; }
+        /* ... and so on */
+
+        /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        /* Apply your chosen font to the table */
+        #paperhands-table {
+            /* Pick one of these font-family lines: */
+            letter-spacing: 0.5px;
+            font-size: 16px; /* Add this line - adjust the value as needed */
+        }
+
+        .time-toggle {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Apply Space Mono to ranks and ETH values */
+        .rank-value,
+        .eth-value {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Make sure the dollar values don't use Space Mono */
+        .usd-value {
+            font-family: inherit;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(253, 185, 49, 0.15), rgba(255, 215, 0, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(232, 232, 232, 0.15), rgba(192, 192, 192, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(233, 150, 122, 0.15), rgba(205, 127, 50, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top Giga Jeeters</h1>
+    <!-- Add this before the table-container div -->
+    <div class="time-toggle">
+        <button class="toggle-btn active" data-period="total_all_time">All Time</button>
+        <button class="toggle-btn" data-period="total_30d">Last 30D</button>
+        <button class="toggle-btn" data-period="total_14d">Last 14D</button>
+    </div>
+
+    <div class="table-container">
+        <table id="paperhands-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Value</th>
+                    <th>Sells</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add this new div after the table-container -->
+    <div style="text-align: center; margin-top: 20px;">
+        <span>Diamond hands?</span>
+        <button id="searchButton" style="
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            <i class="fas fa-search" style="color: #ff69b4;"></i>
+            Search
+        </button>
+    </div>
+
+    <!-- Add the modal structure -->
+    <div id="searchModal" style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+    ">
+        <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: 'Space Mono', monospace;">Search Player</h3>
+                <button id="closeModal" style="
+                    background: none;
+                    border: none;
+                    color: #666;
+                    cursor: pointer;
+                    font-size: 1.5em;
+                ">&times;</button>
+            </div>
+            <div style="position: relative;">
+                <input type="text" id="playerSearch" placeholder="Enter player name..." style="
+                    width: 100%;
+                    padding: 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    color: white;
+                    box-sizing: border-box;
+                    font-family: 'Space Mono', monospace;
+                ">
+                <div id="autocompleteResults" style="
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: #1a1a1a;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    display: none;
+                "></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentData = null;
+        let playersList = [];
+
+        async function fetchAndDisplayData(period = 'total_all_time') {
+            try {
+                // Log the start of the function and the period
+                console.log('Fetching data for period:', period);
+
+                if (!currentData) {
+                    console.log('Fetching from JSON file...');
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`../data/players/paperhands.json?v=${timestamp}`);
+                    currentData = await response.json();
+                    console.log('Received data:', currentData);
+                }  
+                
+                const tableBody = document.getElementById('table-body');
+                tableBody.innerHTML = ''; // Clear existing data
+                
+                // Log filtered data
+                const displayData = currentData[period]
+                    .filter(entry => entry.rank <= 10)
+                    .sort((a, b) => a.rank - b.rank);
+                displayData.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="text-align: center;">
+                            <span class="rank-value ${entry.rank <= 3 ? `rank-${entry.rank}` : ''}">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</span>
+                        </td>
+                        <td>
+                            <div class="player-column">
+                                <img src="https://pbs.twimg.com/profile_images/${entry.player_pfp}" alt="${entry.player}" class="player-image">
+                                <span><a href="/paperhands/player.html?player=${encodeURIComponent(entry.player)}" style="text-decoration: none; color: inherit;">${entry.player}</a></span>
+                            </div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="eth-value">${entry.fumbled.toFixed(1)}</span>
+                                <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
+                                <span style="color: #666; font-size: 0.75em;">
+                                    ($${entry.fumbled * 4000 >= 1000 ? 
+                                        ((entry.fumbled * 3700)/1000).toFixed(1) + 'k' : 
+                                        Math.round(entry.fumbled * 3700)})
+                                </span>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="eth-value">${entry.sell_count}</span>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                addStaggeredAnimation();
+            } catch (error) {
+                console.error('Error details:', error); // More detailed error logging
+                console.error('Error stack:', error.stack); // Log the error stack trace
+            }
+        }
+
+        function addStaggeredAnimation() {
+            const rows = document.querySelectorAll('#table-body tr');
+            rows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.05}s`;
+            });
+        }
+
+        async function initializePlayersList() {
+            if (!currentData) {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`../data/players/paperhands.json?v=${timestamp}`);
+                currentData = await response.json();
+            }
+            
+            // Get unique players from top_10_by_player object keys
+            const uniquePlayers = Object.keys(currentData.top_10_by_player);
+            playersList = uniquePlayers.sort();
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('searchModal');
+            const searchButton = document.getElementById('searchButton');
+            const closeButton = document.getElementById('closeModal');
+            const searchInput = document.getElementById('playerSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+
+            searchButton.onclick = () => {
+                modal.style.display = 'block';
+                searchInput.focus();
+            };
+
+            closeButton.onclick = () => {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            searchInput.oninput = () => {
+                const value = searchInput.value.toLowerCase();
+                if (value.length === 0) {
+                    autocompleteResults.style.display = 'none';
+                    return;
+                }
+
+                const matches = playersList.filter(player => 
+                    player.toLowerCase().includes(value)
+                );
+
+                if (matches.length > 0) {
+                    autocompleteResults.innerHTML = matches
+                        .map(player => `
+                            <div class="autocomplete-item" style="
+                                padding: 8px;
+                                cursor: pointer;
+                                hover: background-color: rgba(255, 255, 255, 0.1);
+                                font-family: 'Space Mono', monospace;
+                            " onclick="selectPlayer('${player}')">
+                                ${player}
+                            </div>
+                        `).join('');
+                    autocompleteResults.style.display = 'block';
+                } else {
+                    autocompleteResults.style.display = 'none';
+                }
+            };
+        }
+
+        function selectPlayer(player) {
+            window.location.href = `/paperhands/player.html?player=${encodeURIComponent(player)}`;
+        }
+
+        // Add event listeners for toggle buttons
+        document.addEventListener('DOMContentLoaded', async () => {
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            
+            await initializePlayersList();
+            setupModal();
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    // Update data based on selected period
+                    fetchAndDisplayData(button.dataset.period);
+                });
+            });
+            
+            // Initial load
+            fetchAndDisplayData();
+        });
+    </script>
+</body>
+</html>

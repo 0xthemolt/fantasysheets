@@ -95,14 +95,16 @@
         }
 
         .card {
-            flex: 0 0 440px;
+            flex: 0 0 400px;
             height: 308px;
             background: #1a1a1a;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
+            align-items: center;
             position: relative;
+            width: 400px;  /* Add explicit width to match flex basis */
         }
 
         .card-image {
@@ -111,12 +113,11 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            margin-top: 11px;
             margin-left: 11px;
         }
 
         .card-content {
-            flex: 1;
+            flex: 0 0 180px;
             padding: 1rem;
             color: white;
             height: 198px;
@@ -187,35 +188,50 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .rank-circle {
+        .rank-ribbon {
             position: absolute;
-            top: 1px;
-            right: 1px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 400px; /* match card width*/
+            padding: 8px 16px;
+            color: white;
             font-weight: bold;
             font-size: 14px;
-            color: white;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            text-align: center;
         }
 
         .rank-1 {
-            background: #FFD700; /* Gold */
+            /* Option 1: Metallic gradient with shimmer animation */
+            background: linear-gradient(135deg, #FFD700, #FDB931, #FFD700);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
         }
 
         .rank-2 {
-            background: #C0C0C0; /* Silver */
+            background: linear-gradient(135deg, #C0C0C0, #E8E8E8, #C0C0C0);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
         }
 
         .rank-3 {
-            background: #CD7F32; /* Bronze */
+            background: linear-gradient(135deg, #CD7F32, #E9967A, #CD7F32);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
         }
 
         .rank-other {
-            background: #808080; /* Grey */
+            /* Subtle gradient for other ranks */
+            background: linear-gradient(135deg, #4a4a4a, #363636, #4a4a4a);
+            background-size: 200% 200%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .price-with-icon {
@@ -390,6 +406,11 @@
                     const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
                                      currentPeriod === 'l30d' ? '30d' : '14d'}`;
                     return player[rankField] != null && player[rankField] <= 10;
+                }).sort((a, b) => {
+                    // Get the correct rank field based on current period
+                    const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
+                                     currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                    return a[rankField] - b[rankField]; // Sort ascending by rank
                 });
                 renderCards();
             }
@@ -436,7 +457,7 @@
                 const rarityColor = getRarityColor(rarity);
                 
                 card.innerHTML = `
-                    <div class="rank-circle ${rankClass}">#${rank}</div>
+                    <div class="rank-ribbon ${rankClass}">#${rank}</div>
                     <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
                     <div class="card-content">
                         <div class="stats-grid">

@@ -107,6 +107,37 @@
         .usd-value {
             font-family: inherit;
         }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Move styles from .rank-X to tr.rank-X */
+        #table-body tr.rank-1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(253, 185, 49, 0.15), rgba(255, 215, 0, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        #table-body tr.rank-2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(232, 232, 232, 0.15), rgba(192, 192, 192, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        #table-body tr.rank-3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(233, 150, 122, 0.15), rgba(205, 127, 50, 0.15));
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        /* Add padding to the rank value itself */
+        .rank-value {
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -239,8 +270,14 @@
                     .sort((a, b) => a.rank - b.rank);
                 displayData.forEach(entry => {
                     const row = document.createElement('tr');
+                    // Add rank class to the entire row if rank is 1, 2, or 3
+                    if (entry.rank <= 3) {
+                        row.classList.add(`rank-${entry.rank}`);
+                    }
                     row.innerHTML = `
-                        <td style="text-align: center;"><span class="rank-value">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</span></td>
+                        <td style="text-align: center;">
+                            <span class="rank-value">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</span>
+                        </td>
                         <td>
                             <div class="player-column">
                                 <img src="https://pbs.twimg.com/profile_images/${entry.player_pfp}" alt="${entry.player}" class="player-image">

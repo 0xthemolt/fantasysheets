@@ -14,9 +14,11 @@ def get_db_connection():
     )
 
 query = """WITH active_buyers AS (
-    SELECT DISTINCT buyer_id
+    SELECT buyer_id,COUNT(*)
     FROM flatten.get_hero_last_trades
     WHERE timestamp >= NOW() - interval '4 weeks'
+    GROUP BY buyer_id
+    HAVING COUNT(*) > 10
 )
 --select count(*) from active_buyers;
 ,player_sales AS (
@@ -48,7 +50,7 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    and sell.seller in ('0xTactic', '0xthemolt')
+    --and sell.seller in ('0xTactic', '0xthemolt')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)

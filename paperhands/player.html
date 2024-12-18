@@ -376,10 +376,6 @@
         <div class="card-container" id="cardContainer">
             <!-- Cards will be inserted here dynamically -->
         </div>
-        <div class="navigation">
-            <button class="nav-button" onclick="previousCard()">Previous</button>
-            <button class="nav-button" onclick="nextCard()">Next</button>
-        </div>
     </div>
 
     <script>
@@ -543,16 +539,6 @@
                 block: 'nearest',
                 inline: 'center'
             });
-        }
-
-        function nextCard() {
-            currentIndex = (currentIndex + 1) % playerData.length;
-            showCard(currentIndex);
-        }
-
-        function previousCard() {
-            currentIndex = (currentIndex - 1 + playerData.length) % playerData.length;
-            showCard(currentIndex);
         }
 
         async function initializePlayersList() {

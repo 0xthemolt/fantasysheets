@@ -95,7 +95,7 @@
         }
 
         .card {
-            flex: 0 0 350px;
+            flex: 0 0 400px; /*350 pbefore*/
             height: 220px;
             background: #1a1a1a;
             border-radius: 10px;
@@ -221,7 +221,7 @@
         .price-with-icon {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             gap: 4px;
             flex-wrap: nowrap;
         }
@@ -438,8 +438,8 @@
                             <div class="stat-item">
                                 <h3>Bought for</h3>
                                 <div class="price-with-icon">
-                                    <span class="eth-price">${formatPrice(data.buy_price)}</span><img src="../icons/eth.webp" alt="ETH">
-                                    <span><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                    <span class="eth-price">${formatPrice(data.buy_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; display: block;">
+                                    <span style="margin-left: auto;"><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
                                 </div>                            
                             </div>
                             ` : `
@@ -454,13 +454,13 @@
                             <div class="stat-item">
                                 <h3>Sold for</h3>
                                 <div class="price-with-icon">
-                                    <span class="eth-price">${formatPrice(data.sell_price)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; display: block;">
                                     ${data.buy_tx_hash ? `
-                                    <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em;">
+                                    <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start;">
                                         ${Math.abs(data.trade_profit) < 0.001 ? 
                                             '- (0%)' : 
                                             `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
-                                            <span style="margin-left: 2px;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
+                                            <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
                                         }
                                     </span>
                                     ` : ''}
@@ -470,14 +470,14 @@
                             <div class="stat-item">
                                 <h3>Last Sold</h3>
                                 <div class="price-with-icon">
-                                    <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; display: block;">
                                     <span><a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>     
                                 </div>                                           
                             </div>
                             <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
                                 <h3>Paperhanded</h3>
                                 <div class="price-with-icon">
-                                    <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; display: block;">
                                     <span style="color: #808080">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
                                 </div>
                             </div>

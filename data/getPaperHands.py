@@ -48,7 +48,8 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    and sell.seller = '0xthemolt'
+    --and sell.seller in ('0xTactic', '0xthemolt')
+    and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
 ),
@@ -112,33 +113,33 @@ cursor.close()
 total_df_all_time = paperhands_df.groupby('player').agg({
     'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count',
-    'rank_all_time': 'first'
+    'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_all_time = total_df_all_time.sort_values('fumbled', ascending=False).head(10)
-total_df_all_time['rank_all_time'] = total_df_all_time['rank_all_time'].astype(int)
+total_df_all_time = total_df_all_time.sort_values('fumbled', ascending=False)
+total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
+total_df_all_time = total_df_all_time.head(10)
 
 # 30-day dataset
-df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]  # Filter for trades within 30 days
+df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]
 total_df_30d = df_30d.groupby('player').agg({
     'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count',
-    'rank_30d': 'first'
+    'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_30d = total_df_30d.sort_values('fumbled', ascending=False).head(10)
-total_df_30d['rank_30d'] = total_df_30d['rank_30d'].astype(int)
+total_df_30d = total_df_30d.sort_values('fumbled', ascending=False)
+total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
+total_df_30d = total_df_30d.head(10)
 
 # 14-day dataset
-df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]  # Filter for trades within 14 days
+df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]
 total_df_14d = df_14d.groupby('player').agg({
     'fumbled': 'sum',
     'player_pfp': 'first',
-    'player': 'count',
-    'rank_14d': 'first'
+    'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_14d = total_df_14d.sort_values('fumbled', ascending=False).head(10)
-total_df_14d['rank_14d'] = total_df_14d['rank_14d'].astype(int)
+total_df_14d = total_df_14d.sort_values('fumbled', ascending=False)
+total_df_14d['rank'] = range(1, len(total_df_14d) + 1)
+total_df_14d = total_df_14d.head(10)
 
 # Create the top 10 by player dataset
 top_10_by_player = {}

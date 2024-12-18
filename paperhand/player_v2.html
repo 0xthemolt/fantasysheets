@@ -96,7 +96,7 @@
 
         .card {
             flex: 0 0 350px;
-            height: 210px;
+            height: 220px;
             background: #1a1a1a;
             border-radius: 10px;
             overflow: hidden;
@@ -367,7 +367,7 @@
 
         async function loadPlayerData() {
             try {
-                const response = await fetch('/data/players/paperhands.json');
+                const response = await fetch(`/data/players/paperhands.json?_=${Date.now()}`);
                 const data = await response.json();
                 return data;
             } catch (error) {
@@ -381,16 +381,21 @@
             if (data) {
                 const allPlayerData = data.top_10_by_player[playerAddress];
                 playerData = allPlayerData.filter(player => {
-                    const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
-                                    currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
-                    return player[rankField] <= 10;
+                    const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
+                                     currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                    return player[rankField] != null && player[rankField] <= 10;
                 });
                 renderCards();
             }
         }
 
         function formatPrice(price) {
-            return Number(price).toFixed(2);
+            const num = Number(price);
+            if (num >= 1) {
+                return num.toFixed(2);
+            } else {
+                return num.toFixed(3).replace('0.', '.');
+            }
         }
 
         function getRarity(heroCard) {
@@ -440,6 +445,10 @@
                             ` : `
                             <div class="stat-item">
                                 <h3>Minted</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price">-</span>
+                                    <span></span>
+                                </div>
                             </div>
                             `}
                             <div class="stat-item">
@@ -447,11 +456,11 @@
                                 <div class="price-with-icon">
                                     <span class="eth-price">${formatPrice(data.sell_price)}</span> <img src="../icons/eth.webp" alt="ETH">
                                     ${data.buy_tx_hash ? `
-                                    <span style="color: ${data.trade_profit < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}">
+                                    <span style="color: ${data.trade_profit < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em;">
                                         ${data.trade_profit < 0.001 ? 
                                             '- (0%)' : 
-                                            `<span class="eth-price">${formatPrice(data.trade_profit)}</span> ETH
-                                            (${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)`
+                                            `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
+                                            <span style="margin-left: 2px;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
                                         }
                                     </span>
                                     ` : ''}
@@ -469,6 +478,7 @@
                                 <h3>Paperhanded</h3>
                                 <div class="price-with-icon">
                                     <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span style="color: #808080">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
                                 </div>
                             </div>
                         </div>

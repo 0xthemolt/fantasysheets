@@ -50,7 +50,7 @@ query = """WITH active_buyers AS (
     WHERE 1=1
     and sell.seller in ('0xTactic', '0xthemolt')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
-    --and sell.hero_handle  ilike '%orangie%'
+    and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
 ),
 --SELECT * from player_sales;

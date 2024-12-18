@@ -16,44 +16,30 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Add subtle alternating row colors */
-        #table-body tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Hover effect on rows */
-        #table-body tr {
-            transition: all 0.2s ease;
-        }
-
-        /* Modern cell styling */
+        /* Remove animation styles and keep just the basic table styling */
         #paperhands-table td {
             padding: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Smooth animation when table loads */
-        #table-body tr {
-            animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0;
+        /* Top 3 row backgrounds */
+        #table-body tr:nth-child(1) {
+            background: linear-gradient(to right, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #table-body tr:nth-child(2) {
+            background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(192, 192, 192, 0.1));
         }
 
-        /* Add stagger effect to rows */
-        #table-body tr:nth-child(1) { animation-delay: 0.1s; }
-        #table-body tr:nth-child(2) { animation-delay: 0.2s; }
-        #table-body tr:nth-child(3) { animation-delay: 0.3s; }
-        /* ... and so on */
+        #table-body tr:nth-child(3) {
+            background: linear-gradient(to right, rgba(205, 127, 50, 0.3), rgba(205, 127, 50, 0.1));
+        }
+
+        /* Remove any potential conflicting background styles */
+        #table-body tr:nth-child(even),
+        #table-body tr:nth-child(odd) {
+            background: none;
+        }
 
         /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
         @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
@@ -135,6 +121,11 @@
             animation: shimmer 2s ease-in-out infinite;
             padding: 8px 12px;
             border-radius: 4px;
+        }
+
+        /* Override the even row background for top 3 */
+        #table-body tr:nth-child(2):nth-child(even) {
+            background: linear-gradient(to right, rgba(192, 192, 192, 0.05), rgba(192, 192, 192, 0.02));
         }
     </style>
 </head>
@@ -266,8 +257,26 @@
                 const displayData = currentData[period]
                     .filter(entry => entry.rank <= 10)
                     .sort((a, b) => a.rank - b.rank);
-                displayData.forEach(entry => {
+                displayData.forEach((entry, index) => {
                     const row = document.createElement('tr');
+                    
+                    // Debug with solid colors first
+                    if (index === 0) {
+                        console.log('Applying gold background to row 1');
+                        row.style.backgroundColor = 'red'; // Test with solid red
+                        console.log('Row 1 computed style:', window.getComputedStyle(row).backgroundColor);
+                    } else if (index === 1) {
+                        console.log('Applying silver background to row 2');
+                        row.style.backgroundColor = 'blue'; // Test with solid blue
+                        console.log('Row 2 computed style:', window.getComputedStyle(row).backgroundColor);
+                    } else if (index === 2) {
+                        console.log('Applying bronze background to row 3');
+                        row.style.backgroundColor = 'green'; // Test with solid green
+                        console.log('Row 3 computed style:', window.getComputedStyle(row).backgroundColor);
+                    }
+                    
+                    row.setAttribute('data-row-index', index);
+                    
                     row.innerHTML = `
                         <td style="text-align: center;">
                             <span class="rank-value ${entry.rank <= 3 ? `rank-${entry.rank}` : ''}">${entry.rank === 1 ? '🏆' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : entry.rank}</span>
@@ -296,18 +305,17 @@
                     tableBody.appendChild(row);
                 });
                 
-                addStaggeredAnimation();
+                // Add debug log to check final state
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#table-body tr');
+                    rows.forEach((row, index) => {
+                        console.log(`Row ${index + 1} final backgroundColor:`, window.getComputedStyle(row).backgroundColor);
+                    });
+                }, 1000);
             } catch (error) {
                 console.error('Error details:', error); // More detailed error logging
                 console.error('Error stack:', error.stack); // Log the error stack trace
             }
-        }
-
-        function addStaggeredAnimation() {
-            const rows = document.querySelectorAll('#table-body tr');
-            rows.forEach((row, index) => {
-                row.style.animationDelay = `${index * 0.05}s`;
-            });
         }
 
         async function initializePlayersList() {

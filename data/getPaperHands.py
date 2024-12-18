@@ -16,9 +16,9 @@ def get_db_connection():
 query = """WITH active_buyers AS (
     SELECT buyer_id,COUNT(*)
     FROM flatten.get_hero_last_trades
-    WHERE timestamp >= NOW() - interval '4 weeks'
+    WHERE timestamp >= NOW() - interval '5 weeks'
     GROUP BY buyer_id
-    HAVING COUNT(*) > 10
+    HAVING COUNT(*) >= 8
 )
 --select count(*) from active_buyers;
 ,player_sales AS (
@@ -119,7 +119,6 @@ total_df_all_time = paperhands_df.groupby('player').agg({
 }).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_all_time = total_df_all_time.sort_values('fumbled', ascending=False)
 total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
-total_df_all_time = total_df_all_time.head(10)
 
 # 30-day dataset
 df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]
@@ -130,7 +129,6 @@ total_df_30d = df_30d.groupby('player').agg({
 }).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_30d = total_df_30d.sort_values('fumbled', ascending=False)
 total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
-total_df_30d = total_df_30d.head(10)
 
 # 14-day dataset
 df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]
@@ -141,7 +139,6 @@ total_df_14d = df_14d.groupby('player').agg({
 }).rename(columns={'player': 'sell_count'}).reset_index()
 total_df_14d = total_df_14d.sort_values('fumbled', ascending=False)
 total_df_14d['rank'] = range(1, len(total_df_14d) + 1)
-total_df_14d = total_df_14d.head(10)
 
 # Create the top 10 by player dataset
 top_10_by_player = {}

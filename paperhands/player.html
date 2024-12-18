@@ -262,7 +262,7 @@
         }
 
         .time-toggle {
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             display: flex;
             justify-content: center;
             gap: 8px;
@@ -309,7 +309,6 @@
             </button>
         </div>
     </div>
-    <h1>Top 10 Fumbles</h1>
     <div id="searchModal" style="
                 display: none;
                 position: fixed;
@@ -367,11 +366,39 @@
                     </div>
                 </div>
     </div>
-    <div class="time-toggle">
-        <button class="toggle-btn active" data-period="all_time">All Time</button>
-        <button class="toggle-btn" data-period="l30d">Last 30D</button>
-        <button class="toggle-btn" data-period="l14d">Last 14D</button>
+  
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; max-width: 1400px; margin: 20px auto;">
+        <div class="time-toggle" style="margin-left: 40px;">
+            <button class="toggle-btn active" data-period="all_time">All Time</button>
+            <button class="toggle-btn" data-period="l30d">Last 30D</button>
+            <button class="toggle-btn" data-period="l14d">Last 14D</button>
+        </div>
     </div>
+    <div id="playerSummary" style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
+        <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
+            <img id="playerPfp" src="" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+            <div style="flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
+                    <span id="playerRank" style="font-size: 0.9em; color: #808080;"></span>
+                </div>
+                <div style="display: flex; gap: 20px;">
+                    <div>
+                        <span style="color: #808080;">Total Paperhanded</span>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <span id="totalFumbled" class="eth-price"></span>
+                            <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                        </div>
+                    </div>
+                    <div>
+                        <span style="color: #808080;">Sell Count</span>
+                        <div id="sellCount" style="font-size: 1.2em;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h1 style="margin: 0;">Top 10 Paperhands</h1>
     <div class="container">
         <div class="card-container" id="cardContainer">
             <!-- Cards will be inserted here dynamically -->

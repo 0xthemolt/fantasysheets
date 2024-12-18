@@ -16,29 +16,11 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        
         /* Remove animation styles and keep just the basic table styling */
         #paperhands-table td {
             padding: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Top 3 row backgrounds */
-        #table-body tr:nth-child(1) {
-            background: linear-gradient(to right, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1));
-        }
-
-        #table-body tr:nth-child(2) {
-            background: linear-gradient(to right, rgba(192, 192, 192, 0.3), rgba(192, 192, 192, 0.1));
-        }
-
-        #table-body tr:nth-child(3) {
-            background: linear-gradient(to right, rgba(205, 127, 50, 0.3), rgba(205, 127, 50, 0.1));
-        }
-
-        /* Remove any potential conflicting background styles */
-        #table-body tr:nth-child(even),
-        #table-body tr:nth-child(odd) {
-            background: none;
         }
 
         /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
@@ -93,40 +75,46 @@
             font-family: inherit;
         }
 
-        @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
+        /* Add these new styles for top 3 ranks */
         .rank-1 {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(253, 185, 49, 0.15), rgba(255, 215, 0, 0.15));
-            background-size: 200% 200%;
-            animation: shimmer 2s ease-in-out infinite;
-            padding: 8px 12px;
-            border-radius: 4px;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
         .rank-2 {
-            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(232, 232, 232, 0.15), rgba(192, 192, 192, 0.15));
-            background-size: 200% 200%;
-            animation: shimmer 2s ease-in-out infinite;
-            padding: 8px 12px;
-            border-radius: 4px;
+            background: linear-gradient(45deg, #C0C0C0, #E8E8E8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.1em;
         }
 
         .rank-3 {
-            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(233, 150, 122, 0.15), rgba(205, 127, 50, 0.15));
-            background-size: 200% 200%;
-            animation: shimmer 2s ease-in-out infinite;
-            padding: 8px 12px;
-            border-radius: 4px;
+            background: linear-gradient(45deg, #CD7F32, #b08d57);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.05em;
         }
 
-        /* Override the even row background for top 3 */
-        #table-body tr:nth-child(2):nth-child(even) {
-            background: linear-gradient(to right, rgba(192, 192, 192, 0.05), rgba(192, 192, 192, 0.02));
+        /* Optional: Add a subtle glow animation for first place */
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+            50% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            100% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         }
+
+        .rank-1 {
+            animation: glow 2s ease-in-out infinite;
+        }
+
     </style>
 </head>
 <body>
@@ -144,7 +132,11 @@
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>Value</th>
+                    <th>
+                        Value 
+                        <i class="fas fa-question-circle" style="font-size: 0.8em; opacity: 0.7;" 
+                           title="Value = Additional Profit you could have made based on Last Sold Price minus Your Sold Price"></i>
+                    </th>
                     <th>Sells</th>
                 </tr>
             </thead>
@@ -260,21 +252,6 @@
                 displayData.forEach((entry, index) => {
                     const row = document.createElement('tr');
                     
-                    // Debug with solid colors first
-                    if (index === 0) {
-                        console.log('Applying gold background to row 1');
-                        row.style.backgroundColor = 'red'; // Test with solid red
-                        console.log('Row 1 computed style:', window.getComputedStyle(row).backgroundColor);
-                    } else if (index === 1) {
-                        console.log('Applying silver background to row 2');
-                        row.style.backgroundColor = 'blue'; // Test with solid blue
-                        console.log('Row 2 computed style:', window.getComputedStyle(row).backgroundColor);
-                    } else if (index === 2) {
-                        console.log('Applying bronze background to row 3');
-                        row.style.backgroundColor = 'green'; // Test with solid green
-                        console.log('Row 3 computed style:', window.getComputedStyle(row).backgroundColor);
-                    }
-                    
                     row.setAttribute('data-row-index', index);
                     
                     row.innerHTML = `
@@ -303,6 +280,7 @@
                         </td>
                     `;
                     tableBody.appendChild(row);
+                    console.log(`Setting row ${index} with data-row-index:`, row.getAttribute('data-row-index'));
                 });
                 
                 // Add debug log to check final state
@@ -313,8 +291,7 @@
                     });
                 }, 1000);
             } catch (error) {
-                console.error('Error details:', error); // More detailed error logging
-                console.error('Error stack:', error.stack); // Log the error stack trace
+                console.error('Error:', error);
             }
         }
 
@@ -352,7 +329,19 @@
                 }
             };
 
-            searchInput.oninput = () => {
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            searchInput.oninput = debounce(() => {
                 const value = searchInput.value.toLowerCase();
                 if (value.length === 0) {
                     autocompleteResults.style.display = 'none';
@@ -379,7 +368,7 @@
                 } else {
                     autocompleteResults.style.display = 'none';
                 }
-            };
+            }, 300);
         }
 
         function selectPlayer(player) {

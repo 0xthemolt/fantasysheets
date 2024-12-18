@@ -376,7 +376,7 @@
     </div>
     <div id="playerSummary" style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
         <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
-            <img id="playerPfp" src="" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+            <img id="playerPfp" src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
             <div style="flex-grow: 1;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
@@ -421,6 +421,38 @@
             }
         }
 
+        async function displayPlayerPaperHandSummary(playerAddress = '0xthemolt') {
+            const data = await loadPlayerData();
+            if (data) {
+                // Get the correct array based on time period
+                const dataArray = currentPeriod === 'all_time' ? data.total_all_time :
+                                 currentPeriod === 'l30d' ? data.total_30d :
+                                 data.total_14d;
+                
+                // Find the player in the array
+                const playerData = dataArray.find(p => p.player === playerAddress);
+                
+                if (playerData) {
+                    // Update the DOM elements
+                    document.getElementById('totalFumbled').textContent = formatPrice(playerData.fumbled);
+                    document.getElementById('sellCount').textContent = playerData.sell_count;
+                    document.getElementById('playerAddress').textContent = playerAddress;
+                    
+                    // Set player profile picture with preloading
+                    if (playerData.player_pfp) {
+                        const img = new Image();
+                        img.onload = function() {
+                            document.getElementById('playerPfp').src = this.src;
+                        };
+                        img.src = "https://pbs.twimg.com/profile_images/" + playerData.player_pfp;
+                    }
+                    
+                    // Set player rank
+                    document.getElementById('playerRank').textContent = playerData.rank ? `Rank #${playerData.rank}` : '';
+                }
+            }
+        }
+
         async function displayPlayerData(playerAddress = '0xthemolt') {
             const data = await loadPlayerData();
             if (data) {
@@ -435,6 +467,7 @@
                                      currentPeriod === 'l30d' ? '30d' : '14d'}`;
                     return a[rankField] - b[rankField]; // Sort ascending by rank
                 });
+                await displayPlayerPaperHandSummary(playerAddress);
                 renderCards();
             }
         }

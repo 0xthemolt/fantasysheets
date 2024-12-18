@@ -8,6 +8,11 @@
         gtag('js', new Date());
         gtag('config', 'G-LXJ5Q7LKKE');
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FantasySheets | Paperhands Leaders</title>
@@ -115,6 +120,59 @@
             animation: glow 2s ease-in-out infinite;
         }
 
+        /* Add these styles */
+        .table-container {
+            min-height: 500px; /* Set minimum height based on expected table size */
+            position: relative;
+        }
+
+        #paperhands-table {
+            /* width: 100%; */
+            width: 700px;
+            table-layout: fixed; /* Prevents column width from changing */
+        }
+
+        #paperhands-table th {
+            padding: 16px;
+        }
+
+        /* Define column widths */
+        #paperhands-table th:nth-child(1) { width: 10%; } /* Rank */
+        #paperhands-table th:nth-child(2) { width: 40%; } /* Player */
+        #paperhands-table th:nth-child(3) { width: 35%; } /* Value */
+        #paperhands-table th:nth-child(4) { width: 15%; } /* Sells */
+
+        /* Skeleton loader styles */
+        .skeleton-row td {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-row td::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%
+            );
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        #paperhands-table th:nth-child(1) { text-align: center; } /* Rank */
+        #paperhands-table th:nth-child(2) { text-align: left; }   /* Player */
+        #paperhands-table th:nth-child(3) { text-align: center; } /* Value */
+        #paperhands-table th:nth-child(4) { text-align: center; } /* Sells */
+
     </style>
 </head>
 <body>
@@ -130,14 +188,14 @@
         <table id="paperhands-table">
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>
+                    <th style="text-align: center;">Rank</th>
+                    <th style="text-align: left;">Player</th>
+                    <th style="text-align: center;">
                         Value 
                         <i class="fas fa-question-circle" style="font-size: 0.8em; opacity: 0.7;" 
                            title="Value = Additional Profit you could have made based on Last Sold Price minus Your Sold Price"></i>
                     </th>
-                    <th>Sells</th>
+                    <th style="text-align: center;">Sells</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -230,6 +288,17 @@
         let playersList = [];
 
         async function fetchAndDisplayData(period = 'total_all_time') {
+            // Show skeleton loader first
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = Array(10).fill(0).map(() => `
+                <tr class="skeleton-row">
+                    <td style="height: 72px"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `).join('');
+
             try {
                 // Log the start of the function and the period
                 console.log('Fetching data for period:', period);
@@ -264,8 +333,8 @@
                                 <span><a href="/paperhands/player.html?player=${encodeURIComponent(entry.player)}" style="text-decoration: none; color: inherit;">${entry.player}</a></span>
                             </div>
                         </td>
-                        <td style="white-space: nowrap;">
-                            <div style="display: flex; align-items: center; gap: 4px;">
+                        <td style="white-space: nowrap; text-align: center;">
+                            <div style="display: flex; align-items: center; gap: 4px; justify-content: center;">
                                 <span class="eth-value">${entry.fumbled.toFixed(1)}</span>
                                 <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 <span style="color: #666; font-size: 0.75em;">

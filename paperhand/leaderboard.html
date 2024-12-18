@@ -224,9 +224,10 @@
 
                 if (!currentData) {
                     console.log('Fetching from JSON file...');
-                    const response = await fetch('../data/players/paperhands.json');
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`../data/players/paperhands.json?v=${timestamp}`);
                     currentData = await response.json();
-                    console.log('Received data:', currentData); // Log the entire data object
+                    console.log('Received data:', currentData);
                 }  
                 
                 const tableBody = document.getElementById('table-body');
@@ -248,12 +249,12 @@
                         </td>
                         <td style="white-space: nowrap;">
                             <div style="display: flex; align-items: center; gap: 4px;">
-                                <span class="eth-value">${entry.price_diff.toFixed(1)}</span>
+                                <span class="eth-value">${entry.fumbled.toFixed(1)}</span>
                                 <img src="/icons/eth.webp" alt="ETH" style="height: 1em; width: auto;">
                                 <span style="color: #666; font-size: 0.75em;">
-                                    ($${entry.price_diff * 4000 >= 1000 ? 
-                                        ((entry.price_diff * 3700)/1000).toFixed(1) + 'k' : 
-                                        Math.round(entry.price_diff * 3700)})
+                                    ($${entry.fumbled * 4000 >= 1000 ? 
+                                        ((entry.fumbled * 3700)/1000).toFixed(1) + 'k' : 
+                                        Math.round(entry.fumbled * 3700)})
                                 </span>
                             </div>
                         </td>
@@ -280,7 +281,8 @@
 
         async function initializePlayersList() {
             if (!currentData) {
-                const response = await fetch('../data/players/paperhands.json');
+                const timestamp = new Date().getTime();
+                const response = await fetch(`../data/players/paperhands.json?v=${timestamp}`);
                 currentData = await response.json();
             }
             

@@ -16,124 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Add subtle alternating row colors */
-        #table-body tr:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Hover effect on rows */
-        #table-body tr {
-            transition: all 0.2s ease;
-        }
-
-        /* Modern cell styling */
-        #paperhands-table td {
-            padding: 16px;
-            font-size: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Smooth animation when table loads */
-        #table-body tr {
-            animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Add stagger effect to rows */
-        #table-body tr:nth-child(1) { animation-delay: 0.1s; }
-        #table-body tr:nth-child(2) { animation-delay: 0.2s; }
-        #table-body tr:nth-child(3) { animation-delay: 0.3s; }
-        /* ... and so on */
-
-        /* Option 1: Space Mono - a monospace font that's popular in tech/crypto sites */
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-
-
-        .search-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .autocomplete-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(30, 30, 30, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            margin-top: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-            z-index: 1000;
-        }
-
-        .autocomplete-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            color: white;
-            transition: background-color 0.2s;
-        }
-
-        .autocomplete-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .hero-image {
-            border-radius: 0;
-            width: 120px;
-            height: 180px;
-            object-fit: cover;
-            max-width: none;
-            display: block;
-        }
-
-        .player-summary {
-            display: none; /* Hidden by default */
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 0 auto 20px auto; /* Center horizontally and add bottom margin */
-            max-width: 600px;
-            text-align: center;
-        }
-
-        .player-summary img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-
-        .player-summary h2 {
-            margin: 10px 0;
-        }
-
-        .player-summary .paperhand-amount {
-            font-size: 1%;
-            color: #ff4444;
-        }
-
         .back-button {
             position: static;
             background: rgba(255, 255, 255, 0.1);
@@ -164,183 +46,249 @@
             border-radius: 8px;
         }
 
-        .search-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            background: #2a2a2a;
-            color: white;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            font-family: 'Arial', sans-serif;
         }
 
-        /* Fixed width for sale date column */
-        #paperhands-table th:last-child,
-        #paperhands-table td:last-child {
-            width: 125px; /* adjust this value as needed */
-            max-width: 125px;
-            white-space: normal; /* allows text to wrap */
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            font-size: 12px;
-        }
-
-        /* Apply Space Mono to ranks and ETH values */
-        .rank-value,
-        .eth-value {
-            font-family: 'Space Mono', monospace;
-        }
-
-        /* Make sure the dollar values don't use Space Mono */
-        .usd-value {
-            font-family: inherit;
-        }
-
-        /* Add these styles to your existing CSS */
-        .cards-container {
+        .card-container {
             display: flex;
-            gap: 20px;
+            gap: 1rem;
             overflow-x: auto;
-            padding: 20px 0;
+            padding: 1rem;
             scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #4a4a4a #1a1a1a;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Firefox */
         }
 
-        .cards-container::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
+        .card-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .card-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 3px;
+        }
+
+        .card-container::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .card-container::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        @media (hover: none) {
+            .card-container {
+                position: relative;
+                scroll-snap-type: x mandatory;
+            }
+
+            .card {
+                scroll-snap-align: center;
+            }
         }
 
         .card {
-            flex: 0 0 auto;
-            width: calc(33.33% - 20px);
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 25px;
+            flex: 0 0 350px;
+            height: 220px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
-            flex-direction: row;
-            gap: 20px;
             position: relative;
-            height: auto;
         }
 
-        .card .trade-details {
+        .card-image {
+            flex: 0 0 140px;
+            height: 180px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin-top: 10px; /* Adds space from the top of the card */
+            margin-left: 10px; /* Adds space from the top of the card */
+        }
+
+        .card-content {
             flex: 1;
-            min-width: 0;
-            font-size: 1.2em;
-            line-height: 1.6;
+            padding: 1rem;
+            color: white;
+            height: 180px; /* Match the card-image height */
         }
 
-        .card .eth-value {
-            font-size: 1.2em;
+        .card-content h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
         }
 
-        .card .price-info {
-            margin-bottom: 12px;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.3rem;
+            align-items: center;
+            justify-content: center;
         }
 
-        .card .sale-timeline {
-            font-size: 1em;
-            margin-top: 15px;
-            color: #888;
+        .stat-item {
+            padding: 0.3rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
         }
 
-        .rank-badge {
+        .stat-item h3 {
+            margin: 0;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+            text-align: left;
+            color: #808080;
+        }
+
+        .stat-item p {
+            margin: 0.2rem 0;
+            color: white;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .navigation {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .stat-item-paperhanded {
+            border: 1px solid transparent; /* Add border for the colored outline */
+        }
+
+        .stat-item-paperhanded {
+            background: none;
+        }
+
+        .nav-button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .rank-circle {
             position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #ff69b4;
+            top: 1px;
+            right: 1px;
             width: 30px;
             height: 30px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Space Mono', monospace;
             font-weight: bold;
+            font-size: 14px;
+            color: white;
         }
 
-        .scroll-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+        .rank-1 {
+            background: #FFD700; /* Gold */
+        }
+
+        .rank-2 {
+            background: #C0C0C0; /* Silver */
+        }
+
+        .rank-3 {
+            background: #CD7F32; /* Bronze */
+        }
+
+        .rank-other {
+            background: #808080; /* Grey */
+        }
+
+        .price-with-icon {
             display: flex;
             align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            flex-wrap: nowrap;
+        }
+
+        .price-with-icon img {
+            height: 1em;
+            width: auto;
+            display: block;
+            margin-left: 2px;
+        }
+
+        .eth-price {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 1.1em;
+            white-space: nowrap;
+        }
+
+        .time-toggle {
+            margin-bottom: 20px;
+            display: flex;
             justify-content: center;
+            gap: 8px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: #fff;
             cursor: pointer;
-            z-index: 2;
+            border-radius: 6px;
+            transition: all 0.3s ease;
         }
 
-        .scroll-left {
-            left: 10px;
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .scroll-right {
-            right: 10px;
-        }
-
-        .scroll-button:hover {
+        .toggle-btn.active {
             background: rgba(255, 255, 255, 0.2);
-        }
-
-        .cards-wrapper {
-            position: relative;
-            width: 100%;
-            margin: 0 auto;
         }
     </style>
 </head>
 <body>
-
-    <!-- Add this as the outermost container -->
-    <div style="width: 50%; margin: 0 auto; min-width: 600px;">
-        <!-- Main container for all content -->
-        <div style="display: flex; flex-direction: column; padding: 20px; gap: 20px;">
-            <!-- Navigation bar with back button and search -->
-            <div class="navigation-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <!-- Left side - Back button -->
-                <a href="/paperhand/leaderboard.html" class="back-button" aria-label="Back to Leaderboard">
-                    <i class="fas fa-ranking-star"></i>
-                    Back to Leaderboard
-                </a>
-                
-                <!-- Right side - Search button -->
-                <div class="search-controls">
-                    <button id="searchButton" class="back-button" aria-label="Search Players">
-                        <i class="fas fa-search" style="color: #ff69b4;"></i>
-                        Search
-                    </button>
-                </div>
-            </div>
-
-            <!-- Player Summary Section -->
-            <div id="player-summary" class="player-summary">
-                <img id="summary-pfp" src="" alt="Player Profile">
-                <h2 id="summary-name"></h2>
-                <p>Total Paperhanded: <span id="summary-amount" class="paperhand-amount"></span></p>
-            </div>
-
-            <!-- Table Container -->
-            <div class="cards-wrapper">
-                <button class="scroll-button scroll-left" onclick="scrollCards('left')" style="display: none;">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                
-                <div class="cards-container" id="cards-container">
-                    <!-- Cards will be populated here -->
-                </div>
-
-                <button class="scroll-button scroll-right" onclick="scrollCards('right')">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-
-                <!-- Add the modal structure -->
-            <div id="searchModal" style="
+    <div class="navigation-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1400px;">
+        <!-- Left side - Back button -->
+        <a href="/paperhand/leaderboard.html" class="back-button" aria-label="Back to Leaderboard">
+            <i class="fas fa-ranking-star"></i>
+            Back to Leaderboard
+        </a>
+        
+        <!-- Right side - Search button -->
+        <div class="search-controls">
+            <button id="searchButton" class="back-button" aria-label="Search Players">
+                <i class="fas fa-search" style="color: #ff69b4;"></i>
+                Search
+            </button>
+        </div>
+    </div>
+    <div id="searchModal" style="
                 display: none;
                 position: fixed;
                 top: 0;
@@ -396,126 +344,181 @@
                         "></div>
                     </div>
                 </div>
-            </div>
-        <script>
-            let currentData = null;
-            let playersList = [];
+    </div>
+    <div class="time-toggle">
+        <button class="toggle-btn active" data-period="all_time">All Time</button>
+        <button class="toggle-btn" data-period="l30d">Last 30D</button>
+        <button class="toggle-btn" data-period="l14d">Last 14D</button>
+    </div>
+    <div class="container">
+        <div class="card-container" id="cardContainer">
+            <!-- Cards will be inserted here dynamically -->
+        </div>
+        <div class="navigation">
+            <button class="nav-button" onclick="previousCard()">Previous</button>
+            <button class="nav-button" onclick="nextCard()">Next</button>
+        </div>
+    </div>
 
-            // Centralized data fetching function
-            async function fetchData() {
-                if (!currentData) {
-                    try {
-                        const response = await fetch('../data/players/paperhands.json');
-                        currentData = await response.json();
-                        return currentData;
-                    } catch (error) {
-                        console.error('Error fetching data:', error);
-                        throw error;
-                    }
-                }
-                return currentData;
+    <script>
+        let currentIndex = 0;
+        let playerData = [];
+        let currentPeriod = 'all_time';
+
+        async function loadPlayerData() {
+            try {
+                const response = await fetch(`/data/players/paperhands.json?_=${Date.now()}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error loading player data:', error);
+                return null;
             }
+        }
 
-            async function displayPlayerData(playerName) {
-                try {
-                    const data = await fetchData();
-                    const cardsContainer = document.getElementById('cards-container');
-                    cardsContainer.innerHTML = '';
-
-                    const playerData = data.top_10_by_player[playerName];
-                    if (playerData && playerData.length > 0) {
-                        // Show and update summary
-                        const summaryContainer = document.getElementById('player-summary');
-                        const summaryPfp = document.getElementById('summary-pfp');
-                        const summaryName = document.getElementById('summary-name');
-                        const summaryAmount = document.getElementById('summary-amount');
-                        
-                        summaryContainer.style.display = 'block';
-                        summaryPfp.src = `https://pbs.twimg.com/profile_images/${playerData[0].player_pfp}`;
-                        summaryName.textContent = playerName;
-                        
-                        // Calculate total paperhanded amount
-                        const totalPaperhanded = data.total_all_time
-                            .filter(entry => entry.player === playerName)
-                            .reduce((sum, entry) => sum + entry.price_diff, 0);
-                        
-                        summaryAmount.innerHTML = `${totalPaperhanded.toFixed(3)} <img src="/icons/eth.webp" alt="ETH" style="height: 1em; vertical-align: middle; margin-left: 4px;"> ($${Math.round(totalPaperhanded * 4000).toLocaleString()})`;
-
-                        playerData.forEach((entry, index) => {
-                            const card = document.createElement('div');
-                            card.className = 'card';
-                            card.setAttribute('role', 'listitem');
-                            card.setAttribute('aria-label', `Trade Record ${index + 1}`);
-                            card.innerHTML = `
-                                <div class="rank-badge" aria-label="Rank ${index + 1}">${index + 1}</div>
-                                <img src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${entry.hero_card}" 
-                                     alt="Hero Card: ${entry.hero}" 
-                                     class="hero-image">
-                                <div class="trade-details">
-                                    <div class="price-info" aria-label="Sale Price">
-                                        <span class="label">Sold for:</span>
-                                        <span class="eth-value">${(entry.sale_price || 0).toFixed(2)}</span>
-                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
-                                    </div>
-                                    <div class="price-info" aria-label="Last Sale Price">
-                                        <span class="label">Last sold:</span>
-                                        <span class="eth-value">${(entry.last_sold_price || 0).toFixed(2)}</span>
-                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
-                                    </div>
-                                    <div class="price-info" aria-label="Price Difference">
-                                        <span class="label">Fumbled:</span>
-                                        <span class="eth-value">${(entry.price_diff || 0).toFixed(2)}</span>
-                                        <img src="/icons/eth.webp" alt="ETH" class="eth-icon">
-                                        <span class="usd-value">
-                                            ($${Math.round((entry.price_diff || 0) * 4000).toLocaleString()})
-                                        </span>
-                                    </div>
-                                    <div class="sale-timeline" aria-label="Sale Timeline">
-                                        ${(() => {
-                                            try {
-                                                const saleDate = new Date(entry.sale_timestamp);
-                                                const [lastBuyer, lastSaleStr] = (entry.last_sale_string || '|').split('|');
-                                                const lastSaleDate = new Date(lastSaleStr);
-                                                const daysDiff = Math.floor((lastSaleDate - saleDate) / (1000 * 60 * 60 * 24));
-                                                return `${lastBuyer || 'Unknown'} bought ${daysDiff || 0} days later`;
-                                            } catch (e) {
-                                                return 'Date information unavailable';
-                                            }
-                                        })()}
-                                    </div>
-                                </div>
-                            `;
-                            cardsContainer.appendChild(card);
-                        });
-
-                        // Show only first 3 cards initially
-                        const cards = cardsContainer.querySelectorAll('.card');
-                        cards.forEach((card, index) => {
-                            if (index >= 3) {
-                                card.style.opacity = '0.5';
-                            }
-                        });
-                    } else {
-                        cardsContainer.innerHTML = '<div class="card">No data found for this player</div>';
-                    }
-                } catch (error) {
-                    console.error('Error displaying player data:', error);
-                }
-            }
-
-            function addStaggeredAnimation() {
-                const rows = document.querySelectorAll('#table-body tr');
-                rows.forEach((row, index) => {
-                    row.style.animationDelay = `${index * 0.05}s`;
+        async function displayPlayerData(playerAddress = '0xthemolt') {
+            const data = await loadPlayerData();
+            if (data) {
+                const allPlayerData = data.top_10_by_player[playerAddress];
+                playerData = allPlayerData.filter(player => {
+                    const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
+                                     currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                    return player[rankField] != null && player[rankField] <= 10;
                 });
+                renderCards();
             }
+        }
 
-            async function initializePlayersList() {
-                const data = await fetchData();
+        function formatPrice(price) {
+            const num = Number(price);
+            if (num >= 1) {
+                return num.toFixed(2);
+            } else {
+                return num.toFixed(3).replace('0.', '.');
+            }
+        }
+
+        function getRarity(heroCard) {
+            return heroCard.split('/')[0];
+        }
+
+        function getRarityColor(rarity) {
+            const rarityColors = {
+                "common": "#93FF01",
+                "rare": "#00FFDF",
+                "epic": "#F1A3FD",
+                "legendary": "#FBE7FF",
+                "all": "#666666"
+            };
+            return rarityColors[rarity] || rarityColors.all;
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardContainer');
+            container.innerHTML = '';
+
+            playerData.forEach((data, index) => {
+                const card = document.createElement('div');
+                card.className = `card ${index === 0 ? 'active' : ''}`;
+                
+                const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
+                                currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                const rank = data[rankField];
+                const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                
+                const rarity = getRarity(data.hero_card);
+                const rarityColor = getRarityColor(rarity);
+                
+                card.innerHTML = `
+                    <div class="rank-circle ${rankClass}">#${rank}</div>
+                    <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
+                    <div class="card-content">
+                        <div class="stats-grid">
+                            ${data.buy_tx_hash ? `
+                            <div class="stat-item">
+                                <h3>Bought for</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price">${formatPrice(data.buy_price)}</span><img src="../icons/eth.webp" alt="ETH">
+                                    <span><a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                </div>                            
+                            </div>
+                            ` : `
+                            <div class="stat-item">
+                                <h3>Minted</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price">-</span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            `}
+                            <div class="stat-item">
+                                <h3>Sold for</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price">${formatPrice(data.sell_price)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    ${data.buy_tx_hash ? `
+                                    <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em;">
+                                        ${Math.abs(data.trade_profit) < 0.001 ? 
+                                            '- (0%)' : 
+                                            `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
+                                            <span style="margin-left: 2px;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
+                                        }
+                                    </span>
+                                    ` : ''}
+                                    <span><a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <h3>Last Sold</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span><a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a></span>     
+                                </div>                                           
+                            </div>
+                            <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
+                                <h3>Paperhanded</h3>
+                                <div class="price-with-icon">
+                                    <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH">
+                                    <span style="color: #808080">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function showCard(index) {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.remove('active'));
+            cards[index].classList.add('active');
+            
+            cards[index].scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % playerData.length;
+            showCard(currentIndex);
+        }
+
+        function previousCard() {
+            currentIndex = (currentIndex - 1 + playerData.length) % playerData.length;
+            showCard(currentIndex);
+        }
+
+        async function initializePlayersList() {
+            const data = await loadPlayerData();
+            if (data) {
                 playersList = Object.keys(data.top_10_by_player).sort();
             }
+        }
 
-            function setupModal() {
+        function setupModal() {
                 const modal = document.getElementById('searchModal');
                 const searchButton = document.getElementById('searchButton');
                 const closeButton = document.getElementById('closeModal');
@@ -562,66 +565,48 @@
                 };
             }
 
-            function selectPlayer(player) {
-                window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
+        function selectPlayer(player) {
+            window.location.href = `/paperhand/player.html?player=${encodeURIComponent(player)}`;
+        }
+
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializePlayersList();
+            setupModal();
+
+            // Check for player parameter in URL
+            const playerParam = getUrlParameter('player');
+            if (playerParam) {
+                displayPlayerData(playerParam);
+            } else {
+                await displayPlayerData();
             }
 
-            function getUrlParameter(name) {
-                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-                const results = regex.exec(location.search);
-                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-            }
-
-            // Initialize everything when DOM is loaded
-            document.addEventListener('DOMContentLoaded', async () => {
-                await initializePlayersList();
-                setupModal();
-
-                // Check for player parameter in URL
-                const playerParam = getUrlParameter('player');
-                if (playerParam) {
-                    displayPlayerData(playerParam);
-                } else {
-                    await displayPlayerData();
-                }
+            // Add toggle button handlers
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    // Update current period
+                    currentPeriod = button.dataset.period;
+                    // Refresh the display
+                    displayPlayerData(getUrlParameter('player') || '0xthemolt');
+                });
             });
+        });
 
-            // Add scroll functionality
-            function scrollCards(direction) {
-                const container = document.getElementById('cards-container');
-                const scrollAmount = container.offsetWidth; // Use container width for scroll amount
-                if (direction === 'left') {
-                    container.scrollBy({
-                        left: -scrollAmount,
-                        behavior: 'smooth'
-                    });
-                } else {
-                    container.scrollBy({
-                        left: scrollAmount,
-                        behavior: 'smooth'
-                    });
-                }
-
-                updateScrollButtons();
-            }
-
-            function updateScrollButtons() {
-                const container = document.getElementById('cards-container');
-                const leftButton = document.querySelector('.scroll-left');
-                const rightButton = document.querySelector('.scroll-right');
-
-                leftButton.style.display = container.scrollLeft > 0 ? 'flex' : 'none';
-                rightButton.style.display = 
-                    container.scrollLeft < (container.scrollWidth - container.clientWidth) 
-                    ? 'flex' 
-                    : 'none';
-            }
-
-            // Add scroll event listener
-            document.getElementById('cards-container').addEventListener('scroll', updateScrollButtons);
-        </script>
-    </div>
-</div>
+        // Load data when page loads
+        loadPlayerData();
+    </script>
 </body>
 </html>

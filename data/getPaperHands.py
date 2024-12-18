@@ -48,8 +48,8 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    --and sell.seller in ('0xTactic', '0xthemolt')
-    and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    and sell.seller in ('0xTactic', '0xthemolt')
+    and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
 ),
@@ -145,14 +145,6 @@ total_df_14d = total_df_14d.head(10)
 top_10_by_player = {}
 for player in paperhands_df['player'].unique():
     player_data = paperhands_df[paperhands_df['player'] == player]
-    # Convert rank columns to int where they're not null
-    for col in ['rank_all_time', 'rank_30d', 'rank_14d']:
-        player_data[col] = player_data[col].astype('Int64')  # Use Int64 to handle NaN values
-    
-    # Add explicit NaN handling for numeric columns
-    numeric_cols = ['buy_price', 'trade_profit']
-    for col in numeric_cols:
-        player_data[col] = player_data[col].where(player_data[col].notna(), None)
     
     player_top_trades = player_data[
         (player_data['rank_all_time'] <= 10) |

@@ -50,7 +50,7 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
+    --and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
@@ -94,35 +94,35 @@ paperhands AS (
 SELECT 
     *,
     -- All-time rankings (partitioned by player)
-    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY  trade_pnl ASC) ELSE NULL END as losses_rank_alltime,
-    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY trade_pnl DESC) ELSE NULL END as profits_rank_alltime,
-    CASE WHEN paperhanded IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY paperhanded DESC) ELSE NULL END as paperhand_rank_alltime,
+    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY  trade_pnl ASC) ELSE NULL END::int as losses_rank_alltime,
+    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY trade_pnl DESC) ELSE NULL END::int as profits_rank_alltime,
+    CASE WHEN paperhanded IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY paperhanded DESC) ELSE NULL END::int as paperhand_rank_alltime,
     -- Last 30 days rankings (partitioned by player)
     case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
         PARTITION BY player
         ORDER BY trade_pnl  ASC
-    ) ELSE NULL END as losses_rank_30d,
+    ) ELSE NULL END::int as losses_rank_30d,
     case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
         PARTITION BY player
         ORDER BY trade_pnl  DESC
-    ) ELSE NULL END as profits_rank_30d,
+    ) ELSE NULL END::int as profits_rank_30d,
     CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' then RANK() OVER (
         PARTITION BY player
         ORDER BY paperhanded DESC 
-    ) ELSE NULL END as paperhand_rank_30d,  
+    ) ELSE NULL END::int as paperhand_rank_30d,  
     -- Last 14 days rankings (partitioned by player)
 case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
         PARTITION BY player
         ORDER BY trade_pnl  ASC
-    ) ELSE NULL END as losses_rank_14d,
+    ) ELSE NULL END::int as losses_rank_14d,
 case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
         PARTITION BY player
         ORDER BY trade_pnl  DESC
-    ) ELSE NULL END as profits_rank_14d,
+    ) ELSE NULL END::int as profits_rank_14d,
     CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' then RANK() OVER (
         PARTITION BY player
         ORDER BY paperhanded DESC 
-    ) ELSE NULL END as paperhand_rank_14d
+    ) ELSE NULL END::int as paperhand_rank_14d
 FROM paperhands
 ORDER BY sell_timestamp DESC;
 """
@@ -167,20 +167,24 @@ top_10_by_player = {}
 for player in paperhands_df['player'].unique():
     player_data = paperhands_df[paperhands_df['player'] == player]
     
-    player_top_trades = player_data[
-        (player_data['paperhand_rank_alltime'] <= 10) |
-        (player_data['losses_rank_alltime'] <= 10) |
-        (player_data['profits_rank_alltime'] <= 10) |
-        (player_data['losses_rank_30d'] <= 10) |
-        (player_data['profits_rank_30d'] <= 10) |
-        (player_data['losses_rank_14d'] <= 10) |
-        (player_data['profits_rank_14d'] <= 10) | 
-        (player_data['paperhand_rank_30d'] <= 10) |
-        (player_data['paperhand_rank_14d'] <= 10)
+    # Create a mask for each rank column being <= 10 (nulls will be False)
+    rank_columns = [
+        'paperhand_rank_alltime', 'losses_rank_alltime', 'profits_rank_alltime',
+        'losses_rank_30d', 'profits_rank_30d', 'losses_rank_14d', 
+        'profits_rank_14d', 'paperhand_rank_30d', 'paperhand_rank_14d'
     ]
+    
+    # A row should be included if any non-null rank is <= 10
+    player_top_trades = player_data[
+        player_data[rank_columns].apply(lambda x: 
+            (x <= 10).any() if x.notna().any() else False, 
+            axis=1
+        )
+    ]
+    
     player_top_trades = (player_top_trades
                         .sort_values('paperhanded', ascending=False)
-                        .replace({pd.NA: None, float('nan'): None})  # Replace both pd.NA and NaN
+                        .replace({pd.NA: None, float('nan'): None})
                         .to_dict('records'))
     top_10_by_player[player] = player_top_trades
 

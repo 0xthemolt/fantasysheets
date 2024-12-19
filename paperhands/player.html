@@ -574,16 +574,7 @@
             const data = await memoizedLoadPlayerData();
             if (data) {
                 const allPlayerData = data.top_10_by_player[playerAddress];
-                playerData = allPlayerData.filter(player => {
-                    const rankField = `paperhand_rank_${currentPeriod === 'all_time' ? 'alltime' : 
-                                     currentPeriod === 'l30d' ? '30d' : '14d'}`;
-                    return player[rankField] != null && player[rankField] <= 10;
-                }).sort((a, b) => {
-                    // Get the correct rank field based on current period
-                    const rankField = `paperhand_rank_${currentPeriod === 'all_time' ? 'alltime' : 
-                                     currentPeriod === 'l30d' ? '30d' : '14d'}`;
-                    return a[rankField] - b[rankField]; // Sort ascending by rank
-                });
+                playerData = allPlayerData;
                 await displayPlayerPaperHandSummary(playerAddress);
                 renderCards();
             }
@@ -626,30 +617,44 @@
                     }
                 },
                 'profitsContainer': {
-                    data: playerData.filter(d => d.trade_profit > 0).sort((a, b) => b.trade_profit - a.trade_profit),
+                    data: playerData.filter(d => {
+                        const rankField = `profits_rank_${currentPeriod === 'all_time' ? 'alltime' : 
+                                         currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                        return d[rankField] != null && d[rankField] <= 10;
+                    }).sort((a, b) => {
+                        const rankField = `profits_rank_${currentPeriod === 'all_time' ? 'alltime' : 
+                                         currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                        return a[rankField] - b[rankField];
+                    }),
                     title: 'Profit',
-                    valueField: 'trade_profit',
+                    valueField: 'trade_pnl',
                     rankField: period => `profits_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
                     updateSummary: (data) => {
-                        const totalProfit = data.reduce((sum, item) => sum + Math.max(0, item.trade_profit), 0);
-                        const profitableTradesCount = data.filter(item => item.trade_profit > 0).length;
+                        const totalProfit = data.reduce((sum, item) => sum + Math.max(0, item.trade_pnl), 0);
+                        const profitableTradesCount = data.filter(item => item.trade_pnl > 0).length;
                         
-                        // Update the profits summary section
                         const profitsSummary = document.querySelector('.profits .trading-summary-content');
                         profitsSummary.querySelector('.eth-price').textContent = formatPrice(totalProfit);
                         profitsSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = profitableTradesCount;
                     }
                 },
                 'lossesContainer': {
-                    data: playerData.filter(d => d.trade_profit < 0).sort((a, b) => a.trade_profit - b.trade_profit),
+                    data: playerData.filter(d => {
+                        const rankField = `losses_rank_${currentPeriod === 'all_time' ? 'alltime' : 
+                                         currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                        return d[rankField] != null && d[rankField] <= 10;
+                    }).sort((a, b) => {
+                        const rankField = `losses_rank_${currentPeriod === 'all_time' ? 'alltime' : 
+                                         currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                        return a[rankField] - b[rankField];
+                    }),
                     title: 'Loss',
-                    valueField: 'trade_profit',
+                    valueField: 'trade_pnl',
                     rankField: period => `losses_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
                     updateSummary: (data) => {
-                        const totalLoss = Math.abs(data.reduce((sum, item) => sum + Math.min(0, item.trade_profit), 0));
-                        const lossTradesCount = data.filter(item => item.trade_profit < 0).length;
+                        const totalLoss = Math.abs(data.reduce((sum, item) => sum + Math.min(0, item.trade_pnl), 0));
+                        const lossTradesCount = data.filter(item => item.trade_pnl < 0).length;
                         
-                        // Update the losses summary section
                         const lossesSummary = document.querySelector('.losses .trading-summary-content');
                         lossesSummary.querySelector('.eth-price').textContent = formatPrice(totalLoss);
                         lossesSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = lossTradesCount;
@@ -734,11 +739,11 @@
                                                 <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
                                             </div>
                                             ${data.buy_tx_hash ? `
-                                            <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
-                                                ${Math.abs(data.trade_profit) < 0.001 ? 
+                                            <span style="color: ${Math.abs(data.trade_pnl) < 0.001 ? '#808080' : data.trade_pnl >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
+                                                ${Math.abs(data.trade_pnl) < 0.001 ? 
                                                     '- (0%)' : 
-                                                    `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
-                                                    <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
+                                                    `<span class="eth-price">${formatPrice(data.trade_pnl)}</span>
+                                                    <span style="margin-left: 2px; text-align: left;">(${((data.trade_pnl) / data.buy_price * 100).toFixed(0)}%)</span>`
                                                 }
                                             </span>
                                             ` : ''}

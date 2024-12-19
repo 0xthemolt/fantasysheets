@@ -77,49 +77,33 @@
 
         .card-container {
             display: flex;
+            flex-direction: column;
             gap: 1rem;
-            overflow-x: auto;
             padding: 1rem;
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            scrollbar-color: #4a4a4a #1a1a1a;
-            -webkit-overflow-scrolling: touch;
         }
 
         .card-container::-webkit-scrollbar {
-            height: 6px;
+            display: none;
         }
 
-        .card-container::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 3px;
+        
+        .paperhands {
+            max-width: 2500px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .paperhands-summary {
+            max-width: 2500px; 
         }
 
-        .card-container::-webkit-scrollbar-thumb {
-            background: #4a4a4a;
-            border-radius: 3px;
-            transition: background 0.3s ease;
-        }
-
-        .card-container::-webkit-scrollbar-thumb:hover {
-            background: #666;
-        }
-
-        @media (hover: none) {
-            .card-container {
-                position: relative;
-                scroll-snap-type: x mandatory;
-            }
-
-            .card {
-                scroll-snap-align: center;
-            }
+        .period-filter {
+            max-width: 2500px; 
         }
 
         .card {
-            flex: 0 0 400px;
-            width: 400px;
-            height: 308px;
+            width: 100%;
+            max-width: 2500px;
+            margin: 0 auto;
             background: #1a1a1a;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -292,6 +276,12 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        @media (hover: none) {
+            .card-container {
+                scroll-snap-type: y mandatory;
+            }
+        }
     </style>
 </head>
 <body>
@@ -373,34 +363,36 @@
         <button class="toggle-btn" data-period="l30d">Last 30D</button>
         <button class="toggle-btn" data-period="l14d">Last 14D</button>
     </div>
-    <div id="playerSummary" style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
-        <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
-            <img id="playerPfp" src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
-            <div style="flex-grow: 1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
-                    <span id="playerRank" style="font-size: 0.9em; color: #808080;"></span>
-                </div>
-                <div style="display: flex; gap: 20px;">
-                    <div>
-                        <span style="color: #808080;">Total Paperhanded</span>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                            <span id="totalFumbled" class="eth-price"></span>
-                            <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
-                        </div>
+    <div class="paperhands">
+        <div class="paperhands-summary" style="margin: 20px auto; padding: 0 20px;">
+            <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
+                <img id="playerPfp" src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+                <div style="flex-grow: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
+                        <span id="playerRank" style="font-size: 0.9em; color: #808080;"></span>
                     </div>
-                    <div>
-                        <span style="color: #808080;">Sell Count</span>
-                        <div id="sellCount" style="font-size: 1.2em;"></div>
+                    <div style="display: flex; gap: 20px;">
+                        <div>
+                            <span style="color: #808080;">Total Paperhanded</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span id="totalFumbled" class="eth-price"></span>
+                                <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                            </div>
+                        </div>
+                        <div>
+                            <span style="color: #808080;">Sell Count</span>
+                            <div id="sellCount" style="font-size: 1.2em;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <h1 style="margin: 0;">Top 10 Paperhands</h1>
-    <div class="container">
-        <div class="card-container" id="cardContainer" loading="lazy">
-            <!-- Cards will be inserted here dynamically -->
+        <div class="paperhands-cards">
+            <h1 style="margin: 0;">Top 10 Paperhands</h1>
+            <div class="card-container" id="cardContainer" loading="lazy">
+                <!-- Cards will be inserted here dynamically -->
+            </div>
         </div>
     </div>
 

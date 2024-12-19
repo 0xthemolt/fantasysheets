@@ -50,7 +50,7 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    --and sell.seller in ('0xTactic', '0xthemolt')
+    and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
@@ -66,7 +66,7 @@ latest_prices AS (
     FROM flatten.get_hero_last_trades
     WHERE hero_rarity_trade_history_rank = 1
 ),
-base AS (
+paperhands AS (
     SELECT 
         bs.seller as player,
         REPLACE(pd.profile_picture, 'https://pbs.twimg.com/profile_images/', '') as player_pfp,
@@ -78,31 +78,53 @@ base AS (
         bs.sell_tx_hash,
         bs.sell_price,
         bs.sell_timestamp,
-        bs.sell_price - bs.buy_price as trade_profit,
-        lp.last_sold_price,
-        lp.last_sold_timestamp,
-        lp.last_sold_tx_hash,
-        lp.last_sold_price - bs.sell_price as fumbled,
-        ROW_NUMBER() OVER (PARTITION BY bs.seller ORDER BY (lp.last_sold_price - bs.sell_price) DESC)::integer as rank_all_time,
-        CASE 
-            WHEN bs.sell_timestamp >= NOW() - INTERVAL '30 days' 
-            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sell_timestamp >= NOW() - INTERVAL '30 days') 
-                                   ORDER BY (lp.last_sold_price - bs.sell_price) DESC)
-        END::integer as rank_30d,
-        CASE 
-            WHEN bs.sell_timestamp >= NOW() - INTERVAL '14 days' 
-            THEN ROW_NUMBER() OVER (PARTITION BY bs.seller, (bs.sell_timestamp >= NOW() - INTERVAL '14 days') 
-                                   ORDER BY (lp.last_sold_price - bs.sell_price) DESC)
-        END::integer as rank_14d
+        case when bs.buy_price is not null then bs.sell_price - bs.buy_price else null end as trade_pnl,
+        case when lp.last_sold_price > bs.sell_price and lp.last_sold_timestamp > bs.sell_timestamp then lp.last_sold_price else null end as last_sold_price,
+        case when lp.last_sold_price > bs.sell_price and lp.last_sold_timestamp > bs.sell_timestamp then lp.last_sold_timestamp else null end as    last_sold_timestamp,
+        case when lp.last_sold_price > bs.sell_price and lp.last_sold_timestamp > bs.sell_timestamp then lp.last_sold_tx_hash   else null end as last_sold_tx_hash,
+        case when lp.last_sold_price > bs.sell_price and lp.last_sold_timestamp > bs.sell_timestamp then lp.last_sold_price - bs.sell_price else 0 end as paperhanded
     FROM player_sales bs
     JOIN latest_prices lp ON bs.hero_rarity_id = lp.hero_rarity_id
     left join flatten.get_player_basic_data pd
     	on bs.seller_id = pd.player_id
-    WHERE lp.last_sold_price > bs.sell_price
-    AND lp.last_sold_timestamp > bs.sell_timestamp
-    ORDER BY fumbled desc
+--    WHERE lp.last_sold_price > bs.sell_price
+--    AND lp.last_sold_timestamp > bs.sell_timestamp
+    ORDER BY sell_timestamp desc
 )
-SELECT * FROM base;
+SELECT 
+    *,
+    -- All-time rankings (partitioned by player)
+    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY  trade_pnl ASC) ELSE NULL END as losses_rank_alltime,
+    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY trade_pnl DESC) ELSE NULL END as profits_rank_alltime,
+    CASE WHEN paperhanded IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY paperhanded DESC) ELSE NULL END as paperhand_rank_alltime,
+    -- Last 30 days rankings (partitioned by player)
+    case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
+        PARTITION BY player
+        ORDER BY trade_pnl  ASC
+    ) ELSE NULL END as losses_rank_30d,
+    case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
+        PARTITION BY player
+        ORDER BY trade_pnl  DESC
+    ) ELSE NULL END as profits_rank_30d,
+    CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' then RANK() OVER (
+        PARTITION BY player
+        ORDER BY paperhanded DESC 
+    ) ELSE NULL END as paperhand_rank_30d,  
+    -- Last 14 days rankings (partitioned by player)
+case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
+        PARTITION BY player
+        ORDER BY trade_pnl  ASC
+    ) ELSE NULL END as losses_rank_14d,
+case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
+        PARTITION BY player
+        ORDER BY trade_pnl  DESC
+    ) ELSE NULL END as profits_rank_14d,
+    CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' then RANK() OVER (
+        PARTITION BY player
+        ORDER BY paperhanded DESC 
+    ) ELSE NULL END as paperhand_rank_14d
+FROM paperhands
+ORDER BY sell_timestamp DESC;
 """
 
 conn = get_db_connection()
@@ -113,31 +135,31 @@ cursor.close()
 # Create the three total datasets (aggregate by player) with rank and profile picture
 # All-time dataset
 total_df_all_time = paperhands_df.groupby('player').agg({
-    'fumbled': 'sum',
+    'paperhanded': 'sum',
     'player_pfp': 'first',
     'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_all_time = total_df_all_time.sort_values('fumbled', ascending=False)
+total_df_all_time = total_df_all_time.sort_values('paperhanded', ascending=False)
 total_df_all_time['rank'] = range(1, len(total_df_all_time) + 1)
 
 # 30-day dataset
-df_30d = paperhands_df[paperhands_df['rank_30d'].notna()]
+df_30d = paperhands_df[paperhands_df['paperhand_rank_30d'].notna()]
 total_df_30d = df_30d.groupby('player').agg({
-    'fumbled': 'sum',
+    'paperhanded': 'sum',
     'player_pfp': 'first',
     'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_30d = total_df_30d.sort_values('fumbled', ascending=False)
+total_df_30d = total_df_30d.sort_values('paperhanded', ascending=False)
 total_df_30d['rank'] = range(1, len(total_df_30d) + 1)
 
 # 14-day dataset
-df_14d = paperhands_df[paperhands_df['rank_14d'].notna()]
+df_14d = paperhands_df[paperhands_df['paperhand_rank_14d'].notna()]
 total_df_14d = df_14d.groupby('player').agg({
-    'fumbled': 'sum',
+    'paperhanded': 'sum',
     'player_pfp': 'first',
     'player': 'count'
 }).rename(columns={'player': 'sell_count'}).reset_index()
-total_df_14d = total_df_14d.sort_values('fumbled', ascending=False)
+total_df_14d = total_df_14d.sort_values('paperhanded', ascending=False)
 total_df_14d['rank'] = range(1, len(total_df_14d) + 1)
 
 # Create the top 10 by player dataset
@@ -146,12 +168,18 @@ for player in paperhands_df['player'].unique():
     player_data = paperhands_df[paperhands_df['player'] == player]
     
     player_top_trades = player_data[
-        (player_data['rank_all_time'] <= 10) |
-        (player_data['rank_30d'] <= 10) |
-        (player_data['rank_14d'] <= 10)
+        (player_data['paperhand_rank_alltime'] <= 10) |
+        (player_data['losses_rank_alltime'] <= 10) |
+        (player_data['profits_rank_alltime'] <= 10) |
+        (player_data['losses_rank_30d'] <= 10) |
+        (player_data['profits_rank_30d'] <= 10) |
+        (player_data['losses_rank_14d'] <= 10) |
+        (player_data['profits_rank_14d'] <= 10) | 
+        (player_data['paperhand_rank_30d'] <= 10) |
+        (player_data['paperhand_rank_14d'] <= 10)
     ]
     player_top_trades = (player_top_trades
-                        .sort_values('fumbled', ascending=False)
+                        .sort_values('paperhanded', ascending=False)
                         .replace({pd.NA: None, float('nan'): None})  # Replace both pd.NA and NaN
                         .to_dict('records'))
     top_10_by_player[player] = player_top_trades

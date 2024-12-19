@@ -117,7 +117,7 @@
             align-items: stretch;
             position: relative;
             overflow: hidden;
-            min-height: 270px; /*must match card-content min-height*/
+            min-height: 300px; /*must match card-content min-height*/
         }
 
         .card-image {
@@ -127,14 +127,14 @@
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            margin-left: 11px;
+            margin: 48px 0 0 11px; /* Increased top margin from 32px to 48px */
         }
 
         .card-content {
             flex: 1;
-            padding: 1rem;
+            padding: 3rem 1rem 1rem; /* Increased top padding from 2rem to 3rem */
             color: white;
-            min-height: 270px;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
         }
@@ -190,14 +190,14 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            width: 400px; /* match card width*/
+            width: 100%;
             padding: 8px 16px;
             color: white;
             font-weight: bold;
             font-size: 14px;
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
             text-align: center;
+            z-index: 1;
         }
 
         .rank-1, .rank-2, .rank-3, .rank-other {
@@ -332,6 +332,16 @@
             align-items: center;
             gap: 20px;
         }
+
+        .trading-cards h1 {
+            margin: 0;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -429,7 +439,7 @@
                                 <div>
                                     <span style="color: #808080;">Total Paperhanded</span>
                                     <div style="display: flex; align-items: center; gap: 4px;">
-                                        <span id="totalFumbled" class="eth-price"></span>
+                                        <span id="totalPaperhanded" class="eth-price"></span>
                                         <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
                                     </div>
                                 </div>
@@ -443,7 +453,7 @@
                 </div>
             </div>
             <div class="trading-cards">
-                <h1 style="margin: 0;">Top 10 Paperhands</h1>
+                <h1>Top 10 Paperhands</h1>
                 <div class="card-container" id="paperhandsContainer" loading="lazy">
                     <!-- Cards will be inserted here dynamically -->
                 </div>
@@ -473,7 +483,7 @@
                 </div>
             </div>
             <div class="trading-cards">
-                <h1 style="margin: 0;">Top 10 Profits</h1>
+                <h1>Top 10 Profits</h1>
                 <div class="card-container" id="profitsContainer" loading="lazy">
                     <!-- Cards will be inserted here dynamically -->
                 </div>
@@ -503,7 +513,7 @@
                 </div>
             </div>
             <div class="trading-cards">
-                <h1 style="margin: 0;">Top 10 Losses</h1>
+                <h1>Top 10 Losses</h1>
                 <div class="card-container" id="lossesContainer" loading="lazy">
                     <!-- Cards will be inserted here dynamically -->
                 </div>
@@ -541,7 +551,7 @@
                 
                 if (playerData) {
                     // Update the DOM elements
-                    document.getElementById('totalFumbled').textContent = formatPrice(playerData.fumbled);
+                    document.getElementById('totalPaperhanded').textContent = formatPrice(playerData.paperhanded);
                     document.getElementById('sellCount').textContent = playerData.sell_count;
                     document.getElementById('playerAddress').textContent = playerAddress;
                     
@@ -565,12 +575,12 @@
             if (data) {
                 const allPlayerData = data.top_10_by_player[playerAddress];
                 playerData = allPlayerData.filter(player => {
-                    const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
+                    const rankField = `paperhand_rank_${currentPeriod === 'all_time' ? 'alltime' : 
                                      currentPeriod === 'l30d' ? '30d' : '14d'}`;
                     return player[rankField] != null && player[rankField] <= 10;
                 }).sort((a, b) => {
                     // Get the correct rank field based on current period
-                    const rankField = `rank_${currentPeriod === 'all_time' ? 'all_time' : 
+                    const rankField = `paperhand_rank_${currentPeriod === 'all_time' ? 'alltime' : 
                                      currentPeriod === 'l30d' ? '30d' : '14d'}`;
                     return a[rankField] - b[rankField]; // Sort ascending by rank
                 });
@@ -604,17 +614,56 @@
         }
 
         function renderCards() {
-            // Define containers and their corresponding data
+            // Define containers and their corresponding data and configurations
             const containers = {
-                'paperhandsContainer': playerData,
-                'profitsContainer': playerData.filter(d => d.trade_profit > 0).sort((a, b) => b.trade_profit - a.trade_profit),
-                'lossesContainer': playerData.filter(d => d.trade_profit < 0).sort((a, b) => a.trade_profit - b.trade_profit)
+                'paperhandsContainer': {
+                    data: playerData,
+                    title: 'Paperhanded',
+                    valueField: 'paperhanded',
+                    rankField: period => `paperhand_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
+                    updateSummary: (data) => {
+                        // Summary already handled by displayPlayerPaperHandSummary
+                    }
+                },
+                'profitsContainer': {
+                    data: playerData.filter(d => d.trade_profit > 0).sort((a, b) => b.trade_profit - a.trade_profit),
+                    title: 'Profit',
+                    valueField: 'trade_profit',
+                    rankField: period => `profits_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
+                    updateSummary: (data) => {
+                        const totalProfit = data.reduce((sum, item) => sum + Math.max(0, item.trade_profit), 0);
+                        const profitableTradesCount = data.filter(item => item.trade_profit > 0).length;
+                        
+                        // Update the profits summary section
+                        const profitsSummary = document.querySelector('.profits .trading-summary-content');
+                        profitsSummary.querySelector('.eth-price').textContent = formatPrice(totalProfit);
+                        profitsSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = profitableTradesCount;
+                    }
+                },
+                'lossesContainer': {
+                    data: playerData.filter(d => d.trade_profit < 0).sort((a, b) => a.trade_profit - b.trade_profit),
+                    title: 'Loss',
+                    valueField: 'trade_profit',
+                    rankField: period => `losses_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
+                    updateSummary: (data) => {
+                        const totalLoss = Math.abs(data.reduce((sum, item) => sum + Math.min(0, item.trade_profit), 0));
+                        const lossTradesCount = data.filter(item => item.trade_profit < 0).length;
+                        
+                        // Update the losses summary section
+                        const lossesSummary = document.querySelector('.losses .trading-summary-content');
+                        lossesSummary.querySelector('.eth-price').textContent = formatPrice(totalLoss);
+                        lossesSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = lossTradesCount;
+                    }
+                }
             };
 
             // Render cards for each container
-            Object.entries(containers).forEach(([containerId, data]) => {
+            Object.entries(containers).forEach(([containerId, config]) => {
                 const container = document.getElementById(containerId);
                 if (!container) return;
+
+                // Update the summary statistics
+                config.updateSummary(config.data);
 
                 // First, render placeholder cards
                 container.innerHTML = Array(10).fill(0).map(() => `
@@ -625,7 +674,7 @@
                 `).join('');
 
                 // Then, asynchronously populate with real data
-                data.slice(0, 10).forEach((data, index) => {
+                config.data.slice(0, 10).forEach((data, index) => {
                     const card = document.createElement('div');
                     card.className = `card ${index === 0 ? 'active' : ''}`;
                     
@@ -634,13 +683,17 @@
                     img.src = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}`;
                     
                     img.onload = () => {
-                        const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
-                                        currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                        const rankField = config.rankField(currentPeriod);
                         const rank = data[rankField];
                         const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
                         const rarity = getRarity(data.hero_card);
                         const rarityColor = getRarityColor(rarity);
                         
+                        // Highlight color based on container type
+                        const highlightColor = containerId === 'profitsContainer' ? '#4CAF50' : 
+                                             containerId === 'lossesContainer' ? '#FF5252' : 
+                                             rarityColor;
+
                         card.innerHTML = `
                             <div class="rank-ribbon ${rankClass}">#${rank}</div>
                             <div class="card-image" style="background-image: url('${img.src}')" 
@@ -677,7 +730,8 @@
                                         <h3>Sold for</h3>
                                         <div class="price-with-icon">
                                             <div class="price-section">
-                                                <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                                <span class="eth-price">${formatPrice(data.sell_price)}</span>
+                                                <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
                                             </div>
                                             ${data.buy_tx_hash ? `
                                             <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
@@ -689,7 +743,9 @@
                                             </span>
                                             ` : ''}
                                             <span class="timestamp-section">
-                                                <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                                <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
+                                                    on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                </a>
                                             </span>
                                         </div>
                                     </div>
@@ -697,19 +753,23 @@
                                         <h3>Last Sold</h3>
                                         <div class="price-with-icon">
                                             <div class="price-section">
-                                                <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                                <span class="eth-price">${formatPrice(data.last_sold_price)}</span>
+                                                <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
                                             </div>
                                             <span class="timestamp-section">
-                                                <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                                <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
+                                                    on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                </a>
                                             </span>     
                                         </div>                                           
                                     </div>
-                                    <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
-                                        <h3>Paperhanded</h3>
+                                    <div class="stat-item stat-item-paperhanded" style="background: ${highlightColor}33; border-color: ${highlightColor};">
+                                        <h3>${config.title}</h3>
                                         <div class="price-with-icon">
                                             <div class="price-section">
-                                                <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
-                                                <span style="color: #808080; margin-left: 4px;">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                                <span class="eth-price" style="color: ${highlightColor}">${formatPrice(data[config.valueField])}</span>
+                                                <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                                <span style="color: #808080; margin-left: 4px;">($${Math.round(data[config.valueField] * 3900).toLocaleString()})</span>
                                             </div>
                                         </div>
                                     </div>

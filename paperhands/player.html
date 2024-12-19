@@ -100,6 +100,12 @@
             max-width: 2500px; 
         }
 
+        
+        .card-container {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
         .card {
             width: 100%;
             max-width: 2500px;
@@ -108,9 +114,10 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
-            align-items: center;
+            align-items: stretch;
             position: relative;
             overflow: hidden;
+            min-height: 270px; /*must match card-content min-height*/
         }
 
         .card-image {
@@ -124,11 +131,12 @@
         }
 
         .card-content {
-            flex: 0 0 180px;
-            width: 180px;
+            flex: 1;
             padding: 1rem;
             color: white;
-            height: 198px;
+            min-height: 270px;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-content h2 {
@@ -282,6 +290,48 @@
                 scroll-snap-type: y mandatory;
             }
         }
+
+        .trading-section {
+            max-width: 2500px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .trading-summary {
+            max-width: 2500px;
+        }
+
+        .trading-cards {
+            margin-top: 20px;
+        }
+
+        .trading-sections-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 2500px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .trading-section {
+            margin: 0;
+            padding: 0;
+        }
+
+        .trading-summary {
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        .trading-summary-content {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
     </style>
 </head>
 <body>
@@ -363,35 +413,100 @@
         <button class="toggle-btn" data-period="l30d">Last 30D</button>
         <button class="toggle-btn" data-period="l14d">Last 14D</button>
     </div>
-    <div class="paperhands">
-        <div class="paperhands-summary" style="margin: 20px auto; padding: 0 20px;">
-            <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
-                <img id="playerPfp" src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
-                <div style="flex-grow: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
-                        <span id="playerRank" style="font-size: 0.9em; color: #808080;"></span>
-                    </div>
-                    <div style="display: flex; gap: 20px;">
-                        <div>
-                            <span style="color: #808080;">Total Paperhanded</span>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <span id="totalFumbled" class="eth-price"></span>
-                                <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+    <div class="trading-sections-container">
+        <!-- Paperhands Section -->
+        <div class="trading-section paperhands">
+            <div class="trading-summary">
+                <div class="trading-summary-content">
+                    <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
+                        <img id="playerPfp" src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h2 id="playerAddress" style="margin: 0; font-size: 1.2em;"></h2>
+                                <span id="playerRank" style="font-size: 0.9em; color: #808080;"></span>
                             </div>
-                        </div>
-                        <div>
-                            <span style="color: #808080;">Sell Count</span>
-                            <div id="sellCount" style="font-size: 1.2em;"></div>
+                            <div style="display: flex; gap: 20px;">
+                                <div>
+                                    <span style="color: #808080;">Total Paperhanded</span>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span id="totalFumbled" class="eth-price"></span>
+                                        <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style="color: #808080;">Sell Count</span>
+                                    <div id="sellCount" style="font-size: 1.2em;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="trading-cards">
+                <h1 style="margin: 0;">Top 10 Paperhands</h1>
+                <div class="card-container" id="paperhandsContainer" loading="lazy">
+                    <!-- Cards will be inserted here dynamically -->
+                </div>
+            </div>
         </div>
-        <div class="paperhands-cards">
-            <h1 style="margin: 0;">Top 10 Paperhands</h1>
-            <div class="card-container" id="cardContainer" loading="lazy">
-                <!-- Cards will be inserted here dynamically -->
+
+        <!-- Profits Section -->
+        <div class="trading-section profits">
+            <div class="trading-summary">
+                <div class="trading-summary-content">
+                    <!-- Placeholder for profits summary -->
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; gap: 20px;">
+                            <div>
+                                <span style="color: #808080;">Total Profit</span>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="eth-price">-</span>
+                                    <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                                </div>
+                            </div>
+                            <div>
+                                <span style="color: #808080;">Profitable Trades</span>
+                                <div style="font-size: 1.2em;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="trading-cards">
+                <h1 style="margin: 0;">Top 10 Profits</h1>
+                <div class="card-container" id="profitsContainer" loading="lazy">
+                    <!-- Cards will be inserted here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Losses Section -->
+        <div class="trading-section losses">
+            <div class="trading-summary">
+                <div class="trading-summary-content">
+                    <!-- Placeholder for losses summary -->
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; gap: 20px;">
+                            <div>
+                                <span style="color: #808080;">Total Loss</span>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="eth-price">-</span>
+                                    <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                                </div>
+                            </div>
+                            <div>
+                                <span style="color: #808080;">Loss Trades</span>
+                                <div style="font-size: 1.2em;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="trading-cards">
+                <h1 style="margin: 0;">Top 10 Losses</h1>
+                <div class="card-container" id="lossesContainer" loading="lazy">
+                    <!-- Cards will be inserted here dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -489,112 +604,123 @@
         }
 
         function renderCards() {
-            const container = document.getElementById('cardContainer');
-            
-            // First, render placeholder cards
-            container.innerHTML = Array(10).fill(0).map(() => `
-                <div class="card card-placeholder">
-                    <div class="card-image"></div>
-                    <div class="card-content"></div>
-                </div>
-            `).join('');
+            // Define containers and their corresponding data
+            const containers = {
+                'paperhandsContainer': playerData,
+                'profitsContainer': playerData.filter(d => d.trade_profit > 0).sort((a, b) => b.trade_profit - a.trade_profit),
+                'lossesContainer': playerData.filter(d => d.trade_profit < 0).sort((a, b) => a.trade_profit - b.trade_profit)
+            };
 
-            // Then, asynchronously populate with real data
-            playerData.forEach((data, index) => {
-                const card = document.createElement('div');
-                card.className = `card ${index === 0 ? 'active' : ''}`;
-                
-                // Pre-load the image
-                const img = new Image();
-                img.src = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}`;
-                
-                img.onload = () => {
-                    const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
-                                    currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
-                    const rank = data[rankField];
-                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
-                    const rarity = getRarity(data.hero_card);
-                    const rarityColor = getRarityColor(rarity);
+            // Render cards for each container
+            Object.entries(containers).forEach(([containerId, data]) => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                // First, render placeholder cards
+                container.innerHTML = Array(10).fill(0).map(() => `
+                    <div class="card card-placeholder">
+                        <div class="card-image"></div>
+                        <div class="card-content"></div>
+                    </div>
+                `).join('');
+
+                // Then, asynchronously populate with real data
+                data.slice(0, 10).forEach((data, index) => {
+                    const card = document.createElement('div');
+                    card.className = `card ${index === 0 ? 'active' : ''}`;
                     
-                    card.innerHTML = `
-                        <div class="rank-ribbon ${rankClass}">#${rank}</div>
-                        <div class="card-image" style="background-image: url('${img.src}')" 
-                             loading="${index === 0 ? 'eager' : 'lazy'}"
-                             fetchpriority="${index === 0 ? 'high' : 'low'}"
-                             decoding="async"></div>
-                        <div class="card-content">
-                            <div class="stats-grid">
-                                ${data.buy_tx_hash ? `
-                                <div class="stat-item">
-                                    <h3>Bought for</h3>
-                                    <div class="price-with-icon">
-                                        <div class="price-section">
-                                            <span class="eth-price">${formatPrice(data.buy_price)}</span>
-                                            <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
-                                        </div>
-                                        <span class="timestamp-section">
-                                            <a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
-                                                on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                            </a>
-                                        </span>
-                                    </div>                            
-                                </div>
-                                ` : `
-                                <div class="stat-item">
-                                    <h3>Minted</h3>
-                                    <div class="price-with-icon">
-                                        <span class="eth-price">-</span>
-                                        <span></span>
+                    // Pre-load the image
+                    const img = new Image();
+                    img.src = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}`;
+                    
+                    img.onload = () => {
+                        const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
+                                        currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                        const rank = data[rankField];
+                        const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                        const rarity = getRarity(data.hero_card);
+                        const rarityColor = getRarityColor(rarity);
+                        
+                        card.innerHTML = `
+                            <div class="rank-ribbon ${rankClass}">#${rank}</div>
+                            <div class="card-image" style="background-image: url('${img.src}')" 
+                                 loading="${index === 0 ? 'eager' : 'lazy'}"
+                                 fetchpriority="${index === 0 ? 'high' : 'low'}"
+                                 decoding="async"></div>
+                            <div class="card-content">
+                                <div class="stats-grid">
+                                    ${data.buy_tx_hash ? `
+                                    <div class="stat-item">
+                                        <h3>Bought for</h3>
+                                        <div class="price-with-icon">
+                                            <div class="price-section">
+                                                <span class="eth-price">${formatPrice(data.buy_price)}</span>
+                                                <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                            </div>
+                                            <span class="timestamp-section">
+                                                <a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
+                                                    on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                </a>
+                                            </span>
+                                        </div>                            
                                     </div>
-                                </div>
-                                `}
-                                <div class="stat-item">
-                                    <h3>Sold for</h3>
-                                    <div class="price-with-icon">
-                                        <div class="price-section">
-                                            <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                    ` : `
+                                    <div class="stat-item">
+                                        <h3>Minted</h3>
+                                        <div class="price-with-icon">
+                                            <span class="eth-price">-</span>
+                                            <span></span>
                                         </div>
-                                        ${data.buy_tx_hash ? `
-                                        <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
-                                            ${Math.abs(data.trade_profit) < 0.001 ? 
-                                                '- (0%)' : 
-                                                `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
-                                                <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
-                                            }
-                                        </span>
-                                        ` : ''}
-                                        <span class="timestamp-section">
-                                            <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
-                                        </span>
                                     </div>
-                                </div>
-                                <div class="stat-item">
-                                    <h3>Last Sold</h3>
-                                    <div class="price-with-icon">
-                                        <div class="price-section">
-                                            <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                    `}
+                                    <div class="stat-item">
+                                        <h3>Sold for</h3>
+                                        <div class="price-with-icon">
+                                            <div class="price-section">
+                                                <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                            </div>
+                                            ${data.buy_tx_hash ? `
+                                            <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
+                                                ${Math.abs(data.trade_profit) < 0.001 ? 
+                                                    '- (0%)' : 
+                                                    `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
+                                                    <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
+                                                }
+                                            </span>
+                                            ` : ''}
+                                            <span class="timestamp-section">
+                                                <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                            </span>
                                         </div>
-                                        <span class="timestamp-section">
-                                            <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
-                                        </span>     
-                                    </div>                                           
-                                </div>
-                                <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
-                                    <h3>Paperhanded</h3>
-                                    <div class="price-with-icon">
-                                        <div class="price-section">
-                                            <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
-                                            <span style="color: #808080; margin-left: 4px;">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h3>Last Sold</h3>
+                                        <div class="price-with-icon">
+                                            <div class="price-section">
+                                                <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                            </div>
+                                            <span class="timestamp-section">
+                                                <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                            </span>     
+                                        </div>                                           
+                                    </div>
+                                    <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
+                                        <h3>Paperhanded</h3>
+                                        <div class="price-with-icon">
+                                            <div class="price-section">
+                                                <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                                <span style="color: #808080; margin-left: 4px;">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                    
-                    // Replace placeholder with actual card
-                    container.children[index].replaceWith(card);
-                };
+                        `;
+                        
+                        // Replace placeholder with actual card
+                        container.children[index].replaceWith(card);
+                    };
+                });
             });
         }
 

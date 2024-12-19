@@ -620,6 +620,8 @@
                     data: playerData.filter(d => {
                         const rankField = `profits_rank_${currentPeriod === 'all_time' ? 'alltime' : 
                                          currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                        console.log('Profit rankField:', rankField);
+                        console.log('Profit rank value:', d[rankField]);
                         return d[rankField] != null && d[rankField] <= 10;
                     }).sort((a, b) => {
                         const rankField = `profits_rank_${currentPeriod === 'all_time' ? 'alltime' : 
@@ -787,6 +789,10 @@
                     };
                 });
             });
+
+            console.log('Player Data:', playerData);
+            console.log('Filtered Profits:', containers.profitsContainer.data);
+            console.log('Filtered Losses:', containers.lossesContainer.data);
         }
 
         function showCard(index) {

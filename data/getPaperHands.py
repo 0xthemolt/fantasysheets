@@ -50,7 +50,8 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    --and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
+    and sell.seller = '0xthemolt'
+    -- and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
@@ -93,36 +94,42 @@ paperhands AS (
 )
 SELECT 
     *,
-    -- All-time rankings (partitioned by player)
-    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY  trade_pnl ASC) ELSE NULL END::int as losses_rank_alltime,
-    CASE WHEN trade_pnl IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY trade_pnl DESC) ELSE NULL END::int as profits_rank_alltime,
-    CASE WHEN paperhanded IS NOT NULL THEN RANK() OVER (PARTITION BY player ORDER BY paperhanded DESC) ELSE NULL END::int as paperhand_rank_alltime,
-    -- Last 30 days rankings (partitioned by player)
-    case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
-        PARTITION BY player
-        ORDER BY trade_pnl  ASC
-    ) ELSE NULL END::int as losses_rank_30d,
-    case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '30 days'  then RANK() OVER (
-        PARTITION BY player
-        ORDER BY trade_pnl  DESC
-    ) ELSE NULL END::int as profits_rank_30d,
-    CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' then RANK() OVER (
-        PARTITION BY player
-        ORDER BY paperhanded DESC 
-    ) ELSE NULL END::int as paperhand_rank_30d,  
-    -- Last 14 days rankings (partitioned by player)
-case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
-        PARTITION BY player
-        ORDER BY trade_pnl  ASC
-    ) ELSE NULL END::int as losses_rank_14d,
-case WHEN trade_pnl is not null AND sell_timestamp >= CURRENT_DATE - INTERVAL '14 days'  then RANK() OVER (
-        PARTITION BY player
-        ORDER BY trade_pnl  DESC
-    ) ELSE NULL END::int as profits_rank_14d,
-    CASE  WHEN paperhanded is not null and sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' then RANK() OVER (
-        PARTITION BY player
-        ORDER BY paperhanded DESC 
-    ) ELSE NULL END::int as paperhand_rank_14d
+	-- All-time rankings (partitioned by player)
+	RANK() OVER (PARTITION BY player ORDER BY COALESCE(trade_pnl,0) ASC)::int as losses_rank_alltime,
+	RANK() OVER (PARTITION BY player ORDER BY COALESCE(trade_pnl,0) DESC)::int as profits_rank_alltime,
+	RANK() OVER (PARTITION BY player ORDER BY COALESCE(paperhanded,0) DESC)::int as paperhand_rank_alltime,
+	-- Last 30 days rankings (partitioned by player)
+	RANK() OVER (
+	  PARTITION BY player 
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' 
+	                    THEN trade_pnl END, 0) ASC
+	)::int as losses_rank_30d,
+	RANK() OVER (
+	  PARTITION BY player
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' 
+	                    THEN trade_pnl END, 0) DESC
+	)::int as profits_rank_30d,
+	RANK() OVER (
+	  PARTITION BY player
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '30 days' 
+	                    THEN paperhanded END, 0) DESC
+	)::int as paperhand_rank_30d,
+	-- Last 14 days rankings (partitioned by player)
+	RANK() OVER (
+	  PARTITION BY player
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' 
+	                    THEN trade_pnl END, 0) ASC
+	)::int as losses_rank_14d,
+	RANK() OVER (
+	  PARTITION BY player
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' 
+	                    THEN trade_pnl END, 0) DESC
+	)::int as profits_rank_14d,
+	RANK() OVER (
+	  PARTITION BY player
+	  ORDER BY COALESCE(CASE WHEN sell_timestamp >= CURRENT_DATE - INTERVAL '14 days' 
+	                    THEN paperhanded END, 0) DESC
+	)::int as paperhand_rank_14d
 FROM paperhands
 ORDER BY sell_timestamp DESC;
 """
@@ -130,7 +137,11 @@ ORDER BY sell_timestamp DESC;
 conn = get_db_connection()
 cursor = conn.cursor()
 paperhands_df = pd.read_sql_query(query, conn)
+best_trades_count = len(paperhands_df[paperhands_df['profits_rank_alltime'] == 1])
+print(f"\nNumber of most profitable trades (profits_rank_alltime = 1): {best_trades_count}")
 cursor.close()
+
+
 
 # Create the three total datasets (aggregate by player) with rank and profile picture
 # All-time dataset
@@ -174,12 +185,9 @@ for player in paperhands_df['player'].unique():
         'profits_rank_14d', 'paperhand_rank_30d', 'paperhand_rank_14d'
     ]
     
-    # A row should be included if any non-null rank is <= 10
+    # Get the minimum rank for each row, ignoring nulls
     player_top_trades = player_data[
-        player_data[rank_columns].apply(lambda x: 
-            (x <= 10).any() if x.notna().any() else False, 
-            axis=1
-        )
+        player_data[rank_columns].min(axis=1).fillna(float('inf')) <= 10
     ]
     
     player_top_trades = (player_top_trades

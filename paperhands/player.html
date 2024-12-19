@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- DNS prefetch and preconnect hints -->
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -15,8 +22,7 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .back-button {
-            position: static;
+        .back-button, .nav-button, .toggle-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 8px;
@@ -24,14 +30,9 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            font-size: 14px;
         }
 
-        .back-button:hover {
+        .back-button:hover, .nav-button:hover, .toggle-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
@@ -95,15 +96,15 @@
 
         .card {
             flex: 0 0 400px;
+            width: 400px;
             height: 308px;
             background: #1a1a1a;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             position: relative;
-            width: 400px;  /* Add explicit width to match flex basis */
+            overflow: hidden;
         }
 
         .card-image {
@@ -141,14 +142,11 @@
             font-size: 0.8rem;
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: left;
         }
 
         .stat-item h3 {
-            margin: 0;
+            margin: 0 0 0.2rem 0;
             font-size: 0.8rem;
-            margin-bottom: 0.2rem;
-            text-align: left;
             color: #808080;
         }
 
@@ -172,21 +170,6 @@
             background: none;
         }
 
-        .nav-button {
-            padding: 0.5rem 1rem;
-            margin: 0 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .nav-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .rank-ribbon {
             position: absolute;
             top: 0;
@@ -201,30 +184,17 @@
             text-align: center;
         }
 
-        .rank-1 {
-            /* Option 1: Metallic gradient with shimmer animation */
-            background: linear-gradient(135deg, #FFD700, #FDB931, #FFD700);
+        .rank-1, .rank-2, .rank-3, .rank-other {
             background-size: 200% 200%;
             animation: shimmer 2s ease-in-out infinite;
         }
 
-        .rank-2 {
-            background: linear-gradient(135deg, #C0C0C0, #E8E8E8, #C0C0C0);
-            background-size: 200% 200%;
-            animation: shimmer 2s ease-in-out infinite;
-        }
-
-        .rank-3 {
-            background: linear-gradient(135deg, #CD7F32, #E9967A, #CD7F32);
-            background-size: 200% 200%;
-            animation: shimmer 2s ease-in-out infinite;
-        }
-
-        .rank-other {
-            /* Subtle gradient for other ranks */
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #FDB931, #FFD700); }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #E8E8E8, #C0C0C0); }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #E9967A, #CD7F32); }
+        .rank-other { 
             background: linear-gradient(135deg, #4a4a4a, #363636, #4a4a4a);
-            background-size: 200% 200%;
-            animation: shimmer 3s ease-in-out infinite;
+            animation-duration: 3s;
         }
 
         @keyframes shimmer {
@@ -514,7 +484,10 @@
                 
                 card.innerHTML = `
                     <div class="rank-ribbon ${rankClass}">#${rank}</div>
-                    <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')"></div>
+                    <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')" 
+                         loading="lazy" 
+                         fetchpriority="high" 
+                         decoding="async"></div>
                     <div class="card-content">
                         <div class="stats-grid">
                             ${data.buy_tx_hash ? `

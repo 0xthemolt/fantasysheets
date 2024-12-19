@@ -6,21 +6,43 @@
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com">
+    <link rel="dns-prefetch" href="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com">
     
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
     <script>
+        // Create a temporary gtag function that queues commands
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-LXJ5Q7LKKE');
+
+        // Load analytics script after page load
+        window.addEventListener('load', function() {
+            // Create script element
+            const script = document.createElement('script');
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE';
+            script.async = true;
+            
+            // Once script loads, initialize GA
+            script.onload = function() {
+                gtag('js', new Date());
+                gtag('config', 'G-LXJ5Q7LKKE');
+            };
+            
+            // Add script to document
+            document.head.appendChild(script);
+        });
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FantasySheets | Paperhands Players</title>
     <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preload" href="../icons/eth.webp" as="image">
+    <link rel="preload" href="../icons/default-pfp.webp" as="image">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </noscript>
     <style>
         .back-button, .nav-button, .toggle-btn {
             background: rgba(255, 255, 255, 0.1);
@@ -109,6 +131,7 @@
 
         .card-image {
             flex: 0 0 154px;
+            width: 154px;
             height: 198px;
             background-size: contain;
             background-position: center;
@@ -118,6 +141,7 @@
 
         .card-content {
             flex: 0 0 180px;
+            width: 180px;
             padding: 1rem;
             color: white;
             height: 198px;
@@ -231,17 +255,13 @@
             white-space: nowrap;
         }
 
-        .time-toggle {
-            margin-bottom: 0px;
+        .period-filter {
             display: flex;
-            justify-content: center;
             gap: 8px;
             padding: 4px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .toggle-btn {
@@ -260,6 +280,17 @@
 
         .toggle-btn.active {
             background: rgba(255, 255, 255, 0.2);
+        }
+
+        .card-placeholder {
+            background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
@@ -337,12 +368,10 @@
                 </div>
     </div>
   
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; max-width: 1400px; margin: 20px auto;">
-        <div class="time-toggle" style="margin-left: 40px;">
-            <button class="toggle-btn active" data-period="all_time">All Time</button>
-            <button class="toggle-btn" data-period="l30d">Last 30D</button>
-            <button class="toggle-btn" data-period="l14d">Last 14D</button>
-        </div>
+    <div class="period-filter" style="max-width: 1400px; margin: 5px auto 5px auto; display: flex; justify-content: center;">
+        <button class="toggle-btn active" data-period="all_time">All Time</button>
+        <button class="toggle-btn" data-period="l30d">Last 30D</button>
+        <button class="toggle-btn" data-period="l14d">Last 14D</button>
     </div>
     <div id="playerSummary" style="max-width: 1400px; margin: 20px auto; padding: 0 20px;">
         <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
@@ -370,7 +399,7 @@
     </div>
     <h1 style="margin: 0;">Top 10 Paperhands</h1>
     <div class="container">
-        <div class="card-container" id="cardContainer">
+        <div class="card-container" id="cardContainer" loading="lazy">
             <!-- Cards will be inserted here dynamically -->
         </div>
     </div>
@@ -380,19 +409,20 @@
         let playerData = [];
         let currentPeriod = 'all_time';
 
-        async function loadPlayerData() {
-            try {
-                const response = await fetch(`/data/players/paperhands.json?_=${Date.now()}`);
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error loading player data:', error);
-                return null;
-            }
-        }
+        const memoizedLoadPlayerData = (() => {
+            const cache = {};
+            return async () => {
+                const cacheKey = Date.now().toString().slice(0, -4); // Cache per 10 seconds
+                if (cache[cacheKey]) return cache[cacheKey];
+                
+                const data = await fetch(`/data/players/paperhands.json`);
+                cache[cacheKey] = await data.json();
+                return cache[cacheKey];
+            };
+        })();
 
         async function displayPlayerPaperHandSummary(playerAddress = '0xthemolt') {
-            const data = await loadPlayerData();
+            const data = await memoizedLoadPlayerData();
             if (data) {
                 // Get the correct array based on time period
                 const dataArray = currentPeriod === 'all_time' ? data.total_all_time :
@@ -424,7 +454,7 @@
         }
 
         async function displayPlayerData(playerAddress = '0xthemolt') {
-            const data = await loadPlayerData();
+            const data = await memoizedLoadPlayerData();
             if (data) {
                 const allPlayerData = data.top_10_by_player[playerAddress];
                 playerData = allPlayerData.filter(player => {
@@ -468,97 +498,111 @@
 
         function renderCards() {
             const container = document.getElementById('cardContainer');
-            container.innerHTML = '';
+            
+            // First, render placeholder cards
+            container.innerHTML = Array(10).fill(0).map(() => `
+                <div class="card card-placeholder">
+                    <div class="card-image"></div>
+                    <div class="card-content"></div>
+                </div>
+            `).join('');
 
+            // Then, asynchronously populate with real data
             playerData.forEach((data, index) => {
                 const card = document.createElement('div');
                 card.className = `card ${index === 0 ? 'active' : ''}`;
                 
-                const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
-                                currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
-                const rank = data[rankField];
-                const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                // Pre-load the image
+                const img = new Image();
+                img.src = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}`;
                 
-                const rarity = getRarity(data.hero_card);
-                const rarityColor = getRarityColor(rarity);
-                
-                card.innerHTML = `
-                    <div class="rank-ribbon ${rankClass}">#${rank}</div>
-                    <div class="card-image" style="background-image: url('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${data.hero_card}')" 
-                         loading="lazy" 
-                         fetchpriority="high" 
-                         decoding="async"></div>
-                    <div class="card-content">
-                        <div class="stats-grid">
-                            ${data.buy_tx_hash ? `
-                            <div class="stat-item">
-                                <h3>Bought for</h3>
-                                <div class="price-with-icon">
-                                    <div class="price-section">
-                                        <span class="eth-price">${formatPrice(data.buy_price)}</span>
-                                        <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
-                                    </div>
-                                    <span class="timestamp-section">
-                                        <a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
-                                            on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        </a>
-                                    </span>
-                                </div>                            
-                            </div>
-                            ` : `
-                            <div class="stat-item">
-                                <h3>Minted</h3>
-                                <div class="price-with-icon">
-                                    <span class="eth-price">-</span>
-                                    <span></span>
+                img.onload = () => {
+                    const rankField = currentPeriod === 'all_time' ? 'rank_all_time' : 
+                                    currentPeriod === 'l30d' ? 'rank_30d' : 'rank_14d';
+                    const rank = data[rankField];
+                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-other';
+                    const rarity = getRarity(data.hero_card);
+                    const rarityColor = getRarityColor(rarity);
+                    
+                    card.innerHTML = `
+                        <div class="rank-ribbon ${rankClass}">#${rank}</div>
+                        <div class="card-image" style="background-image: url('${img.src}')" 
+                             loading="${index === 0 ? 'eager' : 'lazy'}"
+                             fetchpriority="${index === 0 ? 'high' : 'low'}"
+                             decoding="async"></div>
+                        <div class="card-content">
+                            <div class="stats-grid">
+                                ${data.buy_tx_hash ? `
+                                <div class="stat-item">
+                                    <h3>Bought for</h3>
+                                    <div class="price-with-icon">
+                                        <div class="price-section">
+                                            <span class="eth-price">${formatPrice(data.buy_price)}</span>
+                                            <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                        </div>
+                                        <span class="timestamp-section">
+                                            <a href="https://blastscan.io/tx/${data.buy_tx_hash}" target="_blank" style="color: white; text-decoration: none;">
+                                                on ${new Date(data.buy_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </a>
+                                        </span>
+                                    </div>                            
                                 </div>
-                            </div>
-                            `}
-                            <div class="stat-item">
-                                <h3>Sold for</h3>
-                                <div class="price-with-icon">
-                                    <div class="price-section">
-                                        <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                ` : `
+                                <div class="stat-item">
+                                    <h3>Minted</h3>
+                                    <div class="price-with-icon">
+                                        <span class="eth-price">-</span>
+                                        <span></span>
                                     </div>
-                                    ${data.buy_tx_hash ? `
-                                    <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
-                                        ${Math.abs(data.trade_profit) < 0.001 ? 
-                                            '- (0%)' : 
-                                            `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
-                                            <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
-                                        }
-                                    </span>
-                                    ` : ''}
-                                    <span class="timestamp-section">
-                                        <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
-                                    </span>
                                 </div>
-                            </div>
-                            <div class="stat-item">
-                                <h3>Last Sold</h3>
-                                <div class="price-with-icon">
-                                    <div class="price-section">
-                                        <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                `}
+                                <div class="stat-item">
+                                    <h3>Sold for</h3>
+                                    <div class="price-with-icon">
+                                        <div class="price-section">
+                                            <span class="eth-price">${formatPrice(data.sell_price)}</span><img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                        </div>
+                                        ${data.buy_tx_hash ? `
+                                        <span style="color: ${Math.abs(data.trade_profit) < 0.001 ? '#808080' : data.trade_profit >= 0 ? '#4CAF50' : '#FF5252'}; display: flex; align-items: center; font-size: 0.85em; justify-content: flex-start; margin-left: 4px; ">
+                                            ${Math.abs(data.trade_profit) < 0.001 ? 
+                                                '- (0%)' : 
+                                                `<span class="eth-price">${formatPrice(data.trade_profit)}</span>
+                                                <span style="margin-left: 2px; text-align: left;">(${((data.trade_profit) / data.buy_price * 100).toFixed(0)}%)</span>`
+                                            }
+                                        </span>
+                                        ` : ''}
+                                        <span class="timestamp-section">
+                                            <a href="https://blastscan.io/tx/${data.sell_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.sell_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                        </span>
                                     </div>
-                                    <span class="timestamp-section">
-                                        <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
-                                    </span>     
-                                </div>                                           
-                            </div>
-                            <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
-                                <h3>Paperhanded</h3>
-                                <div class="price-with-icon">
-                                    <div class="price-section">
-                                        <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
-                                        <span style="color: #808080; margin-left: 4px;">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                </div>
+                                <div class="stat-item">
+                                    <h3>Last Sold</h3>
+                                    <div class="price-with-icon">
+                                        <div class="price-section">
+                                            <span class="eth-price">${formatPrice(data.last_sold_price)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                        </div>
+                                        <span class="timestamp-section">
+                                            <a href="https://blastscan.io/tx/${data.last_sold_tx_hash}" target="_blank" style="color: white; text-decoration: none;">on ${new Date(data.last_sold_timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</a>
+                                        </span>     
+                                    </div>                                           
+                                </div>
+                                <div class="stat-item stat-item-paperhanded" style="background: ${rarityColor}33; border-color: ${rarityColor};">
+                                    <h3>Paperhanded</h3>
+                                    <div class="price-with-icon">
+                                        <div class="price-section">
+                                            <span class="eth-price" style="color: ${rarityColor}">${formatPrice(data.fumbled)}</span> <img src="../icons/eth.webp" alt="ETH" style="margin: 0; margin-left: 2px; width: 16px; height: 16px; display: block;">
+                                            <span style="color: #808080; margin-left: 4px;">($${Math.round(data.fumbled * 3900).toLocaleString()})</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                
-                container.appendChild(card);
+                    `;
+                    
+                    // Replace placeholder with actual card
+                    container.children[index].replaceWith(card);
+                };
             });
         }
 
@@ -575,7 +619,7 @@
         }
 
         async function initializePlayersList() {
-            const data = await loadPlayerData();
+            const data = await memoizedLoadPlayerData();
             if (data) {
                 playersList = Object.keys(data.top_10_by_player).sort();
             }
@@ -669,7 +713,7 @@
         });
 
         // Load data when page loads
-        loadPlayerData();
+        memoizedLoadPlayerData();
     </script>
 </body>
 </html>

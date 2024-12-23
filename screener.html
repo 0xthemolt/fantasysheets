@@ -17,6 +17,7 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
     <script src="/js/tradeChart.js?v=1.0.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1003,6 +1004,18 @@
         let tradesData = []; // Global variable to store trades
         let pricesData = []; // Global variable to store prices
 
+        // Add this after your script tags but before using supabase
+        let supabaseClient;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Supabase client
+            const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // ... rest of your DOMContentLoaded code ...
+        });
+
         // Add this function to handle filters
         function setupFilters() {
             const filterIcons = document.querySelectorAll('.filter-icon');
@@ -1174,7 +1187,7 @@
             });
         }
 
-        // Update the loadHeroTrades function to store the data globally
+        // Update the loadHeroTrades function to use supabaseClient instead of supabase
         async function loadHeroTrades(heroHandle) {
             try {
                 // Destroy existing chart if it exists
@@ -1183,21 +1196,52 @@
                     currentChart = null;
                 }
 
+                // Fetch trades from Supabase
+                let allTrades = [];
+                let page = 0;
+                const pageSize = 1000;
+                let hasMore = true;
+
+                while (hasMore) {
+                    const { data, error } = await supabaseClient
+                        .from('trades')
+                        .select('hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price,hero_rarity_trade_history_rank')
+                        .eq('hero_handle', heroHandle)
+                        .filter('buyer', 'neq', '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841')
+                        .filter('buyer', 'neq', '0x0000000000000000000000000000000000000000')
+                        .filter('seller', 'neq', '0x0000000000000000000000000000000000000000')
+                        .gte('timestamp', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+                        .order('timestamp', { ascending: false })
+                        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+                    if (error) throw error;
+
+                    if (data.length < pageSize) {
+                        hasMore = false;
+                    }
+
+                    allTrades = allTrades.concat(data);
+                    page++;
+                }
+
+                // Fetch prices from JSON file (keeping existing implementation)
                 const timestamp = new Date().getTime();
-                const response = await fetch(`/data/heroes/${heroHandle}_trades.json?t=${timestamp}`, {
+                const pricesResponse = await fetch(`/data/heroes/${heroHandle}_trades.json?t=${timestamp}`, {
                     headers: {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
                         'Pragma': 'no-cache',
                         'Expires': '0'
                     }
                 });
-                const data = await response.json();
-                tradesData = data.trades; // Store trades in global variable
-                pricesData = data.prices; // Store prices in global variable
-                
+                const pricesData = await pricesResponse.json();
+
+                // Store the data in your global variables
+                tradesData = allTrades;
+                pricesData = pricesData.prices; // Assuming this is the structure of your JSON file
+
                 // Sort trades by timestamp in descending order
                 tradesData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
+
                 // Calculate tradesByRarity for price coloring
                 const tradesByRarity = {};
                 tradesData.forEach(trade => {
@@ -1217,7 +1261,7 @@
                 const toggleState = document.querySelector('.toggle-switch').getAttribute('data-state');
                 
                 // Find the matching price data for current rarity
-                const priceData = data.prices.find(p => p.rarity.toLowerCase() === toggleState);
+                const priceData = pricesData.find(p => p.rarity.toLowerCase() === toggleState);
                 const bidPrice = priceData ? priceData.bid : null;
                 const floorPrice = priceData ? priceData.floor : null;
 

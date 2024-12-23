@@ -31,39 +31,67 @@
     </table>
 
     <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+        const client = supabase.createClient(supabaseUrl, supabaseKey)
+
         async function fetchData(heroHandle = '') {
             try {
-                const response = await fetch(`/api/trades?heroHandle=${encodeURIComponent(heroHandle)}`)
-                const data = await response.json()
-                
-                if (!response.ok) {
-                    throw new Error(data.error)
+                let allData = [];
+                let page = 0;
+                const pageSize = 1000;
+                let hasMore = true;
+
+                while (hasMore) {
+                    const { data, error } = await client
+                        .from('trades')
+                        .select('hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price,hero_rarity_trade_history_rank')
+                        .eq('hero_handle', heroHandle)
+                        .filter('buyer', 'neq', '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841')
+                        .order('timestamp', { ascending: false })
+                        .range(page * pageSize, (page + 1) * pageSize - 1)
+
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        throw error;
+                    }
+                    
+                    console.log('Received data:', data); // Debug log
+                    
+                    if (!data || data.length === 0) {
+                        console.log('No data found for hero handle:', heroHandle);
+                        document.getElementById('data-body').innerHTML = '<tr><td colspan="9">No data found</td></tr>';
+                        return;
+                    }
+                    
+                    if (data.length < pageSize) {
+                        hasMore = false;
+                    }
+                    
+                    allData = allData.concat(data);
+                    page++;
                 }
-                
-                if (!data || data.length === 0) {
-                    console.log('No data found for hero handle:', heroHandle)
-                    document.getElementById('data-body').innerHTML = '<tr><td colspan="9">No data found</td></tr>'
-                    return
-                }
-                
+
+                console.log('Total records found:', allData.length); // Debug log
+
                 // Create table headers
                 const headerRow = document.getElementById('header-row');
-                const headers = Object.keys(data[0]);
+                const headers = Object.keys(allData[0]);
                 headerRow.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
 
                 // Create table rows
                 const tableBody = document.getElementById('data-body');
-                tableBody.innerHTML = data.map(row => `
+                tableBody.innerHTML = allData.map(row => `
                     <tr>
                         ${headers.map(h => `<td>${row[h]}</td>`).join('')}
                     </tr>
                 `).join('');
             } catch (error) {
-                console.error('Error details:', error)
-                document.getElementById('data-body').innerHTML = `<tr><td colspan="9">Error: ${error.message}</td></tr>`
+                console.error('Error details:', error);
+                document.getElementById('data-body').innerHTML = `<tr><td colspan="9">Error: ${error.message}</td></tr>`;
             }
         }
-        
+
         fetchData()
     </script>
 </body>

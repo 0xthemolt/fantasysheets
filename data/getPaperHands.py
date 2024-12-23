@@ -16,9 +16,10 @@ def get_db_connection():
 query = """WITH active_buyers AS (
     SELECT buyer_id,COUNT(*)
     FROM flatten.get_hero_last_trades
-    WHERE timestamp >= NOW() - interval '5 weeks'
+    WHERE timestamp >= NOW() - interval '8 weeks'
+    --and buyer_id = '0x6B02622cd035CC00e98e18CB6801192D0f4aAf5A'
     GROUP BY buyer_id
-    HAVING COUNT(*) >= 8
+    HAVING COUNT(*) >= 50
 )
 --select count(*) from active_buyers;
 ,player_sales AS (
@@ -50,8 +51,8 @@ query = """WITH active_buyers AS (
     	and sell.card_id = buy.card_id
     	and buy.timestamp < sell.timestamp
     WHERE 1=1
-    and sell.seller = '0xthemolt'
-    -- and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
+    --and sell.seller = '0xthemolt'
+     and sell.seller in ('0xTactic', '0xthemolt','Khallid4397')
     and sell.buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841' /*exclude burn buyer*/
     --and sell.hero_handle  ilike '%orangie%'
     AND sell.seller_id IN (SELECT buyer_id FROM active_buyers)
@@ -194,6 +195,12 @@ for player in paperhands_df['player'].unique():
                         .sort_values('paperhanded', ascending=False)
                         .replace({pd.NA: None, float('nan'): None})
                         .to_dict('records'))
+    
+    # Remove player and player_pfp from each trade record
+    for trade in player_top_trades:
+        trade.pop('player', None)
+        trade.pop('player_pfp', None)
+    
     top_10_by_player[player] = player_top_trades
 
 # Create a dictionary with all datasets

@@ -87,7 +87,8 @@
 
         async function fetchAndDisplayData() {
             try {
-                const response = await fetch('/data/tournaments/tournaments_stats.json');
+                const timestamp = new Date().getTime(); // Get current timestamp
+                const response = await fetch(`/data/tournaments/tournaments_stats.json?_=${timestamp}`);
                 const data = await response.json();
                 
                 let html = '<table class="matrix-table">';
@@ -397,7 +398,8 @@
                 });
                 charts = {}; // Reset the charts object
 
-                const response = await fetch('/data/tournaments/tournaments_stats.json');
+                const timestamp = new Date().getTime(); // Get current timestamp
+                const response = await fetch(`/data/tournaments/tournaments_stats.json?_=${timestamp}`);
                 const data = await response.json();
                 
                 const leagueColors = {

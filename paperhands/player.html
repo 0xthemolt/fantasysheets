@@ -34,7 +34,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasySheets | Paperhands Players</title>
+    <title>FantasySheets | Paperhands Players </title>
     <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="preload" href="../icons/eth.webp" as="image">
@@ -156,7 +156,8 @@
             padding: 0.6rem;
             border-radius: 4px;
             font-size: 0.8rem;
-            width: 100%;
+            width: auto; /* Changed from 100% to auto */
+            max-width: 800px; /* Add maximum width */
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -464,19 +465,25 @@
         <div class="trading-section profits">
             <div class="trading-summary">
                 <div class="trading-summary-content">
-                    <!-- Placeholder for profits summary -->
-                    <div style="flex-grow: 1;">
-                        <div style="display: flex; gap: 20px;">
-                            <div>
-                                <span style="color: #808080;">Total Profit</span>
-                                <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span class="eth-price">-</span>
-                                    <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
-                                </div>
+                    <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
+                        <img src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h2 class="player-address" style="margin: 0; font-size: 1.2em;"></h2>
+                                <span class="player-rank" style="font-size: 0.9em; color: #808080;"></span>
                             </div>
-                            <div>
-                                <span style="color: #808080;">Profitable Trades</span>
-                                <div style="font-size: 1.2em;">-</div>
+                            <div style="display: flex; gap: 20px;">
+                                <div>
+                                    <span style="color: #808080;">Total Profit</span>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span class="eth-price">-</span>
+                                        <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style="color: #808080;">Profitable Trades</span>
+                                    <div style="font-size: 1.2em;">-</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -494,19 +501,25 @@
         <div class="trading-section losses">
             <div class="trading-summary">
                 <div class="trading-summary-content">
-                    <!-- Placeholder for losses summary -->
-                    <div style="flex-grow: 1;">
-                        <div style="display: flex; gap: 20px;">
-                            <div>
-                                <span style="color: #808080;">Total Loss</span>
-                                <div style="display: flex; align-items: center; gap: 4px;">
-                                    <span class="eth-price">-</span>
-                                    <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
-                                </div>
+                    <div style="background: #1a1a1a; border-radius: 10px; padding: 20px; display: flex; align-items: center; gap: 20px;">
+                        <img src="../icons/default-pfp.webp" alt="Player Profile" style="width: 64px; height: 64px; border-radius: 50%;">
+                        <div style="flex-grow: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h2 class="player-address" style="margin: 0; font-size: 1.2em;"></h2>
+                                <span class="player-rank" style="font-size: 0.9em; color: #808080;"></span>
                             </div>
-                            <div>
-                                <span style="color: #808080;">Loss Trades</span>
-                                <div style="font-size: 1.2em;">-</div>
+                            <div style="display: flex; gap: 20px;">
+                                <div>
+                                    <span style="color: #808080;">Total Loss</span>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span class="eth-price">-</span>
+                                        <img src="../icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style="color: #808080;">Loss Trades</span>
+                                    <div style="font-size: 1.2em;">-</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -532,7 +545,9 @@
                 const cacheKey = Date.now().toString().slice(0, -4); // Cache per 10 seconds
                 if (cache[cacheKey]) return cache[cacheKey];
                 
-                const data = await fetch(`/data/players/paperhands.json`);
+                // Add cache busting parameter using timestamp
+                const timestamp = Date.now();
+                const data = await fetch(`/data/players/paperhands.json?v=${timestamp}`);
                 cache[cacheKey] = await data.json();
                 return cache[cacheKey];
             };
@@ -631,11 +646,41 @@
                     title: 'Profit',
                     valueField: 'trade_pnl',
                     rankField: period => `profits_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
-                    updateSummary: (data) => {
+                    updateSummary: async (data) => {
                         const totalProfit = data.reduce((sum, item) => sum + Math.max(0, item.trade_pnl), 0);
                         const profitableTradesCount = data.filter(item => item.trade_pnl > 0).length;
                         
                         const profitsSummary = document.querySelector('.profits .trading-summary-content');
+                        
+                        // Get player data from total dataset
+                        const playerAddress = getUrlParameter('player') || '0xthemolt';
+                        const totalPlayerData = await getPlayerDataFromTotal(playerAddress);
+                        
+                        // Update profile picture and rank
+                        if (totalPlayerData) {
+                            const pfpImg = profitsSummary.querySelector('img[alt="Player Profile"]');
+                            const rankSpan = profitsSummary.querySelector('.player-rank');
+                            const addressH2 = profitsSummary.querySelector('.player-address');
+                            
+                            if (totalPlayerData.player_pfp) {
+                                const img = new Image();
+                                img.onload = function() {
+                                    pfpImg.src = this.src;
+                                };
+                                img.src = "https://pbs.twimg.com/profile_images/" + totalPlayerData.player_pfp;
+                            }
+                            
+                            if (addressH2) {
+                                addressH2.textContent = playerAddress;
+                            }
+                            
+                            // Use profits rank from total data if available
+                            if (rankSpan) {
+                                const profitsRankField = `profits_rank_${currentPeriod === 'all_time' ? 'alltime' : currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                                rankSpan.textContent = totalPlayerData[profitsRankField] ? `Rank #${totalPlayerData[profitsRankField]}` : '';
+                            }
+                        }
+                        
                         profitsSummary.querySelector('.eth-price').textContent = formatPrice(totalProfit);
                         profitsSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = profitableTradesCount;
                     }
@@ -653,11 +698,41 @@
                     title: 'Loss',
                     valueField: 'trade_pnl',
                     rankField: period => `losses_rank_${period === 'all_time' ? 'alltime' : period === 'l30d' ? '30d' : '14d'}`,
-                    updateSummary: (data) => {
+                    updateSummary: async (data) => {
                         const totalLoss = Math.abs(data.reduce((sum, item) => sum + Math.min(0, item.trade_pnl), 0));
                         const lossTradesCount = data.filter(item => item.trade_pnl < 0).length;
                         
                         const lossesSummary = document.querySelector('.losses .trading-summary-content');
+                        
+                        // Get player data from total dataset
+                        const playerAddress = getUrlParameter('player') || '0xthemolt';
+                        const totalPlayerData = await getPlayerDataFromTotal(playerAddress);
+                        
+                        // Update profile picture and rank
+                        if (totalPlayerData) {
+                            const pfpImg = lossesSummary.querySelector('img[alt="Player Profile"]');
+                            const rankSpan = lossesSummary.querySelector('.player-rank');
+                            const addressH2 = lossesSummary.querySelector('.player-address');
+                            
+                            if (totalPlayerData.player_pfp) {
+                                const img = new Image();
+                                img.onload = function() {
+                                    pfpImg.src = this.src;
+                                };
+                                img.src = "https://pbs.twimg.com/profile_images/" + totalPlayerData.player_pfp;
+                            }
+                            
+                            if (addressH2) {
+                                addressH2.textContent = playerAddress;
+                            }
+                            
+                            // Use losses rank from total data if available
+                            if (rankSpan) {
+                                const lossesRankField = `losses_rank_${currentPeriod === 'all_time' ? 'alltime' : currentPeriod === 'l30d' ? '30d' : '14d'}`;
+                                rankSpan.textContent = totalPlayerData[lossesRankField] ? `Rank #${totalPlayerData[lossesRankField]}` : '';
+                            }
+                        }
+                        
                         lossesSummary.querySelector('.eth-price').textContent = formatPrice(totalLoss);
                         lossesSummary.querySelector('div[style*="font-size: 1.2em"]').textContent = lossTradesCount;
                     }
@@ -870,6 +945,18 @@
             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
             const results = regex.exec(location.search);
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        async function getPlayerDataFromTotal(playerAddress) {
+            const data = await memoizedLoadPlayerData();
+            if (!data) return null;
+            
+            // Get the correct array based on time period
+            const dataArray = currentPeriod === 'all_time' ? data.total_all_time :
+                             currentPeriod === 'l30d' ? data.total_30d :
+                             data.total_14d;
+            
+            return dataArray.find(p => p.player === playerAddress);
         }
 
         // Initialize everything when DOM is loaded

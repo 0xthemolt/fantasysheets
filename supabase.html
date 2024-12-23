@@ -29,11 +29,11 @@
     <script>
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+        const client = supabase.createClient(supabaseUrl, supabaseKey)
 
         async function fetchData() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await client
                     .from('test')
                     .select('*')
 

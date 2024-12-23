@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Data Display</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <table id="data-table">
+        <thead>
+            <tr id="header-row"></tr>
+        </thead>
+        <tbody id="data-body"></tbody>
+    </table>
+
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+        async function fetchData() {
+            try {
+                const { data, error } = await supabase
+                    .from('test')
+                    .select('*')
+
+                if (error) throw error
+
+                // Create table headers
+                const headerRow = document.getElementById('header-row')
+                const headers = Object.keys(data[0])
+                headerRow.innerHTML = headers.map(h => `<th>${h}</th>`).join('')
+
+                // Create table rows
+                const tableBody = document.getElementById('data-body')
+                tableBody.innerHTML = data.map(row => `
+                    <tr>
+                        ${headers.map(h => `<td>${row[h]}</td>`).join('')}
+                    </tr>
+                `).join('')
+            } catch (error) {
+                console.error('Error:', error)
+            }
+        }
+
+        fetchData()
+    </script>
+</body>
+</html>

@@ -105,6 +105,7 @@ def process_hero_trades():
                 'prices': json.loads(hero_prices.to_json(orient='records')) if not hero_prices.empty else None
             }
             
+            
             # Save to JSON file
             json_filename = os.path.join(directory, f"{hero_handle}_trades.json")
             with open(json_filename, 'w') as f:

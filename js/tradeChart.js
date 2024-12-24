@@ -1,3 +1,32 @@
+// Expected data format:
+/*
+data = {
+    datasets: [
+        {
+            label: "common" | "rare" | "epic" | "legendary" | "all",  // Rarity level (determines color)
+            data: [
+                { x: "2024-03-01T00:00:00", y: 0.005 },  // x: timestamp, y: price
+                { x: "2024-03-02T00:00:00", y: 0.006 },
+                // ... more data points
+            ]
+        },
+        // ... more datasets
+    ]
+}
+
+// Optional options object:
+options = {
+    bidPrice: 0.005,      // Current bid price to show horizontal line
+    floorPrice: 0.008,    // Floor price to show horizontal line
+    chartTitle: "My NFT Price History",  // Title of the chart
+    xAxisLabel: "Date",    // Label for x-axis
+    yAxisLabel: "Price (ETH)"  // Label for y-axis
+}
+
+// Example usage:
+createLineChart("myCanvasId", data, options);
+*/
+
 // Declare variables at the top of the file to track instances
 let tradeChart = null;
 let currentPlugin = null;

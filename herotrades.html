@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
             display: flex;
@@ -791,10 +790,7 @@
             });
         }
 
-        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
-        const client = supabase.createClient(supabaseUrl, supabaseKey)
-        // Add this function to handle trades
+        // Add this to your loadHeroTrades function after populating the table
         async function loadHeroTrades(heroHandle) {
             try {
                 // Destroy existing chart if it exists
@@ -803,17 +799,11 @@
                     currentChart = null;
                 }
 
-                // Replace JSON fetch with Supabase query
-                const { data: tradesData, error } = await supabase
-                    .from('trades')
-                    .select('hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price,hero_rarity_trade_history_rank')
-                    .eq('hero_handle', heroHandle)
-                    .filter('buyer', 'neq', '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841')
-                    .order('timestamp', { ascending: false })
-                    .range(page * pageSize, (page + 1) * pageSize - 1)
-
-                if (error) throw error;
-
+                const response = await fetch(`/data/heroes/${heroHandle}_trades.json`);
+                const data = await response.json();
+                const tradesData = data.trades; // Extract trades array from response
+                
+                // Chart 
                 // Group trades by rarity
                 const tradesByRarity = {};
                 tradesData.forEach(trade => {

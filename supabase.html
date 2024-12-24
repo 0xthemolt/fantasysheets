@@ -48,8 +48,8 @@
                         .select('hero_id,hero_handle,rarity,card_picture,timestamp,buyer,seller,price,hero_rarity_trade_history_rank')
                         .eq('hero_handle', heroHandle)
                         .filter('buyer', 'neq', '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841')
+                        .gte('timestamp', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
                         .order('timestamp', { ascending: false })
-                        .range(page * pageSize, (page + 1) * pageSize - 1)
 
                     if (error) {
                         console.error('Supabase error:', error);

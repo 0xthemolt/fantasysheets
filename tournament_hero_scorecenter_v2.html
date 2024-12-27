@@ -121,7 +121,7 @@
 
             .table-container {
                 margin: 20px auto;
-                max-width: 800px;
+                width: 80%;
                 padding: 0 20px;
             }
 
@@ -159,6 +159,29 @@
                 font-size: 12px;
                 font-weight: bold;
             }
+
+            .metric-group {
+                background-color: rgba(255, 255, 255, 0.02);
+                border-left: 1px solid rgba(255, 255, 255, 0.1);
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            #heroTable th {
+                position: relative;
+            }
+
+            .metric-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .metric-header .metric-type {
+                font-size: 0.8em;
+                color: #808080;
+                text-transform: uppercase;
+            }
         </style>
     </head>
 <body>
@@ -181,11 +204,23 @@
         <table id="heroTable">
             <thead>
                 <tr>
-                    <th>Profile</th>
-                    <th>Handle</th>
-                    <th>Views</th>
-                    <th>Views Rank</th>
-                    <th>Rank</th>
+                    <th>Hero</th>
+                    <th>Score</th>
+                    <th>Posts</th>
+                    <th class="metric-group">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-eye"></i> Views
+                            </span>
+                        </div>
+                    </th>
+                    <th class="metric-group">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-broadcast-tower"></i> Reach
+                            </span>
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -211,16 +246,23 @@
         function getColorForRank(rank, maxRank = 180) {
             const ratio = rank / maxRank;
             if (ratio < 0.5) {
-                // Green to Yellow
-                const r = Math.round(255 * (ratio * 2));
-                const g = 255;
-                return `rgb(${r}, ${g}, 0)`;
+                // Green to Yellow transition
+                const r = Math.round(lerp(44, 254, ratio * 2));
+                const g = Math.round(lerp(162, 224, ratio * 2));
+                const b = Math.round(lerp(95, 139, ratio * 2));
+                return `rgb(${r}, ${g}, ${b})`;
             } else {
-                // Yellow to Red
-                const r = 255;
-                const g = Math.round(255 * (2 - ratio * 2));
-                return `rgb(${r}, ${g}, 0)`;
+                // Yellow to Red transition
+                const r = Math.round(lerp(254, 215, (ratio - 0.5) * 2));
+                const g = Math.round(lerp(224, 48, (ratio - 0.5) * 2));
+                const b = Math.round(lerp(139, 39, (ratio - 0.5) * 2));
+                return `rgb(${r}, ${g}, ${b})`;
             }
+        }
+
+        // Helper function for linear interpolation
+        function lerp(start, end, t) {
+            return start * (1 - t) + end * t;
         }
 
         async function fetchData(tournamentNumber) {
@@ -257,24 +299,45 @@
             tableBody.innerHTML = ''; // Clear existing data
 
             data.forEach(hero => {
-                const color = getColorForRank(hero.views_rank);
-                const barWidth = 100 - ((hero.views_rank / 180) * 100);
-                const circlePosition = `${barWidth}%`;
+                const viewsColor = getColorForRank(hero.views_rank);
+                const avgViewsColor = getColorForRank(hero.avg_views_rank);
+                const reachColor = getColorForRank(hero.reach_rank);
+
+                const viewsBarWidth = 100 - ((hero.views_rank / 180) * 100);
+                const avgViewsBarWidth = 100 - ((hero.avg_views_rank / 180) * 100);
+                const reachBarWidth = 100 - ((hero.reach_rank / 180) * 100);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp"></td>
-                    <td>${hero.hero_handle}</td>
-                    <td>${formatViews(hero.views)}</td>
-                    <td>
-                        <div class="rank-bar-container">
-                            <div class="rank-bar" style="width: ${barWidth}%; background-color: ${color}"></div>
-                            <div class="rank-circle" style="left: ${circlePosition}; background-color: white">
-                                <span style="color: ${color}">${hero.views_rank}</span>
+                    <td style="display: flex; align-items: center; gap: 12px;">
+                        <span style="min-width: 30px; text-align: right;">${hero.rank}</span>
+                        <img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp">
+                        <span style="text-align: left;">${hero.hero_handle}</span>
+                    </td>
+                    <td>${Math.round(hero.score)}</td>
+                    <td>${hero.posts}</td>
+                    <td class="metric-group">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span>${formatViews(hero.views)}</span>
+                            <div class="rank-bar-container">
+                                <div class="rank-bar" style="width: ${viewsBarWidth}%; background-color: ${viewsColor}"></div>
+                                <div class="rank-circle" style="left: ${viewsBarWidth}%; background-color: ${viewsColor}">
+                                    <span style="color: white">#${hero.views_rank}</span>
+                                </div>
                             </div>
                         </div>
                     </td>
-                    <td>${hero.rank}</td>
+                    <td class="metric-group">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span>${formatViews(Math.round(hero.reach))}</span>
+                            <div class="rank-bar-container">
+                                <div class="rank-bar" style="width: ${reachBarWidth}%; background-color: ${reachColor}"></div>
+                                <div class="rank-circle" style="left: ${reachBarWidth}%; background-color: ${reachColor}">
+                                    <span style="color: white">#${hero.reach_rank}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -303,6 +366,24 @@
                 button.onclick = () => selectTournament(tournament.tournament_number);
                 scrollContainer.appendChild(button);
             });
+
+            // Select default tournament
+            const liveTournament = data.find(t => t.tournament_status === 'live');
+            const latestFinishedTournament = data
+                .filter(t => t.tournament_status === 'finished')
+                .reduce((max, t) => t.tournament_number > max.tournament_number ? t : max, data[0]);
+            
+            const defaultTournament = liveTournament || latestFinishedTournament;
+            
+            if (defaultTournament) {
+                selectTournament(defaultTournament.tournament_number);
+                // Find and scroll the default tournament button into view
+                const defaultButton = Array.from(document.querySelectorAll('.scroll-item'))
+                    .find(item => item.querySelector('.number').textContent === String(defaultTournament.tournament_number));
+                if (defaultButton) {
+                    defaultButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }
 
             // Add drag scroll functionality
             let isDown = false;

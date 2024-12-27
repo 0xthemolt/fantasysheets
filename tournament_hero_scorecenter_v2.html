@@ -1,0 +1,395 @@
+  <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){{dataLayer.push(arguments);}}
+            gtag('js', new Date());
+            gtag('config', 'G-LXJ5Q7LKKE');
+        </script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hero Score Center</title>
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+        <link rel="stylesheet" href="./styles.css">
+        <link rel="icon" type="image/png" href="icons/favicon.webp">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <style>
+            .scroll-container {
+                width: 100%;
+                background: #000000;
+                padding: 5px 0;
+                overflow: hidden;
+            }
+
+            .scroll-nav {
+                max-width: 50%;
+                margin: 0 auto;
+                padding: 0 20px;
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .scroll-items {
+                display: flex;
+                gap: 20px;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding-bottom: 5px;
+                cursor: grab;
+                user-select: none;
+            }
+
+            .scroll-items::-webkit-scrollbar {
+                display: none;
+            }
+
+            .scroll-item {
+                padding: 5px 10px;
+                cursor: pointer;
+                text-align: center;
+                transition: all 0.3s ease;
+                background: transparent;
+                border: none;
+                color: #808080;
+                min-width: fit-content;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .scroll-item .main-text {
+                font-size: 10px;
+                margin-bottom: 2px;
+                display: block;
+                text-align: center;
+            }
+
+            .scroll-item .number {
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            .scroll-item:hover,
+            .scroll-item.active {
+                color: #ffffff;
+            }
+
+            @media (max-width: 768px) {
+                .scroll-nav {
+                    max-width: 90%;
+                }
+            }
+
+            .scroll-arrow {
+                background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+                border: none;
+                color: #ffffff;
+                padding: 10px;
+                cursor: pointer;
+                position: absolute;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: opacity 0.3s ease;
+                z-index: 1;
+            }
+
+            .scroll-arrow:hover {
+                background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 100%);
+            }
+
+            .scroll-left {
+                left: 0;
+                background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            }
+
+            .scroll-right {
+                right: 0;
+                background: linear-gradient(-90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            }
+
+            .scroll-arrow.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .table-container {
+                margin: 20px auto;
+                max-width: 800px;
+                padding: 0 20px;
+            }
+
+            .hero-pfp {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+
+            .rank-bar-container {
+                width: 180px;
+                height: 8px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+                position: relative;
+            }
+
+            .rank-bar {
+                height: 100%;
+                border-radius: 4px;
+            }
+
+            .rank-circle {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                position: absolute;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+<body>
+    <div class="scroll-container">
+        <nav class="scroll-nav">
+            <button class="scroll-arrow scroll-left">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="scroll-items">
+                <!-- Tournament buttons will be inserted here -->
+            </div>
+            <button class="scroll-arrow scroll-right">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Add this table container after the scroll-container -->
+    <div class="table-container">
+        <table id="heroTable">
+            <thead>
+                <tr>
+                    <th>Profile</th>
+                    <th>Handle</th>
+                    <th>Views</th>
+                    <th>Views Rank</th>
+                    <th>Rank</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey,)
+
+        function formatViews(views) {
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + 'M';
+            } else if (views >= 1000) {
+                return Math.round(views / 1000) + 'K';
+            }
+            return views;
+        }
+
+        function getColorForRank(rank, maxRank = 180) {
+            const ratio = rank / maxRank;
+            if (ratio < 0.5) {
+                // Green to Yellow
+                const r = Math.round(255 * (ratio * 2));
+                const g = 255;
+                return `rgb(${r}, ${g}, 0)`;
+            } else {
+                // Yellow to Red
+                const r = 255;
+                const g = Math.round(255 * (2 - ratio * 2));
+                return `rgb(${r}, ${g}, 0)`;
+            }
+        }
+
+        async function fetchData(tournamentNumber) {
+            const tournamentKey = `Main ${tournamentNumber}`;
+            const { data, error } = await supabaseClient
+                .from('tournament_hero_stats')
+                .select(`
+                    tournament_unique_key,
+                    hero_handle,
+                    hero_name,
+                    followers,
+                    rank,
+                    score,
+                    posts,
+                    views,
+                    views_rank,
+                    avg_views,
+                    avg_views_rank,
+                    reach,
+                    reach_rank,
+                    hero_pfp_url
+                `)
+                .eq('tournament_unique_key', tournamentKey)
+                .order('rank', { ascending: true })
+            
+            if (error) {
+                console.error('Error fetching data:', error)
+                return
+            }
+            
+            console.log('Data:', data)
+
+            const tableBody = document.querySelector('#heroTable tbody');
+            tableBody.innerHTML = ''; // Clear existing data
+
+            data.forEach(hero => {
+                const color = getColorForRank(hero.views_rank);
+                const barWidth = 100 - ((hero.views_rank / 180) * 100);
+                const circlePosition = `${barWidth}%`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp"></td>
+                    <td>${hero.hero_handle}</td>
+                    <td>${formatViews(hero.views)}</td>
+                    <td>
+                        <div class="rank-bar-container">
+                            <div class="rank-bar" style="width: ${barWidth}%; background-color: ${color}"></div>
+                            <div class="rank-circle" style="left: ${circlePosition}; background-color: white">
+                                <span style="color: ${color}">${hero.views_rank}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${hero.rank}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+
+        async function initializeTournamentScroller() {
+            const { data, error } = await supabaseClient
+                .from('tournaments')
+                .select('tournament_number, tournament_status')
+                .order('start_timestamp', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching tournaments:', error);
+                return;
+            }
+
+            const scrollContainer = document.querySelector('.scroll-items');
+            data.forEach(tournament => {
+                const button = document.createElement('button');
+                button.className = 'scroll-item';
+                button.innerHTML = `
+                    <span class="main-text">Main</span>
+                    <span class="number">${tournament.tournament_number}</span>
+                `;
+                button.onclick = () => selectTournament(tournament.tournament_number);
+                scrollContainer.appendChild(button);
+            });
+
+            // Add drag scroll functionality
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            scrollContainer.addEventListener('mousedown', (e) => {
+                isDown = true;
+                scrollContainer.style.cursor = 'grabbing';
+                startX = e.pageX - scrollContainer.offsetLeft;
+                scrollLeft = scrollContainer.scrollLeft;
+            });
+
+            scrollContainer.addEventListener('mouseleave', () => {
+                isDown = false;
+                scrollContainer.style.cursor = 'grab';
+            });
+
+            scrollContainer.addEventListener('mouseup', () => {
+                isDown = false;
+                scrollContainer.style.cursor = 'grab';
+            });
+
+            scrollContainer.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - scrollContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                scrollContainer.scrollLeft = scrollLeft - walk;
+            });
+        }
+
+        function selectTournament(tournamentNumber) {
+            // Remove active class from all items
+            document.querySelectorAll('.scroll-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected item
+            const selectedItem = Array.from(document.querySelectorAll('.scroll-item'))
+                .find(item => item.querySelector('.number').textContent === String(tournamentNumber));
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+
+            // Call fetchData with the selected tournament number
+            fetchData(tournamentNumber);
+        }
+
+        function updateScrollButtons() {
+            const container = document.querySelector('.scroll-items');
+            const leftButton = document.querySelector('.scroll-left');
+            const rightButton = document.querySelector('.scroll-right');
+
+            // Show/hide left button based on scroll position
+            leftButton.classList.toggle('hidden', container.scrollLeft <= 0);
+            
+            // Show/hide right button based on scroll position
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            rightButton.classList.toggle('hidden', container.scrollLeft >= maxScroll);
+        }
+
+        function initializeScrollButtons() {
+            const container = document.querySelector('.scroll-items');
+            const leftButton = document.querySelector('.scroll-left');
+            const rightButton = document.querySelector('.scroll-right');
+
+            leftButton.addEventListener('click', () => {
+                container.scrollBy({ left: -200, behavior: 'smooth' });
+            });
+
+            rightButton.addEventListener('click', () => {
+                container.scrollBy({ left: 200, behavior: 'smooth' });
+            });
+
+            // Update buttons visibility on scroll
+            container.addEventListener('scroll', updateScrollButtons);
+            // Update buttons visibility on resize
+            window.addEventListener('resize', updateScrollButtons);
+            // Initial check
+            updateScrollButtons();
+        }
+
+        // Update the DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTournamentScroller();
+            initializeScrollButtons();
+        });
+    </script>
+</body>

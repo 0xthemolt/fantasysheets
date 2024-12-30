@@ -357,7 +357,7 @@
                     <th class="metric-group" data-sort="posts">
                         <div class="metric-header">
                             <span class="metric-type">
-                                <i class="fas fa-pen-square"></i> Post Count & Timeline (FAKE DATA)
+                                <i class="fas fa-pen-square"></i> Post Count & Timeline
                             </span>
                             <div class="sort-arrow"></div>
                         </div>
@@ -581,10 +581,10 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span class="metric-value" style="background-color: ${getColorForRank(hero.posts, Math.max(...statsData.map(h => h.posts)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold; min-width: 24px; text-align: center;">${hero.posts}</span>
                             <div class="post-timeline">
-                                ${generateRandomTimeline()}
+                                ${generateTimeline(hero.hero_handle, timelineData)}
                             </div>
-                            <span class="metric-value" title="Time since last post">
-                                <i class="fas fa-clock" style="color: #808080; margin-right: 4px; font-size: 75%;"></i>${generateLastPostTime()}
+                            <span class="metric-value" title="${timelineData.filter(post => post.hero_handle === hero.hero_handle).length === 0 ? 'No tweets' : 'Time since last post'}">
+                                <i class="fas fa-clock" style="color: #808080; margin-right: 4px; font-size: 75%;"></i>${getLastPostTime(hero.hero_handle, timelineData)}
                             </span>
                         </div>
                     </td>
@@ -739,44 +739,75 @@
             updateScrollButtons();
         }
 
-        function generateRandomTimeline() {
-            const numPosts = Math.floor(Math.random() * 6) + 2; // 2-7 posts
-            const pattern = Math.floor(Math.random() * 3); // 0: early, 1: late, 2: distributed
-            let bars = [];
+        function generateTimeline(heroHandle, timelineData) {
+            // Filter timeline data for this specific hero
+            const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
             
-            for (let i = 0; i < numPosts; i++) {
-                let position;
-                if (pattern === 0) { // Early posts
-                    position = Math.random() * 30;
-                } else if (pattern === 1) { // Late posts
-                    position = 50 + (Math.random() * 45);
-                } else { // Distributed
-                    position = (i / numPosts * 90) + (Math.random() * 10);
-                }
+            if (!heroPosts.length) return ''; // Return empty string if no posts
+
+            // If hero has only one post, use maximum height and best color
+            if (heroPosts.length === 1) {
+                const post = heroPosts[0];
+                const position = (post.post_hours_from_start / 72) * 100;
+                const maxHeight = 24; // Maximum height in our 4-24px range
                 
-                const height = Math.floor(Math.random() * 20) + 4; // 4-24px height
-                const color = getBarColor(height);
-                
-                bars.push(`<div class="post-bar" style="left: ${position}%; height: ${height}px; background-color: ${color};"></div>`);
+                return `<div class="post-bar" 
+                             style="left: ${position}%; 
+                                    height: ${maxHeight}px; 
+                                    background-color: #4CAF50;"
+                             title="${post.post_views.toLocaleString()} views at ${Math.round(post.post_hours_from_start)}h">
+                        </div>`;
             }
+
+            // Original code for multiple posts...
+            const heroMaxViews = Math.max(...heroPosts.map(post => post.post_views));
+            const heroMinViews = Math.min(...heroPosts.map(post => post.post_views));
             
-            return bars.join('');
+            // Generate bars for each post
+            const bars = heroPosts.map(post => {
+                // Calculate position (0-72 hours maps to 0-100%)
+                const position = (post.post_hours_from_start / 72) * 100;
+                
+                // Calculate relative performance for this hero's range
+                const viewsRatio = (post.post_views - heroMinViews) / (heroMaxViews - heroMinViews || 1);
+                const height = 4 + (viewsRatio * 20); // Maps to 4-24px
+                
+                // Get color based on relative performance
+                const color = getHeroBarColor(viewsRatio);
+                
+                return `<div class="post-bar" 
+                             style="left: ${position}%; 
+                                    height: ${height}px; 
+                                    background-color: ${color};"
+                             title="${post.post_views.toLocaleString()} views at ${Math.round(post.post_hours_from_start)}h">
+                        </div>`;
+            }).join('');
+            
+            return bars;
         }
 
-        function getBarColor(height) {
-            // Color gradient from red (small) to green (tall)
-            if (height < 10) return '#ff4d4d';
-            if (height < 15) return '#ffa64d';
-            return '#4CAF50';
+        function getHeroBarColor(ratio) {
+            // More granular color gradient based on the hero's own range
+            if (ratio < 0.33) return '#ff4d4d';      // Bottom third - Red
+            if (ratio < 0.66) return '#ffa64d';      // Middle third - Orange
+            return '#4CAF50';                        // Top third - Green
         }
 
-        function generateLastPostTime() {
-            const hoursAgo = Math.floor(Math.random() * 72); // 0-72 hours
-            if (hoursAgo < 24) {
-                return `${hoursAgo}h`;
-            } else {
-                return `${Math.floor(hoursAgo/24)}d`;
-            }
+        function getLastPostTime(heroHandle, timelineData) {
+            const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
+            if (!heroPosts.length || !heroPosts[0].last_post_timestamp) return '-';
+            
+            // Use the raw UTC timestamp directly without creating a new Date object
+            const lastPostTimestamp = new Date(heroPosts[0].last_post_timestamp + 'Z');
+            const now = new Date();
+            
+            // Calculate hours difference using UTC timestamps and ensure it's positive
+            const diffHours = Math.max(0, Math.floor((now.getTime() - lastPostTimestamp.getTime()) / (1000 * 60 * 60)));
+            
+            // Return days if >= 24 hours, otherwise return hours
+            return diffHours >= 24 
+                ? `${Math.floor(diffHours / 24)}d`
+                : `${diffHours}h`;
         }
 
         function generateScoreComparison(currentScore) {

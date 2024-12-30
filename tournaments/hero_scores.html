@@ -203,16 +203,16 @@
                 border-radius: 8px;
                 color: white;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 10px;
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
-                width: 42px;
+                width: 30px;
                 justify-content: center;
             }
 
             .rank-label {
-                font-size: 12px;
+                font-size: 10px;
                 opacity: 0.8;
             }
 
@@ -231,6 +231,48 @@
                 bottom: 0;
                 transition: height 0.3s ease;
             }
+
+            .sort-arrow {
+                display: none; /* Hide by default */
+                width: 0;
+                height: 0;
+                margin: 2px auto;
+            }
+
+            .sort-arrow.active.up {
+                    display: block; /* Show only when active */
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-bottom: 5px solid #4CAF50; /* Green */
+            }
+
+            .sort-arrow.active.down {
+                    display: block; /* Show only when active */
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-top: 5px solid #F44336; /* Red */
+            }
+
+            /* Add new styles for the live indicator */
+            .live-indicator {
+                width: 6px;
+                height: 6px;
+                background-color: #00ff00;
+                border-radius: 50%;
+                display: inline-block;
+                margin-left: 2px;
+                animation: blink 1s infinite;
+                vertical-align: middle;
+                position: relative;
+                top: -1px;
+            }
+
+            @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         </style>
     </head>
 <body>
@@ -254,26 +296,34 @@
             <thead>
                 <tr>
                     <th>Hero</th>
-                    <th>Score</th>
-                    <th class="metric-group">
+                    <th data-sort="score">
+                        <div class="metric-header">
+                            Score
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th class="metric-group" data-sort="views">
                         <div class="metric-header">
                             <span class="metric-type">
                                 <i class="fas fa-eye"></i> Views
                             </span>
+                            <div class="sort-arrow"></div>
                         </div>
                     </th>
-                    <th class="metric-group">
+                    <th class="metric-group" data-sort="reach">
                         <div class="metric-header">
                             <span class="metric-type">
                                 <i class="fas fa-broadcast-tower"></i> Reach
                             </span>
+                            <div class="sort-arrow"></div>
                         </div>
                     </th>
-                    <th class="metric-group">
+                    <th class="metric-group" data-sort="posts">
                         <div class="metric-header">
                             <span class="metric-type">
-                                <i class="fas fa-chart-bar"></i> Post Timeline (FAKE DATA)
+                                <i class="fas fa-chart-bar"></i> Post Count & Timeline (FAKE DATA)
                             </span>
+                            <div class="sort-arrow"></div>
                         </div>
                     </th>
                 </tr>
@@ -298,19 +348,26 @@
             return views;
         }
 
-        function getColorForRank(rank, maxRank = 180) {
-            const ratio = rank / maxRank;
+        function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+            let ratio;
+            if (higherIsBetter) {
+                ratio = Math.min(value / maxValue, 1);
+            } else {
+                // For ranks - lower is better
+                ratio = 1 - (Math.min(value / maxValue, 1));
+            }
+
             if (ratio < 0.5) {
-                // Green to Yellow transition
-                const r = Math.round(lerp(44, 254, ratio * 2));
-                const g = Math.round(lerp(162, 224, ratio * 2));
-                const b = Math.round(lerp(95, 139, ratio * 2));
+                // Red to Yellow transition
+                const r = Math.round(lerp(215, 254, ratio * 2));
+                const g = Math.round(lerp(48, 224, ratio * 2));
+                const b = Math.round(lerp(39, 139, ratio * 2));
                 return `rgb(${r}, ${g}, ${b})`;
             } else {
-                // Yellow to Red transition
-                const r = Math.round(lerp(254, 215, (ratio - 0.5) * 2));
-                const g = Math.round(lerp(224, 48, (ratio - 0.5) * 2));
-                const b = Math.round(lerp(139, 39, (ratio - 0.5) * 2));
+                // Yellow to Green transition
+                const r = Math.round(lerp(254, 44, (ratio - 0.5) * 2));
+                const g = Math.round(lerp(224, 162, (ratio - 0.5) * 2));
+                const b = Math.round(lerp(139, 95, (ratio - 0.5) * 2));
                 return `rgb(${r}, ${g}, ${b})`;
             }
         }
@@ -319,6 +376,11 @@
         function lerp(start, end, t) {
             return start * (1 - t) + end * t;
         }
+
+        let currentSort = {
+            column: 'score',
+            direction: 'desc'
+        };
 
         async function fetchData(tournamentNumber) {
             const tournamentKey = `Main ${tournamentNumber}`;
@@ -338,10 +400,11 @@
                     avg_views_rank,
                     reach,
                     reach_rank,
-                    hero_pfp_url
+                    hero_pfp_url,
+                    hero_stars
                 `)
                 .eq('tournament_unique_key', tournamentKey)
-                .order('rank', { ascending: true })
+                .order(currentSort.column, { ascending: currentSort.direction === 'asc' });
             
             if (error) {
                 console.error('Error fetching data:', error)
@@ -354,9 +417,9 @@
             tableBody.innerHTML = ''; // Clear existing data
 
             data.forEach(hero => {
-                const viewsColor = getColorForRank(hero.views_rank);
-                const avgViewsColor = getColorForRank(hero.avg_views_rank);
-                const reachColor = getColorForRank(hero.reach_rank);
+                const viewsColor = getColorForRank(hero.views_rank, 180, false);
+                const avgViewsColor = getColorForRank(hero.avg_views_rank, 180, false);
+                const reachColor = getColorForRank(hero.reach_rank, 180, false);
 
                 const viewsBarWidth = 100 - ((hero.views_rank / 180) * 100);
                 const avgViewsBarWidth = 100 - ((hero.avg_views_rank / 180) * 100);
@@ -368,12 +431,23 @@
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <span style="min-width: 30px; text-align: right;">${hero.rank}</span>
                             <img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp">
-                            <a href="https://x.com/${hero.hero_handle}" target="_blank" style="text-align: left; color: inherit; text-decoration: none; hover: text-decoration: underline;">${hero.hero_handle}</a>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <a href="https://x.com/${hero.hero_handle}" target="_blank" style="text-align: left; color: inherit; text-decoration: none; hover: text-decoration: underline;">${hero.hero_handle}</a>
+                                <div style="display: flex; align-items: center; gap: 2px; background: transparent; border: 1px solid #FFD700; border-radius: 10px; padding: 1px 5px;">
+                                    <i class="fas fa-star" style="font-size: 8px; color: #FFD700;"></i>
+                                    <span style="font-size: 9px; font-weight: bold; color: #FFD700;">${hero.hero_stars}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 2px; background: transparent; border: 1px solid #1DA1F2; border-radius: 10px; padding: 1px 5px;">
+                                    <i class="fas fa-users" style="font-size: 8px; color: #1DA1F2;"></i>
+                                    <span style="font-size: 9px; font-weight: bold; color: #1DA1F2;">${formatViews(hero.followers)}</span>
+                                </div>
+                            </div>
                         </div>
                     </td>
+                    
                     <td style="padding: 8px 12px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="background-color: ${getColorForRank(hero.rank)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold;">
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
+                            <span style="background-color: ${getColorForRank(hero.score, Math.max(...data.map(h => h.score)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold;">
                                 ${Math.round(hero.score)}
                             </span>
                          <!-- 
@@ -385,7 +459,13 @@
                     </td>
                     <td class="metric-group">
                         <div>
-                            <div class="rank-number" style="background-color: ${viewsColor}">
+                            <div class="rank-number" style="
+                                background-color: transparent;
+                                border: 1px solid ${viewsColor};
+                                color: ${viewsColor};
+                                font-size: 9px;
+                                padding: 2px 6px;
+                                border-radius: 12px;">
                                 #${hero.views_rank}
                             </div>
                             <span class="metric-value">${formatViews(hero.views)}</span>
@@ -393,7 +473,13 @@
                     </td>
                     <td class="metric-group">
                         <div>
-                            <div class="rank-number" style="background-color: ${reachColor}">
+                            <div class="rank-number" style="
+                                background-color: transparent;
+                                border: 1px solid ${reachColor};
+                                color: ${reachColor};
+                                font-size: 9px;
+                                padding: 2px 6px;
+                                border-radius: 12px;">
                                 #${hero.reach_rank}
                             </div>
                             <span class="metric-value">${formatViews(Math.round(hero.reach))}</span>
@@ -401,7 +487,7 @@
                     </td>
                     <td class="metric-group">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="metric-value" style="min-width: 24px;">${hero.posts}</span>
+                            <span class="metric-value" style="background-color: ${getColorForRank(hero.posts, Math.max(...data.map(h => h.posts)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold; min-width: 24px; text-align: center;">${hero.posts}</span>
                             <div class="post-timeline">
                                 ${generateRandomTimeline()}
                             </div>
@@ -428,16 +514,30 @@
             }
 
             const scrollContainer = document.querySelector('.scroll-items');
+            
+            // Add real tournament buttons
             data.forEach(tournament => {
                 const button = document.createElement('button');
                 button.className = 'scroll-item';
                 button.innerHTML = `
                     <span class="main-text">Main</span>
-                    <span class="number">${tournament.tournament_number}</span>
+                    <span class="number">${tournament.tournament_number}${tournament.tournament_status === 'live' ? '<span class="live-indicator"></span>' : ''}</span>
                 `;
                 button.onclick = () => selectTournament(tournament.tournament_number);
                 scrollContainer.appendChild(button);
             });
+
+            // Add dummy tournament button
+            const maxTournamentNumber = Math.max(...data.map(t => t.tournament_number));
+            const dummyButton = document.createElement('button');
+            dummyButton.className = 'scroll-item';
+            dummyButton.style.opacity = '0.5';
+            dummyButton.style.cursor = 'default';
+            dummyButton.innerHTML = `
+                <span class="main-text">Main</span>
+                <span class="number">${maxTournamentNumber + 1}</span>
+            `;
+            scrollContainer.appendChild(dummyButton);
 
             // Select default tournament
             const liveTournament = data.find(t => t.tournament_status === 'live');
@@ -600,10 +700,45 @@
             }).join('');
         }
 
+        function getStarColor(stars, maxStars) {
+            const ratio = stars / maxStars;
+            return `linear-gradient(135deg, 
+                ${ratio > 0.8 ? '#FFD700' : '#FFF8DC'} 0%, 
+                ${ratio > 0.8 ? '#DAA520' : '#FFEFBA'} 100%)`;
+        }
+
         // Update the DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', () => {
             initializeTournamentScroller();
             initializeScrollButtons();
+            
+            // Add click handlers for sortable columns
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    
+                    // Reset all other arrows
+                    document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                        arrow.className = 'sort-arrow';
+                    });
+                    
+                    // Update sort direction
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'desc';
+                    }
+                    
+                    // Update arrow for current column
+                    const arrow = th.querySelector('.sort-arrow');
+                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+                    
+                    // Refetch data with new sort
+                    const activeTournament = document.querySelector('.scroll-item.active .number').textContent;
+                    fetchData(parseInt(activeTournament));
+                });
+            });
         });
     </script>
 </body>

@@ -166,6 +166,21 @@
                 border-right: 1px solid rgba(255, 255, 255, 0.1);
             }
 
+            .metric-group > div {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                justify-content: center;
+                padding: 0;
+            }
+
+            .metric-value {
+                min-width: 45px;
+                text-align: right;
+                padding: 0;
+                margin: 0;
+            }
+
             #heroTable th {
                 position: relative;
             }
@@ -181,6 +196,44 @@
                 font-size: 0.8em;
                 color: #808080;
                 text-transform: uppercase;
+            }
+
+            .rank-number {
+                padding: 4px 4px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                width: 42px;
+                justify-content: center;
+            }
+
+            .rank-label {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
+            .post-timeline {
+                width: 216px;  /* 72 hours * 3px */
+                height: 24px;
+                background: #1a1a1a;
+                position: relative;
+                border-radius: 4px;
+            }
+
+            .post-bar {
+                position: absolute;
+                width: 3px;
+                background: #4CAF50;
+                bottom: 0;
+                transition: height 0.3s ease;
+            }
+
+            .view-post-btn:hover {
+                color: #0c85d0;
             }
         </style>
     </head>
@@ -218,6 +271,20 @@
                         <div class="metric-header">
                             <span class="metric-type">
                                 <i class="fas fa-broadcast-tower"></i> Reach
+                            </span>
+                        </div>
+                    </th>
+                    <th class="metric-group">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-chart-bar"></i> Post Timeline
+                            </span>
+                        </div>
+                    </th>
+                    <th class="metric-group">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fab fa-x-twitter"></i> Best Post
                             </span>
                         </div>
                     </th>
@@ -317,25 +384,40 @@
                     <td>${Math.round(hero.score)}</td>
                     <td>${hero.posts}</td>
                     <td class="metric-group">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span>${formatViews(hero.views)}</span>
-                            <div class="rank-bar-container">
-                                <div class="rank-bar" style="width: ${viewsBarWidth}%; background-color: ${viewsColor}"></div>
-                                <div class="rank-circle" style="left: ${viewsBarWidth}%; background-color: ${viewsColor}">
-                                    <span style="color: white">#${hero.views_rank}</span>
-                                </div>
+                        <div>
+                            <div class="rank-number" style="background-color: ${viewsColor}">
+                                #${hero.views_rank}
                             </div>
+                            <span class="metric-value">${formatViews(hero.views)}</span>
                         </div>
                     </td>
                     <td class="metric-group">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span>${formatViews(Math.round(hero.reach))}</span>
-                            <div class="rank-bar-container">
-                                <div class="rank-bar" style="width: ${reachBarWidth}%; background-color: ${reachColor}"></div>
-                                <div class="rank-circle" style="left: ${reachBarWidth}%; background-color: ${reachColor}">
-                                    <span style="color: white">#${hero.reach_rank}</span>
-                                </div>
+                        <div>
+                            <div class="rank-number" style="background-color: ${reachColor}">
+                                #${hero.reach_rank}
                             </div>
+                            <span class="metric-value">${formatViews(Math.round(hero.reach))}</span>
+                        </div>
+                    </td>
+                    <td class="metric-group">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="post-timeline">
+                                ${generateRandomTimeline()}
+                            </div>
+                            <span class="metric-value" title="Time since last post">
+                                <i class="fas fa-clock" style="color: #808080; margin-right: 4px; font-size: 75%;"></i>${generateLastPostTime()}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="metric-group">
+                        <div>
+                            <button 
+                                class="view-post-btn" 
+                                onclick="openTwitterPopup('https://x.com/fantasy_top_/status/1872658997473681478')"
+                                style="background: none; border: none; color: #1DA1F2; cursor: pointer; padding: 8px;"
+                            >
+                                <i class="fab fa-x-twitter"></i> View
+                            </button>
                         </div>
                     </td>
                 `;
@@ -467,10 +549,82 @@
             updateScrollButtons();
         }
 
+        function generateRandomTimeline() {
+            const numPosts = Math.floor(Math.random() * 6) + 2; // 2-7 posts
+            const pattern = Math.floor(Math.random() * 3); // 0: early, 1: late, 2: distributed
+            let bars = [];
+            
+            for (let i = 0; i < numPosts; i++) {
+                let position;
+                if (pattern === 0) { // Early posts
+                    position = Math.random() * 30;
+                } else if (pattern === 1) { // Late posts
+                    position = 50 + (Math.random() * 45);
+                } else { // Distributed
+                    position = (i / numPosts * 90) + (Math.random() * 10);
+                }
+                
+                const height = Math.floor(Math.random() * 20) + 4; // 4-24px height
+                const color = getBarColor(height);
+                
+                bars.push(`<div class="post-bar" style="left: ${position}%; height: ${height}px; background-color: ${color};"></div>`);
+            }
+            
+            return bars.join('');
+        }
+
+        function getBarColor(height) {
+            // Color gradient from red (small) to green (tall)
+            if (height < 10) return '#ff4d4d';
+            if (height < 15) return '#ffa64d';
+            return '#4CAF50';
+        }
+
+        function generateLastPostTime() {
+            const hoursAgo = Math.floor(Math.random() * 72); // 0-72 hours
+            if (hoursAgo < 24) {
+                return `${hoursAgo}h`;
+            } else {
+                return `${Math.floor(hoursAgo/24)}d`;
+            }
+        }
+
+        function openTwitterPopup(tweetUrl) {
+            const width = 550;
+            const height = 420;
+            const left = (window.innerWidth - width) / 2;
+            const top = (window.innerHeight - height) / 2;
+            
+            const popup = window.open(
+                tweetUrl,
+                'tweet',
+                `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+            );
+
+            // Add error handling
+            if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+                // Popup was blocked or failed to open
+                console.error('Popup window was blocked');
+                // Fallback to opening in a new tab
+                window.open(tweetUrl, '_blank');
+            }
+        }
+
         // Update the DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', () => {
             initializeTournamentScroller();
             initializeScrollButtons();
         });
     </script>
+
+    <div id="tweetModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="tweet-embed-container">
+                <blockquote class="twitter-tweet">
+                    <a id="tweet-link"></a>
+                </blockquote>
+            </div>
+        </div>
+    </div>
 </body>

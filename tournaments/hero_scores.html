@@ -122,7 +122,7 @@
             .table-container {
                 margin: 20px auto;
                 width: 80%;
-                padding: 0 20px;
+                padding: 0 10px;
             }
 
             .hero-pfp {
@@ -273,6 +273,36 @@
             100% { opacity: 0; }
         }
 
+        .perspective-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .perspective-btn {
+            padding: 8px 16px;
+            border: 1px solid #333;
+            background: transparent;
+            color: #808080;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .perspective-btn:hover {
+            border-color: #666;
+            color: #fff;
+        }
+
+        .perspective-btn.active {
+            background: #333;
+            color: #fff;
+            border-color: #444;
+        }
+
         </style>
     </head>
 <body>
@@ -288,6 +318,12 @@
                 <i class="fas fa-chevron-right"></i>
             </button>
         </nav>
+    </div>
+
+    <!-- Add this new toggle container -->
+    <div class="perspective-toggle">
+        <button class="perspective-btn active" data-perspective="all">All Heroes</button>
+        <button class="perspective-btn" data-perspective="top-per-star">Top Hero Per Star</button>
     </div>
 
     <!-- Add this table container after the scroll-container -->
@@ -338,6 +374,8 @@
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey,)
+
+        let currentPerspective = 'all';
 
         function formatViews(views) {
             if (views >= 1000000) {
@@ -427,8 +465,8 @@
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td style="padding: 8px 12px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
+                    <td style="padding: 8px 4px 8px 0;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="min-width: 30px; text-align: right;">${hero.rank}</span>
                             <img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp">
                             <div style="display: flex; align-items: center; gap: 8px;">
@@ -499,6 +537,9 @@
                 `;
                 tableBody.appendChild(row);
             });
+
+            // Apply current perspective filter after data is loaded
+            updateTableVisibility(currentPerspective);
         }
 
 
@@ -707,6 +748,69 @@
                 ${ratio > 0.8 ? '#DAA520' : '#FFEFBA'} 100%)`;
         }
 
+        function filterTopHeroesPerStar(heroes) {
+            // Group heroes by star count
+            const herosByStars = {};
+            heroes.forEach(hero => {
+                if (!herosByStars[hero.hero_stars]) {
+                    herosByStars[hero.hero_stars] = [];
+                }
+                herosByStars[hero.hero_stars].push(hero);
+            });
+
+            // Get top hero for each star count
+            const topHeroes = [];
+            for (const stars in herosByStars) {
+                const topHero = herosByStars[stars].reduce((max, hero) => 
+                    hero.score > max.score ? hero : max
+                );
+                topHeroes.push(topHero);
+            }
+            return topHeroes;
+        }
+
+        function updateTableVisibility(perspective) {
+            const rows = document.querySelectorAll('#heroTable tbody tr');
+            
+            if (perspective === 'all') {
+                rows.forEach(row => row.style.display = '');
+                return;
+            }
+
+            // First, collect all heroes with their stars and scores
+            const heroData = [];
+            rows.forEach(row => {
+                const starElement = row.querySelector('.fa-star').closest('div').querySelector('span');
+                const stars = parseInt(starElement.textContent);
+                const scoreElement = row.querySelector('td:nth-child(2) span');
+                const score = parseInt(scoreElement.textContent);
+                
+                heroData.push({
+                    row,
+                    stars,
+                    score
+                });
+            });
+
+            // Group by stars and find max score for each star level
+            const starGroups = {};
+            heroData.forEach(hero => {
+                if (!starGroups[hero.stars] || hero.score > starGroups[hero.stars].score) {
+                    starGroups[hero.stars] = hero;
+                }
+            });
+
+            console.log('Star groups:', starGroups); // Debug log
+
+            // Hide all rows first
+            rows.forEach(row => row.style.display = 'none');
+
+            // Show only the top scoring hero for each star level
+            Object.values(starGroups).forEach(hero => {
+                hero.row.style.display = '';
+            });
+        }
+
         // Update the DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', () => {
             initializeTournamentScroller();
@@ -737,6 +841,21 @@
                     // Refetch data with new sort
                     const activeTournament = document.querySelector('.scroll-item.active .number').textContent;
                     fetchData(parseInt(activeTournament));
+                });
+            });
+
+            // Update perspective toggle handlers
+            document.querySelectorAll('.perspective-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    document.querySelectorAll('.perspective-btn').forEach(b => 
+                        b.classList.remove('active')
+                    );
+                    btn.classList.add('active');
+
+                    // Store current perspective and update table
+                    currentPerspective = btn.dataset.perspective;
+                    updateTableVisibility(currentPerspective);
                 });
             });
         });

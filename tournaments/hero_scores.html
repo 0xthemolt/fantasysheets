@@ -421,40 +421,94 @@
         };
 
         async function fetchData(tournamentNumber) {
-            const tournamentKey = `Main ${tournamentNumber}`;
-            const { data, error } = await supabaseClient
-                .from('tournament_hero_stats')
-                .select(`
-                    tournament_unique_key,
-                    hero_handle,
-                    hero_name,
-                    followers,
-                    rank,
-                    score,
-                    posts,
-                    views,
-                    views_rank,
-                    avg_views,
-                    avg_views_rank,
-                    reach,
-                    reach_rank,
-                    hero_pfp_url,
-                    hero_stars
-                `)
-                .eq('tournament_unique_key', tournamentKey)
-                .order(currentSort.column, { ascending: currentSort.direction === 'asc' });
-            
-            if (error) {
-                console.error('Error fetching data:', error)
-                return
+            // Fetch both datasets in parallel
+            const [statsPromise, timelinePromise] = await Promise.all([
+                supabaseClient
+                    .from('tournament_hero_stats')
+                    .select(`
+                        tournament_unique_key,
+                        hero_handle,
+                        hero_name,
+                        followers,
+                        rank,
+                        score,
+                        posts,
+                        views,
+                        views_rank,
+                        avg_views,
+                        avg_views_rank,
+                        reach,
+                        reach_rank,
+                        hero_pfp_url,
+                        hero_stars
+                    `)
+                    .eq('tournament_unique_key', `Main ${tournamentNumber}`),
+
+                // New timeline query
+                supabaseClient
+                    .from('hero_tweets')
+                    .select(`
+                        tournament_number,
+                        hero_handle,
+                        post_id,
+                        post_views,
+                        post_hours_from_start,
+                        last_post_timestamp
+                    `)
+                    .eq('tournament_number', tournamentNumber)
+            ]);
+
+            const { data: statsData, error: statsError } = statsPromise;
+            const { data: timelineData, error: timelineError } = timelinePromise;
+
+            if (statsError) {
+                console.error('Error fetching stats:', statsError);
+                return;
             }
+
+            if (timelineError) {
+                console.error('Error fetching timeline:', timelineError);
+                return;
+            }
+
+            console.log('Timeline Data:', timelineData); // For debugging
+
+            // Sort the data based on current sort settings
+            const sortedData = sortData(statsData, currentSort.column, currentSort.direction);
             
-            console.log('Data:', data)
+            // Render the table with sorted data
+            renderTable(sortedData, timelineData);
+        }
 
+        function sortData(data, column, direction) {
+            return [...data].sort((a, b) => {
+                let compareA = a[column];
+                let compareB = b[column];
+                
+                // Handle special cases for rank columns
+                if (column === 'views') compareA = a.views;
+                if (column === 'reach') compareA = a.reach;
+                
+                // Convert to numbers if needed
+                if (typeof compareA === 'string') {
+                    compareA = parseFloat(compareA) || compareA;
+                    compareB = parseFloat(compareB) || compareB;
+                }
+                
+                if (compareA === compareB) return 0;
+                
+                // Handle direction
+                const comparison = compareA < compareB ? -1 : 1;
+                return direction === 'asc' ? comparison : -comparison;
+            });
+        }
+
+        // Separate table rendering into its own function
+        function renderTable(statsData, timelineData) {
             const tableBody = document.querySelector('#heroTable tbody');
-            tableBody.innerHTML = ''; // Clear existing data
-
-            data.forEach(hero => {
+            tableBody.innerHTML = '';
+            
+            statsData.forEach(hero => {
                 const viewsColor = getColorForRank(hero.views_rank, 180, false);
                 const avgViewsColor = getColorForRank(hero.avg_views_rank, 180, false);
                 const reachColor = getColorForRank(hero.reach_rank, 180, false);
@@ -485,7 +539,7 @@
                     
                     <td style="padding: 8px 12px;">
                         <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
-                            <span style="background-color: ${getColorForRank(hero.score, Math.max(...data.map(h => h.score)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold;">
+                            <span style="background-color: ${getColorForRank(hero.score, Math.max(...statsData.map(h => h.score)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold;">
                                 ${Math.round(hero.score)}
                             </span>
                          <!-- 
@@ -525,7 +579,7 @@
                     </td>
                     <td class="metric-group">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="metric-value" style="background-color: ${getColorForRank(hero.posts, Math.max(...data.map(h => h.posts)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold; min-width: 24px; text-align: center;">${hero.posts}</span>
+                            <span class="metric-value" style="background-color: ${getColorForRank(hero.posts, Math.max(...statsData.map(h => h.posts)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold; min-width: 24px; text-align: center;">${hero.posts}</span>
                             <div class="post-timeline">
                                 ${generateRandomTimeline()}
                             </div>
@@ -535,13 +589,18 @@
                         </div>
                     </td>
                 `;
+                row.dataset.heroData = JSON.stringify({
+                    score: hero.score,
+                    views: hero.views,
+                    reach: hero.reach,
+                    posts: hero.posts
+                });
                 tableBody.appendChild(row);
             });
 
             // Apply current perspective filter after data is loaded
             updateTableVisibility(currentPerspective);
         }
-
 
         async function initializeTournamentScroller() {
             const { data, error } = await supabaseClient
@@ -816,6 +875,12 @@
             initializeTournamentScroller();
             initializeScrollButtons();
             
+            // Set default sort
+            currentSort = {
+                column: 'score',
+                direction: 'desc'
+            };
+            
             // Add click handlers for sortable columns
             document.querySelectorAll('th[data-sort]').forEach(th => {
                 th.addEventListener('click', () => {
@@ -838,9 +903,28 @@
                     const arrow = th.querySelector('.sort-arrow');
                     arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
                     
-                    // Refetch data with new sort
-                    const activeTournament = document.querySelector('.scroll-item.active .number').textContent;
-                    fetchData(parseInt(activeTournament));
+                    // Get current data and resort
+                    const tableBody = document.querySelector('#heroTable tbody');
+                    const rows = Array.from(tableBody.querySelectorAll('tr'));
+                    
+                    // Store the original data in a data attribute when rendering the table
+                    const sortedRows = rows.sort((a, b) => {
+                        const aData = JSON.parse(a.dataset.heroData);
+                        const bData = JSON.parse(b.dataset.heroData);
+                        
+                        let compareA = aData[column];
+                        let compareB = bData[column];
+                        
+                        if (compareA === compareB) return 0;
+                        
+                        const comparison = compareA < compareB ? -1 : 1;
+                        return currentSort.direction === 'asc' ? comparison : -comparison;
+                    });
+                    
+                    // Reorder the rows
+                    sortedRows.forEach(row => {
+                        tableBody.appendChild(row);
+                    });
                 });
             });
 

@@ -594,7 +594,8 @@
                             post_count,
                             post_views,
                             post_hours_from_start,
-                            last_post_timestamp
+                            last_post_timestamp,
+                            now_hours_from_start
                         `)
                         .eq('tournament_number', tournamentNumber)
                 ]);
@@ -921,14 +922,32 @@
             
             if (!heroPosts.length) return '';
 
+            // Get the now_hours_from_start from the first post (they should all have the same value)
+            const nowHours = heroPosts[0].now_hours_from_start;
+            const progressWidth = Math.min((nowHours / 72) * 100, 100); // Cap at 100%
+            
+            // Base container with progress bar
+            const baseContainer = `
+                <div class="progress-bar" 
+                     style="position: absolute;
+                            left: 0;
+                            bottom: 0;
+                            height: 100%;
+                            width: ${progressWidth}%;
+                            background-color: #2a2a2a;
+                            border-radius: 4px;">
+                </div>`;
+
             if (heroPosts.length === 1) {
                 const post = heroPosts[0];
                 const position = (post.post_hours_from_start / 72) * 100;
                 
-                return `<div class="post-bar" 
+                return `${baseContainer}
+                        <div class="post-bar" 
                              style="left: ${position}%; 
                                     height: 24px; 
-                                    background-color: #4CAF50;">
+                                    background-color: #4CAF50;
+                                    z-index: 1;">
                         </div>`;
             }
 
@@ -945,7 +964,8 @@
                              style="left: ${position}%; 
                                     height: ${height}px; 
                                     background-color: ${color};
-                                    cursor: pointer;">
+                                    cursor: pointer;
+                                    z-index: 1;">
                         </div>
                         <div class="modal">
                             <div class="modal-content">
@@ -955,7 +975,7 @@
                         </div>`;
             }).join('');
             
-            return bars;
+            return baseContainer + bars;
         }
 
         function getHeroBarColor(ratio) {
@@ -1155,7 +1175,7 @@
                     <svg width="60" height="24">
                         <polyline 
                             points="${points}"
-                            style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                            style="stroke: #6B4E8B; stroke-width: 1.5; fill: none;"
                         />
                         ${circles}
                     </svg>

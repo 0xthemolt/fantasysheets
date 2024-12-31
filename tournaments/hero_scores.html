@@ -8,7 +8,7 @@
         </script>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hero Score Center</title>
+        <title>Tournament Hero Scores</title>
         <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
         <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
         <link rel="stylesheet" href="../styles.css">
@@ -456,6 +456,7 @@
             <div class="view-toggles" style="display: flex; gap: 8px;">
                 <button class="perspective-btn active" data-perspective="all">All</button>
                 <button class="perspective-btn" data-perspective="top-per-star">Best By Star</button>
+                <button class="perspective-btn" data-perspective="split-by-stars">Split By Stars</button>
             </div>
         </div>
     </div>
@@ -1082,6 +1083,8 @@
             
             if (perspective === 'all') {
                 rows.forEach(row => row.style.display = '');
+                // Remove any existing separators
+                document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
                 return;
             }
 
@@ -1108,13 +1111,45 @@
                 }
             });
 
-            console.log('Star groups:', starGroups); // Debug log
+            // Remove any existing separators
+            document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
 
             // Hide all rows first
             rows.forEach(row => row.style.display = 'none');
 
-            // Show only the top scoring hero for each star level
-            Object.values(starGroups).forEach(hero => {
+            // Show top scoring hero for each star level with separators
+            const tbody = document.querySelector('#heroTable tbody');
+            const sortedStars = Object.keys(starGroups).sort((a, b) => b - a); // Sort stars in descending order
+
+            sortedStars.forEach((stars, index) => {
+                const hero = starGroups[stars];
+                
+                // Create separator row
+                const separator = document.createElement('tr');
+                separator.className = 'star-separator';
+                separator.innerHTML = `
+                    <td colspan="6" style="
+                        padding: 15px 0 5px 0;
+                        font-size: 14px;
+                        color: #FFD700;
+                        background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0) 100%);
+                    ">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding-left: 12px;
+                        ">
+                            <i class="fas fa-trophy" style="color: #FFD700;"></i>
+                            <span>Top ${stars} <i class="fas fa-star" style="color: #FFD700;"></i> Performer</span>
+                        </div>
+                    </td>
+                `;
+                
+                // Insert separator before the hero row
+                tbody.appendChild(separator);
+                // Show the hero row
+                tbody.appendChild(hero.row);
                 hero.row.style.display = '';
             });
         }

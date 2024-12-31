@@ -876,12 +876,21 @@
             const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
             if (!heroPosts.length || !heroPosts[0].last_post_timestamp) return '-';
             
+            // Log raw values for debugging
+            console.log('Hero:', heroHandle);
+            console.log('Raw last_post_timestamp:', heroPosts[0].last_post_timestamp);
+            console.log('Current time:', new Date().toISOString());
+            
             // Use the raw UTC timestamp directly without creating a new Date object
             const lastPostTimestamp = new Date(heroPosts[0].last_post_timestamp + 'Z');
             const now = new Date();
             
+            console.log('Parsed lastPostTimestamp:', lastPostTimestamp.toISOString());
+            console.log('Parsed now:', now.toISOString());
+            
             // Calculate hours difference using UTC timestamps and ensure it's positive
             const diffHours = Math.max(0, Math.floor((now.getTime() - lastPostTimestamp.getTime()) / (1000 * 60 * 60)));
+            console.log('Difference in hours:', diffHours);
             
             // Return days if >= 24 hours, otherwise return hours
             return diffHours >= 24 

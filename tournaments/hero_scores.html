@@ -373,6 +373,32 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .sparkline-container {
+            position: relative;
+        }
+
+        .sparkline-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 1000;
+            transform: translate(-50%, -100%);
+            top: -8px;
+            text-align: left;
+        }
+
+        .sparkline-tooltip .score-value {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -1053,31 +1079,87 @@
                 return '<svg width="60" height="24"></svg>';
             }
 
-            // Sort by timestamp to ensure correct order
             const sortedHistory = [...history].sort((a, b) => a.timestamp - b.timestamp);
-
-            // Find min/max values for scaling
             const minTime = sortedHistory[0].timestamp;
             const maxTime = sortedHistory[sortedHistory.length - 1].timestamp;
             const minScore = Math.min(...sortedHistory.map(h => h.score));
             const maxScore = Math.max(...sortedHistory.map(h => h.score));
+            
+            // Add safety check for score range
+            const scoreRange = maxScore - minScore;
+            if (scoreRange === 0) {
+                // If all scores are the same, center the line
+                const y = 12; // Center point of 24px height
+                const points = sortedHistory.map(point => {
+                    const x = 5 + ((point.timestamp - minTime) / (maxTime - minTime)) * 50;
+                    return `${x},${y}`;
+                }).join(' ');
+                
+                const color = getColorForRank(sortedHistory[sortedHistory.length - 1].score, maxScore, true);
+                
+                return `
+                    <div class="sparkline-container">
+                        <div class="sparkline-tooltip"></div>
+                        <svg width="60" height="24">
+                            <polyline 
+                                points="${points}"
+                                style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                            />
+                        </svg>
+                    </div>
+                `;
+            }
 
-            // Scale points to fit SVG viewport
             const points = sortedHistory.map(point => {
-                const x = 5 + ((point.timestamp - minTime) / (maxTime - minTime)) * 50; // Leave 5px padding on each side
-                const y = 19 - ((point.score - minScore) / (maxScore - minScore)) * 14; // Leave 5px padding top/bottom
+                const x = 5 + ((point.timestamp - minTime) / (maxTime - minTime)) * 50;
+                const y = 19 - ((point.score - minScore) / scoreRange) * 14;
                 return `${x},${y}`;
             }).join(' ');
 
             const color = getColorForRank(sortedHistory[sortedHistory.length - 1].score, maxScore, true);
             
-            return `
-                <svg width="60" height="24" style="stroke: ${color}40; stroke-width: 1.5; fill: none;">
-                    <polyline 
-                        points="${points}"
-                        style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+            const circles = sortedHistory.map(point => {
+                const x = 5 + ((point.timestamp - minTime) / (maxTime - minTime)) * 50;
+                const y = 19 - ((point.score - minScore) / scoreRange) * 14;
+                const date = new Date(point.timestamp * 1000);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric',
+                }) + ', ' + date.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                return `
+                    <circle 
+                        cx="${x}" 
+                        cy="${y}" 
+                        r="3" 
+                        fill="${color}"
+                        fill-opacity="0"
+                        stroke="${color}"
+                        stroke-width="1"
+                        stroke-opacity="0"
+                        data-date="${formattedDate}"
+                        data-score="${Math.round(point.score)}"
+                        class="score-point"
+                        onmouseover="this.style.fillOpacity = 0.5; this.style.strokeOpacity = 1;"
+                        onmouseout="this.style.fillOpacity = 0; this.style.strokeOpacity = 0;"
                     />
-                </svg>
+                `;
+            }).join('');
+
+            return `
+                <div class="sparkline-container">
+                    <div class="sparkline-tooltip"></div>
+                    <svg width="60" height="24">
+                        <polyline 
+                            points="${points}"
+                            style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                        />
+                        ${circles}
+                    </svg>
+                </div>
             `;
         }
 
@@ -1126,6 +1208,16 @@
                         let compareA = aData[column];
                         let compareB = bData[column];
                         
+                        // Special handling for views, reach, and avg_views columns
+                        if (column === 'views' || column === 'reach' || column === 'avg_views') {
+                            // Parse the raw numeric values from the metric-value spans
+                            const aCell = a.querySelector(`td:nth-child(${getColumnIndex(column)}) .metric-value`);
+                            const bCell = b.querySelector(`td:nth-child(${getColumnIndex(column)}) .metric-value`);
+                            
+                            compareA = parseRawValue(aCell.textContent);
+                            compareB = parseRawValue(bCell.textContent);
+                        }
+                        
                         if (compareA === compareB) return 0;
                         
                         const comparison = compareA < compareB ? -1 : 1;
@@ -1153,7 +1245,61 @@
                     updateTableVisibility(currentPerspective);
                 });
             });
+
+            // Add hover handlers for sparklines
+            document.body.addEventListener('mouseover', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    tooltip.innerHTML = `${circle.dataset.date}<br>Score: <span class="score-value">${circle.dataset.score}</span>`;
+                    
+                    const containerRect = circle.closest('.sparkline-container').getBoundingClientRect();
+                    const circleRect = circle.getBoundingClientRect();
+                    
+                    const tooltipX = circleRect.left - containerRect.left + (circleRect.width / 2);
+                    const tooltipY = -10;
+                    
+                    tooltip.style.left = `${tooltipX}px`;
+                    tooltip.style.top = `${tooltipY}px`;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    tooltip.style.opacity = '0';
+                }
+            });
         });
+
+        // Helper function to convert formatted strings back to numbers
+        function parseRawValue(formattedValue) {
+            if (typeof formattedValue !== 'string') return formattedValue;
+            
+            // Remove any commas
+            formattedValue = formattedValue.replace(/,/g, '');
+            
+            // Handle K/M suffixes
+            if (formattedValue.endsWith('K')) {
+                return parseFloat(formattedValue) * 1000;
+            } else if (formattedValue.endsWith('M')) {
+                return parseFloat(formattedValue) * 1000000;
+            }
+            
+            return parseFloat(formattedValue);
+        }
+
+        // Helper function to get column index
+        function getColumnIndex(column) {
+            const columnMap = {
+                'views': 3,
+                'reach': 4,
+                'avg_views': 5
+            };
+            return columnMap[column] || 1;
+        }
 
     </script>
 </body>

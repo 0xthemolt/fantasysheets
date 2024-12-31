@@ -287,20 +287,24 @@
             border: 1px solid #333;
             background: transparent;
             color: #808080;
-            border-radius: 20px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .perspective-btn:hover {
-            border-color: #666;
-            color: #fff;
+            background: rgba(128, 128, 128, 0.15);
+            color: #999;
         }
 
         .perspective-btn.active {
-            background: #333;
-            color: #fff;
+            background: rgba(255, 255, 255, 0);
+            color: #ffffff;
             border-color: #444;
+        }
+
+        .perspective-btn:active {
+            transform: translateY(1px);
         }
 
         /* Add these media queries for mobile responsiveness */
@@ -428,13 +432,34 @@
         </nav>
     </div>
 
-    <!-- Add this new toggle container -->
-    <div class="perspective-toggle">
-        <button class="perspective-btn active" data-perspective="all">All Heroes</button>
-        <button class="perspective-btn" data-perspective="top-per-star">Top Hero Per Star</button>
+    <!-- Add this before the table-container -->
+    <div style="width: 80%; margin: 20px auto; padding: 0 10px;">
+        <div style="
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            margin-bottom: 4px;
+            background: #000;
+            padding: 4px 0;
+        ">
+            <div class="search-container" style="position: relative; flex: 1;">
+                <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #808080;"></i>
+                <input type="text" id="heroSearch" placeholder="Search heroes..." style="
+                    padding: 8px 8px 8px 32px;
+                    border-radius: 4px;
+                    border: 1px solid #333;
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #fff;
+                    width: 250px;
+                ">
+            </div>
+            <div class="view-toggles" style="display: flex; gap: 8px;">
+                <button class="perspective-btn active" data-perspective="all">All</button>
+                <button class="perspective-btn" data-perspective="top-per-star">Best By Star</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Add this table container after the scroll-container -->
     <div class="table-container">
         <table id="heroTable">
             <thead>
@@ -1320,6 +1345,16 @@
             };
             return columnMap[column] || 1;
         }
+
+        document.getElementById('heroSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#heroTable tbody tr');
+            
+            rows.forEach(row => {
+                const heroHandle = row.querySelector('a').textContent.toLowerCase();
+                row.style.display = heroHandle.includes(searchTerm) ? '' : 'none';
+            });
+        });
 
     </script>
 </body>

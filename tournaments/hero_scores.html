@@ -303,6 +303,56 @@
             border-color: #444;
         }
 
+        /* Add these media queries for mobile responsiveness */
+        @media (max-width: 768px) {
+            .table-container {
+                width: 100%;
+                margin: 10px 0;
+                padding: 0;
+                overflow-x: auto;  /* Enable horizontal scrolling */
+            }
+
+            #heroTable {
+                width: 100%;
+                min-width: 800px;  /* Ensure minimum width to prevent squishing */
+            }
+
+            .scroll-nav {
+                max-width: 100%;  /* Full width on mobile */
+                padding: 0 10px;
+            }
+
+            /* Adjust metric group spacing */
+            .metric-group > div {
+                gap: 4px;  /* Reduce gap on mobile */
+            }
+
+            /* Adjust post timeline width */
+            .post-timeline {
+                width: 180px;  /* Slightly smaller on mobile */
+            }
+        }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .rank-bar-container {
+                width: 140px;  /* Smaller on very small screens */
+            }
+
+            .metric-value {
+                min-width: 35px;  /* Smaller minimum width */
+            }
+
+            .perspective-toggle {
+                padding: 10px 0;
+            }
+
+            .perspective-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+        }
+
         </style>
     </head>
 <body>
@@ -366,6 +416,7 @@
                         <div class="metric-header">
                             <span class="metric-type">
                                 <i class="fas fa-pencil"></i> Post Count & Timeline
+                                <i class="fas fa-info-circle" title="Timeline only includes tweets, not quotes (limitation of post history)"></i>
                             </span>
                             <div class="sort-arrow"></div>
                         </div>

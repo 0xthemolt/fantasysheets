@@ -4,47 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tweet Modal Example</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .x-icon {
+            font-size: 24px;
+            color: #000;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .x-icon:hover {
+            color: #1DA1F2;
+        }
+
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 10px;
+            width: fit-content;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <!-- Method 1: Official X Embed -->
-<div style="transform: scale(0.5); transform-origin: left top;">
-    <blockquote class="twitter-tweet">
-        <a href="https://twitter.com/TylerDurden/status/1873732440369631634"></a>
-    </blockquote>
-</div>
   <script async src="https://platform.twitter.com/widgets.js"></script>
 <!-- Method 2: Modal Popup with Tweet -->
 <!-- Add this button to trigger the modal -->
-<button onclick="openTweetModal()">Show Tweet</button>
+<i class="fa-brands fa-x-twitter x-icon" onmouseover="openTweetModal()"></i>
 
 <!-- The Modal -->
-<div id="tweetModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.7);">
-  <div class="modal-content" style="background-color: white; margin: 15% auto; padding: 20px; width: 40%; max-width: 300px;">
-    <span onclick="closeTweetModal()" style="float:right; cursor:pointer;">&times;</span>
-    <div style="transform: scale(0.5); transform-origin: left top;">
-        <blockquote class="twitter-tweet">
-            <a href="https://twitter.com/TylerDurden/status/1873732440369631634"></a>
-        </blockquote>
+<div id="tweetModal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeTweetModal()" style="float:right; cursor:pointer; padding: 0 8px;">&times;</span>
+        <div style="transform: scale(0.8); transform-origin: center top;">
+            <blockquote class="twitter-tweet">
+                <a href="https://twitter.com/TylerDurden/status/1873732440369631634"></a>
+            </blockquote>
+        </div>
     </div>
-  </div>
 </div>
 
 <script async src="https://platform.twitter.com/widgets.js"></script>
 <script>
 function openTweetModal() {
-  document.getElementById('tweetModal').style.display = 'block';
+    document.getElementById('tweetModal').classList.add('show');
 }
 
 function closeTweetModal() {
-  document.getElementById('tweetModal').style.display = 'none';
+    document.getElementById('tweetModal').classList.remove('show');
 }
 
-// Close modal when clicking outside
+// Update click outside behavior
 window.onclick = function(event) {
-  if (event.target == document.getElementById('tweetModal')) {
-    closeTweetModal();
-  }
+    const modal = document.getElementById('tweetModal');
+    if (event.target == modal) {
+        closeTweetModal();
+    }
 }
+
+// Add mouse leave behavior
+document.getElementById('tweetModal').addEventListener('mouseleave', function() {
+    closeTweetModal();
+});
 </script>
 </body>
 </html>

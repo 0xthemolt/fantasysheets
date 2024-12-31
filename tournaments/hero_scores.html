@@ -16,6 +16,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script async src="https://platform.twitter.com/widgets.js"></script>
         <style>
             .scroll-container {
                 width: 100%;
@@ -353,9 +354,41 @@
             }
         }
 
-        </style>
-    </head>
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 10px;
+            width: fit-content;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
 <body>
+    <!-- Add this modal HTML right after the body tag -->
+    <div id="tweetModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeTweetModal()" style="float:right; cursor:pointer; padding: 0 8px;">&times;</span>
+            <div style="transform: scale(0.8); transform-origin: center top;">
+                <blockquote class="twitter-tweet">
+                    <a href="" id="tweetLink"></a>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+
     <div class="scroll-container">
         <nav class="scroll-nav">
             <button class="scroll-arrow scroll-left">
@@ -820,12 +853,10 @@
         }
 
         function generateTimeline(heroHandle, timelineData) {
-            // Filter timeline data for this specific hero
             const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
             
-            if (!heroPosts.length) return ''; // Return empty string if no posts
+            if (!heroPosts.length) return '';
 
-            // If there's only one post, treat it as maximum performance
             if (heroPosts.length === 1) {
                 const post = heroPosts[0];
                 const position = (post.post_hours_from_start / 72) * 100;
@@ -834,31 +865,26 @@
                              style="left: ${position}%; 
                                     height: 24px; 
                                     background-color: #4CAF50;"
-                             title="${post.post_views.toLocaleString()} views at ${Math.round(post.post_hours_from_start)}h">
+                             onclick="showTweet('${heroHandle}', '${post.post_id}')"
+                             style="cursor: pointer;">
                         </div>`;
             }
 
-            // Find max views for THIS HERO ONLY
             const heroMaxViews = Math.max(...heroPosts.map(post => post.post_views));
             const heroMinViews = Math.min(...heroPosts.map(post => post.post_views));
             
-            // Generate bars for each post
             const bars = heroPosts.map(post => {
-                // Calculate position (0-72 hours maps to 0-100%)
                 const position = (post.post_hours_from_start / 72) * 100;
-                
-                // Calculate relative performance for this hero's range
                 const viewsRatio = (post.post_views - heroMinViews) / (heroMaxViews - heroMinViews || 1);
-                const height = 4 + (viewsRatio * 20); // Maps to 4-24px
-                
-                // Get color based on relative performance
+                const height = 4 + (viewsRatio * 20);
                 const color = getHeroBarColor(viewsRatio);
                 
                 return `<div class="post-bar" 
                              style="left: ${position}%; 
                                     height: ${height}px; 
-                                    background-color: ${color};"
-                             title="${post.post_views.toLocaleString()} views at ${Math.round(post.post_hours_from_start)}h">
+                                    background-color: ${color};
+                                    cursor: pointer;"
+                             onclick="showTweet('${heroHandle}', '${post.post_id}')">
                         </div>`;
             }).join('');
             
@@ -875,23 +901,15 @@
         function getLastPostTime(heroHandle, timelineData) {
             const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
             if (!heroPosts.length || !heroPosts[0].last_post_timestamp) return '-';
-            
-            // Log raw values for debugging
-            console.log('Hero:', heroHandle);
-            console.log('Raw last_post_timestamp:', heroPosts[0].last_post_timestamp);
-            console.log('Current time:', new Date().toISOString());
-            
+        
             // Use the raw UTC timestamp directly without creating a new Date object
             const lastPostTimestamp = new Date(heroPosts[0].last_post_timestamp + 'Z');
             const now = new Date();
             
-            console.log('Parsed lastPostTimestamp:', lastPostTimestamp.toISOString());
-            console.log('Parsed now:', now.toISOString());
-            
+
             // Calculate hours difference using UTC timestamps and ensure it's positive
             const diffHours = Math.max(0, Math.floor((now.getTime() - lastPostTimestamp.getTime()) / (1000 * 60 * 60)));
-            console.log('Difference in hours:', diffHours);
-            
+
             // Return days if >= 24 hours, otherwise return hours
             return diffHours >= 24 
                 ? `${Math.floor(diffHours / 24)}d`
@@ -1062,5 +1080,64 @@
                 });
             });
         });
+
+        // Add these new functions for modal handling
+        function showTweet(handle, postId) {
+            const modal = document.getElementById('tweetModal');
+            const tweetLink = document.getElementById('tweetLink');
+            
+            // Update the tweet link
+            tweetLink.href = `https://twitter.com/${handle}/status/${postId}`;
+            
+            // Clear any existing tweets
+            const existingTweet = modal.querySelector('iframe');
+            if (existingTweet) {
+                existingTweet.remove();
+            }
+            
+            // Show the modal
+            modal.classList.add('show');
+            
+            // Check if Twitter widget is loaded
+            if (typeof twttr !== 'undefined') {
+                // Load the new tweet
+                twttr.widgets.load(modal);
+            } else {
+                // If Twitter widget isn't loaded yet, wait for it
+                window.twttr = (function(d, s, id) {
+                    var js, fjs = d.getElementsByTagName(s)[0],
+                        t = window.twttr || {};
+                    if (d.getElementById(id)) return t;
+                    js = d.createElement(s);
+                    js.id = id;
+                    js.src = "https://platform.twitter.com/widgets.js";
+                    fjs.parentNode.insertBefore(js, fjs);
+
+                    t._e = [];
+                    t.ready = function(f) {
+                        t._e.push(f);
+                    };
+
+                    return t;
+                }(document, "script", "twitter-wjs"));
+
+                twttr.ready(function () {
+                    twttr.widgets.load(modal);
+                });
+            }
+        }
+
+        function closeTweetModal() {
+            const modal = document.getElementById('tweetModal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('tweetModal');
+            if (event.target === modal) {
+                closeTweetModal();
+            }
+        }
     </script>
 </body>

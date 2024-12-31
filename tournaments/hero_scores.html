@@ -9,14 +9,13 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Hero Score Center</title>
-        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
         <link rel="stylesheet" href="../styles.css">
-        <link rel="icon" type="image/png" href="icons/favicon.webp">
+        <link rel="icon" type="image/png" href="../icons/favicon.webp">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script async src="https://platform.twitter.com/widgets.js"></script>
         <style>
             .scroll-container {
                 width: 100%;
@@ -469,6 +468,12 @@
 
         let currentPerspective = 'all';
 
+        // Cache tournament data to avoid repeated fetches
+        let tournamentCache = new Map();
+
+        // Cache color calculations
+        const colorCache = new Map();
+
         function formatViews(views) {
             if (views >= 1000000) {
                 return (views / 1000000).toFixed(1) + 'M';
@@ -479,6 +484,11 @@
         }
 
         function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+            const cacheKey = `${value}_${maxValue}_${higherIsBetter}`;
+            if (colorCache.has(cacheKey)) {
+                return colorCache.get(cacheKey);
+            }
+
             let ratio;
             if (higherIsBetter) {
                 ratio = Math.min(value / maxValue, 1);
@@ -492,13 +502,17 @@
                 const r = Math.round(lerp(215, 254, ratio * 2));
                 const g = Math.round(lerp(48, 224, ratio * 2));
                 const b = Math.round(lerp(39, 139, ratio * 2));
-                return `rgb(${r}, ${g}, ${b})`;
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
             } else {
                 // Yellow to Green transition
                 const r = Math.round(lerp(254, 44, (ratio - 0.5) * 2));
                 const g = Math.round(lerp(224, 162, (ratio - 0.5) * 2));
                 const b = Math.round(lerp(139, 95, (ratio - 0.5) * 2));
-                return `rgb(${r}, ${g}, ${b})`;
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
             }
         }
 
@@ -513,63 +527,67 @@
         };
 
         async function fetchData(tournamentNumber) {
-            // Fetch both datasets in parallel
-            const [statsPromise, timelinePromise] = await Promise.all([
-                supabaseClient
-                    .from('tournament_hero_stats')
-                    .select(`
-                        tournament_unique_key,
-                        hero_handle,
-                        hero_name,
-                        followers,
-                        rank,
-                        score,
-                        posts,
-                        views,
-                        views_rank,
-                        avg_views,
-                        avg_views_rank,
-                        reach,
-                        reach_rank,
-                        hero_pfp_url,
-                        hero_stars
-                    `)
-                    .eq('tournament_unique_key', `Main ${tournamentNumber}`),
-
-                // New timeline query
-                supabaseClient
-                    .from('hero_tweets')
-                    .select(`
-                        tournament_number,
-                        hero_handle,
-                        post_id,
-                        post_views,
-                        post_hours_from_start,
-                        last_post_timestamp
-                    `)
-                    .eq('tournament_number', tournamentNumber)
-            ]);
-
-            const { data: statsData, error: statsError } = statsPromise;
-            const { data: timelineData, error: timelineError } = timelinePromise;
-
-            if (statsError) {
-                console.error('Error fetching stats:', statsError);
+            // Check cache first
+            const cacheKey = `tournament_${tournamentNumber}`;
+            if (tournamentCache.has(cacheKey)) {
+                const cachedData = tournamentCache.get(cacheKey);
+                renderTable(cachedData.stats, cachedData.timeline);
                 return;
             }
 
-            if (timelineError) {
-                console.error('Error fetching timeline:', timelineError);
-                return;
+            try {
+                const [statsResponse, timelineResponse] = await Promise.all([
+                    supabaseClient
+                        .from('tournament_hero_stats')
+                        .select(`
+                            tournament_unique_key,
+                            hero_handle,
+                            hero_name,
+                            followers,
+                            rank,
+                            score,
+                            posts,
+                            views,
+                            views_rank,
+                            avg_views,
+                            avg_views_rank,
+                            reach,
+                            reach_rank,
+                            hero_pfp_url,
+                            hero_stars
+                        `)
+                        .eq('tournament_unique_key', `Main ${tournamentNumber}`),
+
+                    supabaseClient
+                        .from('hero_tweets')
+                        .select(`
+                            tournament_number,
+                            hero_handle,
+                            post_id,
+                            post_count,
+                            post_views,
+                            post_hours_from_start,
+                            last_post_timestamp
+                        `)
+                        .eq('tournament_number', tournamentNumber)
+                ]);
+
+                if (statsResponse.error) throw statsResponse.error;
+                if (timelineResponse.error) throw timelineResponse.error;
+
+                // Cache the results
+                tournamentCache.set(cacheKey, {
+                    stats: statsResponse.data,
+                    timeline: timelineResponse.data
+                });
+
+                // Sort and render
+                const sortedData = sortData(statsResponse.data, currentSort.column, currentSort.direction);
+                renderTable(sortedData, timelineResponse.data);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-
-            console.log('Timeline Data:', timelineData); // For debugging
-
-            // Sort the data based on current sort settings
-            const sortedData = sortData(statsData, currentSort.column, currentSort.direction);
-            
-            // Render the table with sorted data
-            renderTable(sortedData, timelineData);
         }
 
         function sortData(data, column, direction) {
@@ -597,8 +615,8 @@
 
         // Separate table rendering into its own function
         function renderTable(statsData, timelineData) {
-            const tableBody = document.querySelector('#heroTable tbody');
-            tableBody.innerHTML = '';
+            // Create document fragment for better performance
+            const fragment = document.createDocumentFragment();
             
             statsData.forEach(hero => {
                 const viewsColor = getColorForRank(hero.views_rank, 180, false);
@@ -708,10 +726,14 @@
                     reach: hero.reach,
                     posts: hero.posts
                 });
-                tableBody.appendChild(row);
+                fragment.appendChild(row);
             });
 
-            // Apply current perspective filter after data is loaded
+            const tableBody = document.querySelector('#heroTable tbody');
+            tableBody.innerHTML = '';
+            tableBody.appendChild(fragment);
+
+            // Apply perspective filter after batch DOM update
             updateTableVisibility(currentPerspective);
         }
 
@@ -833,22 +855,39 @@
 
         function initializeScrollButtons() {
             const container = document.querySelector('.scroll-items');
-            const leftButton = document.querySelector('.scroll-left');
-            const rightButton = document.querySelector('.scroll-right');
+            const nav = document.querySelector('.scroll-nav');
 
-            leftButton.addEventListener('click', () => {
-                container.scrollBy({ left: -200, behavior: 'smooth' });
+            nav.addEventListener('click', (e) => {
+                const leftButton = e.target.closest('.scroll-left');
+                const rightButton = e.target.closest('.scroll-right');
+                
+                if (leftButton) {
+                    container.scrollBy({ left: -200, behavior: 'smooth' });
+                } else if (rightButton) {
+                    container.scrollBy({ left: 200, behavior: 'smooth' });
+                }
             });
 
-            rightButton.addEventListener('click', () => {
-                container.scrollBy({ left: 200, behavior: 'smooth' });
+            // Use throttle for scroll event
+            let scrollTimeout;
+            container.addEventListener('scroll', () => {
+                if (!scrollTimeout) {
+                    scrollTimeout = setTimeout(() => {
+                        updateScrollButtons();
+                        scrollTimeout = null;
+                    }, 100);
+                }
             });
 
-            // Update buttons visibility on scroll
-            container.addEventListener('scroll', updateScrollButtons);
-            // Update buttons visibility on resize
-            window.addEventListener('resize', updateScrollButtons);
-            // Initial check
+            window.addEventListener('resize', () => {
+                if (!scrollTimeout) {
+                    scrollTimeout = setTimeout(() => {
+                        updateScrollButtons();
+                        scrollTimeout = null;
+                    }, 100);
+                }
+            });
+
             updateScrollButtons();
         }
 
@@ -864,9 +903,7 @@
                 return `<div class="post-bar" 
                              style="left: ${position}%; 
                                     height: 24px; 
-                                    background-color: #4CAF50;"
-                             onclick="showTweet('${heroHandle}', '${post.post_id}')"
-                             style="cursor: pointer;">
+                                    background-color: #4CAF50;">
                         </div>`;
             }
 
@@ -883,8 +920,13 @@
                              style="left: ${position}%; 
                                     height: ${height}px; 
                                     background-color: ${color};
-                                    cursor: pointer;"
-                             onclick="showTweet('${heroHandle}', '${post.post_id}')">
+                                    cursor: pointer;">
+                        </div>
+                        <div class="modal">
+                            <div class="modal-content">
+                                Views: ${formatViews(post.post_views)}<br>
+                                Hour: ${Math.round(post.post_hours_from_start)}
+                            </div>
                         </div>`;
             }).join('');
             
@@ -1081,63 +1123,5 @@
             });
         });
 
-        // Add these new functions for modal handling
-        function showTweet(handle, postId) {
-            const modal = document.getElementById('tweetModal');
-            const tweetLink = document.getElementById('tweetLink');
-            
-            // Update the tweet link
-            tweetLink.href = `https://twitter.com/${handle}/status/${postId}`;
-            
-            // Clear any existing tweets
-            const existingTweet = modal.querySelector('iframe');
-            if (existingTweet) {
-                existingTweet.remove();
-            }
-            
-            // Show the modal
-            modal.classList.add('show');
-            
-            // Check if Twitter widget is loaded
-            if (typeof twttr !== 'undefined') {
-                // Load the new tweet
-                twttr.widgets.load(modal);
-            } else {
-                // If Twitter widget isn't loaded yet, wait for it
-                window.twttr = (function(d, s, id) {
-                    var js, fjs = d.getElementsByTagName(s)[0],
-                        t = window.twttr || {};
-                    if (d.getElementById(id)) return t;
-                    js = d.createElement(s);
-                    js.id = id;
-                    js.src = "https://platform.twitter.com/widgets.js";
-                    fjs.parentNode.insertBefore(js, fjs);
-
-                    t._e = [];
-                    t.ready = function(f) {
-                        t._e.push(f);
-                    };
-
-                    return t;
-                }(document, "script", "twitter-wjs"));
-
-                twttr.ready(function () {
-                    twttr.widgets.load(modal);
-                });
-            }
-        }
-
-        function closeTweetModal() {
-            const modal = document.getElementById('tweetModal');
-            modal.classList.remove('show');
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('tweetModal');
-            if (event.target === modal) {
-                closeTweetModal();
-            }
-        }
     </script>
 </body>

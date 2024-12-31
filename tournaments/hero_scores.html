@@ -554,7 +554,8 @@
                             reach,
                             reach_rank,
                             hero_pfp_url,
-                            hero_stars
+                            hero_stars,
+                            score_history
                         `)
                         .eq('tournament_unique_key', `Main ${tournamentNumber}`),
 
@@ -652,11 +653,9 @@
                             <span style="background-color: ${getColorForRank(hero.score, Math.max(...statsData.map(h => h.score)), true)}; border-radius: 4px; padding: 4px 8px; color: white; font-weight: bold;">
                                 ${Math.round(hero.score)}
                             </span>
-                         <!-- 
-                          <div style="display: flex; flex-direction: column; gap: 2px;">
-                                ${generateScoreComparison(hero.score)}
+                            <div style="width: 60px; height: 24px; position: relative;">
+                                ${generateScoreHistory(hero.score_history)}
                             </div>
-                          -->
                         </div>
                     </td>
                     <td class="metric-group">
@@ -1047,6 +1046,39 @@
             Object.values(starGroups).forEach(hero => {
                 hero.row.style.display = '';
             });
+        }
+
+        function generateScoreHistory(history) {
+            if (!history || history.length < 2) {
+                return '<svg width="60" height="24"></svg>';
+            }
+
+            // Sort by timestamp to ensure correct order
+            const sortedHistory = [...history].sort((a, b) => a.timestamp - b.timestamp);
+
+            // Find min/max values for scaling
+            const minTime = sortedHistory[0].timestamp;
+            const maxTime = sortedHistory[sortedHistory.length - 1].timestamp;
+            const minScore = Math.min(...sortedHistory.map(h => h.score));
+            const maxScore = Math.max(...sortedHistory.map(h => h.score));
+
+            // Scale points to fit SVG viewport
+            const points = sortedHistory.map(point => {
+                const x = 5 + ((point.timestamp - minTime) / (maxTime - minTime)) * 50; // Leave 5px padding on each side
+                const y = 19 - ((point.score - minScore) / (maxScore - minScore)) * 14; // Leave 5px padding top/bottom
+                return `${x},${y}`;
+            }).join(' ');
+
+            const color = getColorForRank(sortedHistory[sortedHistory.length - 1].score, maxScore, true);
+            
+            return `
+                <svg width="60" height="24" style="stroke: ${color}40; stroke-width: 1.5; fill: none;">
+                    <polyline 
+                        points="${points}"
+                        style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                    />
+                </svg>
+            `;
         }
 
         // Update the DOMContentLoaded event listener

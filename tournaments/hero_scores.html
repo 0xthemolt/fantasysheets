@@ -461,8 +461,8 @@
                 gap: 4px; 
                 margin-bottom: 4px;
                 background: #000;
-                padding: 4px 10px;  /* Added horizontal padding to match table */
-                max-width: 100%;    /* Ensure it doesn't exceed container width */
+                padding: 4px 10px;
+                max-width: 100%;
             ">
                 <div class="search-container" style="position: relative; flex: 1;">
                     <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #808080;"></i>
@@ -478,6 +478,10 @@
                             width: 250px;
                         ">
                 </div>
+                <button class="perspective-btn" id="my-favorites-btn">
+                    <i class="fa-regular fa-star"></i>
+                    My Favorites
+                </button>
                 <div class="view-toggles" style="display: flex; gap: 8px;">
                     <button class="perspective-btn active" data-perspective="all">All</button>
                     <button class="perspective-btn" data-perspective="top-per-star">Best By Star</button>
@@ -633,7 +637,8 @@
                             reach_rank,
                             hero_pfp_url,
                             hero_stars,
-                            score_history
+                            score_history,
+                            star_rank
                         `)
                         .eq('tournament_unique_key', `Main ${tournamentNumber}`),
 
@@ -798,12 +803,21 @@
                         </div>
                     </td>
                 `;
-                row.dataset.heroData = JSON.stringify({
+                console.log('Hero data being processed:', {
+                    handle: hero.hero_handle,
+                    stars: hero.hero_stars,
+                    star_rank: hero.star_rank
+                });
+
+                const rowData = {
                     score: hero.score,
                     views: hero.views,
                     reach: hero.reach,
-                    posts: hero.posts
-                });
+                    posts: hero.posts,
+                    star_rank: hero.star_rank
+                };
+                console.log('Setting row dataset:', rowData);
+                row.dataset.heroData = JSON.stringify(rowData);
                 fragment.appendChild(row);
             });
 
@@ -1055,61 +1069,13 @@
                 : `${diffHours}h`;
         }
 
-        function generateScoreComparison(currentScore) {
-            // Simulated reference scores (we'll replace these with real data later)
-            const comparisons = [
-                { label: 'LM', value: currentScore * (0.7 + Math.random() * 0.6), icon: '🏆' },
-                { label: 'L4', value: currentScore * (0.6 + Math.random() * 0.8), icon: '📊' }
-            ];
-
-            return comparisons.map(comp => {
-                const diff = currentScore - comp.value;
-                const color = diff > 0 ? '#4CAF50' : '#ff4d4d';
-                const arrow = diff > 0 ? '▲' : '▼';
-                
-                return `
-                    <span style="color: ${color}; font-size: 11px; display: flex; align-items: center; gap: 2px;"
-                          title="${comp.icon} ${comp.label}: ${Math.round(comp.value)} (${diff > 0 ? '+' : ''}${Math.round(diff)})">
-                        ${comp.label} ${arrow} ${Math.abs(Math.round(diff))}
-                    </span>
-                `;
-            }).join('');
-        }
-
-        function getStarColor(stars, maxStars) {
-            const ratio = stars / maxStars;
-            return `linear-gradient(135deg, 
-                ${ratio > 0.8 ? '#FFD700' : '#FFF8DC'} 0%, 
-                ${ratio > 0.8 ? '#DAA520' : '#FFEFBA'} 100%)`;
-        }
-
-        function filterTopHeroesPerStar(heroes) {
-            // Group heroes by star count
-            const herosByStars = {};
-            heroes.forEach(hero => {
-                if (!herosByStars[hero.hero_stars]) {
-                    herosByStars[hero.hero_stars] = [];
-                }
-                herosByStars[hero.hero_stars].push(hero);
-            });
-
-            // Get top hero for each star count
-            const topHeroes = [];
-            for (const stars in herosByStars) {
-                const topHero = herosByStars[stars].reduce((max, hero) => 
-                    hero.score > max.score ? hero : max
-                );
-                topHeroes.push(topHero);
-            }
-            return topHeroes;
-        }
-
         function updateTableVisibility(perspective) {
+            console.log('Current perspective:', perspective);
             const rows = document.querySelectorAll('#heroTable tbody tr');
+            console.log('Total rows found:', rows.length);
             
             if (perspective === 'all') {
                 rows.forEach(row => row.style.display = '');
-                // Remove any existing separators
                 document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
                 
                 // Reset sort to default (score descending)
@@ -1118,58 +1084,46 @@
                     direction: 'desc'
                 };
                 
-                // Reset all sort arrows
+                // Reset sort arrows and resort table
                 document.querySelectorAll('.sort-arrow').forEach(arrow => {
                     arrow.className = 'sort-arrow';
                 });          
                 
-                // Resort the table
                 const tableBody = document.querySelector('#heroTable tbody');
                 const rowsArray = Array.from(rows);
                 rowsArray.sort((a, b) => {
                     const aData = JSON.parse(a.dataset.heroData);
                     const bData = JSON.parse(b.dataset.heroData);
-                    return bData.score - aData.score; // Descending order
+                    return bData.score - aData.score;
                 }).forEach(row => tableBody.appendChild(row));
                 
                 return;
             }
 
-            // First, collect all heroes with their stars and scores
-            const heroData = [];
+            // For 'top-per-star' perspective, only show rows where star_rank = 1
             rows.forEach(row => {
+                const data = JSON.parse(row.dataset.heroData);
+                console.log('Row data:', data);
+                console.log('Hero handle:', row.querySelector('a')?.textContent);
+                console.log('Star rank:', data.star_rank);
+                row.style.display = data.star_rank === 1 ? '' : 'none';
+            });
+
+            // Debug visible rows
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            console.log('Visible rows after filtering:', visibleRows.length);
+
+            if (visibleRows.length === 0) {
+                console.log('No rows visible! Check if star_rank data is present and = 1 for any rows');
+            }
+
+            // Add separators between different star levels
+            const tbody = document.querySelector('#heroTable tbody');
+
+            visibleRows.forEach((row, index) => {
                 const starElement = row.querySelector('.fa-star').closest('div').querySelector('span');
                 const stars = parseInt(starElement.textContent);
-                const scoreElement = row.querySelector('td:nth-child(2) span');
-                const score = parseInt(scoreElement.textContent);
-                
-                heroData.push({
-                    row,
-                    stars,
-                    score
-                });
-            });
-
-            // Group by stars and find max score for each star level
-            const starGroups = {};
-            heroData.forEach(hero => {
-                if (!starGroups[hero.stars] || hero.score > starGroups[hero.stars].score) {
-                    starGroups[hero.stars] = hero;
-                }
-            });
-
-            // Remove any existing separators
-            document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
-
-            // Hide all rows first
-            rows.forEach(row => row.style.display = 'none');
-
-            // Show top scoring hero for each star level with separators
-            const tbody = document.querySelector('#heroTable tbody');
-            const sortedStars = Object.keys(starGroups).sort((a, b) => b - a); // Sort stars in descending order
-
-            sortedStars.forEach((stars, index) => {
-                const hero = starGroups[stars];
+                console.log('Adding separator for stars:', stars);
                 
                 // Create separator row
                 const separator = document.createElement('tr');
@@ -1193,11 +1147,8 @@
                     </td>
                 `;
                 
-                // Insert separator before the hero row
                 tbody.appendChild(separator);
-                // Show the hero row
-                tbody.appendChild(hero.row);
-                hero.row.style.display = '';
+                tbody.appendChild(row);
             });
         }
 
@@ -1399,6 +1350,75 @@
                     tooltip.style.opacity = '0';
                 }
             });
+        });
+
+        function filterFavorites(showOnlyFavorites) {
+            // Debug: Log the raw localStorage value
+            console.log('Raw localStorage value:', localStorage.getItem('favoriteHeroes'));
+            
+            // Get favorites from localStorage
+            const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+            
+            // Debug: Log parsed favorites array
+            console.log('Parsed favoriteHeroes:', favoriteHeroes);
+            
+            // First, remove any existing star separators
+            document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
+            
+            const rows = document.querySelectorAll('#heroTable tbody tr');
+            console.log('Found rows:', rows.length);
+
+            // Reset all rows to default style first
+            rows.forEach(row => {
+                row.style.display = '';
+                // Remove any special styling that might have been added
+                row.style.background = '';
+                row.style.borderTop = '';
+                row.style.borderBottom = '';
+            });
+
+            if (showOnlyFavorites) {
+                rows.forEach(function(row) {
+                    const heroHandle = row.querySelector('a')?.textContent;
+                    // Debug: Log each hero handle being checked
+                    console.log('Checking hero:', heroHandle, 'Is favorite:', favoriteHeroes.includes(heroHandle));
+                    
+                    if (!heroHandle) {
+                        console.log('No hero handle found for row:', row);
+                        return;
+                    }
+                    
+                    // Simply hide non-favorite rows
+                    row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                    console.log(`Setting visibility for ${heroHandle}: ${favoriteHeroes.includes(heroHandle) ? 'visible' : 'hidden'}`);
+                });
+            }
+        }
+
+        // Add click handler for the favorites button
+        document.getElementById('my-favorites-btn').addEventListener('click', function() {
+            // Toggle active state for favorites button
+            const isActive = this.classList.toggle('active');
+            
+            // Reset perspective buttons
+            document.querySelectorAll('[data-perspective]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (!isActive) {
+                // Only set "All" as active if we're turning favorites off
+                document.querySelector('[data-perspective="all"]').classList.add('active');
+            }
+            
+            // Important: Reset the current perspective before filtering
+            currentPerspective = 'all';
+            
+            // First reset the table to its default state
+            updateTableVisibility('all');
+            
+            // Then apply favorites filter if needed
+            if (isActive) {
+                filterFavorites(true);
+            }
         });
 
         // Helper function to convert formatted strings back to numbers

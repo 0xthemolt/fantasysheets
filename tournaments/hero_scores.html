@@ -538,7 +538,7 @@
             try {
                 const [statsResponse, timelineResponse] = await Promise.all([
                     supabaseClient
-                        .from('tournament_hero_stats')
+                        .from('hero_stats_tournament')
                         .select(`
                             tournament_unique_key,
                             hero_handle,

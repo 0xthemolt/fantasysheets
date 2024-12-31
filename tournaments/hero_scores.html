@@ -120,8 +120,8 @@
             }
 
             .table-container {
-                margin: 20px auto;
-                width: 80%;
+                margin: 0;
+                width: 100%;
                 padding: 0 10px;
             }
 
@@ -403,21 +403,40 @@
             font-weight: bold;
         }
 
+        .table-view-container {
+            margin: 20px 0;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                width: 100%;
+                padding: 0 10px;
+            }
+
+            .table-container {
+                width: 100%;
+                margin: 10px 0;
+                padding: 0;
+                overflow-x: auto;
+            }
+
+            .table-view-container {
+                width: 100%;
+                margin: 10px 0;
+                padding: 0;
+            }
+
+            #heroTable {
+                width: 100%;
+                min-width: 800px;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <!-- Add this modal HTML right after the body tag -->
-    <div id="tweetModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeTweetModal()" style="float:right; cursor:pointer; padding: 0 8px;">&times;</span>
-            <div style="transform: scale(0.8); transform-origin: center top;">
-                <blockquote class="twitter-tweet">
-                    <a href="" id="tweetLink"></a>
-                </blockquote>
-            </div>
-        </div>
-    </div>
-
     <div class="scroll-container">
         <nav class="scroll-nav">
             <button class="scroll-arrow scroll-left">
@@ -432,85 +451,92 @@
         </nav>
     </div>
 
-    <!-- Add this before the table-container -->
-    <div style="width: 80%; margin: 20px auto; padding: 0 10px;">
-        <div style="
-            display: flex; 
-            align-items: center; 
-            gap: 4px; 
-            margin-bottom: 4px;
-            background: #000;
-            padding: 4px 0;
-        ">
-            <div class="search-container" style="position: relative; flex: 1;">
-                <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #808080;"></i>
-                <input type="text" id="heroSearch" placeholder="Search heroes..." style="
-                    padding: 8px 8px 8px 32px;
-                    border-radius: 4px;
-                    border: 1px solid #333;
-                    background: rgba(255, 255, 255, 0.05);
-                    color: #fff;
-                    width: 250px;
-                ">
-            </div>
-            <div class="view-toggles" style="display: flex; gap: 8px;">
-                <button class="perspective-btn active" data-perspective="all">All</button>
-                <button class="perspective-btn" data-perspective="top-per-star">Best By Star</button>
-                <button class="perspective-btn" data-perspective="split-by-stars">Split By Stars</button>
+    <!-- New parent container -->
+    <div class="content-container" style="width: 80%; margin: 0 auto;">
+        <!-- Modified table-view-container -->
+        <div class="table-view-container">
+            <div style="
+                display: flex; 
+                align-items: center; 
+                gap: 4px; 
+                margin-bottom: 4px;
+                background: #000;
+                padding: 4px 10px;  /* Added horizontal padding to match table */
+                max-width: 100%;    /* Ensure it doesn't exceed container width */
+            ">
+                <div class="search-container" style="position: relative; flex: 1;">
+                    <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #808080;"></i>
+                    <input type="text" id="heroSearch" 
+                        autocomplete="off"
+                        placeholder="Search heroes..." 
+                        style="
+                            padding: 8px 8px 8px 32px;
+                            border-radius: 4px;
+                            border: 1px solid #333;
+                            background: rgba(255, 255, 255, 0.05);
+                            color: #fff;
+                            width: 250px;
+                        ">
+                </div>
+                <div class="view-toggles" style="display: flex; gap: 8px;">
+                    <button class="perspective-btn active" data-perspective="all">All</button>
+                    <button class="perspective-btn" data-perspective="top-per-star">Best By Star</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="table-container">
-        <table id="heroTable">
-            <thead>
-                <tr>
-                    <th>Hero</th>
-                    <th data-sort="score">
-                        <div class="metric-header">
-                            Score
-                            <div class="sort-arrow"></div>
-                        </div>
-                    </th>
-                    <th class="metric-group" data-sort="views">
-                        <div class="metric-header">
-                            <span class="metric-type">
-                                <i class="fas fa-eye"></i> Views
-                            </span>
-                            <div class="sort-arrow"></div>
-                        </div>
-                    </th>
-                    <th class="metric-group" data-sort="reach">
-                        <div class="metric-header">
-                            <span class="metric-type">
-                                <i class="fas fa-broadcast-tower"></i> Reach
-                            </span>
-                            <div class="sort-arrow"></div>
-                        </div>
-                    </th>
-                    <th class="metric-group" data-sort="avg_views">
-                        <div class="metric-header">
-                            <span class="metric-type">
-                                <i class="fas fa-chart-line"></i> Avg Views
-                            </span>
-                            <div class="sort-arrow"></div>
-                        </div>
-                    </th>
-                    <th class="metric-group" data-sort="posts">
-                        <div class="metric-header">
-                            <span class="metric-type">
-                                <i class="fas fa-pencil"></i> Post Count & Timeline
-                                <i class="fas fa-info-circle" title="Timeline only includes tweets, not quotes (limitation of post history)"></i>
-                            </span>
-                            <div class="sort-arrow"></div>
-                        </div>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be inserted here -->
-            </tbody>
-        </table>
+        <!-- Modified table-container -->
+        <div class="table-container" style="width: 100%; margin: 0;">
+            <table id="heroTable">
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th data-sort="score">
+                            <div class="metric-header">
+                                Score
+                                <div class="sort-arrow"></div>
+                            </div>
+                        </th>
+                        <th class="metric-group" data-sort="views">
+                            <div class="metric-header">
+                                <span class="metric-type">
+                                    <i class="fas fa-eye"></i> Views
+                                </span>
+                                <div class="sort-arrow"></div>
+                            </div>
+                        </th>
+                        <th class="metric-group" data-sort="reach">
+                            <div class="metric-header">
+                                <span class="metric-type">
+                                    <i class="fas fa-broadcast-tower"></i> Reach
+                                </span>
+                                <div class="sort-arrow"></div>
+                            </div>
+                        </th>
+                        <th class="metric-group" data-sort="avg_views">
+                            <div class="metric-header">
+                                <span class="metric-type">
+                                    <i class="fas fa-chart-line"></i> Avg Views
+                                </span>
+                                <div class="sort-arrow"></div>
+                            </div>
+                        </th>
+                        <th class="metric-group" data-sort="posts">
+                            <div class="metric-header">
+                                <span class="metric-type">
+                                    <i class="fas fa-pencil"></i> Post Count & Timeline
+                                    <i class="fas fa-info-circle" title="Timeline only includes tweets, not quotes (limitation of post history)"></i>
+                                </span>
+                                <div class="sort-arrow"></div>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -1085,6 +1111,27 @@
                 rows.forEach(row => row.style.display = '');
                 // Remove any existing separators
                 document.querySelectorAll('.star-separator').forEach(sep => sep.remove());
+                
+                // Reset sort to default (score descending)
+                currentSort = {
+                    column: 'score',
+                    direction: 'desc'
+                };
+                
+                // Reset all sort arrows
+                document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                    arrow.className = 'sort-arrow';
+                });          
+                
+                // Resort the table
+                const tableBody = document.querySelector('#heroTable tbody');
+                const rowsArray = Array.from(rows);
+                rowsArray.sort((a, b) => {
+                    const aData = JSON.parse(a.dataset.heroData);
+                    const bData = JSON.parse(b.dataset.heroData);
+                    return bData.score - aData.score; // Descending order
+                }).forEach(row => tableBody.appendChild(row));
+                
                 return;
             }
 
@@ -1129,7 +1176,7 @@
                 separator.className = 'star-separator';
                 separator.innerHTML = `
                     <td colspan="6" style="
-                        padding: 15px 0 5px 0;
+                        padding: 8px 0;
                         font-size: 14px;
                         color: #FFD700;
                         background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0) 100%);
@@ -1138,7 +1185,7 @@
                             display: flex;
                             align-items: center;
                             gap: 8px;
-                            padding-left: 12px;
+                            padding: 0 12px;
                         ">
                             <i class="fas fa-trophy" style="color: #FFD700;"></i>
                             <span>Top ${stars} <i class="fas fa-star" style="color: #FFD700;"></i> Performer</span>

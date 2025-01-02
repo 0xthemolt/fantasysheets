@@ -581,31 +581,39 @@
             }
 
             try {
-                const [statsResponse, timelineResponse] = await Promise.all([
-                    supabaseClient
-                        .from('hero_stats_tournament')
-                        .select(`
-                            tournament_unique_key,
-                            hero_handle,
-                            hero_name,
-                            followers,
-                            rank,
-                            score,
-                            posts,
-                            views,
-                            views_rank,
-                            avg_views,
-                            avg_views_rank,
-                            reach,
-                            reach_rank,
-                            hero_pfp_url,
-                            hero_stars,
-                            score_history,
-                            star_rank
-                        `)
-                        .eq('tournament_unique_key', `Main ${tournamentNumber}`),
+                // Fetch stats data
+                const statsResponse = await supabaseClient
+                    .from('hero_stats_tournament')
+                    .select(`
+                        tournament_unique_key,
+                        hero_handle,
+                        hero_name,
+                        followers,
+                        rank,
+                        score,
+                        posts,
+                        views,
+                        views_rank,
+                        avg_views,
+                        avg_views_rank,
+                        reach,
+                        reach_rank,
+                        hero_pfp_url,
+                        hero_stars,
+                        score_history,
+                        star_rank
+                    `)
+                    .eq('tournament_unique_key', `Main ${tournamentNumber}`);
 
-                    supabaseClient
+                if (statsResponse.error) throw statsResponse.error;
+
+                // Fetch timeline data with pagination
+                let allTimelineData = [];
+                let page = 0;
+                const pageSize = 1000;
+                
+                while (true) {
+                    const timelineResponse = await supabaseClient
                         .from('hero_tweets')
                         .select(`
                             tournament_number,
@@ -618,20 +626,38 @@
                             now_hours_from_start
                         `)
                         .eq('tournament_number', tournamentNumber)
-                ]);
+                        .range(page * pageSize, (page + 1) * pageSize - 1)
+                        .order('post_hours_from_start', { ascending: true });
 
-                if (statsResponse.error) throw statsResponse.error;
-                if (timelineResponse.error) throw timelineResponse.error;
+                    if (timelineResponse.error) throw timelineResponse.error;
+
+                    // Add the new data to our collection
+                    allTimelineData = [...allTimelineData, ...timelineResponse.data];
+
+                    // If we got less than pageSize results, we've reached the end
+                    if (timelineResponse.data.length < pageSize) {
+                        break;
+                    }
+
+                    page++;
+                }
+
+                // Debug logging
+                console.log('Timeline Response:', {
+                    status: 'success',
+                    totalRecords: allTimelineData.length,
+                    uniqueHeroes: [...new Set(allTimelineData.map(d => d.hero_handle))]
+                });
 
                 // Cache the results
                 tournamentCache.set(cacheKey, {
                     stats: statsResponse.data,
-                    timeline: timelineResponse.data
+                    timeline: allTimelineData
                 });
 
                 // Sort and render
                 const sortedData = sortData(statsResponse.data, currentSort.column, currentSort.direction);
-                renderTable(sortedData, timelineResponse.data);
+                renderTable(sortedData, allTimelineData);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -766,11 +792,6 @@
                         </div>
                     </td>
                 `;
-                console.log('Hero data being processed:', {
-                    handle: hero.hero_handle,
-                    stars: hero.hero_stars,
-                    star_rank: hero.star_rank
-                });
 
                 const rowData = {
                     score: hero.score,
@@ -779,7 +800,6 @@
                     posts: hero.posts,
                     star_rank: hero.star_rank
                 };
-                console.log('Setting row dataset:', rowData);
                 row.dataset.heroData = JSON.stringify(rowData);
                 fragment.appendChild(row);
             });
@@ -788,8 +808,6 @@
             tableBody.innerHTML = '';
             tableBody.appendChild(fragment);
 
-            // Apply perspective filter after batch DOM update
-            updateTableVisibility(currentPerspective);
         }
 
         async function initializeTournamentScroller() {
@@ -949,13 +967,15 @@
         function generateTimeline(heroHandle, timelineData) {
             const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
             
-            if (!heroPosts.length) return '';
+            if (!heroPosts.length) {
+                console.log(`No posts found for ${heroHandle}`);
+                return '';
+            }
 
-            // Get the now_hours_from_start from the first post (they should all have the same value)
-            const nowHours = heroPosts[0].now_hours_from_start;
-            const progressWidth = Math.min((nowHours / 72) * 100, 100); // Cap at 100%
+            // Get the latest now_hours_from_start
+            const nowHours = Math.max(...heroPosts.map(post => post.now_hours_from_start));
+            const progressWidth = Math.min((nowHours / 72) * 100, 100);
             
-            // Base container with progress bar
             const baseContainer = `
                 <div class="progress-bar" 
                      style="position: absolute;
@@ -980,9 +1000,11 @@
                         </div>`;
             }
 
+            // Calculate statistics for all posts
             const heroMaxViews = Math.max(...heroPosts.map(post => post.post_views));
             const heroMinViews = Math.min(...heroPosts.map(post => post.post_views));
             
+            // Generate bars for each post
             const bars = heroPosts.map(post => {
                 const position = (post.post_hours_from_start / 72) * 100;
                 const viewsRatio = (post.post_views - heroMinViews) / (heroMaxViews - heroMinViews || 1);
@@ -1016,17 +1038,24 @@
 
         function getLastPostTime(heroHandle, timelineData) {
             const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
-            if (!heroPosts.length || !heroPosts[0].last_post_timestamp) return '-';
-        
-            // Use the raw UTC timestamp directly without creating a new Date object
-            const lastPostTimestamp = new Date(heroPosts[0].last_post_timestamp + 'Z');
-            const now = new Date();
-            
+            if (!heroPosts.length) return '-';
 
-            // Calculate hours difference using UTC timestamps and ensure it's positive
+            // Find the most recent post timestamp
+            const lastPost = heroPosts.reduce((latest, current) => {
+                if (!latest.last_post_timestamp) return current;
+                if (!current.last_post_timestamp) return latest;
+                return new Date(current.last_post_timestamp + 'Z') > new Date(latest.last_post_timestamp + 'Z') 
+                    ? current 
+                    : latest;
+            }, heroPosts[0]);
+
+            if (!lastPost.last_post_timestamp) return '-';
+
+            const lastPostTimestamp = new Date(lastPost.last_post_timestamp + 'Z');
+            const now = new Date();
+
             const diffHours = Math.max(0, Math.floor((now.getTime() - lastPostTimestamp.getTime()) / (1000 * 60 * 60)));
 
-            // Return days if >= 24 hours, otherwise return hours
             return diffHours >= 24 
                 ? `${Math.floor(diffHours / 24)}d`
                 : `${diffHours}h`;

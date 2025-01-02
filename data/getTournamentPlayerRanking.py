@@ -47,7 +47,7 @@ and SUM(case when best_deck_rank = 1 then eth_reward else 0 end) > 0.05
 )
 select start_timestamp,tournament_unique_key ,league,base.player_id,player_name,profile_picture,count(*) as total_decks
 ,max(case when best_deck_rank = 1 then player_rank else 0 end) as best_deck_rank
-,sum(case when best_deck_rank = 1 then eth_reward else 0 end) best_deck_eth_won
+,sum(eth_reward) total_eth_won
 ,max(case when best_deck_rank = 1 then normalized_rank else 0 end) as best_deck_norm_rank
 from base
 join qualified_players qp on base.player_id = qp.player_id

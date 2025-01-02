@@ -33,19 +33,135 @@
             height: 30px;
             border-radius: 50%;
             object-fit: cover;
-            vertical-align: middle;
+            flex-shrink: 0;
             margin-right: 10px;
         }
 
         /* Add left alignment for player column */
         .ranking-table td:nth-child(2) {
             text-align: left;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Keep existing player link styles */
         .player-link {
             text-decoration: none;
             color: inherit;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .month-selector {
+            margin: 20px;
+        }
+
+        .month-checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .month-checkbox {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .month-only-option {
+            position: absolute;
+            top: 100%;
+            font-size: 0.8em;
+            color: #666;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-top: 2px;
+        }
+
+        .month-checkbox:hover .month-only-option {
+            opacity: 1;
+        }
+
+        .month-checkbox input[type="checkbox"] {
+            display: none;
+        }
+
+        .month-checkbox label {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 2px;
+        }
+
+        .month-checkbox input[type="checkbox"]:checked + label {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Add container for player info to maintain layout */
+        .player-info {
+            display: flex;
+            align-items: center;
+            max-width: 100%;
+        }
+
+        .month-context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .month-context-menu-item {
+            padding: 5px 20px;
+            cursor: pointer;
+        }
+
+        .month-context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Add styles for wrapped column headers */
+        .ranking-table th {
+            white-space: normal;
+            vertical-align: top;
+            padding: 8px 4px;
+            line-height: 1.2;
+        }
+
+        .tournament-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .tournament-name {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .tournament-number {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+        }
+
+        .column-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
         }
     </style>
 </head>
@@ -53,9 +169,16 @@
     <div class="league-selector">
         <label for="leagueSelect">Select League:</label>
         <select id="leagueSelect" onchange="updateRankings()">
-            <option value="all">All Leagues</option>
-            <!-- Leagues will be populated dynamically -->
+            <!-- Removed the "All Leagues" option since Elite will be default -->
         </select>
+    </div>
+
+    <!-- Add new month selector -->
+    <div class="month-selector">
+        <label>Select Months:</label>
+        <div id="monthCheckboxes" class="month-checkbox-container">
+            <!-- Will be populated dynamically -->
+        </div>
     </div>
 
     <div id="rankingsTableContainer">
@@ -71,12 +194,15 @@
 
     <script>
         let playerData = [];
+        let months = new Set();
         
         async function fetchData() {
             try {
                 const response = await fetch('/data/players/player_ranking.json');
                 playerData = await response.json();
+                console.log("Raw player data:", playerData); // Debug log
                 populateLeagues();
+                populateMonths();
                 updateRankings();
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -84,32 +210,133 @@
         }
 
         function populateLeagues() {
-            const leagues = [...new Set(playerData.map(item => item.league))];
+            const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
             const leagueSelect = document.getElementById('leagueSelect');
             
-            leagues.forEach(league => {
+            // Add "All Leagues" option first
+            const allOption = document.createElement('option');
+            allOption.value = 'all';
+            allOption.textContent = 'All Leagues';
+            leagueSelect.appendChild(allOption);
+            
+            // Add leagues in specified order
+            leagueOrder.forEach(league => {
                 const option = document.createElement('option');
                 option.value = league;
                 option.textContent = league;
+                if (league === 'Elite') {
+                    option.selected = true;
+                }
                 leagueSelect.appendChild(option);
+            });
+        }
+
+        function populateMonths() {
+            const allMonths = playerData.map(item => {
+                const datePart = item.start_timestamp.split(' ')[0];
+                const date = new Date(datePart);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            });
+
+            months = new Set(allMonths);
+            const monthContainer = document.getElementById('monthCheckboxes');
+            monthContainer.innerHTML = '';
+
+            // Sort months numerically
+            const sortedMonths = [...months].sort((a, b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                
+                if (yearA !== yearB) {
+                    return yearB - yearA;
+                }
+                return monthB - monthA;
+            });
+
+            sortedMonths.forEach(monthKey => {
+                const [year, month] = monthKey.split('-').map(Number);
+                const date = new Date(year, month - 1);
+                const monthName = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                
+                const div = document.createElement('div');
+                div.className = 'month-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" id="${monthKey}" value="${monthKey}" checked onchange="updateRankings()">
+                    <label for="${monthKey}">${monthName}</label>
+                    <span class="month-only-option" onclick="selectOnlyMonth('${monthKey}')">Only</span>
+                `;
+
+                monthContainer.appendChild(div);
             });
         }
 
         function updateRankings() {
             const selectedLeague = document.getElementById('leagueSelect').value;
-            let filteredData = playerData;
+            const selectedMonths = [...document.querySelectorAll('.month-checkbox input:checked')]
+                .map(checkbox => checkbox.value);
             
+            let filteredData = playerData.filter(item => {
+                // Split the timestamp to get just the date part
+                const datePart = item.start_timestamp.split(' ')[0];
+                const itemMonth = datePart.slice(0, 7); // Get YYYY-MM format
+                return selectedMonths.includes(itemMonth);
+            });
+
             if (selectedLeague !== 'all') {
-                filteredData = playerData.filter(item => item.league === selectedLeague);
+                filteredData = filteredData.filter(item => item.league === selectedLeague);
             }
 
             // Get unique tournament keys
             const tournaments = [...new Set(filteredData.map(item => item.tournament_unique_key))];
             
-            // Update header row to include profile picture column
-            const headerRow = ['Rank', 'Player', 'Total Decks', 'Total ETH Won', 'Avg Norm Rank', ...tournaments];
+            // Update header row with wrapped text
+            const headerRow = [
+                { text: 'Rank', wrap: false },
+                { text: 'Player', wrap: false },
+                { 
+                    text: 'Total\nDecks',
+                    wrap: true
+                },
+                { 
+                    text: 'Total ETH\nWon',
+                    wrap: true
+                },
+                { 
+                    text: 'Avg Norm\nRank',
+                    wrap: true
+                },
+                ...tournaments.map(t => {
+                    // Split tournament key into parts (e.g., "Main 24" -> ["Main", "24"])
+                    const parts = t.split(' ');
+                    return {
+                        name: parts[0],
+                        number: parts[1],
+                        isTournament: true
+                    };
+                })
+            ];
+
             const thead = document.getElementById('tableHeader');
-            thead.innerHTML = `<tr>${headerRow.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            thead.innerHTML = `<tr>${
+                headerRow.map(h => {
+                    if (h.isTournament) {
+                        return `<th>
+                            <div class="tournament-header">
+                                <span class="tournament-name">${h.name}</span>
+                                <span class="tournament-number">${h.number}</span>
+                            </div>
+                        </th>`;
+                    } else if (h.wrap) {
+                        return `<th>
+                            <div class="column-header">
+                                ${h.text.split('\n').map(line => `<span>${line}</span>`).join('')}
+                            </div>
+                        </th>`;
+                    } else {
+                        return `<th>${h.text}</th>`;
+                    }
+                }).join('')
+            }</tr>`;
 
             // Group and calculate aggregates by player_name
             const playerGroups = {};
@@ -155,13 +382,17 @@
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>
-                        <img src="${player.profile_picture}" 
-                             alt="${player.playerName}" 
-                             class="profile-pic">
-                        <a href="https://fantasy.top/player/${player.player_id}" 
-                           class="player-link" 
-                           target="_blank" 
-                           rel="noopener noreferrer">${player.playerName}</a>
+                        <div class="player-info">
+                            <img src="${player.profile_picture}" 
+                                 alt="${player.playerName}" 
+                                 class="profile-pic"
+                                 onerror="this.src='/icons/ft_logo.webp'">
+                            <a href="https://fantasy.top/player/${player.player_id}" 
+                               class="player-link" 
+                               title="${player.playerName}"
+                               target="_blank" 
+                               rel="noopener noreferrer">${player.playerName}</a>
+                        </div>
                     </td>
                     <td>${player.total_decks}</td>
                     <td>${player.total_eth.toFixed(3)}</td>
@@ -174,6 +405,63 @@
 
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', fetchData);
+
+        // Add these new functions
+        let activeContextMenu = null;
+
+        function showContextMenu(e, monthKey) {
+            // Remove any existing context menu
+            if (activeContextMenu) {
+                document.body.removeChild(activeContextMenu);
+            }
+
+            // Create context menu
+            const menu = document.createElement('div');
+            menu.className = 'month-context-menu';
+            menu.innerHTML = `
+                <div class="month-context-menu-item" onclick="selectOnlyMonth('${monthKey}')">
+                    Select Only
+                </div>
+            `;
+
+            // Position the menu
+            menu.style.left = `${e.pageX}px`;
+            menu.style.top = `${e.pageY}px`;
+
+            // Add to document
+            document.body.appendChild(menu);
+            activeContextMenu = menu;
+
+            // Close menu when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target)) {
+                        if (document.body.contains(menu)) {
+                            document.body.removeChild(menu);
+                        }
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        function selectOnlyMonth(monthKey) {
+            // Uncheck all checkboxes
+            document.querySelectorAll('.month-checkbox input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = checkbox.value === monthKey;
+            });
+
+            // Update rankings
+            updateRankings();
+        }
+
+        // Add document level click handler to close context menu
+        document.addEventListener('click', function(e) {
+            if (activeContextMenu && !activeContextMenu.contains(e.target)) {
+                document.body.removeChild(activeContextMenu);
+                activeContextMenu = null;
+            }
+        });
     </script>
 </body>
 </html>

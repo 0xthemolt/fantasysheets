@@ -38,17 +38,19 @@ where 1=1
 and t.start_timestamp >= '2024-07-01'
 )
 ,qualified_players as (
-select player_id,MAX(case when best_deck_rank = 1 then eth_reward else 0 end) qualified_player_eth_won
+select player_id,COUNT(DISTINCT tournament_unique_key) mains_played,sum(case when best_deck_rank = 1 then eth_reward else 0 end) qualified_player_eth_won
 from base
+where start_timestamp >= NOW() at TIME zone 'UTC' - interval '1 month'
 group by 1
-having MAX(case when best_deck_rank = 1 then eth_reward else 0 end) > 0
+having count(*) >= 2
+and SUM(case when best_deck_rank = 1 then eth_reward else 0 end) > 0.05
 )
 select start_timestamp,tournament_unique_key ,league,base.player_id,player_name,profile_picture,count(*) as total_decks
+,max(case when best_deck_rank = 1 then player_rank else 0 end) as best_deck_rank
 ,sum(case when best_deck_rank = 1 then eth_reward else 0 end) best_deck_eth_won
 ,max(case when best_deck_rank = 1 then normalized_rank else 0 end) as best_deck_norm_rank
 from base
-join qualified_players qp
-on base.player_id = qp.player_id
+join qualified_players qp on base.player_id = qp.player_id
 group by 1,2,3,4,5,6
 order by start_timestamp asc"""
 player_ranking_df = pd.read_sql_query(player_ranking_query, conn)

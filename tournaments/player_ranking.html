@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Player Rankings</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        .league-selector {
+            margin: 20px;
+        }
+
+        /* Update profile picture size */
+        .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        /* Add left alignment for player column */
+        .ranking-table td:nth-child(2) {
+            text-align: left;
+        }
+
+        /* Keep existing player link styles */
+        .player-link {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="league-selector">
+        <label for="leagueSelect">Select League:</label>
+        <select id="leagueSelect" onchange="updateRankings()">
+            <option value="all">All Leagues</option>
+            <!-- Leagues will be populated dynamically -->
+        </select>
+    </div>
+
+    <div id="rankingsTableContainer">
+        <table class="ranking-table">
+            <thead id="tableHeader">
+                <!-- Headers will be populated dynamically -->
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will be populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let playerData = [];
+        
+        async function fetchData() {
+            try {
+                const response = await fetch('/data/players/player_ranking.json');
+                playerData = await response.json();
+                populateLeagues();
+                updateRankings();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function populateLeagues() {
+            const leagues = [...new Set(playerData.map(item => item.league))];
+            const leagueSelect = document.getElementById('leagueSelect');
+            
+            leagues.forEach(league => {
+                const option = document.createElement('option');
+                option.value = league;
+                option.textContent = league;
+                leagueSelect.appendChild(option);
+            });
+        }
+
+        function updateRankings() {
+            const selectedLeague = document.getElementById('leagueSelect').value;
+            let filteredData = playerData;
+            
+            if (selectedLeague !== 'all') {
+                filteredData = playerData.filter(item => item.league === selectedLeague);
+            }
+
+            // Get unique tournament keys
+            const tournaments = [...new Set(filteredData.map(item => item.tournament_unique_key))];
+            
+            // Update header row to include profile picture column
+            const headerRow = ['Rank', 'Player', 'Total Decks', 'Total ETH Won', 'Avg Norm Rank', ...tournaments];
+            const thead = document.getElementById('tableHeader');
+            thead.innerHTML = `<tr>${headerRow.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+            // Group and calculate aggregates by player_name
+            const playerGroups = {};
+            filteredData.forEach(item => {
+                if (!playerGroups[item.player_name]) {
+                    playerGroups[item.player_name] = {
+                        tournaments: {},
+                        total_decks: 0,
+                        total_eth: 0,
+                        norm_ranks: []
+                    };
+                }
+                playerGroups[item.player_name].tournaments[item.tournament_unique_key] = item.best_deck_rank;
+                playerGroups[item.player_name].total_decks += item.total_decks;
+                playerGroups[item.player_name].total_eth += item.best_deck_eth_won;
+                playerGroups[item.player_name].norm_ranks.push(item.best_deck_norm_rank);
+            });
+
+            // Convert to array and calculate averages
+            let playersArray = Object.entries(playerGroups).map(([playerName, data]) => {
+                // Find the first entry for this player to get their profile info
+                const playerInfo = filteredData.find(item => item.player_name === playerName);
+                return {
+                    playerName,
+                    total_decks: data.total_decks,
+                    total_eth: data.total_eth,
+                    avg_norm_rank: data.norm_ranks.reduce((a, b) => a + b, 0) / data.norm_ranks.length,
+                    tournaments: data.tournaments,
+                    profile_picture: playerInfo?.profile_picture,
+                    player_id: playerInfo?.player_id
+                };
+            });
+
+            // Sort by average norm rank (descending)
+            playersArray.sort((a, b) => b.avg_norm_rank - a.avg_norm_rank);
+
+            // Create rows with rank
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            playersArray.forEach((player, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <img src="${player.profile_picture}" 
+                             alt="${player.playerName}" 
+                             class="profile-pic">
+                        <a href="https://fantasy.top/player/${player.player_id}" 
+                           class="player-link" 
+                           target="_blank" 
+                           rel="noopener noreferrer">${player.playerName}</a>
+                    </td>
+                    <td>${player.total_decks}</td>
+                    <td>${player.total_eth.toFixed(3)}</td>
+                    <td>${player.avg_norm_rank.toFixed(3)}</td>
+                    ${tournaments.map(t => `<td>${player.tournaments[t] || '-'}</td>`).join('')}
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+</html>
+    

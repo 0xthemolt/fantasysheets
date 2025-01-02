@@ -1217,6 +1217,33 @@
                     });
                 });
             });
+
+            // Add hover handlers for sparklines
+            document.body.addEventListener('mouseover', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    tooltip.innerHTML = `${circle.dataset.date}<br>Score: <span class="score-value">${circle.dataset.score}</span>`;
+                    
+                    const containerRect = circle.closest('.sparkline-container').getBoundingClientRect();
+                    const circleRect = circle.getBoundingClientRect();
+                    
+                    const tooltipX = circleRect.left - containerRect.left + (circleRect.width / 2);
+                    const tooltipY = -10;
+                    
+                    tooltip.style.left = `${tooltipX}px`;
+                    tooltip.style.top = `${tooltipY}px`;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    tooltip.style.opacity = '0';
+                }
+            });
         });
 
 

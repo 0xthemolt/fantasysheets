@@ -22,52 +22,86 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* Base table container */
         .table-container {
             max-height: 80vh;
             overflow: hidden;
-            width: 60%;
+            width: 100%;
             margin: 0 auto;
         }
-        
+
+        /* Base table styles */
         #playerTable {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
+        /* Header styles */
         #playerTable thead {
             position: sticky;
             top: 0;
             background-color: var(--background-color);
             z-index: 1;
         }
-        
+
+        /* Scrollable body */
         #playerTable tbody {
             display: block;
             overflow-y: auto;
             max-height: calc(80vh - 50px);
-            width: 100%;
         }
-        
+
+        /* Row layout */
         #playerTable thead tr, #playerTable tbody tr {
             display: table;
             width: 100%;
             table-layout: fixed;
         }
 
-        /* Add these new styles for column widths and alignment */
+        /* Cell base styles */
         #playerTable th, #playerTable td {
             padding: 8px;
-        }
-
-        /* Specific column widths */
-        #playerTable th:nth-child(1), #playerTable td:nth-child(1) { width: 70px; text-align: right; }
-        #playerTable th:nth-child(2), #playerTable td:nth-child(2) { width: auto; text-align: left; }
-        #playerTable th:nth-child(n+3), #playerTable td:nth-child(n+3) { 
-            width: 80px; 
             text-align: right;
+            border-right: 1px solid rgba(155, 155, 155, 0.2);
         }
 
-        /* Modern scrollbar styling */
+        /* Remove border from the last column */
+        #playerTable th:last-child, #playerTable td:last-child {
+            border-right: none;
+        }
+
+        /* Column-specific widths - these override the previous nth-child selectors */
+        #playerTable th[data-sort="rank"], #playerTable td[data-column="rank"] { width: 70px; }
+        #playerTable th[data-sort="name"], #playerTable td[data-column="name"] { 
+            width: 90px; 
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Standard column widths */
+        #playerTable th[data-sort="fan_pts"], #playerTable td[data-column="fan_pts"],
+        #playerTable th[data-sort="gold"], #playerTable td[data-column="gold"],
+        #playerTable th[data-sort="reward_eth"], #playerTable td[data-column="reward_eth"],
+        #playerTable th[data-sort="portfolio"], #playerTable td[data-column="portfolio"],
+        #playerTable th[data-sort="buy_volume"], #playerTable td[data-column="buy_volume"],
+        #playerTable th[data-sort="sell_volume"], #playerTable td[data-column="sell_volume"],
+        #playerTable th[data-sort="cards"], #playerTable td[data-column="cards"],
+        #playerTable th[data-sort="decks"], #playerTable td[data-column="decks"] {
+            width: 40px;
+        }
+
+        /* League rank columns */
+        #playerTable th[data-sort="elite_norm_rank"], #playerTable td[data-column="elite_norm_rank"],
+        #playerTable th[data-sort="gold_norm_rank"], #playerTable td[data-column="gold_norm_rank"],
+        #playerTable th[data-sort="silver_norm_rank"], #playerTable td[data-column="silver_norm_rank"],
+        #playerTable th[data-sort="bronze_norm_rank"], #playerTable td[data-column="bronze_norm_rank"],
+        #playerTable th[data-sort="reverse_norm_rank"], #playerTable td[data-column="reverse_norm_rank"] {
+            width: 30px;
+        }
+
+        /* Scrollbar styling */
         #playerTable tbody::-webkit-scrollbar {
             width: 6px;
         }
@@ -82,15 +116,159 @@
             border: transparent;
         }
 
-        /* Media query for mobile responsiveness */
+        .sort-arrow {
+            display: none; /* Hide by default */
+            width: 0;
+            height: 0;
+            margin: 2px auto;
+        }
+
+        .sort-arrow.active.up {
+            display: block; /* Show only when active */
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #4CAF50; /* Green */
+        }
+
+        .sort-arrow.active.down {
+            display: block; /* Show only when active */
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #F44336; /* Red */
+        }
+
+        #playerTable th {
+            text-align: center;
+            position: relative;
+            padding-right: 20px; /* Increased from 15px to 20px */
+        }
+
+        .sort-arrow {
+            display: none;
+            position: absolute;
+            right: 6px; /* Increased from 4px to 6px */
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Update header content alignment */
+        #playerTable th img {
+            vertical-align: middle;
+        }
+
+        /* Specific column alignments (keep these if you want first/second columns different) */
+        #playerTable th:nth-child(1) { text-align: center; }
+        #playerTable th:nth-child(2) { text-align: left; }
+
+        /* Update these styles */
+        #playerTable tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            transition: background-color 0.2s ease;  /* Add transition here */
+        }
+
+        #playerTable tbody tr:hover {
+            background-color: rgba(155, 155, 155, 0.1) !important;  /* Added !important */
+        }
+
+        .search-containerx {
+            width: 80%;
+            margin: 0 auto 20px auto;
+        }
+
+        .search-boxy {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        #playerSearch {
+            width: 100%;
+            padding: 10px 10px 10px 35px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #playerSearch:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+        }
+
         @media screen and (max-width: 768px) {
-            .table-container {
+            .search-container {
                 width: 95%;
             }
-            
-            #playerTable {
-                font-size: 14px;
-            }
+        }
+
+        /* Add these styles to your existing CSS */
+        .compare-checkbox {
+            width: 20px;
+            height: 20px;
+            margin: 0 8px;
+            cursor: pointer;
+        }
+
+        /* Add width for compare column */
+        #playerTable th[data-sort="compare"], #playerTable td[data-column="compare"] { 
+            width: 40px;
+            text-align: center;
+            padding: 8px;
+            /* Add these to ensure visibility */
+            min-width: 40px;
+            box-sizing: border-box;
+        }
+
+        /* Add this for the compare controls */
+        .compare-controls {
+            width: 80%;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end; /* Align to the right */
+        }
+
+        .compare-button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .compare-button:hover {
+            background-color: #45a049;
+        }
+
+        .compare-button.active {
+            background-color: #f44336;
+        }
+
+        /* Update the player cell content to handle truncation */
+        #playerTable td[data-column="name"] a {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: calc(130px - 40px); /* Account for the image width (30px) and margin (10px) */
+            vertical-align: middle;
         }
     </style>
 </head>
@@ -98,23 +276,36 @@
 <body>
     <div class="container">
         <h1>Player Rankings</h1>
+        <div class="search-containerx">
+            <div class="search-boxy">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="playerSearch" placeholder="Search players...">
+            </div>
+        </div>
+        <div class="compare-controls">
+            <button id="compareButton" class="compare-button">Show Compared Players</button>
+            <span id="compareCount">(0 selected)</span>
+        </div>
         <div class="table-container">
             <table id="playerTable">
                 <thead>
                     <tr>
-                        <th style="width: 70px; text-align: center">Rank</th>
-                        <th style="text-align: left">Player</th>
-                        <th><img src="../icons/fan.webp" alt="Fantasy Points" style="height: 20px; width: 20px;"></th>        
-                        <th><img src="../icons/blast.webp" alt="Gold" style="height: 20px; width: 20px;"></th>
-                        <th><img src="../icons/eth.webp" alt="ETH Rewards" style="height: 20px; width: 20px;"></th>
-                        <th>Decks</th>
-                        <th>Port</th>
-                        <th>Cards</th>
-                        <th><img src="../icons/elite.webp" alt="Elite" style="height: 20px; width: 20px;"></th>
-                        <th><img src="../icons/gold.webp" alt="Gold" style="height: 20px; width: 20px;"></th>
-                        <th><img src="../icons/silver.webp" alt="Silver" style="height: 20px; width: 20px;"></th>
-                        <th><img src="../icons/bronze.webp" alt="Bronze" style="height: 20px; width: 20px;"></th>
-                        <th><img src="../icons/reverse.webp" alt="Reverse" style="height: 20px; width: 20px;"></th>
+                        <th data-sort="rank"><span>Rank</span><div class="sort-arrow"></div></th>
+                        <th data-sort="name"><span>Player</span><div class="sort-arrow"></div></th>
+                        <th data-sort="fan_pts" style="width: 40px"><span><img src="../icons/fan.webp" alt="Fantasy Points" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>        
+                        <th data-sort="gold" style="width: 40px"><span><img src="../icons/blast.webp" alt="Gold" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="reward_eth" style="width: 40px"><span><img src="../icons/eth.webp" alt="ETH Rewards" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="portfolio" style="width: 40px"><span>Port</span><div class="sort-arrow"></div></th>
+                        <th data-sort="buy_volume" style="width: 40px"><span>Buy Vol</span><div class="sort-arrow"></div></th>
+                        <th data-sort="sell_volume" style="width: 40px"><span>Sell Vol</span><div class="sort-arrow"></div></th>
+                        <th data-sort="cards" style="width: 40px"><span>Cards</span><div class="sort-arrow"></div></th>
+                        <th data-sort="decks" style="width: 40px"><span>Decks</span><div class="sort-arrow"></div></th>
+                        <th data-sort="elite_norm_rank" style="width: 30px"><span><img src="../icons/elite.webp" alt="Elite" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="gold_norm_rank" style="width: 30px"><span><img src="../icons/gold.webp" alt="Gold" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="silver_norm_rank" style="width: 30px"><span><img src="../icons/silver.webp" alt="Silver" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="bronze_norm_rank" style="width: 30px"><span><img src="../icons/bronze.webp" alt="Bronze" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="reverse_norm_rank" style="width: 30px"><span><img src="../icons/reverse.webp" alt="Reverse" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
+                        <th data-sort="compare"><span>Compare</span></th>
                     </tr>
                 </thead>
                 <tbody id="playerTableBody">
@@ -140,88 +331,244 @@
             return value.toLocaleString('en-US');
         }
 
+        let players = []; // Store players globally
+        let currentSort = { column: 'fan_pts', direction: 'desc' }; // Default sort
+        let comparedPlayers = new Set();
+        let showingCompared = false;
+
+        function sortTable(column) {
+            const headers = document.querySelectorAll('#playerTable th');
+            const arrows = document.querySelectorAll('.sort-arrow');
+            
+            // Reset all arrows
+            arrows.forEach(arrow => {
+                arrow.className = 'sort-arrow';
+            });
+
+            // Update sort direction
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'desc'; // Always start with descending when switching columns
+            }
+
+            // Update arrow on clicked header
+            const clickedHeader = document.querySelector(`th[data-sort="${column}"]`);
+            const arrow = clickedHeader.querySelector('.sort-arrow');
+            arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`; // Make sure down arrow shows for desc
+
+            // Sort players
+            players.sort((a, b) => {
+                // Handle text-based sorting (player names)
+                if (column === 'name') {
+                    const aVal = a.player_name || '';
+                    const bVal = b.player_name || '';
+                    return currentSort.direction === 'asc' ? 
+                        aVal.localeCompare(bVal) : 
+                        bVal.localeCompare(aVal);
+                }
+                
+                // Handle numeric sorting
+                const aVal = a[column] || 0;
+                const bVal = b[column] || 0;
+                
+                // Special handling for normalized ranks that are 0
+                if (['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank'].includes(column)) {
+                    if (currentSort.direction === 'asc') {
+                        if (aVal === 0) return 1;
+                        if (bVal === 0) return -1;
+                    } else {
+                        if (aVal === 0) return 1;
+                        if (bVal === 0) return -1;
+                    }
+                }
+                
+                return currentSort.direction === 'asc' ? aVal - bVal : bVal - aVal;
+            });
+
+            // Refresh table
+            const tableBody = document.getElementById('playerTableBody');
+            tableBody.innerHTML = '';
+            players.forEach((player, index) => {
+                const row = document.createElement('tr');
+                
+                // Image element code remains the same
+                const imgElement = document.createElement('img');
+                imgElement.src = player.profile_picture || '../icons/ft_logo.webp';
+                imgElement.style.width = '30px';
+                imgElement.style.height = '30px';
+                imgElement.style.borderRadius = '50%';
+                imgElement.style.marginRight = '10px';
+                imgElement.style.verticalAlign = 'middle';
+                imgElement.onerror = function() {
+                    this.src = '../icons/ft_logo.webp';
+                };
+
+                const playerCell = document.createElement('td');
+                playerCell.style.textAlign = 'left';
+                playerCell.appendChild(imgElement);
+                
+                // Create and append the hyperlink
+                const playerLink = document.createElement('a');
+                playerLink.href = `https://fantasy.top/player/${player.player_id}`;
+                playerLink.textContent = player.player_name || 'Unknown';
+                playerLink.style.textDecoration = 'none';
+                playerLink.style.color = 'inherit';
+                playerCell.appendChild(playerLink);
+                
+                row.dataset.playerHandle = player.player_handle || '';
+                
+                row.innerHTML = `
+                    <td data-column="rank">${(index + 1).toLocaleString('en-US')}</td>
+                    <td data-column="name">${playerCell.innerHTML}</td>
+                    <td data-column="fan_pts">${formatNumber(player.fan_pts || 0)}</td>
+                    <td data-column="gold">${formatNumber(player.gold || 0)}</td>
+                    <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>
+                    <td data-column="portfolio">${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
+                    <td data-column="buy_volume">${formatNumber(player.buy_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="sell_volume">${formatNumber(player.sell_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="cards">${formatInt(player.cards || 0)}</td>
+                    <td data-column="decks">${formatInt(player.decks || 0)}</td>
+                    <td data-column="elite_norm_rank">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="gold_norm_rank">${player.gold_norm_rank === 0 ? '-' : (player.gold_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="silver_norm_rank">${player.silver_norm_rank === 0 ? '-' : (player.silver_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="bronze_norm_rank">${player.bronze_norm_rank === 0 ? '-' : (player.bronze_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="reverse_norm_rank">${player.reverse_norm_rank === 0 ? '-' : (player.reverse_norm_rank * 100).toFixed(1)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Update loadPlayerRankings to store players globally and add click handlers
         async function loadPlayerRankings() {
             try {
                 const response = await fetch('../data/players/player_ranking.json');
                 const data = await response.json();
-                const players = data.players || [];
+                players = data.players || []; // Store globally
                 
-                // Create arrays to track top 3 for each metric
-                const metrics = ['fan_pts', 'gold', 'reward_eth', 'decks', 'portfolio', 'cards'];
-                const topThree = {};
-                
-                // Initialize tracking for each metric
-                metrics.forEach(metric => {
-                    topThree[metric] = players
-                        .map((p, idx) => ({ value: p[metric] || 0, index: idx }))
-                        .sort((a, b) => b.value - a.value)
-                        .slice(0, 3);
+                // Add click handlers to headers
+                const headers = document.querySelectorAll('#playerTable th[data-sort]');
+                headers.forEach(header => {
+                    header.style.cursor = 'pointer';
+                    header.addEventListener('click', () => {
+                        sortTable(header.dataset.sort);
+                    });
                 });
 
-                players.sort((a, b) => (b.fan_pts || 0) - (a.fan_pts || 0));
-                const tableBody = document.getElementById('playerTableBody');
-                
-                players.forEach((player, index) => {
-                    const row = document.createElement('tr');
-                    
-                    // Image element code remains the same
-                    const imgElement = document.createElement('img');
-                    imgElement.src = player.profile_picture || '../icons/ft_logo.webp';
-                    imgElement.style.width = '30px';
-                    imgElement.style.height = '30px';
-                    imgElement.style.borderRadius = '50%';
-                    imgElement.style.marginRight = '10px';
-                    imgElement.style.verticalAlign = 'middle';
-                    imgElement.onerror = function() {
-                        this.src = '../icons/ft_logo.webp';
-                    };
+                // Initial sort
+                sortTable('fan_pts');
 
-                    const playerCell = document.createElement('td');
-                    playerCell.style.textAlign = 'left';
-                    playerCell.appendChild(imgElement);
-                    
-                    // Create and append the hyperlink
-                    const playerLink = document.createElement('a');
-                    playerLink.href = `https://fantasy.top/player/${player.player_id}`;
-                    playerLink.textContent = player.player_name || 'Unknown';
-                    playerLink.style.textDecoration = 'none';
-                    playerLink.style.color = 'inherit';
-                    playerCell.appendChild(playerLink);
-                    
-                    row.dataset.playerHandle = player.player_handle || '';
-                    
-                    row.innerHTML = `<td>${(index + 1).toLocaleString('en-US')}</td>`;
-                    row.appendChild(playerCell);
+                // Add search functionality
+                document.getElementById('playerSearch').addEventListener('input', filterPlayers);
 
-                    // Helper function to get medal icon
-                    const getMedalIcon = (metric, value) => {
-                        const position = topThree[metric].findIndex(item => item.value === value);
-                        if (position === 0) return '<i class="fas fa-trophy" style="color: gold; margin-right: 4px;"></i>';
-                        if (position === 1) return '<i class="fas fa-medal" style="color: silver; margin-right: 4px;"></i>';
-                        if (position === 2) return '<i class="fas fa-medal" style="color: #CD7F32; margin-right: 4px;"></i>';
-                        return '';
-                    };
-
-                    // Add cells with medals where appropriate
-                    row.innerHTML += `
-                        <td style="text-align: right">${getMedalIcon('fan_pts', player.fan_pts || 0)}${formatNumber(player.fan_pts || 0)}</td>
-                        <td style="text-align: right">${getMedalIcon('gold', player.gold || 0)}${formatNumber(player.gold || 0)}</td>
-                        <td style="text-align: right">${getMedalIcon('reward_eth', player.reward_eth || 0)}${(player.reward_eth || 0).toFixed(1)}</td>
-                        <td style="text-align: right">${getMedalIcon('decks', player.decks || 0)}${formatInt(player.decks || 0)}</td>
-                        <td style="text-align: right">${getMedalIcon('portfolio', player.portfolio || 0)}${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
-                        <td style="text-align: right">${getMedalIcon('cards', player.cards || 0)}${formatInt(player.cards || 0)}</td>
-                        <td style="text-align: right">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>
-                        <td style="text-align: right">${player.gold_norm_rank === 0 ? '-' : (player.gold_norm_rank * 100).toFixed(1)}</td>
-                        <td style="text-align: right">${player.silver_norm_rank === 0 ? '-' : (player.silver_norm_rank * 100).toFixed(1)}</td>
-                        <td style="text-align: right">${player.bronze_norm_rank === 0 ? '-' : (player.bronze_norm_rank * 100).toFixed(1)}</td>
-                        <td style="text-align: right">${player.reverse_norm_rank === 0 ? '-' : (player.reverse_norm_rank * 100).toFixed(1)}</td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
+                // Add compare button click handler
+                document.getElementById('compareButton').addEventListener('click', toggleCompareView);
             } catch (error) {
                 console.error('Error loading player rankings:', error);
             }
+        }
+
+        function toggleCompare(playerId) {
+            if (comparedPlayers.has(playerId)) {
+                comparedPlayers.delete(playerId);
+            } else {
+                comparedPlayers.add(playerId);
+            }
+            document.getElementById('compareCount').textContent = `(${comparedPlayers.size} selected)`;
+            
+            // If we're currently showing compared players only, refresh the view
+            if (showingCompared) {
+                filterPlayers();
+            }
+        }
+
+        function toggleCompareView() {
+            const button = document.getElementById('compareButton');
+            showingCompared = !showingCompared;
+            button.textContent = showingCompared ? 'Show All Players' : 'Show Compared Players';
+            button.classList.toggle('active');
+            filterPlayers();
+        }
+
+        function filterPlayers() {
+            const searchTerm = document.getElementById('playerSearch').value.toLowerCase();
+            let filteredPlayers = players.filter(player => 
+                (player.player_name || '').toLowerCase().includes(searchTerm) ||
+                (player.player_handle || '').toLowerCase().includes(searchTerm) ||
+                (player.player_id || '').toLowerCase().includes(searchTerm)
+            );
+
+            // If showing compared players only, filter further
+            if (showingCompared) {
+                filteredPlayers = filteredPlayers.filter(player => comparedPlayers.has(player.player_id));
+            }
+
+            // Update your row creation to include the checkbox
+            const tableBody = document.getElementById('playerTableBody');
+            tableBody.innerHTML = '';
+            filteredPlayers.forEach((player, index) => {
+                const row = document.createElement('tr');
+                
+                // Create the compare checkbox cell first
+                const compareCell = document.createElement('td');
+                compareCell.setAttribute('data-column', 'compare');
+                compareCell.innerHTML = `
+                    <input type="checkbox" 
+                        class="compare-checkbox" 
+                        ${comparedPlayers.has(player.player_id) ? 'checked' : ''}
+                        onclick="toggleCompare('${player.player_id}')"
+                    >
+                `;
+
+                // Create the rest of the cells
+                const imgElement = document.createElement('img');
+                imgElement.src = player.profile_picture || '../icons/ft_logo.webp';
+                imgElement.style.width = '30px';
+                imgElement.style.height = '30px';
+                imgElement.style.borderRadius = '50%';
+                imgElement.style.marginRight = '10px';
+                imgElement.style.verticalAlign = 'middle';
+                imgElement.onerror = function() {
+                    this.src = '../icons/ft_logo.webp';
+                };
+
+                const playerCell = document.createElement('td');
+                playerCell.style.textAlign = 'left';
+                playerCell.appendChild(imgElement);
+                
+                // Create and append the hyperlink
+                const playerLink = document.createElement('a');
+                playerLink.href = `https://fantasy.top/player/${player.player_id}`;
+                playerLink.textContent = player.player_name || 'Unknown';
+                playerLink.style.textDecoration = 'none';
+                playerLink.style.color = 'inherit';
+                playerCell.appendChild(playerLink);
+                
+                row.dataset.playerHandle = player.player_handle || '';
+                
+                row.innerHTML = `
+                    <td data-column="rank">${(index + 1).toLocaleString('en-US')}</td>
+                    <td data-column="name">${playerCell.innerHTML}</td>
+                    <td data-column="fan_pts">${formatNumber(player.fan_pts || 0)}</td>
+                    <td data-column="gold">${formatNumber(player.gold || 0)}</td>
+                    <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>
+                    <td data-column="portfolio">${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
+                    <td data-column="buy_volume">${formatNumber(player.buy_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="sell_volume">${formatNumber(player.sell_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="cards">${formatInt(player.cards || 0)}</td>
+                    <td data-column="decks">${formatInt(player.decks || 0)}</td>
+                    <td data-column="elite_norm_rank">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="gold_norm_rank">${player.gold_norm_rank === 0 ? '-' : (player.gold_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="silver_norm_rank">${player.silver_norm_rank === 0 ? '-' : (player.silver_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="bronze_norm_rank">${player.bronze_norm_rank === 0 ? '-' : (player.bronze_norm_rank * 100).toFixed(1)}</td>
+                    <td data-column="reverse_norm_rank">${player.reverse_norm_rank === 0 ? '-' : (player.reverse_norm_rank * 100).toFixed(1)}</td>
+                `;
+                
+                row.appendChild(compareCell);
+                tableBody.appendChild(row);
+            });
         }
 
         loadPlayerRankings();

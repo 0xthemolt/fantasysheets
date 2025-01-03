@@ -63,6 +63,20 @@ from touranment_rankings
 where best_deck_rank = 1
 group by 1,2
 )
+, trade_volume as (
+select buyer_id as player_id,sum(price) as buy_volume,sum(0) as sell_volume
+from flatten.get_hero_last_trades ghlt 
+group by 1
+union
+select seller_id as player_id,sum(0) as buy_volume,sum(price) as sell_volume
+from flatten.get_hero_last_trades ghlt 
+group by 1
+)
+,trade_volume_by_player as (
+select  player_id,sum(buy_volume) as buy_volume,sum(sell_volume) as sell_volume
+from trade_volume
+group by 1
+)
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 
 ,suM(eth_won.reward_eth)reward_eth
 ,suM(coalesce(players.portfolio_value,0)) as portfolio
@@ -76,12 +90,16 @@ select players.player_id,players.player_handle ,players.player_name ,players.pro
 ,max(touranment_rankings_silver.avg_best_deck_norm_rank) as silver_norm_rank
 ,max(touranment_rankings_bronze.avg_best_deck_norm_rank) as bronze_norm_rank
 ,max(touranment_rankings_reverse.avg_best_deck_norm_rank) as reverse_norm_rank
+,max(coalesce(tvbp.buy_volume,0)) as buy_volume
+,max(coalesce(tvbp.sell_volume,0)) as sell_volume
 ,max(updated) freshness_timestamp
 from flatten.get_player_basic_data players
 join eth_won
 	on players.player_id = eth_won.player_id
 join tournaments 
 	on players.player_id  = tournaments.player_id
+left join trade_volume_by_player tvbp
+	on players.player_id = tvbp.player_id
 left join league_ranking touranment_rankings_elite
     on players.player_id = touranment_rankings_elite.player_id
     and touranment_rankings_elite.league = 'Elite'

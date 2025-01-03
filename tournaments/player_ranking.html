@@ -198,7 +198,7 @@
         
         async function fetchData() {
             try {
-                const response = await fetch('/data/players/player_ranking.json');
+                const response = await fetch('/data/tournaments/player_ranking.json');
                 playerData = await response.json();
                 console.log("Raw player data:", playerData); // Debug log
                 populateLeagues();

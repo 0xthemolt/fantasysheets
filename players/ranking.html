@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
@@ -21,4 +21,211 @@
     <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .table-container {
+            max-height: 80vh;
+            overflow: hidden;
+            width: 60%;
+            margin: 0 auto;
+        }
+        
+        #playerTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        #playerTable thead {
+            position: sticky;
+            top: 0;
+            background-color: var(--background-color);
+            z-index: 1;
+        }
+        
+        #playerTable tbody {
+            display: block;
+            overflow-y: auto;
+            max-height: calc(80vh - 50px);
+            width: 100%;
+        }
+        
+        #playerTable thead tr, #playerTable tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        /* Add these new styles for column widths and alignment */
+        #playerTable th, #playerTable td {
+            padding: 8px;
+        }
+
+        /* Specific column widths */
+        #playerTable th:nth-child(1), #playerTable td:nth-child(1) { width: 70px; text-align: right; }
+        #playerTable th:nth-child(2), #playerTable td:nth-child(2) { width: auto; text-align: left; }
+        #playerTable th:nth-child(n+3), #playerTable td:nth-child(n+3) { 
+            width: 80px; 
+            text-align: right;
+        }
+
+        /* Modern scrollbar styling */
+        #playerTable tbody::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #playerTable tbody::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #playerTable tbody::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 20px;
+            border: transparent;
+        }
+
+        /* Media query for mobile responsiveness */
+        @media screen and (max-width: 768px) {
+            .table-container {
+                width: 95%;
+            }
+            
+            #playerTable {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Player Rankings</h1>
+        <div class="table-container">
+            <table id="playerTable">
+                <thead>
+                    <tr>
+                        <th style="width: 70px; text-align: center">Rank</th>
+                        <th style="text-align: left">Player</th>
+                        <th><img src="../icons/fan.webp" alt="Fantasy Points" style="height: 20px; width: 20px;"></th>        
+                        <th><img src="../icons/blast.webp" alt="Gold" style="height: 20px; width: 20px;"></th>
+                        <th><img src="../icons/eth.webp" alt="ETH Rewards" style="height: 20px; width: 20px;"></th>
+                        <th>Decks</th>
+                        <th>Port</th>
+                        <th>Cards</th>
+                        <th><img src="../icons/elite.webp" alt="Elite" style="height: 20px; width: 20px;"></th>
+                        <th><img src="../icons/gold.webp" alt="Gold" style="height: 20px; width: 20px;"></th>
+                        <th><img src="../icons/silver.webp" alt="Silver" style="height: 20px; width: 20px;"></th>
+                        <th><img src="../icons/bronze.webp" alt="Bronze" style="height: 20px; width: 20px;"></th>
+                        <th><img src="../icons/reverse.webp" alt="Reverse" style="height: 20px; width: 20px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="playerTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(value) {
+            if (!value && value !== 0) return 'N/A';
+            
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(2) + 'm';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(1) + 'k';
+            }
+            return value.toFixed(1);
+        }
+
+        function formatInt(value) {
+            if (!value && value !== 0) return '0';
+            return value.toLocaleString('en-US');
+        }
+
+        async function loadPlayerRankings() {
+            try {
+                const response = await fetch('../data/players/player_ranking.json');
+                const data = await response.json();
+                const players = data.players || [];
+                
+                // Create arrays to track top 3 for each metric
+                const metrics = ['fan_pts', 'gold', 'reward_eth', 'decks', 'portfolio', 'cards'];
+                const topThree = {};
+                
+                // Initialize tracking for each metric
+                metrics.forEach(metric => {
+                    topThree[metric] = players
+                        .map((p, idx) => ({ value: p[metric] || 0, index: idx }))
+                        .sort((a, b) => b.value - a.value)
+                        .slice(0, 3);
+                });
+
+                players.sort((a, b) => (b.fan_pts || 0) - (a.fan_pts || 0));
+                const tableBody = document.getElementById('playerTableBody');
+                
+                players.forEach((player, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Image element code remains the same
+                    const imgElement = document.createElement('img');
+                    imgElement.src = player.profile_picture || '../icons/ft_logo.webp';
+                    imgElement.style.width = '30px';
+                    imgElement.style.height = '30px';
+                    imgElement.style.borderRadius = '50%';
+                    imgElement.style.marginRight = '10px';
+                    imgElement.style.verticalAlign = 'middle';
+                    imgElement.onerror = function() {
+                        this.src = '../icons/ft_logo.webp';
+                    };
+
+                    const playerCell = document.createElement('td');
+                    playerCell.style.textAlign = 'left';
+                    playerCell.appendChild(imgElement);
+                    
+                    // Create and append the hyperlink
+                    const playerLink = document.createElement('a');
+                    playerLink.href = `https://fantasy.top/player/${player.player_id}`;
+                    playerLink.textContent = player.player_name || 'Unknown';
+                    playerLink.style.textDecoration = 'none';
+                    playerLink.style.color = 'inherit';
+                    playerCell.appendChild(playerLink);
+                    
+                    row.dataset.playerHandle = player.player_handle || '';
+                    
+                    row.innerHTML = `<td>${(index + 1).toLocaleString('en-US')}</td>`;
+                    row.appendChild(playerCell);
+
+                    // Helper function to get medal icon
+                    const getMedalIcon = (metric, value) => {
+                        const position = topThree[metric].findIndex(item => item.value === value);
+                        if (position === 0) return '<i class="fas fa-trophy" style="color: gold; margin-right: 4px;"></i>';
+                        if (position === 1) return '<i class="fas fa-medal" style="color: silver; margin-right: 4px;"></i>';
+                        if (position === 2) return '<i class="fas fa-medal" style="color: #CD7F32; margin-right: 4px;"></i>';
+                        return '';
+                    };
+
+                    // Add cells with medals where appropriate
+                    row.innerHTML += `
+                        <td style="text-align: right">${getMedalIcon('fan_pts', player.fan_pts || 0)}${formatNumber(player.fan_pts || 0)}</td>
+                        <td style="text-align: right">${getMedalIcon('gold', player.gold || 0)}${formatNumber(player.gold || 0)}</td>
+                        <td style="text-align: right">${getMedalIcon('reward_eth', player.reward_eth || 0)}${(player.reward_eth || 0).toFixed(1)}</td>
+                        <td style="text-align: right">${getMedalIcon('decks', player.decks || 0)}${formatInt(player.decks || 0)}</td>
+                        <td style="text-align: right">${getMedalIcon('portfolio', player.portfolio || 0)}${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
+                        <td style="text-align: right">${getMedalIcon('cards', player.cards || 0)}${formatInt(player.cards || 0)}</td>
+                        <td style="text-align: right">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>
+                        <td style="text-align: right">${player.gold_norm_rank === 0 ? '-' : (player.gold_norm_rank * 100).toFixed(1)}</td>
+                        <td style="text-align: right">${player.silver_norm_rank === 0 ? '-' : (player.silver_norm_rank * 100).toFixed(1)}</td>
+                        <td style="text-align: right">${player.bronze_norm_rank === 0 ? '-' : (player.bronze_norm_rank * 100).toFixed(1)}</td>
+                        <td style="text-align: right">${player.reverse_norm_rank === 0 ? '-' : (player.reverse_norm_rank * 100).toFixed(1)}</td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading player rankings:', error);
+            }
+        }
+
+        loadPlayerRankings();
+    </script>
+</body>
+</html>
     

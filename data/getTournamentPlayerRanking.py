@@ -58,7 +58,7 @@ cursor.close()
 
 # Get the absolute path for the output directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
-output_dir = os.path.join(script_dir, 'players')
+output_dir = os.path.join(script_dir, 'tournaments')
 
 # Ensure the tournaments directory exists
 os.makedirs(output_dir, exist_ok=True)

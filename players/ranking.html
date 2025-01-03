@@ -71,13 +71,10 @@
         }
 
         /* Column-specific widths - these override the previous nth-child selectors */
-        #playerTable th[data-sort="rank"], #playerTable td[data-column="rank"] { width: 70px; }
-        #playerTable th[data-sort="name"], #playerTable td[data-column="name"] { 
-            width: 90px; 
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        #playerTable th[data-sort="rank"], #playerTable td[data-column="rank"] { 
+            width: 25px;
+            min-width: 25px;
+            box-sizing: border-box;
         }
 
         /* Standard column widths */
@@ -261,14 +258,17 @@
             background-color: #f44336;
         }
 
-        /* Update the player cell content to handle truncation */
-        #playerTable td[data-column="name"] a {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: inline-block;
-            max-width: calc(130px - 40px); /* Account for the image width (30px) and margin (10px) */
-            vertical-align: middle;
+        /* Update table layout to ensure header and body rows align */
+        #playerTable thead tr {
+            display: table;
+            width: calc(100% - 6px); /* Subtract scrollbar width */
+            table-layout: fixed;
+        }
+
+        #playerTable tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
         }
     </style>
 </head>
@@ -291,7 +291,6 @@
                 <thead>
                     <tr>
                         <th data-sort="rank"><span>Rank</span><div class="sort-arrow"></div></th>
-                        <th data-sort="name"><span>Player</span><div class="sort-arrow"></div></th>
                         <th data-sort="fan_pts" style="width: 40px"><span><img src="../icons/fan.webp" alt="Fantasy Points" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>        
                         <th data-sort="gold" style="width: 40px"><span><img src="../icons/blast.webp" alt="Gold" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
                         <th data-sort="reward_eth" style="width: 40px"><span><img src="../icons/eth.webp" alt="ETH Rewards" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
@@ -421,7 +420,6 @@
                 
                 row.innerHTML = `
                     <td data-column="rank">${(index + 1).toLocaleString('en-US')}</td>
-                    <td data-column="name">${playerCell.innerHTML}</td>
                     <td data-column="fan_pts">${formatNumber(player.fan_pts || 0)}</td>
                     <td data-column="gold">${formatNumber(player.gold || 0)}</td>
                     <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>
@@ -550,7 +548,11 @@
                 
                 row.innerHTML = `
                     <td data-column="rank">${(index + 1).toLocaleString('en-US')}</td>
-                    <td data-column="name">${playerCell.innerHTML}</td>
+                    <td data-column="name">
+                        <a href="https://fantasy.top/player/${player.player_id}" style="text-decoration: none; color: inherit;">
+                            ${player.player_id || 'Unknown'}
+                        </a>
+                    </td>
                     <td data-column="fan_pts">${formatNumber(player.fan_pts || 0)}</td>
                     <td data-column="gold">${formatNumber(player.gold || 0)}</td>
                     <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>

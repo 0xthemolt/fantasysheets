@@ -381,30 +381,30 @@ table tr:last-child td {
 .sortable {
     position: relative;
     min-width: 25px;
-    cursor: pointer; /* Add this to show it's clickable */
+    cursor: pointer;
 }
 
 .sort-arrow {
-    position: absolute; /* Add this */
-    right: 5px;       /* Add this */
-    top: 50%;         /* Add this */
-    transform: translateY(-50%); /* Add this */
-}
-
-/* Keep these the same */
-.sort-arrow.active.up {
-    display: block;
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 0;
     height: 0;
+    display: none; /* Hidden by default */
+}
+
+/* When sorting ascending */
+.sort-arrow.active.up {
+    display: block;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid #4CAF50;
 }
 
+/* When sorting descending */
 .sort-arrow.active.down {
     display: block;
-    width: 0;
-    height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 5px solid #F44336;

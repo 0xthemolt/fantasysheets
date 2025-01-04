@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Player Rankings</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+    </style>
+</head>
+<body>
+    <h1>Player Rankings</h1>
+    
+    <div id="search-container">
+        <input type="text" class="search-box" id="playerSearch" placeholder="Search players...">
+        <div class="clear-search" id="clearSearch"></div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th class="sortable" data-sort="rank">
+                    Rank
+                    <div class="sort-arrows">
+                        <span class="sort-arrow up"></span>
+                        <span class="sort-arrow down"></span>
+                    </div>
+                </th>
+                <th class="sortable" data-sort="name">
+                    Player Name
+                    <div class="sort-arrows">
+                        <span class="sort-arrow up"></span>
+                        <span class="sort-arrow down"></span>
+                    </div>
+                </th>
+                <th class="sortable" data-sort="score">
+                    Score
+                    <div class="sort-arrows">
+                        <span class="sort-arrow up"></span>
+                        <span class="sort-arrow down"></span>
+                    </div>
+                </th>
+                <th class="sortable" data-sort="games">
+                    Games Played
+                    <div class="sort-arrows">
+                        <span class="sort-arrow up"></span>
+                        <span class="sort-arrow down"></span>
+                    </div>
+                </th>
+                <th class="sortable" data-sort="winrate">
+                    Win Rate
+                    <div class="sort-arrows">
+                        <span class="sort-arrow up"></span>
+                        <span class="sort-arrow down"></span>
+                    </div>
+                </th>
+                <th>Compare</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>John Smith</td>
+                <td>2850</td>
+                <td>156</td>
+                <td>68%</td>
+                <td><input type="checkbox" class="compare-checkbox"></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Sarah Johnson</td>
+                <td>2720</td>
+                <td>142</td>
+                <td>65%</td>
+                <td><input type="checkbox" class="compare-checkbox"></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Mike Wilson</td>
+                <td>2695</td>
+                <td>189</td>
+                <td>62%</td>
+                <td><input type="checkbox" class="compare-checkbox"></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Emma Davis</td>
+                <td>2580</td>
+                <td>134</td>
+                <td>59%</td>
+                <td><input type="checkbox" class="compare-checkbox"></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>James Brown</td>
+                <td>2495</td>
+                <td>167</td>
+                <td>57%</td>
+                <td><input type="checkbox" class="compare-checkbox"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div id="comparison-controls" style="display: none; margin: 20px 0;">
+        <button id="compareSelected">Compare Selected Players</button>
+        <button id="clearSelection">Clear Selection</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchBox = document.getElementById('playerSearch');
+            const clearButton = document.getElementById('clearSearch');
+            const rows = document.querySelectorAll('tbody tr');
+
+            // Search functionality
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                // Show/hide clear button
+                clearButton.style.display = searchTerm ? 'flex' : 'none';
+                
+                // Filter rows
+                rows.forEach(row => {
+                    const playerName = row.children[1].textContent.toLowerCase();
+                    row.style.display = playerName.includes(searchTerm) ? '' : 'none';
+                });
+            });
+
+            // Clear search
+            clearButton.addEventListener('click', function() {
+                searchBox.value = '';
+                rows.forEach(row => row.style.display = '');
+                this.style.display = 'none';
+            });
+
+            // Updated comparison functionality
+            const compareCheckboxes = document.querySelectorAll('.compare-checkbox');
+            const comparisonControls = document.getElementById('comparison-controls');
+            const compareSelectedBtn = document.getElementById('compareSelected');
+            const clearSelectionBtn = document.getElementById('clearSelection');
+            let selectedPlayers = [];
+
+            compareCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    const playerName = row.children[1].textContent;
+                    
+                    if (this.checked) {
+                        selectedPlayers.push(playerName);
+                    } else {
+                        selectedPlayers = selectedPlayers.filter(name => name !== playerName);
+                    }
+
+                    // Show/hide comparison controls
+                    comparisonControls.style.display = selectedPlayers.length > 0 ? 'block' : 'none';
+                });
+            });
+
+            clearSelectionBtn.addEventListener('click', function() {
+                selectedPlayers = [];
+                compareCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                comparisonControls.style.display = 'none';
+            });
+
+            compareSelectedBtn.addEventListener('click', function() {
+                if (selectedPlayers.length > 0) {
+                    alert('Compare players: ' + selectedPlayers.join(', '));
+                    // Here you can add your comparison logic or redirect to a comparison page
+                }
+            });
+
+            // Add sorting functionality
+            const table = document.querySelector('table');
+            const headers = table.querySelectorAll('th.sortable');
+            let currentSort = { column: null, direction: 'asc' };
+
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.dataset.sort;
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    // Reset all arrows
+                    headers.forEach(h => {
+                        h.querySelectorAll('.sort-arrow').forEach(arrow => {
+                            arrow.classList.remove('active');
+                        });
+                    });
+
+                    // Determine sort direction
+                    let direction = 'asc';
+                    if (currentSort.column === column && currentSort.direction === 'asc') {
+                        direction = 'desc';
+                    }
+                    currentSort = { column, direction };
+
+                    // Activate appropriate arrow
+                    const arrow = direction === 'asc' 
+                        ? this.querySelector('.sort-arrow.up')
+                        : this.querySelector('.sort-arrow.down');
+                    arrow.classList.add('active');
+
+                    // Sort rows
+                    rows.sort((a, b) => {
+                        let aValue = a.children[getColumnIndex(column)].textContent;
+                        let bValue = b.children[getColumnIndex(column)].textContent;
+
+                        // Convert to appropriate type for sorting
+                        if (column === 'rank' || column === 'score' || column === 'games') {
+                            aValue = parseInt(aValue);
+                            bValue = parseInt(bValue);
+                        } else if (column === 'winrate') {
+                            aValue = parseFloat(aValue);
+                            bValue = parseFloat(bValue);
+                        }
+
+                        if (direction === 'asc') {
+                            return aValue > bValue ? 1 : -1;
+                        } else {
+                            return aValue < bValue ? 1 : -1;
+                        }
+                    });
+
+                    // Reorder table
+                    tbody.innerHTML = '';
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+
+            // Helper function to get column index based on sort key
+            function getColumnIndex(column) {
+                const indices = {
+                    'rank': 0,
+                    'name': 1,
+                    'score': 2,
+                    'games': 3,
+                    'winrate': 4
+                };
+                return indices[column];
+            }
+        });
+    </script>
+</body>
+</html>

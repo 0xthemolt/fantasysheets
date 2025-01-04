@@ -172,6 +172,78 @@ table tr:last-child td {
     100% { transform: rotate(0deg) scale(1.1); }
 }
 
+/*star compare*/
+.compare-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 0.9em;
+    user-select: none;
+}
+
+.compare-btn input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+    background-color: transparent;
+}
+
+.compare-btn input[type="checkbox"]:checked {
+    background-color: #4CAF50;
+    border-color: #45a049;
+}
+
+.compare-btn input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 14px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.compare-btn:hover input[type="checkbox"] {
+    border-color: #4CAF50;
+}
+
+/* Update the comparison controls styles */
+#comparison-controls {
+    text-align: center;
+    margin-top: 10px;
+}
+
+#comparison-controls button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+#compareSelected {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+#clearSelection {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
+
+
+/*end compare*/
+
 #search-container {
     display: flex;
     align-items: center;
@@ -1187,3 +1259,4 @@ table tr:last-child td {
     object-fit: cover; /* Ensures image fills the circle without distortion */
     vertical-align: middle;
 }
+

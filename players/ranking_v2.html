@@ -21,53 +21,66 @@
     <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-    </style>
 </head>
 <body>
     <h1>Player Rankings</h1>
     
     <div id="search-container">
-        <input type="text" class="search-box" id="playerSearch" placeholder="Search players...">
+        <input type="text" class="search-box" id="playerSearch" placeholder="Search players..." autocomplete="off">
         <div class="clear-search" id="clearSearch"></div>
     </div>
     
     <table>
         <thead>
             <tr>
+                <th colspan="5">Player Info</th>
+                <th colspan="4">Medals</th>
+                <th>Compare</th>
+            </tr>
+            <tr>
                 <th class="sortable" data-sort="rank">
                     Rank
-                    <div class="sort-arrows">
-                        <span class="sort-arrow up"></span>
-                        <span class="sort-arrow down"></span>
+                    <div class="sort-arrow">
                     </div>
                 </th>
                 <th class="sortable" data-sort="name">
                     Player Name
-                    <div class="sort-arrows">
-                        <span class="sort-arrow up"></span>
-                        <span class="sort-arrow down"></span>
+                    <div class="sort-arrow">
                     </div>
                 </th>
                 <th class="sortable" data-sort="score">
                     Score
-                    <div class="sort-arrows">
-                        <span class="sort-arrow up"></span>
-                        <span class="sort-arrow down"></span>
+                    <div class="sort-arrow">
                     </div>
                 </th>
                 <th class="sortable" data-sort="games">
                     Games Played
-                    <div class="sort-arrows">
-                        <span class="sort-arrow up"></span>
-                        <span class="sort-arrow down"></span>
+                    <div class="sort-arrow">
                     </div>
                 </th>
                 <th class="sortable" data-sort="winrate">
                     Win Rate
-                    <div class="sort-arrows">
-                        <span class="sort-arrow up"></span>
-                        <span class="sort-arrow down"></span>
+                    <div class="sort-arrow">
+                    </div>
+                </th>
+                <th class="sortable" data-sort="elite">
+                    Elite
+                    <div class="sort-arrow">
+                    </div>
+                </th>
+                <th class="sortable" data-sort="gold">
+                    Gold
+                    <div class="sort-arrow">
+                    </div>
+                </th>
+                <th class="sortable" data-sort="silver">
+                    Silver
+                    <div class="sort-arrow">
+                    </div>
+                </th>
+                <th class="sortable" data-sort="bronze">
+                    Bronze
+                    <div class="sort-arrow">
                     </div>
                 </th>
                 <th>Compare</th>
@@ -80,6 +93,10 @@
                 <td>2850</td>
                 <td>156</td>
                 <td>68%</td>
+                <td>3</td>
+                <td>5</td>
+                <td>8</td>
+                <td>12</td>
                 <td><input type="checkbox" class="compare-checkbox"></td>
             </tr>
             <tr>
@@ -88,6 +105,10 @@
                 <td>2720</td>
                 <td>142</td>
                 <td>65%</td>
+                <td>2</td>
+                <td>4</td>
+                <td>6</td>
+                <td>10</td>
                 <td><input type="checkbox" class="compare-checkbox"></td>
             </tr>
             <tr>
@@ -96,6 +117,10 @@
                 <td>2695</td>
                 <td>189</td>
                 <td>62%</td>
+                <td>1</td>
+                <td>3</td>
+                <td>5</td>
+                <td>7</td>
                 <td><input type="checkbox" class="compare-checkbox"></td>
             </tr>
             <tr>
@@ -104,6 +129,10 @@
                 <td>2580</td>
                 <td>134</td>
                 <td>59%</td>
+                <td>0</td>
+                <td>2</td>
+                <td>4</td>
+                <td>6</td>
                 <td><input type="checkbox" class="compare-checkbox"></td>
             </tr>
             <tr>
@@ -112,6 +141,10 @@
                 <td>2495</td>
                 <td>167</td>
                 <td>57%</td>
+                <td>0</td>
+                <td>1</td>
+                <td>3</td>
+                <td>5</td>
                 <td><input type="checkbox" class="compare-checkbox"></td>
             </tr>
         </tbody>
@@ -200,43 +233,43 @@
                     
                     // Reset all arrows
                     headers.forEach(h => {
-                        h.querySelectorAll('.sort-arrow').forEach(arrow => {
-                            arrow.classList.remove('active');
-                        });
+                        h.querySelector('.sort-arrow').className = 'sort-arrow';
                     });
 
-                    // Determine sort direction
-                    let direction = 'asc';
-                    if (currentSort.column === column && currentSort.direction === 'asc') {
-                        direction = 'desc';
+                    // Update sort direction
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'desc'; // Always start with descending when switching columns
                     }
-                    currentSort = { column, direction };
 
-                    // Activate appropriate arrow
-                    const arrow = direction === 'asc' 
-                        ? this.querySelector('.sort-arrow.up')
-                        : this.querySelector('.sort-arrow.down');
-                    arrow.classList.add('active');
+                    // Update arrow on clicked header
+                    const arrow = this.querySelector('.sort-arrow');
+                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
 
                     // Sort rows
                     rows.sort((a, b) => {
                         let aValue = a.children[getColumnIndex(column)].textContent;
                         let bValue = b.children[getColumnIndex(column)].textContent;
 
-                        // Convert to appropriate type for sorting
-                        if (column === 'rank' || column === 'score' || column === 'games') {
-                            aValue = parseInt(aValue);
-                            bValue = parseInt(bValue);
-                        } else if (column === 'winrate') {
-                            aValue = parseFloat(aValue);
-                            bValue = parseFloat(bValue);
+                        // Handle text-based sorting (player names)
+                        if (column === 'name') {
+                            return currentSort.direction === 'asc' ? 
+                                aValue.localeCompare(bValue) : 
+                                bValue.localeCompare(aValue);
                         }
 
-                        if (direction === 'asc') {
-                            return aValue > bValue ? 1 : -1;
+                        // Convert to appropriate type for sorting
+                        if (column === 'winrate') {
+                            aValue = parseFloat(aValue);
+                            bValue = parseFloat(bValue);
                         } else {
-                            return aValue < bValue ? 1 : -1;
+                            aValue = parseInt(aValue) || 0;
+                            bValue = parseInt(bValue) || 0;
                         }
+
+                        return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
                     });
 
                     // Reorder table
@@ -252,7 +285,11 @@
                     'name': 1,
                     'score': 2,
                     'games': 3,
-                    'winrate': 4
+                    'winrate': 4,
+                    'elite': 5,
+                    'gold': 6,
+                    'silver': 7,
+                    'bronze': 8
                 };
                 return indices[column];
             }

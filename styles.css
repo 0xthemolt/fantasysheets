@@ -380,46 +380,34 @@ table tr:last-child td {
 
 .sortable {
     position: relative;
-    min-width: 25px; /* Adjust this value as needed */
-    padding-right: 20px; /* Space for sort arrows */
+    min-width: 25px;
+    cursor: pointer; /* Add this to show it's clickable */
 }
 
-/* .sort-arrows {
-    display: inline-block;
-    vertical-align: middle;
-} */
-
 .sort-arrow {
+    position: absolute; /* Add this */
+    right: 5px;       /* Add this */
+    top: 50%;         /* Add this */
+    transform: translateY(-50%); /* Add this */
+}
+
+/* Keep these the same */
+.sort-arrow.active.up {
     display: block;
     width: 0;
     height: 0;
-    margin: 2px auto;
-}
-
-/* .sort-arrow.up {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-bottom: 5px solid #ccc;
-}
-
-.sort-arrow.down {
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #ccc;
-} */
-
-.sort-arrow.active.up {
-    display: block; /* Show only when active */
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom-color: #4CAF50; /* Green */
+    border-bottom: 5px solid #4CAF50;
 }
 
 .sort-arrow.active.down {
-    display: block; /* Show only when active */
+    display: block;
+    width: 0;
+    height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top-color: #F44336; /* Red */
+    border-top: 5px solid #F44336;
 }
 
 .reward-value {

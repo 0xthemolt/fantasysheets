@@ -64,18 +64,64 @@ where best_deck_rank = 1
 group by 1,2
 )
 , trade_volume as (
-select buyer_id as player_id,sum(price) as buy_volume,sum(0) as sell_volume
-from flatten.get_hero_last_trades ghlt 
-group by 1
-union
-select seller_id as player_id,sum(0) as buy_volume,sum(price) as sell_volume
-from flatten.get_hero_last_trades ghlt 
-group by 1
+    SELECT 
+        buyer_id as player_id,
+        DATE(timestamp) as trade_date,
+        sum(price) as buy_volume,
+        sum(0) as sell_volume,
+        count(*) as trade_count,
+        max(price) as max_buy,
+        0 as max_sell
+    FROM flatten.get_hero_last_trades ghlt 
+    where buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    GROUP BY 1, 2
+    
+    UNION
+    
+    SELECT 
+        seller_id as player_id,
+        DATE(timestamp) as trade_date,
+        sum(0) as buy_volume,
+        sum(price) as sell_volume,
+        count(*) as trade_count,
+        0 as max_buy,
+        max(price) as max_sell
+    FROM flatten.get_hero_last_trades ghlt 
+    where buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    GROUP BY 1, 2
+),
+consecutive_days as (
+    SELECT 
+        player_id,
+        trade_date,
+        trade_date - INTERVAL '1 day' * ROW_NUMBER() OVER (PARTITION BY player_id ORDER BY trade_date) as grp
+    FROM (SELECT DISTINCT player_id, trade_date FROM trade_volume)
+),
+streak_lengths as (
+    SELECT 
+        player_id,
+        COUNT(*) as streak_length,
+        MIN(trade_date) as streak_start,
+        MAX(trade_date) as streak_end
+    FROM consecutive_days
+    GROUP BY player_id, grp
 )
 ,trade_volume_by_player as (
-select  player_id,sum(buy_volume) as buy_volume,sum(sell_volume) as sell_volume
-from trade_volume
-group by 1
+    SELECT  
+        tv.player_id,
+        sum(buy_volume) as buy_volume,
+        sum(sell_volume) as sell_volume,
+        sum(trade_count) as trade_count,
+        max(max_buy) as max_buy,
+        max(max_sell) as max_sell,
+        MAX(sl.streak_length) as longest_trading_streak
+    FROM trade_volume tv
+    LEFT JOIN (
+        SELECT player_id, MAX(streak_length) as streak_length
+        FROM streak_lengths
+        GROUP BY player_id
+    ) sl ON tv.player_id = sl.player_id
+    GROUP BY 1
 )
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 
 ,suM(eth_won.reward_eth)reward_eth
@@ -90,8 +136,12 @@ select players.player_id,players.player_handle ,players.player_name ,players.pro
 ,max(touranment_rankings_silver.avg_best_deck_norm_rank) as silver_norm_rank
 ,max(touranment_rankings_bronze.avg_best_deck_norm_rank) as bronze_norm_rank
 ,max(touranment_rankings_reverse.avg_best_deck_norm_rank) as reverse_norm_rank
-,max(coalesce(tvbp.buy_volume,0)) as buy_volume
-,max(coalesce(tvbp.sell_volume,0)) as sell_volume
+,max(coalesce(tvbp.buy_volume,0)) as buy_vol
+,max(coalesce(tvbp.sell_volume,0)) as sell_vol
+,max(coalesce(tvbp.trade_count,0)) as trade_count
+,max(coalesce(tvbp.max_buy,0)) as max_buy
+,max(coalesce(tvbp.max_sell,0)) as max_sell
+,max(coalesce(tvbp.longest_trading_streak,0)) as longest_trade_streak
 ,max(updated) freshness_timestamp
 from flatten.get_player_basic_data players
 join eth_won

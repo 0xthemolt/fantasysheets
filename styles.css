@@ -384,6 +384,9 @@ table tr:last-child td {
     text-transform: uppercase;
 }
 
+.section-end {
+    border-right: 1px solid #444;
+}
 .sortable {
     position: relative;
     min-width: 25px;

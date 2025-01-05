@@ -71,6 +71,43 @@
     th[data-sort="winrate"] {
         min-width: 70px;     /* Reduced from 100px */
     }
+
+    .rankings-table {
+        width: 80%;
+        overflow-x: auto;  /* Allows horizontal scrolling if needed */
+    }
+
+    .rankings-table table {
+        width: 80%;
+        min-width: 1200px;  /* Adjust this value based on your needs */
+        table-layout: fixed;  /* This is important for fixed widths */
+    }
+
+    /* Adjust individual column widths */
+    th[data-sort="rank"] { width: 1%; }
+    th[data-sort="player"] { width: 15%; }
+    th[data-sort="rewardEth"] { width: 8%; }
+    th[data-sort="portfolio"] { width: 8%; }
+    th[data-sort="fanPoints"] { width: 8%; }
+    th[data-sort="gold"] { width: 7%; }
+    th[data-sort="stars"] { width: 7%; }
+    th[data-sort="decks"] { width: 7%; }
+    th[data-sort="cards"] { width: 7%; }
+    th[data-sort="buyVol"] { width: 8%; }
+    th[data-sort="sellVol"] { width: 8%; }
+    th:last-child { width: 7%; }  /* Compare column */
+
+    /* Ensure td content doesn't break layout */
+    td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    td[player-handle] {
+        text-align: left;
+        padding-left: 10px;  /* Optional: adds some spacing from the left edge */
+    }
 </style>
 <body>
     <header>
@@ -102,7 +139,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="column-header" colspan="5">
+                        <th class="column-header section-end" colspan="5">
                             <i class="fa-solid fa-user"></i> Player Info
                         </th>
                         <th class="column-header" colspan="4">
@@ -113,120 +150,114 @@
                     <tr>
                         <th class="sortable" data-sort="rank">
                             Rank
-                            <div class="sort-arrow">
-                            </div>
+                            <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="name">
-                            Player Name
-                            <div class="sort-arrow">
-                            </div>
+                        <th class="sortable" data-sort="player">
+                            Player
+                            <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="score">
-                            Score
-                            <div class="sort-arrow">
-                            </div>
+                        <th class="sortable" data-sort="rewardEth">
+                            <img src="../icons/eth.webp" alt="Reward ETH" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="games">
-                            Games Played
-                            <div class="sort-arrow">
-                            </div>
+                        <th class="sortable" data-sort="portfolio">
+                            Portfolio
+                            <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="winrate">
-                            Win Rate
-                            <div class="sort-arrow">
-                            </div>
+                        <th class="sortable section-end" data-sort="fanPoints">
+                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="elite">
-                            Elite
-                            <div class="sort-arrow">
-                            </div>
+                            <img src="../icons/elite.webp" alt="Elite" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="gold">
-                            Gold
-                            <div class="sort-arrow">
-                            </div>
+                            <img src="../icons/gold.webp" alt="Gold" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="silver">
-                            Silver
-                            <div class="sort-arrow">
-                            </div>
+                            <img src="../icons/silver.webp" alt="Silver" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="bronze">
-                            Bronze
-                            <div class="sort-arrow">
-                            </div>
+                            <img src="../icons/bronze.webp" alt="Bronze" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="reverse">
+                            <img src="../icons/reverse.webp" alt="Reverse" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="buyVol">
+                            Buy Vol
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="sellVol">
+                            Sell Vol
+                            <div class="sort-arrow"></div>
                         </th>
                         <th>Compare</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>John Smith</td>
-                        <td>2850</td>
-                        <td>156</td>
-                        <td>68%</td>
-                        <td>3</td>
-                        <td>5</td>
-                        <td>8</td>
-                        <td>12</td>
-                        <td><input type="checkbox" class="compare-checkbox"></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Sarah Johnson</td>
-                        <td>2720</td>
-                        <td>142</td>
-                        <td>65%</td>
-                        <td>2</td>
-                        <td>4</td>
-                        <td>6</td>
-                        <td>10</td>
-                        <td><input type="checkbox" class="compare-checkbox"></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Mike Wilson</td>
-                        <td>2695</td>
-                        <td>189</td>
-                        <td>62%</td>
-                        <td>1</td>
-                        <td>3</td>
-                        <td>5</td>
-                        <td>7</td>
-                        <td><input type="checkbox" class="compare-checkbox"></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Emma Davis</td>
-                        <td>2580</td>
-                        <td>134</td>
-                        <td>59%</td>
-                        <td>0</td>
-                        <td>2</td>
-                        <td>4</td>
-                        <td>6</td>
-                        <td><input type="checkbox" class="compare-checkbox"></td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>James Brown</td>
-                        <td>2495</td>
-                        <td>167</td>
-                        <td>57%</td>
-                        <td>0</td>
-                        <td>1</td>
-                        <td>3</td>
-                        <td>5</td>
-                        <td><input type="checkbox" class="compare-checkbox"></td>
-                    </tr>
+                    <!-- Table data will be populated dynamically via JavaScript -->
                 </tbody>
             </table>
         </section>
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Fetch player data
+            const response = await fetch('../data/players/player_ranking.json');
+            const data = await response.json();
+            
+            // Transform and sort players by reverse_norm_rank
+            const players = data.players
+                .sort((a, b) => b.reverse_norm_rank - a.reverse_norm_rank)
+                .map((player, index) => ({
+                    rank: index + 1,
+                    name: player.player_name,
+                    handle: player.player_handle,
+                    player_id: player.player_id,
+                    profilePic: player.profile_picture,
+                    rewardEth: player.reward_eth.toFixed(3),
+                    portfolio: player.portfolio.toFixed(3),
+                    fanPoints: Math.round(player.fan_pts),
+                    gold: Math.round(player.gold),
+                    stars: Math.round(player.stars),
+                    decks: Math.round(player.decks),
+                    cards: Math.round(player.cards),
+                    elite: player.elite_norm_rank.toFixed(3),
+                    gold: player.gold_norm_rank.toFixed(3),
+                    silver: player.silver_norm_rank.toFixed(3),
+                    bronze: player.bronze_norm_rank.toFixed(3),
+                    reverse: player.reverse_norm_rank.toFixed(3),
+                    buyVol: player.buy_vol.toFixed(3),
+                    sellVol: player.sell_vol.toFixed(3)
+                }));
+
+            // Update table with real data
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = players.map(player => `
+                <tr>
+                    <td>${player.rank}</td>
+                    <td player-handle="${player.handle}" data-player-id="${player.player_id}">${player.name}</td>
+                    <td>${player.rewardEth}</td>
+                    <td>${player.portfolio}</td>
+                    <td class="section-end">${player.fanPoints}</td>
+                    <td>${player.cards}</td>
+                    <td>${player.elite}</td>
+                    <td>${player.gold}</td>
+                    <td>${player.silver}</td>
+                    <td>${player.bronze}</td>
+                    <td>${player.reverse}</td>
+                    <td>${player.buyVol}</td>
+                    <td>${player.sellVol}</td>
+                    <td><input type="checkbox" class="compare-checkbox"></td>
+                </tr>
+            `).join('');
+
             const searchBox = document.getElementById('playerSearch');
             const clearButton = document.getElementById('clearSearch');
             const rows = document.querySelectorAll('tbody tr');
@@ -235,13 +266,13 @@
             searchBox.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 
-                // Show/hide clear button
                 clearButton.style.display = searchTerm ? 'flex' : 'none';
                 
-                // Filter rows
                 rows.forEach(row => {
-                    const playerName = row.children[1].textContent.toLowerCase();
-                    row.style.display = playerName.includes(searchTerm) ? '' : 'none';
+                    const playerCell = row.children[1];
+                    const playerName = playerCell.textContent.toLowerCase();
+                    const playerHandle = playerCell.dataset.handle.toLowerCase();
+                    row.style.display = playerName.includes(searchTerm) || playerHandle.includes(searchTerm) ? '' : 'none';
                 });
             });
 
@@ -378,16 +409,23 @@
             function getColumnIndex(column) {
                 const indices = {
                     'rank': 0,
-                    'name': 1,
-                    'score': 2,
-                    'games': 3,
-                    'winrate': 4,
-                    'elite': 5,
-                    'gold': 6,
-                    'silver': 7,
-                    'bronze': 8
+                    'player': 1,
+                    'rewardEth': 2,
+                    'portfolio': 3,
+                    'fanPoints': 4,
+                    'gold': 5,
+                    'stars': 6,
+                    'decks': 7,
+                    'cards': 8,
+                    'elite': 9,
+                    'gold': 10,
+                    'silver': 11,
+                    'bronze': 12,
+                    'reverse': 13,
+                    'buyVol': 14,
+                    'sellVol': 15
                 };
-                return indices[column];
+                return indices[column] ?? 0;
             }
         });
     </script>

@@ -21,6 +21,22 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+<style>
+    .controls-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    #search-container {
+        flex: 1;
+    }
+
+    #comparison-controls {
+        margin-left: 1rem;
+    }
+</style>
 <body>
     <header>
         <h1>Player Rankings</h1>
@@ -28,20 +44,22 @@
 
     <main>
         <div class="controls-container">
-            <div id="search-container">
-                <input 
-                    type="text" 
-                    class="search-box" 
-                    id="playerSearch" 
-                    placeholder="Search players..." 
-                    autocomplete="off"
-                    aria-label="Search players">
-                <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
-            </div>
+            <div class="controls-row">
+                <div id="search-container">
+                    <input 
+                        type="text" 
+                        class="search-box" 
+                        id="playerSearch" 
+                        placeholder="Search players..." 
+                        autocomplete="off"
+                        aria-label="Search players">
+                    <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
+                </div>
 
-            <div id="comparison-controls">
-                <button id="compareSelected">Compare Selected Players</button>
-                <button id="clearSelection">Clear Selection</button>
+                <div id="comparison-controls">
+                    <span id="compareSelected" class="text-link compare">Compare</span>
+                    <span id="clearSelection" class="text-link clear">Clear</span>
+                </div>
             </div>
         </div>
 
@@ -226,38 +244,40 @@
             });
 
             clearSelectionBtn.addEventListener('click', function() {
+                // Clear selected players array
                 selectedPlayers = [];
+                // Uncheck all checkboxes
                 compareCheckboxes.forEach(checkbox => {
                     checkbox.checked = false;
                 });
+                // Hide comparison controls
                 comparisonControls.style.display = 'none';
+                // Show all rows
+                document.querySelectorAll('tbody tr').forEach(row => {
+                    row.style.display = '';
+                });
+                // Reset compare button text if needed
+                compareSelectedBtn.textContent = 'Compare';
+                compareSelectedBtn.className = 'text-link compare';
             });
 
             compareSelectedBtn.addEventListener('click', function() {
                 const rows = document.querySelectorAll('tbody tr');
                 if (selectedPlayers.length > 0) {
-                    // Hide all rows first
-                    rows.forEach(row => {
-                        const playerName = row.children[1].textContent;
-                        row.style.display = selectedPlayers.includes(playerName) ? '' : 'none';
-                    });
-                    
-                    // Change button text to "Show All Players"
-                    this.textContent = 'Show All';
-                    
-                    // Remove existing click handler
-                    this.removeEventListener('click', arguments.callee);
-                    
-                    // Add new click handler to show all players
-                    this.addEventListener('click', function() {
+                    if (this.textContent === 'Compare') {
+                        // Hide all rows first
+                        rows.forEach(row => {
+                            const playerName = row.children[1].textContent;
+                            row.style.display = selectedPlayers.includes(playerName) ? '' : 'none';
+                        });
+                        
+                        // Change text to "Show all"
+                        this.textContent = 'Show all';
+                    } else {
+                        // Show all rows
                         rows.forEach(row => row.style.display = '');
                         this.textContent = 'Compare';
-                        clearSelectionBtn.click(); // Clear the selection
-                        
-                        // Restore original compare functionality
-                        this.removeEventListener('click', arguments.callee);
-                        this.addEventListener('click', compareSelectedBtn.onclick);
-                    });
+                    }
                 }
             });
 

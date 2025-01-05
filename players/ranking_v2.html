@@ -35,6 +35,7 @@
 
     #comparison-controls {
         margin-left: 1rem;
+        display: none;
     }
 
     .text-link {
@@ -63,45 +64,47 @@
         transform: translateY(-50%);
     }
 
-    /* Optional specific column widths */
-    th[data-sort="games"] {
-        min-width: 80px;     /* Reduced from 120px */
-    }
-
-    th[data-sort="winrate"] {
-        min-width: 70px;     /* Reduced from 100px */
-    }
-
     .rankings-table {
-        width: 80%;
-        overflow-x: auto;  /* Allows horizontal scrolling if needed */
+        width: 100%;
+        overflow-x: auto;
     }
 
     .rankings-table table {
-        width: 80%;
-        min-width: 1200px;  /* Adjust this value based on your needs */
-        table-layout: fixed;  /* This is important for fixed widths */
+        width: 80%;          /* Changed from 100% to 80% */
+        margin: 0 auto;      /* Center the table */
+        table-layout: fixed;  /* Changed from fixed to auto */
+        /* min-width: 1500px;   Reduced from 1200px */
     }
 
     /* Adjust individual column widths */
-    th[data-sort="rank"] { width: 1%; }
-    th[data-sort="player"] { width: 15%; }
-    th[data-sort="rewardEth"] { width: 8%; }
-    th[data-sort="portfolio"] { width: 8%; }
-    th[data-sort="fanPoints"] { width: 8%; }
-    th[data-sort="gold"] { width: 7%; }
-    th[data-sort="stars"] { width: 7%; }
-    th[data-sort="decks"] { width: 7%; }
-    th[data-sort="cards"] { width: 7%; }
-    th[data-sort="buyVol"] { width: 8%; }
-    th[data-sort="sellVol"] { width: 8%; }
-    th:last-child { width: 7%; }  /* Compare column */
+    th[data-sort="rank"] { width: 50px; }
+    th[data-sort="player"] { width: 200px; }
+    th[data-sort="firstTournament"] { width: 100px; }
+    th[data-sort="rewardEth"] { width: 80px; }
+    th[data-sort="rewardFrag"] { width: 80px; }
+    th[data-sort="portfolio"] { width: 80px; }
+    th[data-sort="fanPoints"] { width: 80px; }
+    th[data-sort="stars"] { width: 80px; }
+    th[data-sort="decks"] { width: 80px; }
+    th[data-sort="cards"] { width: 80px; }
+    th[data-sort="elite"],
+    th[data-sort="gold"],
+    th[data-sort="silver"],
+    th[data-sort="bronze"],
+    th[data-sort="reverse"] {
+        width: 5px;
+        max-width: 5px;
+    }
+    th[data-sort="buyVol"] { width: 90px; }
+    th[data-sort="sellVol"] { width: 90px; }
+    th:last-child { width: 70px; }
 
-    /* Ensure td content doesn't break layout */
-    td {
-        white-space: nowrap;
+    /* Add this to enforce column widths */
+    td, th {
+        max-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     td[player-handle] {
@@ -140,12 +143,18 @@
                 <thead>
                     <tr>
                         <th class="column-header section-end" colspan="5">
-                            <i class="fa-solid fa-user"></i> Player Info
+                            <i class="fa-solid fa-user"></i> Player
                         </th>
-                        <th class="column-header" colspan="4">
-                            <i class="fa-solid fa-trophy"></i> Medals
+                        <th class="column-header section-end" colspan="4">
+                            <i class="fa-solid fa-coins"></i> Rewards
                         </th>
-                        <th class="column-header">Compare</th>
+                        <th class="column-header section-end" colspan="6">
+                            <i class="fa-solid fa-trophy"></i> Performance
+                        </th>
+                        <th class="column-header section-end" colspan="2">
+                            <i class="fa-solid fa-store"></i> Marketplace
+                        </th>
+                        <th class="column-header section-end">Compare</th>
                     </tr>
                     <tr>
                         <th class="sortable" data-sort="rank">
@@ -156,16 +165,36 @@
                             Player
                             <div class="sort-arrow"></div>
                         </th>
+                        <th class="sortable" data-sort="firstTournament">
+                            Cohort
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="portfolio">
+                            Port
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="cards">
+                            Cards
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="fanPoints">
+                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
                         <th class="sortable" data-sort="rewardEth">
                             <img src="../icons/eth.webp" alt="Reward ETH" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="portfolio">
-                            Portfolio
+                        <th class="sortable" data-sort="rewardFrag">
+                            <img src="../icons/fragment.webp" alt="Reward Frag" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable section-end" data-sort="fanPoints">
-                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable section-end" data-sort="stars">
+                            <img src="../icons/stars.webp" alt="Stars" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="decks">
+                            Decks
                             <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="elite">
@@ -184,7 +213,7 @@
                             <img src="../icons/bronze.webp" alt="Bronze" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="reverse">
+                        <th class="sortable section-end" data-sort="reverse">
                             <img src="../icons/reverse.webp" alt="Reverse" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
@@ -192,7 +221,7 @@
                             Buy Vol
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="sellVol">
+                        <th class="sortable section-end" data-sort="sellVol">
                             Sell Vol
                             <div class="sort-arrow"></div>
                         </th>
@@ -207,21 +236,65 @@
     </main>
 
     <script>
+
+        function formatNumberMK(value) {
+            if (!value && value !== 0) return 'N/A';
+            
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(2) + 'm';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(1) + 'k';
+            }
+            return value.toFixed(1);
+        }
+
+        function formatDecimalOne(value) {
+            if (!value && value !== 0) return 'N/A';
+            return parseFloat(value).toFixed(1);
+        }
+
+        function formatDecimalTwo(value) {
+            if (!value && value !== 0) return 'N/A';
+            return parseFloat(value).toFixed(2);
+        }
+
+        function formatDecimalRank(value) {
+            if (!value && value !== 0) return 'N/A';
+            const num = parseFloat(value);
+            if (num === 1) return '1';
+            if (num < 1) return num.toFixed(3).substring(1); // Remove leading 0
+            return num.toFixed(3);
+        }
+
+        function formatInt(value) {
+            if (!value && value !== 0) return '0';
+            return value.toLocaleString('en-US');
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
-            // Fetch player data
-            const response = await fetch('../data/players/player_ranking.json');
+            // Fetch player data with cache busting
+            const timestamp = new Date().getTime();
+            const response = await fetch(`../data/players/player_ranking.json?v=${timestamp}`, {
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
             const data = await response.json();
             
-            // Transform and sort players by reverse_norm_rank
+            // Transform and sort players by fanPoints (descending)
             const players = data.players
-                .sort((a, b) => b.reverse_norm_rank - a.reverse_norm_rank)
+                .sort((a, b) => b.fan_pts - a.fan_pts)
                 .map((player, index) => ({
                     rank: index + 1,
                     name: player.player_name,
                     handle: player.player_handle,
                     player_id: player.player_id,
                     profilePic: player.profile_picture,
+                    firstTournament: player.first_tournament,
                     rewardEth: player.reward_eth.toFixed(3),
+                    rewardFrag: player.reward_frag.toFixed(3),
                     portfolio: player.portfolio.toFixed(3),
                     fanPoints: Math.round(player.fan_pts),
                     gold: Math.round(player.gold),
@@ -243,17 +316,21 @@
                 <tr>
                     <td>${player.rank}</td>
                     <td player-handle="${player.handle}" data-player-id="${player.player_id}">${player.name}</td>
-                    <td>${player.rewardEth}</td>
-                    <td>${player.portfolio}</td>
-                    <td class="section-end">${player.fanPoints}</td>
-                    <td>${player.cards}</td>
-                    <td>${player.elite}</td>
-                    <td>${player.gold}</td>
-                    <td>${player.silver}</td>
-                    <td>${player.bronze}</td>
-                    <td>${player.reverse}</td>
-                    <td>${player.buyVol}</td>
-                    <td>${player.sellVol}</td>
+                    <td>${player.firstTournament}</td>
+                    <td>${formatDecimalOne(player.portfolio)}</td>
+                    <td class="section-end">${formatInt(player.cards)}</td>
+                    <td>${formatNumberMK(player.fanPoints)}</td>
+                    <td>${formatDecimalOne(player.rewardEth)}</td>
+                    <td>${formatNumberMK(parseFloat(player.rewardFrag))}</td>
+                    <td class="section-end">${formatNumberMK(player.stars)}</td>
+                    <td>${formatInt(player.decks)}</td>
+                    <td>${formatDecimalRank(player.elite)}</td>
+                    <td>${formatDecimalRank(player.gold)}</td>
+                    <td>${formatDecimalRank(player.silver)}</td>
+                    <td>${formatDecimalRank(player.bronze)}</td>
+                    <td class="section-end">${formatDecimalRank(player.reverse)}</td>
+                    <td>${formatDecimalOne(player.buyVol)}</td>
+                    <td class="section-end">${formatDecimalOne(player.sellVol)}</td>
                     <td><input type="checkbox" class="compare-checkbox"></td>
                 </tr>
             `).join('');
@@ -271,7 +348,7 @@
                 rows.forEach(row => {
                     const playerCell = row.children[1];
                     const playerName = playerCell.textContent.toLowerCase();
-                    const playerHandle = playerCell.dataset.handle.toLowerCase();
+                    const playerHandle = playerCell.getAttribute('player-handle').toLowerCase();
                     row.style.display = playerName.includes(searchTerm) || playerHandle.includes(searchTerm) ? '' : 'none';
                 });
             });
@@ -368,34 +445,31 @@
                         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
                     } else {
                         currentSort.column = column;
-                        currentSort.direction = 'desc'; // Always start with descending when switching columns
+                        currentSort.direction = 'desc';
                     }
 
                     // Update arrow on clicked header
                     const arrow = this.querySelector('.sort-arrow');
                     arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
 
-                    // Sort rows
+                    // Sort rows based on the original data in players array
                     rows.sort((a, b) => {
-                        let aValue = a.children[getColumnIndex(column)].textContent;
-                        let bValue = b.children[getColumnIndex(column)].textContent;
+                        const aPlayerId = a.querySelector('[data-player-id]').dataset.playerId;
+                        const bPlayerId = b.querySelector('[data-player-id]').dataset.playerId;
+                        
+                        const aPlayer = players.find(p => p.player_id === aPlayerId);
+                        const bPlayer = players.find(p => p.player_id === bPlayerId);
 
-                        // Handle text-based sorting (player names)
-                        if (column === 'name') {
+                        let aValue = aPlayer[column];
+                        let bValue = bPlayer[column];
+
+                        if (column === 'player') {
                             return currentSort.direction === 'asc' ? 
                                 aValue.localeCompare(bValue) : 
                                 bValue.localeCompare(aValue);
                         }
 
-                        // Convert to appropriate type for sorting
-                        if (column === 'winrate') {
-                            aValue = parseFloat(aValue);
-                            bValue = parseFloat(bValue);
-                        } else {
-                            aValue = parseInt(aValue) || 0;
-                            bValue = parseInt(bValue) || 0;
-                        }
-
+                        // Numeric comparison using raw values
                         return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
                     });
 
@@ -404,29 +478,6 @@
                     rows.forEach(row => tbody.appendChild(row));
                 });
             });
-
-            // Helper function to get column index based on sort key
-            function getColumnIndex(column) {
-                const indices = {
-                    'rank': 0,
-                    'player': 1,
-                    'rewardEth': 2,
-                    'portfolio': 3,
-                    'fanPoints': 4,
-                    'gold': 5,
-                    'stars': 6,
-                    'decks': 7,
-                    'cards': 8,
-                    'elite': 9,
-                    'gold': 10,
-                    'silver': 11,
-                    'bronze': 12,
-                    'reverse': 13,
-                    'buyVol': 14,
-                    'sellVol': 15
-                };
-                return indices[column] ?? 0;
-            }
         });
     </script>
 </body>

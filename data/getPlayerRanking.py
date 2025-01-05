@@ -26,9 +26,11 @@ from flatten.get_tournament_past_players gtpp
 --and tournament_unique_key = 'Main 32'
 group by 1
 )
-,eth_won as (
-select player_id--,tournament_unique_key
+,eth_frags_won as (
+select player_id
+--,tournament_unique_key
 ,suM(reward_eth) reward_eth
+,sum(reward_frag) + sum(reward_pack * 100) reward_frag 
 from flatten.get_tournament_histories_by_player_id 
 --where player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --and tournament_unique_key = 'Main 31'
@@ -124,7 +126,10 @@ streak_lengths as (
     GROUP BY 1
 )
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 
-,suM(eth_won.reward_eth)reward_eth
+,case when t.tournament_unique_key= 'Flash Tournament' then 'Flash'
+else t.tournament_unique_key  end as first_tournament
+,suM(eth_frags_won.reward_eth) reward_eth
+,suM(eth_frags_won.reward_frag) reward_frag
 ,suM(coalesce(players.portfolio_value,0)) as portfolio
 ,sum(players.fan_pts + referral_pts) fan_pts
 ,sum(players.gold) gold
@@ -144,8 +149,10 @@ select players.player_id,players.player_handle ,players.player_name ,players.pro
 ,max(coalesce(tvbp.longest_trading_streak,0)) as longest_trade_streak
 ,max(updated) freshness_timestamp
 from flatten.get_player_basic_data players
-join eth_won
-	on players.player_id = eth_won.player_id
+join flatten.GET_TOURNAMENTS t
+	on players.player_first_tournament = t.tournament_id
+join eth_frags_won  
+	on players.player_id = eth_frags_won.player_id
 join tournaments 
 	on players.player_id  = tournaments.player_id
 left join trade_volume_by_player tvbp
@@ -167,7 +174,7 @@ left join league_ranking touranment_rankings_reverse
     and touranment_rankings_reverse.league = 'Reverse'
 --where players.player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --	and t_hist.tournament_unique_key  = 'Main 32'
-group by 1,2,3,4"""
+group by 1,2,3,4,5"""
 player_ranking_df = pd.read_sql_query(player_ranking_query, conn)
 cursor.close()
 

@@ -36,6 +36,41 @@
     #comparison-controls {
         margin-left: 1rem;
     }
+
+    .text-link {
+    cursor: pointer;
+    }
+
+    .text-link:hover {
+        text-decoration: underline;
+    }
+
+    th.sortable {
+        padding-right: 15px;  /* Reduced from 25px */
+        position: relative;
+        min-width: 60px;     /* Reduced from 80px */
+        white-space: nowrap;
+    }
+
+    th[data-sort="name"] {
+        min-width: 100px;    /* Reduced from 150px */
+    }
+
+    .sort-arrow {
+        position: absolute;
+        right: 2px;          /* Reduced from 8px to bring arrow closer to text */
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Optional specific column widths */
+    th[data-sort="games"] {
+        min-width: 80px;     /* Reduced from 120px */
+    }
+
+    th[data-sort="winrate"] {
+        min-width: 70px;     /* Reduced from 100px */
+    }
 </style>
 <body>
     <header>

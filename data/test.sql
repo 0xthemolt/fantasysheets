@@ -69,6 +69,8 @@ group by 1,2
     where buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     GROUP BY 1, 2
 ),
+-- select sum(buy_volume) from trade_volume
+-- where player_id = '0x162F95a9364c891028d255467F616902A479681a';
 consecutive_days as (
     SELECT 
         player_id,
@@ -87,13 +89,17 @@ streak_lengths as (
 )
 ,trade_volume_by_player as (
     SELECT  
-        player_id,
+        tv.player_id,
         sum(buy_volume) as buy_volume,
         sum(sell_volume) as sell_volume,
         sum(trade_count) as trade_count,
-        MAX(streak_length) as longest_trading_streak
-    FROM trade_volume
-    LEFT JOIN streak_lengths USING (player_id)
+        MAX(sl.streak_length) as longest_trading_streak
+    FROM trade_volume tv
+    LEFT JOIN (
+        SELECT player_id, MAX(streak_length) as streak_length
+        FROM streak_lengths
+        GROUP BY player_id
+    ) sl ON tv.player_id = sl.player_id
     GROUP BY 1
 )
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 

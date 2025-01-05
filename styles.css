@@ -378,6 +378,12 @@ table tr:last-child td {
     opacity: 0.8;
 }
 
+.column-header {
+    font-size: 0.8em;
+    color: #808080;
+    text-transform: uppercase;
+}
+
 .sortable {
     position: relative;
     min-width: 25px;
@@ -391,7 +397,6 @@ table tr:last-child td {
     transform: translateY(-50%);
     width: 0;
     height: 0;
-    display: none; /* Hidden by default */
 }
 
 /* When sorting ascending */

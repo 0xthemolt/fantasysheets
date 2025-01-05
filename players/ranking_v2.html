@@ -16,144 +16,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FantasySheets | Player Rankings</title>
-    <link rel="stylesheet" href="../styles.css">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
-    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <h1>Player Rankings</h1>
-    
-    <div id="search-container">
-        <input type="text" class="search-box" id="playerSearch" placeholder="Search players..." autocomplete="off">
-        <div class="clear-search" id="clearSearch"></div>
-    </div>
-    
-    <table>
-        <thead>
-            <tr>
-                <th colspan="5">Player Info</th>
-                <th colspan="4">Medals</th>
-                <th>Compare</th>
-            </tr>
-            <tr>
-                <th class="sortable" data-sort="rank">
-                    Rank
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="name">
-                    Player Name
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="score">
-                    Score
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="games">
-                    Games Played
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="winrate">
-                    Win Rate
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="elite">
-                    Elite
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="gold">
-                    Gold
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="silver">
-                    Silver
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th class="sortable" data-sort="bronze">
-                    Bronze
-                    <div class="sort-arrow">
-                    </div>
-                </th>
-                <th>Compare</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>John Smith</td>
-                <td>2850</td>
-                <td>156</td>
-                <td>68%</td>
-                <td>3</td>
-                <td>5</td>
-                <td>8</td>
-                <td>12</td>
-                <td><input type="checkbox" class="compare-checkbox"></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Sarah Johnson</td>
-                <td>2720</td>
-                <td>142</td>
-                <td>65%</td>
-                <td>2</td>
-                <td>4</td>
-                <td>6</td>
-                <td>10</td>
-                <td><input type="checkbox" class="compare-checkbox"></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Mike Wilson</td>
-                <td>2695</td>
-                <td>189</td>
-                <td>62%</td>
-                <td>1</td>
-                <td>3</td>
-                <td>5</td>
-                <td>7</td>
-                <td><input type="checkbox" class="compare-checkbox"></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>Emma Davis</td>
-                <td>2580</td>
-                <td>134</td>
-                <td>59%</td>
-                <td>0</td>
-                <td>2</td>
-                <td>4</td>
-                <td>6</td>
-                <td><input type="checkbox" class="compare-checkbox"></td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>James Brown</td>
-                <td>2495</td>
-                <td>167</td>
-                <td>57%</td>
-                <td>0</td>
-                <td>1</td>
-                <td>3</td>
-                <td>5</td>
-                <td><input type="checkbox" class="compare-checkbox"></td>
-            </tr>
-        </tbody>
-    </table>
+    <header>
+        <h1>Player Rankings</h1>
+    </header>
 
-    <div id="comparison-controls" style="display: none; margin: 20px 0;">
-        <button id="compareSelected">Compare Selected Players</button>
-        <button id="clearSelection">Clear Selection</button>
-    </div>
+    <main>
+        <div class="controls-container">
+            <div id="search-container">
+                <input 
+                    type="text" 
+                    class="search-box" 
+                    id="playerSearch" 
+                    placeholder="Search players..." 
+                    autocomplete="off"
+                    aria-label="Search players">
+                <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
+            </div>
+
+            <div id="comparison-controls">
+                <button id="compareSelected">Compare Selected Players</button>
+                <button id="clearSelection">Clear Selection</button>
+            </div>
+        </div>
+
+        <section class="rankings-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="column-header" colspan="5">
+                            <i class="fa-solid fa-user"></i> Player Info
+                        </th>
+                        <th class="column-header" colspan="4">
+                            <i class="fa-solid fa-trophy"></i> Medals
+                        </th>
+                        <th class="column-header">Compare</th>
+                    </tr>
+                    <tr>
+                        <th class="sortable" data-sort="rank">
+                            Rank
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="name">
+                            Player Name
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="score">
+                            Score
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="games">
+                            Games Played
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="winrate">
+                            Win Rate
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="elite">
+                            Elite
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="gold">
+                            Gold
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="silver">
+                            Silver
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th class="sortable" data-sort="bronze">
+                            Bronze
+                            <div class="sort-arrow">
+                            </div>
+                        </th>
+                        <th>Compare</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>John Smith</td>
+                        <td>2850</td>
+                        <td>156</td>
+                        <td>68%</td>
+                        <td>3</td>
+                        <td>5</td>
+                        <td>8</td>
+                        <td>12</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Sarah Johnson</td>
+                        <td>2720</td>
+                        <td>142</td>
+                        <td>65%</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>6</td>
+                        <td>10</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Mike Wilson</td>
+                        <td>2695</td>
+                        <td>189</td>
+                        <td>62%</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>5</td>
+                        <td>7</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Emma Davis</td>
+                        <td>2580</td>
+                        <td>134</td>
+                        <td>59%</td>
+                        <td>0</td>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>6</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>James Brown</td>
+                        <td>2495</td>
+                        <td>167</td>
+                        <td>57%</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>5</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -189,6 +206,9 @@
             const clearSelectionBtn = document.getElementById('clearSelection');
             let selectedPlayers = [];
 
+            // Initially hide the comparison controls
+            comparisonControls.style.display = 'none';
+
             compareCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const row = this.closest('tr');
@@ -214,9 +234,30 @@
             });
 
             compareSelectedBtn.addEventListener('click', function() {
+                const rows = document.querySelectorAll('tbody tr');
                 if (selectedPlayers.length > 0) {
-                    alert('Compare players: ' + selectedPlayers.join(', '));
-                    // Here you can add your comparison logic or redirect to a comparison page
+                    // Hide all rows first
+                    rows.forEach(row => {
+                        const playerName = row.children[1].textContent;
+                        row.style.display = selectedPlayers.includes(playerName) ? '' : 'none';
+                    });
+                    
+                    // Change button text to "Show All Players"
+                    this.textContent = 'Show All';
+                    
+                    // Remove existing click handler
+                    this.removeEventListener('click', arguments.callee);
+                    
+                    // Add new click handler to show all players
+                    this.addEventListener('click', function() {
+                        rows.forEach(row => row.style.display = '');
+                        this.textContent = 'Compare';
+                        clearSelectionBtn.click(); // Clear the selection
+                        
+                        // Restore original compare functionality
+                        this.removeEventListener('click', arguments.callee);
+                        this.addEventListener('click', compareSelectedBtn.onclick);
+                    });
                 }
             });
 

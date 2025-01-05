@@ -127,6 +127,9 @@ streak_lengths as (
 )
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 
 ,case when t.tournament_unique_key= 'Flash Tournament' then 'Flash'
+when t.tournament_unique_key= 'Common Only ✳️ Capped 20 🌟 ' then 'Common Capped 20'
+when t.tournament_unique_key= 'Common Only ✳️ Capped 15 🌟' then 'Common Capped 15'
+when t.tournament_unique_key= 'Rare Only 💠' then 'Rare Only'
 else t.tournament_unique_key  end as first_tournament
 ,suM(eth_frags_won.reward_eth) reward_eth
 ,suM(eth_frags_won.reward_frag) reward_frag

@@ -47,9 +47,8 @@
     }
 
     th.sortable {
-        padding-right: 15px;  /* Reduced from 25px */
+        padding-right: 2px;  /* Reduced from 25px */
         position: relative;
-        min-width: 60px;     /* Reduced from 80px */
         white-space: nowrap;
     }
 
@@ -59,7 +58,7 @@
 
     .sort-arrow {
         position: absolute;
-        right: 2px;          /* Reduced from 8px to bring arrow closer to text */
+        right: 1px;          /* Reduced from 8px to bring arrow closer to text */
         top: 50%;
         transform: translateY(-50%);
     }
@@ -70,51 +69,76 @@
     }
 
     .rankings-table table {
-        width: 80%;          /* Changed from 100% to 80% */
-        margin: 0 auto;      /* Center the table */
-        table-layout: fixed;  /* Changed from fixed to auto */
-        /* min-width: 1500px;   Reduced from 1200px */
+        width: max-content;
+        margin: 0 auto;
+        table-layout: fixed;
+        border-collapse: collapse;
     }
 
-    /* Adjust individual column widths */
-    th[data-sort="rank"] { width: 50px; }
-    th[data-sort="player"] { width: 200px; }
-    th[data-sort="firstTournament"] { width: 100px; }
-    th[data-sort="rewardEth"] { width: 80px; }
-    th[data-sort="rewardFrag"] { width: 80px; }
-    th[data-sort="portfolio"] { width: 80px; }
-    th[data-sort="fanPoints"] { width: 80px; }
-    th[data-sort="stars"] { width: 80px; }
-    th[data-sort="decks"] { width: 80px; }
-    th[data-sort="cards"] { width: 80px; }
+    /* Update column widths and add min-width */
+    th[data-sort="rank"] { width: 25px; min-width: 25px; }
+    th[data-sort="player"] { width: 150px; min-width: 150px; }
+    th[data-sort="firstTournament"] { width: 150px; min-width: 150px; }
+    th[data-sort="rewardEth"] { width: 80px; min-width: 80px; }
+    th[data-sort="rewardFrag"] { width: 80px; min-width: 80px; }
+    th[data-sort="portfolio"] { width: 80px; min-width: 80px; }
+    th[data-sort="fanPoints"] { width: 80px; min-width: 80px; }
+    th[data-sort="stars"] { width: 80px; min-width: 80px; }
+    th[data-sort="decks"] { width: 80px; min-width: 80px; }
+    th[data-sort="cards"] { width: 80px; min-width: 80px; }
     th[data-sort="elite"],
     th[data-sort="gold"],
     th[data-sort="silver"],
     th[data-sort="bronze"],
-    th[data-sort="reverse"] {
-        width: 5px;
-        max-width: 5px;
+    th[data-sort="reverse"] { 
+        width: 60px; 
+        min-width: 60px; 
     }
-    th[data-sort="buyVol"] { width: 90px; }
-    th[data-sort="sellVol"] { width: 90px; }
-    th:last-child { width: 70px; }
+    th[data-sort="buyVol"] { width: 90px; min-width: 90px; }
+    th[data-sort="sellVol"] { width: 90px; min-width: 90px; }
+    th:last-child { width: 70px; min-width: 70px; }
 
-    /* Add this to enforce column widths */
+    /* Ensure cells respect the column widths */
     td, th {
-        max-width: 0;
+        box-sizing: border-box;
+        max-width: none;  /* Remove max-width constraint */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        padding: 8px 4px;  /* Add consistent padding */
     }
 
     td[player-handle] {
         text-align: left;
         padding-left: 10px;  /* Optional: adds some spacing from the left edge */
     }
+
+    tbody tr:hover {
+        background-color: #1f2123;  /* Slightly lighter than the base #141515 */
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover td {
+        background-color: #1f2123;  /* Override the td background on hover */
+    }
+
+    tbody tr:hover td.section-end {
+        border-right: 1px solid var(--border-color);
+    }
+
+    /* Add these new styles */
+    .player-handle {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
 </style>
 <body>
     <header>
-        <h1>Player Rankings</h1>
+        <h1>FantasySheets Player Rankings</h1>
     </header>
 
     <main>
@@ -315,22 +339,32 @@
             tbody.innerHTML = players.map(player => `
                 <tr>
                     <td>${player.rank}</td>
-                    <td player-handle="${player.handle}" data-player-id="${player.player_id}">${player.name}</td>
+                    <td player-handle="${player.handle}" data-player-id="${player.player_id}">
+                        <img src="${player.profilePic}" alt="${player.name}" 
+                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';" 
+                            style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 6px;">
+                        <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
+                            <span class="player-handle">${player.name}</span>
+                        </a>
+                        <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                    </td>
                     <td>${player.firstTournament}</td>
-                    <td>${formatDecimalOne(player.portfolio)}</td>
+                    <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatInt(player.cards)}</td>
                     <td>${formatNumberMK(player.fanPoints)}</td>
-                    <td>${formatDecimalOne(player.rewardEth)}</td>
+                    <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td>${formatNumberMK(parseFloat(player.rewardFrag))}</td>
                     <td class="section-end">${formatNumberMK(player.stars)}</td>
                     <td>${formatInt(player.decks)}</td>
-                    <td>${formatDecimalRank(player.elite)}</td>
-                    <td>${formatDecimalRank(player.gold)}</td>
-                    <td>${formatDecimalRank(player.silver)}</td>
-                    <td>${formatDecimalRank(player.bronze)}</td>
-                    <td class="section-end">${formatDecimalRank(player.reverse)}</td>
-                    <td>${formatDecimalOne(player.buyVol)}</td>
-                    <td class="section-end">${formatDecimalOne(player.sellVol)}</td>
+                    <td style="background-color: #a8ccde26">${formatDecimalRank(player.elite)}</td>
+                    <td style="background-color: #dacc8626">${formatDecimalRank(player.gold)}</td>
+                    <td style="background-color: #8b8b8b26">${formatDecimalRank(player.silver)}</td>
+                    <td style="background-color: #a97e4826">${formatDecimalRank(player.bronze)}</td>
+                    <td class="section-end" style="background-color: #82EA8926">${formatDecimalRank(player.reverse)}</td>
+                    <td>${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td class="section-end">${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td><input type="checkbox" class="compare-checkbox"></td>
                 </tr>
             `).join('');

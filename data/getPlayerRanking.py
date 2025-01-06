@@ -77,10 +77,8 @@ group by 1,2
     FROM flatten.get_hero_last_trades ghlt 
     where buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     and seller_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
-    GROUP BY 1, 2
-    
+    GROUP BY 1,2
     UNION
-    
     SELECT 
         seller_id as player_id,
         DATE(timestamp) as trade_date,
@@ -92,7 +90,7 @@ group by 1,2
     FROM flatten.get_hero_last_trades ghlt 
     where buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     and seller_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
-    GROUP BY 1, 2
+    GROUP BY 1,2
 ),
 consecutive_days as (
     SELECT 
@@ -128,11 +126,12 @@ streak_lengths as (
     GROUP BY 1
 )
 select players.player_id,players.player_handle ,players.player_name ,players.profile_picture 
-,case when t.tournament_unique_key= 'Flash Tournament' then 'Flash'
-when t.tournament_unique_key= 'Common Only ✳️ Capped 20 🌟 ' then 'Common Capped 20'
-when t.tournament_unique_key= 'Common Only ✳️ Capped 15 🌟' then 'Common Capped 15'
-when t.tournament_unique_key= 'Rare Only 💠' then 'Rare Only'
-else t.tournament_unique_key  end as first_tournament
+,case when first_tournament.tournament_unique_key= 'Flash Tournament' then 'Flash'
+when first_tournament.tournament_unique_key= 'Common Only ✳️ Capped 20 🌟 ' then 'Common Capped 20'
+when first_tournament.tournament_unique_key= 'Common Only ✳️ Capped 15 🌟' then 'Common Capped 15'
+when first_tournament.tournament_unique_key= 'Rare Only 💠' then 'Rare Only'
+else first_tournament.tournament_unique_key  end as first_tournament
+,EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP AT TIME ZONE 'UTC' - MAX(greatest(last_tournament.start_timestamp,players.last_trade_timestamp)))) / 3600 as hours_since_last_activity
 ,suM(eth_frags_won.reward_eth) reward_eth
 ,suM(eth_frags_won.reward_frag) reward_frag
 ,suM(coalesce(players.portfolio_value,0)) as portfolio
@@ -154,8 +153,10 @@ else t.tournament_unique_key  end as first_tournament
 ,max(coalesce(tvbp.longest_trading_streak,0)) as longest_trade_streak
 ,max(updated) freshness_timestamp
 from flatten.get_player_basic_data players
-join flatten.GET_TOURNAMENTS t
-	on players.player_first_tournament = t.tournament_id
+join flatten.GET_TOURNAMENTS first_tournament
+	on players.first_tournament = first_tournament.tournament_id
+join flatten.GET_TOURNAMENTS last_tournament
+	on players.last_tournament = last_tournament.tournament_id
 join eth_frags_won  
 	on players.player_id = eth_frags_won.player_id
 join tournaments 

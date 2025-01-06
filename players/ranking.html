@@ -83,6 +83,7 @@
     th[data-sort="rewardFrag"] { width: 80px; min-width: 80px; }
     th[data-sort="portfolio"] { width: 80px; min-width: 80px; }
     th[data-sort="fanPoints"] { width: 80px; min-width: 80px; }
+    th[data-sort="blastGold"] { width: 80px; min-width: 80px; }
     th[data-sort="stars"] { width: 80px; min-width: 80px; }
     th[data-sort="decks"] { width: 80px; min-width: 80px; }
     th[data-sort="cards"] { width: 80px; min-width: 80px; }
@@ -169,10 +170,10 @@
                         <th class="column-header section-end" colspan="6">
                             <i class="fa-solid fa-user"></i> Player
                         </th>
-                        <th class="column-header section-end" colspan="4">
+                        <th class="column-header section-end" colspan="5">
                             <i class="fa-solid fa-coins"></i> Rewards
                         </th>
-                        <th class="column-header section-end" colspan="6" title="All tournaments, your best decks rank normalized where 1 is best, 0 is worst, then averaged across those scores">
+                        <th class="column-header section-end" colspan="6" title="Average normalized score using best deck. 1 is best, 0 is worst.">
                             <i class="fa-solid fa-trophy"></i> Performance
                         </th>
                         <th class="column-header section-end" colspan="2">
@@ -215,6 +216,10 @@
                         </th>
                         <th class="sortable" data-sort="rewardFrag">
                             <img src="../icons/fragment.webp" alt="Reward Frag" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="blastGold">
+                            <img src="../icons/blast.webp" alt="Blast Gold" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable section-end" data-sort="stars">
@@ -327,7 +332,7 @@
                     rewardFrag: player.reward_frag.toFixed(3),
                     portfolio: player.portfolio.toFixed(3),
                     fanPoints: Math.round(player.fan_pts),
-                    gold: Math.round(player.gold),
+                    blastGold: Math.round(player.blast_gold),
                     stars: Math.round(player.stars),
                     decks: Math.round(player.decks),
                     cards: Math.round(player.cards),
@@ -359,12 +364,13 @@
                     <td>${player.firstTournament}</td>
                     <td>${player.hoursSinceLastActivity >= 24 
                         ? Math.round(player.hoursSinceLastActivity/24) + '<span style="color: grey; font-size: 0.8em;"> d</span>' 
-                        : ' 0<span style="color: grey; font-size: 0.8em;">d</span>'}</td>
+                        : '0<span style="color: grey; font-size: 0.8em;"> d</span>'}</td>
                     <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatInt(player.cards)}</td>
                     <td>${formatNumberMK(player.fanPoints)}</td>
                     <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td>${formatNumberMK(parseFloat(player.rewardFrag))}</td>
+                    <td>${formatNumberMK(player.blastGold)}</td>  
                     <td class="section-end">${formatNumberMK(player.stars)}</td>
                     <td>${formatInt(player.decks)}</td>
                     <td style="background-color: #a8ccde26">${player.elite == 0 ? '-' : formatDecimalRank(player.elite)}</td>

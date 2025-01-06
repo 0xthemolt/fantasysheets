@@ -136,7 +136,7 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,suM(eth_frags_won.reward_frag) reward_frag
 ,suM(coalesce(players.portfolio_value,0)) as portfolio
 ,sum(players.fan_pts + referral_pts) fan_pts
-,sum(players.gold) gold
+,sum(players.gold) blast_gold
 ,suM(players.stars) stars
 ,sum(tournaments.deck_count) as decks
 ,suM(players.number_of_cards) as cards

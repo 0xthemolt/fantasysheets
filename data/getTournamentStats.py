@@ -18,6 +18,7 @@ conn = get_db_connection()
 cursor = conn.cursor()
 league_decks_query = f"""select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+    gt.start_timestamp,
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
     league,
@@ -28,12 +29,14 @@ from
 join flatten.get_tournament_past_players gtpp
     on gt.tournament_id = gtpp.tournament_id
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
-group by 1,2,3,4"""
+group by 1,2,3,4,5
+order by gt.start_timestamp asc"""
 league_decks_df = pd.read_sql_query(league_decks_query, conn)
 cursor.close()
 
 total_players_query = f"""select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+    gt.start_timestamp,
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
     COUNT(distinct gtpp.player_id) player_count
@@ -42,7 +45,8 @@ from
 join flatten.get_tournament_past_players gtpp
     on gt.tournament_id = gtpp.tournament_id
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
-group by 1,2,3"""
+group by 1,2,3,4
+order by gt.start_timestamp asc"""
 total_players_df = pd.read_sql_query(total_players_query, conn)
 cursor.close()
 
@@ -51,6 +55,7 @@ cursor.close()
 conn = get_db_connection()
 cursor = conn.cursor()
 card_stars_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+gt.start_timestamp,
  gt.tournament_unique_key,
     coalesce(t.hero_stars,1) hero_stars,
     count(*) card_count,
@@ -59,7 +64,8 @@ from agg.tournamentownership t
 join   flatten.get_tournaments gt
     on t.tournament_id  = gt.tournament_id 
     where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
-group by 1,2,3"""
+group by 1,2,3,4
+order by gt.start_timestamp asc"""
 card_stars_df = pd.read_sql_query(card_stars_query, conn)
 cursor.close()
 

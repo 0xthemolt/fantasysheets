@@ -83,7 +83,7 @@
         #playerTable th[data-sort="reward_eth"], #playerTable td[data-column="reward_eth"],
         #playerTable th[data-sort="portfolio"], #playerTable td[data-column="portfolio"],
         #playerTable th[data-sort="buy_volume"], #playerTable td[data-column="buy_volume"],
-        #playerTable th[data-sort="sell_volume"], #playerTable td[data-column="sell_volume"],
+        #playerTable th[data-sort="net_vol"], #playerTable td[data-column="net_vol"],
         #playerTable th[data-sort="cards"], #playerTable td[data-column="cards"],
         #playerTable th[data-sort="decks"], #playerTable td[data-column="decks"] {
             width: 40px;
@@ -296,7 +296,7 @@
                         <th data-sort="reward_eth" style="width: 40px"><span><img src="../icons/eth.webp" alt="ETH Rewards" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
                         <th data-sort="portfolio" style="width: 40px"><span>Port</span><div class="sort-arrow"></div></th>
                         <th data-sort="buy_volume" style="width: 40px"><span>Buy Vol</span><div class="sort-arrow"></div></th>
-                        <th data-sort="sell_volume" style="width: 40px"><span>Sell Vol</span><div class="sort-arrow"></div></th>
+                        <th data-sort="net_vol" style="width: 40px"><span>Net Vol</span><div class="sort-arrow"></div></th>
                         <th data-sort="cards" style="width: 40px"><span>Cards</span><div class="sort-arrow"></div></th>
                         <th data-sort="decks" style="width: 40px"><span>Decks</span><div class="sort-arrow"></div></th>
                         <th data-sort="elite_norm_rank" style="width: 30px"><span><img src="../icons/elite.webp" alt="Elite" style="height: 20px; width: 20px;"></span><div class="sort-arrow"></div></th>
@@ -425,7 +425,7 @@
                     <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>
                     <td data-column="portfolio">${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
                     <td data-column="buy_volume">${formatNumber(player.buy_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
-                    <td data-column="sell_volume">${formatNumber(player.sell_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="net_vol">${formatNumber(player.net_vol || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td data-column="cards">${formatInt(player.cards || 0)}</td>
                     <td data-column="decks">${formatInt(player.decks || 0)}</td>
                     <td data-column="elite_norm_rank">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>
@@ -558,7 +558,7 @@
                     <td data-column="reward_eth">${(player.reward_eth || 0).toFixed(1)}</td>
                     <td data-column="portfolio">${typeof player.portfolio === 'number' ? `${player.portfolio.toFixed(1)} <span style="color: grey; font-size: 0.8em;">ETH</span>` : 'N/A'}</td>
                     <td data-column="buy_volume">${formatNumber(player.buy_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
-                    <td data-column="sell_volume">${formatNumber(player.sell_volume || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td data-column="net_vol">${formatNumber(player.net_vol || 0)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td data-column="cards">${formatInt(player.cards || 0)}</td>
                     <td data-column="decks">${formatInt(player.decks || 0)}</td>
                     <td data-column="elite_norm_rank">${player.elite_norm_rank === 0 ? '-' : (player.elite_norm_rank * 100).toFixed(1)}</td>

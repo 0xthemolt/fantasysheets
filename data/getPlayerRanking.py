@@ -75,7 +75,8 @@ group by 1,2
         max(price) as max_buy,
         0 as max_sell
     FROM flatten.get_hero_last_trades ghlt 
-    where buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    where buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    and seller_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     GROUP BY 1, 2
     
     UNION
@@ -89,7 +90,8 @@ group by 1,2
         0 as max_buy,
         max(price) as max_sell
     FROM flatten.get_hero_last_trades ghlt 
-    where buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    where buyer_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
+    and seller_id <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
     GROUP BY 1, 2
 ),
 consecutive_days as (
@@ -145,7 +147,7 @@ else t.tournament_unique_key  end as first_tournament
 ,max(touranment_rankings_bronze.avg_best_deck_norm_rank) as bronze_norm_rank
 ,max(touranment_rankings_reverse.avg_best_deck_norm_rank) as reverse_norm_rank
 ,max(coalesce(tvbp.buy_volume,0)) as buy_vol
-,max(coalesce(tvbp.sell_volume,0)) as sell_vol
+,max(coalesce(tvbp.buy_volume,0) - coalesce(tvbp.sell_volume,0)) as net_vol
 ,max(coalesce(tvbp.trade_count,0)) as trade_count
 ,max(coalesce(tvbp.max_buy,0)) as max_buy
 ,max(coalesce(tvbp.max_sell,0)) as max_sell

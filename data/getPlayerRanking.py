@@ -64,6 +64,7 @@ select league,player_id
 from touranment_rankings
 where best_deck_rank = 1
 group by 1,2
+having count(*) >= 2 --at least 2 tournaments
 )
 , trade_volume as (
     SELECT 

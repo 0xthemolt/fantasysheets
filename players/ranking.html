@@ -172,7 +172,7 @@
                         <th class="column-header section-end" colspan="4">
                             <i class="fa-solid fa-coins"></i> Rewards
                         </th>
-                        <th class="column-header section-end" colspan="6">
+                        <th class="column-header section-end" colspan="6" title="All tournaments, your best decks rank normalized where 1 is best, 0 is worst, then averaged across those scores">
                             <i class="fa-solid fa-trophy"></i> Performance
                         </th>
                         <th class="column-header section-end" colspan="2">
@@ -359,7 +359,7 @@
                     <td>${player.firstTournament}</td>
                     <td>${player.hoursSinceLastActivity >= 24 
                         ? Math.round(player.hoursSinceLastActivity/24) + '<span style="color: grey; font-size: 0.8em;"> d</span>' 
-                        : '0<span style="color: grey; font-size: 0.8em;">d</span>'}</td>
+                        : ' 0<span style="color: grey; font-size: 0.8em;">d</span>'}</td>
                     <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatInt(player.cards)}</td>
                     <td>${formatNumberMK(player.fanPoints)}</td>

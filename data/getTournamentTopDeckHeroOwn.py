@@ -21,37 +21,47 @@ def get_db_connection():
 TOURNAMENT_NUMBER = config['tournament_number']
 
 query = f"""
-with deck_counts as (
-    select tournament_id, count(*) deck_count 
-    from flatten.get_tournament_past_players gtpp 
-    where tournament_unique_key =  'Main {TOURNAMENT_NUMBER}'
-    group by 1
-),
-top_performers as (
-    select tournament_unique_key,
-        tournament_league_unique_key,
-        hero_handle,
-        hero_fantasy_score,
+with top50_heroes as (
+    select 
+        t.tournament_unique_key,
+        t.tournament_league_unique_key,
+        t.hero_handle,
+        t.card_picture_url,
+        t.hero_fantasy_score,
         count(*) as hero_count,
+        COUNT(distinct tournament_player_deck_id) as deck_count,
+        round(count(*)::decimal / COUNT(distinct tournament_player_deck_id) * 100, 2) as usage_percentage
     from agg.tournamentownership t 
-    join deck_counts decks on t.tournament_id = decks.tournament_id
-    where (player_rank::float / deck_count * 100) <= 5  -- top 5% filter
-    group by 1,2,3,4
+    where player_rank <= 50
+    and t.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
+    group by 1,2,3,4,5
+    order by usage_percentage desc
 )
-select 
-    tournament_unique_key,
-    tournament_league_unique_key,
-    hero_handle,
-    hero_count,
-    hero_fantasy_score,
-    round((hero_count::float / (
-        select sum(hero_count) 
-        from top_performers t2 
-        where t2.tournament_unique_key = t1.tournament_unique_key 
-        and t2.tournament_league_unique_key = t1.tournament_league_unique_key
-    ) * 100)::numeric, 2) as usage_percentage
-from top_performers t1
-order by tournament_unique_key, tournament_league_unique_key, hero_count desc
+,itm_heroes as (
+    select 
+        t.tournament_unique_key,
+        t.tournament_league_unique_key,
+        t.hero_handle,
+        t.card_picture_url,
+        t.hero_fantasy_score,
+        count(*) as hero_count,
+        COUNT(distinct tournament_player_deck_id) as deck_count,
+        round(count(*)::decimal / COUNT(distinct tournament_player_deck_id) * 100, 2) as usage_percentage
+    from agg.tournamentownership t 
+    join flatten.GET_TOURNAMENT_BY_ID rewards
+        on t.tournament_id = rewards.tournament_id 
+        and t.player_rank between rewards.range_start and rewards.range_end 
+        and rewards.reward_type = 'ETH'
+    where t.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
+    group by 1,2,3,4,5
+    order by usage_percentage desc
+)
+select * from (
+    select *, 'top50' as category from top50_heroes
+    union all
+    select *, 'itm' as category from itm_heroes
+) combined
+order by tournament_unique_key, tournament_league_unique_key, category, usage_percentage desc
 """
 
 conn = get_db_connection()
@@ -71,11 +81,14 @@ hero_data = {
 for row in result:
     tournament_key = row[0]
     league_key = row[1]
+    category = row[8]  # new column for category (top50 or itm)
     hero_info = {
         "hero": row[2],
-        "count": row[3],
+        "image_url": row[3],
         "fantasy_score": float(row[4]),
-        "usage_percentage": float(row[5])
+        "hero_count": int(row[5]),
+        "deck_count": int(row[6]),
+        "usage_percentage": float(row[7])
     }
     
     # Create nested structure
@@ -83,11 +96,14 @@ for row in result:
         hero_data["tournaments"][tournament_key] = {}
     
     if league_key not in hero_data["tournaments"][tournament_key]:
-        hero_data["tournaments"][tournament_key][league_key] = []
+        hero_data["tournaments"][tournament_key][league_key] = {
+            "top50": [],
+            "itm": []
+        }
     
-    # Only append if we haven't reached 10 heroes for this tournament/league combination
-    if len(hero_data["tournaments"][tournament_key][league_key]) < 10:
-        hero_data["tournaments"][tournament_key][league_key].append(hero_info)
+    # Add to appropriate category if less than 10 heroes
+    if len(hero_data["tournaments"][tournament_key][league_key][category]) < 10:
+        hero_data["tournaments"][tournament_key][league_key][category].append(hero_info)
 
 # Get the absolute path for the output directory
 script_dir = os.path.dirname(os.path.abspath(__file__))

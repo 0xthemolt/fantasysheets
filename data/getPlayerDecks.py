@@ -463,14 +463,39 @@ for row in rows:
     }
     player_decks.append(player_deck)
 
+# Sort player_decks by player_handle and then player_rank before creating the final structure
+player_decks.sort(key=lambda x: (x['player_handle'], x['player_rank']))
+
+
+metadata = {
+    'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,
+    'tournament_progress_hours': rows[0][3],
+    'timestamp': rows[0][39].isoformat() if rows[0][39] else None  # Convert datetime to ISO format string
+}
+
 # Create the final structure
 output_data = {
     'metadata': metadata,
     'league_results': player_decks
 }
 
-# Write the data to JSON
-with open('pages/player_decks.json', 'w', encoding='utf-8') as f:
-    json.dump(output_data, f, indent=2, default=str)
+try:
+    # Get the absolute path for the output directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(script_dir, 'tournaments')
 
-conn.close()
+    # Ensure the tournaments directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Write to JSON file using absolute path
+    output_file = os.path.join(output_dir, 'player_decks.json')
+    with open(output_file, 'w') as f:
+        json.dump(output_data, f, indent=4)
+
+    print(f"Successfully wrote data to: {output_file}")
+
+except Exception as e:
+    print(f"Error writing data to file: {str(e)}")
+finally:
+    # Close the final connection
+    conn.close()

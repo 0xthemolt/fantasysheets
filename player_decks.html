@@ -147,7 +147,7 @@
                 if (leagues[leagueName]) {
                     // Find the top deck in this league
                     const topDeck = leagues[leagueName]
-                        .sort((a, b) => (b.player_score || 0) - (a.player_score || 0))[0];
+                        .sort((a, b) => (a.player_rank || Infinity) - (b.player_rank || Infinity))[0];
                     
                     // Create the cards display HTML for the top deck
                     let topDeckCardsHtml = `
@@ -381,11 +381,24 @@
             resultsDiv.innerHTML = toggleButton + generateHtmlTable(playerDecks);
         }
 
-        fetch('player_decks.json')
+        fetch('/data/tournaments/player_decks.json')
             .then(response => response.json())
             .then(data => {
-                allData = data.league_results;
+                // Sort the league_results array by player_handle and player_rank
+                allData = data.league_results.sort((a, b) => {
+                    // First compare player_handle (case-insensitive)
+                    const handleCompare = a.player_handle.toLowerCase().localeCompare(b.player_handle.toLowerCase());
+                    
+                    // If handles are the same, compare by rank
+                    if (handleCompare === 0) {
+                        return a.player_rank - b.player_rank;
+                    }
+                    
+                    return handleCompare;
+                });
+
                 document.getElementById('timestamp').textContent = data.metadata.timestamp;
+                // Get unique player handles after sorting
                 playerHandles = [...new Set(allData.map(player => player.player_handle))].sort();
                 
                 $("#player_handle").autocomplete({

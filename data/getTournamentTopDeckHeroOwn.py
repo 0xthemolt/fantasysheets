@@ -21,14 +21,13 @@ with deck_counts as (
     group by 1
 ),
 top_performers as (
-    select 
-        hero_handle,hero_fantasy_score,
+    select tournament_league_unique_key,hero_handle,hero_fantasy_score,
         count(*) as hero_count
     from agg.tournamentownership t 
     join deck_counts decks on t.tournament_id = decks.tournament_id
-    where tournament_league_unique_key = 'Bronze Main 33'
+    where tournament_unique_key = 'Main 33'
     and (player_rank::float / deck_count * 100) <= 5  -- top 5% filter
-    group by hero_handle,hero_fantasy_score
+    group by 1,2,3
     order by hero_count desc
     limit 10
 )

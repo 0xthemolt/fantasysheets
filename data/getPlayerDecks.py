@@ -57,17 +57,43 @@ select hero_handle,
     FROM ordered_records 
     CROSS JOIN hero_count hc
 )
+,trade_history_base as (
+select buyer_id,card_id,timestamp,price,hero_rarity_id,hero_id,rarity,hero_handle,row_number() over (partition by buyer_id,card_id order by timestamp desc) buyer_last_buy_card_id
+from flatten.get_hero_last_trades ghlt 
+where buyer_id  not in ('0x000000000000000000000000000000000000000A','0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841') --frag buy
+)
+,trade_history_prior_to_tournament as (
+select buyer_id,hero_rarity_id,hero_id,price,rarity,hero_handle
+,ROW_NUMBER() over (partition by hero_rarity_id order by timestamp desc) hero_rarity_trade_history_rank
+,timestamp
+from trade_history_base
+where 1=1  
+and timestamp >= NOW() at time zone 'UTC' - interval '21 days'  --for performance
+ and timestamp < (select start_timestamp from  flatten.get_tournaments where tournament_league_unique_key  = 'Elite Main {TOURNAMENT_NUMBER}') --pre main start
+-- and hero_handle = 'blockgraze' and rarity = 'rare'
+)
+,trade_l5_txn_median as (
+select hero_id,hero_rarity_id,rarity,PERCENTILE_CONT(0.5) within group(	order by price) as median_price	
+from trade_history_prior_to_tournament
+where hero_rarity_trade_history_rank <= 5
+group by 1,2,3
+)
     select gt.tournament_name as league_name,gtpp.tournament_league_unique_key,gt.tournament_duration_hours::integer as tournament_duration_hours,
         case when gt.tournament_status  = 'live'   
             then ROUND(EXTRACT(EPOCH FROM (NOW() at time zone 'UTC' - gt.start_timestamp)) / 3600)::integer
         else ROUND(gt.tournament_duration_hours)::integer
         end        AS tournament_progress_hours,
-        player_handle,player_pic,player_score,player_rank,
-           card1_hero_handle,card1_picture_url,ROUND(card1_fantasy_score,0) card1_score,card1_hero_stars,card1_new_hero_stars.new_hero_stars,
-           card2_hero_handle,card2_picture_url,ROUND(card2_fantasy_score,0) card2_score,card2_hero_stars,card2_new_hero_stars.new_hero_stars,   
-           card3_hero_handle,card3_picture_url,ROUND(card3_fantasy_score,0) card3_score,card3_hero_stars,card3_new_hero_stars.new_hero_stars,   
-           card4_hero_handle,card4_picture_url,ROUND(card4_fantasy_score,0) card4_score,card4_hero_stars,card4_new_hero_stars.new_hero_stars,
-           card5_hero_handle,card5_picture_url,ROUND(card5_fantasy_score,0) card5_score,card5_hero_stars,card5_new_hero_stars.new_hero_stars,   
+        player_handle,player_pic,player_score,player_rank,  
+           card1_hero_handle,card1_picture_url,ROUND(card1_fantasy_score,0) card1_score,card1_hero_stars,card1_new_hero_stars.new_hero_stars,buyer_cost_card1.price as card1_actual_cost,market_l5_cost_card1.median_price as card1_market_cost
+           		,case when card1_hero_rarity = 'rare' then (common_market_l5_cost_card1.median_price * .85) * 5 when card1_hero_rarity = 'epic' then  (common_market_l5_cost_card1.median_price * .80) * 25  when card1_hero_rarity = 'legendary' then (common_market_l5_cost_card1.median_price * .75) * 125  else common_market_l5_cost_card1.median_price end as card1_est_cost,
+           card2_hero_handle,card2_picture_url,ROUND(card2_fantasy_score,0) card2_score,card2_hero_stars,card2_new_hero_stars.new_hero_stars,buyer_cost_card2.price as card2_actual_cost,market_l5_cost_card2.median_price as card2_market_cost
+           		,case when card2_hero_rarity = 'rare' then (common_market_l5_cost_card2.median_price * .85) * 5 when card2_hero_rarity = 'epic' then  (common_market_l5_cost_card2.median_price * .80) * 25  when card2_hero_rarity = 'legendary' then (common_market_l5_cost_card2.median_price * .75) * 125  else common_market_l5_cost_card2.median_price end as card2_est_cost,
+           card3_hero_handle,card3_picture_url,ROUND(card3_fantasy_score,0) card3_score,card3_hero_stars,card3_new_hero_stars.new_hero_stars,buyer_cost_card3.price as card3_actual__cost,market_l5_cost_card3.median_price as card3_market_cost
+           		,case when card3_hero_rarity = 'rare' then (common_market_l5_cost_card3.median_price * .85) * 5 when card3_hero_rarity = 'epic' then  (common_market_l5_cost_card3.median_price * .80) * 25  when card3_hero_rarity = 'legendary' then (common_market_l5_cost_card3.median_price * .75) * 125  else common_market_l5_cost_card3.median_price end as card3_est_cost,
+           card4_hero_handle,card4_picture_url,ROUND(card4_fantasy_score,0) card4_score,card4_hero_stars,card4_new_hero_stars.new_hero_stars,buyer_cost_card4.price as card4_actual_cost,market_l5_cost_card4.median_price as card4_market_cost
+           		,case when card4_hero_rarity = 'rare' then (common_market_l5_cost_card4.median_price * .85) * 5 when card4_hero_rarity = 'epic' then  (common_market_l5_cost_card4.median_price * .80) * 25  when card4_hero_rarity = 'legendary' then (common_market_l5_cost_card4.median_price * .75) * 125  else common_market_l5_cost_card4.median_price end as card4_est_cost,
+           card5_hero_handle,card5_picture_url,ROUND(card5_fantasy_score,0) card5_score,card5_hero_stars,card5_new_hero_stars.new_hero_stars,buyer_cost_card5.price as card5_actual_cost,market_l5_cost_card5.median_price as card5_market_cost
+           		,case when card5_hero_rarity = 'rare' then (common_market_l5_cost_card5.median_price * .85) * 5 when card5_hero_rarity = 'epic' then  (common_market_l5_cost_card5.median_price * .80) * 25  when card5_hero_rarity = 'legendary' then (common_market_l5_cost_card5.median_price * .75) * 125  else common_market_l5_cost_card5.median_price end as card5_est_cost,
            tournament_player_deck_id,
            reward_fan.reward as fan,
 			reward_gold.reward AS gold,
@@ -108,6 +134,51 @@ select hero_handle,
         on gtpp.card4_hero_handle = card4_new_hero_stars.hero_handle
     LEFT JOIN new_hero_stars card5_new_hero_stars
         on gtpp.card5_hero_handle = card5_new_hero_stars.hero_handle
+    left join trade_history_base  buyer_cost_card1
+    	on gtpp.card1_id = buyer_cost_card1.card_id
+    	and gtpp.player_id = buyer_cost_card1.buyer_id
+		and buyer_cost_card1.buyer_last_buy_card_id = 1
+    left join trade_history_base  buyer_cost_card2
+    	on gtpp.card2_id = buyer_cost_card2.card_id
+    	and gtpp.player_id = buyer_cost_card2.buyer_id
+		and buyer_cost_card2.buyer_last_buy_card_id = 1
+    left join trade_history_base  buyer_cost_card3
+    	on gtpp.card3_id = buyer_cost_card3.card_id
+    	and gtpp.player_id = buyer_cost_card3.buyer_id
+		and buyer_cost_card3.buyer_last_buy_card_id = 1
+    left join trade_history_base  buyer_cost_card4
+    	on gtpp.card4_id = buyer_cost_card4.card_id
+    	and gtpp.player_id = buyer_cost_card4.buyer_id
+		and buyer_cost_card4.buyer_last_buy_card_id = 1
+    left join trade_history_base  buyer_cost_card5
+    	on gtpp.card5_id = buyer_cost_card5.card_id
+    	and gtpp.player_id = buyer_cost_card5.buyer_id
+		and buyer_cost_card5.buyer_last_buy_card_id = 1
+	left join trade_l5_txn_median market_l5_cost_card1
+		on gtpp.card1_hero_rarity_index = market_l5_cost_card1.hero_rarity_id
+	left join trade_l5_txn_median market_l5_cost_card2
+		on gtpp.card2_hero_rarity_index = market_l5_cost_card2.hero_rarity_id
+	left join trade_l5_txn_median market_l5_cost_card3
+		on gtpp.card3_hero_rarity_index = market_l5_cost_card3.hero_rarity_id
+	left join trade_l5_txn_median market_l5_cost_card4
+		on gtpp.card4_hero_rarity_index = market_l5_cost_card4.hero_rarity_id
+	left join trade_l5_txn_median market_l5_cost_card5
+		on gtpp.card5_hero_rarity_index = market_l5_cost_card5.hero_rarity_id
+	left join trade_l5_txn_median common_market_l5_cost_card1
+		on gtpp.card1_hero_id = common_market_l5_cost_card1.hero_id
+		and common_market_l5_cost_card1.rarity = 'common'
+	left join trade_l5_txn_median common_market_l5_cost_card2
+		on gtpp.card2_hero_id = common_market_l5_cost_card2.hero_id
+		and common_market_l5_cost_card2.rarity = 'common'
+	left join trade_l5_txn_median common_market_l5_cost_card3
+		on gtpp.card3_hero_id = common_market_l5_cost_card3.hero_id
+		and common_market_l5_cost_card3.rarity = 'common'
+	left join trade_l5_txn_median common_market_l5_cost_card4
+		on gtpp.card4_hero_id = common_market_l5_cost_card4.hero_id
+		and common_market_l5_cost_card4.rarity = 'common'
+	left join trade_l5_txn_median common_market_l5_cost_card5
+		on gtpp.card5_hero_id = common_market_l5_cost_card5.hero_id
+		and common_market_l5_cost_card5.rarity = 'common'
     where gtpp.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 """
@@ -391,7 +462,7 @@ def calculate_rarity_score(picture_url, fantasy_score):
 metadata = {
     'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,
     'tournament_progress_hours': rows[0][3],
-    'timestamp': rows[0][39]
+    'timestamp': rows[0][54]
 }
 
 # Convert the results to a list of dictionaries with merged optimal data
@@ -414,52 +485,63 @@ for row in rows:
                 'fantasy_score': float(row[10]) if row[10] else None,
                 'rarity_score': calculate_rarity_score(row[9], float(row[10]) if row[10] else None),
                 'hero_stars': int(row[11]) if row[11] else 0,
-                'new_hero_stars': int(row[12]) if row[12] else 0
+                'new_hero_stars': int(row[12]) if row[12] else 0,
+                'actual_card_cost': float(row[13]) if row[13] else None,
+                'market_card_cost': float(row[14]) if row[14] else None,
+                'est_card_cost': float(row[15]) if row[15] else None
             },
             {
-                'hero_handle': row[13],
-                'picture_url': row[14], 
-                'fantasy_score': float(row[15]) if row[15] else None,
-                'rarity_score': calculate_rarity_score(row[14], float(row[15]) if row[15] else None),
-                'hero_stars': int(row[16]) if row[16] else 0,
-                'new_hero_stars': int(row[17]) if row[17] else 0
+                'hero_handle': row[16],
+                'picture_url': row[17], 
+                'fantasy_score': float(row[18]) if row[18] else None,
+                'rarity_score': calculate_rarity_score(row[17], float(row[18]) if row[18] else None),
+                'hero_stars': int(row[19]) if row[19] else 0,
+                'new_hero_stars': int(row[20]) if row[20] else 0,
+                'actual_card_cost': float(row[21]) if row[21] else None,
+                'market_card_cost': float(row[22]) if row[22] else None,
+                'est_card_cost': float(row[23]) if row[23] else None
             },
             {
-                'hero_handle': row[18],
-                'picture_url': row[19], 
-                'fantasy_score': float(row[20]) if row[20] else None,
-                'rarity_score': calculate_rarity_score(row[19], float(row[20]) if row[20] else None),
-                'hero_stars': int(row[21]) if row[21] else 0,
-                'new_hero_stars': int(row[22]) if row[22] else 0
+                'hero_handle': row[24],
+                'picture_url': row[25], 
+                'fantasy_score': float(row[26]) if row[26] else None,
+                'rarity_score': calculate_rarity_score(row[25], float(row[26]) if row[26] else None),
+                'hero_stars': int(row[27]) if row[27] else 0,
+                'new_hero_stars': int(row[28]) if row[28] else 0,
+                'actual_card_cost': float(row[29]) if row[29] else None,
+                'market_card_cost': float(row[30]) if row[30] else None,
+                'est_card_cost': float(row[31]) if row[31] else None
             },
             {
-                'hero_handle': row[23],
-                'picture_url': row[24], 
-                'fantasy_score': float(row[25]) if row[25] else None,
-                'rarity_score': calculate_rarity_score(row[24], float(row[25]) if row[25] else None),
-                'hero_stars': int(row[26]) if row[26] else 0,
-                'new_hero_stars': int(row[27]) if row[27] else 0
+                'hero_handle': row[32],
+                'picture_url': row[33], 
+                'fantasy_score': float(row[34]) if row[34] else None,
+                'rarity_score': calculate_rarity_score(row[33], float(row[34]) if row[34] else None),
+                'hero_stars': int(row[35]) if row[35] else 0,
+                'new_hero_stars': int(row[36]) if row[36] else 0,
+                'actual_card_cost': float(row[37]) if row[37] else None,
+                'market_card_cost': float(row[38]) if row[38] else None,
+                'est_card_cost': float(row[39]) if row[39] else None
             },
             {
-                'hero_handle': row[28],
-                'picture_url': row[29], 
-                'fantasy_score': float(row[30]) if row[30] else None,
-                'rarity_score': calculate_rarity_score(row[29], float(row[30]) if row[30] else None),
-                'hero_stars': int(row[31]) if row[31] else 0,
-                'new_hero_stars': int(row[32]) if row[32] else 0
+                'hero_handle': row[40],
+                'picture_url': row[41], 
+                'fantasy_score': float(row[42]) if row[42] else None,
+                'rarity_score': calculate_rarity_score(row[41], float(row[42]) if row[42] else None),
+                'hero_stars': int(row[43]) if row[43] else 0,
+                'new_hero_stars': int(row[44]) if row[44] else 0,
+                'actual_card_cost': float(row[45]) if row[45] else None,
+                'market_card_cost': float(row[46]) if row[46] else None,
+                'est_card_cost': float(row[47]) if row[47] else None
             },
         ],
-        'tournament_player_deck_id': tournament_player_deck_id,
-        'fan': int(row[34]) if row[34] else 0,
-        'gold': int(row[35]) if row[35] else 0,
-        'eth': float(row[36]) if row[36] else 0.0,
-        'packs': int(row[37]) if row[37] else 0,
-        'frag': int(row[38]) if row[38] else 0,
-        # Add optimal deck data
-        'optimal_league': optimal_data.get('optimal_league'),
-        'optimal_rank': optimal_data.get('optimal_rank'),
-        'new_eth': optimal_data.get('new_eth'),
-        'new_packs': optimal_data.get('new_packs')
+        'tournament_player_deck_id': row[48],
+        'fan': int(row[49]) if row[49] else 0,
+        'gold': int(row[50]) if row[50] else 0,
+        'eth': float(row[51]) if row[51] else 0.0,
+        'packs': int(row[52]) if row[52] else 0,
+        'frag': int(row[53]) if row[53] else 0,
+        'timestamp': row[54].isoformat() if row[54] else None
     }
     player_decks.append(player_deck)
 
@@ -470,7 +552,7 @@ player_decks.sort(key=lambda x: (x['player_handle'], x['player_rank']))
 metadata = {
     'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,
     'tournament_progress_hours': rows[0][3],
-    'timestamp': rows[0][39].isoformat() if rows[0][39] else None  # Convert datetime to ISO format string
+    'timestamp': rows[0][54].isoformat() if rows[0][54] else None  # Convert datetime to ISO format string
 }
 
 # Create the final structure

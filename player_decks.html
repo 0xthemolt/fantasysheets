@@ -330,7 +330,7 @@
                             playerCostHtml += `
                                 <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
                                     <span>${card.hero_handle}</span>
-                                    <span title="A = actual cost | M = recent market median | E = estimate / common equivalent">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                    <span title="A = actual cost | M = recent market median | E = estimate based on recent common median * rarity multiplier">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
                                 </div>
                             `;
                         });
@@ -357,7 +357,7 @@
                             marketCostHtml += `
                                 <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
                                     <span>${card.hero_handle}</span>
-                                    <span title="A = actual cost | M = recent market median | E = estimate / common equivalent">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                    <span title="A = actual cost | M = recent market median | E = estimate based on recent common median * rarity multiplier">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
                                 </div>
                             `;
                         });

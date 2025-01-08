@@ -251,9 +251,10 @@
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
-                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
-                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
-                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Optimal League / Rewards</th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>                 
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Player Cost</th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Market Cost</th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Rewards</th>   
                     </tr>`;
                     
                     leagues[leagueName].forEach(deck => {
@@ -270,30 +271,30 @@
 
                         const rewardsHtml = `
                             <div style="display: flex; align-items: center; height: 100%; width: 100%;">
-                                <div style="display: grid; grid-template-columns: 1fr; gap: 5px; width: 120px; margin: 0 auto;"> 
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 3px; width: 85px; margin: 0 auto;"> 
                                 ${deck.fan ? `
                                 <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <span style="text-align: right; padding-right: 8px;">${formatRewardFan(deck.fan)}</span>
+                                    <span style="text-align: right; padding-right: 4px;">${formatRewardFan(deck.fan)}</span>
                                     <img src="./icons/fan.webp" alt="Fan" class="icon">
                                 </div>` : ''}
                                 ${deck.gold ? `
                                 <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <span style="text-align: right; padding-right: 8px;">${deck.gold}</span>
+                                    <span style="text-align: right; padding-right: 4px;">${deck.gold}</span>
                                     <img src="./icons/blast.webp" alt="Gold" class="icon">
                                 </div>` : ''}
                                 ${deck.eth ? `
                                 <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <span style="text-align: right; padding-right: 8px;">${deck.eth}</span>
+                                    <span style="text-align: right; padding-right: 4px;">${deck.eth}</span>
                                     <img src="./icons/eth.webp" alt="ETH" class="icon">
                                 </div>` : ''}
                                 ${deck.packs ? `
                                 <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <span style="text-align: right; padding-right: 8px;">${deck.packs}</span>
+                                    <span style="text-align: right; padding-right: 4px;">${deck.packs}</span>
                                     <img src="./icons/pack.webp" alt="Packs" class="icon">
                                     </div>` : ''}
                                 ${deck.frag ? `
                                 <div class="reward-value" style="display: flex; justify-content: flex-end; align-items: center;">
-                                    <span style="text-align: right; padding-right: 8px;">${deck.frag}</span>
+                                    <span style="text-align: right; padding-right: 4px;">${deck.frag}</span>
                                     <img src="./icons/fragment.webp" alt="Fragment" class="icon">
                                 </div>` : ''}
                                 </div>
@@ -322,13 +323,68 @@
                         });
                         cardsHtml += '</div>';
                         
+                        let playerCostHtml = '<div style="display: flex; flex-direction: column; gap: 5px;">';
+                        deck.cards.forEach(card => {
+                            const cost = card.actual_card_cost || card.market_card_cost || card.est_card_cost;
+                            const costType = card.actual_card_cost ? 'a' : (card.market_card_cost ? 'm' : 'e');
+                            playerCostHtml += `
+                                <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
+                                    <span>${card.hero_handle}</span>
+                                    <span title="A = actual cost | M = recent market median | E = estimate / common equivalent">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                </div>
+                            `;
+                        });
+
+                        // Calculate total cost
+                        const playerTotalCost = deck.cards.reduce((sum, card) => {
+                            const cost = card.actual_card_cost || card.market_card_cost || card.est_card_cost || 0;
+                            return sum + cost;
+                        }, 0);
+
+                        // Add divider and total
+                        playerCostHtml += `
+                            <div style="border-top: 1px solid #444; margin: 5px 0;"></div>
+                            <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
+                                <span>Total:</span>
+                                <span>${playerTotalCost ? playerTotalCost.toFixed(3).replace(/\.?0+$/, '') : '-'}</span>
+                            </div>
+                        </div>`;
+
+                        let marketCostHtml = '<div style="display: flex; flex-direction: column; gap: 5px;">';
+                        deck.cards.forEach(card => {
+                            const cost = card.market_card_cost || card.est_card_cost;
+                            const costType =(card.market_card_cost ? 'm' : 'e');
+                            marketCostHtml += `
+                                <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
+                                    <span>${card.hero_handle}</span>
+                                    <span title="A = actual cost | M = recent market median | E = estimate / common equivalent">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                </div>
+                            `;
+                        });
+
+                        // Calculate total cost
+                        const marketTotalCost = deck.cards.reduce((sum, card) => {
+                            const cost = card.market_card_cost || card.est_card_cost || 0;
+                            return sum + cost;
+                        }, 0);
+
+                        // Add divider and total
+                        marketCostHtml += `
+                            <div style="border-top: 1px solid #444; margin: 5px 0;"></div>
+                            <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
+                                <span>Total:</span>
+                                <span>${marketTotalCost ? marketTotalCost.toFixed(3).replace(/\.?0+$/, '') : '-'}</span>
+                            </div>
+                        </div>`;
+                        
                         html += `<tr>
                             <td>${deck.player_rank}</td>
                             <td>${playerInfo}</td>
                             <td>${playerScore}</td>
-                            <td>${cardsHtml}</td>
-                            <td>${rewardsHtml}</td>   
-                            <td>COMING SOON</td>  
+                            <td>${cardsHtml}</td>                  
+                            <td>${playerCostHtml}</td> 
+                            <td>${marketCostHtml}</td>   
+                            <td>${rewardsHtml}</td> 
                         </tr>`;
                     });
                     

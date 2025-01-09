@@ -147,5 +147,5 @@ output_dir = os.path.join(script_dir, 'tournaments')
 # Ensure the tournaments directory exists
 os.makedirs(output_dir, exist_ok=True)
 # Save to JSON file
-with open(os.path.join(output_dir, 'top_hero_utilization.json'), 'w') as f:
+with open(os.path.join(output_dir, 'league_winners.json'), 'w') as f:
     json.dump(hero_data, f, indent=4)

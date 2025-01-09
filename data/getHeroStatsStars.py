@@ -168,6 +168,7 @@ output_path = 'pages/hero_stats.json'
 print(f"Saving data to: {os.path.abspath(output_path)}")
 with open(output_path, 'w') as f:
     json.dump(output_data, f, indent=2)
+print(f"✅ File successfully saved to: {os.path.abspath(output_path)}")
 
 # Close database connections
 cursor.close()

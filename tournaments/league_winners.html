@@ -5,10 +5,58 @@
         function gtag(){{dataLayer.push(arguments);}}
         gtag('js', new Date());
         gtag('config', 'G-LXJ5Q7LKKE');
+
+        async function fetchLeagueWinners() {
+            try {
+                const response = await fetch(`/data/tournaments/league_winners.json?_=${Date.now()}`);
+                const data = await response.json();
+                
+                const latestTournament = Object.values(data.tournaments)[0];
+                const leagueTypes = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+                
+                leagueTypes.forEach(leagueType => {
+                    const leagueData = latestTournament.leagues[leagueType];
+                    if (!leagueData) return;
+
+                    // Get the specific league section first
+                    const leagueSection = document.querySelector(`.league-section:has(h2 img[src*="${leagueType.toLowerCase()}"])`);
+                    
+                    // Then find tables within this section
+                    const top50Table = leagueSection.querySelector('.table-wrapper:first-child table tbody');
+                    const itmTable = leagueSection.querySelector('.table-wrapper:last-child table tbody');
+
+                    // Common table row generator function
+                    const createTableRow = (hero, index) => `
+                        <tr>
+                            <td>${index !== undefined ? index + 1 : ''}</td>
+                            <td style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${hero.image_url}" alt="${hero.hero}" class="hero-image" width="70" height="90">
+                                <span>${hero.hero}</span>
+                            </td>
+                            <td>${Math.round(hero.fantasy_score).toLocaleString()}</td>
+                            <td>${Math.round(hero.usage_percentage)}% <span class="hero-count">(${hero.hero_count})</span></td>
+                        </tr>
+                    `;
+
+                    // Update tables
+                    if (top50Table && leagueData.top50) {
+                        top50Table.innerHTML = leagueData.top50.slice(0, 10).map((hero, index) => createTableRow(hero, index)).join('');
+                    }
+                    
+                    if (itmTable && leagueData.itm) {
+                        itmTable.innerHTML = leagueData.itm.slice(0, 10).map((hero, index) => createTableRow(hero, index)).join('');
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching league winners:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchLeagueWinners);
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Hero Scores</title>
+    <title>Tournament League Winners</title>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="stylesheet" href="../styles.css">
@@ -16,5 +64,259 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="all-leagues-container">
+        <!-- Elite League -->
+        <div class="league-section">
+            <h2><img src="../icons/elite.webp" class="league-icon" alt="Elite League"> Elite League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <h3>Top 50 Heroes</h3>
+                    <table class="league-table elite-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <h3>In The Money</h3>
+                    <table class="league-table elite-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gold League -->
+        <div class="league-section">
+            <h2><img src="../icons/gold.webp" class="league-icon" alt="Gold League"> Gold League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <h3>Top 50 Heroes</h3>
+                    <table class="league-table gold-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <h3>In The Money</h3>
+                    <table class="league-table gold-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Silver League -->
+        <div class="league-section">
+            <h2><img src="../icons/silver.webp" class="league-icon" alt="Silver League"> Silver League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <h3>Top 50 Heroes</h3>
+                    <table class="league-table silver-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <h3>In The Money</h3>
+                    <table class="league-table silver-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bronze League -->
+        <div class="league-section">
+            <h2><img src="../icons/bronze.webp" class="league-icon" alt="Bronze League"> Bronze League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <h3>Top 50 Heroes</h3>
+                    <table class="league-table bronze-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <h3>In The Money</h3>
+                    <table class="league-table bronze-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reverse League -->
+        <div class="league-section">
+            <h2><img src="../icons/reverse.webp" class="league-icon" alt="Reverse League"> Reverse League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <h3>Top 50 Heroes</h3>
+                    <table class="league-table reverse-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <h3>In The Money</h3>
+                    <table class="league-table reverse-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Hero</th>
+                                <th>Score</th>
+                                <th>Usage %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<style>
+     /* Add specific colors for each league table */
+    .elite-table th { background-color: #4a90e2; color: white; }
+    .gold-table th { background-color: #ffd700; }
+    .silver-table th { background-color: #c0c0c0; }
+    .bronze-table th { background-color: #cd7f32; }
+    .reverse-table th { background-color: #ff4444; color: white; }
+
+    .hero-image {
+        border-radius: 0;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .hero-count {
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 4px;
+    }
+
+    /* Add these new styles */
+    .all-leagues-container {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 20px;
+    }
+
+    .league-section {
+        flex: 0 0 auto;
+        min-width: 300px;
+    }
+
+    .tables-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Adjust table sizes for horizontal layout */
+    .table-wrapper {
+        width: 100%;
+    }
+
+    .league-table {
+        width: 100%;
+    }
+
+    /* Ensure table cells can handle flex content */
+    .league-table td {
+        vertical-align: middle;
+    }
+</style>
 
     

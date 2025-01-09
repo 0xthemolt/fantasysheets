@@ -23,15 +23,16 @@ TOURNAMENT_NUMBER = config['tournament_number']
 query = f"""
 with base_records as (
     select 
-    	tournament_id,
-        tournament_unique_key,
-        tournament_league_unique_key,
-        hero_handle,
-        card_picture_url,
-        hero_fantasy_score,
-        tournament_player_deck_id,
-        player_rank
+    	t.tournament_id,
+        t.tournament_unique_key,
+        t2.league,
+        t.hero_handle,
+        t.card_picture_url,
+        t.hero_fantasy_score,
+        t.tournament_player_deck_id,
+        t.player_rank
     from agg.tournamentownership t 
+    join flatten.get_tournaments t2 on t.tournament_id = t2.tournament_id
     where t.tournament_unique_key = 'Main 33'
     --and tournament_league_unique_key = 'Gold Main 33'
 ),
@@ -61,7 +62,7 @@ hero_stats as (
     select 
     	t.tournament_id,
         t.tournament_unique_key,
-        t.tournament_league_unique_key,
+        t.league,
         t.hero_handle,
         t.card_picture_url,
         t.hero_fantasy_score,
@@ -73,7 +74,7 @@ hero_stats as (
     select 
     	t.tournament_id,
         t.tournament_unique_key,
-        t.tournament_league_unique_key,
+        t.league,
         t.hero_handle,
         t.card_picture_url,
         t.hero_fantasy_score,
@@ -91,7 +92,7 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,tournament_league_unique_key,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_count,category,usage_percentage,rnk
+select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_count,category,usage_percentage,rnk
 from base
 where rnk <= 10
 order by tournament_id,category,rnk asc
@@ -113,7 +114,7 @@ hero_data = {
 
 for row in result:
     tournament_id = row[0]  # tournament_unique_key
-    league_key = row[1]     # tournament_league_unique_key
+    league_key = row[1]     # league
     hero_info = {
         "hero": row[2],     # hero_handle
         "image_url": row[3], # card_picture_url

@@ -30,9 +30,14 @@ with base_records as (
         t.card_picture_url,
         t.hero_fantasy_score,
         t.tournament_player_deck_id,
-        t.player_rank
+        t.player_rank,
+        card_stars.hero_stars,
+        t.db_updated_cst + INTERVAL '6 hours' as db_updated_utc
     from agg.tournamentownership t 
     join flatten.get_tournaments t2 on t.tournament_id = t2.tournament_id
+    left join flatten.get_cards_flags_stars card_stars
+	    ON t.hero_id = card_stars.hero_id
+	    and t2.start_timestamp between card_stars.start_datetime and card_stars.end_datetime
     where t.tournament_unique_key = 'Main 33'
     --and tournament_league_unique_key = 'Gold Main 33'
 ),
@@ -66,10 +71,12 @@ hero_stats as (
         t.hero_handle,
         t.card_picture_url,
         t.hero_fantasy_score,
+        t.hero_stars,
+        t.db_updated_utc,
         count(*) as hero_count,
         'top50' as category
     from top50_records t
-    group by 1,2,3,4,5,6
+    group by 1,2,3,4,5,6,7,8
     union all
     select 
     	t.tournament_id,
@@ -78,10 +85,12 @@ hero_stats as (
         t.hero_handle,
         t.card_picture_url,
         t.hero_fantasy_score,
+        t.hero_stars,
+        t.db_updated_utc,
         count(*) as hero_count,
         'itm' as category
     from itm_records t
-    group by 1,2,3,4,5,6
+    group by 1,2,3,4,5,6,7,8
 )
 ,base as (
 select 
@@ -92,7 +101,7 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_count,category,usage_percentage,rnk
+select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,hero_count,category,usage_percentage,rnk,db_updated_utc
 from base
 where rnk <= 10
 order by tournament_id,category,rnk asc
@@ -108,7 +117,9 @@ conn.close()
 
 # Convert results to nested dictionary format
 hero_data = {
-    "timestamp": datetime.now().isoformat(),
+    "metadata": {
+        "data_freshness": result[0][10].isoformat() if result else None  # Get db_updated_utc from last column
+    },
     "tournaments": {}
 }
 
@@ -118,12 +129,13 @@ for row in result:
     hero_info = {
         "hero": row[2],     # hero_handle
         "image_url": row[3], # card_picture_url
-        "fantasy_score": float(row[4]),  # hero_fantasy_score
-        "hero_count": int(row[5]),       # hero_count
-        "usage_percentage": float(row[7]) # usage_percentage
+        "fantasy_score": float(row[4]),  # fantasy_score
+        "hero_stars": row[5], # hero_stars
+        "hero_count": int(row[6]),       # hero_count
+        "usage_percentage": float(row[8]) # usage_percentage
     }
     
-    category = row[6]  # category
+    category = row[7]  # category
     
     # Create nested structure
     if tournament_id not in hero_data["tournaments"]:

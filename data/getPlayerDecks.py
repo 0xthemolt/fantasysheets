@@ -100,7 +100,8 @@ group by 1,2,3
 			reward_eth.reward AS eth,
 			reward_pack.reward AS packs,
             reward_frag.reward AS frag,
-            gtpp.db_updated_cst::timestamp + interval '6 hour' as  timestamp
+            gtpp.db_updated_cst::timestamp + interval '6 hour' as  timestamp,
+            gt.tournament_unique_key
     from flatten.get_tournament_past_players gtpp
     join flatten.get_tournaments gt
         on gtpp.tournament_id = gt.tournament_id
@@ -462,7 +463,8 @@ def calculate_rarity_score(picture_url, fantasy_score):
 metadata = {
     'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,
     'tournament_progress_hours': rows[0][3],
-    'timestamp': rows[0][54]
+    'timestamp': rows[0][54],
+    'tournament_number': rows[0][55]
 }
 
 # Convert the results to a list of dictionaries with merged optimal data
@@ -552,7 +554,8 @@ player_decks.sort(key=lambda x: (x['player_handle'], x['player_rank']))
 metadata = {
     'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,
     'tournament_progress_hours': rows[0][3],
-    'timestamp': rows[0][54].isoformat() if rows[0][54] else None  # Convert datetime to ISO format string
+    'timestamp': rows[0][54].isoformat() if rows[0][54] else None,  # Convert datetime to ISO format string
+    'tournament_number': rows[0][55]
 }
 
 # Create the final structure

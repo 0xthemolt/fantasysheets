@@ -437,9 +437,12 @@
             resultsDiv.innerHTML = toggleButton + generateHtmlTable(playerDecks);
         }
 
-        fetch('/data/tournaments/player_decks.json')
+        fetch(`/data/tournaments/player_decks.json?v=${Date.now()}`)
             .then(response => response.json())
             .then(data => {
+                // Update tournament badge
+                document.getElementById('tournamentBadge').textContent = data.metadata.tournament_number;
+                
                 // Sort the league_results array by player_handle and player_rank
                 allData = data.league_results.sort((a, b) => {
                     // First compare player_handle (case-insensitive)
@@ -670,7 +673,7 @@
                 <i class="fas fa-home"></i>
             </a>
             Player Decks
-            <span class="tournament-badge">Main 30</span>
+            <span class="tournament-badge" id="tournamentBadge"></span>
         </h1>
     </div>
     <div id="search-container" style="display: flex; align-items: center;">

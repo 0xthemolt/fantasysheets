@@ -150,19 +150,33 @@
             .grid-layout {
                 grid-template-columns: repeat(2, 1fr);
                 grid-auto-rows: auto;
+                gap: 1.5rem;
             }
             
-            /* Add specific grid positioning */
-            .column-container:nth-child(1) { /* Scout */
-                grid-column: 1 / -1;  /* Full width */
+            /* Updated grid positioning */
+            .column-container:nth-child(1) { /* Heroes */
+                grid-column: 1;
+                grid-row: 1;
             }
             
-            /* Heroes and Players remain as 2 columns */
+            .column-container:nth-child(2) { /* Players */
+                grid-column: 2;
+                grid-row: 1;
+            }
             
-            /* Rewards and Fun remain as 2 columns */
+            .column-container:nth-child(3) { /* Rewards */
+                grid-column: 1;
+                grid-row: 2;
+            }
             
-            .column-container:last-child { /* Other */
+            .column-container:nth-child(4) { /* Tournaments */
+                grid-column: 2;
+                grid-row: 2;
+            }
+            
+            .column-container:nth-child(5) { /* Fun & Other */
                 grid-column: 1 / -1;  /* Full width */
+                grid-row: 3;
             }
         }
 
@@ -196,10 +210,10 @@
     <h1>FantasySheets - Tournament Analytics</h1>
     <div class="nav-container">
         <div class="grid-layout">
-            <div class="column-container pro-container">
+            <!-- <div class="column-container pro-container">
                 <h2 class="column-title">Pro (in development) </h2>
                 <ul class="nav-list pro-list" id="proList"></ul>
-            </div>
+            </div> -->
             <div class="column-container">
                 <h2 class="column-title">Heroes</h2>
                 <ul class="nav-list" id="heroList"></ul>
@@ -308,7 +322,7 @@
             });
         }
 
-        createLinks(pages.pro, proList);
+        // createLinks(pages.pro, proList);
         createLinks(pages.heroes, heroList);
         createLinks(pages.players, playerList);
         createLinks(pages.rewards, rewardList);

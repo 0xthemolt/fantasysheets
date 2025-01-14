@@ -32,14 +32,25 @@ with base_records as (
         t.tournament_player_deck_id,
         t.player_rank,
         card_stars.hero_stars,
+        coalesce((case when t.hero_fantasy_score  = 0 then 0 else hero_fantasy_score::float / t.player_score end) * gtbi.reward,0) as reward_value_added,
         t.db_updated_cst + INTERVAL '6 hours' as db_updated_utc
     from agg.tournamentownership t 
     join flatten.get_tournaments t2 on t.tournament_id = t2.tournament_id
     left join flatten.get_cards_flags_stars card_stars
 	    ON t.hero_id = card_stars.hero_id
 	    and t2.start_timestamp between card_stars.start_datetime and card_stars.end_datetime
+	left join flatten.get_tournament_by_id gtbi 
+		on t.tournament_id = gtbi.tournament_id
+		and t.player_rank between gtbi.range_start  and gtbi.range_end
+		and gtbi.reward_type = 'ETH'
     where t.tournament_unique_key = 'Main 33'
     --and tournament_league_unique_key = 'Gold Main 33'
+)
+,reward_value_added as (
+select tournament_id,tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
+from base_records
+group by 1,2,3,4,5,6,7,8,9
+order by 3 desc
 ),
 top50_records as (
     select *
@@ -101,8 +112,12 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,hero_count,category,usage_percentage,rnk,db_updated_utc
+select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
 from base
+where rnk <= 10
+union all
+select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
+from reward_value_added
 where rnk <= 10
 order by tournament_id,category,rnk asc
 """

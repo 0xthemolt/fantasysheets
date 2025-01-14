@@ -37,33 +37,37 @@
                     if (!leagueData) return;
 
                     const leagueSection = document.querySelector(`.league-section:has(h2 img[src*="${leagueType.toLowerCase()}"])`);
-                    
-                    // Find all three tables within this section
-                    const rvaTable = leagueSection.querySelector('.table-wrapper:nth-child(1) table tbody');
-                    const top50Table = leagueSection.querySelector('.table-wrapper:nth-child(2) table tbody');
-                    const itmTable = leagueSection.querySelector('.table-wrapper:nth-child(3) table tbody');
+                    const tableBody = leagueSection.querySelector('table tbody');
 
-                    // Common table row generator functions
-                    const createRVATableRow = (hero) => `
-                        <tr>
-                            <td style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-size: 1.1em">${hero.hero}</span>
-                                    <span style="font-size: 0.9em; color: #666;">${Math.round(hero.fantasy_score).toLocaleString()} pts</span>
-                                    <span style="font-size: 0.8em">${'⭐'.repeat(hero.hero_stars)}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
-                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.reward_value_added.toFixed(2)}</span>
-                                    <span style="font-size: 0.8em; color: #666;">ETH</span>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    // Create a map of heroes and their data
+                    const heroMap = new Map();
 
-                    const createTableRow = (hero) => `
+                    // Process RVA data
+                    leagueData.rva?.slice(0, 10).forEach(hero => {
+                        heroMap.set(hero.hero, {
+                            ...hero,
+                            rva: hero.reward_value_added
+                        });
+                    });
+
+                    // Add Top 50 data
+                    leagueData.top50?.slice(0, 10).forEach(hero => {
+                        const heroData = heroMap.get(hero.hero) || { ...hero };
+                        heroData.top50_percentage = hero.usage_percentage;
+                        heroData.top50_count = hero.hero_count;
+                        heroMap.set(hero.hero, heroData);
+                    });
+
+                    // Add ITM data
+                    leagueData.itm?.slice(0, 10).forEach(hero => {
+                        const heroData = heroMap.get(hero.hero) || { ...hero };
+                        heroData.itm_percentage = hero.usage_percentage;
+                        heroData.itm_count = hero.hero_count;
+                        heroMap.set(hero.hero, heroData);
+                    });
+
+                    // Generate table rows
+                    const rows = Array.from(heroMap.values()).map(hero => `
                         <tr>
                             <td style="display: flex; align-items: center; gap: 10px;">
                                 <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
@@ -75,24 +79,27 @@
                             </td>
                             <td>
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${Math.round(hero.usage_percentage)}%</span>
-                                    <span style="font-size: 0.8em; color: #666;">(${hero.hero_count})</span>
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.rva?.toFixed(2) || '-'}</span>
+                                    <span style="font-size: 0.8em; color: #666;">ETH</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.top50_percentage ? Math.round(hero.top50_percentage) + '%' : '-'}</span>
+                                    <span style="font-size: 0.8em; color: #666;">${hero.top50_count ? `(${hero.top50_count})` : ''}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.itm_percentage ? Math.round(hero.itm_percentage) + '%' : '-'}</span>
+                                    <span style="font-size: 0.8em; color: #666;">${hero.itm_count ? `(${hero.itm_count})` : ''}</span>
                                 </div>
                             </td>
                         </tr>
-                    `;
+                    `);
 
-                    // Update tables
-                    if (rvaTable && leagueData.rva) {
-                        rvaTable.innerHTML = leagueData.rva.slice(0, 10).map(hero => createRVATableRow(hero)).join('');
-                    }
-                    
-                    if (top50Table && leagueData.top50) {
-                        top50Table.innerHTML = leagueData.top50.slice(0, 10).map(hero => createTableRow(hero)).join('');
-                    }
-                    
-                    if (itmTable && leagueData.itm) {
-                        itmTable.innerHTML = leagueData.itm.slice(0, 10).map(hero => createTableRow(hero)).join('');
+                    if (tableBody) {
+                        tableBody.innerHTML = rows.join('');
                     }
                 });
             } catch (error) {
@@ -122,11 +129,11 @@
                 <i class="fas fa-home"></i>
             </a>
             Tournament League Winners
-            <span class="tournament-badge">Main 33</span>
+            <span class="tournament-badge">Main 34</span>
         </h1>
     </div>
     <div class="small-text">
-        <span id="timestamp"></span> | Will increment to current tournament 24 hours after start
+        <span id="timestamp"></span> | Values shown if they are in the top 10 of their respective metric
     </div>
     <div class="all-leagues-container">
         <!-- Elite League -->
@@ -134,46 +141,20 @@
             <h2><img src="../icons/elite.webp" class="league-icon" alt="Elite League"> Elite League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <h3>
-                        Reward Value Added
-                        <i class="fas fa-info-circle" 
-                           title="RVA attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
-                           style="font-size: 0.8em; cursor: help;">
-                        </i>
-                    </h3>
+                    <h3>Hero Performance</h3>
                     <table class="league-table elite-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>RVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Top 50 Decks</h3>
-                    <table class="league-table elite-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>In The Money (ETH) Decks</h3>
-                    <table class="league-table elite-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
+                                <th>
+                                    RVA
+                                    <i class="fas fa-info-circle" 
+                                       title="RVA attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
+                                       style="font-size: 0.8em; cursor: help;">
+                                    </i>
+                                </th>
+                                <th>Top 50</th>
+                                <th>ITM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -189,40 +170,14 @@
             <h2><img src="../icons/gold.webp" class="league-icon" alt="Gold League"> Gold League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <h3>Reward Value Added</h3>
+                    <h3>Hero Performance</h3>
                     <table class="league-table gold-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>RVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Top 50 Decks</h3>
-                    <table class="league-table gold-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>In The Money (ETH) Decks</h3>
-                    <table class="league-table gold-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
+                                <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
+                                <th>Top 50</th>
+                                <th>ITM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -238,40 +193,14 @@
             <h2><img src="../icons/silver.webp" class="league-icon" alt="Silver League"> Silver League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <h3>Reward Value Added</h3>
+                    <h3>Hero Performance</h3>
                     <table class="league-table silver-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>RVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Top 50 Decks</h3>
-                    <table class="league-table silver-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>In The Money (ETH) Decks</h3>
-                    <table class="league-table silver-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
+                                <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
+                                <th>Top 50</th>
+                                <th>ITM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -287,40 +216,14 @@
             <h2><img src="../icons/bronze.webp" class="league-icon" alt="Bronze League"> Bronze League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <h3>Reward Value Added</h3>
+                    <h3>Hero Performance</h3>
                     <table class="league-table bronze-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>RVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Top 50 Decks</h3>
-                    <table class="league-table bronze-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>In The Money (ETH) Decks</h3>
-                    <table class="league-table bronze-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
+                                <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
+                                <th>Top 50</th>
+                                <th>ITM</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -336,40 +239,14 @@
             <h2><img src="../icons/reverse.webp" class="league-icon" alt="Reverse League"> Reverse League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <h3>Reward Value Added</h3>
+                    <h3>Hero Performance</h3>
                     <table class="league-table reverse-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>RVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>Top 50 Decks</h3>
-                    <table class="league-table reverse-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-wrapper">
-                    <h3>In The Money (ETH) Decks</h3>
-                    <table class="league-table reverse-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Usage %</th>
+                                <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
+                                <th>Top 50</th>
+                                <th>ITM</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -43,8 +43,7 @@ with base_records as (
 		on t.tournament_id = gtbi.tournament_id
 		and t.player_rank between gtbi.range_start  and gtbi.range_end
 		and gtbi.reward_type = 'ETH'
-    where t.tournament_unique_key = 'Main 33'
-    --and tournament_league_unique_key = 'Gold Main 33'
+    where t.tournament_unique_key = 'Main 34'
 )
 ,reward_value_added as (
 select tournament_id,tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk

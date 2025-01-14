@@ -36,35 +36,63 @@
                     const leagueData = latestTournament.leagues[leagueType];
                     if (!leagueData) return;
 
-                    // Get the specific league section first
                     const leagueSection = document.querySelector(`.league-section:has(h2 img[src*="${leagueType.toLowerCase()}"])`);
                     
-                    // Then find tables within this section
-                    const top50Table = leagueSection.querySelector('.table-wrapper:first-child table tbody');
-                    const itmTable = leagueSection.querySelector('.table-wrapper:last-child table tbody');
+                    // Find all three tables within this section
+                    const rvaTable = leagueSection.querySelector('.table-wrapper:nth-child(1) table tbody');
+                    const top50Table = leagueSection.querySelector('.table-wrapper:nth-child(2) table tbody');
+                    const itmTable = leagueSection.querySelector('.table-wrapper:nth-child(3) table tbody');
 
-                    // Common table row generator function
+                    // Common table row generator functions
+                    const createRVATableRow = (hero) => `
+                        <tr>
+                            <td style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-size: 1.1em">${hero.hero}</span>
+                                    <span style="font-size: 0.9em; color: #666;">${Math.round(hero.fantasy_score).toLocaleString()} pts</span>
+                                    <span style="font-size: 0.8em">${'⭐'.repeat(hero.hero_stars)}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.reward_value_added.toFixed(2)}</span>
+                                    <span style="font-size: 0.8em; color: #666;">ETH</span>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+
                     const createTableRow = (hero) => `
                         <tr>
                             <td style="display: flex; align-items: center; gap: 10px;">
                                 <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
                                 <div style="display: flex; flex-direction: column;">
                                     <span style="font-size: 1.1em">${hero.hero}</span>
+                                    <span style="font-size: 0.9em; color: #666;">${Math.round(hero.fantasy_score).toLocaleString()} pts</span>
                                     <span style="font-size: 0.8em">${'⭐'.repeat(hero.hero_stars)}</span>
                                 </div>
                             </td>
-                            <td>${Math.round(hero.fantasy_score).toLocaleString()}</td>
-                            <td>${Math.round(hero.usage_percentage)}% <span class="hero-count">(${hero.hero_count})</span></td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${Math.round(hero.usage_percentage)}%</span>
+                                    <span style="font-size: 0.8em; color: #666;">(${hero.hero_count})</span>
+                                </div>
+                            </td>
                         </tr>
                     `;
 
                     // Update tables
+                    if (rvaTable && leagueData.rva) {
+                        rvaTable.innerHTML = leagueData.rva.slice(0, 10).map(hero => createRVATableRow(hero)).join('');
+                    }
+                    
                     if (top50Table && leagueData.top50) {
-                        top50Table.innerHTML = leagueData.top50.slice(0, 10).map((hero, index) => createTableRow(hero, index)).join('');
+                        top50Table.innerHTML = leagueData.top50.slice(0, 10).map(hero => createTableRow(hero)).join('');
                     }
                     
                     if (itmTable && leagueData.itm) {
-                        itmTable.innerHTML = leagueData.itm.slice(0, 10).map((hero, index) => createTableRow(hero, index)).join('');
+                        itmTable.innerHTML = leagueData.itm.slice(0, 10).map(hero => createTableRow(hero)).join('');
                     }
                 });
             } catch (error) {
@@ -106,12 +134,31 @@
             <h2><img src="../icons/elite.webp" class="league-icon" alt="Elite League"> Elite League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
+                    <h3>
+                        Reward Value Added
+                        <i class="fas fa-info-circle" 
+                           title="RVA attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
+                           style="font-size: 0.8em; cursor: help;">
+                        </i>
+                    </h3>
+                    <table class="league-table elite-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>RVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
                     <h3>Top 50 Decks</h3>
                     <table class="league-table elite-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -126,7 +173,6 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -143,12 +189,25 @@
             <h2><img src="../icons/gold.webp" class="league-icon" alt="Gold League"> Gold League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
+                    <h3>Reward Value Added</h3>
+                    <table class="league-table gold-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>RVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
                     <h3>Top 50 Decks</h3>
                     <table class="league-table gold-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -163,7 +222,6 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -180,12 +238,25 @@
             <h2><img src="../icons/silver.webp" class="league-icon" alt="Silver League"> Silver League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
+                    <h3>Reward Value Added</h3>
+                    <table class="league-table silver-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>RVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
                     <h3>Top 50 Decks</h3>
                     <table class="league-table silver-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -200,7 +271,6 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -217,12 +287,25 @@
             <h2><img src="../icons/bronze.webp" class="league-icon" alt="Bronze League"> Bronze League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
+                    <h3>Reward Value Added</h3>
+                    <table class="league-table bronze-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>RVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
                     <h3>Top 50 Decks</h3>
                     <table class="league-table bronze-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -237,7 +320,6 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -254,12 +336,25 @@
             <h2><img src="../icons/reverse.webp" class="league-icon" alt="Reverse League"> Reverse League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
+                    <h3>Reward Value Added</h3>
+                    <table class="league-table reverse-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>RVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
                     <h3>Top 50 Decks</h3>
                     <table class="league-table reverse-table">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -274,7 +369,6 @@
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>Score</th>
                                 <th>Usage %</th>
                             </tr>
                         </thead>
@@ -314,11 +408,20 @@
         gap: 20px;
         overflow-x: auto;
         padding: 20px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        margin-left: 0;
+        padding-left: 0;
     }
 
     .league-section {
         flex: 0 0 auto;
         min-width: 300px;
+        scroll-snap-align: start;
+        &:first-child {
+            margin-left: 0;
+        }
     }
 
     .tables-container {
@@ -366,6 +469,24 @@
     /* Ensure table cells can handle flex content */
     .league-table td {
         vertical-align: middle;
+    }
+
+    /* Add media query for mobile devices */
+    @media screen and (max-width: 768px) {
+        .all-leagues-container {
+            margin: 0;
+            padding: 10px;
+            width: 100%;
+        }
+
+        .league-section {
+            min-width: calc(100vw - 20px);
+            margin: 0;
+        }
+
+        .tables-container {
+            width: 100%;
+        }
     }
 </style>
 

@@ -119,13 +119,14 @@ union all
 select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
 from reward_value_added
 where rnk <= 10
-order by tournament_id,category,rnk asc
+order by tournament_unique_key,category,rnk asc
 """
 
 conn = get_db_connection()
 cursor = conn.cursor()
 cursor.execute(query)
 result = cursor.fetchall()
+
 print(f"Number of records returned: {len(result)}")
 conn.close()
 
@@ -133,7 +134,7 @@ conn.close()
 # Convert results to nested dictionary format
 hero_data = {
     "metadata": {
-        "data_freshness": result[0][10].isoformat() if result else None  # Get db_updated_utc from last column
+        "data_freshness": result[0][11].isoformat() if result else None  # Get db_updated_utc from last column
     },
     "tournaments": {}
 }
@@ -147,7 +148,8 @@ for row in result:
         "fantasy_score": float(row[4]),  # fantasy_score
         "hero_stars": row[5], # hero_stars
         "hero_count": int(row[6]),       # hero_count
-        "usage_percentage": float(row[8]) # usage_percentage
+        "usage_percentage": float(row[8]), # usage_percentage
+        "reward_value_added": float(row[9]) # reward_value_added
     }
     
     category = row[7]  # category
@@ -162,7 +164,8 @@ for row in result:
     if league_key not in hero_data["tournaments"][tournament_id]["leagues"]:
         hero_data["tournaments"][tournament_id]["leagues"][league_key] = {
             "top50": [],
-            "itm": []
+            "itm": [],
+            "rva": []
         }
     
     # Add to appropriate category

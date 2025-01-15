@@ -56,6 +56,7 @@ left join flatten.get_player_basic_data gpbd
 where 1=1
 --and tplayers.player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --and t.tournament_unique_key  = 'Main 31'
+and t.tournament_status = 'finished'
 and t.start_timestamp >= '2024-07-01'
 )
 ,league_ranking as (

@@ -52,9 +52,6 @@
                 values = [0, 0]; // Default flat line if no valid data
             }
 
-            // Add debug logging
-            console.log('Sparkline values:', values);
-
             // Calculate the range and adjust scaling for small variations
             const minValue = Math.min(...values);
             const maxValue = Math.max(...values);
@@ -102,9 +99,34 @@
             // Calculate difference between most recent and oldest values
             let diffDisplay = '';
             if (values.length >= 2) {
-                const oldestValue = values[0].inflation_degree || values[0].followers || values[0].fantasy_score || values[0];
-                const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1].fantasy_score || values[values.length - 1];
-                const diff = Math.round(newestValue - oldestValue);
+                let diff;
+                // Special handling for 24h scores
+                if (timestamps && timestamps.length >= 2 && currentSort.column === 'score_24h') {
+                    const newestTime = new Date(timestamps[timestamps.length - 1]);
+                    const newestValue = values[values.length - 1];
+                    
+                    // Find the value closest to 24 hours before the newest time
+                    const target24hAgo = new Date(newestTime - 24 * 60 * 60 * 1000);
+                    let closest24hValue = values[0];
+                    let closestTimeDiff = Infinity;
+                    
+                    for (let i = 0; i < timestamps.length; i++) {
+                        const time = new Date(timestamps[i]);
+                        const timeDiff = Math.abs(time - target24hAgo);
+                        if (timeDiff < closestTimeDiff) {
+                            closestTimeDiff = timeDiff;
+                            closest24hValue = values[i];
+                        }
+                    }
+                    
+                    diff = Math.round(newestValue - closest24hValue);
+                } else {
+                    // Original logic for all other metrics
+                    const oldestValue = values[0].inflation_degree || values[0].followers || values[0].fantasy_score || values[0];
+                    const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1].fantasy_score || values[values.length - 1];
+                    diff = Math.round(newestValue - oldestValue);
+                }
+                
                 const color = diff >= 0 ? '#2DA25F' : '#D14343';
                 const sign = diff >= 0 ? '+' : '';
                 diffDisplay = `<div class="sparkline-diff" style="color: ${color}">${sign}${diff}</div>`;
@@ -172,7 +194,9 @@
         }
 
         function formatFollowers(followers) {
-            if (followers >= 100000) {
+            if (followers >= 1000000) {
+                return `${(followers / 1000000).toFixed(1)}M`;
+            } else if (followers >= 100000) {
                 return `${(followers / 1000).toFixed(1)}k`;
             } else if (followers >= 1000) {
                 return `${(followers / 1000).toFixed(1)}k`;
@@ -218,6 +242,13 @@
                 return;
             }
 
+            // After fetching the data, adjust the timestamps
+            if (data) {
+                data.forEach(row => {
+                    row.db_updated = new Date(new Date(row.db_updated).getTime() + (6 * 60 * 60 * 1000));
+                });
+            }
+
             renderHeroTable(data);
             
             // Add click handlers for sortable columns
@@ -250,6 +281,10 @@
 
         // Add this new function to handle table rendering
         function renderHeroTable(data) {
+            // Add this at the start of the function to find the most recent update time
+            const latestUpdate = Math.max(...data.map(hero => new Date(hero.db_updated)));
+            document.getElementById('timestamp').textContent = `Last updated: ${formatTimestamp(latestUpdate)}`;
+
             // Sort the data
             const sortedData = [...data].sort((a, b) => {
                 let compareA = a[currentSort.column];
@@ -308,26 +343,40 @@
                     inflation_degree: entry.inflation_degree
                 }));
 
-                // Debug logging
-                console.log('Hero:', hero.hero_handle);
-                console.log('Raw glide24h_json:', hero.followersData);
-                console.log('Parsed glide24h:', followersData);
-                console.log('Type of glide24h_json:', typeof hero.followersData);
-                
                 return `
                     <tr>
-                        <td>${hero.rank || ''}</td>
                         <td>
                             <div class="hero-cell">
+                                <span class="hero-rank">${hero.rank || ''}</span>
                                 ${hero.hero_pfp_url ? `<img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp">` : ''}
                                 <span data-hero-name="${hero.hero_name || ''}">${hero.hero_handle}</span>
                             </div>
                         </td>
                         <td>${formatStars(hero.stars || 0)}</td>
-                        <td>${formatScore(hero.score_7d || 0)}${generateDummySparkline(glide7d)}</td>
-                        <td>${formatScore(hero.score_24h || 0)}${generateDummySparkline(glide24h)}</td>
-                        <td>${formatFollowers(hero.followers || 0)}${generateDummySparkline(followersData)}</td>
-                        <td>${formatScore(hero.inflation_degree || 0)}${generateDummySparkline(inflationData)}</td>
+                        <td>
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.score_7d || 0)}</span>
+                                ${generateDummySparkline(glide7d)}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.score_24h || 0)}</span>
+                                ${generateDummySparkline(glide24h)}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatFollowers(hero.followers || 0)}</span>
+                                ${generateDummySparkline(followersData)}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center;">
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.inflation_degree || 0)}</span>
+                                ${generateDummySparkline(inflationData)}
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
@@ -426,10 +475,36 @@
         }
         
         .table-container {
-                margin: 0;
-                width: 100%;
-                padding: 0 11.5px;
+            margin: 0 auto;
+            padding: 0 11.5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            text-align: left;
+            transform: translateX(0);
+        }
+
+        table {
+            font-size: 115%;
+            border-collapse: collapse;
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Desktop styles */
+        @media screen and (min-width: 769px) {
+            table {
+                width: 80%;
+                margin: 0 auto; /* Center the table */
             }
+        }
+
+        /* Mobile styles */
+        @media screen and (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+        }
+
         .hero-pfp {
             width: 34.5px;
             height: 34.5px;
@@ -458,10 +533,6 @@
                     border-top: 5.75px solid #F44336;
             }
 
-            table {
-                font-size: 115%;
-            }
-
             th, td {
                 padding: 11.5px;
             }
@@ -484,17 +555,118 @@
                 margin-top: 2px;
                 font-weight: 500;
             }
+
+            .hero-cell {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                max-width: 130px;
+                margin-right: 10px;
+            }
+
+            .hero-name {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 80px;
+            }
+
+            .hero-rank {
+                min-width: 30px;
+                color: #666;
+            }
+
+            .hero-pfp {
+                width: 34.5px;
+                height: 34.5px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-left: 0;
+            }
+
+            /* Make table more responsive */
+            @media screen and (max-width: 768px) {
+                table {
+                    font-size: 95%;
+                }
+
+                th, td {
+                    padding: 8px 6px;
+                }
+
+                .hero-pfp {
+                    width: 30px;
+                    height: 30px;
+                }
+
+                .sparkline-container {
+                    transform: scale(1);
+                }
+            }
+
+            /* Ensure minimum column widths for better layout */
+            th {
+                white-space: nowrap;
+                min-width: 60px;
+            }
+
+            /* Optional: Hide less important columns on very small screens */
+            @media screen and (max-width: 480px) {
+                .optional-column {
+                    display: none;
+                }
+            }
+
+            /* Improve touch targets on mobile */
+            th, td {
+                padding: 11.5px;
+                touch-action: manipulation;
+            }
+
+            /* Compress spacing for stats columns */
+            @media screen and (max-width: 768px) {
+                th, td {
+                    padding: 8px 4px;
+                }
+                
+                /* Even tighter spacing between stat columns */
+                .stats-column {
+                    padding-left: 3px;
+                    padding-right: 3px;
+                }
+                
+                .sparkline-container {
+                    margin-right: 8px;
+                }
+                
+                /* Adjust star column to prevent overlap */
+                .star-column {
+                    padding-left: 8px;
+                }
+                
+                .star-circle {
+                    width: 22px;
+                    height: 22px;
+                    font-size: 12px;
+                    margin-left: 2px;
+                }
+            }
 </style>
 <body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            FantasySheets Hero Trends
+        </h1>
+    </div>
+    <div class="small-text">
+        <span id="timestamp"></span>
+    </div>
     <table>
         <thead>
             <tr>
-                <th data-sort="rank">
-                    <div class="metric-header">
-                        Rank
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
                 <th data-sort="hero">
                     <div class="metric-header">
                         Hero
@@ -512,7 +684,7 @@
                 <th data-sort="score_7d">
                     <div class="metric-header">
                         <span class="metric-type">
-                            <i class="fas fa-chart-line"></i> 7d Score
+                            <i class="fas fa-calendar-week"></i> 7d
                         </span>
                         <div class="sort-arrow"></div>
                     </div>
@@ -520,7 +692,7 @@
                 <th data-sort="score_24h">
                     <div class="metric-header">
                         <span class="metric-type">
-                            <i class="fas fa-clock"></i> 24hr Score
+                            <i class="fas fa-clock"></i> 24hr
                         </span>
                         <div class="sort-arrow"></div>
                     </div>

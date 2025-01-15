@@ -18,12 +18,15 @@ conn = get_db_connection()
 cursor = conn.cursor()
 player_ranking_query = f"""with tournaments as (
 select  player_id
-,count(distinct tournament_unique_key) mains_played
+,count(distinct gtpp.tournament_unique_key) mains_played
 ,couNT(*) as deck_count
 --,sum(case when player_rank <= 10 then 1 else 0 end) as top_ten_finish_count
 from flatten.get_tournament_past_players gtpp 
+join flatten.get_tournaments t
+	on gtpp.tournament_id = t.tournament_id
 --where player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --and tournament_unique_key = 'Main 32'
+and t.tournament_status = 'finished'
 group by 1
 )
 ,eth_frags_won as (

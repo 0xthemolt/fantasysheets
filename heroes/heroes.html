@@ -38,11 +38,13 @@
         }
 
         function generateDummySparkline(values, color = '#6B4E8B') {
-            // If values is an array of objects, extract and sort by timestamp first
+            // If values is an array of objects, extract timestamps and values
+            let timestamps = [];
             if (values.length > 0 && typeof values[0] === 'object') {
+                timestamps = values.map(v => v.created_at_utc);
                 values = values
                     .sort((a, b) => new Date(a.created_at_utc) - new Date(b.created_at_utc))
-                    .map(v => v.inflation_degree || v.followers || v.fantasy_score || 0); // Add inflation_degree and fallback to 0
+                    .map(v => v.inflation_degree || v.followers || v.fantasy_score || 0);
             }
 
             // Ensure we have numeric values to plot
@@ -64,7 +66,12 @@
             const points = values.map((value, index) => {
                 const x = 5 + (index / (values.length - 1)) * 50;
                 const y = 19 - ((value - minValue) / effectiveRange * 14);
-                return { x, y, value };
+                return { 
+                    x, 
+                    y, 
+                    value,
+                    timestamp: timestamps[index] || null // Add timestamp to points
+                };
             });
 
             const pointsString = points.map(p => `${p.x},${p.y}`).join(' ');
@@ -82,10 +89,17 @@
                                 cx="${p.x}" 
                                 cy="${p.y}" 
                                 r="3" 
-                                fill="${color}" 
-                                style="opacity: 0"
+                                fill="#2DA25F" 
+                                fill-opacity="0"
+                                stroke="#2DA25F"
+                                stroke-width="1"
+                                stroke-opacity="0"
                                 data-value="${p.value}"
+                                data-timestamp="${p.timestamp}"
                                 data-index="${i}"
+                                class="score-point"
+                                onmouseover="this.style.fillOpacity = 0.5; this.style.strokeOpacity = 1;"
+                                onmouseout="this.style.fillOpacity = 0; this.style.strokeOpacity = 0;"
                             />
                         `).join('')}
                     </svg>
@@ -264,12 +278,29 @@
             document.body.addEventListener('mouseover', function(e) {
                 const circle = e.target.closest('circle');
                 if (circle) {
-                    // Make the hovered circle visible
                     circle.style.opacity = "1";
                     
                     const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
                     const value = parseFloat(circle.dataset.value);
-                    tooltip.innerHTML = `Value: <span class="score-value">${formatScore(value)}</span>`;
+                    const timestamp = circle.dataset.timestamp;
+                    
+                    let tooltipContent = '';
+                    if (timestamp) {
+                        const date = new Date(timestamp);
+                        const formattedDate = date.toLocaleDateString('en-US', { 
+                            weekday: 'long',
+                            month: 'short',
+                            day: 'numeric',
+                        }) + ', ' + date.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        tooltipContent = `${formattedDate}<br>Value: <span class="score-value">${formatScore(value)}</span>`;
+                    } else {
+                        tooltipContent = `Value: <span class="score-value">${formatScore(value)}</span>`;
+                    }
+                    
+                    tooltip.innerHTML = tooltipContent;
                     
                     const containerRect = circle.closest('.sparkline-container').getBoundingClientRect();
                     const circleRect = circle.getBoundingClientRect();

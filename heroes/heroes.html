@@ -477,33 +477,87 @@
         }
         
         .table-container {
+            position: relative;
             margin: 0 auto;
             padding: 0 11.5px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            text-align: left;
-            transform: translateX(0);
+            max-height: 80vh;
+            overflow: hidden;
+            max-width: 1200px;
+            width: 95%;
         }
 
-        table {
-            font-size: 115%;
-            border-collapse: collapse;
-            margin-left: 0;
-            margin-right: auto;
-        }
-
-        /* Desktop styles */
-        @media screen and (min-width: 769px) {
-            table {
-                width: 80%;
-                margin: 0 auto; /* Center the table */
+        /* For very wide screens, make the table a bit narrower relatively */
+        @media screen and (min-width: 1400px) {
+            .table-container {
+                width: 85%;
             }
         }
 
-        /* Mobile styles */
+        /* For extra wide screens, make it even narrower relatively */
+        @media screen and (min-width: 1800px) {
+            .table-container {
+                width: 75%;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--background-color);
+        }
+
+        tbody {
+            display: block;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: calc(80vh - 50px); /* Adjust based on header height */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+        }
+
+        tbody::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        tbody::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        tbody::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 20px;
+            border: transparent;
+        }
+
+        thead, tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        /* Adjust column widths */
+        th:nth-child(1), td:nth-child(1) { width: 20%; }
+        th:nth-child(2), td:nth-child(2) { width: 10%; }
+        th:nth-child(3), td:nth-child(3) { width: 17.5%; }
+        th:nth-child(4), td:nth-child(4) { width: 17.5%; }
+        th:nth-child(5), td:nth-child(5) { width: 17.5%; }
+        th:nth-child(6), td:nth-child(6) { width: 17.5%; }
+
+        /* Mobile adjustments */
         @media screen and (max-width: 768px) {
-            table {
-                width: 100%;
+            .table-container {
+                max-height: 70vh;
+            }
+            
+            tbody {
+                max-height: calc(70vh - 50px);
             }
         }
 
@@ -708,57 +762,59 @@
     <div class="small-text">
         <span id="timestamp"></span>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th data-sort="hero">
-                    <div class="metric-header">
-                        Hero
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-                <th data-sort="stars">
-                    <div class="metric-header">
-                        <span class="metric-type">
-                            <i class="fas fa-star"></i> Stars
-                        </span>
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-                <th data-sort="score_7d">
-                    <div class="metric-header">
-                        <span class="metric-type">
-                            <i class="fas fa-calendar-week"></i> 7d
-                        </span>
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-                <th data-sort="score_24h">
-                    <div class="metric-header">
-                        <span class="metric-type">
-                            <i class="fas fa-clock"></i> 24hr
-                        </span>
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-                <th data-sort="followers">
-                    <div class="metric-header">
-                        <span class="metric-type">
-                            <i class="fas fa-users"></i> Followers
-                        </span>
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-                <th data-sort="inflation_degree">
-                    <div class="metric-header">
-                        <span class="metric-type">
-                            <i class="fas fa-chart-line"></i> Inflation
-                        </span>
-                        <div class="sort-arrow"></div>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th data-sort="hero">
+                        <div class="metric-header">
+                            Hero
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th data-sort="stars">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-star"></i> Stars
+                            </span>
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th data-sort="score_7d">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-calendar-week"></i> 7d
+                            </span>
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th data-sort="score_24h">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-clock"></i> 24hr
+                            </span>
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th data-sort="followers">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-users"></i> Followers
+                            </span>
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                    <th data-sort="inflation_degree">
+                        <div class="metric-header">
+                            <span class="metric-type">
+                                <i class="fas fa-chart-line"></i> Inflation
+                            </span>
+                            <div class="sort-arrow"></div>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 </body>

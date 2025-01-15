@@ -81,8 +81,9 @@
             for (let i = 0; i < points.length - 1; i++) {
                 const current = points[i];
                 const next = points[i + 1];
+                const isEqual = next.value === points[0].value;
                 const isAboveReference = next.y < referenceY; // SVG y-axis is inverted
-                const segmentColor = isAboveReference ? '#2DA25F' : '#D14343';
+                const segmentColor = isEqual ? '#808080' : (isAboveReference ? '#2DA25F' : '#D14343');
                 
                 pathSegments += `
                     <line 
@@ -127,9 +128,10 @@
                     diff = Math.round(newestValue - oldestValue);
                 }
                 
-                const color = diff >= 0 ? '#2DA25F' : '#D14343';
-                const sign = diff >= 0 ? '+' : '';
-                diffDisplay = `<div class="sparkline-diff" style="color: ${color}">${sign}${diff}</div>`;
+                const color = diff > 0 ? '#2DA25F' : diff < 0 ? '#D14343' : '#808080';
+                const sign = diff > 0 ? '+' : '';
+                const displayValue = diff === 0 ? '0' : `${sign}${diff}`;
+                diffDisplay = `<div class="sparkline-diff" style="color: ${color}">${displayValue}</div>`;
             }
 
             return `
@@ -448,8 +450,8 @@
         .sparkline-container {
             position: relative;
             transform: scale(1.15);
-            transform-origin: left center;
-            margin-right: 15px;
+            transform-origin: center center;
+            margin: 0 auto;
         }
 
         .sparkline-tooltip {
@@ -650,6 +652,48 @@
                     font-size: 12px;
                     margin-left: 2px;
                 }
+            }
+
+            /* Add/modify these styles */
+            .metric-header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .metric-type {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            /* Modify the table cell styles for metric columns */
+            td > div {
+                display: flex;
+                align-items: center;
+                justify-content: center; /* Center the content horizontally */
+                width: 100%;
+            }
+
+            /* Adjust the value and sparkline container spacing */
+            td > div > span {
+                text-align: right;
+                min-width: 60px;
+                margin-right: 8px;
+            }
+
+            /* Keep hero column left-aligned */
+            td:first-child > div {
+                justify-content: flex-start;
+            }
+
+            /* Adjust sparkline container positioning */
+            .sparkline-container {
+                position: relative;
+                transform: scale(1.15);
+                transform-origin: center center; /* Change from left to center */
+                margin: 0 auto; /* Center the sparkline */
             }
 </style>
 <body>

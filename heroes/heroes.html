@@ -70,25 +70,68 @@
                     x, 
                     y, 
                     value,
-                    timestamp: timestamps[index] || null // Add timestamp to points
+                    timestamp: timestamps[index] || null
                 };
             });
 
             const pointsString = points.map(p => `${p.x},${p.y}`).join(' ');
+            
+            // Calculate the y-position for the reference line using the first value
+            const referenceY = points[0]?.y || 19;
+
+            // Create path segments instead of a single polyline
+            let pathSegments = '';
+            for (let i = 0; i < points.length - 1; i++) {
+                const current = points[i];
+                const next = points[i + 1];
+                const isAboveReference = next.y < referenceY; // SVG y-axis is inverted
+                const segmentColor = isAboveReference ? '#2DA25F' : '#D14343';
+                
+                pathSegments += `
+                    <line 
+                        x1="${current.x}" 
+                        y1="${current.y}" 
+                        x2="${next.x}" 
+                        y2="${next.y}"
+                        stroke="${segmentColor}" 
+                        stroke-width="1.5"
+                    />
+                `;
+            }
+
+            // Calculate difference between most recent and oldest values
+            let diffDisplay = '';
+            if (values.length >= 2) {
+                const oldestValue = values[0].inflation_degree || values[0].followers || values[0].fantasy_score || values[0];
+                const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1].fantasy_score || values[values.length - 1];
+                const diff = Math.round(newestValue - oldestValue);
+                const color = diff >= 0 ? '#2DA25F' : '#D14343';
+                const sign = diff >= 0 ? '+' : '';
+                diffDisplay = `<div class="sparkline-diff" style="color: ${color}">${sign}${diff}</div>`;
+            }
 
             return `
                 <div class="sparkline-container">
                     <div class="sparkline-tooltip"></div>
                     <svg width="60" height="24">
-                        <polyline 
-                            points="${pointsString}"
-                            style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                        <!-- Reference line -->
+                        <line 
+                            x1="${points[0]?.x || 5}" 
+                            y1="${referenceY}" 
+                            x2="55" 
+                            y2="${referenceY}"
+                            stroke="#999999" 
+                            stroke-width="0.75" 
+                            stroke-dasharray="2,2"
+                            opacity="0.8"
                         />
+                        <!-- Colored line segments -->
+                        ${pathSegments}
                         ${points.map((p, i) => `
                             <circle 
                                 cx="${p.x}" 
                                 cy="${p.y}" 
-                                r="3" 
+                                r="3"
                                 fill="#2DA25F" 
                                 fill-opacity="0"
                                 stroke="#2DA25F"
@@ -103,6 +146,7 @@
                             />
                         `).join('')}
                     </svg>
+                    ${diffDisplay}
                 </div>
             `;
         }
@@ -110,6 +154,21 @@
         // Add these new formatting functions
         function formatScore(score) {
             return Math.round(score).toLocaleString();
+        }
+
+        function formatStars(stars) {
+            const starColors = {
+                1: '#808080', // Gray
+                2: '#FFFDD0', // Cream
+                3: '#FFFAA0', // Pastel Yellow
+                4: '#FFFF8F', // Canary Yellow
+                5: '#FAFA33', // Lemon Yellow
+                6: '#FFEA00', // Golden Yellow
+                7: '#FFD700', // Bright Yellow
+                8: '#FFC000'  // Gold
+            };
+            const backgroundColor = starColors[stars] || 'grey';
+            return `<span class="star-circle" style="background-color: ${backgroundColor}">${stars}</span>`;
         }
 
         function formatFollowers(followers) {
@@ -264,7 +323,7 @@
                                 <span data-hero-name="${hero.hero_name || ''}">${hero.hero_handle}</span>
                             </div>
                         </td>
-                        <td>${formatScore(hero.stars || 0)}</td>
+                        <td>${formatStars(hero.stars || 0)}</td>
                         <td>${formatScore(hero.score_7d || 0)}${generateDummySparkline(glide7d)}</td>
                         <td>${formatScore(hero.score_24h || 0)}${generateDummySparkline(glide24h)}</td>
                         <td>${formatFollowers(hero.followers || 0)}${generateDummySparkline(followersData)}</td>
@@ -328,7 +387,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Hero League Winners</title>
+    <title>Hero Trends</title>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="stylesheet" href="../styles.css">
@@ -339,6 +398,9 @@
 <style>
         .sparkline-container {
             position: relative;
+            transform: scale(1.15);
+            transform-origin: left center;
+            margin-right: 15px;
         }
 
         .sparkline-tooltip {
@@ -347,7 +409,7 @@
             color: white;
             padding: 8px;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 10.35px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s;
@@ -359,41 +421,68 @@
         }
 
         .sparkline-tooltip .score-value {
-            font-size: 11px;
+            font-size: 12.65px;
             font-weight: bold;
         }
         
         .table-container {
                 margin: 0;
                 width: 100%;
-                padding: 0 10px;
+                padding: 0 11.5px;
             }
         .hero-pfp {
-            width: 30px;
-            height: 30px;
+            width: 34.5px;
+            height: 34.5px;
             border-radius: 50%;
             object-fit: cover;
         }
 
         .sort-arrow {
-                display: none; /* Hide by default */
+                display: none;
                 width: 0;
                 height: 0;
-                margin: 2px auto;
+                margin: 2.3px auto;
             }
 
             .sort-arrow.active.up {
-                    display: block; /* Show only when active */
-                    border-left: 5px solid transparent;
-                    border-right: 5px solid transparent;
-                    border-bottom: 5px solid #4CAF50; /* Green */
+                    display: block;
+                    border-left: 5.75px solid transparent;
+                    border-right: 5.75px solid transparent;
+                    border-bottom: 5.75px solid #4CAF50;
             }
 
             .sort-arrow.active.down {
-                    display: block; /* Show only when active */
-                    border-left: 5px solid transparent;
-                    border-right: 5px solid transparent;
-                    border-top: 5px solid #F44336; /* Red */
+                    display: block;
+                    border-left: 5.75px solid transparent;
+                    border-right: 5.75px solid transparent;
+                    border-top: 5.75px solid #F44336;
+            }
+
+            table {
+                font-size: 115%;
+            }
+
+            th, td {
+                padding: 11.5px;
+            }
+
+            .star-circle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                color: black;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            .sparkline-diff {
+                font-size: 11px;
+                text-align: center;
+                margin-top: 2px;
+                font-weight: 500;
             }
 </style>
 <body>

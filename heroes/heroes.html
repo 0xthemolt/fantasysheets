@@ -101,8 +101,8 @@
             let diffDisplay = '';
             if (values.length >= 2) {
                 let diff;
-                // Special handling for 24h scores
-                if (timestamps && timestamps.length >= 2 && currentSort.column === 'score_24h') {
+                // Check if we're processing glide24h data by looking at the timestamps
+                if (timestamps && timestamps.length >= 2 && values[0].hasOwnProperty('fantasy_score')) {
                     const newestTime = new Date(timestamps[timestamps.length - 1]);
                     const newestValue = values[values.length - 1];
                     
@@ -123,15 +123,38 @@
                     diff = Math.round(newestValue - closest24hValue);
                 } else {
                     // Original logic for all other metrics
-                    const oldestValue = values[0].inflation_degree || values[0].followers || values[0].fantasy_score || values[0];
-                    const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1].fantasy_score || values[values.length - 1];
+                    const oldestValue = values[0].inflation_degree || values[0].followers || values[0];
+                    const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1];
                     diff = Math.round(newestValue - oldestValue);
                 }
                 
                 const color = diff > 0 ? '#2DA25F' : diff < 0 ? '#D14343' : '#808080';
                 const sign = diff > 0 ? '+' : '';
                 const displayValue = diff === 0 ? '0' : `${sign}${diff}`;
-                diffDisplay = `<div class="sparkline-diff" style="color: ${color}">${displayValue}</div>`;
+                
+                // Create tooltip content
+                let tooltipText = '';
+                if (timestamps && timestamps.length >= 2) {
+                    const newestTime = new Date(timestamps[timestamps.length - 1]);
+                    const oldestTime = new Date(timestamps[0]);
+                    const newestValue = values[values.length - 1];
+                    const oldestValue = values[0];
+                    
+                    // Check if we're comparing 24h or full range
+                    const is24hComparison = values[0].hasOwnProperty('fantasy_score');
+                    if (is24hComparison) {
+                        tooltipText = `24h Change:\n${Math.round(oldestValue)} → ${Math.round(newestValue)}`;
+                    } else {
+                        const daysDiff = Math.round((newestTime - oldestTime) / (1000 * 60 * 60 * 24));
+                        tooltipText = `${daysDiff}d Change:\n${Math.round(oldestValue)} → ${Math.round(newestValue)}`;
+                    }
+                }
+                
+                diffDisplay = `
+                    <div class="sparkline-diff" style="color: ${color}" title="${tooltipText}">
+                        ${displayValue}
+                    </div>
+                `;
             }
 
             return `

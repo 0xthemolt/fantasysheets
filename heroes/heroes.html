@@ -7,7 +7,7 @@
         window.onload = async function() {
             // Initialize Supabase
             const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
             supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
             // Load hero data after Supabase is initialized
@@ -33,9 +33,21 @@
         }
 
         function generateDummySparkline(values, color = '#6B4E8B') {
+            // If values is an array of objects, extract and sort by timestamp first
+            if (values.length > 0 && typeof values[0] === 'object') {
+                values = values
+                    .sort((a, b) => new Date(a.created_at_utc) - new Date(b.created_at_utc))
+                    .map(v => v.fantasy_score);
+            }
+
+            // Ensure we have numeric values to plot
+            if (!values.length || values.every(v => v === 0)) {
+                values = [0, 0]; // Default flat line if no valid data
+            }
+
             const points = values.map((value, index) => {
                 const x = 5 + (index / (values.length - 1)) * 50;
-                const y = 19 - ((value - Math.min(...values)) / (Math.max(...values) - Math.min(...values))) * 14;
+                const y = 19 - ((value - Math.min(...values)) / (Math.max(...values) - Math.min(...values)) * 14 || 0);
                 return `${x},${y}`;
             }).join(' ');
 
@@ -49,7 +61,21 @@
                         />
                     </svg>
                 </div>
-            `;  // Added missing backtick here
+            `;
+        }
+
+        // Add these new formatting functions
+        function formatScore(score) {
+            return Math.round(score).toLocaleString();
+        }
+
+        function formatFollowers(followers) {
+            if (followers >= 100000) {
+                return `${(followers / 1000).toFixed(1)}k`;
+            } else if (followers >= 1000) {
+                return `${(followers / 1000).toFixed(1)}k`;
+            }
+            return followers.toLocaleString();
         }
 
         // Add function to fetch and display data
@@ -59,6 +85,7 @@
                 .select(`
                     hero_id,
                     hero_handle,
+                    hero_name,
                     hero_pfp_url,
                     rank,
                     score_7d,
@@ -69,7 +96,8 @@
                     glide_7d_json,
                     stars_inflation_follow_json,
                     db_updated
-                `);
+                `)
+                .order('rank', { ascending: true });
 
             if (error) {
                 console.error('Error fetching data:', error);
@@ -78,22 +106,65 @@
 
             const tbody = document.querySelector('tbody');
             tbody.innerHTML = data.map(hero => {
-                // Parse JSON strings into arrays
-                const glide7d = JSON.parse(hero.glide_7d_json || '[]');
-                const glide24h = JSON.parse(hero.glide_24h_json || '[]');
-                const starsFollow = JSON.parse(hero.stars_inflation_follow_json || '[]');
+                // Modified JSON parsing function
+                const safeJsonParse = (jsonString, defaultValue = []) => {
+                    try {
+                        // Handle case where data might already be an array
+                        if (Array.isArray(jsonString)) {
+                            return jsonString;
+                        }
+                        // Handle case where data is a string
+                        if (typeof jsonString === 'string') {
+                            return JSON.parse(jsonString);
+                        }
+                        return defaultValue;
+                    } catch (e) {
+                        console.warn('JSON parse error:', e);
+                        console.warn('Raw data:', jsonString);
+                        return defaultValue;
+                    }
+                };
+
+                const glide24h = safeJsonParse(hero.glide_24h_json);
                 
+                // Debug logging
+                console.log('Hero:', hero.hero_handle);
+                console.log('Raw glide24h_json:', hero.glide_24h_json);
+                console.log('Parsed glide24h:', glide24h);
+                console.log('Type of glide24h_json:', typeof hero.glide_24h_json);
+                
+                const glide7d = safeJsonParse(hero.glide_7d_json);
+                const starsFollow = safeJsonParse(hero.stars_inflation_follow_json);
+                
+                // Extract specific fields from starsFollow data
+                const followersData = starsFollow.map(entry => ({
+                    created_at_utc: entry.created_at_utc,
+                    followers: entry.followers
+                }));
+
+                const starsData = starsFollow.map(entry => ({
+                    created_at_utc: entry.created_at_utc,
+                    stars: entry.stars
+                }));
+
+                const inflationData = starsFollow.map(entry => ({
+                    created_at_utc: entry.created_at_utc,
+                    inflation_degree: entry.inflation_degree
+                }));
+
                 return `
                     <tr>
                         <td>${hero.rank || ''}</td>
                         <td>
-                            ${hero.hero_pfp_url ? `<img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" style="width: 20px; height: 20px; border-radius: 50%; vertical-align: middle;">` : ''}
-                            ${hero.hero_handle}
+                            <div class="hero-cell">
+                                ${hero.hero_pfp_url ? `<img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" class="hero-pfp">` : ''}
+                                <span data-hero-name="${hero.hero_name || ''}">${hero.hero_handle}</span>
+                            </div>
                         </td>
-                        <td>${hero.stars || 0}</td>
-                        <td>${hero.score_7d || 0}${generateDummySparkline(glide7d)}</td>
-                        <td>${hero.score_24h || 0}${generateDummySparkline(glide24h)}</td>
-                        <td>${hero.followers || 0}${generateDummySparkline(starsFollow)}</td>
+                        <td>${formatScore(hero.stars || 0)}</td>
+                        <td>${formatScore(hero.score_7d || 0)}${generateDummySparkline(glide7d)}</td>
+                        <td>${formatScore(hero.score_24h || 0)}${generateDummySparkline(glide24h)}</td>
+                        <td>${formatFollowers(hero.followers || 0)}${generateDummySparkline(followersData)}</td>
                     </tr>
                 `;
             }).join('');
@@ -109,7 +180,6 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="/js/timeUtils.js?v=1.0.0" defer></script>
 </head>
 <style>
         .sparkline-container {
@@ -137,17 +207,67 @@
             font-size: 11px;
             font-weight: bold;
         }
+        
+        .table-container {
+                margin: 0;
+                width: 100%;
+                padding: 0 10px;
+            }
+        .hero-pfp {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
 </style>
 <body>
     <table>
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>Hero</th>
-                <th>Stars</th>
-                <th>7d Score</th>
-                <th>24hr Score</th>
-                <th>Follower</th>
+                <th data-sort="rank">
+                    <div class="metric-header">
+                        Rank
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="hero">
+                    <div class="metric-header">
+                        Hero
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="stars">
+                    <div class="metric-header">
+                        <span class="metric-type">
+                            <i class="fas fa-star"></i> Stars
+                        </span>
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="score_7d">
+                    <div class="metric-header">
+                        <span class="metric-type">
+                            <i class="fas fa-chart-line"></i> 7d Score
+                        </span>
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="score_24h">
+                    <div class="metric-header">
+                        <span class="metric-type">
+                            <i class="fas fa-clock"></i> 24hr Score
+                        </span>
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="followers">
+                    <div class="metric-header">
+                        <span class="metric-type">
+                            <i class="fas fa-users"></i> Followers
+                        </span>
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody></tbody>

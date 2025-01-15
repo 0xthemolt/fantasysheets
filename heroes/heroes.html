@@ -3,6 +3,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         let supabaseClient;
+        let currentSort = {
+            column: 'rank',
+            direction: 'asc'
+        };
 
         window.onload = async function() {
             // Initialize Supabase
@@ -12,6 +16,7 @@
 
             // Load hero data after Supabase is initialized
             await loadHeroData();
+            initializeSparklineHovers();
         };
 
         // Google Analytics code
@@ -37,7 +42,7 @@
             if (values.length > 0 && typeof values[0] === 'object') {
                 values = values
                     .sort((a, b) => new Date(a.created_at_utc) - new Date(b.created_at_utc))
-                    .map(v => v.fantasy_score);
+                    .map(v => v.inflation_degree || v.followers || v.fantasy_score || 0); // Add inflation_degree and fallback to 0
             }
 
             // Ensure we have numeric values to plot
@@ -45,20 +50,44 @@
                 values = [0, 0]; // Default flat line if no valid data
             }
 
+            // Add debug logging
+            console.log('Sparkline values:', values);
+
+            // Calculate the range and adjust scaling for small variations
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const range = maxValue - minValue;
+            
+            // Ensure we always have a non-zero range
+            const effectiveRange = range || 1;
+            
             const points = values.map((value, index) => {
                 const x = 5 + (index / (values.length - 1)) * 50;
-                const y = 19 - ((value - Math.min(...values)) / (Math.max(...values) - Math.min(...values)) * 14 || 0);
-                return `${x},${y}`;
-            }).join(' ');
+                const y = 19 - ((value - minValue) / effectiveRange * 14);
+                return { x, y, value };
+            });
+
+            const pointsString = points.map(p => `${p.x},${p.y}`).join(' ');
 
             return `
                 <div class="sparkline-container">
                     <div class="sparkline-tooltip"></div>
                     <svg width="60" height="24">
                         <polyline 
-                            points="${points}"
+                            points="${pointsString}"
                             style="stroke: ${color}; stroke-width: 1.5; fill: none;"
                         />
+                        ${points.map((p, i) => `
+                            <circle 
+                                cx="${p.x}" 
+                                cy="${p.y}" 
+                                r="3" 
+                                fill="${color}" 
+                                style="opacity: 0"
+                                data-value="${p.value}"
+                                data-index="${i}"
+                            />
+                        `).join('')}
                     </svg>
                 </div>
             `;
@@ -78,6 +107,17 @@
             return followers.toLocaleString();
         }
 
+        function parseRawValue(value) {
+            if (typeof value === 'string') {
+                if (value.endsWith('k')) {
+                    return parseFloat(value.replace('k', '')) * 1000;
+                }
+                // Remove commas and convert to number
+                return parseFloat(value.replace(/,/g, ''));
+            }
+            return value;
+        }
+
         // Add function to fetch and display data
         async function loadHeroData() {
             const { data, error } = await supabaseClient
@@ -92,6 +132,7 @@
                     score_24h,
                     stars,
                     followers,
+                    inflation_degree,
                     glide_24h_json,
                     glide_7d_json,
                     stars_inflation_follow_json,
@@ -104,8 +145,57 @@
                 return;
             }
 
+            renderHeroTable(data);
+            
+            // Add click handlers for sortable columns
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const column = th.dataset.sort;
+                    
+                    // Reset all other arrows
+                    document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                        arrow.className = 'sort-arrow';
+                    });
+                    
+                    // Update sort direction
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'desc';
+                    }
+                    
+                    // Update arrow for current column
+                    const arrow = th.querySelector('.sort-arrow');
+                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+                    
+                    // Resort and render
+                    renderHeroTable(data);
+                });
+            });
+        }
+
+        // Add this new function to handle table rendering
+        function renderHeroTable(data) {
+            // Sort the data
+            const sortedData = [...data].sort((a, b) => {
+                let compareA = a[currentSort.column];
+                let compareB = b[currentSort.column];
+                
+                // Special handling for followers
+                if (currentSort.column === 'followers') {
+                    compareA = a.followers || 0;
+                    compareB = b.followers || 0;
+                }
+                
+                if (compareA === compareB) return 0;
+                const comparison = compareA < compareB ? -1 : 1;
+                return currentSort.direction === 'asc' ? comparison : -comparison;
+            });
+
+            // Your existing rendering code, moved to a separate function
             const tbody = document.querySelector('tbody');
-            tbody.innerHTML = data.map(hero => {
+            tbody.innerHTML = sortedData.map(hero => {
                 // Modified JSON parsing function
                 const safeJsonParse = (jsonString, defaultValue = []) => {
                     try {
@@ -126,13 +216,6 @@
                 };
 
                 const glide24h = safeJsonParse(hero.glide_24h_json);
-                
-                // Debug logging
-                console.log('Hero:', hero.hero_handle);
-                console.log('Raw glide24h_json:', hero.glide_24h_json);
-                console.log('Parsed glide24h:', glide24h);
-                console.log('Type of glide24h_json:', typeof hero.glide_24h_json);
-                
                 const glide7d = safeJsonParse(hero.glide_7d_json);
                 const starsFollow = safeJsonParse(hero.stars_inflation_follow_json);
                 
@@ -152,6 +235,12 @@
                     inflation_degree: entry.inflation_degree
                 }));
 
+                // Debug logging
+                console.log('Hero:', hero.hero_handle);
+                console.log('Raw glide24h_json:', hero.followersData);
+                console.log('Parsed glide24h:', followersData);
+                console.log('Type of glide24h_json:', typeof hero.followersData);
+                
                 return `
                     <tr>
                         <td>${hero.rank || ''}</td>
@@ -165,9 +254,44 @@
                         <td>${formatScore(hero.score_7d || 0)}${generateDummySparkline(glide7d)}</td>
                         <td>${formatScore(hero.score_24h || 0)}${generateDummySparkline(glide24h)}</td>
                         <td>${formatFollowers(hero.followers || 0)}${generateDummySparkline(followersData)}</td>
+                        <td>${formatScore(hero.inflation_degree || 0)}${generateDummySparkline(inflationData)}</td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        function initializeSparklineHovers() {
+            document.body.addEventListener('mouseover', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    // Make the hovered circle visible
+                    circle.style.opacity = "1";
+                    
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    const value = parseFloat(circle.dataset.value);
+                    tooltip.innerHTML = `Value: <span class="score-value">${formatScore(value)}</span>`;
+                    
+                    const containerRect = circle.closest('.sparkline-container').getBoundingClientRect();
+                    const circleRect = circle.getBoundingClientRect();
+                    
+                    const tooltipX = circleRect.left - containerRect.left + (circleRect.width / 2);
+                    const tooltipY = -10;
+                    
+                    tooltip.style.left = `${tooltipX}px`;
+                    tooltip.style.top = `${tooltipY}px`;
+                    tooltip.style.opacity = '1';
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(e) {
+                const circle = e.target.closest('circle');
+                if (circle) {
+                    // Hide the circle again
+                    circle.style.opacity = "0";
+                    const tooltip = circle.closest('.sparkline-container').querySelector('.sparkline-tooltip');
+                    tooltip.style.opacity = '0';
+                }
+            });
         }
     </script>
 
@@ -219,6 +343,27 @@
             border-radius: 50%;
             object-fit: cover;
         }
+
+        .sort-arrow {
+                display: none; /* Hide by default */
+                width: 0;
+                height: 0;
+                margin: 2px auto;
+            }
+
+            .sort-arrow.active.up {
+                    display: block; /* Show only when active */
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-bottom: 5px solid #4CAF50; /* Green */
+            }
+
+            .sort-arrow.active.down {
+                    display: block; /* Show only when active */
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-top: 5px solid #F44336; /* Red */
+            }
 </style>
 <body>
     <table>
@@ -264,6 +409,14 @@
                     <div class="metric-header">
                         <span class="metric-type">
                             <i class="fas fa-users"></i> Followers
+                        </span>
+                        <div class="sort-arrow"></div>
+                    </div>
+                </th>
+                <th data-sort="inflation_degree">
+                    <div class="metric-header">
+                        <span class="metric-type">
+                            <i class="fas fa-chart-line"></i> Inflation
                         </span>
                         <div class="sort-arrow"></div>
                     </div>

@@ -1,6 +1,20 @@
 <head>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        let supabaseClient;
+
+        window.onload = async function() {
+            // Initialize Supabase
+            const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+            // Load hero data after Supabase is initialized
+            await loadHeroData();
+        };
+
+        // Google Analytics code
         window.dataLayer = window.dataLayer || [];
         function gtag(){{dataLayer.push(arguments);}}
         gtag('js', new Date());
@@ -16,7 +30,75 @@
                 minute: '2-digit',
                 hour12: true
             });
-        }   
+        }
+
+        function generateDummySparkline(values, color = '#6B4E8B') {
+            const points = values.map((value, index) => {
+                const x = 5 + (index / (values.length - 1)) * 50;
+                const y = 19 - ((value - Math.min(...values)) / (Math.max(...values) - Math.min(...values))) * 14;
+                return `${x},${y}`;
+            }).join(' ');
+
+            return `
+                <div class="sparkline-container">
+                    <div class="sparkline-tooltip"></div>
+                    <svg width="60" height="24">
+                        <polyline 
+                            points="${points}"
+                            style="stroke: ${color}; stroke-width: 1.5; fill: none;"
+                        />
+                    </svg>
+                </div>
+            `;  // Added missing backtick here
+        }
+
+        // Add function to fetch and display data
+        async function loadHeroData() {
+            const { data, error } = await supabaseClient
+                .from('hero_stat_history')
+                .select(`
+                    hero_id,
+                    hero_handle,
+                    hero_pfp_url,
+                    rank,
+                    score_7d,
+                    score_24h,
+                    stars,
+                    followers,
+                    glide_24h_json,
+                    glide_7d_json,
+                    stars_inflation_follow_json,
+                    db_updated
+                `);
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                return;
+            }
+
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = data.map(hero => {
+                // Parse JSON strings into arrays
+                const glide7d = JSON.parse(hero.glide_7d_json || '[]');
+                const glide24h = JSON.parse(hero.glide_24h_json || '[]');
+                const starsFollow = JSON.parse(hero.stars_inflation_follow_json || '[]');
+                
+                return `
+                    <tr>
+                        <td>${hero.rank || ''}</td>
+                        <td>
+                            ${hero.hero_pfp_url ? `<img src="${hero.hero_pfp_url}" alt="${hero.hero_handle}" style="width: 20px; height: 20px; border-radius: 50%; vertical-align: middle;">` : ''}
+                            ${hero.hero_handle}
+                        </td>
+                        <td>${hero.stars || 0}</td>
+                        <td>${hero.score_7d || 0}${generateDummySparkline(glide7d)}</td>
+                        <td>${hero.score_24h || 0}${generateDummySparkline(glide24h)}</td>
+                        <td>${hero.followers || 0}${generateDummySparkline(starsFollow)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +109,47 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/timeUtils.js?v=1.0.0" defer></script>
-
 </head>
+<style>
+        .sparkline-container {
+            position: relative;
+        }
+
+        .sparkline-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            z-index: 1000;
+            transform: translate(-50%, -100%);
+            top: -8px;
+            text-align: left;
+        }
+
+        .sparkline-tooltip .score-value {
+            font-size: 11px;
+            font-weight: bold;
+        }
+</style>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Hero</th>
+                <th>Stars</th>
+                <th>7d Score</th>
+                <th>24hr Score</th>
+                <th>Follower</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>

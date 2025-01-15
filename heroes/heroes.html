@@ -8,6 +8,43 @@
             direction: 'asc'
         };
 
+        // Add these utility functions at the start of your script
+        const colorCache = new Map();
+
+        function lerp(start, end, t) {
+            return start * (1 - t) + end * t;
+        }
+
+        function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+            const cacheKey = `${value}_${maxValue}_${higherIsBetter}`;
+            if (colorCache.has(cacheKey)) {
+                return colorCache.get(cacheKey);
+            }
+
+            let ratio;
+            if (higherIsBetter) {
+                ratio = Math.min(value / maxValue, 1);
+            } else {
+                ratio = 1 - (Math.min(value / maxValue, 1));
+            }
+
+            if (ratio < 0.5) {
+                const r = Math.round(lerp(215, 254, ratio * 2));
+                const g = Math.round(lerp(48, 224, ratio * 2));
+                const b = Math.round(lerp(39, 139, ratio * 2));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            } else {
+                const r = Math.round(lerp(254, 44, (ratio - 0.5) * 2));
+                const g = Math.round(lerp(224, 162, (ratio - 0.5) * 2));
+                const b = Math.round(lerp(139, 95, (ratio - 0.5) * 2));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            }
+        }
+
         window.onload = async function() {
             // Initialize Supabase
             const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
@@ -37,7 +74,7 @@
             });
         }
 
-        function generateDummySparkline(values, color = '#6B4E8B') {
+        function generateDummySparkline(values, name, color = '#6B4E8B') {
             // If values is an array of objects, extract timestamps and values
             let timestamps = [];
             if (values.length > 0 && typeof values[0] === 'object') {
@@ -101,12 +138,11 @@
             let diffDisplay = '';
             if (values.length >= 2) {
                 let diff;
-                // Check if we're processing glide24h data by looking at the timestamps
-                if (timestamps && timestamps.length >= 2 && values[0].hasOwnProperty('fantasy_score')) {
-                    const newestTime = new Date(timestamps[timestamps.length - 1]);
-                    const newestValue = values[values.length - 1];
-                    
-                    // Find the value closest to 24 hours before the newest time
+                const newestTime = new Date(timestamps[timestamps.length - 1]);
+                const newestValue = values[values.length - 1];
+                
+                if (name === 'glide24h') {
+                    // For 24h data, compare with closest value to 24h ago
                     const target24hAgo = new Date(newestTime - 24 * 60 * 60 * 1000);
                     let closest24hValue = values[0];
                     let closestTimeDiff = Infinity;
@@ -121,34 +157,20 @@
                     }
                     
                     diff = Math.round(newestValue - closest24hValue);
+                    tooltipText = `24h Change:\n${Math.round(closest24hValue)} → ${Math.round(newestValue)}`;
                 } else {
-                    // Original logic for all other metrics
-                    const oldestValue = values[0].inflation_degree || values[0].followers || values[0];
-                    const newestValue = values[values.length - 1].inflation_degree || values[values.length - 1].followers || values[values.length - 1];
+                    // For all other metrics, compare newest vs oldest
+                    const oldestTime = new Date(timestamps[0]);
+                    const oldestValue = values[0];
                     diff = Math.round(newestValue - oldestValue);
+                    
+                    const daysDiff = Math.round((newestTime - oldestTime) / (1000 * 60 * 60 * 24));
+                    tooltipText = `${daysDiff}d Change:\n${Math.round(oldestValue)} → ${Math.round(newestValue)}`;
                 }
                 
                 const color = diff > 0 ? '#2DA25F' : diff < 0 ? '#D14343' : '#808080';
                 const sign = diff > 0 ? '+' : '';
                 const displayValue = diff === 0 ? '0' : `${sign}${diff}`;
-                
-                // Create tooltip content
-                let tooltipText = '';
-                if (timestamps && timestamps.length >= 2) {
-                    const newestTime = new Date(timestamps[timestamps.length - 1]);
-                    const oldestTime = new Date(timestamps[0]);
-                    const newestValue = values[values.length - 1];
-                    const oldestValue = values[0];
-                    
-                    // Check if we're comparing 24h or full range
-                    const is24hComparison = values[0].hasOwnProperty('fantasy_score');
-                    if (is24hComparison) {
-                        tooltipText = `24h Change:\n${Math.round(oldestValue)} → ${Math.round(newestValue)}`;
-                    } else {
-                        const daysDiff = Math.round((newestTime - oldestTime) / (1000 * 60 * 60 * 24));
-                        tooltipText = `${daysDiff}d Change:\n${Math.round(oldestValue)} → ${Math.round(newestValue)}`;
-                    }
-                }
                 
                 diffDisplay = `
                     <div class="sparkline-diff" style="color: ${color}" title="${tooltipText}">
@@ -380,26 +402,34 @@
                         <td>${formatStars(hero.stars || 0)}</td>
                         <td>
                             <div style="display: flex; align-items: center;">
-                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.score_7d || 0)}</span>
-                                ${generateDummySparkline(glide7d)}
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">
+                                    <span style="background-color: ${getColorForRank(hero.score_7d || 0, Math.max(...data.map(h => h.score_7d || 0)), true)}; border-radius: 4px; padding: 4px 4px; color: white; font-weight: bold; display: inline-block; min-width: 25px; text-align: center;">
+                                        ${formatScore(hero.score_7d || 0)}
+                                    </span>
+                                </span>
+                                ${generateDummySparkline(glide7d, 'glide7d')}
                             </div>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center;">
-                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.score_24h || 0)}</span>
-                                ${generateDummySparkline(glide24h)}
+                                <span style="margin-right: 8px; min-width: 60px; text-align: right;">
+                                    <span style="background-color: ${getColorForRank(hero.score_24h || 0, Math.max(...data.map(h => h.score_24h || 0)), true)}; border-radius: 4px; padding: 4px 4px; color: white; font-weight: bold; display: inline-block; min-width: 25px; text-align: center;">
+                                        ${formatScore(hero.score_24h || 0)}
+                                    </span>
+                                </span>
+                                ${generateDummySparkline(glide24h, 'glide24h')}
                             </div>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center;">
                                 <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatFollowers(hero.followers || 0)}</span>
-                                ${generateDummySparkline(followersData)}
+                                ${generateDummySparkline(followersData, 'followersData')}
                             </div>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center;">
                                 <span style="margin-right: 8px; min-width: 60px; text-align: right;">${formatScore(hero.inflation_degree || 0)}</span>
-                                ${generateDummySparkline(inflationData)}
+                                ${generateDummySparkline(inflationData, 'inflationData')}
                             </div>
                         </td>
                     </tr>

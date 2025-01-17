@@ -47,18 +47,18 @@
     }
 
     th.sortable {
-        padding-right: 2px;  /* Reduced from 25px */
+        padding-right: 2px;
         position: relative;
         white-space: nowrap;
     }
 
     th[data-sort="name"] {
-        min-width: 100px;    /* Reduced from 150px */
+        min-width: 100px;
     }
 
     .sort-arrow {
         position: absolute;
-        right: 1px;          /* Reduced from 8px to bring arrow closer to text */
+        right: 1px;
         top: 50%;
         transform: translateY(-50%);
     }
@@ -66,68 +66,84 @@
     .rankings-table {
         width: 100%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .rankings-table table {
-        width: max-content;
-        margin: 0 auto;
-        table-layout: fixed;
+        width: 100%;
         border-collapse: collapse;
     }
 
-    /* Update column widths and add min-width */
-    th[data-sort="rank"] { width: 25px; min-width: 25px; }
-    th[data-sort="player"] { width: 150px; min-width: 150px; }
-    th[data-sort="firstTournament"] { width: 150px; min-width: 150px; }
-    th[data-sort="rewardEth"] { width: 80px; min-width: 80px; }
-    th[data-sort="rewardFrag"] { width: 80px; min-width: 80px; }
-    th[data-sort="portfolio"] { width: 80px; min-width: 80px; }
-    th[data-sort="fanPoints"] { width: 80px; min-width: 80px; }
-    th[data-sort="blastGold"] { width: 80px; min-width: 80px; }
-    th[data-sort="stars"] { width: 80px; min-width: 80px; }
-    th[data-sort="decks"] { width: 80px; min-width: 80px; }
-    th[data-sort="cards"] { width: 80px; min-width: 80px; }
+    th, td {
+        box-sizing: border-box;
+        max-width: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 8px 4px;
+    }
+
+    th.sortable {
+        padding-right: 2px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    td img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    .placeholder {
+        background-color: #ccc;
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+    }
+
+    th[data-sort="rank"] { width: 40px; }
+    th[data-sort="player"] { width: 180px; }
+    th[data-sort="firstTournament"] { width: 80px; }
+    th[data-sort="hoursSinceLastActivity"] { width: 60px; }
+    th[data-sort="portfolio"] { width: 60px; }
+    th[data-sort="cards"] { width: 60px; }
+    th[data-sort="fanPoints"],
+    th[data-sort="rewardEth"],
+    th[data-sort="rewardFrag"],
+    th[data-sort="blastGold"],
+    th[data-sort="stars"] { width: 70px; }
+    th[data-sort="decks"] { width: 60px; }
     th[data-sort="elite"],
     th[data-sort="gold"],
     th[data-sort="silver"],
     th[data-sort="bronze"],
-    th[data-sort="reverse"] { 
-        width: 60px; 
-        min-width: 60px; 
-    }
-    th[data-sort="buyVol"] { width: 90px; min-width: 90px; }
-    th[data-sort="netVol"] { width: 90px; min-width: 90px; }
-    th:last-child { width: 70px; min-width: 70px; }
-
-    /* Ensure cells respect the column widths */
-    td, th {
-        box-sizing: border-box;
-        max-width: none;  /* Remove max-width constraint */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 8px 4px;  /* Add consistent padding */
-    }
+    th[data-sort="reverse"] { width: 50px; }
+    th[data-sort="buyVol"],
+    th[data-sort="netVol"] { width: 70px; }
+    th:last-child { width: 40px; }
 
     td[player-handle] {
         text-align: left;
-        padding-left: 10px;  /* Optional: adds some spacing from the left edge */
+        padding-left: 10px;
     }
 
     tbody tr:hover {
-        background-color: #1f2123;  /* Slightly lighter than the base #141515 */
+        background-color: #1f2123;
         transition: background-color 0.2s ease;
     }
 
     tbody tr:hover td {
-        background-color: #1f2123;  /* Override the td background on hover */
+        background-color: #1f2123;
     }
 
     tbody tr:hover td.section-end {
         border-right: 1px solid var(--border-color);
     }
 
-    /* Add these new styles */
     .player-handle {
         max-width: 100px;
         overflow: hidden;
@@ -136,11 +152,40 @@
         display: inline-block;
         vertical-align: middle;
     }
+
+    @media (max-width: 768px) {
+        .rankings-table {
+            margin: 0 -1rem;
+            padding: 0 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        th {
+            font-size: 0.85rem;
+        }
+        
+        th[data-sort="rank"],
+        th[data-sort="player"],
+        td:nth-child(1),
+        td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background-color: var(--background-color);
+            z-index: 2;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+        
+        th[data-sort="player"],
+        td:nth-child(2) {
+            left: 50px;
+        }
+    }
 </style>
 <body>
     <header>
         <h1>FantasySheets Player Rankings</h1>
-        <div style="text-align: center; color: #888; font-size: 0.9em;">As of Main 34</div>
+        <div style="text-align: center; color: #888; font-size: 0.9em;">As of Main 34 (if rewards claimed)</div>
     </header>
 
     <main>
@@ -263,7 +308,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Table data will be populated dynamically via JavaScript -->
+                    <tr>
+                        <td colspan="20" style="text-align: center; padding: 2rem;">
+                            Loading player data...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </section>
@@ -296,7 +345,7 @@
             if (!value && value !== 0) return 'N/A';
             const num = parseFloat(value);
             if (num === 1) return '1';
-            if (num < 1) return num.toFixed(3).substring(1); // Remove leading 0
+            if (num < 1) return num.toFixed(3).substring(1);
             return num.toFixed(3);
         }
 
@@ -321,7 +370,7 @@
             const players = data.players
                 .sort((a, b) => b.fan_pts - a.fan_pts)
                 .map((player, index) => ({
-                    originalRank: index + 1,  // Store original rank
+                    originalRank: index + 1,
                     rank: index + 1,
                     name: player.player_name,
                     handle: player.player_handle,
@@ -351,16 +400,17 @@
             tbody.innerHTML = players.map(player => `
                 <tr>
                     <td>${player.rank}</td>
-                    <td player-handle="${player.handle}" data-player-id="${player.player_id}">
+                    <td player-handle="${player.handle}" data-player-id="${player.player_id}" style="display: flex; align-items: center;">
                         <img src="${player.profilePic}" alt="${player.name}" 
-                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';" 
-                            style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 6px;">
-                        <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
-                            <span class="player-handle">${player.name}</span>
-                        </a>
-                        <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
-                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                        </a>
+                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
+                        <div style="display: flex; align-items: center; margin-left: 6px;">
+                            <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
+                                <span class="player-handle">${player.name}</span>
+                            </a>
+                            <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
+                                <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                            </a>
+                        </div>
                     </td>
                     <td>${player.firstTournament}</td>
                     <td>${player.hoursSinceLastActivity >= 24 

@@ -408,6 +408,14 @@
     </button>
 </div>
 
+<!-- Add hero filter container -->
+<div class="hero-filter-container">
+    <h3>Filter by Heroes:</h3>
+    <div class="hero-buttons">
+        <!-- Hero buttons will be dynamically inserted here -->
+    </div>
+</div>
+
 <!-- Add table container -->
 <div class="table-container">
     <table id="heroTable">
@@ -595,6 +603,7 @@ async function initializeTournamentScroller() {
             initializeTournamentScroller();
             initializeScrollButtons();
             initializeLeagueButtons();
+            initializeHeroFilterButtons();
         });
 
 async function fetchData(tournamentNumber) {
@@ -702,6 +711,13 @@ function initializeLeagueButtons() {
                 document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 selectedLeague = null;
+
+                // Filter players based on local storage value
+                const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
+                if (selectedPlayerHandle) {
+                    cachedTournamentData.players = cachedTournamentData.players.filter(player => player.player_handle === selectedPlayerHandle);
+                }
+
                 updateTableWithData(cachedTournamentData);
                 return;
             }
@@ -716,6 +732,13 @@ function initializeLeagueButtons() {
             button.classList.add('active');
             const league = button.textContent.trim();
             selectedLeague = league === selectedLeague ? null : league;
+
+            // Check if the selected league is one of the specific leagues
+            if (['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(league)) {
+                selectedLeague = league; // Set selectedLeague to the clicked league
+                updateTableWithData(cachedTournamentData); // Show all records
+                return; // Exit early
+            }
             
             if (!selectedLeague) {
                 button.classList.remove('active');
@@ -731,8 +754,21 @@ function updateTableWithData(data) {
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = '';
 
+    // Check if selectedPlayerHandle is blank
+    const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
+    if (!selectedPlayerHandle && (selectedLeague === null || selectedLeague === 'My Decks')) {
+        const noPlayerRow = document.createElement('tr');
+        noPlayerRow.innerHTML = `
+            <td colspan="5" style="text-align: center; color: #ff0000;">
+                No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
+            </td>
+        `;
+        tableBody.appendChild(noPlayerRow);
+        return; // Exit the function early
+    }
+
     let filteredData = data.players;
-    if (selectedLeague) {
+    if (selectedLeague && !['My Decks', 'My Leagues'].includes(selectedLeague)) {
         filteredData = data.players.filter(player => player.league === selectedLeague);
     }
 
@@ -823,6 +859,46 @@ function updateTableWithData(data) {
 
 function formatInt(number) {
     return Math.round(number).toLocaleString();
+}
+
+// Function to initialize hero filter buttons
+function initializeHeroFilterButtons() {
+    const heroButtonsContainer = document.querySelector('.hero-buttons');
+    const uniqueHeroes = new Set();
+
+    // Collect unique heroes from cachedTournamentData
+    cachedTournamentData.players.forEach(player => {
+        uniqueHeroes.add(player.card1_hero_handle);
+        uniqueHeroes.add(player.card2_hero_handle);
+        uniqueHeroes.add(player.card3_hero_handle);
+        uniqueHeroes.add(player.card4_hero_handle);
+        uniqueHeroes.add(player.card5_hero_handle);
+    });
+
+    // Create buttons for each unique hero
+    uniqueHeroes.forEach(hero => {
+        const button = document.createElement('button');
+        button.className = 'toggle-button hero-button';
+        button.textContent = hero;
+        button.onclick = () => filterByHero(hero);
+        heroButtonsContainer.appendChild(button);
+    });
+}
+
+// Function to filter players by selected hero
+function filterByHero(selectedHero) {
+    // Update selectedHero and filter the table
+    selectedLeague = null; // Clear league selection
+    const filteredPlayers = cachedTournamentData.players.filter(player => 
+        player.card1_hero_handle === selectedHero || 
+        player.card2_hero_handle === selectedHero || 
+        player.card3_hero_handle === selectedHero || 
+        player.card4_hero_handle === selectedHero || 
+        player.card5_hero_handle === selectedHero
+    );
+
+    // Update the table with filtered data
+    updateTableWithData({ players: filteredPlayers, rewards: cachedTournamentData.rewards });
 }
 </script>
 

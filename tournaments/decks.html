@@ -408,14 +408,6 @@
     </button>
 </div>
 
-<!-- Add hero filter container -->
-<div class="hero-filter-container">
-    <h3>Filter by Heroes:</h3>
-    <div class="hero-buttons">
-        <!-- Hero buttons will be dynamically inserted here -->
-    </div>
-</div>
-
 <!-- Add table container -->
 <div class="table-container">
     <table id="heroTable">
@@ -441,6 +433,14 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey,)
 
 let cachedTournamentData = []; // Add this at the top of your script
 let selectedLeague = null; // Track selected league
+
+const LEAGUE_COLORS = {
+    "elite": "#a8ccde",
+    "gold": "#dacc86",
+    "silver": "#8b8b8b",
+    "bronze": "#a97e48",
+    "reverse": "#82EA89"
+};
 
 async function initializeTournamentScroller() {
             const { data, error } = await supabaseClient
@@ -603,7 +603,6 @@ async function initializeTournamentScroller() {
             initializeTournamentScroller();
             initializeScrollButtons();
             initializeLeagueButtons();
-            initializeHeroFilterButtons();
         });
 
 async function fetchData(tournamentNumber) {
@@ -768,8 +767,14 @@ function updateTableWithData(data) {
     }
 
     let filteredData = data.players;
+
+    // Check if the selected league is one of the specific leagues
     if (selectedLeague && !['My Decks', 'My Leagues'].includes(selectedLeague)) {
+        // If a league button is selected, filter by league
         filteredData = data.players.filter(player => player.league === selectedLeague);
+    } else if (selectedPlayerHandle) {
+        // If a player handle is selected, filter by player handle
+        filteredData = data.players.filter(player => player.player_handle === selectedPlayerHandle);
     }
 
     filteredData.forEach(player => {
@@ -795,7 +800,19 @@ function updateTableWithData(data) {
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${player.player_rank}</td>
+            <td>
+                ${(() => {
+                    if (player.player_rank === 1) {
+                        return '<i class="fas fa-trophy"></i>';
+                    } else if (player.player_rank === 2) {
+                        return '<i class="fas fa-medal silver"></i>';
+                    } else if (player.player_rank === 3) {
+                        return '<i class="fas fa-medal bronze"></i>';
+                    } else {
+                        return ''; // No icon for other ranks
+                    }
+                })()} ${player.player_rank}
+            </td>
             <td>
                 <img src="${player.player_pic}" alt="${player.player_handle}" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle;">
                 ${player.player_handle}
@@ -810,45 +827,21 @@ function updateTableWithData(data) {
                 `).join('')}
             </td>
             <td>
-                <span class="rank-text">${formatInt(player.player_score)} points</span>
+                <span class="rank-text" style="color: ${getLeagueColor(player.league)};">${formatInt(player.player_score)} points</span>
             </td>
             <td>
                 <div class="progress-container" style="position: relative; width: 100%; overflow: visible;">
-                    <div class="progress-bar" style="width: 100%;"></div>
+                    <div class="progress-bar" style="width: 100%; background: #ccc;">
+                    </div>
                     ${leagueRewards?.processedRewards?.ETH?.thresholds.map(threshold => {
                         const thresholdPercentage = ((threshold - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score)) * 100;
                         return `
-                            <div class="threshold-line" style="left: ${Math.min(Math.max(thresholdPercentage, 0), 100)}%">
+                            <div class="threshold-line" style="left: ${Math.min(Math.max(thresholdPercentage, 0), 100)}%; background-color: white;">
                                 <span class="threshold-tooltip">${formatInt(threshold)}</span>
                             </div>
                         `;
-                    }).join('') || ''}
+                    }).join('')}
                     <div class="rank-marker" style="left: ${Math.min(Math.max(scorePercentage, 0), 100)}%">
-                        ${(() => {
-                            if (player.player_rank === 1) {
-                                return '<i class="fas fa-trophy"></i>';
-                            } else if (player.player_rank === 2) {
-                                return '<i class="fas fa-medal silver"></i>';
-                            } else if (player.player_rank === 3) {
-                                return '<i class="fas fa-medal bronze"></i>';
-                            } else {
-                                // Calculate color based on score position
-                                const scoreRatio = (player.player_score - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score);
-                                let color;
-                                if (scoreRatio > 0.66) {
-                                    color = '#4CAF50'; // Green
-                                } else if (scoreRatio > 0.33) {
-                                    color = '#FFC107'; // Yellow
-                                } else {
-                                    color = '#F44336'; // Red
-                                }
-                                return `<span class="score-dot" style="background-color: ${color}"></span>`;
-                            }
-                        })()}
-                    </div>
-                    <div style="position: relative; width: 100%; margin-top: 5px; font-size: 12px; color: #808080; text-align: center;">
-                        <span style="display: inline-block; width: 50%; text-align: left;">${formatInt(leagueRewards.min_score)}</span>
-                        <span style="display: inline-block; width: 50%; text-align: right;">${formatInt(leagueRewards.max_score)}</span>
                     </div>
                 </div>
             </td>
@@ -861,44 +854,8 @@ function formatInt(number) {
     return Math.round(number).toLocaleString();
 }
 
-// Function to initialize hero filter buttons
-function initializeHeroFilterButtons() {
-    const heroButtonsContainer = document.querySelector('.hero-buttons');
-    const uniqueHeroes = new Set();
-
-    // Collect unique heroes from cachedTournamentData
-    cachedTournamentData.players.forEach(player => {
-        uniqueHeroes.add(player.card1_hero_handle);
-        uniqueHeroes.add(player.card2_hero_handle);
-        uniqueHeroes.add(player.card3_hero_handle);
-        uniqueHeroes.add(player.card4_hero_handle);
-        uniqueHeroes.add(player.card5_hero_handle);
-    });
-
-    // Create buttons for each unique hero
-    uniqueHeroes.forEach(hero => {
-        const button = document.createElement('button');
-        button.className = 'toggle-button hero-button';
-        button.textContent = hero;
-        button.onclick = () => filterByHero(hero);
-        heroButtonsContainer.appendChild(button);
-    });
-}
-
-// Function to filter players by selected hero
-function filterByHero(selectedHero) {
-    // Update selectedHero and filter the table
-    selectedLeague = null; // Clear league selection
-    const filteredPlayers = cachedTournamentData.players.filter(player => 
-        player.card1_hero_handle === selectedHero || 
-        player.card2_hero_handle === selectedHero || 
-        player.card3_hero_handle === selectedHero || 
-        player.card4_hero_handle === selectedHero || 
-        player.card5_hero_handle === selectedHero
-    );
-
-    // Update the table with filtered data
-    updateTableWithData({ players: filteredPlayers, rewards: cachedTournamentData.rewards });
+function getLeagueColor(league) {
+    return LEAGUE_COLORS[league.toLowerCase()] || "#1a1a1a"; // Default color if league not found
 }
 </script>
 

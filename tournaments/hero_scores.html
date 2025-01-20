@@ -641,14 +641,6 @@
 
                     page++;
                 }
-
-                // Debug logging
-                console.log('Timeline Response:', {
-                    status: 'success',
-                    totalRecords: allTimelineData.length,
-                    uniqueHeroes: [...new Set(allTimelineData.map(d => d.hero_handle))]
-                });
-
                 // Cache the results
                 tournamentCache.set(cacheKey, {
                     stats: statsResponse.data,

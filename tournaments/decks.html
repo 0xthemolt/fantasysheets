@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Hero Scores</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .scroll-container {
+            width: 100%;
+            background: #000000;
+            padding: 5px 0;
+            overflow: hidden;
+        }
+
+        .scroll-nav {
+            max-width: 50%;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .scroll-items {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 5px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .scroll-items::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: #808080;
+            min-width: fit-content;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .scroll-item .main-text {
+            font-size: 10px;
+            margin-bottom: 2px;
+            display: block;
+            text-align: center;
+        }
+
+        .scroll-item .number {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .scroll-item:hover,
+        .scroll-item.active {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-nav {
+                max-width: 90%;
+            }
+        }
+
+        .scroll-arrow {
+            background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            border: none;
+            color: #ffffff;
+            padding: 10px;
+            cursor: pointer;
+            position: absolute;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .scroll-arrow:hover {
+            background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .scroll-left {
+            left: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+        }
+
+        .scroll-right {
+            right: 0;
+            background: linear-gradient(-90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+        }
+
+        .scroll-arrow.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sort-arrow {
+            display: none; /* Hide by default */
+            width: 0;
+            height: 0;
+            margin: 2px auto;
+        }
+
+        .sort-arrow.active.up {
+                display: block; /* Show only when active */
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid #4CAF50; /* Green */
+        }
+
+        .sort-arrow.active.down {
+                display: block; /* Show only when active */
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #F44336; /* Red */
+        }
+
+        /* Add new styles for the live indicator */
+        .live-indicator {
+            width: 6px;
+            height: 6px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        @keyframes blink {
+        0% { opacity: 0; }
+        50% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+
+    @media (max-width: 768px) {
+        .content-container {
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            margin: 10px 0;
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .table-view-container {
+            width: 100%;
+            margin: 10px 0;
+            padding: 0;
+        }
+
+        #heroTable {
+            width: 100%;
+            min-width: 800px;
+        }
+    }
+
+    .table-container {
+        margin: 20px auto;
+        max-width: 1200px;
+        overflow-x: auto;
+    }
+
+    #heroTable {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    #heroTable th, #heroTable td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+    }
+
+    #heroTable th {
+        background-color: #2a2a2a;
+        font-weight: bold;
+    }
+
+    #heroTable tr:hover {
+        background-color: #2a2a2a;
+    }
+
+    .toggle-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        background: #1a1a1a;
+        flex-wrap: wrap;
+    }
+
+    .toggle-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #2a2a2a;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #808080;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .toggle-button:hover {
+        background: #333;
+        color: #ffffff;
+    }
+
+    .toggle-button.active {
+        background: #404040;
+        color: #ffffff;
+        border-color: #505050;
+    }
+
+    .league-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        .toggle-container {
+            gap: 5px;
+        }
+
+        .toggle-button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    }
+
+    .progress-container {
+        position: relative;
+        background: linear-gradient(to right, #2a2a2a 0%, #404040 100%);
+        height: 20px;
+        border-radius: 10px;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(to right, #1a1a1a 0%, #333333 100%);
+        width: 100%;
+    }
+
+    .score-range {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .progress-container:hover .score-range {
+        opacity: 1;
+    }
+
+    .rank-marker {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+    }
+
+    .rank-marker i {
+        font-size: 16px;
+        filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+        transition: transform 0.2s ease;
+    }
+
+    .rank-marker i.fa-trophy {
+        color: #ffd700; /* Gold */
+    }
+
+    .rank-marker i.fa-medal.silver {
+        color: #C0C0C0; /* Silver */
+    }
+
+    .rank-marker i.fa-medal.bronze {
+        color: #CD7F32; /* Bronze */
+    }
+
+    .rank-marker .score-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .rank-marker:hover i {
+        transform: scale(1.2);
+    }
+
+    .rank-text {
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 10px;
+        color: #808080;
+        font-size: 14px;
+    }
+
+    /* Add these new styles */
+    .threshold-line {
+        position: absolute;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background-color: rgba(147, 112, 219, 0.5); /* Semi-transparent purple */
+        z-index: 1;
+    }
+
+    .threshold-tooltip {
+        position: absolute;
+        bottom: -20px;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color: #ffd700;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .threshold-line:hover .threshold-tooltip {
+        opacity: 1;
+    }
+
+</style>
+</head>
+<body>
+<div class="scroll-container">
+    <nav class="scroll-nav">
+        <button class="scroll-arrow scroll-left">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="scroll-items">
+            <!-- Tournament buttons will be inserted here -->
+        </div>
+        <button class="scroll-arrow scroll-right">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </nav>
+</div>
+
+<!-- Add toggle container -->
+<div class="toggle-container">
+    <button class="toggle-button">
+        <i class="fas fa-trophy"></i>
+        My Leagues
+    </button>
+    <button class="toggle-button">
+        <i class="fa-regular fa-user"></i>
+        My Decks
+    </button>
+    <button class="toggle-button">
+        <img src="../icons/elite.webp" alt="Elite" class="league-icon">
+        Elite
+    </button>
+    <button class="toggle-button">
+        <img src="../icons/gold.webp" alt="Gold" class="league-icon">
+        Gold
+    </button>
+    <button class="toggle-button">
+        <img src="../icons/silver.webp" alt="Silver" class="league-icon">
+        Silver
+    </button>
+    <button class="toggle-button">
+        <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
+        Bronze
+    </button>
+    <button class="toggle-button">
+        <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
+        Reverse
+    </button>
+</div>
+
+<!-- Add table container -->
+<div class="table-container">
+    <table id="heroTable">
+        <thead>
+            <tr>
+                <th style="width: 25px;">Rank</th>
+                <th style="width: 100px;">Player</th>
+                <th style="width: 200px;">Heroes</th>
+                <th style="width: 50px;">Score</th>
+                <th style="width: 250px;">Rank</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey,)
+
+let cachedTournamentData = []; // Add this at the top of your script
+let selectedLeague = null; // Track selected league
+
+async function initializeTournamentScroller() {
+            const { data, error } = await supabaseClient
+                .from('tournaments')
+                .select('tournament_number, tournament_status')
+                .order('start_timestamp', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching tournaments:', error);
+                return;
+            }
+
+            const scrollContainer = document.querySelector('.scroll-items');
+            
+            // Add real tournament buttons
+            data.forEach(tournament => {
+                const button = document.createElement('button');
+                button.className = 'scroll-item';
+                button.innerHTML = `
+                    <span class="main-text">Main</span>
+                    <span class="number">${tournament.tournament_number}${tournament.tournament_status === 'live' ? '<span class="live-indicator"></span>' : ''}</span>
+                `;
+                button.onclick = () => selectTournament(tournament.tournament_number);
+                scrollContainer.appendChild(button);
+            });
+
+            // Add dummy tournament button
+            const maxTournamentNumber = Math.max(...data.map(t => t.tournament_number));
+            const dummyButton = document.createElement('button');
+            dummyButton.className = 'scroll-item';
+            dummyButton.style.opacity = '0.5';
+            dummyButton.style.cursor = 'default';
+            dummyButton.innerHTML = `
+                <span class="main-text">Main</span>
+                <span class="number">${maxTournamentNumber + 1}</span>
+            `;
+            scrollContainer.appendChild(dummyButton);
+
+            // Select default tournament
+            const liveTournament = data.find(t => t.tournament_status === 'live');
+            const latestFinishedTournament = data
+                .filter(t => t.tournament_status === 'finished')
+                .reduce((max, t) => t.tournament_number > max.tournament_number ? t : max, data[0]);
+            
+            const defaultTournament = liveTournament || latestFinishedTournament;
+            
+            if (defaultTournament) {
+                selectTournament(defaultTournament.tournament_number);
+                // Find and scroll the default tournament button into view
+                const defaultButton = Array.from(document.querySelectorAll('.scroll-item'))
+                    .find(item => item.querySelector('.number').textContent === String(defaultTournament.tournament_number));
+                if (defaultButton) {
+                    defaultButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }
+
+            // Add drag scroll functionality
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            scrollContainer.addEventListener('mousedown', (e) => {
+                isDown = true;
+                scrollContainer.style.cursor = 'grabbing';
+                startX = e.pageX - scrollContainer.offsetLeft;
+                scrollLeft = scrollContainer.scrollLeft;
+            });
+
+            scrollContainer.addEventListener('mouseleave', () => {
+                isDown = false;
+                scrollContainer.style.cursor = 'grab';
+            });
+
+            scrollContainer.addEventListener('mouseup', () => {
+                isDown = false;
+                scrollContainer.style.cursor = 'grab';
+            });
+
+            scrollContainer.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - scrollContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                scrollContainer.scrollLeft = scrollLeft - walk;
+            });
+        }
+
+        function selectTournament(tournamentNumber) {
+            // Remove active class from all items
+            document.querySelectorAll('.scroll-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected item
+            const selectedItem = Array.from(document.querySelectorAll('.scroll-item'))
+                .find(item => item.querySelector('.number').textContent === String(tournamentNumber));
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+
+            // Call fetchData with the selected tournament number
+            fetchData(tournamentNumber);
+        }
+
+        
+
+        function updateScrollButtons() {
+            const container = document.querySelector('.scroll-items');
+            const leftButton = document.querySelector('.scroll-left');
+            const rightButton = document.querySelector('.scroll-right');
+
+            // Show/hide left button based on scroll position
+            leftButton.classList.toggle('hidden', container.scrollLeft <= 0);
+            
+            // Show/hide right button based on scroll position
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            rightButton.classList.toggle('hidden', container.scrollLeft >= maxScroll);
+        }
+
+        function initializeScrollButtons() {
+            const container = document.querySelector('.scroll-items');
+            const nav = document.querySelector('.scroll-nav');
+
+            nav.addEventListener('click', (e) => {
+                const leftButton = e.target.closest('.scroll-left');
+                const rightButton = e.target.closest('.scroll-right');
+                
+                if (leftButton) {
+                    container.scrollBy({ left: -200, behavior: 'smooth' });
+                } else if (rightButton) {
+                    container.scrollBy({ left: 200, behavior: 'smooth' });
+                }
+            });
+
+            // Use throttle for scroll event
+            let scrollTimeout;
+            container.addEventListener('scroll', () => {
+                if (!scrollTimeout) {
+                    scrollTimeout = setTimeout(() => {
+                        updateScrollButtons();
+                        scrollTimeout = null;
+                    }, 100);
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (!scrollTimeout) {
+                    scrollTimeout = setTimeout(() => {
+                        updateScrollButtons();
+                        scrollTimeout = null;
+                    }, 100);
+                }
+            });
+
+            updateScrollButtons();
+        }
+
+        // Update the DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTournamentScroller();
+            initializeScrollButtons();
+            initializeLeagueButtons();
+        });
+
+async function fetchData(tournamentNumber) {
+    try {
+        // Fetch rewards data first
+        const { data: rewardsData, error: rewardsError } = await supabaseClient
+            .from('reward_thresholds')
+            .select('tournament_league_unique_key, league, min_score, max_score, total_decks, rewards')
+            .eq('tournament_unique_key', `Main ${tournamentNumber}`);
+
+        if (rewardsError) {
+            console.error('Error fetching rewards:', rewardsError);
+            return;
+        }
+
+        // Process the rewards JSON data
+        const processedRewards = rewardsData.map(leagueReward => {
+            const rewards = leagueReward.rewards;
+            
+            // Sort the arrays by min_score_threshold in descending order
+            const ethRewards = rewards.ETH.sort((a, b) => b.min_score_threshold - a.min_score_threshold);
+            const fragmentRewards = rewards.FRAGMENT.sort((a, b) => b.min_score_threshold - a.min_score_threshold);
+
+            return {
+                ...leagueReward,
+                processedRewards: {
+                    ETH: {
+                        thresholds: ethRewards.map(r => r.min_score_threshold),
+                        rewards: ethRewards.map(r => r.reward),
+                        // Add max threshold from the highest score
+                        maxThreshold: Math.max(...ethRewards.map(r => r.min_score_threshold)) * 1.1
+                    },
+                    FRAGMENT: {
+                        thresholds: fragmentRewards.map(r => r.min_score_threshold),
+                        rewards: fragmentRewards.map(r => r.reward),
+                        // Add max threshold from the highest score
+                        maxThreshold: Math.max(...fragmentRewards.map(r => r.min_score_threshold)) * 1.1
+                    }
+                }
+            };
+        });
+
+        // Log the processed rewards for debugging
+        console.log('Processed rewards:', processedRewards);
+
+        // Continue with existing player data fetch
+        const pageSize = 1000;
+        let allResults = [];
+        let hasMore = true;
+        let currentPage = 0;
+
+        while (hasMore) {
+            const { data, error, count } = await supabaseClient
+                .from('tournament_players')
+                .select(`
+                    tournament_id, tournament_unique_key, tournament_league_unique_key, league,
+                    deck_id, tournament_player_deck_id, player_id, player_handle, player_name,
+                    player_pic, player_score, player_rank, total_decks, unique_player_rank
+                    , card1_id, card1_hero_rarity_index, card1_hero_id, card1_hero_rarity, card1_hero_handle,card1_score, card1_hero_stars, card1_picture_url
+                    , card2_id, card2_hero_rarity_index, card2_hero_id, card2_hero_rarity, card2_hero_handle, card2_score, card2_hero_stars, card2_picture_url
+                    , card3_id, card3_hero_rarity_index, card3_hero_id, card3_hero_rarity, card3_hero_handle, card3_score, card3_hero_stars,card3_picture_url
+                    , card4_id, card4_hero_rarity_index, card4_hero_id, card4_hero_rarity, card4_hero_handle, card4_score, card4_hero_stars, card4_picture_url
+                    , card5_id, card5_hero_rarity_index, card5_hero_id, card5_hero_rarity, card5_hero_handle, card5_score, card5_hero_stars, card5_picture_url
+                    ,db_updated_cst`)
+                .eq('tournament_unique_key', `Main ${tournamentNumber}`)
+                .range(currentPage * pageSize, (currentPage + 1) * pageSize - 1)
+                .order('player_rank', { ascending: true });
+
+            if (error) {
+                throw error;
+            }
+
+            if (data.length === 0) {
+                hasMore = false;
+            } else {
+                allResults = [...allResults, ...data];
+                currentPage++;
+            }
+
+            if (data.length < pageSize) {
+                hasMore = false;
+            }
+        }
+
+        // Store both player data and processed rewards data in the cache
+        cachedTournamentData = {
+            players: allResults,
+            rewards: processedRewards
+        };
+
+        // Update the table with the combined data
+        updateTableWithData(cachedTournamentData);
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+// Add this function to handle league button clicks
+function initializeLeagueButtons() {
+    document.querySelectorAll('.toggle-button').forEach(button => {
+        button.addEventListener('click', () => {
+            // Handle My Decks button
+            if (button.querySelector('.fa-user')) {
+                document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                selectedLeague = null;
+                updateTableWithData(cachedTournamentData);
+                return;
+            }
+
+            // Skip My Tournaments button
+            if (button.querySelector('.fa-trophy')) {
+                return;
+            }
+
+            // Existing league button logic
+            document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            const league = button.textContent.trim();
+            selectedLeague = league === selectedLeague ? null : league;
+            
+            if (!selectedLeague) {
+                button.classList.remove('active');
+            }
+
+            updateTableWithData(cachedTournamentData);
+        });
+    });
+}
+
+// New function to handle table updates
+function updateTableWithData(data) {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    let filteredData = data.players;
+    if (selectedLeague) {
+        filteredData = data.players.filter(player => player.league === selectedLeague);
+    }
+
+    filteredData.forEach(player => {
+        // Find the rewards data for this player's league using tournament_league_unique_key
+        const leagueRewards = data.rewards.find(r => r.tournament_league_unique_key === player.tournament_league_unique_key);
+        
+        // Calculate the percentage based on min/max scores if rewards exist
+        let scorePercentage = 0;
+        if (leagueRewards) {
+            const { min_score, max_score } = leagueRewards;
+            scorePercentage = ((player.player_score - min_score) / (max_score - min_score)) * 100;
+            // Clamp the percentage between 0 and 100
+            scorePercentage = Math.min(Math.max(scorePercentage, 0), 100);
+        }
+
+        const heroes = [
+            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url },
+            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: player.card2_picture_url },
+            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: player.card3_picture_url },
+            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: player.card4_picture_url },
+            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: player.card5_picture_url }
+        ];
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${player.player_rank}</td>
+            <td>
+                <img src="${player.player_pic}" alt="${player.player_handle}" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle;">
+                ${player.player_handle}
+            </td>
+            <td>
+                ${heroes.map(hero => `
+                    <div style="display: inline-block; margin-right: 5px; text-align: center;">
+                        <img src="${hero.url}" alt="${hero.handle}" style="width: 27.8px; height: 40px;">
+                        <div style="font-size: 12px;">${formatInt(hero.score)}</div>
+                        <div style="font-size: 10px;">⭐${hero.stars}</div>
+                    </div>
+                `).join('')}
+            </td>
+            <td>
+                <span class="rank-text">${formatInt(player.player_score)} points</span>
+            </td>
+            <td>
+                <div class="progress-container" style="position: relative; width: 100%; overflow: visible;">
+                    <div class="progress-bar" style="width: 100%;"></div>
+                    ${leagueRewards?.processedRewards?.ETH?.thresholds.map(threshold => {
+                        const thresholdPercentage = ((threshold - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score)) * 100;
+                        return `
+                            <div class="threshold-line" style="left: ${Math.min(Math.max(thresholdPercentage, 0), 100)}%">
+                                <span class="threshold-tooltip">${formatInt(threshold)}</span>
+                            </div>
+                        `;
+                    }).join('') || ''}
+                    <div class="rank-marker" style="left: ${Math.min(Math.max(scorePercentage, 0), 100)}%">
+                        ${(() => {
+                            if (player.player_rank === 1) {
+                                return '<i class="fas fa-trophy"></i>';
+                            } else if (player.player_rank === 2) {
+                                return '<i class="fas fa-medal silver"></i>';
+                            } else if (player.player_rank === 3) {
+                                return '<i class="fas fa-medal bronze"></i>';
+                            } else {
+                                // Calculate color based on score position
+                                const scoreRatio = (player.player_score - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score);
+                                let color;
+                                if (scoreRatio > 0.66) {
+                                    color = '#4CAF50'; // Green
+                                } else if (scoreRatio > 0.33) {
+                                    color = '#FFC107'; // Yellow
+                                } else {
+                                    color = '#F44336'; // Red
+                                }
+                                return `<span class="score-dot" style="background-color: ${color}"></span>`;
+                            }
+                        })()}
+                    </div>
+                    <div style="position: relative; width: 100%; margin-top: 5px; font-size: 12px; color: #808080; text-align: center;">
+                        <span style="display: inline-block; width: 50%; text-align: left;">${formatInt(leagueRewards.min_score)}</span>
+                        <span style="display: inline-block; width: 50%; text-align: right;">${formatInt(leagueRewards.max_score)}</span>
+                    </div>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function formatInt(number) {
+    return Math.round(number).toLocaleString();
+}
+</script>
+
+</body>
+</html>

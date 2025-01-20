@@ -191,7 +191,8 @@
     .table-container {
         margin: 20px auto;
         max-width: 1200px;
-        overflow-x: auto;
+        height: 70vh;
+        overflow: hidden; /* Hide outer scrollbar */
     }
 
     #heroTable {
@@ -201,19 +202,44 @@
         color: #ffffff;
     }
 
-    #heroTable th, #heroTable td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #333;
+    #heroTable thead {
+        position: sticky;
+        top: 0;
+        background: #2a2a2a;
+        z-index: 1;
     }
 
-    #heroTable th {
-        background-color: #2a2a2a;
-        font-weight: bold;
+    #heroTable tbody {
+        display: block;
+        height: calc(70vh - 40px); /* Adjust for header height */
+        overflow-y: overlay; /* Creates the thin overlay scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(64, 64, 64, 0.5) transparent;
     }
 
-    #heroTable tr:hover {
-        background-color: #2a2a2a;
+    #heroTable tbody::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #heroTable tbody::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #heroTable tbody::-webkit-scrollbar-thumb {
+        background: rgba(64, 64, 64, 0.5);
+        border-radius: 2px;
+    }
+
+    #heroTable tbody::-webkit-scrollbar-thumb:hover {
+        background: rgba(80, 80, 80, 0.7);
+    }
+
+    /* Make sure thead and tbody rows align */
+    #heroTable thead tr,
+    #heroTable tbody tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
     }
 
     .toggle-container {
@@ -413,8 +439,7 @@
     <table id="heroTable">
         <thead>
             <tr>
-                <th style="width: 25px;">Rank</th>
-                <th style="width: 100px;">Player</th>
+                <th style="width: 125px;">Player</th>
                 <th style="width: 200px;">Heroes</th>
                 <th style="width: 50px;">Score</th>
                 <th style="width: 250px;">Rank</th>
@@ -753,28 +778,27 @@ function updateTableWithData(data) {
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = '';
 
-    // Check if selectedPlayerHandle is blank
-    const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
-    if (!selectedPlayerHandle && (selectedLeague === null || selectedLeague === 'My Decks')) {
-        const noPlayerRow = document.createElement('tr');
-        noPlayerRow.innerHTML = `
-            <td colspan="5" style="text-align: center; color: #ff0000;">
-                No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
-            </td>
-        `;
-        tableBody.appendChild(noPlayerRow);
-        return; // Exit the function early
-    }
-
     let filteredData = data.players;
+    const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
 
-    // Check if the selected league is one of the specific leagues
-    if (selectedLeague && !['My Decks', 'My Leagues'].includes(selectedLeague)) {
-        // If a league button is selected, filter by league
-        filteredData = data.players.filter(player => player.league === selectedLeague);
-    } else if (selectedPlayerHandle) {
-        // If a player handle is selected, filter by player handle
+    // If no league is selected (default state) or "My Decks" is selected
+    if (!selectedLeague || selectedLeague === 'My Decks') {
+        // Check if selectedPlayerHandle exists
+        if (!selectedPlayerHandle) {
+            const noPlayerRow = document.createElement('tr');
+            noPlayerRow.innerHTML = `
+                <td colspan="5" style="text-align: center; color: #ff0000;">
+                    No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
+                </td>
+            `;
+            tableBody.appendChild(noPlayerRow);
+            return;
+        }
+        // Filter by player handle
         filteredData = data.players.filter(player => player.player_handle === selectedPlayerHandle);
+    } else if (['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
+        // Show all players for the selected league
+        filteredData = data.players.filter(player => player.league === selectedLeague);
     }
 
     filteredData.forEach(player => {
@@ -801,21 +825,21 @@ function updateTableWithData(data) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                ${(() => {
-                    if (player.player_rank === 1) {
-                        return '<i class="fas fa-trophy"></i>';
-                    } else if (player.player_rank === 2) {
-                        return '<i class="fas fa-medal silver"></i>';
-                    } else if (player.player_rank === 3) {
-                        return '<i class="fas fa-medal bronze"></i>';
-                    } else {
-                        return ''; // No icon for other ranks
-                    }
-                })()} ${player.player_rank}
-            </td>
-            <td>
-                <img src="${player.player_pic}" alt="${player.player_handle}" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle;">
-                ${player.player_handle}
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <!-- Rank -->
+                    <div>
+                        ${player.player_rank <= 3 ? 
+                            `<i class="fas fa-${player.player_rank === 1 ? 'trophy' : 'medal'}" 
+                                style="color: ${player.player_rank === 1 ? '#ffd700' : player.player_rank === 2 ? '#C0C0C0' : '#CD7F32'};"></i>` 
+                            : player.player_rank}
+                    </div>
+                    <!-- Player Picture -->
+                    <img src="${player.player_pic}" 
+                         alt="${player.player_handle}" 
+                         style="width: 30px; height: 30px; border-radius: 50%;">
+                    <!-- Player Handle -->
+                    <div>${player.player_handle}</div>
+                </div>
             </td>
             <td>
                 ${heroes.map(hero => `

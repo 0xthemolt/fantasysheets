@@ -831,17 +831,37 @@ function updateTableWithData(data) {
             </td>
             <td>
                 <div class="progress-container" style="position: relative; width: 100%; overflow: visible;">
-                    <div class="progress-bar" style="width: 100%; background: #ccc;">
+                    <div class="progress-bar" style="width: ${Math.min(Math.max(scorePercentage, 0), 100)}%; background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, ${getLeagueColor(player.league)} 100%); border-radius: 10px 0 0 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);">
                     </div>
                     ${leagueRewards?.processedRewards?.ETH?.thresholds.map(threshold => {
                         const thresholdPercentage = ((threshold - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score)) * 100;
                         return `
-                            <div class="threshold-line" style="left: ${Math.min(Math.max(thresholdPercentage, 0), 100)}%; background-color: white;">
+                            <div class="threshold-line" style="left: calc(${Math.min(Math.max(thresholdPercentage, 0), 100)}% + 10px); background-color: white;">
                                 <span class="threshold-tooltip">${formatInt(threshold)}</span>
                             </div>
                         `;
                     }).join('')}
                     <div class="rank-marker" style="left: ${Math.min(Math.max(scorePercentage, 0), 100)}%">
+                    </div>
+                    <!-- New label for points needed -->
+                    <div class="points-needed" style="text-align: center; margin-top: 5px; color: #ffffff;">
+                        ${(() => {
+                            const nextThreshold = leagueRewards?.processedRewards?.ETH?.thresholds.find(threshold => threshold > player.player_score);
+                            return nextThreshold ? `${formatInt(nextThreshold - player.player_score)} points to next threshold` : 'Max threshold reached';
+                        })()}
+                    </div>
+                    <!-- Winning reward display -->
+                    <div class="winning-reward" style="text-align: center; margin-top: 5px; color: #00ff00;">
+                        ${(() => {
+                            const winningReward = leagueRewards?.processedRewards?.ETH?.rewards.find((reward, index) => {
+                                return player.player_score > leagueRewards.processedRewards.ETH.thresholds[index];
+                            });
+                            const minScoreThreshold = leagueRewards?.processedRewards?.ETH?.thresholds.find((threshold, index) => {
+                                return player.player_score > threshold;
+                            });
+                            const difference = minScoreThreshold ? player.player_score - minScoreThreshold : 0;
+                            return winningReward ? `Winning: ${winningReward} by ${formatInt(difference)}` : '';
+                        })()}
                     </div>
                 </div>
             </td>

@@ -439,10 +439,9 @@
     <table id="heroTable">
         <thead>
             <tr>
-                <th style="width: 125px;">Player</th>
-                <th style="width: 200px;">Heroes</th>
-                <th style="width: 50px;">Score</th>
-                <th style="width: 250px;">Rank</th>
+                <th>Player</th>
+                <th>Deck</th>
+                <th>Score</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -807,6 +806,9 @@ function updateTableWithData(data) {
     } else if (['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
         // Show all players for the selected league
         filteredData = data.players.filter(player => player.league === selectedLeague);
+    } else {
+        // Reset filteredData to show all players if a league is selected
+        filteredData = data.players; // Add this line to reset filtering for leagues
     }
 
     filteredData.forEach(player => {
@@ -834,36 +836,47 @@ function updateTableWithData(data) {
         row.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
+                    <!-- League Icon -->
+                    <img src="/icons/${player.league.toLowerCase()}.webp" alt="${player.league} Icon" style="width: 20px; height: 20px;">
                     <!-- Combined Rank and Picture with positioning -->
                     <div style="position: relative; width: 30px; height: 36px;">
                         <img src="${player.player_pic}" 
                             alt="${player.player_handle}" 
-                            style="width: 30px; height: 30px; border-radius: 50%;">
-                        <div style="position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+                            style="width: 30px; height: 30px; border-radius: 50%;"
+                            onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
+                        <div style="position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
                                     background: ${player.player_rank <= 3 ? 
-                                        (player.player_rank === 1 ? '#ffd700' : 
-                                         player.player_rank === 2 ? '#C0C0C0' : 
-                                         '#CD7F32') : '#2a2a2a'};
-                                    clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
+                                        (player.player_rank === 1 ? 'rgba(255, 215, 0, 0.15)' : 
+                                         player.player_rank === 2 ? 'rgba(192, 192, 192, 0.15)' : 
+                                         'rgba(205, 127, 50, 0.15)') : 'rgba(255, 255, 255, 0.15)'};
+                                    clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
                                     width: 28px; 
                                     height: 12px; 
                                     display: flex; 
                                     align-items: center; 
                                     justify-content: center;
                                     font-size: ${player.player_rank <= 3 ? '10px' : '9px'};
-                                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                                    border: 1px solid #404040;">
+                                    box-shadow: 0 2px 4px rgba(0,0,0,0.3),
+                                              inset 0 1px 3px rgba(255, 255, 255, 0.3),
+                                              0 0 8px ${player.player_rank <= 3 ? 
+                                                (player.player_rank === 1 ? 'rgba(255, 215, 0, 0.4)' : 
+                                                 player.player_rank === 2 ? 'rgba(192, 192, 192, 0.4)' : 
+                                                 'rgba(205, 127, 50, 0.4)') : 'rgba(255, 255, 255, 0.4)'};
+                                    border-radius: 2px;">
                             ${player.player_rank <= 3 ? 
                                 `<i class="fas fa-${player.player_rank === 1 ? 'trophy' : 'medal'}" 
-                                    style="color: #000000;"></i>` : 
-                                player.player_rank}
+                                    style="color: ${player.player_rank === 1 ? '#ffd700' : 
+                                         player.player_rank === 2 ? '#C0C0C0' : 
+                                         '#CD7F32'};
+                                    text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);"></i>` : 
+                                `<span style="color: #ffffff; text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);">${player.player_rank}</span>`}
                         </div>
                     </div>
                     <!-- Player Handle and Rewards -->
                     <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <div>${player.player_handle}</div>
+                        <div style="text-align: center;">${player.player_handle}</div>
                         <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
-                            <div style="display: flex; gap: 10px;">
+                            <div style="display: flex; gap: 10px; justify-content: flex-start;">
                                 ${player.eth_won ? `
                                     <div style="display: flex; align-items: center; gap: 2px;">
                                         <span style="color: ${getRewardColor('eth')}">
@@ -884,7 +897,7 @@ function updateTableWithData(data) {
                                 ` : ''}
                             </div>
                             ${player.fan_won ? `
-                                <div style="display: flex; align-items: center; gap: 2px;">
+                                <div style="display: flex; align-items: center; gap: 2px; justify-content: center;">
                                     <span style="color: ${getRewardColor('fan')}">
                                         ${player.fan_won >= 100000 ? 
                                             Math.floor(player.fan_won/1000) + 'k' : 
@@ -900,56 +913,50 @@ function updateTableWithData(data) {
                 </div>
             </td>
             <td>
-                ${heroes.map(hero => `
+                ${heroes.sort((a, b) => b.score - a.score).map(hero => `
                     <div style="display: inline-block; margin-right: 2px; text-align: center;">
                         <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
-                        <div style="font-size: 12px;">${formatInt(hero.score)}</div>
+                        <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
+                            ${formatInt(calculateDisplayScore(hero))}
+                        </div>
                     </div>
                 `).join('')}
             </td>
             <td>
                 <span class="rank-text" style="color: ${getLeagueColor(player.league)};">${formatInt(player.player_score)} points</span>
             </td>
-            <td>
-                <div class="progress-container" style="position: relative; width: 100%; overflow: visible;">
-                    <div class="progress-bar" style="width: ${Math.min(Math.max(scorePercentage, 0), 100)}%; background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, ${getLeagueColor(player.league)} 100%); border-radius: 10px 0 0 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);">
-                    </div>
-                    ${leagueRewards?.processedRewards?.ETH?.thresholds.map(threshold => {
-                        const thresholdPercentage = ((threshold - leagueRewards.min_score) / (leagueRewards.max_score - leagueRewards.min_score)) * 100;
-                        return `
-                            <div class="threshold-line" style="left: calc(${Math.min(Math.max(thresholdPercentage, 0), 100)}% + 10px); background-color: white;">
-                                <span class="threshold-tooltip">${formatInt(threshold)}</span>
-                            </div>
-                        `;
-                    }).join('')}
-                    <div class="rank-marker" style="left: ${Math.min(Math.max(scorePercentage, 0), 100)}%">
-                    </div>
-                    <!-- New label for points needed -->
-                    <div class="points-needed" style="text-align: center; margin-top: 5px; color: #ffffff;">
-                        ${(() => {
-                            const nextThreshold = leagueRewards?.processedRewards?.ETH?.thresholds.find(threshold => threshold > player.player_score);
-                            return nextThreshold ? `${formatInt(nextThreshold - player.player_score)} points to next threshold` : 'Max threshold reached';
-                        })()}
-                    </div>
-                    <!-- Winning reward display -->
-                    <div class="winning-reward" style="text-align: center; margin-top: 5px; color: #00ff00;">
-                        ${(() => {
-                            const winningReward = leagueRewards?.processedRewards?.ETH?.rewards.find((reward, index) => {
-                                return player.player_score > leagueRewards.processedRewards.ETH.thresholds[index];
-                            });
-                            const minScoreThreshold = leagueRewards?.processedRewards?.ETH?.thresholds.find((threshold, index) => {
-                                return player.player_score > threshold;
-                            });
-                            const difference = minScoreThreshold ? player.player_score - minScoreThreshold : 0;
-                            return winningReward ? `Winning: ${winningReward} by ${formatInt(difference)}` : '';
-                        })()}
-                    </div>
-                </div>
-            </td>
         `;
         tableBody.appendChild(row);
     });
 }
+
+function getScoreColor(score) {
+            // Calculate percentage between 0 and max
+            const percentage = score / 1000;
+            
+            // Color stops based on matplotlib's RdYlGn
+            if (percentage <= 0.25) {
+                // Red to Orange
+                const r = 255;
+                const g = Math.round(percentage * 4 * 127);
+                return `rgb(${r}, ${g}, 0)`;
+            } else if (percentage <= 0.5) {
+                // Orange to Yellow
+                const r = 255;
+                const g = Math.round(127 + (percentage - 0.25) * 4 * 128);
+                return `rgb(${r}, ${g}, 0)`;
+            } else if (percentage <= 0.75) {
+                // Yellow to Light Green
+                const r = Math.round(255 - (percentage - 0.5) * 4 * 128);
+                const g = 255;
+                return `rgb(${r}, ${g}, 0)`;
+            } else {
+                // Light Green to Dark Green
+                const r = Math.round(127 - (percentage - 0.75) * 4 * 127);
+                const g = 255;
+                return `rgb(${r}, ${g}, 0)`;
+            }
+        }
 
 function formatInt(number) {
     return Math.round(number).toLocaleString();
@@ -961,6 +968,19 @@ function getLeagueColor(league) {
 
 function getRewardColor(rewardType) {
     return REWARD_COLORS[rewardType.toLowerCase()] || "#ffffff"; // Default to white if reward type not found
+}
+
+function calculateDisplayScore(hero) {
+    switch (hero.rarity) {
+        case 'legendary':
+            return hero.score * 2.5;
+        case 'rare':
+            return hero.score * 1.5;
+        case 'epic':
+            return hero.score * 2;
+        default:
+            return hero.score; // For common or any other rarity
+    }
 }
 </script>
 

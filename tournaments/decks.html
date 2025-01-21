@@ -190,7 +190,7 @@
 
     .rewards-summary-container {
         margin: 10px auto;
-        max-width: 650px;
+        max-width: 800px;
         background: #1a1a1a;
         border-radius: 8px;
         padding: 10px;
@@ -199,6 +199,7 @@
     .summary-card {
         padding: 0;
         background: transparent;
+        flex: 1;
     }
 
     .summary-header {
@@ -572,6 +573,59 @@
         border-color: #606060 !important;
     }
 
+    .scoring-view {
+        background: #1a1a1a;
+        padding: 10px;
+        border-radius: 8px;
+        flex: 2;
+        min-width: 450px;
+    }
+
+    .league-score-bar {
+        margin: 10px 0;
+        position: relative;
+        width: 100%;
+        min-width: 400px;
+    }
+
+    .score-bar {
+        height: 24px;
+        background: #2a2a2a;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        min-width: 400px;
+    }
+
+    .player-score-marker {
+        position: absolute;
+        width: 3px;
+        height: 24px;
+        background: #ffffff;
+        top: 0;
+        transform: translateX(-50%);
+        z-index: 2;
+    }
+
+    .score-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #808080;
+    }
+
+    .league-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .league-label img {
+        width: 20px;
+        height: 20px;
+    }
+
 </style>
 </head>
 <body>
@@ -651,16 +705,27 @@
     </div>
 </div>
 
-<!-- Add this new container after the toggle-container and before the table-container -->
+<!-- Modify the rewards-summary-container to include the new scoring view -->
 <div class="rewards-summary-container" style="display: none;">
-    <div class="summary-card">
-        <div class="summary-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <!-- Player info will be inserted by JavaScript -->
+    <div style="display: flex; gap: 20px; align-items: stretch;">
+        <div class="summary-card" style="flex: 1;">
+            <div class="summary-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <!-- Player info will be inserted by JavaScript -->
+                </div>
+            </div>
+            <div class="summary-content">
+                <!-- Existing rewards summary content -->
             </div>
         </div>
-        <div class="summary-content">
-            <!-- Content will be populated by JavaScript -->
+        
+        <div class="scoring-view" style="flex: 1;">
+            <div class="summary-header">
+                <span>Live Ranking</span>
+            </div>
+            <div class="league-scores">
+                <!-- League score bars will be inserted here -->
+            </div>
         </div>
     </div>
 </div>
@@ -1092,7 +1157,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                      onerror="this.onerror=null; this.src='/icons/ft_logo.webp';"
                      onload="this.style.display='block'"
                      onerror="this.onerror=null; this.src='/icons/ft_logo.webp'; return true;">
-                <span>Rewards Summary</span>
+                <span>Rewards</span>
             `;
         }
 
@@ -1143,6 +1208,79 @@ function updateTableWithData(data, preserveFiltered = false) {
             </div>
             ` : ''}
         `;
+
+        // Add league scoring visualization
+        const leagueScores = document.querySelector('.league-scores');
+        leagueScores.innerHTML = '';
+        
+        // Group players by league and find corresponding rewards data
+        const leagueData = {};
+        relevantData.forEach(player => {
+            if (!leagueData[player.league]) {
+                const leagueRewards = data.rewards.find(r => 
+                    r.tournament_league_unique_key === player.tournament_league_unique_key
+                );
+                if (leagueRewards) {
+                    leagueData[player.league] = {
+                        min_score: leagueRewards.min_score,
+                        max_score: leagueRewards.max_score,
+                        players: []
+                    };
+                }
+            }
+            if (leagueData[player.league]) {
+                leagueData[player.league].players.push(player);
+            }
+        });
+
+        // Create score bars for each league
+        Object.entries(leagueData).forEach(([league, data]) => {
+            const scoreRange = data.max_score - data.min_score;
+            const scoreBar = document.createElement('div');
+            scoreBar.className = 'league-score-bar';
+            
+            scoreBar.innerHTML = `
+                <div class="league-label">
+                    <img src="/icons/${league.toLowerCase()}.webp" alt="${league}">
+                </div>
+                <div class="score-bar">
+                    ${data.players.map(player => {
+                        const percentage = ((player.player_score - data.min_score) / scoreRange) * 100;
+                        let pinColor;
+                        let pinStyle;
+                        
+                        if (player.eth_won > 0) {
+                            pinColor = getRewardColor('eth');
+                            pinStyle = 'solid';
+                        } else if (player.frags_won > 0) {
+                            pinColor = getRewardColor('fragment');
+                            pinStyle = 'solid';
+                        } else if (player.fan_won > 0) {
+                            pinColor = getRewardColor('fan');
+                            pinStyle = 'solid';
+                        } else {
+                            pinColor = '#808080';
+                            pinStyle = 'regular';
+                        }
+                        
+                        return `
+                            <div class="player-score-marker" 
+                                 style="left: ${percentage}%; transform: translateX(-50%);"
+                                 title="${player.player_score.toLocaleString()} points">
+                                <i class="fa-${pinStyle} fa-map-pin" 
+                                   style="color: ${pinColor}; font-size: 16px; transform: translateY(-8px);"></i>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="score-labels">
+                    <span>${Math.floor(data.min_score).toLocaleString()}</span>
+                    <span>${Math.floor(data.max_score).toLocaleString()}</span>
+                </div>
+            `;
+            
+            leagueScores.appendChild(scoreBar);
+        });
     } else {
         rewardsSummaryContainer.style.display = 'none';
     }

@@ -585,16 +585,16 @@
         margin: 10px 0;
         position: relative;
         width: 100%;
-        min-width: 400px;
+        min-width: 350px;
     }
 
     .score-bar {
-        height: 24px;
+        height: 12px;
         background: #2a2a2a;
         position: relative;
         overflow: visible;
         width: 100%;
-        min-width: 400px;
+        min-width: 350px;
     }
 
     .player-score-marker {
@@ -1316,7 +1316,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                         return `
                             <div class="player-score-marker" 
                                  style="left: ${percentage}%; transform: translateX(-50%);"
-                                 title="${formatInt(player.player_score)} points">
+                                 title="Score: ${formatInt(player.player_score)}${player.eth_won ? '\nETH: ' + player.eth_won.toFixed(2) : ''}${player.frags_won ? '\nFrags: ' + formatInt(player.frags_won) : ''}">
                                 <i class="fa-${pinStyle} fa-map-pin" 
                                    style="color: ${pinColor}; font-size: 16px; transform: translateY(-8px) rotate(20deg);"></i>
                             </div>

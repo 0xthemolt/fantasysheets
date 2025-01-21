@@ -467,9 +467,9 @@
     .threshold-line {
         position: absolute;
         top: 0;
-        width: 2px;
+        width: 1px;
         height: 100%;
-        background-color: rgba(147, 112, 219, 0.5); /* Semi-transparent purple */
+        background-color: rgba(255, 255, 255, 0.3); /* Semi-transparent white */
         z-index: 1;
     }
 
@@ -592,7 +592,7 @@
         height: 24px;
         background: #2a2a2a;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         width: 100%;
         min-width: 400px;
     }
@@ -601,8 +601,7 @@
         position: absolute;
         width: 3px;
         height: 24px;
-        background: #ffffff;
-        top: 0;
+        top: -8px;
         transform: translateX(-50%);
         z-index: 2;
     }
@@ -1224,6 +1223,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                     leagueData[player.league] = {
                         min_score: leagueRewards.min_score,
                         max_score: leagueRewards.max_score,
+                        rewards: leagueRewards,
                         players: []
                     };
                 }
@@ -1239,11 +1239,61 @@ function updateTableWithData(data, preserveFiltered = false) {
             const scoreBar = document.createElement('div');
             scoreBar.className = 'league-score-bar';
             
+            // Parse ETH thresholds from rewards data
+            const ethThresholds = [];
+            if (data.rewards && data.rewards.rewards && data.rewards.rewards.ETH) {
+                ethThresholds.push(...data.rewards.rewards.ETH.map(item => ({
+                    threshold: item.min_score_threshold,
+                    reward: item.reward
+                })));
+            }
+            
             scoreBar.innerHTML = `
                 <div class="league-label">
                     <img src="/icons/${league.toLowerCase()}.webp" alt="${league}">
                 </div>
                 <div class="score-bar">
+                    ${(() => {
+                        // Find the lowest ETH threshold
+                        const lowestThreshold = ethThresholds.length > 0 
+                            ? Math.min(...ethThresholds.map(t => t.threshold))
+                            : null;
+                        
+                        if (lowestThreshold !== null) {
+                            const percentage = ((lowestThreshold - data.min_score) / scoreRange) * 100;
+                            if (percentage >= 0 && percentage <= 100) {
+                                const leagueColor = getLeagueColor(league);
+                                // Create a lighter version of the league color for gradient
+                                const lighterColor = adjustColor(leagueColor, 30);
+                                return `
+                                    <div class="money-zone" style="
+                                        position: absolute;
+                                        left: ${percentage}%;
+                                        right: 0;
+                                        top: 0;
+                                        bottom: 0;
+                                        background: linear-gradient(90deg, 
+                                            ${lighterColor}40 0%,
+                                            ${leagueColor}40 100%
+                                        );
+                                        z-index: 1;
+                                    "></div>
+                                `;
+                            }
+                        }
+                        return '';
+                    })()}
+                    ${ethThresholds.map(threshold => {
+                        const percentage = ((threshold.threshold - data.min_score) / scoreRange) * 100;
+                        if (percentage >= 0 && percentage <= 100) {
+                            return `
+                                <div class="threshold-line" style="left: ${percentage}%;">
+                                    <div class="threshold-tooltip">${threshold.reward} ETH</div>
+                                </div>
+                            `;
+                        }
+                        return '';
+                    }).join('')}
                     ${data.players.map(player => {
                         const percentage = ((player.player_score - data.min_score) / scoreRange) * 100;
                         let pinColor;
@@ -1260,15 +1310,15 @@ function updateTableWithData(data, preserveFiltered = false) {
                             pinStyle = 'solid';
                         } else {
                             pinColor = '#808080';
-                            pinStyle = 'regular';
+                            pinStyle = 'solid';
                         }
                         
                         return `
                             <div class="player-score-marker" 
                                  style="left: ${percentage}%; transform: translateX(-50%);"
-                                 title="${player.player_score.toLocaleString()} points">
+                                 title="${formatInt(player.player_score)} points">
                                 <i class="fa-${pinStyle} fa-map-pin" 
-                                   style="color: ${pinColor}; font-size: 16px; transform: translateY(-8px);"></i>
+                                   style="color: ${pinColor}; font-size: 16px; transform: translateY(-8px) rotate(20deg);"></i>
                             </div>
                         `;
                     }).join('')}
@@ -1724,6 +1774,24 @@ function initializePlayerFilter() {
         clearFilterButton.style.display = 'none';
         updateTableWithData(cachedTournamentData, false);
     });
+}
+
+function adjustColor(color, amount) {
+    // Remove any leading #
+    color = color.replace('#', '');
+    
+    // Parse the color into RGB components
+    let r = parseInt(color.substring(0, 2), 16);
+    let g = parseInt(color.substring(2, 4), 16);
+    let b = parseInt(color.substring(4, 6), 16);
+    
+    // Make the color lighter
+    r = Math.min(255, r + amount);
+    g = Math.min(255, g + amount);
+    b = Math.min(255, b + amount);
+    
+    // Convert back to hex
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
 </script>

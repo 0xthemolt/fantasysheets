@@ -409,8 +409,9 @@
         border-radius: 8px;
     }
 
+    /* Adjust the hero search input width */
     #heroSearchInput {
-        width: 100%;
+        width: calc(100% - 16px); /* Subtracting padding (8px on each side) */
         padding: 8px;
         margin-bottom: 10px;
         background: #2a2a2a;
@@ -470,6 +471,7 @@
         color: #ffffff !important;
         border-color: #606060 !important;
     }
+
 </style>
 </head>
 <body>
@@ -542,7 +544,6 @@
         <thead>
             <tr>
                 <th>Player</th>
-                <th>Score</th>
                 <th>Deck</th>
             </tr>
         </thead>
@@ -864,11 +865,7 @@ function initializeLeagueButtons() {
                 return;
             }
 
-            // Skip My Tournaments button
-            if (button.querySelector('.fa-trophy')) {
-                return;
-            }
-
+            // Skip My Tournaments button logic removed as it is not used
             // Existing league button logic
             document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
@@ -907,14 +904,12 @@ function updateTableWithData(data, preserveFiltered = false) {
 
     const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
     const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
-    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
 
     // Check active filters
     const isMyDecksActive = myDecksButton.classList.contains('active');
-    const isMyLeaguesActive = myLeaguesButton.classList.contains('active');
 
-    // Apply My Decks/My Leagues filter
-    if (isMyDecksActive || isMyLeaguesActive) {
+    // Apply My Decks filter
+    if (isMyDecksActive) {
         if (!selectedPlayerHandle) {
             const noPlayerRow = document.createElement('tr');
             noPlayerRow.innerHTML = `
@@ -1017,7 +1012,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                     </div>
                     <!-- Player Handle and Rewards -->
                     <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <div style="text-align: left; margin-top: 5px;">${player.player_handle}</div>
+                        <div style="text-align: left; margin-top: 8px;">${player.player_handle}</div>
                         <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
                             <div style="display: flex; gap: 10px; justify-content: flex-start;">
                                 ${player.eth_won ? `
@@ -1045,17 +1040,21 @@ function updateTableWithData(data, preserveFiltered = false) {
                 </div>
             </td>
             <td>
-                <span class="rank-text" style="color: ${getLeagueColor(player.league)};">${formatInt(player.player_score)} points</span>
-            </td>
-            <td>
-                ${heroes.sort((a, b) => b.score - a.score).map(hero => `
-                    <div style="display: inline-block; margin-right: 2px; text-align: center;">
-                        <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
-                            ${formatInt(calculateDisplayScore(hero))}
-                        </div>
-                        <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
+                <div style="display: flex; align-items: center;">
+                    <span class="rank-text" style="color: ${getLeagueColor(player.league)}; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); margin-right: 10px;">
+                        ${formatInt(player.player_score)}
+                    </span>
+                    <div style="display: flex; gap: 4px;">
+                        ${heroes.sort((a, b) => b.score - a.score).map(hero => `
+                            <div style="display: inline-block; text-align: center;">
+                                <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
+                                    ${formatInt(calculateDisplayScore(hero))}
+                                </div>
+                                <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
+                            </div>
+                        `).join('')}
                     </div>
-                `).join('')}
+                </div>
             </td>
         `;
         tableBody.appendChild(row);
@@ -1157,36 +1156,15 @@ function initializeHeroFilter() {
     const searchInput = document.getElementById('heroSearchInput');
     const heroList = document.getElementById('heroList');
     
-    // Add new autocomplete container
-    const autocompleteContainer = document.createElement('div');
-    autocompleteContainer.id = 'autocompleteContainer';
-    autocompleteContainer.style.cssText = `
-        position: absolute;
-        width: 100%;
-        max-height: 150px;
-        overflow-y: auto;
-        background: #2a2a2a;
-        border: 1px solid #404040;
-        border-top: none;
-        border-radius: 0 0 4px 4px;
-        display: none;
-        z-index: 2;
-    `;
-    searchInput.parentNode.insertBefore(autocompleteContainer, searchInput.nextSibling);
-
     heroFilterButton.addEventListener('click', (e) => {
         if (e.target.classList.contains('fa-times')) {
             filterByHero(null);
             return;
         }
-        // Add debug logging
-        console.log("Current unique heroes:", Array.from(uniqueHeroes));
-        console.log("Number of unique heroes:", uniqueHeroes.size);
         
         modal.style.display = 'block';
         updateHeroList();
         searchInput.value = '';
-        autocompleteContainer.style.display = 'none';
     });
 
     window.addEventListener('click', (e) => {
@@ -1195,87 +1173,23 @@ function initializeHeroFilter() {
         }
     });
 
-    // Update search input handler
+    // Simplified search input handler - directly updates hero list
     searchInput.addEventListener('input', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        
-        if (searchTerm.length === 0) {
-            autocompleteContainer.style.display = 'none';
-            updateHeroList();
-            return;
-        }
-
-        const matches = Array.from(uniqueHeroes)
-            .filter(hero => hero.toLowerCase().includes(searchTerm))
-            .sort();
-
-        if (matches.length > 0) {
-            autocompleteContainer.style.display = 'block';
-            autocompleteContainer.innerHTML = matches.map(hero => `
-                <div class="hero-option" style="padding: 8px; cursor: pointer; border-bottom: 1px solid #404040;"
-                     onmouseover="this.style.background='#404040'"
-                     onmouseout="this.style.background='#2a2a2a'"
-                     onclick="selectAutoComplete('${hero}')">
-                    ${highlightMatch(hero, searchTerm)}
-                </div>
-            `).join('');
-        } else {
-            autocompleteContainer.style.display = 'none';
-        }
-        
         updateHeroList();
     });
 
-    // Add keyboard navigation
+    // Simplified keyboard navigation - only handle Enter key
     searchInput.addEventListener('keydown', (e) => {
-        const options = autocompleteContainer.getElementsByClassName('hero-option');
-        const currentIndex = Array.from(options).findIndex(option => option.classList.contains('selected'));
-        
-        switch(e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                if (options.length > 0) {
-                    const nextIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
-                    highlightOption(options, nextIndex);
-                }
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                if (options.length > 0) {
-                    const prevIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
-                    highlightOption(options, prevIndex);
-                }
-                break;
-            case 'Enter':
-                e.preventDefault();
-                const selectedOption = autocompleteContainer.querySelector('.hero-option.selected');
-                if (selectedOption) {
-                    const heroName = selectedOption.textContent.trim();
-                    selectAutoComplete(heroName);
-                }
-                break;
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const firstMatchingHero = Array.from(uniqueHeroes)
+                .find(hero => hero.toLowerCase().includes(searchInput.value.toLowerCase()));
+            if (firstMatchingHero) {
+                filterByHero(firstMatchingHero);
+                modal.style.display = 'none';
+            }
         }
     });
-}
-
-// Add these helper functions
-function highlightMatch(text, searchTerm) {
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
-    return text.replace(regex, '<span style="color: #ffffff; font-weight: bold;">$1</span>');
-}
-
-function highlightOption(options, index) {
-    Array.from(options).forEach(opt => opt.classList.remove('selected'));
-    options[index].classList.add('selected');
-    options[index].scrollIntoView({ block: 'nearest' });
-}
-
-function selectAutoComplete(heroName) {
-    const searchInput = document.getElementById('heroSearchInput');
-    searchInput.value = heroName;
-    document.getElementById('autocompleteContainer').style.display = 'none';
-    filterByHero(heroName);
-    document.getElementById('heroSearchModal').style.display = 'none';
 }
 
 function updateHeroList() {

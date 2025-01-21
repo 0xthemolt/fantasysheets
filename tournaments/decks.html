@@ -454,6 +454,22 @@
         color: #ffffff !important;
     }
 
+    .filter-style {
+        background: #2a2a2a;
+        border: 1px solid #505050 !important;
+        color: #909090 !important;
+    }
+    
+    .filter-style:hover {
+        background: #333 !important;
+        color: #ffffff !important;
+    }
+    
+    .filter-style.active {
+        background: #404040 !important;
+        color: #ffffff !important;
+        border-color: #606060 !important;
+    }
 </style>
 </head>
 <body>
@@ -473,10 +489,6 @@
 
 <!-- Add toggle container -->
 <div class="toggle-container">
-    <button class="toggle-button hero-filter-button">
-        <i class="fas fa-search"></i>
-        Hero Filter
-    </button>
     <button class="toggle-button">
         <i class="fas fa-trophy"></i>
         My Leagues
@@ -485,6 +497,7 @@
         <i class="fa-regular fa-user"></i>
         My Decks
     </button>
+    <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
     <button class="toggle-button">
         <img src="../icons/elite.webp" alt="Elite" class="league-icon">
         Elite
@@ -505,7 +518,14 @@
         <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
         Reverse
     </button>
-    
+    <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
+    <button class="toggle-button hero-filter-button filter-style">
+        <i class="fas fa-search"></i>
+        Hero Filter
+    </button>
+    <button class="toggle-button zero-rewards-button filter-style">
+        0 Rewards
+    </button>
 </div>
 
 <!-- Add this new modal HTML after the toggle-container -->
@@ -541,6 +561,8 @@ let cachedTournamentData = []; // Add this at the top of your script
 let selectedLeague = null; // Track selected league
 let uniqueHeroes = new Set();
 let selectedHero = null;
+let currentFilteredData = null;
+let zeroRewardsFilterActive = false;
 
 const LEAGUE_COLORS = {
     "elite": "#a8ccde",
@@ -720,6 +742,7 @@ async function initializeTournamentScroller() {
             initializeScrollButtons();
             initializeLeagueButtons();
             initializeHeroFilter();
+            initializeZeroRewardsFilter();
         });
 
 async function fetchData(tournamentNumber) {
@@ -804,6 +827,9 @@ async function fetchData(tournamentNumber) {
             }
         }
 
+        // Update unique heroes right after getting all results
+        updateUniqueHeroes(allResults);
+
         // Store both player data and processed rewards data in the cache
         cachedTournamentData = {
             players: allResults,
@@ -871,21 +897,23 @@ function initializeLeagueButtons() {
     }
 }
 
-// New function to handle table updates
-function updateTableWithData(data) {
+// Modify the updateTableWithData function
+function updateTableWithData(data, preserveFiltered = false) {
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = '';
 
-    let filteredData = data.players;
+    // Always start with the full dataset when not preserving filters
+    let filteredData = [...data.players];
+
     const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
     const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
     const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
 
-    // Check if "My Decks" or "My Leagues" is active
+    // Check active filters
     const isMyDecksActive = myDecksButton.classList.contains('active');
     const isMyLeaguesActive = myLeaguesButton.classList.contains('active');
 
-    // First, handle the case where we need to filter by player
+    // Apply My Decks/My Leagues filter
     if (isMyDecksActive || isMyLeaguesActive) {
         if (!selectedPlayerHandle) {
             const noPlayerRow = document.createElement('tr');
@@ -897,16 +925,15 @@ function updateTableWithData(data) {
             tableBody.appendChild(noPlayerRow);
             return;
         }
-        // Filter by player handle
         filteredData = filteredData.filter(player => player.player_handle === selectedPlayerHandle);
     }
 
-    // Then, apply league filter if a specific league is selected
+    // Apply league filter
     if (selectedLeague && ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
         filteredData = filteredData.filter(player => player.league === selectedLeague);
     }
 
-    // Apply hero filter if selected
+    // Apply hero filter
     if (selectedHero) {
         filteredData = filteredData.filter(player => {
             for (let i = 1; i <= 5; i++) {
@@ -915,6 +942,17 @@ function updateTableWithData(data) {
             return false;
         });
     }
+
+    // Apply zero rewards filter last
+    if (zeroRewardsFilterActive) {
+        filteredData = filteredData.filter(player => {
+            const totalRewards = (player.eth_won || 0) + (player.frags_won || 0);
+            return totalRewards === 0;
+        });
+    }
+
+    // Store the current filtered data
+    currentFilteredData = filteredData;
 
     filteredData.forEach(player => {
         // Find the rewards data for this player's league using tournament_league_unique_key
@@ -1088,7 +1126,7 @@ function updateUniqueHeroes(data) {
     });
 }
 
-// Add this function to handle hero filtering
+// Modify the filterByHero function
 function filterByHero(heroHandle) {
     selectedHero = heroHandle;
     const heroFilterButton = document.querySelector('.hero-filter-button');
@@ -1108,7 +1146,8 @@ function filterByHero(heroHandle) {
         `;
     }
     
-    updateTableWithData(cachedTournamentData);
+    // Pass true to preserve existing filtered data
+    updateTableWithData(cachedTournamentData, true);
 }
 
 // Add this function to handle hero filtering
@@ -1140,10 +1179,14 @@ function initializeHeroFilter() {
             filterByHero(null);
             return;
         }
+        // Add debug logging
+        console.log("Current unique heroes:", Array.from(uniqueHeroes));
+        console.log("Number of unique heroes:", uniqueHeroes.size);
+        
         modal.style.display = 'block';
         updateHeroList();
-        searchInput.value = ''; // Clear search input when opening modal
-        autocompleteContainer.style.display = 'none'; // Hide autocomplete
+        searchInput.value = '';
+        autocompleteContainer.style.display = 'none';
     });
 
     window.addEventListener('click', (e) => {
@@ -1234,6 +1277,39 @@ function selectAutoComplete(heroName) {
     filterByHero(heroName);
     document.getElementById('heroSearchModal').style.display = 'none';
 }
+
+function updateHeroList() {
+    const searchTerm = document.getElementById('heroSearchInput').value.toLowerCase();
+    const heroList = document.getElementById('heroList');
+    
+    // Get all heroes and sort them alphabetically
+    const sortedHeroes = Array.from(uniqueHeroes).sort();
+    
+    // Filter heroes based on search term
+    const filteredHeroes = sortedHeroes.filter(hero => 
+        hero.toLowerCase().includes(searchTerm)
+    );
+    
+    // Update the hero list
+    heroList.innerHTML = filteredHeroes.map(hero => `
+        <div class="hero-option ${hero === selectedHero ? 'selected' : ''}" 
+             onclick="filterByHero('${hero}')">
+            ${hero}
+        </div>
+    `).join('');
+}
+
+function initializeZeroRewardsFilter() {
+    const zeroRewardsButton = document.querySelector('.zero-rewards-button');
+    
+    zeroRewardsButton.addEventListener('click', () => {
+        zeroRewardsFilterActive = !zeroRewardsFilterActive;
+        zeroRewardsButton.classList.toggle('active', zeroRewardsFilterActive);
+        // Update table with cached data but don't preserve filters
+        updateTableWithData(cachedTournamentData, false);
+    });
+}
+
 </script>
 
 </body>

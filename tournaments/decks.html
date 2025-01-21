@@ -426,49 +426,41 @@
         opacity: 1;
     }
 
-    .rank-marker {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
+    .rank-circle {
+      position: relative;
+      width: 150px;
+      margin: 20px;
+      text-align: center;
     }
-
-    .rank-marker i {
-        font-size: 16px;
-        filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-        transition: transform 0.2s ease;
+    
+    .circle-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid;
     }
-
-    .rank-marker i.fa-trophy {
-        color: #ffd700; /* Gold */
+    
+    .rank-label {
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      white-space: nowrap;
     }
-
-    .rank-marker i.fa-medal.silver {
-        color: #C0C0C0; /* Silver */
-    }
-
-    .rank-marker i.fa-medal.bronze {
-        color: #CD7F32; /* Bronze */
-    }
-
-    .rank-marker .score-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    .rank-marker:hover i {
-        transform: scale(1.2);
-    }
-
-    .rank-text {
-        display: inline-block;
-        vertical-align: middle;
-        margin-left: 10px;
-        color: #808080;
-        font-size: 14px;
-    }
+    
+    .rank-1 .circle-img { border-color: #FFD700; }
+    .rank-2 .circle-img { border-color: #C0C0C0; }
+    .rank-3 .circle-img { border-color: #CD7F32; }
+    .rank-other .circle-img { border-color: #ffffff; }
+    
+    .rank-1 .rank-label { background: #FFD700; color: white; }
+    .rank-2 .rank-label { background: #C0C0C0; color: white; }
+    .rank-3 .rank-label { background: #CD7F32; color: white; }
+    .rank-other .rank-label { background: #ffffff; color: #333; }
 
     /* Add these new styles */
     .threshold-line {
@@ -1335,42 +1327,18 @@ function updateTableWithData(data, preserveFiltered = false) {
         row.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <!-- Combined Rank and Picture with positioning -->
-                    <div style="position: relative; width: 30px; height: 36px;">
-                        <img src="${player.player_pic}" 
-                            alt="${player.player_handle}" 
-                            style="width: 30px; height: 30px; border-radius: 50%;"
-                            onerror="this.onerror=null; this.src='/icons/ft_logo.webp';"
-                            onload="this.style.display='block'"
-                            onerror="this.onerror=null; this.src='/icons/ft_logo.webp'; return true;"
-                            style="width: 30px; height: 30px; border-radius: 50%; display: none;">
-                        <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-                                    background: ${player.player_rank <= 3 ? 
-                                        (player.player_rank === 1 ? 'rgba(255, 215, 0, 0.15)' : 
-                                         player.player_rank === 2 ? 'rgba(192, 192, 192, 0.15)' : 
-                                         'rgba(205, 127, 50, 0.15)') : 'rgba(255, 255, 255, 0.15)'};
-                                    clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
-                                    width: 34px;
-                                    height: 14px;
-                                    display: flex; 
-                                    align-items: center; 
-                                    justify-content: center;
-                                    font-size: ${player.player_rank <= 3 ? '12px' : '11px'};
-                                    box-shadow: 0 2px 4px rgba(0,0,0,0.3),
-                                              inset 0 1px 3px rgba(255, 255, 255, 0.3),
-                                              0 0 8px ${player.player_rank <= 3 ? 
-                                                (player.player_rank === 1 ? 'rgba(255, 215, 0, 0.4)' : 
-                                                 player.player_rank === 2 ? 'rgba(192, 192, 192, 0.4)' : 
-                                                 'rgba(205, 127, 50, 0.4)') : 'rgba(255, 255, 255, 0.4)'};
-                                    border-radius: 2px;">
-                            ${player.player_rank <= 3 ? 
-                                `<i class="fas fa-${player.player_rank === 1 ? 'trophy' : 'medal'}" 
-                                    style="color: ${player.player_rank === 1 ? '#ffd700' : 
-                                         player.player_rank === 2 ? '#C0C0C0' : 
-                                         '#CD7F32'};
-                                    text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);"></i>` : 
-                                `<span style="color: #ffffff; text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);">${player.player_rank}</span>`}
-                        </div>
+                    <!-- Replace the old rank display with new rank circle pattern -->
+                    <div class="rank-circle rank-${player.player_rank <= 3 ? player.player_rank : 'other'}">
+                        <img class="circle-img" 
+                             src="${player.player_pic}" 
+                             alt="${player.player_handle}"
+                             onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
+                        <span class="rank-label">${player.player_rank}${
+                            player.player_rank === 1 ? 'st' : 
+                            player.player_rank === 2 ? 'nd' : 
+                            player.player_rank === 3 ? 'rd' : 
+                            'th'
+                        }</span>
                     </div>
                     <!-- Player Handle and Rewards -->
                     <div style="display: flex; flex-direction: column; gap: 15px;">

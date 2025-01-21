@@ -1,83 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tweet Modal Example</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        .x-icon {
-            font-size: 24px;
-            color: #000;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-        
-        .x-icon:hover {
-            color: #1DA1F2;
-        }
-
-        .modal {
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s;
-        }
-
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 10px;
-            width: fit-content;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
-<body>
-  <script async src="https://platform.twitter.com/widgets.js"></script>
-<!-- Method 2: Modal Popup with Tweet -->
-<!-- Add this button to trigger the modal -->
-<i class="fa-brands fa-x-twitter x-icon" onmouseover="openTweetModal()"></i>
-
-<!-- The Modal -->
-<div id="tweetModal" class="modal">
-    <div class="modal-content">
-        <span onclick="closeTweetModal()" style="float:right; cursor:pointer; padding: 0 8px;">&times;</span>
-        <div style="transform: scale(0.8); transform-origin: center top;">
-            <blockquote class="twitter-tweet">
-                <a href="https://twitter.com/TylerDurden/status/1873732440369631634"></a>
-            </blockquote>
-        </div>
-    </div>
-</div>
-
-<script async src="https://platform.twitter.com/widgets.js"></script>
-<script>
-function openTweetModal() {
-    document.getElementById('tweetModal').classList.add('show');
-}
-
-function closeTweetModal() {
-    document.getElementById('tweetModal').classList.remove('show');
-}
-
-// Update click outside behavior
-window.onclick = function(event) {
-    const modal = document.getElementById('tweetModal');
-    if (event.target == modal) {
-        closeTweetModal();
+<link rel="stylesheet" href="../styles.css">
+<style>
+    .rank-circle {
+      position: relative;
+      width: 150px;
+      margin: 20px;
+      text-align: center;
     }
-}
+    
+    .circle-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid;
+    }
+    
+    .rank-label {
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    
+    .rank-1 .circle-img { border-color: #FFD700; }
+    .rank-2 .circle-img { border-color: #C0C0C0; }
+    .rank-3 .circle-img { border-color: #CD7F32; }
+    .rank-other .circle-img { border-color: #ffffff; }
+    
+    .rank-1 .rank-label { background: #FFD700; color: white; }
+    .rank-2 .rank-label { background: #C0C0C0; color: white; }
+    .rank-3 .rank-label { background: #CD7F32; color: white; }
+    .rank-other .rank-label { background: #ffffff; color: #333; }
+    </style>
+    
+    <div class="rank-circle rank-1">
+      <img class="circle-img" src="https://pbs.twimg.com/profile_images/1721158078765424640/hFrzagyZ.jpg">
+      <span class="rank-label">1st</span>
+    </div>
 
-// Add mouse leave behavior
-document.getElementById('tweetModal').addEventListener('mouseleave', function() {
-    closeTweetModal();
-});
-</script>
-</body>
-</html>
+    <div class="rank-circle rank-2">
+      <img class="circle-img" src="https://pbs.twimg.com/profile_images/1721158078765424640/hFrzagyZ.jpg">
+      <span class="rank-label">2nd</span>
+    </div>
+
+    <div class="rank-circle rank-3">
+      <img class="circle-img" src="https://pbs.twimg.com/profile_images/1721158078765424640/hFrzagyZ.jpg">
+      <span class="rank-label">3rd</span>
+    </div>
+
+    <div class="rank-circle rank-other">
+      <img class="circle-img" src="https://pbs.twimg.com/profile_images/1721158078765424640/hFrzagyZ.jpg">
+      <span class="rank-label">4th</span>
+    </div>
+
+    <div class="rank-circle rank-other">
+      <img class="circle-img" src="https://pbs.twimg.com/profile_images/1721158078765424640/hFrzagyZ.jpg">
+      <span class="rank-label">5th</span>
+    </div>

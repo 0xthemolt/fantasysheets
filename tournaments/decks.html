@@ -184,13 +184,30 @@
 
         #heroTable {
             width: 100%;
-            min-width: 800px;
+            min-width: 300px; /* Adjusted for mobile */
+            display: block; /* Make table block for better stacking */
+        }
+
+        #heroTable thead, #heroTable tbody {
+            display: block; /* Stack headers and body */
+        }
+
+        #heroTable tr {
+            display: table; /* Keep rows as table elements */
+            width: 100%;
+            table-layout: fixed; /* Ensure fixed layout */
+        }
+
+        #heroTable th, #heroTable td {
+            width: 100%; /* Make columns full width */
+            box-sizing: border-box; /* Include padding in width */
         }
     }
 
     .table-container {
+        width: 100%;
+        max-width: 550px;
         margin: 20px auto;
-        max-width: 1200px;
         height: 70vh;
         overflow: hidden; /* Hide outer scrollbar */
     }
@@ -200,6 +217,19 @@
         border-collapse: collapse;
         background-color: #1a1a1a;
         color: #ffffff;
+    }
+
+    #heroTable th {
+        width: 30%;
+        text-align: center;
+    }
+
+    #heroTable th:nth-child(2) {
+        width: 10%;
+    }
+
+    #heroTable th:nth-child(3) {
+        width: 50%;
     }
 
     #heroTable thead {
@@ -289,6 +319,11 @@
         .toggle-button {
             padding: 6px 12px;
             font-size: 14px;
+        }
+
+        #heroTable th {
+            width: 100%;
+            display: block;
         }
     }
 
@@ -404,31 +439,31 @@
 
 <!-- Add toggle container -->
 <div class="toggle-container">
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <i class="fas fa-trophy"></i>
         My Leagues
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <i class="fa-regular fa-user"></i>
         My Decks
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <img src="../icons/elite.webp" alt="Elite" class="league-icon">
         Elite
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <img src="../icons/gold.webp" alt="Gold" class="league-icon">
         Gold
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <img src="../icons/silver.webp" alt="Silver" class="league-icon">
         Silver
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
         Bronze
     </button>
-    <button class="toggle-button">
+    <button class="toggle-button" style="font-size: 68%;">
         <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
         Reverse
     </button>
@@ -440,8 +475,8 @@
         <thead>
             <tr>
                 <th>Player</th>
-                <th>Deck</th>
                 <th>Score</th>
+                <th>Deck</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -778,6 +813,12 @@ function initializeLeagueButtons() {
             updateTableWithData(cachedTournamentData);
         });
     });
+
+    // Set "My Decks" button as active on page load
+    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
+    if (myDecksButton) {
+        myDecksButton.classList.add('active');
+    }
 }
 
 // New function to handle table updates
@@ -873,7 +914,7 @@ function updateTableWithData(data) {
                         </div>
                     </div>
                     <!-- Player Handle and Rewards -->
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
                         <div style="text-align: center;">${player.player_handle}</div>
                         <div style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
                             <div style="display: flex; gap: 10px; justify-content: flex-start;">
@@ -896,34 +937,23 @@ function updateTableWithData(data) {
                                     </div>
                                 ` : ''}
                             </div>
-                            ${player.fan_won ? `
-                                <div style="display: flex; align-items: center; gap: 2px; justify-content: center;">
-                                    <span style="color: ${getRewardColor('fan')}">
-                                        ${player.fan_won >= 100000 ? 
-                                            Math.floor(player.fan_won/1000) + 'k' : 
-                                            player.fan_won >= 1000 ? 
-                                                (player.fan_won/1000).toFixed(1) + 'k' : 
-                                                Math.floor(player.fan_won)}
-                                    </span>
-                                    <img src="/icons/fan.webp" alt="Fan" style="width: 12px; height: 12px;">
-                                </div>
-                            ` : ''}
+                            ${player.fan_won ? '' : ''}
                         </div>
                     </div>
                 </div>
             </td>
-            <td>
+            <td style="text-align: center;">
+                <span class="rank-text" style="color: ${getLeagueColor(player.league)};">${formatInt(player.player_score)} points</span>
+            </td>
+            <td style="text-align: center;">
                 ${heroes.sort((a, b) => b.score - a.score).map(hero => `
                     <div style="display: inline-block; margin-right: 2px; text-align: center;">
-                        <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
                         <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                             ${formatInt(calculateDisplayScore(hero))}
                         </div>
+                        <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
                     </div>
                 `).join('')}
-            </td>
-            <td>
-                <span class="rank-text" style="color: ${getLeagueColor(player.league)};">${formatInt(player.player_score)} points</span>
             </td>
         `;
         tableBody.appendChild(row);

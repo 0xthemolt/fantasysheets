@@ -191,8 +191,8 @@
     .table-container {
         margin: 20px auto;
         max-width: 650px;
-        height: 70vh;
-        overflow: hidden; /* Hide outer scrollbar */
+        max-height: 70vh;
+        overflow: hidden;
     }
 
     #heroTable {
@@ -211,8 +211,9 @@
 
     #heroTable tbody {
         display: block;
-        height: calc(70vh - 40px); /* Adjust for header height */
-        overflow-y: overlay; /* Creates the thin overlay scrollbar */
+        max-height: calc(70vh - 40px);
+        min-height: 100px;
+        overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: rgba(64, 64, 64, 0.5) transparent;
     }
@@ -244,12 +245,52 @@
 
     .toggle-container {
         display: flex;
-        justify-content: center;
-        gap: 5px;
+        flex-direction: column;
+        gap: 10px;
         padding: 5px;
         background: #1a1a1a;
-        flex-wrap: wrap;
         border-radius: 8px;
+    }
+
+    .toggle-row {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .filter-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-input {
+        padding: 4px 8px;
+        background: #2a2a2a;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #ffffff;
+        font-size: 65%;
+        min-width: 120px;
+        height: 24px;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #505050;
+    }
+
+    .clear-filter {
+        position: absolute;
+        right: 8px;
+        color: #808080;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .clear-filter:hover {
+        color: #ffffff;
     }
 
     .toggle-button {
@@ -472,6 +513,64 @@
         border-color: #606060 !important;
     }
 
+    .rewards-summary-container {
+        margin: 20px auto;
+        max-width: 650px;
+        background: #1a1a1a;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .summary-card {
+        background: #2a2a2a;
+        border-radius: 6px;
+        padding: 15px;
+    }
+
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ffffff;
+        font-size: 16px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #404040;
+    }
+
+    .summary-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .reward-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #1a1a1a;
+        border-radius: 4px;
+    }
+
+    .reward-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .reward-value {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .reward-currency {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
 </style>
 </head>
 <body>
@@ -491,43 +590,56 @@
 
 <!-- Add toggle container -->
 <div class="toggle-container">
-    <button class="toggle-button">
-        <i class="fas fa-trophy"></i>
-        My Leagues
-    </button>
-    <button class="toggle-button">
-        <i class="fa-regular fa-user"></i>
-        My Decks
-    </button>
-    <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
-    <button class="toggle-button">
-        <img src="../icons/elite.webp" alt="Elite" class="league-icon">
-        Elite
-    </button>
-    <button class="toggle-button">
-        <img src="../icons/gold.webp" alt="Gold" class="league-icon">
-        Gold
-    </button>
-    <button class="toggle-button">
-        <img src="../icons/silver.webp" alt="Silver" class="league-icon">
-        Silver
-    </button>
-    <button class="toggle-button">
-        <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
-        Bronze
-    </button>
-    <button class="toggle-button">
-        <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
-        Reverse
-    </button>
-    <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
-    <button class="toggle-button hero-filter-button filter-style">
-        <i class="fas fa-search"></i>
-        Hero Filter
-    </button>
-    <button class="toggle-button zero-rewards-button filter-style">
-        0 Rewards
-    </button>
+    <!-- First row: My Decks and Leagues -->
+    <div class="toggle-row">
+        <button class="toggle-button">
+            <i class="fas fa-trophy"></i>
+            My Leagues
+        </button>
+        <button class="toggle-button">
+            <i class="fa-regular fa-user"></i>
+            My Decks
+        </button>
+        <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
+        <button class="toggle-button">
+            <img src="../icons/elite.webp" alt="Elite" class="league-icon">
+            Elite
+        </button>
+        <button class="toggle-button">
+            <img src="../icons/gold.webp" alt="Gold" class="league-icon">
+            Gold
+        </button>
+        <button class="toggle-button">
+            <img src="../icons/silver.webp" alt="Silver" class="league-icon">
+            Silver
+        </button>
+        <button class="toggle-button">
+            <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
+            Bronze
+        </button>
+        <button class="toggle-button">
+            <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
+            Reverse
+        </button>
+    </div>
+    
+    <!-- Second row: Filters -->
+    <div class="toggle-row">
+        <div class="filter-input-container">
+            <input type="text" 
+                   class="filter-input" 
+                   id="playerFilterInput" 
+                   placeholder="Filter players...">
+            <i class="fas fa-times clear-filter" style="display: none;"></i>
+        </div>
+        <button class="toggle-button hero-filter-button filter-style">
+            <i class="fas fa-search"></i>
+            Hero Filter
+        </button>
+        <button class="toggle-button zero-rewards-button filter-style">
+            0 Rewards
+        </button>
+    </div>
 </div>
 
 <!-- Add this new modal HTML after the toggle-container -->
@@ -535,6 +647,19 @@
     <div class="modal-content">
         <input type="text" id="heroSearchInput" placeholder="Search heroes...">
         <div id="heroList"></div>
+    </div>
+</div>
+
+<!-- Add this new container after the toggle-container and before the table-container -->
+<div class="rewards-summary-container" style="display: none;">
+    <div class="summary-card">
+        <div class="summary-header">
+            <i class="fas fa-chart-pie"></i>
+            <span>Rewards Summary</span>
+        </div>
+        <div class="summary-content" style="display: flex; justify-content: space-between;">
+            <!-- Content will be populated by JavaScript -->
+        </div>
     </div>
 </div>
 
@@ -744,6 +869,7 @@ async function initializeTournamentScroller() {
             initializeLeagueButtons();
             initializeHeroFilter();
             initializeZeroRewardsFilter();
+            initializePlayerFilter();
         });
 
 async function fetchData(tournamentNumber) {
@@ -896,31 +1022,215 @@ function initializeLeagueButtons() {
 
 // Modify the updateTableWithData function
 function updateTableWithData(data, preserveFiltered = false) {
+    const rewardsSummaryContainer = document.querySelector('.rewards-summary-container');
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = '';
 
-    // Always start with the full dataset when not preserving filters
     let filteredData = [...data.players];
-
     const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle');
     const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
+    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
 
     // Check active filters
     const isMyDecksActive = myDecksButton.classList.contains('active');
+    const isMyLeaguesActive = myLeaguesButton.classList.contains('active');
+    const isLeagueSelected = selectedLeague && ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague);
 
-    // Apply My Decks filter
-    if (isMyDecksActive) {
-        if (!selectedPlayerHandle) {
-            const noPlayerRow = document.createElement('tr');
-            noPlayerRow.innerHTML = `
-                <td colspan="5" style="text-align: center; color: #ff0000;">
-                    No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
+    // Show/hide rewards summary based on filters
+    if ((isMyDecksActive || isMyLeaguesActive || (isLeagueSelected && selectedPlayerHandle)) && selectedPlayerHandle) {
+        rewardsSummaryContainer.style.display = 'block';
+        
+        // Calculate total rewards
+        let totalEth = 0;
+        let totalFrags = 0;
+        let totalFan = 0;
+        let decksCount = 0;
+
+        const relevantData = filteredData.filter(player => {
+            if (isLeagueSelected) {
+                return player.player_handle === selectedPlayerHandle && player.league === selectedLeague;
+            }
+            return player.player_handle === selectedPlayerHandle;
+        });
+
+        relevantData.forEach(player => {
+            totalEth += player.eth_won || 0;
+            totalFrags += player.frags_won || 0;
+            totalFan += player.fan_won || 0;
+            decksCount++;
+        });
+
+        // Update summary content
+        const summaryContent = document.querySelector('.summary-content');
+        summaryContent.innerHTML = `
+            <div class="reward-item" style="flex: 1; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <i class="fas fa-layer-group" style="color: #808080;"></i>
+                    <span>${decksCount}</span>
+                </div>
+            </div>
+            ${totalEth > 0 ? `
+            <div class="reward-item" style="flex: 1; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <img src="/icons/eth.webp" alt="ETH" style="width: 16px; height: 16px;">
+                    <span style="color: ${getRewardColor('eth')}">${totalEth.toFixed(2)}</span>
+                </div>
+            </div>
+            ` : ''}
+            ${totalFrags > 0 ? `
+            <div class="reward-item" style="flex: 1; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <img src="/icons/fragment.webp" alt="Fragments" style="width: 16px; height: 16px;">
+                    <span style="color: ${getRewardColor('fragment')}">
+                        ${totalFrags >= 1000 ? (totalFrags/1000).toFixed(1) + 'k' : Math.floor(totalFrags)}
+                    </span>
+                </div>
+            </div>
+            ` : ''}
+            ${totalFan > 0 ? `
+            <div class="reward-item" style="flex: 1; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                    <img src="/icons/fan.webp" alt="FAN" style="width: 16px; height: 16px;">
+                    <span style="color: ${getRewardColor('fan')}">
+                        ${totalFan >= 1000000 ? (totalFan/1000000).toFixed(1) + 'M' : 
+                          totalFan >= 1000 ? (totalFan/1000).toFixed(1) + 'k' : 
+                          totalFan}
+                    </span>
+                </div>
+            </div>
+            ` : ''}
+        `;
+    } else {
+        rewardsSummaryContainer.style.display = 'none';
+    }
+
+    // Handle no player selected
+    if ((isMyDecksActive || isMyLeaguesActive) && !selectedPlayerHandle) {
+        const noPlayerRow = document.createElement('tr');
+        noPlayerRow.innerHTML = `
+            <td colspan="5" style="text-align: center; color: #ff0000;">
+                No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
+            </td>
+        `;
+        tableBody.appendChild(noPlayerRow);
+        return;
+    }
+
+    // Filter by selected player if My Decks or My Leagues is active
+    if (isMyDecksActive || isMyLeaguesActive) {
+        filteredData = filteredData.filter(player => player.player_handle === selectedPlayerHandle);
+    }
+
+    // If My Leagues is active, show aggregated view
+    if (isMyLeaguesActive) {
+        // Group data by league
+        const leagueGroups = {};
+        filteredData.forEach(player => {
+            if (!leagueGroups[player.league]) {
+                leagueGroups[player.league] = {
+                    league: player.league,
+                    total_eth: 0,
+                    total_frags: 0,
+                    best_rank: Infinity,
+                    best_deck: null,
+                    count: 0
+                };
+            }
+            
+            const group = leagueGroups[player.league];
+            group.total_eth += player.eth_won || 0;
+            group.total_frags += player.frags_won || 0;
+            group.count++;
+            
+            // Update best rank and corresponding deck
+            if (player.player_rank < group.best_rank) {
+                group.best_rank = player.player_rank;
+                group.best_deck = player;
+            }
+        });
+
+        // Sort leagues by precedence
+        const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+        const sortedLeagues = Object.values(leagueGroups).sort((a, b) => 
+            leagueOrder.indexOf(a.league) - leagueOrder.indexOf(b.league)
+        );
+
+        // Display aggregated data
+        sortedLeagues.forEach(group => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="/icons/${group.league.toLowerCase()}.webp" 
+                                 alt="${group.league}" 
+                                 style="width: 30px; height: 30px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div style="color: ${getLeagueColor(group.league)}; font-weight: bold;">
+                                    ${group.league}
+                                </div>
+                                <div style="font-size: 12px; color: #808080;">
+                                    ${group.count} deck${group.count !== 1 ? 's' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            ${group.total_eth || group.total_frags ? `
+                                <div style="display: flex; gap: 10px; font-size: 14px;">
+                                    ${group.total_eth ? `
+                                        <div style="display: flex; align-items: center; gap: 2px;">
+                                            <span style="color: ${getRewardColor('eth')}">
+                                                ${group.total_eth.toFixed(2)}
+                                            </span>
+                                            <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
+                                        </div>
+                                    ` : ''}
+                                    ${group.total_frags ? `
+                                        <div style="display: flex; align-items: center; gap: 2px;">
+                                            <span style="color: ${getRewardColor('fragment')}">
+                                                ${group.total_frags >= 1000 ? 
+                                                    (group.total_frags/1000).toFixed(1) + 'k' : 
+                                                    Math.floor(group.total_frags)}
+                                            </span>
+                                            <img src="/icons/fragment.webp" alt="Fragments" style="width: 12px; height: 12px;">
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    ${group.best_deck ? `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="color: #808080; font-size: 14px;">
+                                Best Rank: #${group.best_rank}
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                ${[1,2,3,4,5].map(i => ({
+                                    id: group.best_deck[`card${i}_id`],
+                                    handle: group.best_deck[`card${i}_hero_handle`],
+                                    stars: group.best_deck[`card${i}_hero_stars`],
+                                    score: group.best_deck[`card${i}_score`],
+                                    url: group.best_deck[`card${i}_picture_url`]
+                                }))
+                                .sort((a, b) => b.score - a.score)
+                                .map(hero => `
+                                    <div style="display: inline-block; text-align: center;">
+                                        <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
+                                            ${formatInt(calculateDisplayScore(hero))}
+                                        </div>
+                                        <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
                 </td>
             `;
-            tableBody.appendChild(noPlayerRow);
-            return;
-        }
-        filteredData = filteredData.filter(player => player.player_handle === selectedPlayerHandle);
+            tableBody.appendChild(row);
+        });
+        return;
     }
 
     // Apply league filter
@@ -974,26 +1284,24 @@ function updateTableWithData(data, preserveFiltered = false) {
         row.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <!-- League Icon -->
-                    <img src="/icons/${player.league.toLowerCase()}.webp" alt="${player.league} Icon" style="width: 20px; height: 20px;">
                     <!-- Combined Rank and Picture with positioning -->
                     <div style="position: relative; width: 30px; height: 36px;">
                         <img src="${player.player_pic}" 
                             alt="${player.player_handle}" 
                             style="width: 30px; height: 30px; border-radius: 50%;"
                             onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
-                        <div style="position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+                        <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
                                     background: ${player.player_rank <= 3 ? 
                                         (player.player_rank === 1 ? 'rgba(255, 215, 0, 0.15)' : 
                                          player.player_rank === 2 ? 'rgba(192, 192, 192, 0.15)' : 
                                          'rgba(205, 127, 50, 0.15)') : 'rgba(255, 255, 255, 0.15)'};
                                     clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
-                                    width: 28px; 
-                                    height: 12px; 
+                                    width: 34px;
+                                    height: 14px;
                                     display: flex; 
                                     align-items: center; 
                                     justify-content: center;
-                                    font-size: ${player.player_rank <= 3 ? '10px' : '9px'};
+                                    font-size: ${player.player_rank <= 3 ? '12px' : '11px'};
                                     box-shadow: 0 2px 4px rgba(0,0,0,0.3),
                                               inset 0 1px 3px rgba(255, 255, 255, 0.3),
                                               0 0 8px ${player.player_rank <= 3 ? 
@@ -1041,6 +1349,7 @@ function updateTableWithData(data, preserveFiltered = false) {
             </td>
             <td>
                 <div style="display: flex; align-items: center;">
+                    <img src="/icons/${player.league.toLowerCase()}.webp" alt="${player.league} Icon" style="width: 20px; height: 20px;">
                     <span class="rank-text" style="color: ${getLeagueColor(player.league)}; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); margin-right: 10px;">
                         ${formatInt(player.player_score)}
                     </span>
@@ -1220,6 +1529,39 @@ function initializeZeroRewardsFilter() {
         zeroRewardsFilterActive = !zeroRewardsFilterActive;
         zeroRewardsButton.classList.toggle('active', zeroRewardsFilterActive);
         // Update table with cached data but don't preserve filters
+        updateTableWithData(cachedTournamentData, false);
+    });
+}
+
+function initializePlayerFilter() {
+    const playerFilterInput = document.getElementById('playerFilterInput');
+    const clearFilterButton = document.querySelector('.clear-filter');
+    let filterTimeout;
+
+    playerFilterInput.addEventListener('input', (e) => {
+        clearTimeout(filterTimeout);
+        const filterValue = e.target.value.toLowerCase();
+        
+        // Show/hide clear button
+        clearFilterButton.style.display = filterValue ? 'block' : 'none';
+
+        // Debounce the filter operation
+        filterTimeout = setTimeout(() => {
+            if (cachedTournamentData && cachedTournamentData.players) {
+                const filteredData = {
+                    ...cachedTournamentData,
+                    players: cachedTournamentData.players.filter(player => 
+                        player.player_handle.toLowerCase().includes(filterValue)
+                    )
+                };
+                updateTableWithData(filteredData, true);
+            }
+        }, 300);
+    });
+
+    clearFilterButton.addEventListener('click', () => {
+        playerFilterInput.value = '';
+        clearFilterButton.style.display = 'none';
         updateTableWithData(cachedTournamentData, false);
     });
 }

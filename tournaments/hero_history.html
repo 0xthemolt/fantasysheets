@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Hero Tournament History</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+            async function fetchHeroStats() {
+                const { data, error } = await supabaseClient
+                    .from('hero_bump_chart')
+                    .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key')
+                    .lte('tournament_seq_nbr', 10)
+
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    return;
+                }
+
+                renderBumpChart(data);
+            }
+
+            function renderBumpChart(data) {
+                // Group data by hero
+                const heroesData = d3.group(data, d => d.hero_handle);
+                
+                // Set up dimensions
+                const margin = { top: 40, right: 150, bottom: 60, left: 60 };
+                const width = 1000 - margin.left - margin.right;
+                const height = 500 - margin.top - margin.bottom;
+
+                // Create SVG
+                const svg = d3.select("#bump-chart")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // Create color scale for different heroes
+                const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+                // Create scales
+                const xScale = d3.scaleLinear()
+                    .domain(d3.extent(data, d => d.tournament_seq_nbr).reverse())
+                    .range([0, width]);
+
+                const yScale = d3.scaleLinear()
+                    .domain(d3.extent(data, d => d.score))
+                    .range([height, 0])
+                    .nice();
+
+                // Create line generator
+                const line = d3.line()
+                    .x(d => xScale(d.tournament_seq_nbr))
+                    .y(d => yScale(d.score))
+                    .curve(d3.curveMonotoneX);
+
+                // Add axes
+                svg.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(xScale)
+                        .tickFormat(d => {
+                            const tournament = data.find(item => item.tournament_seq_nbr === d);
+                            return tournament ? tournament.tournament_unique_key : '';
+                        }))
+                    .selectAll("text")
+                    .attr("transform", "rotate(-45)")
+                    .style("text-anchor", "end");
+
+                svg.append("g")
+                    .call(d3.axisLeft(yScale));
+
+                // Add lines for each hero
+                heroesData.forEach((heroData, heroHandle) => {
+                    // Sort hero's data by tournament sequence
+                    heroData.sort((a, b) => a.tournament_seq_nbr - b.tournament_seq_nbr);
+                    
+                    // Add the line
+                    svg.append("path")
+                        .datum(heroData)
+                        .attr("fill", "none")
+                        .attr("stroke", colorScale(heroHandle))
+                        .attr("stroke-width", 3)
+                        .attr("d", line);
+
+                    // Add circles with hero PFPs
+                    const defs = svg.append("defs");
+                    
+                    heroData.forEach((d, i) => {
+                        // Create circular clip path
+                        defs.append("clipPath")
+                            .attr("id", `clip-${heroHandle}-${i}`)
+                            .append("circle")
+                            .attr("r", 15);
+
+                        // Add hero PFP
+                        const group = svg.append("g")
+                            .attr("transform", `translate(${xScale(d.tournament_seq_nbr)},${yScale(d.score)})`);
+
+                        group.append("image")
+                            .attr("xlink:href", d.hero_pfp_url)
+                            .attr("x", -15)
+                            .attr("y", -15)
+                            .attr("width", 30)
+                            .attr("height", 30)
+                            .attr("clip-path", `url(#clip-${heroHandle}-${i})`);
+                    });
+
+                    // Add hero handle label on the right
+                    const lastPoint = heroData[heroData.length - 1];
+                    svg.append("text")
+                        .attr("x", xScale(lastPoint.tournament_seq_nbr) + 10)
+                        .attr("y", yScale(lastPoint.score))
+                        .attr("dy", "0.35em")
+                        .text(heroHandle)
+                        .attr("fill", colorScale(heroHandle))
+                        .style("font-weight", "bold");
+                });
+            }
+
+            // Call the function to fetch and display data
+            await fetchHeroStats();
+        });
+    </script>
+    <div id="bump-chart"></div>
+</body>
+</html>

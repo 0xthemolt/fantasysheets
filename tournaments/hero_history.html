@@ -31,19 +31,47 @@
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
             const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+            let allData = []; // Store all fetched data
+
             async function fetchHeroStats() {
+                // Fetch all data from the database
                 const { data, error } = await supabaseClient
                     .from('hero_bump_chart')
                     .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key')
-                    .lte('tournament_seq_nbr', 10)
+                    .lte('tournament_seq_nbr', 10);
 
                 if (error) {
                     console.error('Error fetching data:', error);
                     return;
                 }
 
-                renderBumpChart(data);
+                allData = data; // Store the fetched data
+
+                // Apply filters based on user input
+                applyFilters();
             }
+
+            function applyFilters() {
+                const minScore = parseFloat(document.getElementById('current-score-min').value) || -Infinity;
+                const maxScore = parseFloat(document.getElementById('current-score-max').value) || Infinity;
+                const minimumScore = parseFloat(document.getElementById('minimum-score').value) || -Infinity;
+                const medianMinScore = parseFloat(document.getElementById('median-score-min').value) || -Infinity;
+                const medianMaxScore = parseFloat(document.getElementById('median-score-max').value) || Infinity;
+
+                // Filter data based on user input
+                const filteredData = allData.filter(d => 
+                    d.score >= minScore && d.score <= maxScore &&
+                    d.score >= minimumScore
+                );
+
+                // Calculate median score if needed and apply additional filtering
+                // (You can implement median calculation logic here if required)
+
+                renderBumpChart(filteredData);
+            }
+
+            // Add event listener for filter application
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
 
             function renderBumpChart(data) {
                 // Group data by hero
@@ -135,12 +163,13 @@
                     // Add hero handle label on the right
                     const lastPoint = heroData[heroData.length - 1];
                     svg.append("text")
-                        .attr("x", xScale(lastPoint.tournament_seq_nbr) + 10)
+                        .attr("x", width - 10)
                         .attr("y", yScale(lastPoint.score))
                         .attr("dy", "0.35em")
                         .text(heroHandle)
                         .attr("fill", colorScale(heroHandle))
-                        .style("font-weight", "bold");
+                        .style("font-weight", "bold")
+                        .attr("text-anchor", "end");
                 });
             }
 
@@ -148,6 +177,20 @@
             await fetchHeroStats();
         });
     </script>
+    <div id="filters">
+        <label for="current-score-min">Current Score:</label>
+        <input type="number" id="current-score-min" placeholder="Min">
+        <input type="number" id="current-score-max" placeholder="Max">
+        
+        <label for="minimum-score">Minimum Score:</label>
+        <input type="number" id="minimum-score" placeholder="Value">
+        
+        <label for="median-score-min">Median Score:</label>
+        <input type="number" id="median-score-min" placeholder="Min">
+        <input type="number" id="median-score-max" placeholder="Max">
+        
+        <button id="apply-filters">Apply Filters</button>
+    </div>
     <div id="bump-chart"></div>
 </body>
 </html>

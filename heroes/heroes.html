@@ -7,6 +7,7 @@
             column: 'rank',
             direction: 'asc'
         };
+        let heroData;
 
         // Add these utility functions at the start of your script
         const colorCache = new Map();
@@ -54,6 +55,13 @@
             // Load hero data after Supabase is initialized
             await loadHeroData();
             initializeSparklineHovers();
+
+            // Add this to your window.onload function after loadHeroData():
+            document.querySelectorAll('.star-checkbox input').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    renderHeroTable(heroData);  // Use global heroData variable
+                });
+            });
         };
 
         // Google Analytics code
@@ -296,7 +304,8 @@
                 });
             }
 
-            renderHeroTable(data);
+            heroData = data; // Store data in global variable
+            renderHeroTable(heroData);
             
             // Add click handlers for sortable columns
             document.querySelectorAll('th[data-sort]').forEach(th => {
@@ -321,19 +330,25 @@
                     arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
                     
                     // Resort and render
-                    renderHeroTable(data);
+                    renderHeroTable(heroData);
                 });
             });
         }
 
         // Add this new function to handle table rendering
         function renderHeroTable(data) {
-            // Add this at the start of the function to find the most recent update time
-            const latestUpdate = Math.max(...data.map(hero => new Date(hero.db_updated)));
-            document.getElementById('timestamp').textContent = `Last updated: ${formatTimestamp(latestUpdate)}`;
+            // Get selected star filters
+            const selectedStars = Array.from(document.querySelectorAll('.star-checkbox input:checked'))
+                .map(checkbox => parseInt(checkbox.value));
 
-            // Sort the data
-            const sortedData = [...data].sort((a, b) => {
+            // Filter the data based on selected stars
+            let filteredData = [...data];
+            if (selectedStars.length > 0) {
+                filteredData = filteredData.filter(hero => selectedStars.includes(hero.stars));
+            }
+
+            // Sort the filtered data
+            const sortedData = [...filteredData].sort((a, b) => {
                 let compareA = a[currentSort.column];
                 let compareB = b[currentSort.column];
                 
@@ -347,6 +362,10 @@
                 const comparison = compareA < compareB ? -1 : 1;
                 return currentSort.direction === 'asc' ? comparison : -comparison;
             });
+
+            // Add this at the start of the function to find the most recent update time
+            const latestUpdate = Math.max(...data.map(hero => new Date(hero.db_updated)));
+            document.getElementById('timestamp').textContent = `Last updated: ${formatTimestamp(latestUpdate)}`;
 
             // Your existing rendering code, moved to a separate function
             const tbody = document.querySelector('tbody');
@@ -802,6 +821,58 @@
                 transform-origin: center center; /* Change from left to center */
                 margin: 0 auto; /* Center the sparkline */
             }
+
+            .filter-container {
+                margin: 20px auto;
+                padding: 0 11.5px;
+                max-width: 1200px;
+                width: 95%;
+            }
+
+            .filter-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+                background: var(--card-background-color);
+                border-radius: 8px;
+            }
+
+            .filter-group label {
+                font-weight: 500;
+            }
+
+            .stars-filter {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .star-checkbox {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+            }
+
+            .star-checkbox input {
+                display: none;
+            }
+
+            .star-checkbox .star-circle {
+                opacity: 0.5;
+                transition: opacity 0.2s;
+            }
+
+            .star-checkbox input:checked + .star-circle {
+                opacity: 1;
+            }
+
+            @media screen and (max-width: 768px) {
+                .filter-group {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+            }
 </style>
 <body>
     <div class="title-container">
@@ -814,6 +885,45 @@
     </div>
     <div class="small-text">
         <span id="timestamp"></span>
+    </div>
+    <div class="filter-container">
+        <div class="filter-group">
+            <label>Filter by Stars:</label>
+            <div class="stars-filter">
+                <label class="star-checkbox">
+                    <input type="checkbox" value="1">
+                    <span class="star-circle" style="background-color: #808080">1</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="2">
+                    <span class="star-circle" style="background-color: #FFFDD0">2</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="3">
+                    <span class="star-circle" style="background-color: #FFFAA0">3</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="4">
+                    <span class="star-circle" style="background-color: #FFFF8F">4</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="5">
+                    <span class="star-circle" style="background-color: #FAFA33">5</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="6">
+                    <span class="star-circle" style="background-color: #FFEA00">6</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="7">
+                    <span class="star-circle" style="background-color: #FFD700">7</span>
+                </label>
+                <label class="star-checkbox">
+                    <input type="checkbox" value="8">
+                    <span class="star-circle" style="background-color: #FFC000">8</span>
+                </label>
+            </div>
+        </div>
     </div>
     <div class="table-container">
         <table>

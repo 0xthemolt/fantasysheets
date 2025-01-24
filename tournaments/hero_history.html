@@ -1,26 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-LXJ5Q7LKKE');
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://pbs.twimg.com">
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasySheets | Hero Tournament History</title>
-    <link rel="stylesheet" href="../styles.css">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
-    <link rel="stylesheet" href="../styles.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="../icons/favicon.webp">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
@@ -37,7 +17,7 @@
                 // Fetch all data from the database
                 const { data, error } = await supabaseClient
                     .from('hero_bump_chart')
-                    .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key')
+                    .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key,dominant_color')
                     .lte('tournament_seq_nbr', 10);
 
                 if (error) {
@@ -133,7 +113,7 @@
                     svg.append("path")
                         .datum(heroData)
                         .attr("fill", "none")
-                        .attr("stroke", colorScale(heroHandle))
+                        .attr("stroke", heroData[0].dominant_color)
                         .attr("stroke-width", 3)
                         .attr("d", line);
 
@@ -167,7 +147,7 @@
                         .attr("y", yScale(lastPoint.score))
                         .attr("dy", "0.35em")
                         .text(heroHandle)
-                        .attr("fill", colorScale(heroHandle))
+                        .attr("fill", lastPoint.dominant_color)
                         .style("font-weight", "bold")
                         .attr("text-anchor", "end");
                 });

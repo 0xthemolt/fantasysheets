@@ -28,8 +28,8 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            width: 90%;
-            max-width: 1200px;
+            width: 95%;
+            max-width: 1400px;
         }
 
         #filters {
@@ -38,11 +38,11 @@
             align-items: flex-start;
             margin-bottom: 20px;
             background: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 300px;
         }
 
         label {
@@ -51,9 +51,9 @@
         }
 
         input, button {
-            padding: 10px;
-            font-size: 1rem;
-            margin: 5px 0 15px;
+            padding: 8px;
+            font-size: 0.9rem;
+            margin: 3px 0 10px;
             width: 100%;
             border: 2px solid #ddd;
             border-radius: 5px;
@@ -96,6 +96,16 @@
         .filter-label {
             font-weight: bold;
         }
+
+        .tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -104,16 +114,16 @@
         <div class="filters-container">
             <div>
                 <label for="score-min" class="filter-label">Min Score</label>
-                <input type="number" id="score-min" placeholder="Min Score">
+                <input type="number" id="score-min" value="500" placeholder="Min Score">
             </div>
             <div>
                 <label for="score-max" class="filter-label">Max Score</label>
-                <input type="number" id="score-max" placeholder="Max Score">
+                <input type="number" id="score-max" value="1000" placeholder="Max Score">
             </div>
         </div>
         
-        <label for="lookback" class="filter-label">Lookback</label>
-        <input type="number" id="lookback" placeholder="Number of Tournaments">
+        <label for="lookback" class="filter-label">Lookback (max 10)</label>
+        <input type="number" id="lookback" value="5" placeholder="Number of Tournaments">
 
         <button id="apply-filters">Apply Filters</button>
     </div>
@@ -131,17 +141,33 @@
             async function fetchHeroStats() {
                 const { data, error } = await supabaseClient
                     .from('hero_bump_chart')
-                    .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key')
-                    .lte('tournament_seq_nbr', 10);
+                    .select('hero_handle, score, hero_pfp_url, tournament_seq_nbr, tournament_unique_key,dominant_color')
+                    .lte('tournament_seq_nbr', 10)
+                    .in('hero_handle', ['boldleonidas', 'beast_ico', '0xRamonos']);
+                    
 
                 if (error) {
                     console.error('Error fetching data:', error);
                     return;
                 }
 
+                // Debug: Print distinct tournament keys before any filtering
+                const distinctTournaments = [...new Set(data.map(d => d.tournament_unique_key))].sort();
+                console.log('Distinct tournament keys:', distinctTournaments);
+                console.log('Tournament data:', data.map(d => ({
+                    seq: d.tournament_seq_nbr,
+                    key: d.tournament_unique_key
+                })).sort((a, b) => a.seq - b.seq));
+
                 // Filter out non-integer tournament sequence numbers
                 allData = data.filter(d => Number.isInteger(d.tournament_seq_nbr));
 
+                // Set default values
+                document.getElementById('score-min').value = '500';
+                document.getElementById('score-max').value = '1000';
+                document.getElementById('lookback').value = '5';
+
+                // Automatically apply filters on load
                 applyFilters();
             }
 
@@ -151,22 +177,30 @@
                 const lookback = parseInt(document.getElementById('lookback').value) || 0;
 
                 const maxTournamentSeq = d3.max(allData, d => d.tournament_seq_nbr);
+                
+                // First, filter by lookback period only
+                const lookbackData = allData.filter(d => 
+                    d.tournament_seq_nbr <= lookback
+                );
 
-                const filteredData = allData
-                    .filter(d => 
-                        d.score >= minScore &&
-                        d.score <= maxScore &&
-                        d.tournament_seq_nbr >= maxTournamentSeq - lookback + 1
-                    );
+                // Group by hero to check their score ranges
+                const heroesData = d3.group(lookbackData, d => d.hero_handle);
 
-                const heroesData = d3.group(filteredData, d => d.hero_handle);
-
+                // Filter heroes based on their score ranges during the lookback period
                 const validHeroes = Array.from(heroesData.entries()).filter(([hero, records]) => {
                     const uniqueTournaments = new Set(records.map(r => r.tournament_seq_nbr));
-                    return uniqueTournaments.size === lookback;
+                    if (uniqueTournaments.size !== lookback) return false;
+
+                    // Check if ALL scores are within the requested range
+                    const heroMinScore = d3.min(records, r => r.score);
+                    const heroMaxScore = d3.max(records, r => r.score);
+                    return heroMinScore >= minScore && heroMaxScore <= maxScore;
                 });
 
                 const finalFilteredData = validHeroes.flatMap(([_, records]) => records);
+
+                console.log('Final filtered data - unique tournaments:', 
+                    [...new Set(finalFilteredData.map(d => d.tournament_unique_key))].sort());
 
                 renderBumpChart(finalFilteredData);
             }
@@ -189,53 +223,128 @@
                     .append("g")
                     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-                const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
-                // Get the min and max score from the filtered data
                 const scoreMin = d3.min(data, d => d.score);
                 const scoreMax = d3.max(data, d => d.score);
 
                 const yPadding = 50; 
                 const yScale = d3.scaleLinear()
-                    .domain([scoreMin - yPadding, scoreMax + yPadding])
-                    .range([height, 0])
-                    .nice();
+                    .domain([0, 1000])  // Fixed domain from 0 to 1000
+                    .range([height, 0]);
 
                 const xScale = d3.scaleLinear()
-                    .domain(d3.extent(data, d => d.tournament_seq_nbr))
+                    .domain(d3.extent(data, d => d.tournament_seq_nbr).reverse())
                     .range([0, width]);
 
+                // Define the line generator
                 const line = d3.line()
                     .x(d => xScale(d.tournament_seq_nbr))
                     .y(d => yScale(d.score))
                     .curve(d3.curveMonotoneX);
 
+                // Create a map of tournament_seq_nbr to tournament_unique_key
+                const tournamentLabels = new Map(
+                    [...new Set(data.map(d => [d.tournament_seq_nbr, d.tournament_unique_key]))]
+                        .sort((a, b) => a[0] - b[0])
+                );
+
                 svg.append("g")
                     .attr("transform", `translate(0,${height})`)
-                    .call(d3.axisBottom(xScale).tickFormat(d => `Tournament ${d}`));
+                    .call(d3.axisBottom(xScale)
+                        .tickFormat(d => tournamentLabels.get(d)))
+                    .selectAll("text")
+                    .attr("transform", "rotate(-45)")
+                    .style("text-anchor", "end");
 
                 svg.append("g")
                     .call(d3.axisLeft(yScale));
 
+                // Add tooltip div
+                const tooltip = d3.select("#bump-chart")
+                    .append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+
                 heroesData.forEach((heroData, heroHandle) => {
                     heroData.sort((a, b) => a.tournament_seq_nbr - b.tournament_seq_nbr);
 
-                    svg.append("path")
+                    // Create group for the hero's elements
+                    const heroGroup = svg.append("g")
+                        .attr("class", "hero-group");
+
+                    // Add path with hover effects
+                    const path = heroGroup.append("path")
                         .datum(heroData)
                         .attr("fill", "none")
-                        .attr("stroke", colorScale(heroHandle))
+                        .attr("stroke", heroData[0].dominant_color)
                         .attr("stroke-width", 2)
+                        .attr("class", "hero-line")
                         .attr("d", line);
 
-                    // Add hero images at the rightmost side
-                    const latestPoint = heroData[heroData.length - 1];
-                    svg.append("image")
-                        .attr("xlink:href", latestPoint.hero_pfp_url)
-                        .attr("x", xScale(latestPoint.tournament_seq_nbr) + 10)
-                        .attr("y", yScale(latestPoint.score) - 15)
+                    // Create score labels (initially hidden)
+                    const scoreLabels = heroGroup.selectAll(".score-label")
+                        .data(heroData)
+                        .enter()
+                        .append("text")
+                        .attr("class", "score-label")
+                        .attr("x", d => xScale(d.tournament_seq_nbr))
+                        .attr("y", d => yScale(d.score) - 10)
+                        .text(d => Math.round(d.score))
+                        .attr("text-anchor", "middle")
+                        .attr("font-size", "12px")
+                        .style("opacity", 0);
+
+                    // Update hero handle text - align with the first tournament (rightmost point)
+                    const heroHandleText = heroGroup.append("text")
+                        .attr("class", "hero-handle")
+                        .attr("x", width + 45)
+                        .attr("y", yScale(heroData[0].score) + 5)  // Use first tournament's score instead of last
+                        .text(heroHandle)
+                        .attr("font-size", "12px")
+                        .style("opacity", 0);
+
+                    // Update hover effects
+                    path.on("mouseover", function(event, d) {
+                            svg.selectAll(".hero-line").style("opacity", 0.2);
+                            d3.select(this)
+                                .style("opacity", 1)
+                                .attr("stroke-width", 4);
+                            heroGroup.selectAll(".score-label")
+                                .style("opacity", 1);
+                            heroHandleText.style("opacity", 1);
+                        })
+                        .on("mouseout", function() {
+                            svg.selectAll(".hero-line").style("opacity", 1);
+                            d3.select(this).attr("stroke-width", 2);
+                            heroGroup.selectAll(".score-label")
+                                .style("opacity", 0);
+                            heroHandleText.style("opacity", 0);
+                        });
+
+                    // Update image position - align with the first tournament (rightmost point)
+                    const firstPoint = heroData[0];  // Use first tournament point instead of last
+                    heroGroup.append("image")
+                        .attr("xlink:href", firstPoint.hero_pfp_url)
+                        .attr("x", width + 10)
+                        .attr("y", yScale(firstPoint.score) - 15)
                         .attr("width", 30)
                         .attr("height", 30)
-                        .attr("clip-path", "circle(15px)");
+                        .attr("clip-path", "circle(15px)")
+                        .style("cursor", "pointer")
+                        .on("mouseover", function() {
+                            svg.selectAll(".hero-line").style("opacity", 0.2);
+                            path.style("opacity", 1)
+                                .attr("stroke-width", 4);
+                            heroGroup.selectAll(".score-label")
+                                .style("opacity", 1);
+                            heroHandleText.style("opacity", 1);
+                        })
+                        .on("mouseout", function() {
+                            svg.selectAll(".hero-line").style("opacity", 1);
+                            path.attr("stroke-width", 2);
+                            heroGroup.selectAll(".score-label")
+                                .style("opacity", 0);
+                            heroHandleText.style("opacity", 0);
+                        });
                 });
             }
 

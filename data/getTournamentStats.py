@@ -6,10 +6,10 @@ import pandas as pd
 
 def get_db_connection():
     return psycopg2.connect(
-        dbname="0xthemolt",
+        dbname="postgres",
         user="postgres",
-        password="admin",
-        host="localhost",
+        password="$&roct8&rgp4NE",
+        host="db.hhcuqhvmzwmehdsaamhn.supabase.co",
         port="5432"
     )
 
@@ -21,12 +21,12 @@ league_decks_query = f"""select
     gt.start_timestamp,
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
-    league,
+    gt.league,
     COUNT(*) deck_count,
     COUNT(distinct gtpp.player_id) player_count
 from
     flatten.get_tournaments gt
-join flatten.get_tournament_past_players gtpp
+join flatten.tournament_players gtpp
     on gt.tournament_id = gtpp.tournament_id
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
 group by 1,2,3,4,5
@@ -42,7 +42,7 @@ total_players_query = f"""select
     COUNT(distinct gtpp.player_id) player_count
 from
     flatten.get_tournaments gt
-join flatten.get_tournament_past_players gtpp
+join flatten.tournament_players gtpp
     on gt.tournament_id = gtpp.tournament_id
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
 group by 1,2,3,4

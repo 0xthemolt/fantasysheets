@@ -1106,7 +1106,7 @@ async function fetchData(tournamentNumber) {
         query = query.order('player_rank', { ascending: true });
 
         // Execute query with pagination
-        const pageSize = 15000;
+        const pageSize = 500;
         let allResults = [];
         let hasMore = true;
         let currentPage = 0;
@@ -1157,6 +1157,7 @@ function initializeLeagueButtons() {
         button.addEventListener('click', () => {
             // Handle My Decks button
             if (button.querySelector('.fa-user')) {
+                console.log('Getting data for My Decks');
                 document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 selectedLeague = null;
@@ -1173,6 +1174,7 @@ function initializeLeagueButtons() {
 
             // Handle My Leagues button
             if (button.querySelector('.fa-trophy')) {
+                console.log('Getting data for My Leagues');
                 document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 selectedLeague = null;
@@ -1190,6 +1192,7 @@ function initializeLeagueButtons() {
             // Handle league buttons (Elite, Gold, etc.)
             const league = button.textContent.trim();
             if (['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(league)) {
+                console.log(`Getting data for ${league} league`);
                 document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 selectedLeague = league;
@@ -1200,7 +1203,7 @@ function initializeLeagueButtons() {
                     activeTournament.querySelector('.number').textContent.replace(/[^0-9]/g, '') : null;
                 
                 if (tournamentNumber) {
-                    fetchData(tournamentNumber); // Trigger new data fetch with league filter
+                    fetchData(tournamentNumber);
                 }
                 return;
             }
@@ -1217,6 +1220,7 @@ function initializeLeagueButtons() {
         myDecksButton.classList.add('active');
     }
 }
+
 
 // Modify the updateTableWithData function
 function updateTableWithData(data, preserveFiltered = false) {

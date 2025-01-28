@@ -731,6 +731,85 @@
         }
     }
 
+    .league-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .league-toggle.active {
+        background: #404040;
+        color: #ffffff;
+        border-color: #505050;
+    }
+
+    .league-dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #2a2a2a;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        border-radius: 4px;
+        border: 1px solid #404040;
+        z-index: 1000;
+        margin-top: 4px;
+    }
+
+    .league-dropdown.active .league-dropdown-content {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        color: #808080;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+    }
+
+    .dropdown-item:hover {
+        background: #404040;
+        color: #ffffff;
+    }
+
+    .dropdown-item.active {
+        background: #505050;
+        color: #ffffff;
+    }
+
+    .league-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .league-dropdown-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 300px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 0 0 100vmax rgba(0,0,0,0.5);
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            font-size: 16px;
+        }
+    }
+
 </style>
 </head>
 <body>
@@ -761,26 +840,37 @@
             My Decks
         </button>
         <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
-        <button class="toggle-button">
-            <img src="../icons/elite.webp" alt="Elite" class="league-icon">
-            Elite
-        </button>
-        <button class="toggle-button">
-            <img src="../icons/gold.webp" alt="Gold" class="league-icon">
-            Gold
-        </button>
-        <button class="toggle-button">
-            <img src="../icons/silver.webp" alt="Silver" class="league-icon">
-            Silver
-        </button>
-        <button class="toggle-button">
-            <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
-            Bronze
-        </button>
-        <button class="toggle-button">
-            <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
-            Reverse
-        </button>
+        
+        <!-- Replace the individual league buttons with this dropdown structure -->
+        <div class="league-dropdown">
+            <button class="toggle-button league-toggle">
+                <i class="fas fa-layer-group"></i>
+                Leagues
+                <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
+            </button>
+            <div class="league-dropdown-content">
+                <button class="dropdown-item" data-league="Elite">
+                    <img src="../icons/elite.webp" alt="Elite" class="league-icon">
+                    Elite
+                </button>
+                <button class="dropdown-item" data-league="Gold">
+                    <img src="../icons/gold.webp" alt="Gold" class="league-icon">
+                    Gold
+                </button>
+                <button class="dropdown-item" data-league="Silver">
+                    <img src="../icons/silver.webp" alt="Silver" class="league-icon">
+                    Silver
+                </button>
+                <button class="dropdown-item" data-league="Bronze">
+                    <img src="../icons/bronze.webp" alt="Bronze" class="league-icon">
+                    Bronze
+                </button>
+                <button class="dropdown-item" data-league="Reverse">
+                    <img src="../icons/reverse.webp" alt="Reverse" class="league-icon">
+                    Reverse
+                </button>
+            </div>
+        </div>
     </div>
     
     <!-- Second row: Filters -->
@@ -1105,43 +1195,17 @@ async function fetchData(tournamentNumber) {
         // Add order by
         query = query.order('player_rank', { ascending: true });
 
-        // Execute query with pagination
-        const pageSize = 500;
-        let allResults = [];
-        let hasMore = true;
-        let currentPage = 0;
-        let totalQueryTime = 0;
+        // Execute single query with limit of 500
+        const { data, error } = await query
+            .limit(500);
 
-        while (hasMore) {
-            const queryStart = performance.now();
-            
-            const { data, error } = await query
-                .range(currentPage * pageSize, (currentPage + 1) * pageSize - 1);
-
-            const queryEnd = performance.now();
-            const queryTime = queryEnd - queryStart;
-            totalQueryTime += queryTime;
-            console.log(`Player query page ${currentPage + 1} took ${queryTime.toFixed(2)}ms`);
-
-            if (error) {
-                throw error;
-            }
-
-            if (data.length === 0) {
-                hasMore = false;
-            } else {
-                allResults = [...allResults, ...data];
-                currentPage++;
-            }
-
-            if (data.length < pageSize) {
-                hasMore = false;
-            }
+        if (error) {
+            throw error;
         }
 
         // Continue with existing code...
         cachedTournamentData = {
-            players: allResults,
+            players: data,
             rewards: rewardsData
         };
         updateTableWithData(cachedTournamentData);
@@ -1153,72 +1217,85 @@ async function fetchData(tournamentNumber) {
 
 // Add this function to handle league button clicks
 function initializeLeagueButtons() {
-    document.querySelectorAll('.toggle-button').forEach(button => {
-        button.addEventListener('click', () => {
-            // Handle My Decks button
-            if (button.querySelector('.fa-user')) {
-                console.log('Getting data for My Decks');
-                document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                selectedLeague = null;
-                // Get current tournament number from active scroll-item
-                const activeTournament = document.querySelector('.scroll-item.active');
-                const tournamentNumber = activeTournament ? 
-                    activeTournament.querySelector('.number').textContent.replace(/[^0-9]/g, '') : null;
-                
-                if (tournamentNumber) {
-                    fetchData(tournamentNumber);
-                }
-                return;
-            }
+    const leagueToggle = document.querySelector('.league-toggle');
+    const leagueDropdown = document.querySelector('.league-dropdown');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
+    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
 
-            // Handle My Leagues button
-            if (button.querySelector('.fa-trophy')) {
-                console.log('Getting data for My Leagues');
-                document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                selectedLeague = null;
-                // Get current tournament number from active scroll-item
-                const activeTournament = document.querySelector('.scroll-item.active');
-                const tournamentNumber = activeTournament ? 
-                    activeTournament.querySelector('.number').textContent.replace(/[^0-9]/g, '') : null;
-                
-                if (tournamentNumber) {
-                    fetchData(tournamentNumber);
-                }
-                return;
-            }
+    // Initialize My Decks button
+    myDecksButton.addEventListener('click', () => {
+        myDecksButton.classList.toggle('active');
+        // Clear other toggles
+        myLeaguesButton.classList.remove('active');
+        leagueToggle.classList.remove('active');
+        leagueDropdown.classList.remove('active');
+        selectedLeague = null;
+        
+        // Update table
+        updateTableWithData(cachedTournamentData, false);
+    });
 
-            // Handle league buttons (Elite, Gold, etc.)
-            const league = button.textContent.trim();
-            if (['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(league)) {
-                console.log(`Getting data for ${league} league`);
-                document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                selectedLeague = league;
-                
-                // Get current tournament number from active scroll-item
-                const activeTournament = document.querySelector('.scroll-item.active');
-                const tournamentNumber = activeTournament ? 
-                    activeTournament.querySelector('.number').textContent.replace(/[^0-9]/g, '') : null;
-                
-                if (tournamentNumber) {
-                    fetchData(tournamentNumber);
-                }
-                return;
-            }
+    // Initialize My Leagues button
+    myLeaguesButton.addEventListener('click', () => {
+        myLeaguesButton.classList.toggle('active');
+        // Clear other toggles
+        myDecksButton.classList.remove('active');
+        leagueToggle.classList.remove('active');
+        leagueDropdown.classList.remove('active');
+        selectedLeague = null;
+        
+        // Update table
+        updateTableWithData(cachedTournamentData, false);
+    });
+
+    // Toggle dropdown
+    leagueToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        leagueDropdown.classList.toggle('active');
+        
+        // Remove active class from other toggle buttons
+        myDecksButton.classList.remove('active');
+        myLeaguesButton.classList.remove('active');
+    });
+
+    // Handle dropdown item selection
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const league = item.dataset.league;
             
-            if (!selectedLeague) {
-                button.classList.remove('active');
-            }
+            // Update toggle button text and icon
+            leagueToggle.innerHTML = `
+                <i class="fas fa-layer-group"></i>
+                ${league}
+                <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
+            `;
+            
+            // Update active states
+            dropdownItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            leagueToggle.classList.add('active');
+            
+            // Close dropdown
+            leagueDropdown.classList.remove('active');
+            
+            // Clear other toggle buttons
+            myDecksButton.classList.remove('active');
+            myLeaguesButton.classList.remove('active');
+            
+            // Update selected league and refresh table
+            selectedLeague = league;
+            updateTableWithData(cachedTournamentData, false);
         });
     });
 
-    // Set "My Decks" button as active on page load
-    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
-    if (myDecksButton) {
-        myDecksButton.classList.add('active');
-    }
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!leagueDropdown.contains(e.target)) {
+            leagueDropdown.classList.remove('active');
+        }
+    });
 }
 
 

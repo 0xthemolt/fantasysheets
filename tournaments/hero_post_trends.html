@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div style="width: 80%; margin: auto;">
+        <canvas id="viewsChart"></canvas>
+    </div>
+
+    <script>
+        Chart.register(ChartDataLabels);
+        async function fetchData() {
+            const response = await fetch('/data/tournaments/tournaments_stats_view_growth.json');
+            const data = await response.json();
+            
+            const datasets = Object.entries(data).map(([tournament, values]) => ({
+                label: tournament,
+                data: values.map(item => ({
+                    x: item.hours_since_start,
+                    y: item.views
+                })),
+                fill: false,
+                tension: 0.4
+            }));
+
+            new Chart(document.getElementById('viewsChart'), {
+                type: 'line',
+                data: {
+                    datasets: datasets.map(dataset => ({
+                        ...dataset,
+                        pointRadius: 0,
+                        pointHoverRadius: 0
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.875,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Hours Since Start'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Views'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Tournament Views Growth Over Time'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            display: function(context) {
+                                return context.dataIndex === context.dataset.data.length - 1;
+                            },
+                            align: 'right',
+                            anchor: 'end',
+                            formatter: function(value, context) {
+                                return context.dataset.label;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>

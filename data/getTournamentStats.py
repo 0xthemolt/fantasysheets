@@ -15,12 +15,13 @@ def get_db_connection():
 
 def get_second_db_connection():
     return psycopg2.connect(
-        dbname="0xthemolt",
+        dbname="fantasysheets",
         user="postgres",
-        password="admin",
-        host="localhost",
-        port="5432"
+        password="WIKrjPIYtqCWApMIXculsqbMIQcGotEg",
+        host="viaduct.proxy.rlwy.net",
+        port="38391"
     )
+
 
 # First query into league_decks_df
 conn = get_db_connection()

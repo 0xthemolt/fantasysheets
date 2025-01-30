@@ -16,6 +16,10 @@
             const response = await fetch('/data/tournaments/tournaments_stats_view_growth.json');
             const data = await response.json();
             
+            // Find the latest tournament number
+            const latestTournament = Math.max(...Object.keys(data)
+                .map(key => parseInt(key.match(/\d+/)[0])));
+            
             const datasets = Object.entries(data).map(([tournament, values]) => ({
                 label: tournament,
                 data: values.map(item => ({
@@ -23,7 +27,8 @@
                     y: item.views
                 })),
                 fill: false,
-                tension: 0.4
+                tension: 0.4,
+                borderDash: tournament.includes(latestTournament.toString()) ? [5, 5] : [] // Make latest tournament dashed
             }));
 
             new Chart(document.getElementById('viewsChart'), {

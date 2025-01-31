@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Bracket</title>
+    <style>
+        .bracket {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            gap: 40px;
+        }
+        .curve {
+            width: 45%;
+        }
+        .rounds-container {
+            display: flex;
+            gap: 40px;
+        }
+        .rounds-container.right {
+            flex-direction: row-reverse; /* Flip the right side */
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+        .match {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+            cursor: pointer;
+            width: 150px;
+        }
+        .team {
+            display: flex;
+            align-items: center;
+            padding: 3px;
+        }
+        .team img {
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .winner {
+            background-color: #90EE90;
+        }
+        .team:hover {
+            background-color: #f0f0f0;
+        }
+        /* Add championship game styling */
+        .championship {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid gold;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tournament Bracket</h1>
+    <div class="bracket">
+        <div class="curve" id="left-curve">
+            <h2>Left Curve</h2>
+            <div class="rounds-container" id="left-rounds"></div>
+        </div>
+        <div class="curve" id="right-curve">
+            <h2>Right Curve</h2>
+            <div class="rounds-container right" id="right-rounds"></div>
+        </div>
+    </div>
+    <div id="championship" class="championship" style="display: none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabaseJs.createClient(supabaseUrl, supabaseKey);
+
+        let teams = [];
+        const leftRounds = document.getElementById('left-rounds');
+        const rightRounds = document.getElementById('right-rounds');
+
+        // Create data structure to store bracket state
+        const bracketState = {
+            left: Array(6).fill().map(() => []),
+            right: Array(6).fill().map(() => [])
+        };
+
+        // Update createTeamElement to include hero image
+        function createTeamElement(team, matchIndex, roundIndex, side) {
+            const teamDiv = document.createElement('div');
+            teamDiv.className = 'team';
+            
+            if (team.hero_pfp_url) {
+                const img = document.createElement('img');
+                img.src = team.hero_pfp_url;
+                img.style.width = '30px';
+                img.style.height = '30px';
+                img.style.marginRight = '5px';
+                teamDiv.appendChild(img);
+            }
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = team.hero_name || 'TBD';
+            teamDiv.appendChild(nameSpan);
+            
+            teamDiv.onclick = () => selectWinner(teamDiv, team, matchIndex, roundIndex, side);
+            return teamDiv;
+        }
+
+        // Update createMatch for the new team object structure
+        function createMatch(team1, team2, matchIndex, roundIndex, side) {
+            const match = document.createElement('div');
+            match.className = 'match';
+            match.appendChild(createTeamElement(team1, matchIndex, roundIndex, side));
+            match.appendChild(createTeamElement(team2, matchIndex, roundIndex, side));
+            return match;
+        }
+
+        function selectWinner(teamElement, team, matchIndex, roundIndex, side) {
+            // Remove previous winner styling in this match
+            const match = teamElement.parentElement;
+            Array.from(match.children).forEach(team => team.classList.remove('winner'));
+            
+            // Add winner styling
+            teamElement.classList.add('winner');
+
+            // Update bracket state
+            bracketState[side][roundIndex][matchIndex] = team;
+
+            // If not the final round, update next round's match
+            if (roundIndex < 5) {
+                const nextRoundIndex = roundIndex + 1;
+                const nextMatchIndex = Math.floor(matchIndex / 2);
+                
+                // Create or update next round match
+                updateNextRoundMatch(side, nextRoundIndex, nextMatchIndex);
+            } else if (roundIndex === 5) {
+                // Check if both sides have winners for championship
+                const leftFinalWinner = bracketState.left[5][0];
+                const rightFinalWinner = bracketState.right[5][0];
+                
+                if (leftFinalWinner && rightFinalWinner) {
+                    createChampionshipGame(leftFinalWinner, rightFinalWinner);
+                }
+            }
+        }
+
+        function updateNextRoundMatch(side, roundIndex, matchIndex) {
+            const previousRoundIndex = roundIndex - 1;
+            const match1Index = matchIndex * 2;
+            const match2Index = match1Index + 1;
+            
+            const team1 = bracketState[side][previousRoundIndex][match1Index];
+            const team2 = bracketState[side][previousRoundIndex][match2Index];
+
+            // Find the existing match in the DOM
+            const roundsContainer = side === 'left' ? leftRounds : rightRounds;
+            const round = roundsContainer.children[roundIndex];
+            const existingMatch = round.children[matchIndex];
+
+            // Update or create the match
+            if (team1 && team2) {
+                if (existingMatch) {
+                    existingMatch.innerHTML = '';
+                    existingMatch.appendChild(createTeamElement(team1, matchIndex, roundIndex, side));
+                    existingMatch.appendChild(createTeamElement(team2, matchIndex, roundIndex, side));
+                }
+            }
+        }
+
+        function createChampionshipGame(leftWinner, rightWinner) {
+            const championship = document.getElementById('championship');
+            championship.style.display = 'block';
+            championship.innerHTML = '';
+            
+            const match = createMatch(leftWinner, rightWinner, 0, 6, 'championship');
+            championship.appendChild(match);
+        }
+
+        // Fetch teams from Supabase
+        async function loadTeams() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('heroes')
+                    .select('hero_name, hero_pfp_url, row_number() over(order by score desc) as seed_nbr')
+                    .order('score', { ascending: false })
+                    .limit(64);
+
+                if (error) throw error;
+                teams = data;
+                
+                // Create initial brackets after loading teams
+                for (let i = 0; i < 6; i++) {
+                    leftRounds.appendChild(createRound(i, 'left'));
+                    rightRounds.appendChild(createRound(i, 'right'));
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+
+        // Update createRound for the new team object structure
+        function createRound(roundIndex, side) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'round';
+            
+            const numMatches = 32 >> roundIndex;
+            
+            for (let i = 0; i < numMatches; i++) {
+                let match;
+                if (roundIndex === 0) {
+                    if (side === 'left') {
+                        match = createMatch(
+                            teams[i * 2] || { hero_name: 'TBD' },
+                            teams[63 - i * 2] || { hero_name: 'TBD' },
+                            i, roundIndex, side
+                        );
+                        bracketState.left[0].push(null);
+                    } else {
+                        const startIdx = numMatches - 1 - i;
+                        match = createMatch(
+                            teams[startIdx * 2 + 1] || { hero_name: 'TBD' },
+                            teams[62 - startIdx * 2] || { hero_name: 'TBD' },
+                            i, roundIndex, side
+                        );
+                        bracketState.right[0].push(null);
+                    }
+                } else {
+                    match = createMatch(
+                        { hero_name: 'TBD' },
+                        { hero_name: 'TBD' },
+                        i, roundIndex, side
+                    );
+                    bracketState[side][roundIndex].push(null);
+                }
+                roundDiv.appendChild(match);
+            }
+            return roundDiv;
+        }
+
+        // Initialize the bracket
+        loadTeams();
+    </script>
+</body>
+</html>

@@ -27,16 +27,19 @@
             justify-content: space-around;
         }
         .match {
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin: 5px;
-            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
             width: 150px;
         }
         .team {
             display: flex;
             align-items: center;
             padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            min-height: 36px;
         }
         .team img {
             border-radius: 50%;
@@ -47,8 +50,72 @@
         }
         .team:hover {
             background-color: #f0f0f0;
+            cursor: pointer;
         }
-        /* Add championship game styling */
+        /* Lines connecting matches */
+        .match::after {  /* Horizontal lines */
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 2px;
+            background: #ccc;
+        }
+        
+        .rounds-container:not(.right) .match::after {
+            right: -20px;
+        }
+        
+        .rounds-container.right .match::after {
+            left: -20px;
+        }
+
+        /* Vertical connecting lines */
+        .match::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background: #ccc;
+            right: -20px;
+        }
+
+        .rounds-container.right .match::before {
+            left: -20px;
+        }
+
+        /* First team in pair */
+        .match:nth-child(odd)::before {
+            top: calc(50% + 1px);
+            height: 100%;
+        }
+
+        /* Second team in pair */
+        .match:nth-child(even)::before {
+            bottom: calc(50% + 1px);
+            height: 100%;
+        }
+
+        /* Progressive spacing for rounds */
+        .round:nth-child(1) .match { margin: 3px 0; }
+        .round:nth-child(2) .match { margin: 20px 0; }
+        .round:nth-child(3) .match { margin: 60px 0; }
+        .round:nth-child(4) .match { margin: 140px 0; }
+        .round:nth-child(5) .match { margin: 300px 0; }
+        .round:nth-child(6) .match { margin: 620px 0; }
+
+        /* Remove connecting lines for last round */
+        .round:last-child .match::after,
+        .round:last-child .match::before {
+            display: none;
+        }
+
+        .round-label {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        /* Championship game styling */
         .championship {
             position: absolute;
             left: 50%;
@@ -78,7 +145,7 @@
     <script>
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
-        const supabaseClient = supabaseJs.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let teams = [];
         const leftRounds = document.getElementById('left-rounds');
@@ -95,20 +162,33 @@
             const teamDiv = document.createElement('div');
             teamDiv.className = 'team';
             
-            if (team.hero_pfp_url) {
-                const img = document.createElement('img');
-                img.src = team.hero_pfp_url;
-                img.style.width = '30px';
-                img.style.height = '30px';
-                img.style.marginRight = '5px';
-                teamDiv.appendChild(img);
+            // Only add content if there's actual team data
+            if (team && team.hero_name) {
+                // Add seed number if it exists
+                if (team.seed_nbr) {
+                    const seedSpan = document.createElement('span');
+                    seedSpan.textContent = `${team.seed_nbr}. `;
+                    seedSpan.style.marginRight = '5px';
+                    seedSpan.style.minWidth = '25px';
+                    teamDiv.appendChild(seedSpan);
+                }
+                
+                if (team.hero_pfp_url) {
+                    const img = document.createElement('img');
+                    img.src = team.hero_pfp_url;
+                    img.style.width = '30px';
+                    img.style.height = '30px';
+                    img.style.marginRight = '5px';
+                    teamDiv.appendChild(img);
+                }
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = team.hero_name;
+                teamDiv.appendChild(nameSpan);
+                
+                teamDiv.onclick = () => selectWinner(teamDiv, team, matchIndex, roundIndex, side);
             }
             
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = team.hero_name || 'TBD';
-            teamDiv.appendChild(nameSpan);
-            
-            teamDiv.onclick = () => selectWinner(teamDiv, team, matchIndex, roundIndex, side);
             return teamDiv;
         }
 
@@ -116,8 +196,14 @@
         function createMatch(team1, team2, matchIndex, roundIndex, side) {
             const match = document.createElement('div');
             match.className = 'match';
-            match.appendChild(createTeamElement(team1, matchIndex, roundIndex, side));
-            match.appendChild(createTeamElement(team2, matchIndex, roundIndex, side));
+            
+            // Create empty slots for future rounds
+            const team1Element = createTeamElement(team1, matchIndex, roundIndex, side);
+            const team2Element = createTeamElement(team2, matchIndex, roundIndex, side);
+            
+            match.appendChild(team1Element);
+            match.appendChild(team2Element);
+            
             return match;
         }
 
@@ -132,13 +218,26 @@
             // Update bracket state
             bracketState[side][roundIndex][matchIndex] = team;
 
-            // If not the final round, update next round's match
+            // If not the final round, update next round's match immediately
             if (roundIndex < 5) {
                 const nextRoundIndex = roundIndex + 1;
                 const nextMatchIndex = Math.floor(matchIndex / 2);
+                const isEvenMatch = matchIndex % 2 === 0;
                 
-                // Create or update next round match
-                updateNextRoundMatch(side, nextRoundIndex, nextMatchIndex);
+                // Get or create the next round's match
+                const roundsContainer = side === 'left' ? leftRounds : rightRounds;
+                const nextRound = roundsContainer.children[nextRoundIndex];
+                const nextMatch = nextRound.children[nextMatchIndex];
+                
+                // Update the appropriate team slot in the next match
+                if (nextMatch) {
+                    const teamSlot = isEvenMatch ? 0 : 1; // First or second team slot
+                    if (!nextMatch.children[teamSlot]) {
+                        nextMatch.appendChild(createTeamElement(team, nextMatchIndex, nextRoundIndex, side));
+                    } else {
+                        nextMatch.children[teamSlot].replaceWith(createTeamElement(team, nextMatchIndex, nextRoundIndex, side));
+                    }
+                }
             } else if (roundIndex === 5) {
                 // Check if both sides have winners for championship
                 const leftFinalWinner = bracketState.left[5][0];
@@ -186,10 +285,8 @@
         async function loadTeams() {
             try {
                 const { data, error } = await supabaseClient
-                    .from('heroes')
-                    .select('hero_name, hero_pfp_url, row_number() over(order by score desc) as seed_nbr')
-                    .order('score', { ascending: false })
-                    .limit(64);
+                    .from('heroes_bracket')
+                    .select('hero_name, hero_pfp_url,seed_nbr')
 
                 if (error) throw error;
                 teams = data;
@@ -209,6 +306,12 @@
             const roundDiv = document.createElement('div');
             roundDiv.className = 'round';
             
+            // Add round label
+            const roundLabel = document.createElement('div');
+            roundLabel.className = 'round-label';
+            roundLabel.textContent = getRoundName(roundIndex);
+            roundDiv.appendChild(roundLabel);
+            
             const numMatches = 32 >> roundIndex;
             
             for (let i = 0; i < numMatches; i++) {
@@ -216,24 +319,25 @@
                 if (roundIndex === 0) {
                     if (side === 'left') {
                         match = createMatch(
-                            teams[i * 2] || { hero_name: 'TBD' },
-                            teams[63 - i * 2] || { hero_name: 'TBD' },
+                            teams[i * 2],
+                            teams[63 - i * 2],
                             i, roundIndex, side
                         );
                         bracketState.left[0].push(null);
                     } else {
                         const startIdx = numMatches - 1 - i;
                         match = createMatch(
-                            teams[startIdx * 2 + 1] || { hero_name: 'TBD' },
-                            teams[62 - startIdx * 2] || { hero_name: 'TBD' },
+                            teams[startIdx * 2 + 1],
+                            teams[62 - startIdx * 2],
                             i, roundIndex, side
                         );
                         bracketState.right[0].push(null);
                     }
                 } else {
+                    // For future rounds, create empty match with placeholder teams
                     match = createMatch(
-                        { hero_name: 'TBD' },
-                        { hero_name: 'TBD' },
+                        { hero_name: '' },  // Empty placeholder instead of null
+                        { hero_name: '' },  // Empty placeholder instead of null
                         i, roundIndex, side
                     );
                     bracketState[side][roundIndex].push(null);
@@ -241,6 +345,18 @@
                 roundDiv.appendChild(match);
             }
             return roundDiv;
+        }
+
+        function getRoundName(roundIndex) {
+            switch(roundIndex) {
+                case 0: return 'Round 1';
+                case 1: return 'Round 2';
+                case 2: return 'Sweet 16';
+                case 3: return 'Elite 8';
+                case 4: return 'Final 4';
+                case 5: return 'Finals';
+                default: return `Round ${roundIndex + 1}`;
+            }
         }
 
         // Initialize the bracket

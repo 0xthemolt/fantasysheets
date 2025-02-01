@@ -173,9 +173,14 @@
                 grid-column: 2;
                 grid-row: 2;
             }
-            
-            .column-container:nth-child(5) { /* Fun & Other */
-                grid-column: 1 / -1;  /* Full width */
+
+            .column-container:nth-child(5) { /* Marketplace */
+                grid-column: 1;
+                grid-row: 3;
+            }
+
+            .column-container:nth-child(6) { /* Fun & Other */
+                grid-column: 2;
                 grid-row: 3;
             }
         }
@@ -231,8 +236,13 @@
                 <ul class="nav-list" id="previewList"></ul>
             </div>
             <div class="column-container">
+                <h2 class="column-title">Marketplace</h2>
+                <ul class="nav-list" id="marketplaceList"></ul>
+            </div>
+            <div class="column-container">
                 <h2 class="column-title">Fun & Other</h2>
                 <ul class="nav-list" id="otherList"></ul>
+
             </div>
         </div>
         <p style="font-size: 0.5em; color: grey; text-align: center;">Best viewed on wide screen desktop, but works on mobile.</p>
@@ -266,12 +276,16 @@
             { filename: 'league_rewards_itm_v2.html', title: 'League Rewards ITM v2'},
             { filename: 'tournament_reward_history.html', title: 'League Reward History'},
         ],
+        marketplace: [
+            { filename: 'marketplace.html', title: 'Marketplace'},
+        ],
         preview: [
             { filename: 'tournaments.html', title: 'Deck / Player Registration Stats' }, 
             //{ filename: 'index.html', title: 'PaperHands (in development)' },
             //{ filename: 'index.html', title: 'Marketplace Trends (in development)' },
             // { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
         ],
+
         other: [
             { filename: 'tier_maker.html', title: 'Tier Maker'},
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
@@ -327,8 +341,10 @@
         createLinks(pages.players, playerList);
         createLinks(pages.rewards, rewardList);
         createLinks(pages.preview, previewList);
+        createLinks(pages.marketplace, marketplaceList);
         createLinks(pages.other, otherList);
     }
+
 
     document.addEventListener('DOMContentLoaded', loadPages);
 </script>

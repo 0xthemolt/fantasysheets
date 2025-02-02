@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Insert Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <h1>Insert Data into Supabase</h1>
+    <form id="dataForm">
+        <label for="jsonString">JSON String:</label>
+        <input type="text" id="jsonString" name="jsonString" value='{"key": "value"}' required>
+        <br>
+        <label for="column2">Column 2:</label>
+        <input type="text" id="column2" name="column2" required>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.getElementById('dataForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const jsonString = document.getElementById('jsonString').value;
+            const column2 = document.getElementById('column2').value;
+            const insertdatetime = new Date().toISOString(); // Get current time in ISO format
+
+            const { data, error } = await client
+                .from('bracket_selections') // Updated table name
+                .insert([{ json_string: jsonString, x_handle: column2, insertdatetime }]); // Insert current time
+
+            if (error) {
+                console.error('Error inserting data:', error);
+            } else {
+                console.log('Data inserted successfully:', data);
+                alert('Data inserted successfully!');
+            }
+        });
+    </script>
+</body>
+</html>

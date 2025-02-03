@@ -145,7 +145,7 @@ tournament_views_data = {}
 print("Debug: Number of rows in tournament_views_df:", len(tournament_views_df))
 for _, row in tournament_views_df.iterrows():
     tournament_key = row['tournament_unique_key']
-    print(f"Debug: Processing tournament {tournament_key}, hours: {row['hours_since_start']}, views: {row['views']}")
+    # print(f"Debug: Processing tournament {tournament_key}, hours: {row['hours_since_start']}, views: {row['views']}")
     if tournament_key not in tournament_views_data:
         tournament_views_data[tournament_key] = []
     
@@ -154,7 +154,7 @@ for _, row in tournament_views_df.iterrows():
         'views': int(row['views'])
     })
 
-print("Debug: Final tournament_views_data structure:", json.dumps(tournament_views_data, indent=2))
+# print("Debug: Final tournament_views_data structure:", json.dumps(tournament_views_data, indent=2))
 
 # Get the absolute path for the output directory
 script_dir = os.path.dirname(os.path.abspath(__file__))

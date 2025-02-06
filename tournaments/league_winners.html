@@ -67,7 +67,9 @@
                     });
 
                     // Generate table rows
-                    const rows = Array.from(heroMap.values()).map(hero => `
+                    const rows = Array.from(heroMap.values())
+                        .sort((a, b) => (b.rva || 0) - (a.rva || 0))  // Sort by RVA descending
+                        .map(hero => `
                         <tr>
                             <td style="display: flex; align-items: center; gap: 10px;">
                                 <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
@@ -148,10 +150,11 @@
                                 <th>
                                     RVA
                                     <i class="fas fa-info-circle" 
-                                       title="RVA attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
+                                       title="Rewards Value Added (RVA) attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
                                        style="font-size: 0.8em; cursor: help;">
                                     </i>
                                 </th>
+
                                 <th>
                                     Top 50
                                     <i class="fas fa-info-circle" 

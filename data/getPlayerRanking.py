@@ -56,6 +56,8 @@ left join  flatten.GET_TOURNAMENT_BY_ID rewards_eth
 	and rewards_eth.reward_type = 'ETH'
 left join flatten.get_player_basic_data gpbd 
 	on tplayers.player_id  = gpbd.player_id 
+join eth_frags_won 
+    on tplayers.player_id = eth_frags_won.player_id
 where 1=1
 --and tplayers.player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --and t.tournament_unique_key  = 'Main 31'
@@ -68,7 +70,7 @@ select league,player_id
 ,case when avg(normalized_rank) is null then null else dense_rank() over (partition by league order by avg(normalized_rank)  desc) end as avg_best_deck_norm_rank
 from touranment_rankings
 where best_deck_rank = 1
---and league = 'Bronze'
+--and league = 'Silver'
 group by 1,2
 having count(*) >= 2 --at least 2 tournaments
 )
@@ -190,7 +192,7 @@ left join league_ranking touranment_rankings_bronze
 left join league_ranking touranment_rankings_reverse
     on players.player_id = touranment_rankings_reverse.player_id
     and touranment_rankings_reverse.league = 'Reverse'
---where players.player_id = '0x162F95a9364c891028d255467F616902A479681a'
+--where players.player_id = '0xDdb0d23E0AaE161b817A5Dfd5FA70077D5d1172D'
 --	and t_hist.tournament_unique_key  = 'Main 32'
 group by 1,2,3,4,5
 order by sum(players.fan_pts + referral_pts)  desc"""

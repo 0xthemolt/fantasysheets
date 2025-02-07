@@ -64,9 +64,11 @@ and t.start_timestamp >= '2024-07-01'
 )
 ,league_ranking as (
 select league,player_id
-,avg(normalized_rank) as avg_best_deck_norm_rank
+,avg(normalized_rank) as avg_best_deck_norm_score
+,case when avg(normalized_rank) is null then null else dense_rank() over (partition by league order by avg(normalized_rank)  desc) end as avg_best_deck_norm_rank
 from touranment_rankings
 where best_deck_rank = 1
+--and league = 'Bronze'
 group by 1,2
 having count(*) >= 2 --at least 2 tournaments
 )
@@ -145,10 +147,15 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,suM(players.stars) stars
 ,sum(tournaments.deck_count) as decks
 ,suM(players.number_of_cards) as cards
+,max(touranment_rankings_elite.avg_best_deck_norm_score) as elite_norm_score
 ,max(touranment_rankings_elite.avg_best_deck_norm_rank) as elite_norm_rank
+,max(touranment_rankings_gold.avg_best_deck_norm_score) as gold_norm_score
 ,max(touranment_rankings_gold.avg_best_deck_norm_rank) as gold_norm_rank
+,max(touranment_rankings_silver.avg_best_deck_norm_score) as silver_norm_score
 ,max(touranment_rankings_silver.avg_best_deck_norm_rank) as silver_norm_rank
+,max(touranment_rankings_bronze.avg_best_deck_norm_score) as bronze_norm_score
 ,max(touranment_rankings_bronze.avg_best_deck_norm_rank) as bronze_norm_rank
+,max(touranment_rankings_reverse.avg_best_deck_norm_score) as reverse_norm_score
 ,max(touranment_rankings_reverse.avg_best_deck_norm_rank) as reverse_norm_rank
 ,max(coalesce(tvbp.buy_volume,0)) as buy_vol
 ,max(coalesce(tvbp.buy_volume,0) - coalesce(tvbp.sell_volume,0)) as net_vol
@@ -185,7 +192,8 @@ left join league_ranking touranment_rankings_reverse
     and touranment_rankings_reverse.league = 'Reverse'
 --where players.player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --	and t_hist.tournament_unique_key  = 'Main 32'
-group by 1,2,3,4,5"""
+group by 1,2,3,4,5
+order by sum(players.fan_pts + referral_pts)  desc"""
 player_ranking_df = pd.read_sql_query(player_ranking_query, conn)
 cursor.close()
 
@@ -202,6 +210,11 @@ player_ranking_df['freshness_timestamp'] = player_ranking_df['freshness_timestam
 # Handle NaN values in norm rank columns
 rank_columns = ['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank']
 for col in rank_columns:
+    player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
+
+# Handle NaN values in norm rank columns
+score_columns = ['elite_norm_score', 'gold_norm_score', 'silver_norm_score', 'bronze_norm_score', 'reverse_norm_score']
+for col in score_columns:
     player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 
 # Get the maximum freshness timestamp

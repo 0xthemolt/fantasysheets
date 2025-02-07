@@ -386,11 +386,16 @@
                     stars: Math.round(player.stars),
                     decks: Math.round(player.decks),
                     cards: Math.round(player.cards),
-                    elite: player.elite_norm_rank.toFixed(3),
-                    gold: player.gold_norm_rank.toFixed(3),
-                    silver: player.silver_norm_rank.toFixed(3),
-                    bronze: player.bronze_norm_rank.toFixed(3),
-                    reverse: player.reverse_norm_rank.toFixed(3),
+                    elite: Math.round(player.elite_norm_rank),
+                    gold: Math.round(player.gold_norm_rank),
+                    silver: Math.round(player.silver_norm_rank),
+                    bronze: Math.round(player.bronze_norm_rank),
+                    reverse: Math.round(player.reverse_norm_rank),
+                    elite_norm_score: player.elite_norm_score.toFixed(3),
+                    gold_norm_score: player.gold_norm_score.toFixed(3),
+                    silver_norm_score: player.silver_norm_score.toFixed(3),
+                    bronze_norm_score: player.bronze_norm_score.toFixed(3),
+                    reverse_norm_score: player.reverse_norm_score.toFixed(3),
                     buyVol: player.buy_vol.toFixed(3),
                     netVol: player.net_vol.toFixed(3)
                 }));
@@ -424,11 +429,46 @@
                     <td>${formatNumberMK(player.blastGold)}</td>  
                     <td class="section-end">${formatNumberMK(player.stars)}</td>
                     <td>${formatInt(player.decks)}</td>
-                    <td style="background-color: #a8ccde26">${player.elite == 0 ? '-' : formatDecimalRank(player.elite)}</td>
-                    <td style="background-color: #dacc8626">${player.gold == 0 ? '-' : formatDecimalRank(player.gold)}</td>
-                    <td style="background-color: #8b8b8b26">${player.silver == 0 ? '-' : formatDecimalRank(player.silver)}</td>
-                    <td style="background-color: #a97e4826">${player.bronze == 0 ? '-' : formatDecimalRank(player.bronze)}</td>
-                    <td class="section-end" style="background-color: #82EA8926">${player.reverse == 0 ? '-' : formatDecimalRank(player.reverse)}</td>
+                    <td style="background-color: #a8ccde26">
+                        ${player.elite == 0 ? '-' : 
+                          player.elite == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.elite == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.elite == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.elite <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elite)}</span>` :
+                          formatInt(player.elite)}
+                    </td>
+                    <td style="background-color: #dacc8626">
+                        ${player.gold == 0 ? '-' : 
+                          player.gold == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.gold == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.gold == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.gold <= 10 ? `<span style="display: inline-block; background-color: #b5a642; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold)}</span>` :
+                          formatInt(player.gold)}
+                    </td>
+                    <td style="background-color: #8b8b8b26">
+                        ${player.silver == 0 ? '-' : 
+                          player.silver == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.silver == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.silver == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.silver <= 10 ? `<span style="display: inline-block; background-color: #8b8b8b; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver)}</span>` :
+                          formatInt(player.silver)}
+                    </td>
+                    <td style="background-color: #a97e4826">
+                        ${player.bronze == 0 ? '-' : 
+                          player.bronze == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.bronze == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.bronze == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.bronze <= 10 ? `<span style="display: inline-block; background-color: #CD7F32; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze)}</span>` :
+                          formatInt(player.bronze)}
+                    </td>
+                    <td class="section-end" style="background-color: #82EA8926">
+                        ${player.reverse == 0 ? '-' : 
+                          player.reverse == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.reverse == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.reverse == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.reverse <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse)}</span>` :
+                          formatInt(player.reverse)}
+                    </td>
                     <td>${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td><input type="checkbox" class="compare-checkbox"></td>

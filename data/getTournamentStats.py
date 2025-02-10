@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 import pandas as pd
 
-def get_db_connection():
+def supabase_db_connection():
     return psycopg2.connect(
         dbname="postgres",
         user="postgres",
@@ -13,7 +13,7 @@ def get_db_connection():
         port="5432"
     )
 
-def get_second_db_connection():
+def fantasysheets_db_connection():
     return psycopg2.connect(
         dbname="fantasysheets",
         user="postgres",
@@ -24,7 +24,7 @@ def get_second_db_connection():
 
 
 # First query into league_decks_df
-conn = get_db_connection()
+conn = supabase_db_connection()
 cursor = conn.cursor()
 league_decks_query = f"""select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
@@ -61,9 +61,6 @@ total_players_df = pd.read_sql_query(total_players_query, conn)
 cursor.close()
 
 
-# Second query into card_stars_df
-conn = get_db_connection()
-cursor = conn.cursor()
 card_stars_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,
  gt.tournament_unique_key,
@@ -80,7 +77,7 @@ card_stars_df = pd.read_sql_query(card_stars_query, conn)
 cursor.close()
 
 
-conn_two = get_second_db_connection()
+conn_two = fantasysheets_db_connection()
 cursor_two = conn_two.cursor()
 tournament_views_query = f"""with base as (
 select ghwst.tournament_unique_key

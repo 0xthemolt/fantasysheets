@@ -1702,40 +1702,41 @@ function updateTableWithData(data, preserveFiltered = false) {
         sortedLeagues.forEach(group => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <img src="/icons/${group.league.toLowerCase()}.webp" 
+                <td class="league-summary-cell">
+                    <div class="league-summary-container" style="display: flex; align-items: center; gap: 10px;">
+                        <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                            <img class="league-icon" 
+                                 src="/icons/${group.league.toLowerCase()}.webp" 
                                  alt="${group.league}" 
                                  style="width: 30px; height: 30px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <div style="color: ${getLeagueColor(group.league)}; font-weight: bold;">
+                            <div class="league-details" style="display: flex; flex-direction: column;">
+                                <div class="league-name" style="color: ${getLeagueColor(group.league)}; font-weight: bold;">
                                     ${group.league}
                                 </div>
-                                <div style="font-size: 12px; color: #808080;">
+                                <div class="deck-count" style="font-size: 12px; color: #808080;">
                                     ${group.count} deck${group.count !== 1 ? 's' : ''}
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <div class="rewards-summary" style="display: flex; flex-direction: column; gap: 5px;">
                             ${group.total_eth || group.total_frags ? `
-                                <div style="display: flex; gap: 10px; font-size: 14px;">
+                                <div class="rewards-container" style="display: flex; gap: 10px; font-size: 14px;">
                                     ${group.total_eth ? `
-                                        <div style="display: flex; align-items: center; gap: 2px;">
-                                            <span style="color: ${getRewardColor('eth')}">
+                                        <div class="eth-reward" style="display: flex; align-items: center; gap: 2px;">
+                                            <span class="eth-amount" style="color: ${getRewardColor('eth')}">
                                                 ${group.total_eth.toFixed(2)}
                                             </span>
-                                            <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
+                                            <img class="eth-icon" src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
                                         </div>
                                     ` : ''}
                                     ${group.total_frags ? `
-                                        <div style="display: flex; align-items: center; gap: 2px;">
-                                            <span style="color: ${getRewardColor('fragment')}">
+                                        <div class="frag-reward" style="display: flex; align-items: center; gap: 2px;">
+                                            <span class="frag-amount" style="color: ${getRewardColor('fragment')}">
                                                 ${group.total_frags >= 1000 ? 
                                                     (group.total_frags/1000).toFixed(1) + 'k' : 
                                                     Math.floor(group.total_frags)}
                                             </span>
-                                            <img src="/icons/fragment.webp" alt="Fragments" style="width: 12px; height: 12px;">
+                                            <img class="frag-icon" src="/icons/fragment.webp" alt="Fragments" style="width: 12px; height: 12px;">
                                         </div>
                                     ` : ''}
                                 </div>
@@ -1743,13 +1744,32 @@ function updateTableWithData(data, preserveFiltered = false) {
                         </div>
                     </div>
                 </td>
-                <td>
+                <td class="best-deck-cell">
                     ${group.best_deck ? `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="color: #808080; font-size: 14px;">
-                                Best Rank: #${group.best_rank}
+                        <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <!-- Left side: Rank and Score -->
+                            <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
+                                <div class="best-deck-label" style="color: #666; font-size: 0.875em;">
+                                    Best Deck
+                                </div>
+                                
+                                <div class="rank-score-container" style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="best-deck-stats" style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em;">
+                                            ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                                            group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                                            group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
+                                            `#${group.best_rank}`}
+                                        </span>
+                                        <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em;">
+                                            ${Math.round(group.best_deck.player_score).toLocaleString()}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 4px;">
+
+                            <!-- Right side: Hero Cards -->
+                            <div class="hero-cards-container" style="display: flex; gap: 4px; margin-left: auto;">
                                 ${[1,2,3,4,5].map(i => ({
                                     id: group.best_deck[`card${i}_id`],
                                     handle: group.best_deck[`card${i}_hero_handle`],
@@ -1759,11 +1779,11 @@ function updateTableWithData(data, preserveFiltered = false) {
                                 }))
                                 .sort((a, b) => b.score - a.score)
                                 .map(hero => `
-                                    <div style="display: inline-block; text-align: center;">
-                                        <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
+                                    <div class="hero-card" style="display: inline-block; text-align: center;">
+                                        <div class="hero-score" style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                                             ${formatInt(calculateDisplayScore(hero))}
                                         </div>
-                                        <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
+                                        <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
                                     </div>
                                 `).join('')}
                             </div>

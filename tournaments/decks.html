@@ -929,10 +929,6 @@
 <div class="table-container">
     <table id="heroTable">
         <thead>
-            <tr>
-                <th></th>
-                <th></th>
-            </tr>
         </thead>
         <tbody id="tableBody">
             <!-- Data will be inserted here -->
@@ -1125,7 +1121,8 @@ async function initializeTournamentScroller() {
         }
 
         // Update the DOMContentLoaded event listener
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await updateUniqueHeroes(); // Add this line to populate uniqueHeroes
             initializeTournamentScroller();
             initializeScrollButtons();
             initializeLeagueButtons();
@@ -1196,9 +1193,10 @@ async function fetchData(tournamentNumber) {
         // Add order by
         query = query.order('player_rank', { ascending: true });
 
-        // Execute single query with limit of 500
-        const { data, error } = await query
-            .limit(500);
+        // Execute query with limit only if not viewing personal decks/leagues
+        const { data, error } = await (!(myDecksButton.classList.contains('active') || myLeaguesButton.classList.contains('active')) 
+            ? query.limit(500)
+            : query);
 
         if (error) {
             throw error;
@@ -1218,37 +1216,17 @@ async function fetchData(tournamentNumber) {
 
 // Add this function to handle league button clicks
 function initializeLeagueButtons() {
+    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
+    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
     const leagueToggle = document.querySelector('.league-toggle');
     const leagueDropdown = document.querySelector('.league-dropdown');
     const dropdownItems = document.querySelectorAll('.dropdown-item');
-    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
-    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
 
     // Initialize My Decks button
-    myDecksButton.addEventListener('click', () => {
-        myDecksButton.classList.toggle('active');
-        // Clear other toggles
-        myLeaguesButton.classList.remove('active');
-        leagueToggle.classList.remove('active');
-        leagueDropdown.classList.remove('active');
-        selectedLeague = null;
-        
-        // Update table
-        updateTableWithData(cachedTournamentData, false);
-    });
+    myDecksButton.addEventListener('click', () => handleButtonClick('myDecks'));
 
     // Initialize My Leagues button
-    myLeaguesButton.addEventListener('click', () => {
-        myLeaguesButton.classList.toggle('active');
-        // Clear other toggles
-        myDecksButton.classList.remove('active');
-        leagueToggle.classList.remove('active');
-        leagueDropdown.classList.remove('active');
-        selectedLeague = null;
-        
-        // Update table
-        updateTableWithData(cachedTournamentData, false);
-    });
+    myLeaguesButton.addEventListener('click', () => handleButtonClick('myLeagues'));
 
     // Toggle dropdown
     leagueToggle.addEventListener('click', (e) => {
@@ -1299,6 +1277,49 @@ function initializeLeagueButtons() {
     });
 }
 
+// Add this function to handle button clicks
+function handleButtonClick(button) {
+    const myDecksButton = document.querySelector('.toggle-button .fa-user').closest('.toggle-button');
+    const myLeaguesButton = document.querySelector('.toggle-button .fa-trophy').closest('.toggle-button');
+    const leagueToggle = document.querySelector('.league-toggle');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    
+    if (button === 'myDecks') {
+        myDecksButton.classList.toggle('active');
+        myLeaguesButton.classList.remove('active');
+        leagueToggle.classList.remove('active');
+        // Reset league toggle text
+        leagueToggle.innerHTML = `
+            <i class="fas fa-layer-group"></i>
+            Leagues
+            <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
+        `;
+        // Remove active class from dropdown items
+        dropdownItems.forEach(item => item.classList.remove('active'));
+        selectedLeague = null;
+    } else if (button === 'myLeagues') {
+        myLeaguesButton.classList.toggle('active');
+        myDecksButton.classList.remove('active');
+        leagueToggle.classList.remove('active');
+        // Reset league toggle text
+        leagueToggle.innerHTML = `
+            <i class="fas fa-layer-group"></i>
+            Leagues
+            <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
+        `;
+        // Remove active class from dropdown items
+        dropdownItems.forEach(item => item.classList.remove('active'));
+        selectedLeague = null;
+    }
+    
+    // Get current tournament number from active scroll item
+    const activeItem = document.querySelector('.scroll-item.active');
+    const tournamentNumber = activeItem ? activeItem.querySelector('.number').textContent.replace(/[^0-9]/g, '') : null;
+    
+    if (tournamentNumber) {
+        fetchData(tournamentNumber); // Make a fresh query
+    }
+}
 
 // Modify the updateTableWithData function
 function updateTableWithData(data, preserveFiltered = false) {
@@ -1860,14 +1881,24 @@ function calculateDisplayScore(hero) {
 }
 
 // Add this new function to get unique heroes from the data
-function updateUniqueHeroes(data) {
+async function updateUniqueHeroes() {
     uniqueHeroes.clear();
-    data.forEach(player => {
-        for (let i = 1; i <= 5; i++) {
-            const handle = player[`card${i}_hero_handle`];
-            if (handle) uniqueHeroes.add(handle);
+    try {
+        const { data, error } = await supabaseClient
+            .from('heroes')
+            .select('hero_name, hero_handle');
+
+        if (error) {
+            console.error('Error fetching heroes:', error);
+            return;
         }
-    });
+
+        data.forEach(hero => {
+            if (hero.hero_handle) uniqueHeroes.add(hero.hero_handle);
+        });
+    } catch (error) {
+        console.error('Error in updateUniqueHeroes:', error);
+    }
 }
 
 // Modify the filterByHero function
@@ -1901,15 +1932,17 @@ function initializeHeroFilter() {
     const searchInput = document.getElementById('heroSearchInput');
     const heroList = document.getElementById('heroList');
     
-    heroFilterButton.addEventListener('click', (e) => {
+    heroFilterButton.addEventListener('click', async (e) => {
         if (e.target.classList.contains('fa-times')) {
             filterByHero(null);
             return;
         }
         
-        modal.style.display = 'block';
-        updateHeroList();
+        // Reset the search input and refresh the hero list
         searchInput.value = '';
+        await updateUniqueHeroes(); // Refresh the uniqueHeroes Set
+        updateHeroList(); // Update the display with all heroes
+        modal.style.display = 'block';
     });
 
     window.addEventListener('click', (e) => {
@@ -1920,7 +1953,7 @@ function initializeHeroFilter() {
 
     // Simplified search input handler - directly updates hero list
     searchInput.addEventListener('input', () => {
-        updateHeroList();
+        updateHeroList(); // This should filter based on the current input
     });
 
     // Simplified keyboard navigation - only handle Enter key
@@ -1937,6 +1970,7 @@ function initializeHeroFilter() {
     });
 }
 
+// Ensure this function is correctly filtering and updating the hero list
 function updateHeroList() {
     const searchTerm = document.getElementById('heroSearchInput').value.toLowerCase();
     const heroList = document.getElementById('heroList');

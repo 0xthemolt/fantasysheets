@@ -463,24 +463,24 @@
       height: 45px;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid;
     }
+    
+    /* Only add borders for top 3 ranks */
+    .rank-1 .circle-img { border: 2px solid #FFD700; }
+    .rank-2 .circle-img { border: 2px solid #C0C0C0; }
+    .rank-3 .circle-img { border: 2px solid #CD7F32; }
     
     .rank-label {
       position: absolute;
-      bottom: -13.5px;
       left: 50%;
       transform: translateX(-50%);
       padding: 4.5px 13.5px;
       border-radius: 13.5px;
       font-weight: bold;
       white-space: nowrap;
+      /* Move label below image */
+      bottom: -25px;
     }
-    
-    .rank-1 .circle-img { border-color: #FFD700; }
-    .rank-2 .circle-img { border-color: #C0C0C0; }
-    .rank-3 .circle-img { border-color: #CD7F32; }
-    .rank-other .circle-img { border-color: #ffffff; }
     
     .rank-1 .rank-label { background: #FFD700; color: white; }
     .rank-2 .rank-label { background: #C0C0C0; color: white; }
@@ -1752,12 +1752,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp';"
                              onload="this.style.display='block'"
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp'; return true;">
-                        <span class="rank-label">${player.player_rank}${
-                            player.player_rank === 1 ? 'st' : 
-                            player.player_rank === 2 ? 'nd' : 
-                            player.player_rank === 3 ? 'rd' : 
-                            'th'
-                        }</span>
+                        <span class="rank-label">${player.player_rank}</span>
                     </div>
                     <!-- Player Handle and Rewards -->
                     <div style="display: flex; flex-direction: column; gap: 15px;">

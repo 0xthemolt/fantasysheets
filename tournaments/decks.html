@@ -453,8 +453,8 @@
 
     .rank-circle {
       position: relative;
-      width: 135px;
-      margin: 18px;
+      width: 45px; /* Reduced from 135px */
+      margin: 0; /* Removed margins */
       text-align: center;
     }
     
@@ -472,14 +472,15 @@
     
     .rank-label {
       position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 4.5px 13.5px;
-      border-radius: 13.5px;
+      right: -8px; /* Position label on the right side of the image */
+      bottom: -8px; /* Position label at the bottom of the image */
+      min-width: 20px; /* Ensure consistent width for single/double digits */
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: bold;
       white-space: nowrap;
-      /* Move label below image */
-      bottom: -25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     
     .rank-1 .rank-label { background: #FFD700; color: white; }
@@ -929,8 +930,8 @@
     <table id="heroTable">
         <thead>
             <tr>
-                <th>Player</th>
-                <th>Deck</th>
+                <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -1733,18 +1734,18 @@ function updateTableWithData(data, preserveFiltered = false) {
         }
 
         const heroes = [
-            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url },
-            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: player.card2_picture_url },
-            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: player.card3_picture_url },
-            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: player.card4_picture_url },
-            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: player.card5_picture_url }
+            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url, rarity: player.card1_hero_rarity },
+            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: player.card2_picture_url, rarity: player.card2_hero_rarity },
+            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: player.card3_picture_url, rarity: player.card3_hero_rarity },
+            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: player.card4_picture_url, rarity: player.card4_hero_rarity },
+            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: player.card5_picture_url, rarity: player.card5_hero_rarity }
         ];
 
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <div class="player-info-container" style="display: flex; align-items: center; gap: 10px;">
-                    <!-- Replace the old rank display with new rank circle pattern -->
+                <div class="player-info-container" style="display: flex; align-items: center; gap: 20px;">
+                    <!-- Increased gap from 10px to 20px above -->
                     <div class="rank-circle rank-${player.player_rank <= 3 ? player.player_rank : 'other'}">
                         <img class="circle-img player-avatar" 
                              src="${player.player_pic}" 
@@ -1756,7 +1757,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                     </div>
                     <!-- Player Handle and Rewards -->
                     <div class="player-details" style="display: flex; flex-direction: column; gap: 15px;">
-                        <div class="player-handle" style="text-align: left; margin-top: 8px;">${player.player_handle}</div>
+                        <div class="player-handle" style="text-align: left; margin-top: 8px;">${player.player_name}</div>
                         <div class="player-rewards" style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
                             <div class="rewards-container" style="display: flex; gap: 10px; justify-content: flex-start;">
                                 ${player.eth_won ? `
@@ -1785,7 +1786,6 @@ function updateTableWithData(data, preserveFiltered = false) {
             </td>
             <td>
                 <div class="deck-info-container" style="display: flex; align-items: center;">
-                    <img class="league-icon" src="/icons/${player.league.toLowerCase()}.webp" alt="${player.league} Icon" style="width: 20px; height: 20px;">
                     <span class="player-score rank-text" style="color: ${getLeagueColor(player.league)}; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); margin-right: 10px;">
                         ${formatInt(player.player_score)}
                     </span>
@@ -1795,7 +1795,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                 <div class="hero-score" style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                                     ${formatInt(calculateDisplayScore(hero))}
                                 </div>
-                                <img class="hero-image" src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
                             </div>
                         `).join('')}
                     </div>
@@ -1850,10 +1850,10 @@ function calculateDisplayScore(hero) {
     switch (hero.rarity) {
         case 'legendary':
             return hero.score * 2.5;
-        case 'rare':
-            return hero.score * 1.5;
         case 'epic':
             return hero.score * 2;
+        case 'rare':
+            return hero.score * 1.5;
         default:
             return hero.score; // For common or any other rarity
     }

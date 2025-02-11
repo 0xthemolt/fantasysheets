@@ -218,10 +218,15 @@
 
     .summary-content {
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        gap: 5px;
+        gap: 20px;
+    }
+
+    .rewards-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
     }
 
     .reward-item {
@@ -229,7 +234,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 3px;
+        padding: 6px 8px;
         background: #1a1a1a;
         border-radius: 4px;
     }
@@ -714,8 +719,8 @@
         }
 
         .reward-item.player-image img {
-            width: 45px !important;
-            height: 45px !important;
+            width: 35px !important;
+            height: 35px !important;
         }
 
         /* Slightly larger reward icons on mobile */
@@ -911,7 +916,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url('/icons/elite-texture.webp') no-repeat center;
+        background: url('/icons/main-texture.webp') no-repeat center;
         background-size: 1125px 633px;
         opacity: 0.4;
         pointer-events: none;
@@ -1391,7 +1396,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                 textureDiv.style.backgroundSize = '1125px 633px';
             } else {
                 // Default to elite texture for My Decks/My Leagues
-                textureDiv.style.background = "url('/icons/elite-texture.webp') repeat";
+                textureDiv.style.background = "url('/icons/main-texture.webp') repeat";
             }
         }
 
@@ -1433,40 +1438,42 @@ function updateTableWithData(data, preserveFiltered = false) {
                 </div>
             </div>
             ` : ''}
-            <div class="reward-item">
-                <div>
-                    <i class="fas fa-layer-group" style="color: #808080; font-size: 14px;"></i>
-                    <span style="font-size: 14px;">${decksCount}</span>
+            <div class="rewards-group" style="gap: 4px;"> 
+                <div class="reward-item" style="padding: 3px 8px;">
+                    <div>
+                        <i class="fas fa-layer-group" style="color: #808080; font-size: 14px;"></i>
+                        <span style="font-size: 14px;">${decksCount}</span>
+                    </div>
                 </div>
-            </div>
-            ${totalEth > 0 ? `
-            <div class="reward-item">
-                <div>
-                    <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
-                    <span style="color: ${getRewardColor('eth')}; font-size: 14px;">${totalEth.toFixed(2)}</span>
+                ${totalEth > 0 ? `
+                <div class="reward-item" style="padding: 3px 8px;">
+                    <div>
+                        <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
+                        <span style="color: ${getRewardColor('eth')}; font-size: 14px;">${totalEth.toFixed(2)}</span>
+                    </div>
                 </div>
-            </div>
-            ` : ''}
-            ${totalFrags > 0 ? `
-            <div class="reward-item">
-                <div>
-                    <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
-                    <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
-                        ${totalFrags >= 1000 ? (totalFrags/1000).toFixed(1) + 'k' : Math.floor(totalFrags)}
-                    </span>
+                ` : ''}
+                ${totalFrags > 0 ? `
+                <div class="reward-item" style="padding: 3px 8px;">
+                    <div>
+                        <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
+                        <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
+                            ${totalFrags >= 1000 ? (totalFrags/1000).toFixed(1) + 'k' : Math.floor(totalFrags)}
+                        </span>
+                    </div>
                 </div>
-            </div>
-            ` : ''}
-            ${totalFan > 0 ? `
-            <div class="reward-item">
-                <div>
-                    <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
-                    <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
-                        ${totalFan >= 1000 ? (totalFan/1000).toFixed(1) + 'k' : Math.floor(totalFan)}
-                    </span>
+                ` : ''}
+                ${totalFan > 0 ? `
+                <div class="reward-item" style="padding: 3px 8px;"> 
+                    <div>
+                        <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
+                        <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
+                            ${totalFan >= 1000 ? (totalFan/1000).toFixed(1) + 'k' : Math.floor(totalFan)}
+                        </span>
+                    </div>
                 </div>
+                ` : ''}
             </div>
-            ` : ''}
         `;
 
         // Add league scoring visualization
@@ -1922,16 +1929,14 @@ function getRewardColor(rewardType) {
 }
 
 function calculateDisplayScore(hero) {
-    switch (hero.rarity) {
-        case 'legendary':
-            return hero.score * 2.5;
-        case 'epic':
-            return hero.score * 2;
-        case 'rare':
-            return hero.score * 1.5;
-        default:
-            return hero.score; // For common or any other rarity
-    }
+    const calculatedScore = hero.rarity?.toLowerCase() === 'legendary' ? hero.score * 2.5 :
+                          hero.rarity?.toLowerCase() === 'epic' ? hero.score * 2 :
+                          hero.rarity?.toLowerCase() === 'rare' ? hero.score * 1.5 :
+                          hero.score;
+    
+    // console.log('Hero rarity:', hero.rarity, 'Raw Score:', hero.score, 'Calculated Score:', calculatedScore);
+    
+    return calculatedScore;
 }
 
 // Add this new function to get unique heroes from the data

@@ -238,14 +238,15 @@
     .reward-item.player-image {
         flex: 0 0 30%;
         max-width: 60px;
+        background: transparent !important; /* Override the default background */
     }
 
     .reward-item.player-image img {
         width: 45px;
         height: 45px;
-        border-radius: 50%; /* Make image circular */
+        border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #1a1a1a;
+        border: 2px solid rgba(26, 26, 26, 0.5); /* Make border semi-transparent */
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
@@ -904,7 +905,20 @@
 <!-- Modified rewards-summary-container with stacked layout -->
 <div class="rewards-summary-container" style="display: none; position: relative;">
     <!-- Add texture background div -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('/icons/elite-texture.webp') repeat; opacity: 0.3; pointer-events: none;"></div>
+    <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('/icons/elite-texture.webp') no-repeat center;
+        background-size: 1125px 633px;
+        opacity: 0.4;
+        pointer-events: none;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    "></div>
     
     <!-- Existing content -->
     <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
@@ -1368,6 +1382,19 @@ function updateTableWithData(data, preserveFiltered = false) {
     if ((isMyDecksActive || isMyLeaguesActive || (isLeagueSelected && selectedPlayerHandle)) && selectedPlayerHandle) {
         rewardsSummaryContainer.style.display = 'block';
         
+        // Update the texture based on view type
+        const textureDiv = rewardsSummaryContainer.querySelector('div[style*="background: url"]');
+        if (textureDiv) {
+            if (isLeagueSelected) {
+                // Use league-specific texture
+                textureDiv.style.background = `url('/icons/${selectedLeague.toLowerCase()}-texture.webp') no-repeat center`;
+                textureDiv.style.backgroundSize = '1125px 633px';
+            } else {
+                // Default to elite texture for My Decks/My Leagues
+                textureDiv.style.background = "url('/icons/elite-texture.webp') repeat";
+            }
+        }
+
         // Calculate total rewards
         let totalEth = 0;
         let totalFrags = 0;
@@ -1501,11 +1528,11 @@ function updateTableWithData(data, preserveFiltered = false) {
                                 const lighterColor = adjustColor(leagueColor, 30);
                                 return `
                                     <div class="money-zone" style="
-                                        position: absolute;
+        position: absolute;
                                         left: ${percentage}%;
                                         right: 0;
-                                        top: 0;
-                                        bottom: 0;
+        top: 0;
+        bottom: 0;
                                         background: linear-gradient(90deg, 
                                             ${lighterColor}40 0%,
                                             ${leagueColor}40 100%

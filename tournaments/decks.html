@@ -182,7 +182,7 @@
     }
 
     .rewards-summary-container {
-        margin: 10px auto;
+        margin: 10px auto 0;
         max-width: 800px;
         background: #1a1a1a;
         border-radius: 8px;
@@ -280,7 +280,7 @@
     }
 
     .table-container {
-        margin: 10px auto;
+        margin: 10px auto 0;
         max-width: 650px;
         max-height: 70vh;
         overflow: hidden;
@@ -668,7 +668,7 @@
     /* Add these media queries */
     @media (max-width: 768px) {
         .rewards-summary-container {
-            margin: 10px 0;
+            margin: 5px auto 0; 
             padding: 10px 5px;
         }
 
@@ -821,7 +821,7 @@
     @media (max-width: 768px) {
         .table-container {
             width: 100%;
-            margin: 10px 0;
+            margin: 5px auto 0;
             padding: 10px 5px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -1802,44 +1802,42 @@ function updateTableWithData(data, preserveFiltered = false) {
                                             </div>
                                         </div>
 
-                                        <div class="rewards-summary">
+                                        <div class="rewards-container" style="display: flex; justify-content: center; gap: 4px; font-size: 14px;">
                                             ${group.total_eth || group.total_frags || group.total_fan ? `
-                                                <div class="rewards-container" style="display: flex; gap: 4px; font-size: 14px;">
-                                                    ${group.total_eth ? `
-                                                        <div class="reward-item" style="padding: 3px 8px;">
-                                                            <div>
-                                                                <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
-                                                                    ${group.total_eth.toFixed(2)}
-                                                                </span>
-                                                            </div>
+                                                ${group.total_eth ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
+                                                                ${group.total_eth.toFixed(2)}
+                                                            </span>
                                                         </div>
-                                                    ` : ''}
-                                                    ${group.total_frags ? `
-                                                        <div class="reward-item" style="padding: 3px 8px;">
-                                                            <div>
-                                                                <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
-                                                                    ${group.total_frags >= 1000 ? 
-                                                                        (group.total_frags/1000).toFixed(1) + 'k' : 
-                                                                        Math.floor(group.total_frags)}
-                                                                </span>
-                                                            </div>
+                                                    </div>
+                                                ` : ''}
+                                                ${group.total_frags ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
+                                                                ${group.total_frags >= 1000 ? 
+                                                                    (group.total_frags/1000).toFixed(1) + 'k' : 
+                                                                    Math.floor(group.total_frags)}
+                                                            </span>
                                                         </div>
-                                                    ` : ''}
-                                                    ${group.total_fan ? `
-                                                        <div class="reward-item" style="padding: 3px 8px;">
-                                                            <div>
-                                                                <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
-                                                                    ${group.total_fan >= 1000 ? 
-                                                                        (group.total_fan/1000).toFixed(1) + 'k' : 
-                                                                        Math.floor(group.total_fan)}
-                                                                </span>
-                                                            </div>
+                                                    </div>
+                                                ` : ''}
+                                                ${group.total_fan ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
+                                                                ${group.total_fan >= 1000 ? 
+                                                                    (group.total_fan/1000).toFixed(1) + 'k' : 
+                                                                    Math.floor(group.total_fan)}
+                                                            </span>
                                                         </div>
-                                                    ` : ''}
-                                                </div>
+                                                    </div>
+                                                ` : ''}
                                             ` : ''}
                                         </div>
                                     </div>
@@ -1854,13 +1852,13 @@ function updateTableWithData(data, preserveFiltered = false) {
                                         <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
                                             <div class="rank-score-container" style="display: flex; align-items: center;">
                                                 <div class="best-deck-stats" style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px;">
-                                                    <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em;">
+                                                    <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 12px;">
                                                         ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                                                         group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                                                         group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
                                                         `#${group.best_rank}`}
                                                     </span>
-                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 16px; font-weight: bold;">
+                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 14px; font-weight: bold;">
                                                         ${Math.round(group.best_deck.player_score).toLocaleString()}
                                                     </span>
                                                 </div>

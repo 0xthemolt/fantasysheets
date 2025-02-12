@@ -972,11 +972,6 @@
     
     <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
         <div class="summary-card" style="position: relative;">
-            <div class="summary-header">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <!-- Player info will be inserted by JavaScript -->
-                </div>
-            </div>
             <div class="summary-content">
                 <!-- Existing rewards summary content -->
             </div>
@@ -1032,6 +1027,9 @@ const REWARD_COLORS = {
         };
 
 async function initializeTournamentScroller() {
+    // Ensure selectedPlayerHandle is defined
+    const selectedPlayerHandle = localStorage.getItem('selectedPlayerHandle'); // Retrieve from localStorage or define it appropriately
+
     const { data, error } = await supabaseClient
         .from('tournaments')
         .select('tournament_number, tournament_status')
@@ -1561,8 +1559,15 @@ function updateTableWithData(data, preserveFiltered = false) {
             }
         });
 
+        // Sort leagues by predefined order
+        const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+        const sortedLeagues = Object.keys(leagueData).sort((a, b) => 
+            leagueOrder.indexOf(a) - leagueOrder.indexOf(b)
+        );
+
         // Create score bars for each league
-        Object.entries(leagueData).forEach(([league, data]) => {
+        sortedLeagues.forEach(league => {
+            const data = leagueData[league];
             const scoreRange = data.max_score - data.min_score;
             const scoreBar = document.createElement('div');
             scoreBar.className = 'league-score-bar';
@@ -1652,7 +1657,8 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                 handle: player[`card${i}_hero_handle`],
                                                 stars: player[`card${i}_hero_stars`],
                                                 score: player[`card${i}_score`],
-                                                url: player[`card${i}_picture_url`]
+                                                url: player[`card${i}_picture_url`],
+                                                rarity: player[`card${i}_hero_rarity`] // Added hero rarity
                                             }))
                                             .sort((a, b) => b.score - a.score)
                                             .map(hero => `
@@ -1712,7 +1718,7 @@ function updateTableWithData(data, preserveFiltered = false) {
         const noPlayerRow = document.createElement('tr');
         noPlayerRow.innerHTML = `
             <td colspan="5" style="text-align: center; color: #ff0000;">
-                No player added to settings, <a href="/settings.html" style="color: #00ff00;">add in Settings</a>
+                No player saved in Settings, <a href="/settings.html" style="color: #00ff00;">add your handle here</a>
             </td>
         `;
         tableBody.appendChild(noPlayerRow);
@@ -1768,49 +1774,20 @@ function updateTableWithData(data, preserveFiltered = false) {
             row.style.cssText = 'margin: 0; padding: 0; border: none; background: #000000;';
             row.innerHTML = `
                 <td class="league-summary-cell" colspan="2" style="padding: 2px 0; border: none; background: #000000;">
-                    <div class="league-wrapper" style="
-                        position: relative;
-                        padding: 15px;
-                        margin: 0;
-                        border-radius: 8px;
-                        overflow: hidden;
-                        background: #1a1a1a;
-                    ">
-                        <!-- League-specific texture background -->
-                        <div class="league-texture-background" style="
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: url('/icons/${group.league.toLowerCase()}-texture.webp') no-repeat center;
-                            background-size: 1125px 633px;
-                            opacity: 0.4;
-                            pointer-events: none;
-                            overflow: hidden;
-                            width: 100%;
-                            height: 100%;
-                        "></div>
+                    <div class="league-wrapper" style="position: relative; padding: 15px; margin: 0; border-radius: 8px; overflow: hidden; background: #1a1a1a;">
+                        <!-- Existing league texture background -->
+                        <div class="league-texture-background" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('/icons/${group.league.toLowerCase()}-texture.webp') no-repeat center; background-size: 1125px 633px; opacity: 0.4; pointer-events: none; overflow: hidden; width: 100%; height: 100%;"></div>
 
                         <div style="position: relative; display: flex; gap: 20px; justify-content: space-between;">
                             <div class="league-summary-cell">
                                 <div class="league-summary-container">
-                                    <!-- Separate the containers for better mobile layout -->
                                     <div class="league-info-and-rewards" style="display: flex; flex-direction: column; gap: 10px;">
-                                        <!-- Change to row layout and align items center -->
                                         <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; width: 100%;">
                                             <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
-                                                <img class="league-icon" 
-                                                     src="/icons/${group.league.toLowerCase()}.webp" 
-                                                     alt="${group.league}" 
-                                                     style="width: 30px; height: 30px;">
+                                                <img class="league-icon" src="/icons/${group.league.toLowerCase()}.webp" alt="${group.league}" style="width: 30px; height: 30px;">
                                                 <div class="league-details" style="display: flex; flex-direction: column;">
-                                                    <div class="league-name" style="font-size: 16px; color: ${getLeagueColor(group.league)}; font-weight: bold;">
-                                                        ${group.league}
-                                                    </div>
-                                                    <div class="deck-count" style="font-size: 12px; color: #808080;">
-                                                        ${group.count} deck${group.count !== 1 ? 's' : ''}
-                                                    </div>
+                                                    <div class="league-name" style="font-size: 16px; color: ${getLeagueColor(group.league)}; font-weight: bold;">${group.league}</div>
+                                                    <div class="deck-count" style="font-size: 12px; color: #808080;">${group.count} deck${group.count !== 1 ? 's' : ''}</div>
                                                 </div>
                                             </div>
 
@@ -1820,9 +1797,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                         <div class="reward-item" style="padding: 3px 8px;">
                                                             <div>
                                                                 <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
-                                                                    ${group.total_eth.toFixed(2)}
-                                                                </span>
+                                                                <span style="color: ${getRewardColor('eth')}; font-size: 14px;">${group.total_eth.toFixed(2)}</span>
                                                             </div>
                                                         </div>
                                                     ` : ''}
@@ -1830,11 +1805,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                         <div class="reward-item" style="padding: 3px 8px;">
                                                             <div>
                                                                 <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
-                                                                    ${group.total_frags >= 1000 ? 
-                                                                        (group.total_frags/1000).toFixed(1) + 'k' : 
-                                                                        Math.floor(group.total_frags)}
-                                                                </span>
+                                                                <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">${group.total_frags >= 1000 ? (group.total_frags/1000).toFixed(1) + 'k' : Math.floor(group.total_frags)}</span>
                                                             </div>
                                                         </div>
                                                     ` : ''}
@@ -1842,13 +1813,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                         <div class="reward-item" style="padding: 3px 8px;">
                                                             <div>
                                                                 <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
-                                                                <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
-                                                                    ${group.total_fan < 1000 ? 
-                                                                        Math.floor(group.total_fan) : 
-                                                                        group.total_fan >= 10000 ? 
-                                                                            (group.total_fan / 1000).toFixed(0) + 'k' : 
-                                                                            (group.total_fan / 1000).toFixed(1) + 'k'}
-                                                                </span>
+                                                                <span style="color: ${getRewardColor('fan')}; font-size: 14px;">${group.total_fan < 1000 ? Math.floor(group.total_fan) : group.total_fan >= 10000 ? (group.total_fan / 1000).toFixed(0) + 'k' : (group.total_fan / 1000).toFixed(1) + 'k'}</span>
                                                             </div>
                                                         </div>
                                                     ` : ''}
@@ -1862,31 +1827,28 @@ function updateTableWithData(data, preserveFiltered = false) {
                             <div class="best-deck-cell">
                                 ${group.best_deck ? `
                                     <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center;">
-                                        <!-- Existing best deck content -->
                                         <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
                                             <div class="rank-score-container" style="display: flex; align-items: center;">
                                                 <div class="best-deck-stats" style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px;">
                                                     <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 12px;">
                                                         ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                                                         group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
-                                                        group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
-                                                        `#${group.best_rank}`}
+                                                        group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' : `#${group.best_rank}`}
                                                     </span>
-                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 14px; font-weight: bold;">
-                                                        ${Math.round(group.best_deck.player_score).toLocaleString()}
-                                                    </span>
+                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 14px; font-weight: bold;">${Math.round(group.best_deck.player_score).toLocaleString()}</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Right side: Hero Cards -->
-                                        <div class="hero-cards-container" style="display: flex; gap: 2.5px; margin-left: auto;">
+                                        <div class="heroes-container" style="display: flex; gap: 2.5px; margin-left: auto;">
                                             ${[1,2,3,4,5].map(i => ({
                                                 id: group.best_deck[`card${i}_id`],
                                                 handle: group.best_deck[`card${i}_hero_handle`],
                                                 stars: group.best_deck[`card${i}_hero_stars`],
                                                 score: group.best_deck[`card${i}_score`],
-                                                url: group.best_deck[`card${i}_picture_url`]
+                                                url: group.best_deck[`card${i}_picture_url`],
+                                                rarity: group.best_deck[`card${i}_hero_rarity`] // Ensure rarity is included
                                             }))
                                             .sort((a, b) => b.score - a.score)
                                             .map(hero => `
@@ -1894,7 +1856,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                     <div class="hero-score" style="font-size: 11px; color: ${getScoreColor(hero.score)};">
                                                         ${formatInt(calculateDisplayScore(hero))}
                                                     </div>
-                                                         <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
                                                 </div>
                                             `).join('')}
                                         </div>
@@ -1953,7 +1915,7 @@ function updateTableWithData(data, preserveFiltered = false) {
         }
 
         const heroes = [
-            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url, rarity: player.card1_hero_rarity },
+            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url, rarity: player.card1_hero_rarity }, 
             { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: player.card2_picture_url, rarity: player.card2_hero_rarity },
             { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: player.card3_picture_url, rarity: player.card3_hero_rarity },
             { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: player.card4_picture_url, rarity: player.card4_hero_rarity },
@@ -1973,7 +1935,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp'; return true;">
                         <span class="rank-label">${player.player_rank}</span>
                     </div>
-                    <div class="player-details" style="display: flex; flex-direction: column; gap: 0; margin: 0;"> <!-- Set margin to 0 -->
+                    <div class="player-details" style="display: flex; flex-direction: column; gap: 0; margin: 2px;">
                         <div class="player-handle" style="text-align: left; margin-top: 0;">${player.player_name}</div> <!-- Adjust margin-top -->
                         <div class="player-rewards" style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
                             <div class="rewards-container" style="display: flex; gap: 10px; justify-content: flex-start;">

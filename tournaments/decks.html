@@ -169,13 +169,6 @@
             padding: 0 10px;
         }
 
-        .table-container {
-            width: 100%;
-            margin: 10px 0;
-            padding: 0;
-            overflow-x: auto;
-        }
-
         .table-view-container {
             width: 100%;
             margin: 10px 0;
@@ -291,6 +284,8 @@
         max-width: 650px;
         max-height: 70vh;
         overflow: hidden;
+        width: 100%; /* Add this */
+        box-sizing: border-box; /* Add this */
     }
 
     #heroTable {
@@ -822,6 +817,57 @@
         }
     }
 
+    /* Add/update media queries for mobile */
+    @media (max-width: 768px) {
+        .table-container {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #heroTable {
+            width: 100%;
+            min-width: unset; /* Remove fixed min-width */
+        }
+
+        /* Adjust table cell padding for mobile */
+        #heroTable td {
+            padding: 8px 4px;
+        }
+
+        /* Make player info more compact on mobile */
+        .player-info-container {
+            gap: 10px !important; /* Reduce gap */
+        }
+
+        /* Adjust hero cards size for mobile */
+        .heroes-container .hero-card img {
+            width: 24px !important;
+            height: 35px !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .league-summary-container {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .league-info-and-rewards {
+            width: 100%;
+        }
+
+        .rewards-container {
+            margin-left: 40px; /* Aligns with the league icon */
+        }
+
+        .reward-item {
+            padding: 2px 6px !important;
+        }
+    }
+
 </style>
 </head>
 <body>
@@ -930,7 +976,6 @@
         height: 100%;
     "></div>
     
-    <!-- Existing content -->
     <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
         <div class="summary-card" style="position: relative;">
             <div class="summary-header">
@@ -954,7 +999,7 @@
 </div>
 
 <!-- Add table container -->
-<div class="table-container">
+<div class="table-container"  style="display: flex; flex-direction: column; gap: 5px; position: relative;">
     <table id="heroTable">
         <thead>
         </thead>
@@ -1737,66 +1782,66 @@ function updateTableWithData(data, preserveFiltered = false) {
                             height: 100%;
                         "></div>
 
-                        <!-- Content container -->
                         <div style="position: relative; display: flex; gap: 20px; justify-content: space-between;">
-                            <!-- League Summary Cell -->
                             <div class="league-summary-cell">
-                                <div class="league-summary-container" style="display: flex; align-items: center; gap: 10px;">
-                                    <!-- Existing league summary content -->
-                                    <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
-                                        <img class="league-icon" 
-                                             src="/icons/${group.league.toLowerCase()}.webp" 
-                                             alt="${group.league}" 
-                                             style="width: 30px; height: 30px;">
-                                        <div class="league-details" style="display: flex; flex-direction: column;">
-                                            <div class="league-name" style="font-size: 16px; color: ${getLeagueColor(group.league)}; font-weight: bold;">
-                                                ${group.league}
-                                            </div>
-                                            <div class="deck-count" style="font-size: 12px; color: #808080;">
-                                                ${group.count} deck${group.count !== 1 ? 's' : ''}
+                                <div class="league-summary-container">
+                                    <!-- Separate the containers for better mobile layout -->
+                                    <div class="league-info-and-rewards" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                            <img class="league-icon" 
+                                                 src="/icons/${group.league.toLowerCase()}.webp" 
+                                                 alt="${group.league}" 
+                                                 style="width: 30px; height: 30px;">
+                                            <div class="league-details" style="display: flex; flex-direction: column;">
+                                                <div class="league-name" style="font-size: 16px; color: ${getLeagueColor(group.league)}; font-weight: bold;">
+                                                    ${group.league}
+                                                </div>
+                                                <div class="deck-count" style="font-size: 12px; color: #808080;">
+                                                    ${group.count} deck${group.count !== 1 ? 's' : ''}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="rewards-summary" style="display: flex; flex-direction: column; gap: 5px;">
-                                        ${group.total_eth || group.total_frags || group.total_fan ? `
-                                            <div class="rewards-container" style="display: flex; gap: 4px; font-size: 14px;">
-                                                <!-- Existing rewards content -->
-                                                ${group.total_eth ? `
-                                                    <div class="reward-item" style="padding: 3px 8px;">
-                                                        <div>
-                                                            <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
-                                                            <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
-                                                                ${group.total_eth.toFixed(2)}
-                                                            </span>
+
+                                        <div class="rewards-summary">
+                                            ${group.total_eth || group.total_frags || group.total_fan ? `
+                                                <div class="rewards-container" style="display: flex; gap: 4px; font-size: 14px;">
+                                                    ${group.total_eth ? `
+                                                        <div class="reward-item" style="padding: 3px 8px;">
+                                                            <div>
+                                                                <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
+                                                                <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
+                                                                    ${group.total_eth.toFixed(2)}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ` : ''}
-                                                ${group.total_frags ? `
-                                                    <div class="reward-item" style="padding: 3px 8px;">
-                                                        <div>
-                                                            <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
-                                                            <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
-                                                                ${group.total_frags >= 1000 ? 
-                                                                    (group.total_frags/1000).toFixed(1) + 'k' : 
-                                                                    Math.floor(group.total_frags)}
-                                                            </span>
+                                                    ` : ''}
+                                                    ${group.total_frags ? `
+                                                        <div class="reward-item" style="padding: 3px 8px;">
+                                                            <div>
+                                                                <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
+                                                                <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
+                                                                    ${group.total_frags >= 1000 ? 
+                                                                        (group.total_frags/1000).toFixed(1) + 'k' : 
+                                                                        Math.floor(group.total_frags)}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ` : ''}
-                                                ${group.total_fan ? `
-                                                    <div class="reward-item" style="padding: 3px 8px;">
-                                                        <div>
-                                                            <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
-                                                            <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
-                                                                ${group.total_fan >= 1000 ? 
-                                                                    (group.total_fan/1000).toFixed(1) + 'k' : 
-                                                                    Math.floor(group.total_fan)}
-                                                            </span>
+                                                    ` : ''}
+                                                    ${group.total_fan ? `
+                                                        <div class="reward-item" style="padding: 3px 8px;">
+                                                            <div>
+                                                                <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
+                                                                <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
+                                                                    ${group.total_fan >= 1000 ? 
+                                                                        (group.total_fan/1000).toFixed(1) + 'k' : 
+                                                                        Math.floor(group.total_fan)}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ` : ''}
-                                            </div>
-                                        ` : ''}
+                                                    ` : ''}
+                                                </div>
+                                            ` : ''}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1807,19 +1852,15 @@ function updateTableWithData(data, preserveFiltered = false) {
                                     <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center;">
                                         <!-- Existing best deck content -->
                                         <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
-                                            <div class="best-deck-label" style="color: #383838; font-size: 0.875em;">
-                                                Best Deck
-                                            </div>
-                                            
                                             <div class="rank-score-container" style="display: flex; align-items: center;">
-                                                <div class="best-deck-stats" style="display: grid; grid-template-columns: 50px 100px; gap: 8px; min-width: 160px;">
-                                                    <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em; text-align: right;">
+                                                <div class="best-deck-stats" style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 10px;">
+                                                    <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em;">
                                                         ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                                                         group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                                                         group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
                                                         `#${group.best_rank}`}
                                                     </span>
-                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em; text-align: right;">
+                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 16px; font-weight: bold;">
                                                         ${Math.round(group.best_deck.player_score).toLocaleString()}
                                                     </span>
                                                 </div>

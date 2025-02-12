@@ -1649,7 +1649,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                         return `
                             <div class="player-score-marker" 
                                  style="left: ${percentage}%; transform: translateX(-50%);">
-                                <div class="pin-tooltip" style="display: none; position: absolute; background: #2a2a2a; padding: 8px; border-radius: 4px; z-index: 10; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; border: 1px solid #404040; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
+                                <div class="pin-tooltip" style="display: none; position: absolute; background: #2a2a2a; padding: 8px; border-radius: 4px; z-index: 100; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; border: 1px solid #404040; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
                                     <div style="display: flex; flex-direction: column; gap: 8px;">
                                         <div style="display: flex; gap: 4px;">
                                             ${[1,2,3,4,5].map(i => ({
@@ -1671,6 +1671,9 @@ function updateTableWithData(data, preserveFiltered = false) {
                                             `).join('')}
                                         </div>
                                         <div style="display: flex; gap: 10px; justify-content: center; padding-top: 4px; border-top: 1px solid #404040;">
+                                            <div style="color: #ffffff; font-size: 12px;">
+                                                #${player.player_rank}
+                                            </div>
                                             <div style="color: #ffffff; font-size: 12px;">
                                                 ${formatInt(player.player_score)}
                                             </div>
@@ -1883,10 +1886,10 @@ function updateTableWithData(data, preserveFiltered = false) {
     // Apply hero filter
     if (selectedHero) {
         filteredData = filteredData.filter(player => {
-            for (let i = 1; i <= 5; i++) {
-                if (player[`card${i}_hero_handle`] === selectedHero) return true;
+            if (player.player_handle && selectedHero) {
+                return player.player_handle.toLowerCase() === selectedHero.toLowerCase();
             }
-            return false;
+            return false; // Exclude if either is null
         });
     }
 
@@ -1936,7 +1939,9 @@ function updateTableWithData(data, preserveFiltered = false) {
                         <span class="rank-label">${player.player_rank}</span>
                     </div>
                     <div class="player-details" style="display: flex; flex-direction: column; gap: 0; margin: 2px;">
-                        <div class="player-handle" style="text-align: left; margin-top: 0;">${player.player_name}</div> <!-- Adjust margin-top -->
+                        <div class="player-handle" style="text-align: left; margin-top: 0;">
+                            ${player.player_name.length > 12 ? player.player_name.substring(0, 12) + '..' : player.player_name}
+                        </div>
                         <div class="player-rewards" style="display: flex; flex-direction: column; gap: 2px; font-size: 12px;">
                             <div class="rewards-container" style="display: flex; gap: 10px; justify-content: flex-start;">
                                 ${player.eth_won ? `
@@ -2176,9 +2181,9 @@ function updateHeroList() {
     // Get all heroes and sort them alphabetically
     const sortedHeroes = Array.from(uniqueHeroes).sort();
     
-    // Filter heroes based on search term
+    // Filter heroes based on search term, ensuring the hero is not null
     const filteredHeroes = sortedHeroes.filter(hero => 
-        hero.toLowerCase().includes(searchTerm)
+        hero && hero.toLowerCase().includes(searchTerm) // Check if hero is not null
     );
     
     // Update the hero list

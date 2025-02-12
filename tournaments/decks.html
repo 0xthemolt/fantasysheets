@@ -1708,107 +1708,155 @@ function updateTableWithData(data, preserveFiltered = false) {
         // Display aggregated data
         sortedLeagues.forEach(group => {
             const row = document.createElement('tr');
+            // Add a descriptive class name and minimal styling to the row
+            row.className = 'league-summary-row';
+            row.style.cssText = 'margin: 0; padding: 0; border: none; background: #000000;';
             row.innerHTML = `
-                <td class="league-summary-cell">
-                    <div class="league-summary-container" style="display: flex; align-items: center; gap: 10px;">
-                        <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
-                            <img class="league-icon" 
-                                 src="/icons/${group.league.toLowerCase()}.webp" 
-                                 alt="${group.league}" 
-                                 style="width: 30px; height: 30px;">
-                            <div class="league-details" style="display: flex; flex-direction: column;">
-                                <div class="league-name" style="color: ${getLeagueColor(group.league)}; font-weight: bold;">
-                                    ${group.league}
-                                </div>
-                                <div class="deck-count" style="font-size: 12px; color: #808080;">
-                                    ${group.count} deck${group.count !== 1 ? 's' : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="rewards-summary" style="display: flex; flex-direction: column; gap: 5px;">
-                            ${group.total_eth || group.total_frags || group.total_fan ? `
-                                <div class="rewards-container" style="display: flex; gap: 10px; font-size: 14px;">
-                                    ${group.total_eth ? `
-                                        <div class="eth-reward" style="display: flex; align-items: center; gap: 2px;">
-                                            <span class="eth-amount" style="color: ${getRewardColor('eth')}">
-                                                ${group.total_eth.toFixed(2)}
-                                            </span>
-                                            <img class="eth-icon" src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
+                <td class="league-summary-cell" colspan="2" style="padding: 2px 0; border: none; background: #000000;">
+                    <div class="league-wrapper" style="
+                        position: relative;
+                        padding: 15px;
+                        margin: 0;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        background: #1a1a1a;
+                    ">
+                        <!-- League-specific texture background -->
+                        <div class="league-texture-background" style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: url('/icons/${group.league.toLowerCase()}-texture.webp') no-repeat center;
+                            background-size: 1125px 633px;
+                            opacity: 0.4;
+                            pointer-events: none;
+                            overflow: hidden;
+                            width: 100%;
+                            height: 100%;
+                        "></div>
+
+                        <!-- Content container -->
+                        <div style="position: relative; display: flex; gap: 20px; justify-content: space-between;">
+                            <!-- League Summary Cell -->
+                            <div class="league-summary-cell">
+                                <div class="league-summary-container" style="display: flex; align-items: center; gap: 10px;">
+                                    <!-- Existing league summary content -->
+                                    <div class="league-info-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                        <img class="league-icon" 
+                                             src="/icons/${group.league.toLowerCase()}.webp" 
+                                             alt="${group.league}" 
+                                             style="width: 30px; height: 30px;">
+                                        <div class="league-details" style="display: flex; flex-direction: column;">
+                                            <div class="league-name" style="font-size: 16px; color: ${getLeagueColor(group.league)}; font-weight: bold;">
+                                                ${group.league}
+                                            </div>
+                                            <div class="deck-count" style="font-size: 12px; color: #808080;">
+                                                ${group.count} deck${group.count !== 1 ? 's' : ''}
+                                            </div>
                                         </div>
-                                    ` : ''}
-                                    ${group.total_frags ? `
-                                        <div class="frag-reward" style="display: flex; align-items: center; gap: 2px;">
-                                            <span class="frag-amount" style="color: ${getRewardColor('fragment')}">
-                                                ${group.total_frags >= 1000 ? 
-                                                    (group.total_frags/1000).toFixed(1) + 'k' : 
-                                                    Math.floor(group.total_frags)}
-                                            </span>
-                                            <img class="frag-icon" src="/icons/fragment.webp" alt="Fragments" style="width: 12px; height: 12px;">
-                                        </div>
-                                    ` : ''}
-                                    ${group.total_fan ? `
-                                    <div class="fan-reward" style="display: flex; align-items: center; gap: 2px;">
-                                        <span class="fan-amount" style="color: ${getRewardColor('fan')}">
-                                            ${group.total_fan >= 1000 ? 
-                                                (group.total_fan/1000).toFixed(1) + 'k' : 
-                                                Math.floor(group.total_fan)}
-                                        </span>
-                                        <img class="fan-icon" src="/icons/fan.webp" alt="Fan" style="width: 12px; height: 12px;">
                                     </div>
-                                ` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </td>
-                <td class="best-deck-cell">
-                    ${group.best_deck ? `
-                        <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
-                                <div class="best-deck-label" style="color: #666; font-size: 0.875em;">
-                                    Best Deck
-                                </div>
-                                
-                                <div class="rank-score-container" style="display: flex; align-items: center;">
-                                    <div class="best-deck-stats" style="display: grid; grid-template-columns: 50px 100px; gap: 8px; min-width: 160px;">
-                                        <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em; text-align: right;">
-                                            ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
-                                            group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
-                                            group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
-                                            `#${group.best_rank}`}
-                                        </span>
-                                        <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em; text-align: right;">
-                                            ${Math.round(group.best_deck.player_score).toLocaleString()}
-                                        </span>
+                                    <div class="rewards-summary" style="display: flex; flex-direction: column; gap: 5px;">
+                                        ${group.total_eth || group.total_frags || group.total_fan ? `
+                                            <div class="rewards-container" style="display: flex; gap: 4px; font-size: 14px;">
+                                                <!-- Existing rewards content -->
+                                                ${group.total_eth ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/eth.webp" alt="ETH" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('eth')}; font-size: 14px;">
+                                                                ${group.total_eth.toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
+                                                ${group.total_frags ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/fragment.webp" alt="Fragments" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('fragment')}; font-size: 14px;">
+                                                                ${group.total_frags >= 1000 ? 
+                                                                    (group.total_frags/1000).toFixed(1) + 'k' : 
+                                                                    Math.floor(group.total_frags)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
+                                                ${group.total_fan ? `
+                                                    <div class="reward-item" style="padding: 3px 8px;">
+                                                        <div>
+                                                            <img src="/icons/fan.webp" alt="Fan" style="width: 14px; height: 14px;">
+                                                            <span style="color: ${getRewardColor('fan')}; font-size: 14px;">
+                                                                ${group.total_fan >= 1000 ? 
+                                                                    (group.total_fan/1000).toFixed(1) + 'k' : 
+                                                                    Math.floor(group.total_fan)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        ` : ''}
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Right side: Hero Cards -->
-                            <div class="hero-cards-container" style="display: flex; gap: 4px; margin-left: auto;">
-                                ${[1,2,3,4,5].map(i => ({
-                                    id: group.best_deck[`card${i}_id`],
-                                    handle: group.best_deck[`card${i}_hero_handle`],
-                                    stars: group.best_deck[`card${i}_hero_stars`],
-                                    score: group.best_deck[`card${i}_score`],
-                                    url: group.best_deck[`card${i}_picture_url`]
-                                }))
-                                .sort((a, b) => b.score - a.score)
-                                .map(hero => `
-                                    <div class="hero-card" style="display: inline-block; text-align: center;">
-                                        <div class="hero-score" style="font-size: 12px; color: ${getScoreColor(hero.score)};">
-                                            ${formatInt(calculateDisplayScore(hero))}
+                            <!-- Best Deck Cell -->
+                            <div class="best-deck-cell">
+                                ${group.best_deck ? `
+                                    <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <!-- Existing best deck content -->
+                                        <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
+                                            <div class="best-deck-label" style="color: #383838; font-size: 0.875em;">
+                                                Best Deck
+                                            </div>
+                                            
+                                            <div class="rank-score-container" style="display: flex; align-items: center;">
+                                                <div class="best-deck-stats" style="display: grid; grid-template-columns: 50px 100px; gap: 8px; min-width: 160px;">
+                                                    <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em; text-align: right;">
+                                                        ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                                                        group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                                                        group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
+                                                        `#${group.best_rank}`}
+                                                    </span>
+                                                    <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em; text-align: right;">
+                                                        ${Math.round(group.best_deck.player_score).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                             <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+
+                                        <!-- Right side: Hero Cards -->
+                                        <div class="hero-cards-container" style="display: flex; gap: 4px; margin-left: auto;">
+                                            ${[1,2,3,4,5].map(i => ({
+                                                id: group.best_deck[`card${i}_id`],
+                                                handle: group.best_deck[`card${i}_hero_handle`],
+                                                stars: group.best_deck[`card${i}_hero_stars`],
+                                                score: group.best_deck[`card${i}_score`],
+                                                url: group.best_deck[`card${i}_picture_url`]
+                                            }))
+                                            .sort((a, b) => b.score - a.score)
+                                            .map(hero => `
+                                                <div class="hero-card" style="display: inline-block; text-align: center;">
+                                                    <div class="hero-score" style="font-size: 12px; color: ${getScoreColor(hero.score)};">
+                                                        ${formatInt(calculateDisplayScore(hero))}
+                                                    </div>
+                                                         <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                                </div>
+                                            `).join('')}
+                                        </div>
                                     </div>
-                                `).join('')}
+                                ` : ''}
                             </div>
                         </div>
-                    ` : ''}
+                    </div>
                 </td>
             `;
             tableBody.appendChild(row);
         });
+
+        // Also add this style to the tableBody itself
+        document.getElementById('tableBody').style.cssText = 'background: transparent; border: none; border-spacing: 0; border-collapse: collapse; margin: 0; padding: 0;';
         return;
     }
 

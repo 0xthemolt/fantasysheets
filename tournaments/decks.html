@@ -475,18 +475,23 @@
     .rank-1 .circle-img { border: 2px solid #FFD700; }
     .rank-2 .circle-img { border: 2px solid #C0C0C0; }
     .rank-3 .circle-img { border: 2px solid #CD7F32; }
+    .rank-other .circle-img { border: 1px solid #ffffff; }
     
     .rank-label {
       position: absolute;
-      right: -8px; /* Position label on the right side of the image */
-      bottom: -8px; /* Position label at the bottom of the image */
+      right: -4px; /* Position label on the right side of the image */
+      bottom: -1px; /* Position label at the bottom of the image */
       min-width: 20px; /* Ensure consistent width for single/double digits */
+      justify-content: center;  /* Center the content */
+      align-items: center;  /* Center vertically */
       padding: 2px 6px;
       border-radius: 10px;
       font-size: 12px;
       font-weight: bold;
       white-space: nowrap;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      min-width: min-content;  /* Allow shrinking to content */
+      width: auto;  /* Let it grow based on content */
     }
     
     .rank-1 .rank-label { background: #FFD700; color: white; }
@@ -1600,7 +1605,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                     <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                                                         ${formatInt(calculateDisplayScore(hero))}
                                                     </div>
-                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 25px; height: 36px;">
+                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
                                                 </div>
                                             `).join('')}
                                         </div>
@@ -1674,6 +1679,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                     league: player.league,
                     total_eth: 0,
                     total_frags: 0,
+                    total_fan: 0,
                     best_rank: Infinity,
                     best_deck: null,
                     count: 0
@@ -1683,6 +1689,7 @@ function updateTableWithData(data, preserveFiltered = false) {
             const group = leagueGroups[player.league];
             group.total_eth += player.eth_won || 0;
             group.total_frags += player.frags_won || 0;
+            group.total_fan += player.fan_won || 0; 
             group.count++;
             
             // Update best rank and corresponding deck
@@ -1719,7 +1726,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                             </div>
                         </div>
                         <div class="rewards-summary" style="display: flex; flex-direction: column; gap: 5px;">
-                            ${group.total_eth || group.total_frags ? `
+                            ${group.total_eth || group.total_frags || group.total_fan ? `
                                 <div class="rewards-container" style="display: flex; gap: 10px; font-size: 14px;">
                                     ${group.total_eth ? `
                                         <div class="eth-reward" style="display: flex; align-items: center; gap: 2px;">
@@ -1739,6 +1746,16 @@ function updateTableWithData(data, preserveFiltered = false) {
                                             <img class="frag-icon" src="/icons/fragment.webp" alt="Fragments" style="width: 12px; height: 12px;">
                                         </div>
                                     ` : ''}
+                                    ${group.total_fan ? `
+                                    <div class="fan-reward" style="display: flex; align-items: center; gap: 2px;">
+                                        <span class="fan-amount" style="color: ${getRewardColor('fan')}">
+                                            ${group.total_fan >= 1000 ? 
+                                                (group.total_fan/1000).toFixed(1) + 'k' : 
+                                                Math.floor(group.total_fan)}
+                                        </span>
+                                        <img class="fan-icon" src="/icons/fan.webp" alt="Fan" style="width: 12px; height: 12px;">
+                                    </div>
+                                ` : ''}
                                 </div>
                             ` : ''}
                         </div>
@@ -1747,21 +1764,20 @@ function updateTableWithData(data, preserveFiltered = false) {
                 <td class="best-deck-cell">
                     ${group.best_deck ? `
                         <div class="best-deck-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <!-- Left side: Rank and Score -->
                             <div class="best-deck-info" style="display: flex; flex-direction: column; gap: 8px;">
                                 <div class="best-deck-label" style="color: #666; font-size: 0.875em;">
                                     Best Deck
                                 </div>
                                 
-                                <div class="rank-score-container" style="display: flex; align-items: center; gap: 12px;">
-                                    <div class="best-deck-stats" style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em;">
+                                <div class="rank-score-container" style="display: flex; align-items: center;">
+                                    <div class="best-deck-stats" style="display: grid; grid-template-columns: 50px 100px; gap: 8px; min-width: 160px;">
+                                        <span class="deck-rank" style="font-weight: bold; color: #fff; font-size: 0.875em; text-align: right;">
                                             ${group.best_rank === 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                                             group.best_rank === 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                                             group.best_rank === 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :                                    
                                             `#${group.best_rank}`}
                                         </span>
-                                        <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em;">
+                                        <span class="deck-score" style="color: ${getLeagueColor(group.league)}; font-size: 0.875em; text-align: right;">
                                             ${Math.round(group.best_deck.player_score).toLocaleString()}
                                         </span>
                                     </div>
@@ -1783,7 +1799,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                         <div class="hero-score" style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                                             ${formatInt(calculateDisplayScore(hero))}
                                         </div>
-                                        <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                             <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
                                     </div>
                                 `).join('')}
                             </div>

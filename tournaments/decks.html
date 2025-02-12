@@ -883,9 +883,7 @@
     </nav>
 </div>
 
-<!-- Add toggle container -->
 <div class="toggle-container">
-    <!-- First row: My Decks and Leagues -->
     <div class="toggle-row">
         <button class="toggle-button">
             <i class="fas fa-trophy"></i>
@@ -897,7 +895,6 @@
         </button>
         <div style="width: 1px; background: #404040; height: 24px; margin: 0 8px;"></div>
         
-        <!-- Replace the individual league buttons with this dropdown structure -->
         <div class="league-dropdown">
             <button class="toggle-button league-toggle">
                 <i class="fas fa-layer-group"></i>
@@ -929,7 +926,6 @@
         </div>
     </div>
     
-    <!-- Second row: Filters -->
     <div class="toggle-row">
         <div class="filter-input-container">
             <input type="text" 
@@ -942,9 +938,9 @@
             <i class="fas fa-search"></i>
             Hero Filter
         </button>
-        <button class="toggle-button zero-rewards-button filter-style">
+        <!-- <button class="toggle-button zero-rewards-button filter-style">
             0 Rewards
-        </button>
+        </button> -->
     </div>
 </div>
 
@@ -1198,7 +1194,7 @@ async function initializeTournamentScroller() {
             initializeScrollButtons();
             initializeLeagueButtons();
             initializeHeroFilter();
-            initializeZeroRewardsFilter();
+            // initializeZeroRewardsFilter();
             initializePlayerFilter();
         });
 
@@ -1280,7 +1276,7 @@ async function fetchData(tournamentNumber) {
 
         // Execute query with limit only if not viewing personal decks/leagues
         const { data, error } = await (!(myDecksButton.classList.contains('active') || myLeaguesButton.classList.contains('active')) 
-            ? query.limit(500)
+            ? query.limit(1000)
             : query);
 
         if (error) {
@@ -2017,33 +2013,69 @@ function updateTableWithData(data, preserveFiltered = false) {
     });
 }
 
+const SCORE_MAX = 1000; // Use a constant for max score
+
+function getColorFromPercentage(percentage, colorStops) {
+    // Generic function to get color based on percentage
+    const r = Math.round(255 * (1 - percentage));
+    const g = Math.round(255 * percentage);
+    return `rgb(${r}, ${g}, 0)`;
+}
+
 function getScoreColor(score) {
-            // Calculate percentage between 0 and max
-            const percentage = score / 1000;
-            
-            // Color stops based on matplotlib's RdYlGn
-            if (percentage <= 0.25) {
-                // Red to Orange
-                const r = 255;
-                const g = Math.round(percentage * 4 * 127);
-                return `rgb(${r}, ${g}, 0)`;
-            } else if (percentage <= 0.5) {
-                // Orange to Yellow
-                const r = 255;
-                const g = Math.round(127 + (percentage - 0.25) * 4 * 128);
-                return `rgb(${r}, ${g}, 0)`;
-            } else if (percentage <= 0.75) {
-                // Yellow to Light Green
-                const r = Math.round(255 - (percentage - 0.5) * 4 * 128);
-                const g = 255;
-                return `rgb(${r}, ${g}, 0)`;
-            } else {
-                // Light Green to Dark Green
-                const r = Math.round(127 - (percentage - 0.75) * 4 * 127);
-                const g = 255;
-                return `rgb(${r}, ${g}, 0)`;
-            }
+    const percentage = score / SCORE_MAX;
+    if (percentage <= 0.25) return getColorFromPercentage(percentage * 4, 'red to orange');
+    if (percentage <= 0.5) return getColorFromPercentage(percentage * 4, 'orange to yellow');
+    if (percentage <= 0.75) return getColorFromPercentage(percentage * 4, 'yellow to light green');
+    return getColorFromPercentage(percentage * 4, 'light green to dark green');
+}
+
+function getColorFromMap(type, map) {
+    return map[type.toLowerCase()] || "#ffffff"; // Default color
+}
+
+function getLeagueColor(league) {
+    return getColorFromMap(league, LEAGUE_COLORS);
+}
+
+function getRewardColor(rewardType) {
+    return getColorFromMap(rewardType, REWARD_COLORS);
+}
+
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function initializePlayerFilter() {
+    const playerFilterInput = document.getElementById('playerFilterInput');
+    const clearFilterButton = document.querySelector('.clear-filter');
+
+    playerFilterInput.addEventListener('input', debounce((e) => {
+        const filterValue = e.target.value.toLowerCase();
+        clearFilterButton.style.display = filterValue ? 'block' : 'none';
+
+        if (cachedTournamentData && cachedTournamentData.players) {
+            const filteredData = {
+                ...cachedTournamentData,
+                players: cachedTournamentData.players.filter(player => 
+                    player.player_handle.toLowerCase().includes(filterValue) || 
+                    player.player_name.toLowerCase().includes(filterValue)
+                )
+            };
+            updateTableWithData(filteredData, true);
         }
+    }, 300));
+
+    clearFilterButton.addEventListener('click', () => {
+        playerFilterInput.value = '';
+        clearFilterButton.style.display = 'none';
+        updateTableWithData(cachedTournamentData, false);
+    });
+}
 
 function formatInt(number) {
     return Math.round(number).toLocaleString();
@@ -2187,39 +2219,6 @@ function initializeZeroRewardsFilter() {
         zeroRewardsFilterActive = !zeroRewardsFilterActive;
         zeroRewardsButton.classList.toggle('active', zeroRewardsFilterActive);
         // Update table with cached data but don't preserve filters
-        updateTableWithData(cachedTournamentData, false);
-    });
-}
-
-function initializePlayerFilter() {
-    const playerFilterInput = document.getElementById('playerFilterInput');
-    const clearFilterButton = document.querySelector('.clear-filter');
-    let filterTimeout;
-
-    playerFilterInput.addEventListener('input', (e) => {
-        clearTimeout(filterTimeout);
-        const filterValue = e.target.value.toLowerCase();
-        
-        // Show/hide clear button
-        clearFilterButton.style.display = filterValue ? 'block' : 'none';
-
-        // Debounce the filter operation
-        filterTimeout = setTimeout(() => {
-            if (cachedTournamentData && cachedTournamentData.players) {
-                const filteredData = {
-                    ...cachedTournamentData,
-                    players: cachedTournamentData.players.filter(player => 
-                        player.player_handle.toLowerCase().includes(filterValue)
-                    )
-                };
-                updateTableWithData(filteredData, true);
-            }
-        }, 300);
-    });
-
-    clearFilterButton.addEventListener('click', () => {
-        playerFilterInput.value = '';
-        clearFilterButton.style.display = 'none';
         updateTableWithData(cachedTournamentData, false);
     });
 }

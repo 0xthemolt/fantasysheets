@@ -1032,90 +1032,106 @@ const REWARD_COLORS = {
         };
 
 async function initializeTournamentScroller() {
-            const { data, error } = await supabaseClient
-                .from('tournaments')
-                .select('tournament_number, tournament_status')
-                .order('start_timestamp', { ascending: true });
+    const { data, error } = await supabaseClient
+        .from('tournaments')
+        .select('tournament_number, tournament_status')
+        .order('start_timestamp', { ascending: true });
 
-            if (error) {
-                console.error('Error fetching tournaments:', error);
-                return;
-            }
+    if (error) {
+        console.error('Error fetching tournaments:', error);
+        return;
+    }
 
-            const scrollContainer = document.querySelector('.scroll-items');
-            
-            // Add real tournament buttons
-            data.forEach(tournament => {
-                const button = document.createElement('button');
-                button.className = 'scroll-item';
-                button.innerHTML = `
-                    <span class="main-text">Main</span>
-                    <span class="number">${tournament.tournament_number}${tournament.tournament_status === 'live' ? '<span class="live-indicator"></span>' : ''}</span>
-                `;
-                button.onclick = () => selectTournament(tournament.tournament_number);
-                scrollContainer.appendChild(button);
-            });
+    const scrollContainer = document.querySelector('.scroll-items');
+    
+    // Add real tournament buttons
+    data.forEach(tournament => {
+        const button = document.createElement('button');
+        button.className = 'scroll-item';
+        button.innerHTML = `
+            <span class="main-text">Main</span>
+            <span class="number">${tournament.tournament_number}${tournament.tournament_status === 'live' ? '<span class="live-indicator"></span>' : ''}</span>
+        `;
+        button.onclick = () => selectTournament(tournament.tournament_number);
+        scrollContainer.appendChild(button);
+    });
 
-            // Add dummy tournament button
-            const maxTournamentNumber = Math.max(...data.map(t => t.tournament_number));
-            const dummyButton = document.createElement('button');
-            dummyButton.className = 'scroll-item';
-            dummyButton.style.opacity = '0.5';
-            dummyButton.style.cursor = 'default';
-            dummyButton.innerHTML = `
-                <span class="main-text">Main</span>
-                <span class="number">${maxTournamentNumber + 1}</span>
-            `;
-            scrollContainer.appendChild(dummyButton);
+    // Add dummy tournament button
+    const maxTournamentNumber = Math.max(...data.map(t => t.tournament_number));
+    const dummyButton = document.createElement('button');
+    dummyButton.className = 'scroll-item';
+    dummyButton.style.opacity = '0.5';
+    dummyButton.style.cursor = 'default';
+    dummyButton.innerHTML = `
+        <span class="main-text">Main</span>
+        <span class="number">${maxTournamentNumber + 1}</span>
+    `;
+    scrollContainer.appendChild(dummyButton);
 
-            // Select default tournament
-            const liveTournament = data.find(t => t.tournament_status === 'live');
-            const latestFinishedTournament = data
-                .filter(t => t.tournament_status === 'finished')
-                .reduce((max, t) => t.tournament_number > max.tournament_number ? t : max, data[0]);
-            
-            const defaultTournament = liveTournament || latestFinishedTournament;
-            
-            if (defaultTournament) {
-                selectTournament(defaultTournament.tournament_number);
-                // Find and scroll the default tournament button into view
-                const defaultButton = Array.from(document.querySelectorAll('.scroll-item'))
-                    .find(item => item.querySelector('.number').textContent === String(defaultTournament.tournament_number));
-                if (defaultButton) {
-                    defaultButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-            }
-
-            // Add drag scroll functionality
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            scrollContainer.addEventListener('mousedown', (e) => {
-                isDown = true;
-                scrollContainer.style.cursor = 'grabbing';
-                startX = e.pageX - scrollContainer.offsetLeft;
-                scrollLeft = scrollContainer.scrollLeft;
-            });
-
-            scrollContainer.addEventListener('mouseleave', () => {
-                isDown = false;
-                scrollContainer.style.cursor = 'grab';
-            });
-
-            scrollContainer.addEventListener('mouseup', () => {
-                isDown = false;
-                scrollContainer.style.cursor = 'grab';
-            });
-
-            scrollContainer.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - scrollContainer.offsetLeft;
-                const walk = (x - startX) * 2;
-                scrollContainer.scrollLeft = scrollLeft - walk;
-            });
+    // Select default tournament
+    const liveTournament = data.find(t => t.tournament_status === 'live');
+    const latestFinishedTournament = data
+        .filter(t => t.tournament_status === 'finished')
+        .reduce((max, t) => t.tournament_number > max.tournament_number ? t : max, data[0]);
+    
+    const defaultTournament = liveTournament || latestFinishedTournament;
+    
+    if (defaultTournament) {
+        selectTournament(defaultTournament.tournament_number);
+        // Find and scroll the default tournament button into view
+        const defaultButton = Array.from(document.querySelectorAll('.scroll-item'))
+            .find(item => item.querySelector('.number').textContent === String(defaultTournament.tournament_number));
+        if (defaultButton) {
+            defaultButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
+    }
+
+    // New logic to select league based on selectedPlayerHandle
+    if (selectedPlayerHandle) {
+        // Select My Leagues if selectedPlayerHandle is not null
+        handleButtonClick('myLeagues');
+    } else {
+        // Select "Elite" if selectedPlayerHandle is null
+        selectedLeague = 'Elite';
+        const leagueToggle = document.querySelector('.league-toggle');
+        leagueToggle.innerHTML = `
+            <i class="fas fa-layer-group"></i>
+            Elite
+            <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
+        `;
+        fetchData(defaultTournament.tournament_number); // Fetch data for the selected tournament
+    }
+
+    // Add drag scroll functionality
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    scrollContainer.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+    });
+
+    scrollContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainer.scrollLeft = scrollLeft - walk;
+    });
+}
 
         function selectTournament(tournamentNumber) {
             // Remove active class from all items

@@ -25,7 +25,7 @@ from flatten.get_tournament_past_players gtpp
 join flatten.get_tournaments t
 	on gtpp.tournament_id = t.tournament_id
 --where player_id = '0x162F95a9364c891028d255467F616902A479681a'
---and tournament_unique_key = 'Main 32'
+and t.start_timestamp >= '2024-07-01'
 and t.tournament_status = 'finished'
 group by 1
 )
@@ -147,6 +147,9 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,sum(players.fan_pts + referral_pts) fan_pts
 ,sum(players.gold) blast_gold
 ,suM(players.stars) stars
+,min(elo.overall_elo_rank) as elo_rank
+,max(elo.elo_score) as elo_score
+,max(elo.elo_image) as elo_image
 ,sum(tournaments.deck_count) as decks
 ,suM(players.number_of_cards) as cards
 ,max(touranment_rankings_elite.avg_best_deck_norm_score) as elite_norm_score
@@ -167,6 +170,8 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,max(coalesce(tvbp.longest_trading_streak,0)) as longest_trade_streak
 ,max(updated) freshness_timestamp
 from flatten.get_player_basic_data players
+left join flatten.elo_leaderboard elo
+	on players.player_id = elo.player_id
 join flatten.GET_TOURNAMENTS first_tournament
 	on players.first_tournament = first_tournament.tournament_id
 join flatten.GET_TOURNAMENTS last_tournament
@@ -217,6 +222,11 @@ for col in rank_columns:
 # Handle NaN values in norm rank columns
 score_columns = ['elite_norm_score', 'gold_norm_score', 'silver_norm_score', 'bronze_norm_score', 'reverse_norm_score']
 for col in score_columns:
+    player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
+
+# Handle NaN values in norm rank columns
+elo_columns = ['elo_score', 'elo_rank']
+for col in elo_columns:
     player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 
 # Get the maximum freshness timestamp

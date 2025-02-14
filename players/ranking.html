@@ -222,7 +222,7 @@
                         <th class="column-header section-end" colspan="5">
                             <i class="fa-solid fa-coins"></i> Rewards
                         </th>
-                        <th class="column-header section-end" colspan="6" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
+                        <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
                             <i class="fa-solid fa-trophy"></i> Performance
                         </th>
                         <th class="column-header section-end" colspan="2">
@@ -275,7 +275,11 @@
                             <img src="../icons/stars.webp" alt="Stars" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="decks" title="All Time Decks - Since May 2024">
+                        <th class="sortable" data-sort="elo_rank">
+                            <img src="../icons/elo.webp" alt="Elo" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="decks">
                             Decks
                             <div class="sort-arrow"></div>
                         </th>
@@ -312,7 +316,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="20" style="text-align: center; padding: 2rem;">
+                        <td colspan="21" style="text-align: center; padding: 2rem;">
                             Loading player data...
                         </td>
                     </tr>
@@ -389,6 +393,9 @@
                     stars: Math.round(player.stars),
                     decks: Math.round(player.decks),
                     cards: Math.round(player.cards),
+                    elo_rank: Math.round(player.elo_rank),
+                    elo_score: Math.round(player.elo_score),
+                    elo_image: player.elo_image ? player.elo_image.replace('.png', '') : '',
                     elite: Math.round(player.elite_norm_rank),
                     gold: Math.round(player.gold_norm_rank),
                     silver: Math.round(player.silver_norm_rank),
@@ -415,6 +422,7 @@
                             <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
                                 <span class="player-handle">${player.name}</span>
                             </a>
+                            <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
                             <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
                                 <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                             </a>
@@ -431,6 +439,15 @@
                     <td>${formatNumberMK(parseFloat(player.rewardFrag))}</td>
                     <td>${formatNumberMK(player.blastGold)}</td>  
                     <td class="section-end">${formatNumberMK(player.stars)}</td>
+                    <td>
+                        ${player.elo_rank == 0 ? '-' : 
+                          player.elo_rank == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.elo_rank == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.elo_rank == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.elo_rank <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elo_rank)}</span>` :
+                          formatInt(player.elo_rank)}
+                        ${player.elo_score !== undefined ? `<span style="color: grey; font-size: 0.8em;"> (${formatInt(player.elo_score)})</span>` : ''}
+                    </td>
                     <td>${formatInt(player.decks)}</td>
                     <td style="background-color: #a8ccde26">
                         ${player.elite == 0 ? '-' : 
@@ -596,7 +613,8 @@
                         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
                     } else {
                         currentSort.column = column;
-                        currentSort.direction = 'desc';
+                        // Set specific columns to sort ascending by default
+                        currentSort.direction = (['elo_rank', 'elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) ? 'asc' : 'desc';
                     }
 
                     // Update arrow on clicked header

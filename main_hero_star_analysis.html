@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <div id="chart"></div>
+    <script>
+        // Fetch data from the backend
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                // D3 code to create the chart
+                console.log(data); // Check the fetched data
+
+                // Example D3 code to visualize the data
+                // ... your D3 chart code here ...
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>

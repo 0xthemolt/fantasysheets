@@ -138,7 +138,7 @@
                         values.push(currentCount);
                         
                         let changeHtml = '';
-                        if (previousCount !== null) {
+                        if (previousCount !== null && currentCount !== '-') {
                             const change = currentCount - previousCount;
                             const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
                             changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
@@ -239,21 +239,27 @@
                     const values = []; // Store values for sparkline
                     Object.values(data).forEach(tournamentData => {
                         const leagueData = tournamentData.leagues.find(l => l.league === league);
-                        const currentCount = leagueData ? leagueData.player_count : 0;
-                        values.push(currentCount);
-                        
-                        let changeHtml = '';
-                        if (previousCount !== null) {
-                            const change = currentCount - previousCount;
-                            const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
-                            changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
+                        const currentCount = leagueData ? (leagueData.player_count !== null ? leagueData.player_count : '-') : '-';
+                        if (currentCount !== '-' && currentCount !== null) {
+                            values.push(currentCount);
+                            
+                            let changeHtml = '';
+                            if (previousCount !== null) {
+                                const change = currentCount - previousCount;
+                                const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
+                                changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
+                            }
+                            
+                            html += `<td style="background-color: ${leagueColors[leagueLower]}40; vertical-align: top; padding-top: 8px;">
+                                <span style="font-size: 1.1em">${currentCount.toLocaleString()}</span>${changeHtml}
+                            </td>`;
+                            
+                            previousCount = currentCount;
+                        } else {
+                            html += `<td style="background-color: ${leagueColors[leagueLower]}40; vertical-align: top; padding-top: 8px;">
+                                <span style="font-size: 1.1em">-</span>
+                            </td>`;
                         }
-                        
-                        html += `<td style="background-color: ${leagueColors[leagueLower]}40; vertical-align: top; padding-top: 8px;">
-                            <span style="font-size: 1.1em">${currentCount.toLocaleString()}</span>${changeHtml}
-                        </td>`;
-                        
-                        previousCount = currentCount;
                     });
 
                     // Add sparkline (same as before)
@@ -304,17 +310,17 @@
                 html += '<tr class="total-row"><td>Total Players</td>';
                 let previousPlayerTotal = null;
                 Object.values(data).forEach(tournamentData => {
-                    const total = tournamentData.total_player_count;
+                    const total = tournamentData.total_player_count !== undefined ? tournamentData.total_player_count : 0;
                     
                     let changeHtml = '';
-                    if (previousPlayerTotal !== null) {
+                    if (total !== 0 && previousPlayerTotal !== null) {
                         const change = total - previousPlayerTotal;
                         const color = change > 0 ? 'green' : change < 0 ? 'red' : 'gray';
                         changeHtml = `<br><span style="font-size: 0.7em; color: ${color}">${change > 0 ? '+' : ''}${change.toLocaleString()}</span>`;
                     }
                     
                     html += `<td style="vertical-align: top; padding-top: 8px;">
-                        <span style="font-size: 1.1em">${total.toLocaleString()}</span>${changeHtml}
+                        <span style="font-size: 1.1em">${total !== 0 ? total.toLocaleString() : ''}</span>${changeHtml}
                     </td>`;
                     
                     previousPlayerTotal = total;
@@ -327,8 +333,8 @@
                 // Stars rows
                 html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Stars</th></tr>';
                 // Get all unique star values and sort them in descending order
-                const stars = [...new Set(Object.values(data).flatMap(t => t.stars.map(s => s.hero_stars)))];
-                const sortedStars = stars.sort((a, b) => b - a); // Sort in descending order
+                const stars = [...new Set(Object.values(data).flatMap(t => t.stars ? t.stars.map(s => s.hero_stars) : []))];
+                const sortedStars = stars.length > 0 ? stars.sort((a, b) => b - a) : []; // Sort in descending order or set to empty array
                 
                 sortedStars.forEach(star => {
                     html += `<tr><td>${star} ⭐</td>`;

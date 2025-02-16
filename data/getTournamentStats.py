@@ -32,13 +32,12 @@ league_decks_query = f"""select
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
     gt.league,
-    COUNT(*) deck_count,
-    COUNT(distinct gtpp.player_id) player_count
+    max(gt.registered_decks) deck_count,
+    max(gt.player_count) player_count
 from
     flatten.get_tournaments gt
-join flatten.tournament_players gtpp
-    on gt.tournament_id = gtpp.tournament_id
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
+    or gt.tournament_status = 'not started'
 group by 1,2,3,4,5
 order by gt.start_timestamp asc"""
 league_decks_df = pd.read_sql_query(league_decks_query, conn)
@@ -65,8 +64,7 @@ card_stars_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ',
 gt.start_timestamp,
  gt.tournament_unique_key,
     coalesce(t.hero_stars,1) hero_stars,
-    count(*) card_count,
-    count(distinct t.player_id) player_count
+    count(*) card_count
 from agg.tournamentownership t 
 join   flatten.get_tournaments gt
     on t.tournament_id  = gt.tournament_id 
@@ -119,7 +117,7 @@ for _, row in league_decks_df.iterrows():
     tournaments_data[tournament_key]['leagues'].append({
         'league': row['league'],
         'deck_count': int(row['deck_count']),
-        'player_count': int(row['player_count'])
+        'player_count': int(row['player_count']) if not pd.isna(row['player_count']) else None
     })
 
 # Process total_players_df

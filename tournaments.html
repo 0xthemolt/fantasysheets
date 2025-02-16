@@ -340,7 +340,7 @@
                     html += `<tr><td>${star} ⭐</td>`;
                     Object.values(data).forEach(tournamentData => {
                         const starData = tournamentData.stars.find(s => s.hero_stars === star);
-                        html += `<td>${starData ? starData.card_count.toLocaleString() : '0'}</td>`;
+                        html += `<td>${starData ? starData.card_count.toLocaleString() : '-'}</td>`;
                     });
                     html += '<td></td></tr>';
                 });

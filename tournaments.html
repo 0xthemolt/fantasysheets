@@ -340,7 +340,7 @@
                 const rarityOrder = ["legendary", "epic", "rare", "common"];
                 // Sort rarities based on the defined order (lowercased)
                 rarities.sort((a, b) => rarityOrder.indexOf(a.toLowerCase()) - rarityOrder.indexOf(b.toLowerCase()));
-
+                
                 const rarityColors = {
                     "common": "#93FF01",
                     "rare": "#00FFDF",
@@ -349,12 +349,16 @@
                 };
 
                 rarities.forEach(rarity => {
-                    html += `<tr style="background-color: ${rarityColors[rarity.toLowerCase()]}40;"><td><span style="color: ${rarityColors[rarity.toLowerCase()] || '#000'}; margin-left: 5px; font-size: 1.1em; font-weight: bold;">${rarity.charAt(0).toUpperCase() + rarity.slice(1)}</span></td>`; // Capitalize first letter
+                    // Add background color to the left side label
+                    html += `<tr style="background-color: ${rarityColors[rarity.toLowerCase()]}40;">
+                        <td style="background-color: ${rarityColors[rarity.toLowerCase()]}40; color: ${rarityColors[rarity.toLowerCase()] || '#000'};">
+                            ${rarity.charAt(0).toUpperCase() + rarity.slice(1)}
+                        </td>`;
                     const values = []; // Store values for sparkline
                     Object.values(data).forEach(tournamentData => {
                         const rarityData = tournamentData.rarity.find(r => r.hero_rarity.toLowerCase() === rarity);
                         const cardCount = rarityData ? rarityData.card_count : '-';
-                        html += `<td>${cardCount !== '-' ? cardCount.toLocaleString() : '-'}</td>`;
+                        html += `<td style="background-color: ${rarityColors[rarity.toLowerCase()]}40;">${cardCount !== '-' ? cardCount.toLocaleString() : '-'}</td>`;
                         if (cardCount !== '-') {
                             values.push(cardCount);
                         }

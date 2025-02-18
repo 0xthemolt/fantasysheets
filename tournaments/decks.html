@@ -280,7 +280,7 @@
     }
 
     .table-container {
-        margin: 10px auto 0;
+        margin: 5px auto 0;
         max-width: 650px;
         max-height: 70vh;
         overflow: hidden;
@@ -820,7 +820,7 @@
         .table-container {
             width: 100%;
             margin: 5px auto 0;
-            padding: 10px 5px;
+            padding: 5px 5px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -864,6 +864,22 @@
         .reward-item {
             padding: 2px 6px !important;
         }
+    }
+
+    /* Add this media query to adjust body area on mobile */
+    @media (max-width: 768px) {
+        body {
+            padding: 10px; /* Adjust padding as needed */
+            margin: 0; /* Remove default margin */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+        .scroll-container {
+            width: 100%; /* Ensure full width */
+        }
+        .toggle-container {
+            width: 80%; /* Ensure full width */
+        }
+        /* Add any other adjustments for mobile layout here */
     }
 
 </style>
@@ -970,14 +986,14 @@
         height: 100%;
     "></div>
     
-    <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative;">
+    <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative; overflow: hidden; padding: 0; margin: 0;">
         <div class="summary-card" style="position: relative;">
             <div class="summary-content">
                 <!-- Existing rewards summary content -->
             </div>
         </div>
         
-        <div class="scoring-view" style="position: relative;">
+        <div class="scoring-view" style="position: relative; overflow: hidden; margin: 0;">
             <div class="summary-header">
             </div>
             <div class="league-scores">
@@ -1891,10 +1907,14 @@ function updateTableWithData(data, preserveFiltered = false) {
     // Apply hero filter
     if (selectedHero) {
         filteredData = filteredData.filter(player => {
-            if (player.player_handle && selectedHero) {
-                return player.player_handle.toLowerCase() === selectedHero.toLowerCase();
-            }
-            return false; // Exclude if either is null
+            // Check if the selected hero is in any of the player's cards
+            return [
+                player.card1_hero_handle,
+                player.card2_hero_handle,
+                player.card3_hero_handle,
+                player.card4_hero_handle,
+                player.card5_hero_handle
+            ].some(heroHandle => heroHandle && heroHandle.toLowerCase() === selectedHero.toLowerCase());
         });
     }
 

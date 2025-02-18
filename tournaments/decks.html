@@ -842,8 +842,8 @@
 
         /* Adjust hero cards size for mobile */
         .heroes-container .hero-card img {
-            width: 24px !important;
-            height: 35px !important;
+            width: 25px !important; /* Increased from 24px */
+            height: 37px !important; /* Increased from 35px */
         }
 
         .league-summary-container {
@@ -1687,7 +1687,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                     <div style="font-size: 12px; color: ${getScoreColor(hero.score)};">
                                                         ${formatInt(calculateDisplayScore(hero))}
                                                     </div>
-                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 31.7625px; height: 46.7775px;">
                                                 </div>
                                             `).join('')}
                                         </div>
@@ -1880,7 +1880,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                     <div class="hero-score" style="font-size: 11px; color: ${getScoreColor(hero.score)};">
                                                         ${formatInt(calculateDisplayScore(hero))}
                                                     </div>
-                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 31.7625px; height: 46.7775px;">
                                                 </div>
                                             `).join('')}
                                         </div>
@@ -2010,7 +2010,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                     <div class="hero-score" style="font-size: 11px; color: ${getScoreColor(hero.score)};">
                                         ${formatInt(calculateDisplayScore(hero))}
                                     </div>
-                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 28.875px; height: 42.525px;">
+                                    <img src="${hero.url}" alt="${hero.handle}" style="width: 31.7625px; height: 46.7775px;">
                                 </div>
                             `).join('')}
                     </div>

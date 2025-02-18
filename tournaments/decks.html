@@ -720,8 +720,8 @@
         }
 
         .reward-item.player-image img {
-            width: 35px !important;
-            height: 35px !important;
+            width: 30px !important;
+            height: 30px !important;
         }
 
         /* Slightly larger reward icons on mobile */
@@ -842,8 +842,8 @@
 
         /* Adjust hero cards size for mobile */
         .heroes-container .hero-card img {
-            width: 25px !important; /* Increased from 24px */
-            height: 37px !important; /* Increased from 35px */
+            width: 26.25px !important; /* Increased from 25px by 5% */
+            height: 38.5px !important; /* Increased from 37px by 5% */
         }
 
         .league-summary-container {
@@ -1995,7 +1995,7 @@ function updateTableWithData(data, preserveFiltered = false) {
             </td>
             <td style="width: 57.5%;">
                 <div class="deck-info-container" style="display: flex; align-items: center;">
-                    <span class="player-score rank-text" style="color: ${getLeagueColor(player.league)}; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); margin-right: 10px;">
+                    <span class="player-score rank-text" style="color: ${getLeagueColor(player.league)}; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); margin-right: 10px; text-align: right; width: 50px;"> <!-- Added text-align and width -->
                         ${formatInt(player.player_score)}
                     </span>
                     <div class="heroes-container" style="display: flex; gap: 2.5px;">
@@ -2214,7 +2214,7 @@ function updateHeroList() {
     // Update the hero list
     heroList.innerHTML = filteredHeroes.map(hero => `
         <div class="hero-option ${hero === selectedHero ? 'selected' : ''}" 
-             onclick="filterByHero('${hero}')">
+             onclick="filterByHero('${hero}'); document.getElementById('heroSearchModal').style.display = 'none';"> <!-- Close modal on click -->
             ${hero}
         </div>
     `).join('');

@@ -332,7 +332,7 @@
                 
                 
                 // Add this new section for Card Counts By Hero Rarity
-                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Rarity</th></tr>';
+                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Rarity</th></tr>';
                 // Get all unique rarity values
                 const rarities = [...new Set(Object.values(data).flatMap(t => t.rarity ? t.rarity.map(r => r.hero_rarity) : []))];
                 
@@ -350,15 +350,15 @@
 
                 rarities.forEach(rarity => {
                     // Add background color to the left side label
-                    html += `<tr style="background-color: ${rarityColors[rarity.toLowerCase()]}40;">
-                        <td style="background-color: ${rarityColors[rarity.toLowerCase()]}40; color: ${rarityColors[rarity.toLowerCase()] || '#000'};">
+                    html += `<tr style="background-color: ${rarityColors[rarity.toLowerCase()]}25;">
+                        <td style="background-color: ${rarityColors[rarity.toLowerCase()]}25; color: ${rarityColors[rarity.toLowerCase()] || '#000'};">
                             ${rarity.charAt(0).toUpperCase() + rarity.slice(1)}
                         </td>`;
                     const values = []; // Store values for sparkline
                     Object.values(data).forEach(tournamentData => {
                         const rarityData = tournamentData.rarity.find(r => r.hero_rarity.toLowerCase() === rarity);
                         const cardCount = rarityData ? rarityData.card_count : '-';
-                        html += `<td style="background-color: ${rarityColors[rarity.toLowerCase()]}40;">${cardCount !== '-' ? cardCount.toLocaleString() : '-'}</td>`;
+                        html += `<td style="background-color: ${rarityColors[rarity.toLowerCase()]}25;">${cardCount !== '-' ? cardCount.toLocaleString() : '-'}</td>`;
                         if (cardCount !== '-') {
                             values.push(cardCount);
                         }
@@ -374,7 +374,7 @@
                     const firstValue = values[0];
                     const lastValue = values[values.length - 1];
 
-                    let sparkline = `<td style="padding: 0; background-color: ${rarityColors[rarity.toLowerCase()]}40"><svg width="${sparklineWidth}" height="${sparklineHeight}">
+                    let sparkline = `<td style="padding: 0; background-color: ${rarityColors[rarity.toLowerCase()]}25"><svg width="${sparklineWidth}" height="${sparklineHeight}">
                         <polyline 
                             points="${values.map((value, index) => {
                                 const x = (index / (values.length - 1)) * (sparklineWidth - 80) + 40;

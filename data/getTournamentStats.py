@@ -75,6 +75,20 @@ card_stars_df = pd.read_sql_query(card_stars_query, conn)
 cursor.close()
 
 
+rarity_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+gt.start_timestamp,
+ gt.tournament_unique_key,
+    t.hero_rarity,
+    count(*) card_count
+from agg.tournamentownership t 
+join   flatten.get_tournaments gt
+    on t.tournament_id  = gt.tournament_id 
+    where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
+group by 1,2,3,4
+order by gt.start_timestamp asc"""
+card_rarity_df = pd.read_sql_query(rarity_query, conn)
+cursor.close()
+
 conn_two = fantasysheets_db_connection()
 cursor_two = conn_two.cursor()
 tournament_views_query = f"""with base as (
@@ -112,7 +126,8 @@ for _, row in league_decks_df.iterrows():
         tournaments_data[tournament_key] = {
             'tournament_unique_key': row['tournament_unique_key'],
             'leagues': [],
-            'stars': []
+            'stars': [],
+            'rarity': []
         }
     tournaments_data[tournament_key]['leagues'].append({
         'league': row['league'],
@@ -135,6 +150,14 @@ for _, row in card_stars_df.iterrows():
             'card_count': int(row['card_count'])
         })
 
+# Process card_rarity_df
+for _, row in card_rarity_df.iterrows():
+    tournament_key = row['tournament']
+    if tournament_key in tournaments_data:
+        tournaments_data[tournament_key]['rarity'].append({
+            'hero_rarity': row['hero_rarity'],
+            'card_count': int(row['card_count'])
+        })
 # Process tournament views data
 tournament_views_data = {}
 print("Debug: Number of rows in tournament_views_df:", len(tournament_views_df))

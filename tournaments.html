@@ -330,8 +330,95 @@
                 // Add spacing between sections
                 html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;
                 
+                
+                // Add this new section for Card Counts By Hero Rarity
+                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Rarity</th></tr>';
+                // Get all unique rarity values
+                const rarities = [...new Set(Object.values(data).flatMap(t => t.rarity ? t.rarity.map(r => r.hero_rarity) : []))];
+                
+                // Define the desired order of rarities
+                const rarityOrder = ["legendary", "epic", "rare", "common"];
+                // Sort rarities based on the defined order (lowercased)
+                rarities.sort((a, b) => rarityOrder.indexOf(a.toLowerCase()) - rarityOrder.indexOf(b.toLowerCase()));
+
+                const rarityColors = {
+                    "common": "#93FF01",
+                    "rare": "#00FFDF",
+                    "epic": "#F1A3FD",
+                    "legendary": "#FBE7FF"
+                };
+
+                rarities.forEach(rarity => {
+                    html += `<tr style="background-color: ${rarityColors[rarity.toLowerCase()]}40;"><td><span style="color: ${rarityColors[rarity.toLowerCase()] || '#000'}; margin-left: 5px; font-size: 1.1em; font-weight: bold;">${rarity.charAt(0).toUpperCase() + rarity.slice(1)}</span></td>`; // Capitalize first letter
+                    const values = []; // Store values for sparkline
+                    Object.values(data).forEach(tournamentData => {
+                        const rarityData = tournamentData.rarity.find(r => r.hero_rarity.toLowerCase() === rarity);
+                        const cardCount = rarityData ? rarityData.card_count : '-';
+                        html += `<td>${cardCount !== '-' ? cardCount.toLocaleString() : '-'}</td>`;
+                        if (cardCount !== '-') {
+                            values.push(cardCount);
+                        }
+                    });
+                    
+                    // Add sparkline
+                    const sparklineWidth = 180;
+                    const sparklineHeight = 40;
+                    const max = Math.max(...values);
+                    const min = Math.min(...values);
+                    const range = max - min;
+
+                    const firstValue = values[0];
+                    const lastValue = values[values.length - 1];
+
+                    let sparkline = `<td style="padding: 0; background-color: ${rarityColors[rarity.toLowerCase()]}40"><svg width="${sparklineWidth}" height="${sparklineHeight}">
+                        <polyline 
+                            points="${values.map((value, index) => {
+                                const x = (index / (values.length - 1)) * (sparklineWidth - 80) + 40;
+                                const y = (sparklineHeight - 8) - ((value - min) / range) * (sparklineHeight - 16) + 4;
+                                return `${x},${y}`;
+                            }).join(' ')}"
+                            fill="none"
+                            stroke="${rarityColors[rarity.toLowerCase()]}"
+                            stroke-width="2"
+                        />
+                        
+                        <text
+                            x="2"
+                            y="${(sparklineHeight - 8) - ((firstValue - min) / range) * (sparklineHeight - 16) + 4}"
+                            fill="${rarityColors[rarity.toLowerCase()]}"
+                            font-size="10px"
+                            text-anchor="start"
+                            dy="4"
+                        >${firstValue.toLocaleString()}</text>
+                        
+                        <text
+                            x="${sparklineWidth - 2}"
+                            y="${(sparklineHeight - 8) - ((lastValue - min) / range) * (sparklineHeight - 16) + 4}"
+                            fill="${rarityColors[rarity.toLowerCase()]}"
+                            font-size="10px"
+                            text-anchor="end"
+                            dy="4"
+                        >${lastValue.toLocaleString()}</text>
+                    </svg></td>`;
+                    
+                    html += sparkline + '</tr>';
+                });
+                
+                // Add Rarity Total row
+                html += '<tr class="total-row"><td>Total Cards</td>';
+                Object.values(data).forEach(tournamentData => {
+                    const total = tournamentData.rarity.reduce((sum, rarity) => sum + rarity.card_count, 0);
+                    html += `<td>${total.toLocaleString()}</td>`;
+                });
+                html += '<td></td></tr>';
+
+                // Add spacing between sections
+                html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;
+
+
                 // Stars rows
                 html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Stars</th></tr>';
+
                 // Get all unique star values and sort them in descending order
                 const stars = [...new Set(Object.values(data).flatMap(t => t.stars ? t.stars.map(s => s.hero_stars) : []))];
                 const sortedStars = stars.length > 0 ? stars.sort((a, b) => b - a) : []; // Sort in descending order or set to empty array

@@ -1,842 +1,286 @@
 {
     "metadata": {
-        "data_freshness": "2025-02-13T23:34:38.564874-06:00"
+        "data_freshness": "2025-02-18T16:46:09.466935-06:00"
     },
     "tournaments": {
-        "Main 38": {
-            "tournament_key": "Main 38",
+        "Main 39": {
+            "tournament_key": "Main 39",
             "leagues": {
-                "Elite": {
+                "Gold": {
                     "top50": [
                         {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
-                            "fantasy_score": 1674.3063570526429,
-                            "hero_stars": 7,
-                            "hero_count": 15,
-                            "usage_percentage": 30.0,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
+                            "hero_stars": 1,
+                            "hero_count": 32,
+                            "usage_percentage": 64.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
-                            "fantasy_score": 1591.9338371389413,
-                            "hero_stars": 7,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/2361601055_1.png",
+                            "fantasy_score": 1969.5537141306827,
+                            "hero_stars": 1,
                             "hero_count": 13,
                             "usage_percentage": 26.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "greg16676935420",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1356434353623093249_8.png",
-                            "fantasy_score": 1859.2752511456056,
-                            "hero_stars": 8,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "rasmr_eth",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/423164349_8.png",
-                            "fantasy_score": 1910.3618941706534,
-                            "hero_stars": 8,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "dcfgod",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/legendary/1350996311777161219_5.png",
-                            "fantasy_score": 1725.0706988883012,
-                            "hero_stars": 5,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "boldleonidas",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1432635656161746947_8.png",
-                            "fantasy_score": 1749.6839057695674,
-                            "hero_stars": 8,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "frankdegods",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1441835930889818113_8.png",
-                            "fantasy_score": 1293.7789282657368,
-                            "hero_stars": 8,
-                            "hero_count": 6,
-                            "usage_percentage": 12.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "artsch00lreject",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1354947293921701892_7.png",
-                            "fantasy_score": 1418.7196959595842,
-                            "hero_stars": 7,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "MINHxDYNASTY",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1310378599984148480_6.png",
-                            "fantasy_score": 1351.4933317274758,
-                            "hero_stars": 6,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "0xBreadguy",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1453661470869360643_8.png",
-                            "fantasy_score": 1270.6106674329233,
-                            "hero_stars": 8,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        }
-                    ],
-                    "itm": [
-                        {
-                            "hero": "frankdegods",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1441835930889818113_8.png",
-                            "fantasy_score": 1293.7789282657368,
-                            "hero_stars": 8,
-                            "hero_count": 38,
-                            "usage_percentage": 25.5,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
-                            "fantasy_score": 1674.3063570526429,
-                            "hero_stars": 7,
-                            "hero_count": 31,
-                            "usage_percentage": 20.81,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
-                            "fantasy_score": 1591.9338371389413,
-                            "hero_stars": 7,
-                            "hero_count": 25,
-                            "usage_percentage": 16.78,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "wizardofsoho",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1175781003245191178_7.png",
-                            "fantasy_score": 1313.8048568044953,
-                            "hero_stars": 7,
-                            "hero_count": 19,
-                            "usage_percentage": 12.75,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/906234475604037637_7.png",
-                            "fantasy_score": 1193.950377854206,
-                            "hero_stars": 7,
-                            "hero_count": 17,
-                            "usage_percentage": 11.41,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
-                            "fantasy_score": 1255.7297677894821,
-                            "hero_stars": 7,
-                            "hero_count": 16,
-                            "usage_percentage": 10.74,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "beast_ico",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1499585375534206980_8.png",
-                            "fantasy_score": 1336.808040528612,
-                            "hero_stars": 8,
-                            "hero_count": 16,
-                            "usage_percentage": 10.74,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "boldleonidas",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1432635656161746947_8.png",
-                            "fantasy_score": 1312.2629293271755,
-                            "hero_stars": 8,
-                            "hero_count": 13,
-                            "usage_percentage": 8.72,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "0xBreadguy",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1453661470869360643_8.png",
-                            "fantasy_score": 1270.6106674329233,
-                            "hero_stars": 8,
-                            "hero_count": 13,
-                            "usage_percentage": 8.72,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "gianinaskarlett",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1443441794465755138_8.png",
-                            "fantasy_score": 1500.0,
-                            "hero_stars": 8,
-                            "hero_count": 12,
-                            "usage_percentage": 8.05,
-                            "reward_value_added": 0.0
-                        }
-                    ],
-                    "rva": [
-                        {
-                            "hero": "greg16676935420",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1356434353623093249_8.png",
-                            "fantasy_score": 1859.2752511456056,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.4669137816510014
-                        },
-                        {
-                            "hero": "rasmr_eth",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/423164349_8.png",
-                            "fantasy_score": 1910.3618941706534,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.4337985518641888
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
-                            "fantasy_score": 1674.3063570526429,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.42852753923118214
-                        },
-                        {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
-                            "fantasy_score": 1591.9338371389413,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.35684352414844384
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/legendary/1138993163706753029_7.png",
-                            "fantasy_score": 2092.8829463158036,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.3310770228752196
-                        },
-                        {
-                            "hero": "frankdegods",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1441835930889818113_8.png",
-                            "fantasy_score": 1293.7789282657368,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.27768290938834506
-                        },
-                        {
-                            "hero": "boldleonidas",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1432635656161746947_8.png",
-                            "fantasy_score": 1749.6839057695674,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.262961283888541
-                        },
-                        {
-                            "hero": "blknoiz06",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/973261472_8.png",
-                            "fantasy_score": 1594.8982736267292,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.21421132915610697
-                        },
-                        {
-                            "hero": "0xRamonos",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1586054864240525315_8.png",
-                            "fantasy_score": 1826.6840363468632,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.194506805303439
-                        },
-                        {
-                            "hero": "frankdegods",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1441835930889818113_8.png",
-                            "fantasy_score": 1725.0385710209823,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.19435181041448654
-                        }
-                    ]
-                },
-                "Silver": {
-                    "top50": [
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
-                            "hero_stars": 1,
-                            "hero_count": 26,
-                            "usage_percentage": 52.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 18,
-                            "usage_percentage": 36.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "ciniz",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1093242943127932930_1.png",
-                            "fantasy_score": 171.02658632389736,
-                            "hero_stars": 1,
-                            "hero_count": 10,
-                            "usage_percentage": 20.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
-                            "fantasy_score": 1255.7297677894821,
-                            "hero_stars": 7,
-                            "hero_count": 8,
-                            "usage_percentage": 16.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
-                            "hero_stars": 6,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1240784920831762433_4.png",
-                            "fantasy_score": 1454.128982041748,
-                            "hero_stars": 4,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1518981537307496448_1.png",
-                            "fantasy_score": 868.2606533821896,
-                            "hero_stars": 1,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "farokh",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/3369243892_4.png",
-                            "fantasy_score": 675.730695721083,
-                            "hero_stars": 4,
-                            "hero_count": 6,
-                            "usage_percentage": 12.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
                             "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_5.png",
-                            "fantasy_score": 1145.2257065642175,
-                            "hero_stars": 5,
-                            "hero_count": 6,
-                            "usage_percentage": 12.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Chilearmy123",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1456142714756468738_6.png",
-                            "fantasy_score": 1338.1177691282683,
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
                             "hero_stars": 6,
-                            "hero_count": 6,
-                            "usage_percentage": 12.0,
-                            "reward_value_added": 0.0
-                        }
-                    ],
-                    "itm": [
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
-                            "hero_stars": 1,
-                            "hero_count": 72,
-                            "usage_percentage": 18.05,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 60,
-                            "usage_percentage": 15.04,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "ciniz",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1093242943127932930_1.png",
-                            "fantasy_score": 171.02658632389736,
-                            "hero_stars": 1,
-                            "hero_count": 56,
-                            "usage_percentage": 14.04,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
-                            "fantasy_score": 1255.7297677894821,
-                            "hero_stars": 7,
-                            "hero_count": 49,
-                            "usage_percentage": 12.28,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1635676907529285642_4.png",
-                            "fantasy_score": 1103.6657790808174,
-                            "hero_stars": 4,
-                            "hero_count": 43,
-                            "usage_percentage": 10.78,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/906234475604037637_7.png",
-                            "fantasy_score": 1193.950377854206,
-                            "hero_stars": 7,
-                            "hero_count": 36,
-                            "usage_percentage": 9.02,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "zacxbt",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/886765719391789057_5.png",
-                            "fantasy_score": 968.0444253789475,
-                            "hero_stars": 5,
-                            "hero_count": 36,
-                            "usage_percentage": 9.02,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
-                            "hero_stars": 6,
-                            "hero_count": 31,
-                            "usage_percentage": 7.77,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_5.png",
-                            "fantasy_score": 1145.2257065642175,
-                            "hero_stars": 5,
-                            "hero_count": 31,
-                            "usage_percentage": 7.77,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "dcfgod",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1350996311777161219_5.png",
-                            "fantasy_score": 1035.0424193329807,
-                            "hero_stars": 5,
-                            "hero_count": 31,
-                            "usage_percentage": 7.77,
-                            "reward_value_added": 0.0
-                        }
-                    ],
-                    "rva": [
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.3650541387512208
-                        },
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
-                            "hero_stars": 1,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.2869600470209058
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
-                            "fantasy_score": 1255.7297677894821,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.274281397636194
-                        },
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1240784920831762433_4.png",
-                            "fantasy_score": 1454.128982041748,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.2339291448963532
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
-                            "hero_stars": 6,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.21266815961734453
-                        },
-                        {
-                            "hero": "Chilearmy123",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1456142714756468738_6.png",
-                            "fantasy_score": 1338.1177691282683,
-                            "hero_stars": 6,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.19528273761368511
-                        },
-                        {
-                            "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_5.png",
-                            "fantasy_score": 1145.2257065642175,
-                            "hero_stars": 5,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.1855843935129213
-                        },
-                        {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1635676907529285642_4.png",
-                            "fantasy_score": 1103.6657790808174,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.17120722805563962
-                        },
-                        {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/906234475604037637_7.png",
-                            "fantasy_score": 1193.950377854206,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.16417731127799523
-                        },
-                        {
-                            "hero": "rasmr_eth",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/423164349_8.png",
-                            "fantasy_score": 1432.77142062799,
-                            "hero_stars": 8,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.12918506188896509
-                        }
-                    ]
-                },
-                "Gold": {
-                    "top50": [
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1240784920831762433_4.png",
-                            "fantasy_score": 1454.128982041748,
-                            "hero_stars": 4,
-                            "hero_count": 16,
-                            "usage_percentage": 32.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1518981537307496448_1.png",
-                            "fantasy_score": 868.2606533821896,
-                            "hero_stars": 1,
-                            "hero_count": 14,
-                            "usage_percentage": 28.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "WazzCrypto",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/869659857590288384_5.png",
-                            "fantasy_score": 1006.0542950139987,
-                            "hero_stars": 5,
                             "hero_count": 11,
                             "usage_percentage": 22.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1449164448321605632_5.png",
+                            "fantasy_score": 1512.6159680261314,
+                            "hero_stars": 5,
+                            "hero_count": 9,
+                            "usage_percentage": 18.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "WazzCrypto",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/869659857590288384_6.png",
+                            "fantasy_score": 1410.5299343504653,
                             "hero_stars": 6,
                             "hero_count": 9,
                             "usage_percentage": 18.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "theunipcs",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1755899659040555009_5.png",
-                            "fantasy_score": 1101.3998003879394,
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1426732252768182281_6.png",
+                            "fantasy_score": 1491.8954724492928,
+                            "hero_stars": 6,
+                            "hero_count": 8,
+                            "usage_percentage": 16.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "zacxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/886765719391789057_5.png",
+                            "fantasy_score": 1416.8551603885778,
                             "hero_stars": 5,
                             "hero_count": 8,
                             "usage_percentage": 16.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "CryptoKaleo",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
-                            "fantasy_score": 1591.9338371389413,
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
+                            "fantasy_score": 1329.5784504466615,
+                            "hero_stars": 7,
+                            "hero_count": 7,
+                            "usage_percentage": 14.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/834123445856145408_4.png",
+                            "fantasy_score": 1311.38344448495,
+                            "hero_stars": 4,
+                            "hero_count": 7,
+                            "usage_percentage": 14.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "wizardofsoho",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1175781003245191178_7.png",
+                            "fantasy_score": 1279.3861807462526,
                             "hero_stars": 7,
                             "hero_count": 6,
                             "usage_percentage": 12.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1635676907529285642_4.png",
-                            "fantasy_score": 1471.5543721077563,
-                            "hero_stars": 4,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Chilearmy123",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1456142714756468738_6.png",
-                            "fantasy_score": 1338.1177691282683,
-                            "hero_stars": 6,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "theunipcs",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1755899659040555009_5.png",
-                            "fantasy_score": 1468.5330671839192,
-                            "hero_stars": 5,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "CL207",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1073132650309726208_3.png",
-                            "fantasy_score": 779.0586547937911,
-                            "hero_stars": 3,
-                            "hero_count": 5,
-                            "usage_percentage": 10.0,
                             "reward_value_added": 0.0
                         }
                     ],
                     "itm": [
                         {
-                            "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_5.png",
-                            "fantasy_score": 1145.2257065642175,
-                            "hero_stars": 5,
-                            "hero_count": 36,
-                            "usage_percentage": 12.04,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
+                            "hero_stars": 1,
+                            "hero_count": 72,
+                            "usage_percentage": 24.08,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1240784920831762433_4.png",
-                            "fantasy_score": 1454.128982041748,
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
+                            "hero_stars": 6,
+                            "hero_count": 43,
+                            "usage_percentage": 14.38,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "Cbb0fe",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1703332734603591680_4.png",
+                            "fantasy_score": 1022.1205363546162,
                             "hero_stars": 4,
+                            "hero_count": 31,
+                            "usage_percentage": 10.37,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/834123445856145408_4.png",
+                            "fantasy_score": 1311.38344448495,
+                            "hero_stars": 4,
+                            "hero_count": 30,
+                            "usage_percentage": 10.03,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1449164448321605632_5.png",
+                            "fantasy_score": 1134.4619760195985,
+                            "hero_stars": 5,
                             "hero_count": 28,
                             "usage_percentage": 9.36,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "dcfgod",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1350996311777161219_5.png",
-                            "fantasy_score": 1380.056559110641,
+                            "hero": "Tyler_Did_It",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/40134343_5.png",
+                            "fantasy_score": 1254.189265756426,
                             "hero_stars": 5,
-                            "hero_count": 26,
-                            "usage_percentage": 8.7,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
-                            "hero_stars": 6,
-                            "hero_count": 25,
-                            "usage_percentage": 8.36,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
-                            "fantasy_score": 1255.7297677894821,
-                            "hero_stars": 7,
-                            "hero_count": 25,
-                            "usage_percentage": 8.36,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "basedkarbon",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1249193324461916161_5.png",
-                            "fantasy_score": 935.7776940952353,
-                            "hero_stars": 5,
-                            "hero_count": 22,
-                            "usage_percentage": 7.36,
+                            "hero_count": 27,
+                            "usage_percentage": 9.03,
                             "reward_value_added": 0.0
                         },
                         {
                             "hero": "zacxbt",
                             "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/886765719391789057_5.png",
-                            "fantasy_score": 1290.7259005052633,
+                            "fantasy_score": 1416.8551603885778,
                             "hero_stars": 5,
-                            "hero_count": 21,
-                            "usage_percentage": 7.02,
+                            "hero_count": 27,
+                            "usage_percentage": 9.03,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "mememe69696969",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1453982860663087107_4.png",
-                            "fantasy_score": 791.3658399268722,
-                            "hero_stars": 4,
-                            "hero_count": 21,
-                            "usage_percentage": 7.02,
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1449164448321605632_5.png",
+                            "fantasy_score": 1512.6159680261314,
+                            "hero_stars": 5,
+                            "hero_count": 25,
+                            "usage_percentage": 8.36,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1635676907529285642_4.png",
-                            "fantasy_score": 1471.5543721077563,
-                            "hero_stars": 4,
-                            "hero_count": 20,
-                            "usage_percentage": 6.69,
+                            "hero": "zacxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/886765719391789057_5.png",
+                            "fantasy_score": 1062.6413702914333,
+                            "hero_stars": 5,
+                            "hero_count": 25,
+                            "usage_percentage": 8.36,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1518981537307496448_1.png",
-                            "fantasy_score": 868.2606533821896,
-                            "hero_stars": 1,
-                            "hero_count": 20,
-                            "usage_percentage": 6.69,
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
+                            "fantasy_score": 1329.5784504466615,
+                            "hero_stars": 7,
+                            "hero_count": 24,
+                            "usage_percentage": 8.03,
                             "reward_value_added": 0.0
                         }
                     ],
                     "rva": [
                         {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1240784920831762433_4.png",
-                            "fantasy_score": 1454.128982041748,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.3789188716746911
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_6.png",
-                            "fantasy_score": 1441.909925256024,
-                            "hero_stars": 6,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.22791110670148448
-                        },
-                        {
-                            "hero": "Pentosh1",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
-                            "fantasy_score": 1674.3063570526429,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.18711128305595906
-                        },
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1518981537307496448_1.png",
-                            "fantasy_score": 868.2606533821896,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
                             "hero_stars": 1,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.18407959603567217
+                            "reward_value_added": 0.6890294687488824
                         },
                         {
                             "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_5.png",
-                            "fantasy_score": 1145.2257065642175,
-                            "hero_stars": 5,
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
+                            "hero_stars": 6,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.1771041958040446
+                            "reward_value_added": 0.36307782933056915
                         },
                         {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1635676907529285642_4.png",
-                            "fantasy_score": 1471.5543721077563,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/2361601055_1.png",
+                            "fantasy_score": 1969.5537141306827,
+                            "hero_stars": 1,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.32087099147871
+                        },
+                        {
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1426732252768182281_6.png",
+                            "fantasy_score": 1491.8954724492928,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.23004514614478827
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/834123445856145408_4.png",
+                            "fantasy_score": 1311.38344448495,
                             "hero_stars": 4,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.1769612991332832
+                            "reward_value_added": 0.21939164239763567
                         },
                         {
-                            "hero": "WazzCrypto",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/869659857590288384_5.png",
-                            "fantasy_score": 1006.0542950139987,
+                            "hero": "zacxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/886765719391789057_5.png",
+                            "fantasy_score": 1416.8551603885778,
                             "hero_stars": 5,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.16394813492212815
+                            "reward_value_added": 0.1917837835928948
+                        },
+                        {
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1351139954525696005_6.png",
+                            "fantasy_score": 1991.242543376653,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.18847248333391273
+                        },
+                        {
+                            "hero": "Tyler_Did_It",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/40134343_5.png",
+                            "fantasy_score": 1254.189265756426,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.18227593524386038
+                        },
+                        {
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1449164448321605632_5.png",
+                            "fantasy_score": 1512.6159680261314,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.17142839261608872
                         },
                         {
                             "hero": "CryptoKaleo",
                             "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
-                            "fantasy_score": 1591.9338371389413,
+                            "fantasy_score": 1691.2994055524246,
                             "hero_stars": 7,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.1613700584438819
-                        },
-                        {
-                            "hero": "Chilearmy123",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1456142714756468738_6.png",
-                            "fantasy_score": 1338.1177691282683,
-                            "hero_stars": 6,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.1591483762901839
-                        },
-                        {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1240784920831762433_4.png",
-                            "fantasy_score": 1938.8386427223309,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.1574768077530539
+                            "reward_value_added": 0.16155029992293662
                         }
                     ]
                 },
@@ -844,223 +288,268 @@
                     "top50": [
                         {
                             "hero": "0xMakesy",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_4.png",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_5.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 4,
-                            "hero_count": 53,
-                            "usage_percentage": 88.33,
+                            "hero_stars": 5,
+                            "hero_count": 58,
+                            "usage_percentage": 90.63,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_7.png",
+                            "hero": "optimizoor",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_5.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 48,
-                            "usage_percentage": 80.0,
+                            "hero_stars": 5,
+                            "hero_count": 57,
+                            "usage_percentage": 89.06,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "j0hnwang",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1341287326467538945_5.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 5,
+                            "hero_count": 44,
+                            "usage_percentage": 68.75,
                             "reward_value_added": 0.0
                         },
                         {
                             "hero": "Zeneca",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_5.png",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 44,
+                            "usage_percentage": 68.75,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "intuitio_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_1.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 1,
+                            "hero_count": 26,
+                            "usage_percentage": 40.63,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "wabdoteth",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1417876510413885444_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 8,
+                            "usage_percentage": 12.5,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "j0hnwang",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1341287326467538945_5.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 5,
-                            "hero_count": 39,
-                            "usage_percentage": 65.0,
+                            "hero_count": 8,
+                            "usage_percentage": 12.5,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "0xLawliette",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1509030724103409665_1.png",
+                            "hero": "lmrankhan",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/57584739_1.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 1,
-                            "hero_count": 31,
-                            "usage_percentage": 51.67,
+                            "hero_count": 7,
+                            "usage_percentage": 10.94,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "0xENAS",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1663502213870915584_1.png",
+                            "hero": "HerroCrypto",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/949016786506100736_2.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 1,
-                            "hero_count": 19,
-                            "usage_percentage": 31.67,
+                            "hero_stars": 2,
+                            "hero_count": 7,
+                            "usage_percentage": 10.94,
                             "reward_value_added": 0.0
                         },
                         {
                             "hero": "NBA__trey",
                             "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2202247850_1.png",
-                            "fantasy_score": 54.514873477914044,
-                            "hero_stars": 1,
-                            "hero_count": 14,
-                            "usage_percentage": 23.33,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "0xKipit",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/720313843021385728_1.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 1,
-                            "hero_count": 14,
-                            "usage_percentage": 23.33,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1356211964624691204_7.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 8,
-                            "usage_percentage": 13.33,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "Zeneca",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1370479673818427403_5.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 5,
-                            "hero_count": 8,
-                            "usage_percentage": 13.33,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "thecexoffender",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1639862641_1.png",
-                            "fantasy_score": 17.155074782886167,
-                            "hero_stars": 1,
-                            "hero_count": 8,
-                            "usage_percentage": 13.33,
+                            "hero_count": 6,
+                            "usage_percentage": 9.38,
                             "reward_value_added": 0.0
                         }
                     ],
                     "itm": [
                         {
                             "hero": "0xMakesy",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_4.png",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_5.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 4,
-                            "hero_count": 309,
-                            "usage_percentage": 77.44,
+                            "hero_stars": 5,
+                            "hero_count": 316,
+                            "usage_percentage": 78.22,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_7.png",
+                            "hero": "j0hnwang",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1341287326467538945_5.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 298,
-                            "usage_percentage": 74.69,
+                            "hero_stars": 5,
+                            "hero_count": 213,
+                            "usage_percentage": 52.72,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "optimizoor",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_5.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 5,
+                            "hero_count": 193,
+                            "usage_percentage": 47.77,
                             "reward_value_added": 0.0
                         },
                         {
                             "hero": "Zeneca",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_5.png",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_2.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 5,
-                            "hero_count": 205,
-                            "usage_percentage": 51.38,
+                            "hero_stars": 2,
+                            "hero_count": 140,
+                            "usage_percentage": 34.65,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "0xLawliette",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1509030724103409665_1.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 1,
-                            "hero_count": 142,
-                            "usage_percentage": 35.59,
+                            "hero": "andy8052",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/217534944_6.png",
+                            "fantasy_score": 290.0862674244837,
+                            "hero_stars": 6,
+                            "hero_count": 110,
+                            "usage_percentage": 27.23,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "0xMikado",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1354867416430501890_1.png",
-                            "fantasy_score": 143.0523740898224,
-                            "hero_stars": 1,
-                            "hero_count": 130,
-                            "usage_percentage": 32.58,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "wabdoteth",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1417876510413885444_1.png",
-                            "fantasy_score": 238.60543662101483,
-                            "hero_stars": 1,
-                            "hero_count": 78,
-                            "usage_percentage": 19.55,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "barneytheboi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/913556689110147072_5.png",
-                            "fantasy_score": 64.84343867970114,
-                            "hero_stars": 5,
-                            "hero_count": 70,
-                            "usage_percentage": 17.54,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "0xKipit",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/720313843021385728_1.png",
+                            "hero": "intuitio_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_1.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 1,
-                            "hero_count": 68,
-                            "usage_percentage": 17.04,
+                            "hero_count": 87,
+                            "usage_percentage": 21.53,
                             "reward_value_added": 0.0
                         },
                         {
                             "hero": "NBA__trey",
                             "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2202247850_1.png",
-                            "fantasy_score": 54.514873477914044,
+                            "fantasy_score": 0.0,
                             "hero_stars": 1,
-                            "hero_count": 56,
-                            "usage_percentage": 14.04,
+                            "hero_count": 71,
+                            "usage_percentage": 17.57,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1356211964624691204_7.png",
+                            "hero": "HerroCrypto",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/949016786506100736_2.png",
                             "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 49,
-                            "usage_percentage": 12.28,
+                            "hero_stars": 2,
+                            "hero_count": 44,
+                            "usage_percentage": 10.89,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "wabdoteth",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1417876510413885444_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 42,
+                            "usage_percentage": 10.4,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "thecexoffender",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1639862641_1.png",
+                            "fantasy_score": 125.5884308842467,
+                            "hero_stars": 1,
+                            "hero_count": 39,
+                            "usage_percentage": 9.65,
                             "reward_value_added": 0.0
                         }
                     ],
                     "rva": [
                         {
                             "hero": "0xMakesy",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_4.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.9708288578644374
-                        },
-                        {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_7.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.8769419445359655
-                        },
-                        {
-                            "hero": "Zeneca",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_5.png",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1416421769561378817_5.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 5,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.6936804889415707
+                            "reward_value_added": 1.422653284130748
                         },
                         {
-                            "hero": "0xLawliette",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1509030724103409665_1.png",
+                            "hero": "optimizoor",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_5.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 1.167341996591268
+                        },
+                        {
+                            "hero": "j0hnwang",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1341287326467538945_5.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 1.0315309998069941
+                        },
+                        {
+                            "hero": "Zeneca",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1370479673818427403_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.8782370881126855
+                        },
+                        {
+                            "hero": "intuitio_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356211964624691204_1.png",
                             "fantasy_score": 0.0,
                             "hero_stars": 1,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.5569407247981106
+                            "reward_value_added": 0.5282547718321031
+                        },
+                        {
+                            "hero": "NBA__trey",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2202247850_1.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 1,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.21989488096562998
+                        },
+                        {
+                            "hero": "HerroCrypto",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/949016786506100736_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.1921475338682199
+                        },
+                        {
+                            "hero": "wabdoteth",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1417876510413885444_2.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 2,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.18954408819497656
+                        },
+                        {
+                            "hero": "lmrankhan",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/57584739_1.png",
+                            "fantasy_score": 0.0,
+                            "hero_stars": 1,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.15656730653237141
                         },
                         {
                             "hero": "0xENAS",
@@ -1069,143 +558,376 @@
                             "hero_stars": 1,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.30634762479063676
-                        },
-                        {
-                            "hero": "0xKipit",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/720313843021385728_1.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 1,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.2715895613107309
-                        },
-                        {
-                            "hero": "intuitio_",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1356211964624691204_7.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 7,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.19673105019369785
-                        },
-                        {
-                            "hero": "wsbmod",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/legendary/1282418324228337665_2.png",
-                            "fantasy_score": 327.79702875980337,
-                            "hero_stars": 2,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.13841446694036366
-                        },
-                        {
-                            "hero": "tomhschmidt",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/239090734_2.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 2,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.12903312053923777
-                        },
-                        {
-                            "hero": "djenn",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/3063147623_1.png",
-                            "fantasy_score": 0.0,
-                            "hero_stars": 1,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.11752186622425198
+                            "reward_value_added": 0.14671556762932403
                         }
                     ]
                 },
                 "Bronze": {
                     "top50": [
                         {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
                             "hero_stars": 1,
-                            "hero_count": 38,
-                            "usage_percentage": 76.0,
+                            "hero_count": 50,
+                            "usage_percentage": 100.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 34,
-                            "usage_percentage": 68.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/965651_6.png",
-                            "fantasy_score": 961.2732835040161,
-                            "hero_stars": 6,
-                            "hero_count": 17,
-                            "usage_percentage": 34.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "CL207",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1073132650309726208_3.png",
-                            "fantasy_score": 519.3724365291941,
-                            "hero_stars": 3,
-                            "hero_count": 15,
-                            "usage_percentage": 30.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "optimizoor",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_2.png",
-                            "fantasy_score": 610.6061026877398,
+                            "hero": "larpalt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1450587414892847105_2.png",
+                            "fantasy_score": 674.3624141195617,
                             "hero_stars": 2,
+                            "hero_count": 33,
+                            "usage_percentage": 66.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/834123445856145408_4.png",
+                            "fantasy_score": 874.2556296566332,
+                            "hero_stars": 4,
+                            "hero_count": 22,
+                            "usage_percentage": 44.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1426732252768182281_6.png",
+                            "fantasy_score": 994.5969816328619,
+                            "hero_stars": 6,
+                            "hero_count": 12,
+                            "usage_percentage": 24.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1351139954525696005_6.png",
+                            "fantasy_score": 995.6212716883265,
+                            "hero_stars": 6,
+                            "hero_count": 12,
+                            "usage_percentage": 24.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1437463799347531782_4.png",
+                            "fantasy_score": 755.4910077878295,
+                            "hero_stars": 4,
+                            "hero_count": 11,
+                            "usage_percentage": 22.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "vydamo_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1449941836034822144_3.png",
+                            "fantasy_score": 482.41884373820875,
+                            "hero_stars": 3,
                             "hero_count": 10,
                             "usage_percentage": 20.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "ciniz",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1093242943127932930_1.png",
-                            "fantasy_score": 171.02658632389736,
-                            "hero_stars": 1,
+                            "hero": "Cbb0fe",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1703332734603591680_4.png",
+                            "fantasy_score": 681.4136909030775,
+                            "hero_stars": 4,
                             "hero_count": 9,
                             "usage_percentage": 18.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "theunipcs",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1755899659040555009_5.png",
-                            "fantasy_score": 734.2665335919596,
+                            "hero": "Tyler_Did_It",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/40134343_5.png",
+                            "fantasy_score": 836.1261771709507,
                             "hero_stars": 5,
+                            "hero_count": 9,
+                            "usage_percentage": 18.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1449164448321605632_5.png",
+                            "fantasy_score": 756.3079840130657,
+                            "hero_stars": 5,
+                            "hero_count": 7,
+                            "usage_percentage": 14.0,
+                            "reward_value_added": 0.0
+                        }
+                    ],
+                    "itm": [
+                        {
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
+                            "hero_stars": 1,
+                            "hero_count": 225,
+                            "usage_percentage": 56.39,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "larpalt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1450587414892847105_2.png",
+                            "fantasy_score": 674.3624141195617,
+                            "hero_stars": 2,
+                            "hero_count": 137,
+                            "usage_percentage": 34.34,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/834123445856145408_4.png",
+                            "fantasy_score": 874.2556296566332,
+                            "hero_stars": 4,
+                            "hero_count": 120,
+                            "usage_percentage": 30.08,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1437463799347531782_4.png",
+                            "fantasy_score": 755.4910077878295,
+                            "hero_stars": 4,
+                            "hero_count": 91,
+                            "usage_percentage": 22.81,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "vydamo_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1449941836034822144_3.png",
+                            "fantasy_score": 482.41884373820875,
+                            "hero_stars": 3,
+                            "hero_count": 63,
+                            "usage_percentage": 15.79,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "0xfoobar",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356386110847377408_2.png",
+                            "fantasy_score": 814.6869961158098,
+                            "hero_stars": 2,
+                            "hero_count": 61,
+                            "usage_percentage": 15.29,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1351139954525696005_6.png",
+                            "fantasy_score": 995.6212716883265,
+                            "hero_stars": 6,
+                            "hero_count": 58,
+                            "usage_percentage": 14.54,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "evan_van_ness",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/189518354_3.png",
+                            "fantasy_score": 471.517630815291,
+                            "hero_stars": 3,
+                            "hero_count": 56,
+                            "usage_percentage": 14.04,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "Cbb0fe",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1703332734603591680_4.png",
+                            "fantasy_score": 681.4136909030775,
+                            "hero_stars": 4,
+                            "hero_count": 49,
+                            "usage_percentage": 12.28,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "banditxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1482640180855160832_5.png",
+                            "fantasy_score": 757.9539160285697,
+                            "hero_stars": 5,
+                            "hero_count": 46,
+                            "usage_percentage": 11.53,
+                            "reward_value_added": 0.0
+                        }
+                    ],
+                    "rva": [
+                        {
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
+                            "hero_stars": 1,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 1.1525427567532027
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/834123445856145408_4.png",
+                            "fantasy_score": 874.2556296566332,
+                            "hero_stars": 4,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.5253345802081351
+                        },
+                        {
+                            "hero": "larpalt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1450587414892847105_2.png",
+                            "fantasy_score": 674.3624141195617,
+                            "hero_stars": 2,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.49681988313952974
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1437463799347531782_4.png",
+                            "fantasy_score": 755.4910077878295,
+                            "hero_stars": 4,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.2886119292303832
+                        },
+                        {
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1351139954525696005_6.png",
+                            "fantasy_score": 995.6212716883265,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.2847003048975536
+                        },
+                        {
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1426732252768182281_6.png",
+                            "fantasy_score": 994.5969816328619,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.22704717090425455
+                        },
+                        {
+                            "hero": "Tyler_Did_It",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/40134343_5.png",
+                            "fantasy_score": 836.1261771709507,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.1746248568700591
+                        },
+                        {
+                            "hero": "0xfoobar",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1356386110847377408_2.png",
+                            "fantasy_score": 814.6869961158098,
+                            "hero_stars": 2,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.172239479542399
+                        },
+                        {
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1449164448321605632_5.png",
+                            "fantasy_score": 756.3079840130657,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.15401912827345937
+                        },
+                        {
+                            "hero": "Cbb0fe",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1703332734603591680_4.png",
+                            "fantasy_score": 681.4136909030775,
+                            "hero_stars": 4,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.14702160768910819
+                        }
+                    ]
+                },
+                "Silver": {
+                    "top50": [
+                        {
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
+                            "hero_stars": 1,
+                            "hero_count": 28,
+                            "usage_percentage": 56.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
+                            "hero_stars": 1,
+                            "hero_count": 20,
+                            "usage_percentage": 40.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
+                            "hero_stars": 6,
+                            "hero_count": 15,
+                            "usage_percentage": 30.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "larpalt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1450587414892847105_2.png",
+                            "fantasy_score": 674.3624141195617,
+                            "hero_stars": 2,
                             "hero_count": 8,
                             "usage_percentage": 16.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "mikadontlouz",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/4830383913_4.png",
-                            "fantasy_score": 425.6728356288544,
-                            "hero_stars": 4,
+                            "hero": "chooserich",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_8.png",
+                            "fantasy_score": 1478.9005087112132,
+                            "hero_stars": 8,
                             "hero_count": 7,
                             "usage_percentage": 14.0,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "farokh",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/3369243892_4.png",
-                            "fantasy_score": 450.487130480722,
-                            "hero_stars": 4,
-                            "hero_count": 7,
-                            "usage_percentage": 14.0,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1351139954525696005_5.png",
-                            "fantasy_score": 763.483804376145,
+                            "hero": "Tyler_Did_It",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/40134343_5.png",
+                            "fantasy_score": 836.1261771709507,
                             "hero_stars": 5,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1437463799347531782_4.png",
+                            "fantasy_score": 755.4910077878295,
+                            "hero_stars": 4,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1437463799347531782_4.png",
+                            "fantasy_score": 1133.2365116817443,
+                            "hero_stars": 4,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1426732252768182281_6.png",
+                            "fantasy_score": 1491.8954724492928,
+                            "hero_stars": 6,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
+                            "fantasy_score": 997.1838378349961,
+                            "hero_stars": 7,
                             "hero_count": 6,
                             "usage_percentage": 12.0,
                             "reward_value_added": 0.0
@@ -1213,186 +935,464 @@
                     ],
                     "itm": [
                         {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
                             "hero_stars": 1,
-                            "hero_count": 119,
-                            "usage_percentage": 29.82,
+                            "hero_count": 159,
+                            "usage_percentage": 39.85,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "optimizoor",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_2.png",
-                            "fantasy_score": 610.6061026877398,
-                            "hero_stars": 2,
-                            "hero_count": 112,
-                            "usage_percentage": 28.07,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1635676907529285642_4.png",
-                            "fantasy_score": 735.7771860538782,
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/834123445856145408_4.png",
+                            "fantasy_score": 1311.38344448495,
                             "hero_stars": 4,
-                            "hero_count": 88,
-                            "usage_percentage": 22.06,
+                            "hero_count": 67,
+                            "usage_percentage": 16.79,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 87,
-                            "usage_percentage": 21.8,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "ciniz",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1093242943127932930_1.png",
-                            "fantasy_score": 171.02658632389736,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
                             "hero_stars": 1,
-                            "hero_count": 78,
-                            "usage_percentage": 19.55,
+                            "hero_count": 62,
+                            "usage_percentage": 15.54,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "CL207",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1073132650309726208_3.png",
-                            "fantasy_score": 519.3724365291941,
-                            "hero_stars": 3,
-                            "hero_count": 71,
-                            "usage_percentage": 17.79,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/965651_6.png",
-                            "fantasy_score": 961.2732835040161,
+                            "hero": "beaniemaxi",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
                             "hero_stars": 6,
-                            "hero_count": 57,
-                            "usage_percentage": 14.29,
+                            "hero_count": 55,
+                            "usage_percentage": 13.78,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "Route2FI",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1084397942319054850_3.png",
-                            "fantasy_score": 674.2686339175798,
-                            "hero_stars": 3,
-                            "hero_count": 56,
-                            "usage_percentage": 14.04,
+                            "hero": "zacxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/886765719391789057_5.png",
+                            "fantasy_score": 1062.6413702914333,
+                            "hero_stars": 5,
+                            "hero_count": 49,
+                            "usage_percentage": 12.28,
                             "reward_value_added": 0.0
                         },
                         {
-                            "hero": "0xjaypeg",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1455759696967651333_3.png",
-                            "fantasy_score": 461.76474208651626,
-                            "hero_stars": 3,
-                            "hero_count": 50,
-                            "usage_percentage": 12.53,
-                            "reward_value_added": 0.0
-                        },
-                        {
-                            "hero": "0xgaut",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/262018615_2.png",
-                            "fantasy_score": 345.74399369612576,
-                            "hero_stars": 2,
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
+                            "fantasy_score": 997.1838378349961,
+                            "hero_stars": 7,
                             "hero_count": 48,
                             "usage_percentage": 12.03,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "larpalt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1450587414892847105_2.png",
+                            "fantasy_score": 674.3624141195617,
+                            "hero_stars": 2,
+                            "hero_count": 40,
+                            "usage_percentage": 10.03,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "banditxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1482640180855160832_5.png",
+                            "fantasy_score": 1136.9308740428546,
+                            "hero_stars": 5,
+                            "hero_count": 38,
+                            "usage_percentage": 9.52,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "sershokunin",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1437463799347531782_4.png",
+                            "fantasy_score": 1133.2365116817443,
+                            "hero_stars": 4,
+                            "hero_count": 36,
+                            "usage_percentage": 9.02,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CryptoKaleo",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/906234475604037637_7.png",
+                            "fantasy_score": 1268.4745541643185,
+                            "hero_stars": 7,
+                            "hero_count": 33,
+                            "usage_percentage": 8.27,
                             "reward_value_added": 0.0
                         }
                     ],
                     "rva": [
                         {
-                            "hero": "SCHIZO_FREQ",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1240784920831762433_4.png",
-                            "fantasy_score": 969.4193213611654,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.7359847863673222
-                        },
-                        {
-                            "hero": "Web3Quant",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1518981537307496448_1.png",
-                            "fantasy_score": 578.8404355881264,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/2361601055_1.png",
+                            "fantasy_score": 984.7768570653413,
                             "hero_stars": 1,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.5201859379547539
+                            "reward_value_added": 0.6116721363575577
                         },
                         {
-                            "hero": "chooserich",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/965651_6.png",
-                            "fantasy_score": 961.2732835040161,
-                            "hero_stars": 6,
+                            "hero": "tier10k",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/2361601055_1.png",
+                            "fantasy_score": 1477.165285598012,
+                            "hero_stars": 1,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.42708084293705684
-                        },
-                        {
-                            "hero": "optimizoor",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1496567813737091075_2.png",
-                            "fantasy_score": 610.6061026877398,
-                            "hero_stars": 2,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.3077065975275913
-                        },
-                        {
-                            "hero": "HugoMartingale",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1635676907529285642_4.png",
-                            "fantasy_score": 735.7771860538782,
-                            "hero_stars": 4,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.285532309611726
-                        },
-                        {
-                            "hero": "CL207",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1073132650309726208_3.png",
-                            "fantasy_score": 519.3724365291941,
-                            "hero_stars": 3,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.24149480948667193
-                        },
-                        {
-                            "hero": "Route2FI",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1084397942319054850_3.png",
-                            "fantasy_score": 674.2686339175798,
-                            "hero_stars": 3,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.1491751817334992
-                        },
-                        {
-                            "hero": "TylerDurden",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1469851247133945856_6.png",
-                            "fantasy_score": 897.0146762444091,
-                            "hero_stars": 6,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.14396706795457928
-                        },
-                        {
-                            "hero": "theunipcs",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1755899659040555009_5.png",
-                            "fantasy_score": 734.2665335919596,
-                            "hero_stars": 5,
-                            "hero_count": 0,
-                            "usage_percentage": 0.0,
-                            "reward_value_added": 0.14046220987310545
+                            "reward_value_added": 0.5014624874629763
                         },
                         {
                             "hero": "beaniemaxi",
-                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/common/1351139954525696005_5.png",
-                            "fantasy_score": 763.483804376145,
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1351139954525696005_6.png",
+                            "fantasy_score": 1493.4319075324897,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.47885828041023915
+                        },
+                        {
+                            "hero": "CirrusNFT",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/834123445856145408_4.png",
+                            "fantasy_score": 1311.38344448495,
+                            "hero_stars": 4,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.26516740273949424
+                        },
+                        {
+                            "hero": "zacxbt",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/886765719391789057_5.png",
+                            "fantasy_score": 1062.6413702914333,
                             "hero_stars": 5,
                             "hero_count": 0,
                             "usage_percentage": 0.0,
-                            "reward_value_added": 0.1392192048355385
+                            "reward_value_added": 0.1640414893486092
+                        },
+                        {
+                            "hero": "chooserich",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_8.png",
+                            "fantasy_score": 1478.9005087112132,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.16200240477736289
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
+                            "fantasy_score": 997.1838378349961,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.14640733418237736
+                        },
+                        {
+                            "hero": "gianinaskarlett",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1443441794465755138_8.png",
+                            "fantasy_score": 1456.68728214762,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.14346685007142382
+                        },
+                        {
+                            "hero": "notthreadguy",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1426732252768182281_6.png",
+                            "fantasy_score": 1491.8954724492928,
+                            "hero_stars": 6,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.1423394771911511
+                        },
+                        {
+                            "hero": "punk9059",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1449164448321605632_5.png",
+                            "fantasy_score": 1134.4619760195985,
+                            "hero_stars": 5,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.14218830753774817
+                        }
+                    ]
+                },
+                "Elite": {
+                    "top50": [
+                        {
+                            "hero": "CryptoKaleo",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
+                            "fantasy_score": 1691.2994055524246,
+                            "hero_stars": 7,
+                            "hero_count": 15,
+                            "usage_percentage": 30.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "boldleonidas",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1432635656161746947_8.png",
+                            "fantasy_score": 1887.3602879487469,
+                            "hero_stars": 8,
+                            "hero_count": 11,
+                            "usage_percentage": 22.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
+                            "fantasy_score": 1329.5784504466615,
+                            "hero_stars": 7,
+                            "hero_count": 10,
+                            "usage_percentage": 20.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "greg16676935420",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1356434353623093249_8.png",
+                            "fantasy_score": 1844.8351063960067,
+                            "hero_stars": 8,
+                            "hero_count": 7,
+                            "usage_percentage": 14.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "artsch00lreject",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1354947293921701892_6.png",
+                            "fantasy_score": 1488.31833412262,
+                            "hero_stars": 6,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "0xMert_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1309886201944473600_7.png",
+                            "fantasy_score": 1843.1717753571272,
+                            "hero_stars": 7,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "based16z",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1446541960181858315_7.png",
+                            "fantasy_score": 1825.563408688864,
+                            "hero_stars": 7,
+                            "hero_count": 6,
+                            "usage_percentage": 12.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "chooserich",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/965651_8.png",
+                            "fantasy_score": 1971.8673449482844,
+                            "hero_stars": 8,
+                            "hero_count": 5,
+                            "usage_percentage": 10.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "rasmr_eth",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/423164349_8.png",
+                            "fantasy_score": 1947.8519280653086,
+                            "hero_stars": 8,
+                            "hero_count": 5,
+                            "usage_percentage": 10.0,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "KookCapitalLLC",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/864011281_7.png",
+                            "fantasy_score": 1771.8871773206404,
+                            "hero_stars": 7,
+                            "hero_count": 4,
+                            "usage_percentage": 8.0,
+                            "reward_value_added": 0.0
+                        }
+                    ],
+                    "itm": [
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
+                            "fantasy_score": 1329.5784504466615,
+                            "hero_stars": 7,
+                            "hero_count": 26,
+                            "usage_percentage": 17.45,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "CryptoKaleo",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
+                            "fantasy_score": 1691.2994055524246,
+                            "hero_stars": 7,
+                            "hero_count": 24,
+                            "usage_percentage": 16.11,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "chooserich",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/965651_8.png",
+                            "fantasy_score": 1478.9005087112132,
+                            "hero_stars": 8,
+                            "hero_count": 15,
+                            "usage_percentage": 10.07,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "boldleonidas",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1432635656161746947_8.png",
+                            "fantasy_score": 1887.3602879487469,
+                            "hero_stars": 8,
+                            "hero_count": 14,
+                            "usage_percentage": 9.4,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "EasyEatsBodega",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1423097842034528257_7.png",
+                            "fantasy_score": 1630.7208513105868,
+                            "hero_stars": 7,
+                            "hero_count": 12,
+                            "usage_percentage": 8.05,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1138993163706753029_7.png",
+                            "fantasy_score": 997.1838378349961,
+                            "hero_stars": 7,
+                            "hero_count": 11,
+                            "usage_percentage": 7.38,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "boldleonidas",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1432635656161746947_8.png",
+                            "fantasy_score": 1415.52021596156,
+                            "hero_stars": 8,
+                            "hero_count": 11,
+                            "usage_percentage": 7.38,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "EasyEatsBodega",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1423097842034528257_7.png",
+                            "fantasy_score": 1223.04063848294,
+                            "hero_stars": 7,
+                            "hero_count": 11,
+                            "usage_percentage": 7.38,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "beast_ico",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1499585375534206980_8.png",
+                            "fantasy_score": 1467.7969337951258,
+                            "hero_stars": 8,
+                            "hero_count": 10,
+                            "usage_percentage": 6.71,
+                            "reward_value_added": 0.0
+                        },
+                        {
+                            "hero": "0xMert_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/rare/1309886201944473600_7.png",
+                            "fantasy_score": 1382.3788315178454,
+                            "hero_stars": 7,
+                            "hero_count": 10,
+                            "usage_percentage": 6.71,
+                            "reward_value_added": 0.0
+                        }
+                    ],
+                    "rva": [
+                        {
+                            "hero": "boldleonidas",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1432635656161746947_8.png",
+                            "fantasy_score": 1887.3602879487469,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.5072577605747358
+                        },
+                        {
+                            "hero": "CryptoKaleo",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/906234475604037637_7.png",
+                            "fantasy_score": 1691.2994055524246,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.4451609287137603
+                        },
+                        {
+                            "hero": "greg16676935420",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1356434353623093249_8.png",
+                            "fantasy_score": 1844.8351063960067,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.4404907039909547
+                        },
+                        {
+                            "hero": "rasmr_eth",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/423164349_8.png",
+                            "fantasy_score": 1947.8519280653086,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.34610004470028
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1138993163706753029_7.png",
+                            "fantasy_score": 1329.5784504466615,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.2552745087803898
+                        },
+                        {
+                            "hero": "0xMert_",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1309886201944473600_7.png",
+                            "fantasy_score": 1843.1717753571272,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.22776030188368301
+                        },
+                        {
+                            "hero": "Pentosh1",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/legendary/1138993163706753029_7.png",
+                            "fantasy_score": 1661.9730630583267,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.2157348799132262
+                        },
+                        {
+                            "hero": "blknoiz06",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/973261472_8.png",
+                            "fantasy_score": 1839.493597488724,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.2134022124373146
+                        },
+                        {
+                            "hero": "CryptoKaleo",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/legendary/906234475604037637_7.png",
+                            "fantasy_score": 2114.124256940531,
+                            "hero_stars": 7,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.17735238237743606
+                        },
+                        {
+                            "hero": "beast_ico",
+                            "image_url": "https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/epic/1499585375534206980_8.png",
+                            "fantasy_score": 1957.062578393501,
+                            "hero_stars": 8,
+                            "hero_count": 0,
+                            "usage_percentage": 0.0,
+                            "reward_value_added": 0.1760458507845825
                         }
                     ]
                 }

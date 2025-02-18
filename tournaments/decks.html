@@ -366,7 +366,7 @@
         color: #ffffff;
         font-size: 65%;
         min-width: 120px;
-        height: 24px;
+        height: 14px;
     }
 
     .filter-input:focus {
@@ -1297,6 +1297,10 @@ async function fetchData(tournamentNumber) {
             throw error;
         }
 
+        // Debugging: Count players with player_rank = 1
+        const rankOneCount = data.filter(player => player.player_rank === 1).length;
+        console.log(`Number of players with rank 1: ${rankOneCount}`);
+
         // Continue with existing code...
         cachedTournamentData = {
             players: data,
@@ -1368,6 +1372,7 @@ function initializeLeagueButtons() {
                 null;
             
             if (tournamentNumber) {
+                console.log(`Fetching data for tournament number: ${tournamentNumber} with league: ${selectedLeague}`);
                 fetchData(tournamentNumber); // Make a fresh query with the new league
             }
         });

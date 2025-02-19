@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monad Testnet Tournaments</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .tournament {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .tournament::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            opacity: 0.4;
+            z-index: 0;
+            background-image: var(--background-image);
+        }
+
+        .tournament h2, .tournament p {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monad Testnet Tournament Main 1</h1>
+    <div id="total-registered-players"></div>
+    <div id="tournaments" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+
+    <script>
+        async function fetchTournaments() {
+            const response = await fetch('https://secret-api.fantasy.top/tournaments/next-tournaments', {
+                method: 'GET',
+                headers: {
+                    'sec-ch-ua-platform': 'Windows',
+                    'Referer': 'https://monad.fantasy.top/',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/plain, */*',
+                    'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+                    'sec-ch-ua-mobile': '?0'
+                }
+            });
+            const data = await response.json();
+            displayTournaments(data);
+        }
+
+        function displayTournaments(tournaments) {
+            const tournamentsDiv = document.getElementById('tournaments');
+            const totalRegisteredPlayersDiv = document.getElementById('total-registered-players');
+
+            // Define the order of tournament types with "Reverse" last
+            const order = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+
+            // Sort tournaments based on the defined order
+            tournaments.sort((a, b) => {
+                const indexA = order.indexOf(a.name === "Reverse Score" ? "Reverse" : a.name);
+                const indexB = order.indexOf(b.name === "Reverse Score" ? "Reverse" : b.name);
+                return indexA - indexB;
+            });
+
+            // Calculate total registered players
+            const totalRegisteredPlayers = tournaments.reduce((total, tournament) => total + tournament.registered_players_count, 0);
+            totalRegisteredPlayersDiv.textContent = `Total Registered Players: ${totalRegisteredPlayers}`;
+
+            tournaments.forEach(tournament => {
+                // Modify the tournament name if it is "Reverse Score"
+                const tournamentName = tournament.name === "Reverse Score" ? "Reverse" : tournament.name;
+                const leagueName = tournamentName.toLowerCase(); // Use for league color
+
+                const tournamentDiv = document.createElement('div');
+                tournamentDiv.className = 'tournament';
+                
+                // Set the background image URL in the pseudo-element
+                tournamentDiv.style.setProperty('--background-image', `url(../icons/${tournamentName.toLowerCase()}-texture.webp)`);
+                
+                // Create the league icon image element
+                const leagueIcon = document.createElement('img');
+                leagueIcon.src = `../icons/${leagueName}.webp`; // Use tournamentName for the league icon
+                leagueIcon.alt = `${tournamentName} Icon`;
+                leagueIcon.className = 'league-icon'; // Optional: add a class for styling
+
+                // Create a span for the tournament name with color
+                const tournamentNameSpan = document.createElement('span');
+                tournamentNameSpan.textContent = tournamentName;
+                tournamentNameSpan.style.color = leagueColors[leagueName]; // Set color based on league
+
+                // Create a container for registered players count
+                const registeredPlayersCountDiv = document.createElement('div');
+                registeredPlayersCountDiv.textContent = tournament.registered_players_count;
+                registeredPlayersCountDiv.style.backgroundColor = leagueColors[leagueName];
+                registeredPlayersCountDiv.style.color = '#FFFFFF';
+                registeredPlayersCountDiv.style.fontWeight = 'bold';
+                registeredPlayersCountDiv.style.borderRadius = '12px';
+                registeredPlayersCountDiv.style.padding = '5px 10px';
+                registeredPlayersCountDiv.style.display = 'inline-block';
+                registeredPlayersCountDiv.style.marginLeft = '5px';
+                registeredPlayersCountDiv.style.opacity = '1'; // Force full opacity
+                registeredPlayersCountDiv.style.position = 'relative'; // Ensure it's above the background
+                registeredPlayersCountDiv.style.zIndex = '1'; // Ensure it's above the semi-transparent background
+
+                // Create the "Decks" label
+                const decksLabel = document.createElement('span');
+                decksLabel.textContent = 'Decks';
+                decksLabel.style.marginLeft = '10px'; // Space after the tournament name
+
+                // Create a container for both the label and count
+                const statsContainer = document.createElement('div');
+                statsContainer.style.display = 'flex';
+                statsContainer.style.alignItems = 'center';
+                statsContainer.appendChild(decksLabel);
+                statsContainer.appendChild(registeredPlayersCountDiv);
+
+                tournamentDiv.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        ${leagueIcon.outerHTML}
+                        <h2 style="margin: 0;">${tournamentNameSpan.outerHTML}</h2>
+                    </div>
+                `;
+                
+                // Add margin-top to create space between title and stats
+                statsContainer.style.marginTop = '10px';
+                tournamentDiv.appendChild(statsContainer);
+                tournamentsDiv.appendChild(tournamentDiv);
+            });
+        }
+
+        // Define league colors based on the config
+        const leagueColors = {
+            elite: "#B64892",
+            gold: "#C9CA88",
+            silver: "#9E9E9E",
+            bronze: "#4D2E1E",
+            reverse: "#78B15A"
+        };
+
+        fetchTournaments();
+    </script>
+</body>
+</html>

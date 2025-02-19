@@ -77,18 +77,31 @@
             // Define the order of tournament types with "Reverse" last
             const order = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
 
-            // Sort tournaments based on the defined order
             tournaments.sort((a, b) => {
                 const indexA = order.indexOf(a.name === "Reverse Score" ? "Reverse" : a.name);
                 const indexB = order.indexOf(b.name === "Reverse Score" ? "Reverse" : b.name);
                 return indexA - indexB;
             });
 
-            // Calculate total registered players
             const totalRegisteredPlayers = tournaments.reduce((total, tournament) => total + tournament.registered_players_count, 0);
             totalRegisteredPlayersDiv.textContent = `Total Registered Decks: ${totalRegisteredPlayers}`;
 
             tournaments.forEach(tournament => {
+                // Get potential rewards for all types
+                const potentialRewards = {};
+                if (tournament.rewards && tournament.rewards.length > 0) {
+                    tournament.rewards.forEach(reward => {
+                        const distribution = reward.distribution;
+                        for (const tier of distribution) {
+                            if (tournament.registered_players_count >= tier.start && 
+                                tournament.registered_players_count <= tier.end) {
+                                potentialRewards[reward.type] = tier.reward;
+                                break;
+                            }
+                        }
+                    });
+                }
+
                 // Modify the tournament name if it is "Reverse Score"
                 const tournamentName = tournament.name === "Reverse Score" ? "Reverse" : tournament.name;
                 const leagueName = tournamentName.toLowerCase(); // Use for league color
@@ -135,6 +148,49 @@
                 statsContainer.style.alignItems = 'center';
                 statsContainer.appendChild(decksLabel);
                 statsContainer.appendChild(registeredPlayersCountDiv);
+
+                // Add all reward types to stats container
+                if (Object.keys(potentialRewards).length > 0) {
+                    const rewardsContainer = document.createElement('div');
+                    rewardsContainer.style.marginLeft = '20px';
+                    rewardsContainer.style.position = 'relative';
+                    rewardsContainer.style.zIndex = '1';
+                    
+                    Object.entries(potentialRewards).forEach(([type, reward]) => {
+                        const rewardDiv = document.createElement('div');
+                        rewardDiv.style.display = 'flex';
+                        rewardDiv.style.alignItems = 'center';
+                        rewardDiv.style.gap = '5px';
+
+                        let iconHtml;
+                        switch(type) {
+                            case 'WL':
+                                iconHtml = '🎟️';
+                                break;
+                            case 'FRAGMENT':
+                                iconHtml = `<img src="../icons/fragment.webp" alt="Fragment" style="width: 20px; height: 20px;">`;
+                                break;
+                            case 'ETH':
+                                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none" class="w-5 h-5 text-white">
+                                    <path d="M15.921 0C11.3234 0 0 11.3792 0 15.9999C0 20.6206 11.3234 32 15.921 32C20.5186 32 31.8422 20.6204 31.8422 15.9999C31.8422 11.3794 20.5188 0 15.921 0ZM13.44 25.1492C11.5012 24.6183 6.28864 15.455 6.81704 13.5066C7.34544 11.5581 16.4634 6.31979 18.4021 6.8508C20.341 7.38173 25.5535 16.5449 25.0252 18.4934C24.4968 20.4418 15.3787 25.6802 13.44 25.1492Z" fill="#836EF9"/>
+                                </svg>`;
+                                break;
+                            case 'FAN':
+                                iconHtml = `<img src="../icons/xp.webp" alt="XP" style="width: 20px; height: 20px;">`;
+                                break;
+                            default:
+                                iconHtml = type;
+                        }
+
+                        rewardDiv.innerHTML = `
+                            <div class="flex items-center gap-x-1 font-bold text-white text-lg">${iconHtml}</div>
+                            <span>${reward}</span>
+                        `;
+                        rewardsContainer.appendChild(rewardDiv);
+                    });
+                    
+                    statsContainer.appendChild(rewardsContainer);
+                }
 
                 tournamentDiv.innerHTML = `
                     <div style="display: flex; align-items: center;">

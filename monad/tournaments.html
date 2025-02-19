@@ -86,7 +86,7 @@
 
             // Calculate total registered players
             const totalRegisteredPlayers = tournaments.reduce((total, tournament) => total + tournament.registered_players_count, 0);
-            totalRegisteredPlayersDiv.textContent = `Total Registered Players: ${totalRegisteredPlayers}`;
+            totalRegisteredPlayersDiv.textContent = `Total Registered Decks: ${totalRegisteredPlayers}`;
 
             tournaments.forEach(tournament => {
                 // Modify the tournament name if it is "Reverse Score"

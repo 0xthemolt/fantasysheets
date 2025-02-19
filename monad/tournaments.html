@@ -50,8 +50,8 @@
 </head>
 <body>
     <h1>Monad Testnet Tournament Main 1</h1>
-    <div id="total-registered-players"></div>
-    <div id="tournaments" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+    <div id="total-registered-players" class="total-players-counter"></div>
+    <div id="tournaments" class="tournaments-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
 
     <script>
         async function fetchTournaments() {
@@ -125,6 +125,7 @@
 
                 // Create a container for registered players count
                 const registeredPlayersCountDiv = document.createElement('div');
+                registeredPlayersCountDiv.className = 'player-count';
                 registeredPlayersCountDiv.textContent = tournament.registered_players_count;
                 registeredPlayersCountDiv.style.backgroundColor = leagueColors[leagueName];
                 registeredPlayersCountDiv.style.color = '#FFFFFF';
@@ -139,11 +140,13 @@
 
                 // Create the "Decks" label
                 const decksLabel = document.createElement('span');
+                decksLabel.className = 'decks-label';
                 decksLabel.textContent = 'Decks';
                 decksLabel.style.marginLeft = '10px'; // Space after the tournament name
 
                 // Create a container for both the label and count
                 const statsContainer = document.createElement('div');
+                statsContainer.className = 'tournament-stats';
                 statsContainer.style.display = 'flex';
                 statsContainer.style.alignItems = 'center';
                 statsContainer.appendChild(decksLabel);
@@ -151,51 +154,80 @@
 
                 // Add all reward types to stats container
                 if (Object.keys(potentialRewards).length > 0) {
-                    const rewardsContainer = document.createElement('div');
-                    rewardsContainer.style.marginLeft = '20px';
-                    rewardsContainer.style.position = 'relative';
-                    rewardsContainer.style.zIndex = '1';
+                    const overlayContainer = document.createElement('div');
+                    overlayContainer.className = 'rewards-container';
+                    overlayContainer.style.marginLeft = '20px';
+                    overlayContainer.style.position = 'relative';
+                    overlayContainer.style.zIndex = '1';
+                    overlayContainer.style.display = 'grid';
+                    overlayContainer.style.gridTemplateColumns = 'auto 1fr';
+                    overlayContainer.style.gap = '10px';
+                    overlayContainer.style.alignItems = 'center';
+
+                    // Add "Overlay" label
+                    const overlayLabel = document.createElement('div');
+                    overlayLabel.textContent = 'Overlay';
+                    overlayLabel.style.color = '#888';
+                    overlayLabel.style.fontSize = '12px';
+                    overlayLabel.style.marginBottom = '5px';
+                    overlayLabel.style.gridColumn = '1 / -1';
+                    overlayContainer.appendChild(overlayLabel);
                     
-                    Object.entries(potentialRewards).forEach(([type, reward]) => {
-                        const rewardDiv = document.createElement('div');
-                        rewardDiv.style.display = 'flex';
-                        rewardDiv.style.alignItems = 'center';
-                        rewardDiv.style.gap = '5px';
+                    // Define the order of reward types
+                    const rewardOrder = ['ETH', 'FRAGMENT', 'WL', 'FAN'];
+                    
+                    // Sort and add rewards in specified order
+                    rewardOrder.forEach(type => {
+                        if (type in potentialRewards) {
+                            const reward = potentialRewards[type];
+                            const iconContainer = document.createElement('div');
+                            iconContainer.className = 'reward-icon';
+                            iconContainer.style.display = 'flex';
+                            iconContainer.style.justifyContent = 'center';
+                            iconContainer.style.alignItems = 'center';
+                            iconContainer.style.width = '24px'; // Fixed width for consistent alignment
 
-                        let iconHtml;
-                        switch(type) {
-                            case 'WL':
-                                iconHtml = '🎟️';
-                                break;
-                            case 'FRAGMENT':
-                                iconHtml = `<img src="../icons/fragment.webp" alt="Fragment" style="width: 20px; height: 20px;">`;
-                                break;
-                            case 'ETH':
-                                iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none" class="w-5 h-5 text-white">
-                                    <path d="M15.921 0C11.3234 0 0 11.3792 0 15.9999C0 20.6206 11.3234 32 15.921 32C20.5186 32 31.8422 20.6204 31.8422 15.9999C31.8422 11.3794 20.5188 0 15.921 0ZM13.44 25.1492C11.5012 24.6183 6.28864 15.455 6.81704 13.5066C7.34544 11.5581 16.4634 6.31979 18.4021 6.8508C20.341 7.38173 25.5535 16.5449 25.0252 18.4934C24.4968 20.4418 15.3787 25.6802 13.44 25.1492Z" fill="#836EF9"/>
-                                </svg>`;
-                                break;
-                            case 'FAN':
-                                iconHtml = `<img src="../icons/xp.webp" alt="XP" style="width: 20px; height: 20px;">`;
-                                break;
-                            default:
-                                iconHtml = type;
+                            let iconHtml;
+                            switch(type) {
+                                case 'WL':
+                                    iconHtml = '🎟️';
+                                    break;
+                                case 'FRAGMENT':
+                                    iconHtml = `<img src="../icons/fragment.webp" alt="Fragment" style="width: 20px; height: 20px;">`;
+                                    break;
+                                case 'ETH':
+                                    iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 32 32" fill="none" class="w-5 h-5 text-white">
+                                        <path d="M15.921 0C11.3234 0 0 11.3792 0 15.9999C0 20.6206 11.3234 32 15.921 32C20.5186 32 31.8422 20.6204 31.8422 15.9999C31.8422 11.3794 20.5188 0 15.921 0ZM13.44 25.1492C11.5012 24.6183 6.28864 15.455 6.81704 13.5066C7.34544 11.5581 16.4634 6.31979 18.4021 6.8508C20.341 7.38173 25.5535 16.5449 25.0252 18.4934C24.4968 20.4418 15.3787 25.6802 13.44 25.1492Z" fill="#836EF9"/>
+                                    </svg>`;
+                                    break;
+                                case 'FAN':
+                                    iconHtml = `<img src="../icons/xp.webp" alt="XP" style="width: 20px; height: 20px;">`;
+                                    break;
+                                default:
+                                    iconHtml = type;
+                            }
+
+                            iconContainer.innerHTML = iconHtml;
+
+                            // Value container with left alignment
+                            const valueContainer = document.createElement('div');
+                            valueContainer.className = 'reward-value';
+                            valueContainer.style.textAlign = 'left';
+                            valueContainer.textContent = reward;
+
+                            // Add both containers to the overlay
+                            overlayContainer.appendChild(iconContainer);
+                            overlayContainer.appendChild(valueContainer);
                         }
-
-                        rewardDiv.innerHTML = `
-                            <div class="flex items-center gap-x-1 font-bold text-white text-lg">${iconHtml}</div>
-                            <span>${reward}</span>
-                        `;
-                        rewardsContainer.appendChild(rewardDiv);
                     });
                     
-                    statsContainer.appendChild(rewardsContainer);
+                    statsContainer.appendChild(overlayContainer);
                 }
 
                 tournamentDiv.innerHTML = `
-                    <div style="display: flex; align-items: center;">
+                    <div class="tournament-header" style="display: flex; align-items: center;">
                         ${leagueIcon.outerHTML}
-                        <h2 style="margin: 0;">${tournamentNameSpan.outerHTML}</h2>
+                        <h2 class="tournament-title" style="margin: 0;">${tournamentNameSpan.outerHTML}</h2>
                     </div>
                 `;
                 

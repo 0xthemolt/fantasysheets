@@ -46,12 +46,25 @@
             position: relative;
             z-index: 1;
         }
+
+        .tournaments-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Add media query for mobile devices */
+        @media screen and (max-width: 768px) {
+            .tournaments-grid {
+                grid-template-columns: 1fr;  /* Single column on mobile */
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Monad Testnet Tournament Main 1</h1>
     <div id="total-registered-players" class="total-players-counter"></div>
-    <div id="tournaments" class="tournaments-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+    <div id="tournaments" class="tournaments-grid"></div>
 
     <script>
         async function fetchTournaments() {

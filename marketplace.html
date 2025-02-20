@@ -26,6 +26,24 @@
         .rarity-epic { color: #9400d3; }
         .rarity-rare { color: #0080ff; }
         .rarity-common { color: #808080; }
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sortable i {
+            margin-left: 5px;
+            opacity: 0.3;
+        }
+        .sortable.desc i {
+            opacity: 1;
+            transform: rotate(180deg);
+        }
+        .sortable.asc i {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -231,9 +249,9 @@
                             <thead>
                                 <tr>
                                     <th>Hero</th>
-                                    <th>Score</th>
-                                    <th>Stars</th>
-                                    <th>Inflation</th>
+                                    <th class="sortable" data-sort="score">Score <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
                                     <th class="rarity-divider rarity-divider-legendary"></th>
                                     <th colspan="3" class="rarity-header-legendary">Legendary</th>
                                     <th class="rarity-divider rarity-divider-epic"></th>
@@ -394,6 +412,59 @@
                     const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
                     return `${year}-${month}-${day} ${hours}:${minutes}`;
                 }
+
+                // Sorting functionality
+                function initializeSorting() {
+                    const headers = document.querySelectorAll('.sortable');
+                    headers.forEach(header => {
+                        header.addEventListener('click', () => {
+                            const sortKey = header.dataset.sort;
+                            const tbody = document.querySelector('.marketplace-table tbody');
+                            const rows = Array.from(tbody.querySelectorAll('tr'));
+                            
+                            // Remove sorting classes from all headers
+                            headers.forEach(h => {
+                                if (h !== header) h.classList.remove('asc', 'desc');
+                            });
+                            
+                            // Toggle sorting direction
+                            const isAsc = header.classList.contains('asc');
+                            header.classList.toggle('asc', !isAsc);
+                            header.classList.toggle('desc', isAsc);
+                            
+                            // Sort the rows
+                            rows.sort((a, b) => {
+                                let aVal, bVal;
+                                
+                                switch(sortKey) {
+                                    case 'score':
+                                        aVal = parseFloat(a.children[1].textContent);
+                                        bVal = parseFloat(b.children[1].textContent);
+                                        break;
+                                    case 'stars':
+                                        aVal = parseFloat(a.children[2].textContent);
+                                        bVal = parseFloat(b.children[2].textContent);
+                                        break;
+                                    case 'inflation':
+                                        aVal = parseFloat(a.children[3].textContent);
+                                        bVal = parseFloat(b.children[3].textContent);
+                                        break;
+                                }
+                                
+                                if (isNaN(aVal)) aVal = isAsc ? Infinity : -Infinity;
+                                if (isNaN(bVal)) bVal = isAsc ? Infinity : -Infinity;
+                                
+                                return isAsc ? bVal - aVal : aVal - bVal;
+                            });
+                            
+                            // Reorder the rows
+                            rows.forEach(row => tbody.appendChild(row));
+                        });
+                    });
+                }
+
+                // Call initializeSorting after the table is created
+                initializeSorting();
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('marketplace-container').innerHTML = 'Error loading marketplace data';

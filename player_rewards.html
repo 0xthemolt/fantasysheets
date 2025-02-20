@@ -87,7 +87,7 @@
         </div>
         <div class="small-text">
             <span id="timestamp">2025-02-20 13:46 UTC</span>
-            <span id="timeAgo"></span>
+            (Main 39 End)
             <span class="info-text"> | Click                         <svg class="chevron-icon" viewBox="0 0 448 512" width="12" height="12">
                             <path fill="#00d9fb" d="M224 416c-8.188 0-16.38-3.125-22.62-9.375l-192-192c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0L224 338.8l169.4-169.4c12.5-12.5 32.75-12.5 45.25 0s12.5 32.75 0 45.25l-192 192C240.4 412.9 232.2 416 224 416z"/>
                         </svg> to see reward history</span>
@@ -27188,7 +27188,6 @@
                         const maxPacks = Math.max(...playerHistory.map(h => h.reward_pack));
                         const maxFrag = Math.max(...playerHistory.map(h => h.reward_frag));
                         const maxFan = Math.max(...playerHistory.map(h => h.reward_fan));
-                        const maxGold = Math.max(...playerHistory.map(h => h.reward_gold));
 
                         // Insert history rows
                         for (const history of playerHistory) {
@@ -27202,7 +27201,6 @@
                                 <td><span style="color: ${getColorForValue(history.reward_eth, maxEth)}">${history.reward_eth === 0 ? '-' : history.reward_eth.toFixed(3)}</span></td>
                                 <td><span style="color: ${getColorForValue(combinedPacks, maxPacks * 100 + maxFrag)}">${combinedPacks === 0 ? '-' : Math.floor(combinedPacks)}</span></td>
                                 <td><span style="color: ${getColorForValue(history.reward_fan, maxFan)}">${history.reward_fan === 0 ? '-' : formatRewardFan(history.reward_fan)}</span></td>
-                                <td><span style="color: ${getColorForValue(history.reward_gold, maxGold)}">${history.reward_gold === 0 ? '-' : Math.floor(history.reward_gold)}</span></td>
                                 <td class="rank-cell">${Number.isInteger(history.elite_rank) ? 
                                     `<span class="rank-value">${history.elite_rank}</span>${getPRIndicator(history.elite_rank, allEliteRanks)}` : 
                                     '-'}</td>
@@ -27241,7 +27239,6 @@
                             <td><strong>${totals.eth === 0 ? '-' : totals.eth.toFixed(3)}</strong></td>
                             <td><strong>${totals.combinedPacks === 0 ? '-' : Math.floor(totals.combinedPacks)}</strong></td>
                             <td><strong>${totals.fan === 0 ? '-' : formatRewardFan(totals.fan)}</strong></td>
-                            <td><strong>${totals.gold === 0 ? '-' : Math.floor(totals.gold)}</strong></td>
                             <td colspan="5"></td>
                         `;
                         

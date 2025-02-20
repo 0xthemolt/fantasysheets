@@ -49,14 +49,15 @@
 
         .tournaments-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(5, 1fr); /* 5 columns for desktop */
             gap: 10px;
         }
 
-        /* Add media query for mobile devices */
+        /* Stack vertically on mobile */
         @media screen and (max-width: 768px) {
             .tournaments-grid {
-                grid-template-columns: 1fr;  /* Single column on mobile */
+                grid-template-columns: 1fr; /* Single column */
+                grid-template-rows: repeat(5, auto); /* 5 rows */
             }
         }
     </style>
@@ -151,19 +152,30 @@
                 registeredPlayersCountDiv.style.position = 'relative'; // Ensure it's above the background
                 registeredPlayersCountDiv.style.zIndex = '1'; // Ensure it's above the semi-transparent background
 
+                // Create a container for the decks section
+                const decksContainer = document.createElement('div');
+                decksContainer.style.display = 'flex';
+                decksContainer.style.flexDirection = 'column';
+                decksContainer.style.alignItems = 'center';
+
                 // Create the "Decks" label
                 const decksLabel = document.createElement('span');
                 decksLabel.className = 'decks-label';
                 decksLabel.textContent = 'Decks';
-                decksLabel.style.marginLeft = '10px'; // Space after the tournament name
+                decksLabel.style.color = '#888';
+                decksLabel.style.fontSize = '12px';
+                decksLabel.style.marginBottom = '5px';
 
-                // Create a container for both the label and count
+                // Add label and count to the decks container
+                decksContainer.appendChild(decksLabel);
+                decksContainer.appendChild(registeredPlayersCountDiv);
+
+                // Create a container for both the decks section and rewards
                 const statsContainer = document.createElement('div');
                 statsContainer.className = 'tournament-stats';
                 statsContainer.style.display = 'flex';
-                statsContainer.style.alignItems = 'center';
-                statsContainer.appendChild(decksLabel);
-                statsContainer.appendChild(registeredPlayersCountDiv);
+                statsContainer.style.alignItems = 'flex-start';
+                statsContainer.appendChild(decksContainer);
 
                 // Add all reward types to stats container
                 if (Object.keys(potentialRewards).length > 0) {

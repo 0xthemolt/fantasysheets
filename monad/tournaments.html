@@ -53,11 +53,16 @@
             gap: 10px;
         }
 
-        /* Stack vertically on mobile */
+        /* Update mobile layout to 1x2x2 */
         @media screen and (max-width: 768px) {
             .tournaments-grid {
-                grid-template-columns: 1fr; /* Single column */
-                grid-template-rows: repeat(5, auto); /* 5 rows */
+                grid-template-columns: repeat(2, 1fr); /* 2 columns */
+                grid-template-rows: auto auto; /* 2 rows */
+            }
+            
+            /* Make the first tournament span full width */
+            .tournaments-grid .tournament:first-child {
+                grid-column: 1 / -1; /* Span all columns */
             }
         }
 

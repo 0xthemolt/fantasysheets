@@ -12,6 +12,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .bar { fill: steelblue; }
         .bar:hover { fill: brown; }
@@ -20,18 +21,27 @@
 </head>
 <body>
     <h1>Trade Volume Trends</h1>
-    <div id="chart"></div>
+    <div>
+        <label for="filter">Select Time Filter:</label>
+        <select id="filter">
+            <option value="6months">Last 6 Months</option>
+            <option value="4weeks">Last 4 Weeks</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="all">All Time</option>
+        </select>
+    </div>
+    <canvas id="myChart"></canvas>
 
     <script>
         // Initialize Supabase client
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         // Set up chart dimensions
         const margin = {top: 20, right: 20, bottom: 50, left: 70};
-        const width = 800 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        const width = 50 - margin.left - margin.right;
+        const height = 25 - margin.top - margin.bottom;
 
         // Create SVG container
         const svg = d3.select("#chart")
@@ -41,24 +51,66 @@
             .append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
+        let myChart; // Declare a variable to hold the chart instance
+
         // Fetch data from Supabase
-        async function fetchData() {
-            const { data, error } = await supabase
-                .from('flatten.hero_Trades')
+        async function fetchData(filter) {
+            const now = new Date();
+            let startDate = new Date(); // Create a new date object to avoid modifying 'now'
+            
+            if (filter === '6months') {
+                startDate.setMonth(startDate.getMonth() - 6);
+            } else if (filter === '4weeks') {
+                startDate.setDate(startDate.getDate() - 28);
+            } else if (filter === '7days') {
+                startDate.setDate(startDate.getDate() - 7);
+            } else {
+                startDate = new Date(0); // All time
+            }
+
+            console.log('Query parameters:', {
+                filter: filter,
+                startDate: startDate.toISOString(),
+                endDate: now.toISOString(),
+                startDateReadable: startDate.toString(),
+                endDateReadable: now.toString()
+            });
+
+            const query = supabaseClient
+                .from('hero_trades')
                 .select('trade_timestamp, price')
-                .order('trade_timestamp');
+                .gte('trade_timestamp', startDate.toISOString())
+                .lte('trade_timestamp', now.toISOString())
+                .order('trade_timestamp', { ascending: true });
+
+            console.log('Query URL:', query.url);
+            
+            const { data, error } = await query;
 
             if (error) {
                 console.error('Error fetching data:', error);
                 return;
             }
 
+            console.log('Number of records:', data.length);
+            console.log('Date range in data:', {
+                first: data[0]?.trade_timestamp,
+                last: data[data.length - 1]?.trade_timestamp
+            });
+
             // Process data: group by date and sum trade volumes
-            const groupedData = d3.group(data, d => d.trade_timestamp.split('T')[0]);
-            const processedData = Array.from(groupedData, ([date, values]) => ({
+            const groupedData = d3.group(data, d => {
+                const date = new Date(d.trade_timestamp);
+                return date.toISOString().split('T')[0];  // Convert to local date
+            });
+            
+            const processedData = Array.from(groupedData, ([date, trades]) => ({
                 date: new Date(date),
-                volume: d3.sum(values, d => d.price)
+                totalVolume: d3.sum(trades, d => d.price)
             }));
+
+            // Sort processedData by date in ascending order
+            processedData.sort((a, b) => a.date - b.date);
 
             // Create scales
             const x = d3.scaleTime()
@@ -66,13 +118,13 @@
                 .range([0, width]);
 
             const y = d3.scaleLinear()
-                .domain([0, d3.max(processedData, d => d.volume)])
+                .domain([0, d3.max(processedData, d => d.totalVolume)])
                 .range([height, 0]);
 
-            // Add X axis
+            // Add X axis with formatted labels
             svg.append("g")
                 .attr("transform", `translate(0,${height})`)
-                .call(d3.axisBottom(x))
+                .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%a %d")))
                 .selectAll("text")
                 .style("text-anchor", "end")
                 .attr("dx", "-.8em")
@@ -83,15 +135,49 @@
             svg.append("g")
                 .call(d3.axisLeft(y));
 
+            // Define colors for days of the week
+            const dayColors = [
+                '#FF9999', // Sunday
+                '#99FF99', // Monday
+                '#9999FF', // Tuesday
+                '#FFFF99', // Wednesday
+                '#FF99FF', // Thursday
+                '#99FFFF', // Friday
+                '#FFB366'  // Saturday
+            ];
+
             // Add bars
             svg.selectAll("rect")
                 .data(processedData)
                 .join("rect")
-                .attr("class", "bar")
                 .attr("x", d => x(d.date))
-                .attr("y", d => y(d.volume))
+                .attr("y", d => y(d.totalVolume))
+                .attr("height", d => height - y(d.totalVolume))
                 .attr("width", width / processedData.length - 1)
-                .attr("height", d => height - y(d.volume));
+                .attr("fill", d => dayColors[d.date.getDay()]);
+
+            // Add legend
+            const legend = svg.append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${width - 100}, 0)`);
+
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            legend.selectAll("rect")
+                .data(dayColors)
+                .join("rect")
+                .attr("y", (d, i) => i * 20)
+                .attr("width", 10)
+                .attr("height", 10)
+                .attr("fill", d => d);
+
+            legend.selectAll("text")
+                .data(dayNames)
+                .join("text")
+                .attr("x", 15)
+                .attr("y", (d, i) => i * 20 + 9)
+                .text(d => d)
+                .style("font-size", "12px");
 
             // Add axis labels
             svg.append("text")
@@ -105,10 +191,95 @@
                 .attr("text-anchor", "middle")
                 .attr("transform", `translate(${width/2},${height + 40})`)
                 .text("Date");
+
+            // Destroy the existing chart if it exists
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Create Chart.js chart
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const chartData = {
+                labels: processedData.map(d => d.date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })),
+                datasets: [{
+                    label: 'Total Volume',
+                    data: processedData.map(d => d.totalVolume),
+                    backgroundColor: processedData.map(d => dayColors[d.date.getDay()]),
+                }]
+            };
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const date = new Date(processedData[context[0].dataIndex].date);
+                                    return date.toLocaleDateString('en-US', { 
+                                        weekday: 'short', 
+                                        year: '2-digit', 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    });
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                                color: '#808080',
+                                generateLabels: function(chart) {
+                                    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                    return dayNames.map((day, index) => ({
+                                        text: day,
+                                        fillStyle: dayColors[index],
+                                        strokeStyle: dayColors[index],
+                                        lineWidth: 0,
+                                        hidden: false,
+                                        index: index
+                                    }));
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#808080'
+                            },
+                            ticks: {
+                                color: '#808080'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Trade Volume',
+                                color: '#808080'
+                            },
+                            ticks: {
+                                color: '#808080'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
-        // Call the function to fetch data and create the chart
-        fetchData();
+        // Event listener for filter change
+        document.getElementById('filter').addEventListener('change', (event) => {
+            fetchData(event.target.value);
+        });
+
+        // Initial call to fetch data with default filter
+        fetchData('all');
     </script>
 </body>
 </html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trade Volume Trends</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .bar { fill: steelblue; }
+        .bar:hover { fill: brown; }
+        .axis-label { font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Trade Volume Trends</h1>
+    <div id="chart"></div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Set up chart dimensions
+        const margin = {top: 20, right: 20, bottom: 50, left: 70};
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        // Create SVG container
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Fetch data from Supabase
+        async function fetchData() {
+            const { data, error } = await supabase
+                .from('flatten.hero_Trades')
+                .select('trade_timestamp, price')
+                .order('trade_timestamp');
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                return;
+            }
+
+            // Process data: group by date and sum trade volumes
+            const groupedData = d3.group(data, d => d.trade_timestamp.split('T')[0]);
+            const processedData = Array.from(groupedData, ([date, values]) => ({
+                date: new Date(date),
+                volume: d3.sum(values, d => d.price)
+            }));
+
+            // Create scales
+            const x = d3.scaleTime()
+                .domain(d3.extent(processedData, d => d.date))
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(processedData, d => d.volume)])
+                .range([height, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-45)");
+
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            // Add bars
+            svg.selectAll("rect")
+                .data(processedData)
+                .join("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.date))
+                .attr("y", d => y(d.volume))
+                .attr("width", width / processedData.length - 1)
+                .attr("height", d => height - y(d.volume));
+
+            // Add axis labels
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", `translate(${-50},${height/2})rotate(-90)`)
+                .text("Trade Volume");
+
+            svg.append("text")
+                .attr("class", "axis-label")
+                .attr("text-anchor", "middle")
+                .attr("transform", `translate(${width/2},${height + 40})`)
+                .text("Date");
+        }
+
+        // Call the function to fetch data and create the chart
+        fetchData();
+    </script>
+</body>
+</html>

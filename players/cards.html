@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scout Cards</title>
+    <title>Player Cards</title>
     <!-- Add Supabase JS library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -431,7 +431,6 @@
             uniqueCards.forEach(card => {
                 const stars = extractHeroStars(card);
                 const rarity = getRarityLabel(card.rarity);
-                console.log(`Card Rarity: ${card.rarity}, Mapped Rarity: ${rarity}`); // Debugging line
                 const rowIndex = matrix.findIndex(row => row.stars === stars);
                 if (rowIndex !== -1) {
                     matrix[rowIndex].rarities[rarity].push(card);
@@ -589,18 +588,19 @@
                         const sevenDayScore = document.createElement('div');
                         sevenDayScore.className = 'score-item';
                         
-                        // Get raw score value
-                        let sevenDayScoreValue = Math.floor(card.card_weighted_score);
+                        // Get raw score value and log the heroes data for debugging
+                        let sevenDayScoreValue = Math.floor(card.heroes?.current?.fantasy_score || 0);
                         
                         // Apply rarity-based adjustments for star range comparison
                         let adjustedSevenDayScore = sevenDayScoreValue;
-                        if (rarity === 'Legendary') {
-                            adjustedSevenDayScore = sevenDayScoreValue / 2.5;
-                        } else if (rarity === 'Epic') {
-                            adjustedSevenDayScore = sevenDayScoreValue / 2;
-                        } else if (rarity === 'Rare') {
-                            adjustedSevenDayScore = sevenDayScoreValue / 1.5;
+                        if (card.rarity === 1) { // Legendary
+                            adjustedSevenDayScore = Math.floor(sevenDayScoreValue / 2.5);
+                        } else if (card.rarity === 2) { // Epic
+                            adjustedSevenDayScore = Math.floor(sevenDayScoreValue / 2);
+                        } else if (card.rarity === 3) { // Rare
+                            adjustedSevenDayScore = Math.floor(sevenDayScoreValue / 1.5);
                         }
+                        // Common (rarity 4) remains unchanged
                         
                         // Create two-line format with label on top and score below
                         const sevenDayLabel = document.createElement('div');
@@ -609,7 +609,7 @@
                         
                         const sevenDayValue = document.createElement('div');
                         sevenDayValue.className = 'score-value';
-                        sevenDayValue.textContent = sevenDayScoreValue;
+                        sevenDayValue.textContent = adjustedSevenDayScore;
                         
                         sevenDayScore.appendChild(sevenDayLabel);
                         sevenDayScore.appendChild(sevenDayValue);
@@ -907,7 +907,7 @@
                         // New container for card_weighted_score
                         const scoreContainer = document.createElement('div');
                         scoreContainer.className = 'score-container'; // Add a class for styling
-                        scoreContainer.textContent = `7D: ${Math.floor(card.card_weighted_score)}`; // Add "7D:" label before the score
+                        scoreContainer.textContent = `7D: ${Math.floor(card.heroes?.current?.fantasy_score || 0)}`; // Use heroes.current.fantasy_score
                         wrapper.appendChild(scoreContainer); // Append the score container to the wrapper
 
                         cell.appendChild(wrapper);
@@ -1047,7 +1047,7 @@
                     rarityText,
                     card.card_number,
                     card.stars,
-                    Math.floor(card.card_weighted_score),
+                    Math.floor(card.heroes?.current?.fantasy_score || 0), // Use heroes.current.fantasy_score
                     score24h ? Math.floor(score24h) : ''
                 ].join(',');
                 

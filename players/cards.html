@@ -167,20 +167,47 @@
         </h1>
     </div>
     <div id="searchControls" style="margin: 20px 0; display: flex; align-items: center; flex-wrap: nowrap;">
-        <input 
-            type="text" 
-            id="ownerSearch" 
-            placeholder="Enter owner address"
-            style="padding: 8px; flex: 1; max-width: 400px; margin-right: 10px;"
-            value="0x162F95a9364c891028d255467F616902A479681a"
-        >
-        <button onclick="fetchCardData()" style="padding: 8px 16px; white-space: nowrap;">Search</button>
+        <div style="position: relative; flex: 1; max-width: 400px; margin-right: 10px;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #666;" onclick="fetchCardData()"></i>
+            <input 
+                type="text" 
+                id="ownerSearch" 
+                placeholder="Enter owner address"
+                style="padding: 10px 10px 10px 35px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
+                value="0x162F95a9364c891028d255467F616902A479681a"
+                onkeypress="if(event.key === 'Enter') fetchCardData()"
+            >
+        </div>
         <span id="totalCards" style="margin-left: 15px; color: #666; white-space: nowrap;"></span>
         <button id="exportButton" onclick="exportCardData()" class="export-button" style="margin-left: 20px; white-space: nowrap;">
             <i class="fas fa-file-export" style="margin-right: 5px;"></i> Export CSV
         </button>
     </div>
 
+    <div id="filterControl" style="margin: 20px 0; padding: 15px; background-color: #292828; border-radius: 8px;">
+        <div id = "rarity-filter-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; color: #fff; font-size: 0.85rem;">Filter by Rarity</h3>
+                <button id="clearFilters" onclick="clearRarityFilters()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">
+                    <i class="fas fa-times" style="margin-right: 5px;"></i>Clear Filters
+                </button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <button class="rarity-filter-button active" data-rarity="Legendary" style="display: flex; align-items: center; cursor: pointer; padding: 6px 9px; border-radius: 6px; background-color: rgba(127, 118, 245, 0.2); border: 1px solid #7F76F5; font-size: 12px; transition: all 0.2s ease;">
+                    <span style="color: #7F76F5; font-weight: bold;">Legendary</span>
+                </button>
+                <button class="rarity-filter-button active" data-rarity="Epic" style="display: flex; align-items: center; cursor: pointer; padding: 6px 9px; border-radius: 6px; background-color: rgba(205, 47, 215, 0.2); border: 1px solid #CD2FD7; font-size: 12px; transition: all 0.2s ease;">
+                    <span style="color: #CD2FD7; font-weight: bold;">Epic</span>
+                </button>
+                <button class="rarity-filter-button active" data-rarity="Rare" style="display: flex; align-items: center; cursor: pointer; padding: 6px 9px; border-radius: 6px; background-color: rgba(2, 224, 244, 0.2); border: 1px solid #02E0F4; font-size: 12px; transition: all 0.2s ease;">
+                    <span style="color: #02E0F4; font-weight: bold;">Rare</span>
+                </button>
+                <button class="rarity-filter-button active" data-rarity="Common" style="display: flex; align-items: center; cursor: pointer; padding: 6px 9px; border-radius: 6px; background-color: rgba(72, 238, 75, 0.2); border: 1px solid #48EE4B; font-size: 12px; transition: all 0.2s ease;">
+                    <span style="color: #48EE4B; font-weight: bold;">Common</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="loading">Loading...</div>
     <div id="cardsByStars" style="display: none;">
@@ -267,6 +294,7 @@
         let heroesData = [];
         let starRangesData = []; // Variable to store star ranges from Supabase
         let heroStats = []; // Generalized variable to store hero stats from Supabase
+        let activeRarityFilters = ['Legendary', 'Epic', 'Rare', 'Common']; // Default: all rarities are active
 
         // Add this function to fetch hero stats from Supabase
         async function fetchHeroStatsFromSupabase() {
@@ -492,9 +520,9 @@
             `;
             document.head.appendChild(styleElement);
 
-            // First, determine which rarities have cards
+            // First, determine which rarities have cards AND are active in filters
             const activeRarities = ['Legendary', 'Epic', 'Rare', 'Common'].filter(rarity => {
-                return matrix.some(row => row.rarities[rarity].length > 0);
+                return activeRarityFilters.includes(rarity) && matrix.some(row => row.rarities[rarity].length > 0);
             });
 
             // Create header row with only active rarities
@@ -739,6 +767,7 @@
             return container;
         }
 
+        
         async function fetchAllCardData(ownerAddress) {
             const BATCH_SIZE = 50;
             let allCards = [];
@@ -936,7 +965,10 @@
                 loadingDiv.style.display = 'block';
                 starView.style.display = 'none';
                 
-                // Remove the old headers setup and just call fetchAllCardData directly
+                // Fetch player data
+                const playerData = await fetchPlayerData(ownerAddress);
+                
+                // Fetch all card data
                 const allCards = await fetchAllCardData(ownerAddress);
                 console.log(`Fetched ${allCards.length} cards`);
                 
@@ -949,7 +981,6 @@
                     const matrixElement = renderMatrix(matrix);
                     starView.innerHTML = '';
                     starView.appendChild(matrixElement);
-                    // }
                 } else {
                     loadingDiv.textContent = 'No cards found for this address';
                     loadingDiv.style.display = 'block';
@@ -1070,6 +1101,110 @@
             // Trigger download and clean up
             link.click();
             document.body.removeChild(link);
+        }
+
+        // Add this function to apply rarity filters
+        function applyRarityFilters() {
+            // Get all filter buttons
+            const buttons = document.querySelectorAll('.rarity-filter-button');
+            
+            // Update activeRarityFilters based on active buttons
+            activeRarityFilters = Array.from(buttons)
+                .filter(button => button.classList.contains('active'))
+                .map(button => button.getAttribute('data-rarity'));
+            
+            // Re-render the matrix with filtered data
+            if (window.currentCardData && window.currentCardData.length > 0) {
+                const matrix = organizeCardsIntoMatrix(window.currentCardData);
+                const matrixElement = renderMatrix(matrix);
+                const starView = document.getElementById('cardsByStars');
+                starView.innerHTML = '';
+                starView.appendChild(matrixElement);
+            }
+        }
+        
+        // Add this function to clear all filters
+        function clearRarityFilters() {
+            // Set all buttons to active
+            document.querySelectorAll('.rarity-filter-button').forEach(button => {
+                button.classList.add('active');
+                button.style.opacity = '1';
+                button.style.backgroundColor = `rgba(${getRarityRGB(button.getAttribute('data-rarity'))}, 0.2)`;
+            });
+            
+            // Reset active filters
+            activeRarityFilters = ['Legendary', 'Epic', 'Rare', 'Common'];
+            
+            // Re-render the matrix
+            if (window.currentCardData && window.currentCardData.length > 0) {
+                const matrix = organizeCardsIntoMatrix(window.currentCardData);
+                const matrixElement = renderMatrix(matrix);
+                const starView = document.getElementById('cardsByStars');
+                starView.innerHTML = '';
+                starView.appendChild(matrixElement);
+            }
+        }
+
+        // Helper function to get RGB values for rarity colors
+        function getRarityRGB(rarity) {
+            const colorMap = {
+                'Legendary': '127, 118, 245',
+                'Epic': '205, 47, 215',
+                'Rare': '2, 224, 244',
+                'Common': '72, 238, 75'
+            };
+            return colorMap[rarity] || '100, 100, 100';
+        }
+
+        // Add event listeners for the filter buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Existing code...
+            
+            // Add event listeners for filter buttons
+            setTimeout(() => {
+                document.querySelectorAll('.rarity-filter-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Toggle active state
+                        this.classList.toggle('active');
+                        
+                        // Update visual appearance
+                        if (this.classList.contains('active')) {
+                            this.style.opacity = '1';
+                            this.style.backgroundColor = `rgba(${getRarityRGB(this.getAttribute('data-rarity'))}, 0.2)`;
+                        } else {
+                            this.style.opacity = '0.5';
+                            this.style.backgroundColor = 'rgba(50, 50, 50, 0.2)';
+                        }
+                        
+                        // Apply filters
+                        applyRarityFilters();
+                    });
+                });
+            }, 1000); // Small delay to ensure DOM is fully loaded
+        });
+
+        async function fetchPlayerData(ownerAddress) {
+            try {
+                const response = await fetch(
+                    `https://api-v2.fantasy.top/player/search?search=${ownerAddress}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "accept": "application/json",
+                            "x-api-key": "cbc57228-5495-47b0-ae2f-b43ba6d5a9b6",
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Api-Key"
+                        }
+                    }
+                );
+                const playerData = await response.json();
+                console.log('Fetched player data:', playerData); // Log player data for debugging
+                return playerData; // Return the player data
+            } catch (error) {
+                console.error('Error fetching player data:', error);
+                return null; // Return null in case of error
+            }
         }
 
     </script>

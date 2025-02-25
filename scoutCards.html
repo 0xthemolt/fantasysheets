@@ -278,31 +278,31 @@
             return rarityMap[rarity] || 'Unknown';
         };
 
-        function fixImageUrl(card) {
-            // Clone the card to avoid modifying the original data
-            const fixedCard = { ...card };
-            
-            // Fix specific hero_id cases
-            if (card.hero_id === '3063147623') {
-                fixedCard.picture = card.picture.replace('djenn', 'jenndefer');
-            }   
-            if (card.hero_id === '1423031747432783872') {
-                fixedCard.picture = card.picture.replace('zagabond', 'ZAGABOND');
-            }
-
-            return fixedCard;
-        }
+        // function fixImageUrl(card) {
+        //     // Clone the card to avoid modifying the original data
+        //     const fixedCard = { ...card };
+        //     
+        //     // Fix specific hero_id cases
+        //     if (card.hero_id === '3063147623') {
+        //         fixedCard.picture = card.picture.replace('djenn', 'jenndefer');
+        //     }   
+        //     if (card.hero_id === '1423031747432783872') {
+        //         fixedCard.picture = card.picture.replace('zagabond', 'ZAGABOND');
+        //     }
+        //
+        //     return fixedCard;
+        // }
 
         function organizeCardsIntoMatrix(data) {
             // First, group cards by their unique properties and count occurrences
             const cardGroups = data.reduce((acc, card) => {
                 // Fix image URL before grouping
-                const fixedCard = fixImageUrl(card);
-                const key = `${fixedCard.rarity}-${fixedCard.picture}`;
+                // const fixedCard = fixImageUrl(card); // Removed this line
+                const key = `${card.rarity}-${card.picture}`; // Updated to use card directly
                 
                 if (!acc[key]) {
                     acc[key] = {
-                        ...fixedCard,
+                        ...card, // Use card directly
                         count: 1
                     };
                 } else {
@@ -519,33 +519,62 @@
             return container;
         }
 
-        async function fetchAllCardData(ownerAddress, requestOptions) {
+        async function fetchAllCardData(ownerAddress) {
             const BATCH_SIZE = 50;
             let allCards = [];
-            let skip = 0;
+            let currentPage = 1;
             
             // Get first batch and total count
             const firstResponse = await fetch(
-                `https://portal.fantasy.top/card?%24limit=${BATCH_SIZE}&%24skip=${skip}&owner=${ownerAddress}`,
-                requestOptions
+                `https://api-v2.fantasy.top/card/player/${ownerAddress}?pagination[page]=${currentPage}&pagination[limit]=${BATCH_SIZE}&orderBy=cards_score&groupCard=true`,
+                {
+                    method: "GET",
+                    headers: {
+                        "accept": "application/json",
+                        "x-api-key": "cbc57228-5495-47b0-ae2f-b43ba6d5a9b6",
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Api-Key"
+                    }
+                }
             );
             const firstData = await firstResponse.json();
             
             // Display total cards count
-            document.getElementById('totalCards').textContent = `(Total Cards: ${firstData.total})`;
+            const totalCards = firstData.meta?.total || 0;
+            document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
             
             // Add first batch to results
-            allCards = [...firstData.data];
+            allCards = [...(firstData.data || [])];
             
-            // Fetch remaining batches
-            while (allCards.length < firstData.total) {
-                skip += BATCH_SIZE;
+            // Fetch remaining batches using lastPage from metadata
+            const lastPage = firstData.meta?.lastPage || 1;
+            while (currentPage < lastPage) {
+                currentPage++;
                 const response = await fetch(
-                    `https://portal.fantasy.top/card?%24limit=${BATCH_SIZE}&%24skip=${skip}&owner=${ownerAddress}`,
-                    requestOptions
+                    `https://api-v2.fantasy.top/card/player/${ownerAddress}?pagination[page]=${currentPage}&pagination[limit]=${BATCH_SIZE}&orderBy=cards_score&groupCard=true`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "accept": "application/json",
+                            "x-api-key": "cbc57228-5495-47b0-ae2f-b43ba6d5a9b6",
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Api-Key"
+                        }
+                    }
                 );
                 const data = await response.json();
-                allCards = [...allCards, ...data.data];
+                
+                // Update picture field to make it valid
+                data.data.forEach(card => {
+                    // Ensure stars is available and valid
+                    if (card.stars) {
+                        card.picture = `${card.picture}_${card.stars}.png`; // Concatenate to make the URL valid
+                    }
+                });
+
+                allCards = [...allCards, ...(data.data || [])];
             }
             
             return allCards;
@@ -582,11 +611,11 @@
             
             // Group cards by unique hero (picture) and apply fixImageUrl first
             const uniqueCards = Object.values(data.reduce((acc, card) => {
-                const fixedCard = fixImageUrl(card); // Reuse existing image fix function
-                const key = fixedCard.picture;
+                // const fixedCard = fixImageUrl(card); // Removed this line
+                const key = card.picture;
                 if (!acc[key]) {
                     acc[key] = {
-                        ...fixedCard,
+                        ...card, // Use card directly
                         score: Math.floor(Math.random() * 1001), // Random score 0-1000
                         count: 1
                     };
@@ -760,29 +789,8 @@
                 starView.style.display = 'none';
                 scoreView.style.display = 'none';
                 
-                const myHeaders = new Headers();
-                myHeaders.append("accept", "application/json");
-                myHeaders.append("accept-language", "en-US,en;q=0.9");
-                myHeaders.append("origin", "https://fantasy.top");
-                myHeaders.append("priority", "u=1, i");
-                myHeaders.append("referer", "https://fantasy-top.redoc.ly/");
-                myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
-                myHeaders.append("sec-ch-ua-mobile", "?0");
-                myHeaders.append("sec-ch-ua-platform", "\"Windows\"");
-                myHeaders.append("sec-fetch-dest", "empty");
-                myHeaders.append("sec-fetch-mode", "cors");
-                myHeaders.append("sec-fetch-site", "cross-site");
-                myHeaders.append("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
-                myHeaders.append("x-api-key", "7ecbff33-d82e-4a4e-8b53-004446914dd6");
-                myHeaders.append("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIweDE2MkY5NWE5MzY0Yzg5MTAyOGQyNTU0NjdGNjE2OTAyQTQ3OTY4MWEiLCJpYXQiOjE3MTYxMzk0NzEsImV4cCI6MTcxNjE4MjY3MSwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIiwieC1oYXN1cmEtdXNlci1pZCI6IjB4MTYyRjk1YTkzNjRjODkxMDI4ZDI1NTQ2N0Y2MTY5MDJBNDc5NjgxYSJ9fQ.jQqSiDScZl6nP2UBKIo_pNd9-fdeVkS7N8umbSAqeKI");
-
-                const requestOptions = {
-                    method: "GET",
-                    headers: myHeaders,
-                    redirect: "follow"
-                };
-
-                const allCards = await fetchAllCardData(ownerAddress, requestOptions);
+                // Remove the old headers setup and just call fetchAllCardData directly
+                const allCards = await fetchAllCardData(ownerAddress);
                 console.log(`Fetched ${allCards.length} cards`);
                 
                 window.currentCardData = allCards;

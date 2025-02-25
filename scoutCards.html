@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scout Cards</title>
     <!-- Add Supabase JS library -->
@@ -82,47 +91,20 @@
             line-height: 1.2;
         }
         .score-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
             margin-top: 5px;
-            padding: 3px;
+        }
+        .score-item {
+            padding: 5px;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 4px;
             text-align: center;
             font-weight: bold;
             color: #333;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            font-size: 75%;
-            width: 75%;
-            margin-left: auto;
-            margin-right: auto;
             position: relative;
-            overflow: hidden;
-        }
-        .score-container::before {
-            content: "";
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-        }
-        .score-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 2px 0;
-            position: relative;
-        }
-        .score-star-indicator {
-            width: 20px;
-            height: 20px;
-            line-height: 20px;
-            font-size: 10px;
-            margin-left: 5px;
-            position: relative;
-            z-index: 2;
-        }
-        .score-item {
-            flex: 1;
         }
         .score-label {
             font-size: 10px;
@@ -133,20 +115,55 @@
             font-size: 12px;
             font-weight: bold;
         }
+        .star-transition {
+            font-size: 10px;
+            margin-top: 2px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            color: white;
+        }
+        .arrow {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 2px;
+            color: white;
+        }
+        .export-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .export-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
     <h1>Scout Cards</h1>
-    <div style="margin: 20px 0;">
+    <div id="searchControls" style="margin: 20px 0; display: flex; align-items: center; flex-wrap: nowrap;">
         <input 
             type="text" 
             id="ownerSearch" 
             placeholder="Enter owner address"
-            style="padding: 8px; width: 400px; margin-right: 10px;"
+            style="padding: 8px; flex: 1; max-width: 400px; margin-right: 10px;"
             value="0x162F95a9364c891028d255467F616902A479681a"
         >
-        <button onclick="fetchCardData()" style="padding: 8px 16px;">Search</button>
-        <span id="totalCards" style="margin-left: 15px; color: #666;"></span>
+        <button onclick="fetchCardData()" style="padding: 8px 16px; white-space: nowrap;">Search</button>
+        <span id="totalCards" style="margin-left: 15px; color: #666; white-space: nowrap;"></span>
+        <button id="exportButton" onclick="exportCardData()" class="export-button" style="margin-left: auto; white-space: nowrap;">
+            <i class="fas fa-file-export" style="margin-right: 5px;"></i> Export CSV
+        </button>
     </div>
 
 
@@ -590,23 +607,10 @@
                         if (starRange) {
                             const topRange = Math.floor(starRange.top_range);
                             const bottomRange = Math.floor(starRange.bottom_range);
-                            const midPoint = bottomRange + (topRange - bottomRange) / 2;
                             
                             if (adjustedSevenDayScore >= bottomRange && adjustedSevenDayScore <= topRange) {
-        
-                                // Create star circle indicator for the current star level
-                                const starIndicator = document.createElement('div');
-                                starIndicator.className = 'star-circle score-star-indicator';
-                                starIndicator.style.backgroundColor = getStarColor(row.stars);
-                                starIndicator.textContent = row.stars;
-                                
-                                // Create wrapper to hold score and indicator
-                                const scoreWrapper = document.createElement('div');
-                                scoreWrapper.className = 'score-wrapper';
-                                scoreWrapper.appendChild(sevenDayScore);
-                                scoreWrapper.appendChild(starIndicator);
-                                
-                                scoreContainer.appendChild(scoreWrapper);
+                                // Score matches current star level - no special styling needed
+                                scoreContainer.appendChild(sevenDayScore);
                             } else {
                                 // Score is outside range - find which star range it falls into
                                 const matchingRange = starRangesData.find(range => 
@@ -615,21 +619,52 @@
                                 );
                                 
                                 if (matchingRange) {
-                                    // Create star circle indicator
-                                    const starIndicator = document.createElement('div');
-                                    starIndicator.className = 'star-circle score-star-indicator';
-                                    starIndicator.style.backgroundColor = getStarColor(matchingRange.stars);
-                                    starIndicator.textContent = matchingRange.stars;
-                                    // Create wrapper to hold score and indicator
-                                    const scoreWrapper = document.createElement('div');
-                                    scoreWrapper.className = 'score-wrapper';
-                                    scoreWrapper.appendChild(sevenDayScore);
-                                    scoreWrapper.appendChild(starIndicator);
-                                    
-                                    scoreContainer.appendChild(scoreWrapper);
-                                } else {
-                                    scoreContainer.appendChild(sevenDayScore);
+                                    // Compare matching range stars with current card stars
+                                    if (matchingRange.stars > row.stars) {
+                                        // Calculate the star difference
+                                        const starDiff = matchingRange.stars - row.stars;
+                                        
+                                        if (starDiff === 1) {
+                                            // Subtle improvement (+1 star)
+                                            sevenDayScore.style.backgroundColor = '#4CAF50'; // Medium green with better contrast
+                                        } else {
+                                            // Significant improvement (+2 or more stars)
+                                            sevenDayScore.style.backgroundColor = '#006D2C'; // Dark green
+                                        }
+                                        
+                                        // Add an arrow indicator showing upward potential
+                                        const arrowIndicator = document.createElement('div');
+                                        arrowIndicator.className = 'star-transition';
+                                        arrowIndicator.innerHTML = `${row.stars} <span class="arrow">→</span> ${matchingRange.stars}`;
+                                        arrowIndicator.style.color = 'white';
+                                        arrowIndicator.style.fontWeight = 'bold';
+                                        arrowIndicator.style.backgroundColor = sevenDayScore.style.backgroundColor;
+                                        
+                                        sevenDayScore.appendChild(arrowIndicator);
+                                    } else if (matchingRange.stars < row.stars) {
+                                        // Calculate the star difference
+                                        const starDiff = row.stars - matchingRange.stars;
+                                        
+                                        if (starDiff === 1) {
+                                            // Subtle decline (-1 star)
+                                            sevenDayScore.style.backgroundColor = '#FF6B6B'; // Medium red that works with white text
+                                        } else {
+                                            // Significant decline (-2 or more stars)
+                                            sevenDayScore.style.backgroundColor = '#A50F15'; // Dark red
+                                        }
+                                        
+                                        // Add an arrow indicator showing downward performance
+                                        const arrowIndicator = document.createElement('div');
+                                        arrowIndicator.className = 'star-transition';
+                                        arrowIndicator.innerHTML = `${row.stars} <span class="arrow">→</span> ${matchingRange.stars}`;
+                                        arrowIndicator.style.color = 'white';
+                                        arrowIndicator.style.fontWeight = 'bold';
+                                        arrowIndicator.style.backgroundColor = sevenDayScore.style.backgroundColor;
+                                        
+                                        sevenDayScore.appendChild(arrowIndicator);
+                                    }
                                 }
+                                scoreContainer.appendChild(sevenDayScore);
                             }
                         } else {
                             scoreContainer.appendChild(sevenDayScore);
@@ -649,9 +684,6 @@
                             // Get raw score value
                             const dayScoreValue = Math.floor(score24h);
                             
-                            // Apply rarity-based adjustments for star range comparison
-                            let adjustedDayScore = dayScoreValue;
-                            
                             // Create two-line format with label on top and score below
                             const dayLabel = document.createElement('div');
                             dayLabel.className = 'score-label';
@@ -661,49 +693,17 @@
                             dayValue.className = 'score-value';
                             dayValue.textContent = dayScoreValue;
                             
+                            // Make text red if score is 200 or below, green if 800 or above
+                            if (dayScoreValue <= 200) {
+                                dayValue.style.color = 'red';
+                            } else if (dayScoreValue >= 800) {
+                                dayValue.style.color = 'green';
+                            }
+                            
                             dayScore.appendChild(dayLabel);
                             dayScore.appendChild(dayValue);
                             
-                            // Check if score is within star range and color accordingly
-                            if (starRange) {
-                                const topRange = Math.floor(starRange.top_range);
-                                const bottomRange = Math.floor(starRange.bottom_range);
-                                const midPoint = bottomRange + (topRange - bottomRange) / 2;
-                                
-                                if (adjustedDayScore >= bottomRange && adjustedDayScore <= topRange) {
-                            
-                                    // Create wrapper to hold score only
-                                    const scoreWrapper = document.createElement('div');
-                                    scoreWrapper.className = 'score-wrapper';
-                                    scoreWrapper.appendChild(dayScore);
-                                    
-                                    scoreContainer.appendChild(scoreWrapper);
-                                } else {
-                                    // Score is outside range - find which star range it falls into
-                                    const matchingRange = starRangesData.find(range => 
-                                        adjustedDayScore >= Math.floor(range.bottom_range) && 
-                                        adjustedDayScore <= Math.floor(range.top_range)
-                                    );
-                                    
-                                    if (matchingRange) {
-                                        // Create wrapper to hold score only
-                                        const scoreWrapper = document.createElement('div');
-                                        scoreWrapper.className = 'score-wrapper';
-                                        scoreWrapper.appendChild(dayScore);
-                                        
-                                        scoreContainer.appendChild(scoreWrapper);
-                                    } else {
-                                        scoreContainer.appendChild(dayScore);
-                                    }
-                                }
-                            } else {
-                                scoreContainer.appendChild(dayScore);
-                            }
-                            
-                            // Only add to container if we didn't add it in the conditional logic above
-                            if (!dayScore.parentNode) {
-                                scoreContainer.appendChild(dayScore);
-                            }
+                            scoreContainer.appendChild(dayScore);
                         }
                         
                         wrapper.appendChild(scoreContainer);
@@ -1006,6 +1006,56 @@
         function getHeroStat(heroId, statType) {
             const statData = heroStats.find(item => item.hero_id === heroId && item.stat_type === statType);
             return statData ? statData.fantasy_score : null;
+        }
+
+        // Add this new function to export card data
+        function exportCardData() {
+            if (!window.currentCardData || window.currentCardData.length === 0) {
+                alert('No card data available to export. Please search for cards first.');
+                return;
+            }
+            
+            // Create CSV header
+            let csvContent = "hero_id,handle,name,rarity,card_number,stars,score,score_24h\n";
+            
+            // Process each card and add to CSV
+            window.currentCardData.forEach(card => {
+                // Get 24h score from Supabase data if available
+                const score24h = getHeroStat(card.hero_id, 'gliding_24h') || '';
+                
+                // Map rarity number to text
+                const rarityText = getRarityLabel(card.rarity);
+                
+                // Create CSV row
+                const row = [
+                    card.hero_id,
+                    card.handle || '',
+                    rarityText,
+                    card.card_number,
+                    card.stars,
+                    Math.floor(card.card_weighted_score),
+                    score24h ? Math.floor(score24h) : ''
+                ].join(',');
+                
+                csvContent += row + "\n";
+            });
+            
+            // Create download link
+            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            
+            // Generate filename with current date
+            const date = new Date();
+            const dateStr = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            const address = document.getElementById('ownerSearch').value.trim().substring(0, 8); // First 8 chars of address
+            
+            link.setAttribute("download", `scout_cards_${address}_${dateStr}.csv`);
+            document.body.appendChild(link);
+            
+            // Trigger download and clean up
+            link.click();
+            document.body.removeChild(link);
         }
 
     </script>

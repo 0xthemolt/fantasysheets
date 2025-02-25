@@ -97,14 +97,24 @@
             margin-top: 5px;
         }
         .score-item {
-            padding: 5px;
-            background-color: rgba(255, 255, 255, 0.8);
+            margin-top: 2px;
+            padding: 3px;
+            background: #222222;
             border-radius: 4px;
             text-align: center;
             font-weight: bold;
-            color: #333;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 75%;
+            width: 75%;
+            margin-left: auto;
+            margin-right: auto;
             position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .score-item::after {
+            content: none;
         }
         .score-label {
             font-size: 10px;
@@ -463,26 +473,22 @@
                 .score-item {
                     margin-top: 2px;
                     padding: 3px;
-                    background-color: rgba(255, 255, 255, 0.8);
+                    background: #222222;
                     border-radius: 4px;
                     text-align: center;
                     font-weight: bold;
-                    color: #333;
-                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                    color: #fff;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
                     font-size: 75%;
                     width: 75%;
                     margin-left: auto;
                     margin-right: auto;
                     position: relative;
                     overflow: hidden;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
                 }
-                .score-item::before {
-                    content: "";
-                    position: absolute;
-                    top: -10px;
-                    left: -10px;
-                    right: -10px;
-                    bottom: -10px;
+                .score-item::after {
+                    content: none;
                 }
             `;
             document.head.appendChild(styleElement);
@@ -631,10 +637,10 @@
                                         
                                         if (starDiff === 1) {
                                             // Subtle improvement (+1 star)
-                                            sevenDayScore.style.backgroundColor = '#4CAF50'; // Medium green with better contrast
+                                            sevenDayScore.style.backgroundColor = 'rgba(0, 191, 255, 0.33)'; // Light blue with 67% opacity
                                         } else {
                                             // Significant improvement (+2 or more stars)
-                                            sevenDayScore.style.backgroundColor = '#006D2C'; // Dark green
+                                            sevenDayScore.style.backgroundColor = 'rgba(0, 109, 44, 0.33)'; // Dark green with 67% opacity
                                         }
                                         
                                         // Add an arrow indicator showing upward potential
@@ -652,10 +658,10 @@
                                         
                                         if (starDiff === 1) {
                                             // Subtle decline (-1 star)
-                                            sevenDayScore.style.backgroundColor = '#FF6B6B'; // Medium red that works with white text
+                                            sevenDayScore.style.backgroundColor = 'rgba(255, 152, 0, 0.33)'; // Orange with 67% opacity
                                         } else {
                                             // Significant decline (-2 or more stars)
-                                            sevenDayScore.style.backgroundColor = '#A50F15'; // Dark red
+                                            sevenDayScore.style.backgroundColor = 'rgba(165, 15, 21, 0.33)'; // Dark red with 67% opacity
                                         }
                                         
                                         // Add an arrow indicator showing downward performance
@@ -696,7 +702,7 @@
                             
                             const dayValue = document.createElement('div');
                             dayValue.className = 'score-value';
-                            dayValue.textContent = score24h !== null ? Math.floor(score24h) : 0;
+                            dayValue.textContent = dayScoreValue;
                             
                             // Make text red if score is 200 or below, green if 800 or above
                             if (dayScoreValue <= 200) {
@@ -1042,7 +1048,7 @@
                     card.card_number,
                     card.stars,
                     Math.floor(card.card_weighted_score),
-                    score24h !== null ? Math.floor(score24h) : 0
+                    score24h ? Math.floor(score24h) : ''
                 ].join(',');
                 
                 csvContent += row + "\n";

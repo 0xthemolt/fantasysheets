@@ -63,7 +63,7 @@
         .card-count {
             position: absolute;
             top: -5px;
-            left: -5px;
+            right: -5px;
             background-color: #ff4444;
             color: white;
             border-radius: 4px;
@@ -78,39 +78,6 @@
             margin-top: 4px;
             white-space: normal;
             line-height: 1.2;
-        }
-        .score-gauge {
-            margin: 2px 0;
-        }
-        .gauge-bar {
-            position: relative;
-            height: 12px;
-            background: rgba(51, 51, 51, 0.3);
-            border-radius: 2px;
-            margin: 2px 0;
-            overflow: hidden;
-        }
-        .gauge-range {
-            position: absolute;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.15);
-            top: 0;
-        }
-        .gauge-indicator {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #FF5F1F;  /* Neon orange */
-            border-radius: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 3px #FF5F1F;  /* Glow effect */
-            z-index: 1;
-        }
-        .gauge-value {
-            font-size: 8px;
-            color: white;
-            text-align: center;
         }
     </style>
 </head>
@@ -128,13 +95,6 @@
         <span id="totalCards" style="margin-left: 15px; color: #666;"></span>
     </div>
 
-    <div style="margin: 20px 0; display: flex; align-items: center; gap: 20px;">
-        <label class="toggle-switch" style="display: inline-flex; align-items: center; gap: 10px;">
-            <input type="checkbox" id="viewToggle" onchange="toggleView()">
-            <span style="font-weight: bold;">View:</span>
-            <span id="viewLabel">Cards by Stars</span>
-        </label>
-    </div>
 
     <div id="loading">Loading...</div>
     <div id="cardsByStars" style="display: none;">
@@ -196,7 +156,7 @@
             .card-count {
                 position: absolute;
                 top: -5px;
-                left: -5px;
+                right: -5px;
                 background-color: #ff4444;
                 color: white;
                 border-radius: 4px;
@@ -213,9 +173,6 @@
                 line-height: 1.2;
             }
         </style>
-    </div>
-    <div id="cardsByScore" style="display: none;">
-        <!-- New score-based grid will go here -->
     </div>
 
     <script>
@@ -248,9 +205,8 @@
         }
 
         // Helper functions
-        const extractHeroStars = (pictureUrl) => {
-            const match = pictureUrl.match(/(\d+)\.png$/);
-            return match ? parseInt(match[1]) : 0;
+        const extractHeroStars = (card) => {
+            return card.stars || 0;
         };
 
         const getStarColor = (number) => {
@@ -315,7 +271,7 @@
             const uniqueCards = Object.values(cardGroups);
 
             // Find all unique star values
-            const uniqueStars = [...new Set(uniqueCards.map(card => extractHeroStars(card.picture)))].sort((a, b) => b - a);
+            const uniqueStars = [...new Set(uniqueCards.map(card => extractHeroStars(card)))].sort((a, b) => b - a);
             
             // Create matrix structure
             const matrix = uniqueStars.map(stars => {
@@ -332,8 +288,9 @@
 
             // Populate the matrix with unique cards
             uniqueCards.forEach(card => {
-                const stars = extractHeroStars(card.picture);
+                const stars = extractHeroStars(card);
                 const rarity = getRarityLabel(card.rarity);
+                console.log(`Card Rarity: ${card.rarity}, Mapped Rarity: ${rarity}`); // Debugging line
                 const rowIndex = matrix.findIndex(row => row.stars === stars);
                 if (rowIndex !== -1) {
                     matrix[rowIndex].rarities[rarity].push(card);
@@ -431,7 +388,7 @@
                     cell.className = 'card-container';
                     
                     // Calculate total cards in this rarity+star combination
-                    const totalCards = row.rarities[rarity].reduce((sum, card) => sum + card.count, 0);
+                    const totalCards = row.rarities[rarity].reduce((sum, card) => sum + card.card_number, 0);
                     
                     row.rarities[rarity].forEach(card => {
                         const wrapper = document.createElement('div');
@@ -439,65 +396,15 @@
 
                         const countBadge = document.createElement('div');
                         countBadge.className = 'card-count';
-                        countBadge.textContent = card.count;
+                        countBadge.textContent = card.card_number;
                         wrapper.appendChild(countBadge);
 
                         const img = document.createElement('img');
+                        card.picture = `${card.picture}_${card.stars}.png`; // Update picture URL to include stars
                         img.src = card.picture;
                         img.className = 'card-image';
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
-
-                        // Add the score difference
-                        const heroStats = getHeroStats(card.hero_id);
-                        if (heroStats) {
-                            console.log('Hero Stats:', heroStats); // Debug log
-                            
-                            const scoreDiff = document.createElement('div');
-                            scoreDiff.className = 'score-diff';
-                            
-                            const ranges = findScoreRanges();
-                            
-                            // 7D Fantasy Score
-                            const sevenDayLabel = document.createElement('div');
-                            sevenDayLabel.style.fontSize = '8px';
-                            sevenDayLabel.style.color = 'white';
-                            sevenDayLabel.textContent = '7D';
-                            scoreDiff.appendChild(sevenDayLabel);
-                            
-                            // Debug log for 7D score
-                            console.log('7D Score:', heroStats.seven_day_fantasy_score);
-                            
-                            // Always create gauge even if value is 0
-                            const sevenDayGauge = createScoreGauge(
-                                heroStats.seven_day_fantasy_score || 0,
-                                ranges.sevenDayRange.min,
-                                ranges.sevenDayRange.max,
-                                row.stars
-                            );
-                            scoreDiff.appendChild(sevenDayGauge);
-                            
-                            // L3MT Median
-                            const l3mtLabel = document.createElement('div');
-                            l3mtLabel.style.fontSize = '8px';
-                            l3mtLabel.style.color = 'white';
-                            l3mtLabel.textContent = 'L3MT';
-                            scoreDiff.appendChild(l3mtLabel);
-                            
-                            // Debug log for L3MT score
-                            console.log('L3MT Score:', heroStats.l3_main_median);
-                            
-                            // Always create gauge even if value is 0
-                            const l3mtGauge = createScoreGauge(
-                                heroStats.l3_main_median || 0,
-                                ranges.l3mtRange.min,
-                                ranges.l3mtRange.max,
-                                row.stars
-                            );
-                            scoreDiff.appendChild(l3mtGauge);
-                            
-                            wrapper.appendChild(scoreDiff);
-                        }
 
                         cell.appendChild(wrapper);
                     });
@@ -522,7 +429,7 @@
         async function fetchAllCardData(ownerAddress) {
             const BATCH_SIZE = 50;
             let allCards = [];
-            let currentPage = 1;
+            let currentPage = 0;
             
             // Get first batch and total count
             const firstResponse = await fetch(
@@ -541,11 +448,14 @@
             const firstData = await firstResponse.json();
             
             // Display total cards count
-            const totalCards = firstData.meta?.total || 0;
+            const totalCards = firstData.data.reduce((sum, card) => sum + card.card_number, 0);
             document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
             
             // Add first batch to results
-            allCards = [...(firstData.data || [])];
+            if (firstData.data) {
+                allCards = [...firstData.data];
+                console.log(`Added ${firstData.data.length} cards from page 1`);
+            }
             
             // Fetch remaining batches using lastPage from metadata
             const lastPage = firstData.meta?.lastPage || 1;
@@ -566,44 +476,14 @@
                 );
                 const data = await response.json();
                 
-                // Update picture field to make it valid
-                data.data.forEach(card => {
-                    // Ensure stars is available and valid
-                    if (card.stars) {
-                        card.picture = `${card.picture}_${card.stars}.png`; // Concatenate to make the URL valid
-                    }
-                });
-
-                allCards = [...allCards, ...(data.data || [])];
+                if (data.data && data.data.length > 0) {
+                    allCards = [...allCards, ...data.data];
+                    console.log(`Added ${data.data.length} cards from page ${currentPage}`);
+                }
             }
             
+            console.log(`Total cards accumulated: ${allCards.length}`);
             return allCards;
-        }
-
-        function toggleView() {
-            const toggle = document.getElementById('viewToggle');
-            const starView = document.getElementById('cardsByStars');
-            const scoreView = document.getElementById('cardsByScore');
-            const viewLabel = document.getElementById('viewLabel');
-
-            if (toggle.checked) {
-                viewLabel.textContent = 'Cards by Score';
-                starView.style.display = 'none';
-                scoreView.style.display = 'block';
-                renderScoreView();
-            } else {
-                viewLabel.textContent = 'Cards by Stars';
-                starView.style.display = 'block';
-                scoreView.style.display = 'none';
-            }
-        }
-
-        function renderScoreView() {
-            const scoreView = document.getElementById('cardsByScore');
-            const matrix = organizeCardsByScore(window.currentCardData); // Store card data globally
-            const matrixElement = renderScoreMatrix(matrix);
-            scoreView.innerHTML = '';
-            scoreView.appendChild(matrixElement);
         }
 
         function organizeCardsByScore(data) {
@@ -701,65 +581,15 @@
 
                         const countBadge = document.createElement('div');
                         countBadge.className = 'card-count';
-                        countBadge.textContent = card.count;
+                        countBadge.textContent = card.card_number;
                         wrapper.appendChild(countBadge);
 
                         const img = document.createElement('img');
+                        console.log('Image URL:', card.picture); // Debug print the full URL
                         img.src = card.picture;
                         img.className = 'card-image';
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
-
-                        // Add the score difference
-                        const heroStats = getHeroStats(card.hero_id);
-                        if (heroStats) {
-                            console.log('Hero Stats:', heroStats); // Debug log
-                            
-                            const scoreDiff = document.createElement('div');
-                            scoreDiff.className = 'score-diff';
-                            
-                            const ranges = findScoreRanges();
-                            
-                            // 7D Fantasy Score
-                            const sevenDayLabel = document.createElement('div');
-                            sevenDayLabel.style.fontSize = '8px';
-                            sevenDayLabel.style.color = 'white';
-                            sevenDayLabel.textContent = '7D';
-                            scoreDiff.appendChild(sevenDayLabel);
-                            
-                            // Debug log for 7D score
-                            console.log('7D Score:', heroStats.seven_day_fantasy_score);
-                            
-                            // Always create gauge even if value is 0
-                            const sevenDayGauge = createScoreGauge(
-                                heroStats.seven_day_fantasy_score || 0,
-                                ranges.sevenDayRange.min,
-                                ranges.sevenDayRange.max,
-                                row.stars
-                            );
-                            scoreDiff.appendChild(sevenDayGauge);
-                            
-                            // L3MT Median
-                            const l3mtLabel = document.createElement('div');
-                            l3mtLabel.style.fontSize = '8px';
-                            l3mtLabel.style.color = 'white';
-                            l3mtLabel.textContent = 'L3MT';
-                            scoreDiff.appendChild(l3mtLabel);
-                            
-                            // Debug log for L3MT score
-                            console.log('L3MT Score:', heroStats.l3_main_median);
-                            
-                            // Always create gauge even if value is 0
-                            const l3mtGauge = createScoreGauge(
-                                heroStats.l3_main_median || 0,
-                                ranges.l3mtRange.min,
-                                ranges.l3mtRange.max,
-                                row.stars
-                            );
-                            scoreDiff.appendChild(l3mtGauge);
-                            
-                            wrapper.appendChild(scoreDiff);
-                        }
 
                         cell.appendChild(wrapper);
                     });
@@ -779,7 +609,6 @@
                 const ownerAddress = document.getElementById('ownerSearch').value.trim();
                 const loadingDiv = document.getElementById('loading');
                 const starView = document.getElementById('cardsByStars');
-                const scoreView = document.getElementById('cardsByScore');
                 
                 if (!heroMetadata || !heroesData) {
                     throw new Error('Hero data not loaded yet');
@@ -787,7 +616,6 @@
                 
                 loadingDiv.style.display = 'block';
                 starView.style.display = 'none';
-                scoreView.style.display = 'none';
                 
                 // Remove the old headers setup and just call fetchAllCardData directly
                 const allCards = await fetchAllCardData(ownerAddress);
@@ -797,17 +625,12 @@
                 loadingDiv.style.display = 'none';
                 
                 if (allCards.length > 0) {
-                    const viewToggle = document.getElementById('viewToggle');
-                    if (viewToggle.checked) {
-                        scoreView.style.display = 'block';
-                        renderScoreView();
-                    } else {
-                        starView.style.display = 'block';
-                        const matrix = organizeCardsIntoMatrix(allCards);
-                        const matrixElement = renderMatrix(matrix);
-                        starView.innerHTML = '';
-                        starView.appendChild(matrixElement);
-                    }
+                    starView.style.display = 'block';
+                    const matrix = organizeCardsIntoMatrix(allCards);
+                    const matrixElement = renderMatrix(matrix);
+                    starView.innerHTML = '';
+                    starView.appendChild(matrixElement);
+                    // }
                 } else {
                     loadingDiv.textContent = 'No cards found for this address';
                     loadingDiv.style.display = 'block';
@@ -859,48 +682,6 @@
             };
         }
 
-        function createScoreGauge(value, minValue, maxValue, stars) {
-            const gauge = document.createElement('div');
-            gauge.className = 'score-gauge';
-            
-            const gaugeBar = document.createElement('div');
-            gaugeBar.className = 'gauge-bar';
-            
-            // Get star metadata for range
-            const starMetadata = heroMetadata.find(meta => meta.stars === stars);
-            if (starMetadata) {
-                // Create range fill
-                const rangeElement = document.createElement('div');
-                rangeElement.className = 'gauge-range';
-                
-                // Calculate positions as percentages of the max value (1000)
-                const startPercent = (starMetadata.bottom_range / maxValue) * 100;
-                const endPercent = (starMetadata.top_range / maxValue) * 100;
-                const width = endPercent - startPercent;
-                
-                rangeElement.style.left = `${startPercent}%`;
-                rangeElement.style.width = `${width}%`;
-                gaugeBar.appendChild(rangeElement);
-            }
-            
-            // Calculate position percentage for the indicator
-            const percentage = value / maxValue;
-            
-            // Add the orange dot indicator
-            const indicator = document.createElement('div');
-            indicator.className = 'gauge-indicator';
-            indicator.style.left = `${percentage * 100}%`;
-            gaugeBar.appendChild(indicator);
-            
-            const valueDisplay = document.createElement('div');
-            valueDisplay.className = 'gauge-value';
-            valueDisplay.textContent = Math.round(value);
-            
-            gauge.appendChild(gaugeBar);
-            gauge.appendChild(valueDisplay);
-            
-            return gauge;
-        }
     </script>
 </body>
 </html>

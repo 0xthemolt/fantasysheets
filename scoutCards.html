@@ -104,16 +104,6 @@
             left: -10px;
             right: -10px;
             bottom: -10px;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shine 2s infinite;
-        }
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%);
-            }
-            100% {
-                transform: translateX(100%);
-            }
         }
         .score-wrapper {
             display: flex;
@@ -133,6 +123,15 @@
         }
         .score-item {
             flex: 1;
+        }
+        .score-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .score-value {
+            font-size: 12px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -462,8 +461,6 @@
                     left: -10px;
                     right: -10px;
                     bottom: -10px;
-                    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-                    animation: shine 2s infinite;
                 }
             `;
             document.head.appendChild(styleElement);
@@ -563,8 +560,31 @@
                         // Add 7D score
                         const sevenDayScore = document.createElement('div');
                         sevenDayScore.className = 'score-item';
-                        const sevenDayScoreValue = Math.floor(card.card_weighted_score);
-                        sevenDayScore.textContent = `7D: ${sevenDayScoreValue}`;
+                        
+                        // Get raw score value
+                        let sevenDayScoreValue = Math.floor(card.card_weighted_score);
+                        
+                        // Apply rarity-based adjustments for star range comparison
+                        let adjustedSevenDayScore = sevenDayScoreValue;
+                        if (rarity === 'Legendary') {
+                            adjustedSevenDayScore = sevenDayScoreValue / 2.5;
+                        } else if (rarity === 'Epic') {
+                            adjustedSevenDayScore = sevenDayScoreValue / 2;
+                        } else if (rarity === 'Rare') {
+                            adjustedSevenDayScore = sevenDayScoreValue / 1.5;
+                        }
+                        
+                        // Create two-line format with label on top and score below
+                        const sevenDayLabel = document.createElement('div');
+                        sevenDayLabel.className = 'score-label';
+                        sevenDayLabel.textContent = '7D';
+                        
+                        const sevenDayValue = document.createElement('div');
+                        sevenDayValue.className = 'score-value';
+                        sevenDayValue.textContent = sevenDayScoreValue;
+                        
+                        sevenDayScore.appendChild(sevenDayLabel);
+                        sevenDayScore.appendChild(sevenDayValue);
                         
                         // Check if score is within star range and color accordingly
                         if (starRange) {
@@ -572,18 +592,26 @@
                             const bottomRange = Math.floor(starRange.bottom_range);
                             const midPoint = bottomRange + (topRange - bottomRange) / 2;
                             
-                            if (sevenDayScoreValue >= bottomRange && sevenDayScoreValue <= topRange) {
-                                // Score is within range - color based on position in range
-                                if (sevenDayScoreValue >= midPoint) {
-                                    sevenDayScore.style.backgroundColor = '#4CAF50'; // Darker green for upper 50%
-                                } else {
-                                    sevenDayScore.style.backgroundColor = '#8BC34A'; // Lighter green for lower 50%
-                                }
+                            if (adjustedSevenDayScore >= bottomRange && adjustedSevenDayScore <= topRange) {
+        
+                                // Create star circle indicator for the current star level
+                                const starIndicator = document.createElement('div');
+                                starIndicator.className = 'star-circle score-star-indicator';
+                                starIndicator.style.backgroundColor = getStarColor(row.stars);
+                                starIndicator.textContent = row.stars;
+                                
+                                // Create wrapper to hold score and indicator
+                                const scoreWrapper = document.createElement('div');
+                                scoreWrapper.className = 'score-wrapper';
+                                scoreWrapper.appendChild(sevenDayScore);
+                                scoreWrapper.appendChild(starIndicator);
+                                
+                                scoreContainer.appendChild(scoreWrapper);
                             } else {
                                 // Score is outside range - find which star range it falls into
                                 const matchingRange = starRangesData.find(range => 
-                                    sevenDayScoreValue >= Math.floor(range.bottom_range) && 
-                                    sevenDayScoreValue <= Math.floor(range.top_range)
+                                    adjustedSevenDayScore >= Math.floor(range.bottom_range) && 
+                                    adjustedSevenDayScore <= Math.floor(range.top_range)
                                 );
                                 
                                 if (matchingRange) {
@@ -592,7 +620,6 @@
                                     starIndicator.className = 'star-circle score-star-indicator';
                                     starIndicator.style.backgroundColor = getStarColor(matchingRange.stars);
                                     starIndicator.textContent = matchingRange.stars;
-                                    
                                     // Create wrapper to hold score and indicator
                                     const scoreWrapper = document.createElement('div');
                                     scoreWrapper.className = 'score-wrapper';
@@ -618,8 +645,24 @@
                         if (score24h !== null) {
                             const dayScore = document.createElement('div');
                             dayScore.className = 'score-item';
+                            
+                            // Get raw score value
                             const dayScoreValue = Math.floor(score24h);
-                            dayScore.textContent = `24H: ${dayScoreValue}`;
+                            
+                            // Apply rarity-based adjustments for star range comparison
+                            let adjustedDayScore = dayScoreValue;
+                            
+                            // Create two-line format with label on top and score below
+                            const dayLabel = document.createElement('div');
+                            dayLabel.className = 'score-label';
+                            dayLabel.textContent = '24H';
+                            
+                            const dayValue = document.createElement('div');
+                            dayValue.className = 'score-value';
+                            dayValue.textContent = dayScoreValue;
+                            
+                            dayScore.appendChild(dayLabel);
+                            dayScore.appendChild(dayValue);
                             
                             // Check if score is within star range and color accordingly
                             if (starRange) {
@@ -627,32 +670,26 @@
                                 const bottomRange = Math.floor(starRange.bottom_range);
                                 const midPoint = bottomRange + (topRange - bottomRange) / 2;
                                 
-                                if (dayScoreValue >= bottomRange && dayScoreValue <= topRange) {
-                                    // Score is within range - color based on position in range
-                                    if (dayScoreValue >= midPoint) {
-                                        dayScore.style.backgroundColor = '#4CAF50'; // Darker green for upper 50%
-                                    } else {
-                                        dayScore.style.backgroundColor = '#8BC34A'; // Lighter green for lower 50%
-                                    }
+                                if (adjustedDayScore >= bottomRange && adjustedDayScore <= topRange) {
+                            
+                                    // Create wrapper to hold score only
+                                    const scoreWrapper = document.createElement('div');
+                                    scoreWrapper.className = 'score-wrapper';
+                                    scoreWrapper.appendChild(dayScore);
+                                    
+                                    scoreContainer.appendChild(scoreWrapper);
                                 } else {
                                     // Score is outside range - find which star range it falls into
                                     const matchingRange = starRangesData.find(range => 
-                                        dayScoreValue >= Math.floor(range.bottom_range) && 
-                                        dayScoreValue <= Math.floor(range.top_range)
+                                        adjustedDayScore >= Math.floor(range.bottom_range) && 
+                                        adjustedDayScore <= Math.floor(range.top_range)
                                     );
                                     
                                     if (matchingRange) {
-                                        // Create star circle indicator
-                                        const starIndicator = document.createElement('div');
-                                        starIndicator.className = 'star-circle score-star-indicator';
-                                        starIndicator.style.backgroundColor = getStarColor(matchingRange.stars);
-                                        starIndicator.textContent = matchingRange.stars;
-                                        
-                                        // Create wrapper to hold score and indicator
+                                        // Create wrapper to hold score only
                                         const scoreWrapper = document.createElement('div');
                                         scoreWrapper.className = 'score-wrapper';
                                         scoreWrapper.appendChild(dayScore);
-                                        scoreWrapper.appendChild(starIndicator);
                                         
                                         scoreContainer.appendChild(scoreWrapper);
                                     } else {

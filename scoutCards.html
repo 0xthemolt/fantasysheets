@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="./styles.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scout Cards</title>
+    <!-- Add Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .grid-container {
             margin: 20px;
@@ -78,6 +80,40 @@
             margin-top: 4px;
             white-space: normal;
             line-height: 1.2;
+        }
+        .score-container {
+            margin-top: 5px;
+            padding: 3px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 75%;
+            width: 75%;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .score-container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 2s infinite;
+        }
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
         }
     </style>
 </head>
@@ -179,6 +215,33 @@
         // Add these global variables at the top of the script
         let heroMetadata = [];
         let heroesData = [];
+        let starRangesData = []; // New variable to store star ranges from Supabase
+
+        // Add this function to fetch star ranges from Supabase
+        async function fetchStarRangesFromSupabase() {
+            try {
+                console.log('Fetching star ranges from Supabase...');
+                const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+                const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                const { data, error } = await supabase
+                    .from('master.star_ranges')
+                    .select('*');
+                
+                if (error) {
+                    throw new Error(`Supabase error: ${error.message}`);
+                }
+                
+                starRangesData = data || [];
+                console.log(`Loaded ${starRangesData.length} star ranges from Supabase`);
+                
+                return starRangesData;
+            } catch (error) {
+                console.error('Error fetching star ranges:', error);
+                return [];
+            }
+        }
 
         // Add this function to load the JSON data
         async function loadHeroData() {
@@ -371,11 +434,20 @@
                 rangeInfo.style.marginTop = '4px';
                 rangeInfo.style.color = '#666';
 
-                const starMetadata = heroMetadata.find(meta => meta.stars === row.stars);
-                if (starMetadata) {
-                    const topRange = Math.floor(starMetadata.top_range);
-                    const bottomRange = Math.floor(starMetadata.bottom_range);
+                // Use Supabase star ranges data if available
+                const starRange = starRangesData.find(range => range.stars === row.stars);
+                if (starRange) {
+                    const topRange = Math.floor(starRange.top_range);
+                    const bottomRange = Math.floor(starRange.bottom_range);
                     rangeInfo.textContent = `Range: ${topRange} - ${bottomRange}`;
+                } else {
+                    // Fallback to local metadata if Supabase data isn't available
+                    const starMetadata = heroMetadata.find(meta => meta.stars === row.stars);
+                    if (starMetadata) {
+                        const topRange = Math.floor(starMetadata.top_range);
+                        const bottomRange = Math.floor(starMetadata.bottom_range);
+                        rangeInfo.textContent = `Range: ${topRange} - ${bottomRange}`;
+                    }
                 }
 
                 starLabel.appendChild(starCircle);
@@ -405,6 +477,12 @@
                         img.className = 'card-image';
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
+
+                        // New container for card_weighted_score
+                        const scoreContainer = document.createElement('div');
+                        scoreContainer.className = 'score-container'; // Add a class for styling
+                        scoreContainer.textContent = `7D: ${Math.floor(card.card_weighted_score)}`; // Add "7D:" label before the score
+                        wrapper.appendChild(scoreContainer); // Append the score container to the wrapper
 
                         cell.appendChild(wrapper);
                     });
@@ -447,10 +525,6 @@
             );
             const firstData = await firstResponse.json();
             
-            // Display total cards count
-            const totalCards = firstData.data.reduce((sum, card) => sum + card.card_number, 0);
-            document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
-            
             // Add first batch to results
             if (firstData.data) {
                 allCards = [...firstData.data];
@@ -481,6 +555,10 @@
                     console.log(`Added ${data.data.length} cards from page ${currentPage}`);
                 }
             }
+
+            // Display total cards count after fetching all pages
+            const totalCards = allCards.reduce((sum, card) => sum + card.card_number, 0); // Updated to sum card_number values from allCards
+            document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
             
             console.log(`Total cards accumulated: ${allCards.length}`);
             return allCards;
@@ -591,6 +669,12 @@
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
 
+                        // New container for card_weighted_score
+                        const scoreContainer = document.createElement('div');
+                        scoreContainer.className = 'score-container'; // Add a class for styling
+                        scoreContainer.textContent = `7D: ${Math.floor(card.card_weighted_score)}`; // Add "7D:" label before the score
+                        wrapper.appendChild(scoreContainer); // Append the score container to the wrapper
+
                         cell.appendChild(wrapper);
                     });
 
@@ -649,9 +733,20 @@
         });
 
         // Update the initial load section
-        // Remove the Promise.all and just call loadHeroData
         document.addEventListener('DOMContentLoaded', function() {
-            loadHeroData();
+            // Load both data sources
+            Promise.all([
+                loadHeroData(),
+                fetchStarRangesFromSupabase()
+            ])
+            .then(() => {
+                console.log('All data loaded successfully');
+                fetchCardData();
+            })
+            .catch(error => {
+                console.error('Error loading initial data:', error);
+                document.getElementById('loading').textContent = 'Error loading initial data: ' + error.message;
+            });
         });
 
         const getRarityColor = (rarity) => {

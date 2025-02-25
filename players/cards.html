@@ -155,49 +155,110 @@
         .export-button:hover {
             background: rgba(255, 255, 255, 0.1);
         }
+        .profile-picture-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, rgba(40, 40, 40, 0.6), rgba(20, 20, 20, 0.8));
+            transition: all 0.3s ease;
+        }
+        
+        .profile-picture-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        #playerProfilePicture {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-picture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+            pointer-events: none;
+        }
+        
+        #playerProfilePicture:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
-    <div class="title-container"></div>
-    <div id="searchControls" style="position: absolute; top: 20px; left: 20px; margin: 20px 0; display: flex; align-items: center; flex-wrap: nowrap; justify-content: flex-start;">
-        <h1 class="title-header" style="margin-right: 10px;">
+    <div id="searchControls" style="position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; width: auto; max-width: none;">
+        <h1 class="title-header">
             <a href="/index.html">
                 <i class="fas fa-home" style="font-size: .6em; color: #fff;"></i>
             </a>
         </h1>
-        <div style="position: relative; flex: 1; max-width: 400px; margin-right: 10px;" id="ownerSearchContainer">
-            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #666;" onclick="fetchCardData()"></i>
-            <input 
-                type="text" 
-                id="ownerSearch" 
-                placeholder="Enter owner address"
-                style="padding: 10px 10px 10px 35px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
-                value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
-                onkeypress="if(event.key === 'Enter') fetchCardData()"
-            >
+        
+        <div style="display: flex; align-items: center; width: 100%;">
+            <div id="searchIconContainer" style="cursor: pointer; margin-right: 10px;">
+                <i id="searchIcon" class="fas fa-search" style="color: #fff; font-size: 16px;"></i>
+            </div>
+            <div id="ownerSearchContainer" style="position: relative; flex: 1; max-width: 0; overflow: hidden; transition: max-width 0.3s ease, opacity 0.3s ease; opacity: 0;">
+                <input 
+                    type="text" 
+                    id="ownerSearch" 
+                    placeholder="Enter owner address"
+                    style="padding: 6px 6px 6px 7px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 8.4px; transition: all 0.2s ease;"
+                    value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
+                >
+                <button id="searchButton" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer;">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
-        <div id="cardCounts" style="margin-right: 10px; color: #fff; font-size: 14px;">
-            <span id="totalCards">(Total Cards: 0)</span>
-            <div style="display: flex; gap: 10px; margin-top: 5px;">
+        
+        <div id="exportButtonContainer" style="position: relative;">
+            <button id="exportButton" onclick="exportCardData()" class="export-button" style="background: transparent; border: none; color: #fff; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <i class="fas fa-file-export" style="font-size: 16px;"></i>
+            </button>
+            <div id="exportTooltip" style="position: absolute; left: 30px; top: 0; background-color: rgba(0,0,0,0.7); color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; opacity: 0; transition: opacity 0.2s ease; pointer-events: none;">
+                Export CSV
+            </div>
+        </div>
+    </div>
+
+    <div id="playerContainer" style="display: none; text-align: center; margin: 20px;">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+            <div class="profile-picture-container">
+                <img id="playerProfilePicture" src="" alt="Profile Picture">
+                <div class="profile-picture-overlay"></div>
+            </div>
+            <div style="margin-left: 15px; text-align: left;">
+                <h2 id="playerName" style="color: #fff; margin: 0 5px 5px 0; display: inline-block;"></h2>
+                <a id="playerTwitterLink" href="#" target="_blank">
+                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div id="cardCounts" style="margin-top: 15px; color: #fff; font-size: 14px;">
+            <span id="totalCards">Total Cards: 0</span>
+            <div style="display: flex; gap: 10px; margin-top: 5px; justify-content: center;">
                 <span style="color: #7F76F5;">Legendary: <span id="legendaryCount">0</span></span>
                 <span style="color: #CD2FD7;">Epic: <span id="epicCount">0</span></span>
                 <span style="color: #02E0F4;">Rare: <span id="rareCount">0</span></span>
                 <span style="color: #48EE4B;">Common: <span id="commonCount">0</span></span>
             </div>
         </div>
-        <button id="exportButton" onclick="exportCardData()" class="export-button" style="margin-left: auto; white-space: nowrap;">
-            <i class="fas fa-file-export" style="margin-right: 5px;"></i> Export CSV
-        </button>
     </div>
 
-    <div id="playerContainer" style="display: none; text-align: center; margin: 20px;">
-        <h2 id="playerName" style="color: #fff;"></h2>
-        <h3 id="playerHandle" style="color: #aaa;"></h3>
-        <img id="playerProfilePicture" src="" alt="Profile Picture" style="border-radius: 50%; width: 100px; height: 100px; margin-top: 10px;">
-    </div>
-
-    <div id="filterControl" style="margin: 20px 0; padding: 15px; background-color: #292828; border-radius: 8px;">
-        <div id = "rarity-filter-container">
+    <div id="filterControl" style="margin: 20px 0; padding: 15px; background-color: #292828; border-radius: 8px; display: none;">
+        <div id="rarity-filter-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <h3 style="margin: 0; color: #fff; font-size: 0.85rem;">Filter by Rarity</h3>
                 <button id="clearFilters" onclick="clearRarityFilters()" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">
@@ -849,7 +910,7 @@
             const totalCards = rarityCounts.Legendary + rarityCounts.Epic + rarityCounts.Rare + rarityCounts.Common;
 
             // Update total cards display
-            document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
+            document.getElementById('totalCards').textContent = `Total Cards: ${totalCards}`;
 
             // Update counts for each rarity in the UI
             document.getElementById('legendaryCount').textContent = rarityCounts.Legendary;
@@ -987,20 +1048,25 @@
             return container;
         }
 
-        // Update fetchCardData to include error handling
+        // Add a flag to track if we're already fetching data
+        let isFetchingData = false;
+
+        // Update fetchCardData to prevent duplicate fetches
         async function fetchCardData() {
+            // If already fetching, don't start another fetch
+            if (isFetchingData) return;
+            
             try {
+                isFetchingData = true;
                 const ownerAddress = document.getElementById('ownerSearch').value.trim();
                 const loadingDiv = document.getElementById('loading');
                 const starView = document.getElementById('cardsByStars');
-                
-                if (!heroMetadata || !heroesData) {
-                    throw new Error('Hero data not loaded yet');
-                }
-                
+                const filterControl = document.getElementById('filterControl'); // Get the filterControl div
+
                 loadingDiv.style.display = 'block';
                 starView.style.display = 'none';
-                
+                filterControl.style.display = 'none'; // Hide filterControl while fetching data
+
                 // Fetch player data
                 const playerData = await fetchPlayerData(ownerAddress);
                 
@@ -1013,6 +1079,7 @@
                 
                 if (allCards.length > 0) {
                     starView.style.display = 'block';
+                    filterControl.style.display = 'block'; // Show filterControl after data is fetched
                     const matrix = organizeCardsIntoMatrix(allCards);
                     const matrixElement = renderMatrix(matrix);
                     starView.innerHTML = '';
@@ -1024,6 +1091,8 @@
             } catch (error) {
                 console.error('Error in fetchCardData:', error);
                 document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+            } finally {
+                isFetchingData = false;
             }
         }
 
@@ -1242,7 +1311,16 @@
                 if (playerData && playerData.length > 0) {
                     const player = playerData[0]; // Assuming we only need the first player
                     document.getElementById('playerName').textContent = player.name;
-                    document.getElementById('playerHandle').textContent = player.handle;
+                    
+                    // Set Twitter link
+                    const twitterLink = document.getElementById('playerTwitterLink');
+                    if (player.handle) {
+                        twitterLink.href = `https://x.com/${player.handle}`;
+                        twitterLink.style.display = 'inline';
+                    } else {
+                        twitterLink.style.display = 'none';
+                    }
+                    
                     document.getElementById('playerProfilePicture').src = player.profile_picture.replace('_normal.jpg', '.jpg');
                     document.getElementById('playerContainer').style.display = 'block'; // Show the player container
                 }
@@ -1253,6 +1331,81 @@
                 return null; // Return null in case of error
             }
         }
+
+        // Add this code near the beginning of your script section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup search box toggle functionality
+            const searchIconContainer = document.getElementById('searchIconContainer');
+            const searchIcon = document.getElementById('searchIcon');
+            const ownerSearchContainer = document.getElementById('ownerSearchContainer');
+            const ownerSearch = document.getElementById('ownerSearch');
+            const searchButton = document.getElementById('searchButton');
+            
+            let searchVisible = false;
+            
+            // Function to toggle search visibility
+            function toggleSearch() {
+                searchVisible = !searchVisible;
+                
+                if (searchVisible) {
+                    // Show search box with increased width
+                    ownerSearchContainer.style.maxWidth = '250px';
+                    ownerSearchContainer.style.width = '250px'; // Add explicit width
+                    ownerSearchContainer.style.marginRight = '10px';
+                    ownerSearchContainer.style.opacity = '1';
+                    setTimeout(() => ownerSearch.focus(), 300); // Focus after animation
+                } else {
+                    // Hide search box
+                    ownerSearchContainer.style.maxWidth = '0';
+                    ownerSearchContainer.style.width = '0'; // Reset explicit width
+                    ownerSearchContainer.style.marginRight = '0';
+                    ownerSearchContainer.style.opacity = '0';
+                    
+                    // Only fetch if this was triggered by a user action (not initial load)
+                    if (ownerSearch.value.trim() && event && event.type) {
+                        fetchCardData();
+                    }
+                }
+            }
+            
+            // Click on search icon to show search box
+            searchIconContainer.addEventListener('click', toggleSearch);
+            
+            // Click on search button to hide search box and trigger search
+            searchButton.addEventListener('click', function() {
+                toggleSearch();
+                fetchCardData();
+            });
+            
+            // Press Enter to hide search box and trigger search
+            ownerSearch.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    toggleSearch();
+                    fetchCardData();
+                }
+            });
+            
+            // Other existing DOMContentLoaded code...
+        });
+
+        // Add this code to your existing DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+            
+            // Add hover effect for export button tooltip
+            const exportButton = document.getElementById('exportButton');
+            const exportTooltip = document.getElementById('exportTooltip');
+            
+            exportButton.addEventListener('mouseenter', function() {
+                exportTooltip.style.opacity = '1';
+            });
+            
+            exportButton.addEventListener('mouseleave', function() {
+                exportTooltip.style.opacity = '0';
+            });
+            
+            // ... existing code ...
+        });
 
     </script>
 </body>

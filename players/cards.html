@@ -696,7 +696,7 @@
                             
                             const dayValue = document.createElement('div');
                             dayValue.className = 'score-value';
-                            dayValue.textContent = dayScoreValue;
+                            dayValue.textContent = score24h !== null ? Math.floor(score24h) : 0;
                             
                             // Make text red if score is 200 or below, green if 800 or above
                             if (dayScoreValue <= 200) {
@@ -1021,7 +1021,7 @@
             }
             
             // Create CSV header
-            let csvContent = "hero_id,handle,name,rarity,card_number,stars,score,score_24h\n";
+            let csvContent = "hero_id,handle,rarity,card_number,stars,score,score_24h\n";
             
             // Process each card and add to CSV
             window.currentCardData.forEach(card => {
@@ -1042,7 +1042,7 @@
                     card.card_number,
                     card.stars,
                     Math.floor(card.card_weighted_score),
-                    score24h ? Math.floor(score24h) : ''
+                    score24h !== null ? Math.floor(score24h) : 0
                 ].join(',');
                 
                 csvContent += row + "\n";

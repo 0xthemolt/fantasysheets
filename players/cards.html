@@ -159,29 +159,41 @@
 </head>
 <body>
     <div class="title-container"></div>
-        <h1 class="title-header">
-            <a href="/index.html" class="home-link">
-                <i class="fas fa-home"></i>
+    <div id="searchControls" style="position: absolute; top: 20px; left: 20px; margin: 20px 0; display: flex; align-items: center; flex-wrap: nowrap; justify-content: flex-start;">
+        <h1 class="title-header" style="margin-right: 10px;">
+            <a href="/index.html">
+                <i class="fas fa-home" style="font-size: .6em; color: #fff;"></i>
             </a>
-            Player Cards
         </h1>
-    </div>
-    <div id="searchControls" style="margin: 20px 0; display: flex; align-items: center; flex-wrap: nowrap;">
-        <div style="position: relative; flex: 1; max-width: 400px; margin-right: 10px;">
+        <div style="position: relative; flex: 1; max-width: 400px; margin-right: 10px;" id="ownerSearchContainer">
             <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #666;" onclick="fetchCardData()"></i>
             <input 
                 type="text" 
                 id="ownerSearch" 
                 placeholder="Enter owner address"
                 style="padding: 10px 10px 10px 35px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
-                value="0x162F95a9364c891028d255467F616902A479681a"
+                value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
                 onkeypress="if(event.key === 'Enter') fetchCardData()"
             >
         </div>
-        <span id="totalCards" style="margin-left: 15px; color: #666; white-space: nowrap;"></span>
-        <button id="exportButton" onclick="exportCardData()" class="export-button" style="margin-left: 20px; white-space: nowrap;">
+        <div id="cardCounts" style="margin-right: 10px; color: #fff; font-size: 14px;">
+            <span id="totalCards">(Total Cards: 0)</span>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <span style="color: #7F76F5;">Legendary: <span id="legendaryCount">0</span></span>
+                <span style="color: #CD2FD7;">Epic: <span id="epicCount">0</span></span>
+                <span style="color: #02E0F4;">Rare: <span id="rareCount">0</span></span>
+                <span style="color: #48EE4B;">Common: <span id="commonCount">0</span></span>
+            </div>
+        </div>
+        <button id="exportButton" onclick="exportCardData()" class="export-button" style="margin-left: auto; white-space: nowrap;">
             <i class="fas fa-file-export" style="margin-right: 5px;"></i> Export CSV
         </button>
+    </div>
+
+    <div id="playerContainer" style="display: none; text-align: center; margin: 20px;">
+        <h2 id="playerName" style="color: #fff;"></h2>
+        <h3 id="playerHandle" style="color: #aaa;"></h3>
+        <img id="playerProfilePicture" src="" alt="Profile Picture" style="border-radius: 50%; width: 100px; height: 100px; margin-top: 10px;">
     </div>
 
     <div id="filterControl" style="margin: 20px 0; padding: 15px; background-color: #292828; border-radius: 8px;">
@@ -820,9 +832,33 @@
                 }
             }
 
-            // Display total cards count after fetching all pages
-            const totalCards = allCards.reduce((sum, card) => sum + card.card_number, 0); // Updated to sum card_number values from allCards
+            // Initialize counts for each rarity
+            let rarityCounts = {
+                Legendary: 0,
+                Epic: 0,
+                Rare: 0,
+                Common: 0
+            };
+
+            // Calculate total cards and counts for each rarity
+            allCards.forEach(card => {
+                rarityCounts[getRarityLabel(card.rarity)] += card.card_number; // Increment count for the respective rarity
+            });
+
+            // Calculate total cards (sum of all rarity counts)
+            const totalCards = rarityCounts.Legendary + rarityCounts.Epic + rarityCounts.Rare + rarityCounts.Common;
+
+            // Update total cards display
             document.getElementById('totalCards').textContent = `(Total Cards: ${totalCards})`;
+
+            // Update counts for each rarity in the UI
+            document.getElementById('legendaryCount').textContent = rarityCounts.Legendary;
+            document.getElementById('epicCount').textContent = rarityCounts.Epic;
+            document.getElementById('rareCount').textContent = rarityCounts.Rare;
+            document.getElementById('commonCount').textContent = rarityCounts.Common;
+
+            // Log rarity counts for debugging
+            console.log(`Legendary: ${rarityCounts.Legendary}, Epic: ${rarityCounts.Epic}, Rare: ${rarityCounts.Rare}, Common: ${rarityCounts.Common}`);
             
             console.log(`Total cards accumulated: ${allCards.length}`);
             return allCards;
@@ -1183,6 +1219,7 @@
             }, 1000); // Small delay to ensure DOM is fully loaded
         });
 
+        // Update fetchPlayerData to display player information
         async function fetchPlayerData(ownerAddress) {
             try {
                 const response = await fetch(
@@ -1200,6 +1237,16 @@
                 );
                 const playerData = await response.json();
                 console.log('Fetched player data:', playerData); // Log player data for debugging
+                
+                // Display player information
+                if (playerData && playerData.length > 0) {
+                    const player = playerData[0]; // Assuming we only need the first player
+                    document.getElementById('playerName').textContent = player.name;
+                    document.getElementById('playerHandle').textContent = player.handle;
+                    document.getElementById('playerProfilePicture').src = player.profile_picture.replace('_normal.jpg', '.jpg');
+                    document.getElementById('playerContainer').style.display = 'block'; // Show the player container
+                }
+                
                 return playerData; // Return the player data
             } catch (error) {
                 console.error('Error fetching player data:', error);

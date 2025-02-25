@@ -115,6 +115,25 @@
                 transform: translateX(100%);
             }
         }
+        .score-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2px 0;
+            position: relative;
+        }
+        .score-star-indicator {
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            font-size: 10px;
+            margin-left: 5px;
+            position: relative;
+            z-index: 2;
+        }
+        .score-item {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -215,7 +234,35 @@
         // Add these global variables at the top of the script
         let heroMetadata = [];
         let heroesData = [];
-        let starRangesData = []; // New variable to store star ranges from Supabase
+        let starRangesData = []; // Variable to store star ranges from Supabase
+        let heroStats = []; // Generalized variable to store hero stats from Supabase
+
+        // Add this function to fetch hero stats from Supabase
+        async function fetchHeroStatsFromSupabase() {
+            try {
+                console.log('Fetching hero stats from Supabase...');
+                const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                const { data, error } = await supabaseClient
+                    .from('hero_stat_history_current')
+                    .select('hero_id, hero_handle, fantasy_score, stat_type')
+                    .eq('stat_type', 'gliding_24h');
+                
+                if (error) {
+                    throw new Error(`Supabase error: ${error.message}`);
+                }
+                
+                heroStats = data || [];
+                console.log(`Loaded ${heroStats.length} hero stats from Supabase`);
+                
+                return heroStats;
+            } catch (error) {
+                console.error('Error fetching hero stats:', error);
+                return [];
+            }
+        }
 
         // Add this function to fetch star ranges from Supabase
         async function fetchStarRangesFromSupabase() {
@@ -223,10 +270,10 @@
                 console.log('Fetching star ranges from Supabase...');
                 const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
                 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
-                const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 
-                const { data, error } = await supabase
-                    .from('master.star_ranges')
+                const { data, error } = await supabaseClient
+                    .from('star_ranges')
                     .select('*');
                 
                 if (error) {
@@ -387,6 +434,37 @@
                 .card-container {
                     position: relative;  // Added to position the total count
                 }
+                .score-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+                .score-item {
+                    margin-top: 2px;
+                    padding: 3px;
+                    background-color: rgba(255, 255, 255, 0.8);
+                    border-radius: 4px;
+                    text-align: center;
+                    font-weight: bold;
+                    color: #333;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                    font-size: 75%;
+                    width: 75%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .score-item::before {
+                    content: "";
+                    position: absolute;
+                    top: -10px;
+                    left: -10px;
+                    right: -10px;
+                    bottom: -10px;
+                    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                    animation: shine 2s infinite;
+                }
             `;
             document.head.appendChild(styleElement);
 
@@ -478,11 +556,120 @@
                         img.alt = `${rarity} ${row.stars}-star card`;
                         wrapper.appendChild(img);
 
-                        // New container for card_weighted_score
+                        // New container for scores
                         const scoreContainer = document.createElement('div');
                         scoreContainer.className = 'score-container'; // Add a class for styling
-                        scoreContainer.textContent = `7D: ${Math.floor(card.card_weighted_score)}`; // Add "7D:" label before the score
-                        wrapper.appendChild(scoreContainer); // Append the score container to the wrapper
+                        
+                        // Add 7D score
+                        const sevenDayScore = document.createElement('div');
+                        sevenDayScore.className = 'score-item';
+                        const sevenDayScoreValue = Math.floor(card.card_weighted_score);
+                        sevenDayScore.textContent = `7D: ${sevenDayScoreValue}`;
+                        
+                        // Check if score is within star range and color accordingly
+                        if (starRange) {
+                            const topRange = Math.floor(starRange.top_range);
+                            const bottomRange = Math.floor(starRange.bottom_range);
+                            const midPoint = bottomRange + (topRange - bottomRange) / 2;
+                            
+                            if (sevenDayScoreValue >= bottomRange && sevenDayScoreValue <= topRange) {
+                                // Score is within range - color based on position in range
+                                if (sevenDayScoreValue >= midPoint) {
+                                    sevenDayScore.style.backgroundColor = '#4CAF50'; // Darker green for upper 50%
+                                } else {
+                                    sevenDayScore.style.backgroundColor = '#8BC34A'; // Lighter green for lower 50%
+                                }
+                            } else {
+                                // Score is outside range - find which star range it falls into
+                                const matchingRange = starRangesData.find(range => 
+                                    sevenDayScoreValue >= Math.floor(range.bottom_range) && 
+                                    sevenDayScoreValue <= Math.floor(range.top_range)
+                                );
+                                
+                                if (matchingRange) {
+                                    // Create star circle indicator
+                                    const starIndicator = document.createElement('div');
+                                    starIndicator.className = 'star-circle score-star-indicator';
+                                    starIndicator.style.backgroundColor = getStarColor(matchingRange.stars);
+                                    starIndicator.textContent = matchingRange.stars;
+                                    
+                                    // Create wrapper to hold score and indicator
+                                    const scoreWrapper = document.createElement('div');
+                                    scoreWrapper.className = 'score-wrapper';
+                                    scoreWrapper.appendChild(sevenDayScore);
+                                    scoreWrapper.appendChild(starIndicator);
+                                    
+                                    scoreContainer.appendChild(scoreWrapper);
+                                } else {
+                                    scoreContainer.appendChild(sevenDayScore);
+                                }
+                            }
+                        } else {
+                            scoreContainer.appendChild(sevenDayScore);
+                        }
+                        
+                        // Only add to container if we didn't add it in the conditional logic above
+                        if (!sevenDayScore.parentNode) {
+                            scoreContainer.appendChild(sevenDayScore);
+                        }
+                        
+                        // Add 24H score if available
+                        const score24h = getHeroStat(card.hero_id, 'gliding_24h');
+                        if (score24h !== null) {
+                            const dayScore = document.createElement('div');
+                            dayScore.className = 'score-item';
+                            const dayScoreValue = Math.floor(score24h);
+                            dayScore.textContent = `24H: ${dayScoreValue}`;
+                            
+                            // Check if score is within star range and color accordingly
+                            if (starRange) {
+                                const topRange = Math.floor(starRange.top_range);
+                                const bottomRange = Math.floor(starRange.bottom_range);
+                                const midPoint = bottomRange + (topRange - bottomRange) / 2;
+                                
+                                if (dayScoreValue >= bottomRange && dayScoreValue <= topRange) {
+                                    // Score is within range - color based on position in range
+                                    if (dayScoreValue >= midPoint) {
+                                        dayScore.style.backgroundColor = '#4CAF50'; // Darker green for upper 50%
+                                    } else {
+                                        dayScore.style.backgroundColor = '#8BC34A'; // Lighter green for lower 50%
+                                    }
+                                } else {
+                                    // Score is outside range - find which star range it falls into
+                                    const matchingRange = starRangesData.find(range => 
+                                        dayScoreValue >= Math.floor(range.bottom_range) && 
+                                        dayScoreValue <= Math.floor(range.top_range)
+                                    );
+                                    
+                                    if (matchingRange) {
+                                        // Create star circle indicator
+                                        const starIndicator = document.createElement('div');
+                                        starIndicator.className = 'star-circle score-star-indicator';
+                                        starIndicator.style.backgroundColor = getStarColor(matchingRange.stars);
+                                        starIndicator.textContent = matchingRange.stars;
+                                        
+                                        // Create wrapper to hold score and indicator
+                                        const scoreWrapper = document.createElement('div');
+                                        scoreWrapper.className = 'score-wrapper';
+                                        scoreWrapper.appendChild(dayScore);
+                                        scoreWrapper.appendChild(starIndicator);
+                                        
+                                        scoreContainer.appendChild(scoreWrapper);
+                                    } else {
+                                        scoreContainer.appendChild(dayScore);
+                                    }
+                                }
+                            } else {
+                                scoreContainer.appendChild(dayScore);
+                            }
+                            
+                            // Only add to container if we didn't add it in the conditional logic above
+                            if (!dayScore.parentNode) {
+                                scoreContainer.appendChild(dayScore);
+                            }
+                        }
+                        
+                        wrapper.appendChild(scoreContainer);
 
                         cell.appendChild(wrapper);
                     });
@@ -734,10 +921,11 @@
 
         // Update the initial load section
         document.addEventListener('DOMContentLoaded', function() {
-            // Load both data sources
+            // Load all data sources
             Promise.all([
                 loadHeroData(),
-                fetchStarRangesFromSupabase()
+                fetchStarRangesFromSupabase(),
+                fetchHeroStatsFromSupabase()
             ])
             .then(() => {
                 console.log('All data loaded successfully');
@@ -775,6 +963,12 @@
                 sevenDayRange: { min: 0, max: 1000 },
                 l3mtRange: { min: 0, max: 1000 }
             };
+        }
+
+        // Generalized helper function to get hero stats by hero_id and stat_type
+        function getHeroStat(heroId, statType) {
+            const statData = heroStats.find(item => item.hero_id === heroId && item.stat_type === statType);
+            return statData ? statData.fantasy_score : null;
         }
 
     </script>

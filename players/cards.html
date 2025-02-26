@@ -847,7 +847,9 @@
                     if (row.rarities[rarity].length > 0) {
                         const totalCountBadge = document.createElement('div');
                         totalCountBadge.className = 'total-count';
-                        totalCountBadge.textContent = `Total: ${row.rarities[rarity].length}`;
+                        // Calculate the sum of card_number values instead of just counting unique cards
+                        const totalCardCount = row.rarities[rarity].reduce((sum, card) => sum + (card.card_number || 1), 0);
+                        totalCountBadge.textContent = `Total: ${totalCardCount}`;
                         cell.appendChild(totalCountBadge);
                     }
 

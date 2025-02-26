@@ -194,6 +194,17 @@
         #playerProfilePicture:hover {
             transform: scale(1.05);
         }
+        
+        .empty-card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 50px;
+            background-color: transparent;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -665,10 +676,14 @@
                 // Only render cells for active rarities
                 activeRarities.forEach(rarity => {
                     const cell = document.createElement('div');
-                    cell.className = 'card-container';
                     
-                    // Calculate total cards in this rarity+star combination
-                    const totalCards = row.rarities[rarity].reduce((sum, card) => sum + card.card_number, 0);
+                    // Only add the card-container class and styling if there are cards
+                    if (row.rarities[rarity].length > 0) {
+                        cell.className = 'card-container';
+                    } else {
+                        // For empty containers, use a minimal class without background
+                        cell.className = 'empty-card-container';
+                    }
                     
                     row.rarities[rarity].forEach(card => {
                         const wrapper = document.createElement('div');
@@ -829,10 +844,10 @@
                     });
 
                     // Add total count if there are any cards
-                    if (totalCards > 0) {
+                    if (row.rarities[rarity].length > 0) {
                         const totalCountBadge = document.createElement('div');
                         totalCountBadge.className = 'total-count';
-                        totalCountBadge.textContent = `Total: ${totalCards}`;
+                        totalCountBadge.textContent = `Total: ${row.rarities[rarity].length}`;
                         cell.appendChild(totalCountBadge);
                     }
 
@@ -1017,7 +1032,14 @@
                 // Add cells for each rarity
                 activeRarities.forEach(rarity => {
                     const cell = document.createElement('div');
-                    cell.className = 'card-container';
+                    
+                    // Only add the card-container class and styling if there are cards
+                    if (row.rarities[rarity].length > 0) {
+                        cell.className = 'card-container';
+                    } else {
+                        // For empty containers, use a minimal class without background
+                        cell.className = 'empty-card-container';
+                    }
                     
                     row.rarities[rarity].forEach(card => {
                         const wrapper = document.createElement('div');

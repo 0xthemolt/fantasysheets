@@ -233,6 +233,7 @@
     </div>
 
     <div id="playerContainer" style="display: none; text-align: center; margin: 20px;">
+        
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
             <div class="profile-picture-container">
                 <img id="playerProfilePicture" src="" alt="Profile Picture">
@@ -1385,7 +1386,14 @@
                 }
             });
             
-            // Other existing DOMContentLoaded code...
+            // Add event listener to hide search box when clicking outside
+            document.addEventListener('click', function(event) {
+                const isClickInside = ownerSearchContainer.contains(event.target) || searchIconContainer.contains(event.target);
+                if (!isClickInside && searchVisible) {
+                    searchVisible = false; // Update visibility state
+                    toggleSearch(); // Collapse the search box
+                }
+            });
         });
 
         // Add this code to your existing DOMContentLoaded event listener

@@ -204,24 +204,6 @@
             </a>
         </h1>
         
-        <div style="display: flex; align-items: center; width: 100%;">
-            <div id="searchIconContainer" style="cursor: pointer; margin-right: 10px;">
-                <i id="searchIcon" class="fas fa-search" style="color: #fff; font-size: 16px;"></i>
-            </div>
-            <div id="ownerSearchContainer" style="position: relative; flex: 1; max-width: 0; overflow: hidden; transition: max-width 0.3s ease, opacity 0.3s ease; opacity: 0;">
-                <input 
-                    type="text" 
-                    id="ownerSearch" 
-                    placeholder="Enter owner address"
-                    style="padding: 6px 6px 6px 7px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 8.4px; transition: all 0.2s ease;"
-                    value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
-                >
-                <button id="searchButton" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer;">
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-        
         <div id="exportButtonContainer" style="position: relative;">
             <button id="exportButton" onclick="exportCardData()" class="export-button" style="background: transparent; border: none; color: #fff; cursor: pointer; padding: 0; display: flex; align-items: center;">
                 <i class="fas fa-file-export" style="font-size: 16px;"></i>
@@ -266,7 +248,7 @@
                 <input 
                     type="text" 
                     id="playerSearch" 
-                    placeholder="Enter owner address"
+                    placeholder="Enter 0xAddress"
                     style="padding: 10px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
                     value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
                 >
@@ -1081,7 +1063,7 @@
             
             try {
                 isFetchingData = true;
-                const ownerAddress = document.getElementById('ownerSearch').value.trim();
+                const ownerAddress = document.getElementById('playerSearch').value.trim();
                 const loadingDiv = document.getElementById('loading');
                 const starView = document.getElementById('cardsByStars');
                 const filterControl = document.getElementById('filterControl'); // Get the filterControl div
@@ -1123,13 +1105,6 @@
                 isFetchingData = false;
             }
         }
-
-        // Add event listener for Enter key
-        document.getElementById('ownerSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                fetchCardData();
-            }
-        });
 
         // Update the initial load section
         document.addEventListener('DOMContentLoaded', function() {
@@ -1226,7 +1201,7 @@
             // Generate filename with current date
             const date = new Date();
             const dateStr = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-            const address = document.getElementById('ownerSearch').value.trim().substring(0, 8); // First 8 chars of address
+            const address = document.getElementById('playerSearch').value.trim().substring(0, 8); // First 8 chars of address
             
             link.setAttribute("download", `scout_cards_${address}_${dateStr}.csv`);
             document.body.appendChild(link);
@@ -1372,6 +1347,9 @@
             
             // Show search when clicking the search icon
             modalSearchIcon.addEventListener('click', function() {
+                // Clear the search input field
+                playerSearch.value = '';
+                
                 // Hide player info content with animation
                 playerInfoContent.style.transition = 'opacity 0.3s ease';
                 playerInfoContent.style.opacity = '0';
@@ -1414,7 +1392,7 @@
                 const ownerAddress = playerSearch.value.trim();
                 if (ownerAddress) {
                     // Set the value in the main search input
-                    document.getElementById('ownerSearch').value = ownerAddress;
+                    document.getElementById('playerSearch').value = ownerAddress;
                     
                     // Hide search container with animation
                     playerSearchContainer.style.transition = 'opacity 0.3s ease';
@@ -1478,27 +1456,12 @@
         const searchAddressButton = document.getElementById('searchAddressButton');
         const addressInput = document.getElementById('addressInput');
 
-        modalSearchIcon.addEventListener('click', () => {
-            addressModal.style.display = 'flex'; // Show modal
-        });
-
-        closeModalButton.addEventListener('click', () => {
-            addressModal.style.display = 'none'; // Hide modal
-        });
-
-        // Close modal when clicking outside of it
-        window.addEventListener('click', (event) => {
-            if (event.target === addressModal) {
-                addressModal.style.display = 'none'; // Hide modal
-            }
-        });
-
         // Search functionality
         searchAddressButton.addEventListener('click', () => {
             const ownerAddress = addressInput.value.trim();
             if (ownerAddress) {
                 // Call the fetchCardData function with the entered address
-                document.getElementById('ownerSearch').value = ownerAddress; // Set the value in the main search input
+                document.getElementById('playerSearch').value = ownerAddress; // Set the value in the main search input
                 fetchCardData(); // Trigger the search
                 addressModal.style.display = 'none'; // Hide modal after search
             }

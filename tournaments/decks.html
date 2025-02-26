@@ -1238,11 +1238,18 @@ async function fetchData(tournamentNumber) {
         // Start timing rewards query
         const rewardsStart = performance.now();
         
+        // Log the query we're about to execute
+        console.log(`Executing rewards query: reward_thresholds.select().eq('tournament_unique_key', 'Main ${tournamentNumber}')`);
+        
         // Fetch rewards data first
         const { data: rewardsData, error: rewardsError } = await supabaseClient
             .from('reward_thresholds')
             .select('tournament_league_unique_key, league, min_score, max_score, total_decks, rewards')
             .eq('tournament_unique_key', `Main ${tournamentNumber}`);
+
+        // Calculate and log the query duration
+        const rewardsEnd = performance.now();
+        console.log(`Rewards query completed in ${(rewardsEnd - rewardsStart).toFixed(2)}ms with ${rewardsData?.length || 0} results`);
 
         if (rewardsError) {
             console.error('Error fetching rewards:', rewardsError);

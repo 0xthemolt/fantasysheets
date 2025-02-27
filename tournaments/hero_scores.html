@@ -582,7 +582,7 @@
 
             try {
                 // Fetch stats data
-                const statsResponse = await supabaseClient
+                const statsQuery = supabaseClient
                     .from('hero_stats_tournament')
                     .select(`
                         tournament_unique_key,
@@ -605,6 +605,10 @@
                     `)
                     .eq('tournament_unique_key', `Main ${tournamentNumber}`);
 
+                console.log('Executing stats query:', statsQuery); // Log the stats query
+
+                const statsResponse = await statsQuery;
+
                 if (statsResponse.error) throw statsResponse.error;
 
                 // Fetch timeline data with pagination
@@ -613,7 +617,7 @@
                 const pageSize = 1000;
                 
                 while (true) {
-                    const timelineResponse = await supabaseClient
+                    const timelineQuery = supabaseClient
                         .from('hero_tweets')
                         .select(`
                             tournament_number,
@@ -628,6 +632,10 @@
                         .eq('tournament_number', tournamentNumber)
                         .range(page * pageSize, (page + 1) * pageSize - 1)
                         .order('post_hours_from_start', { ascending: true });
+
+                    console.log('Executing timeline query:', timelineQuery); // Log the timeline query
+
+                    const timelineResponse = await timelineQuery;
 
                     if (timelineResponse.error) throw timelineResponse.error;
 

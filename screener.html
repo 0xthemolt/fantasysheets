@@ -1224,16 +1224,18 @@
                     page++;
                 }
 
+                // Change this line to let to allow reassignment
+                let pricesData; // Global variable to store prices
                 // Fetch prices from JSON file (keeping existing implementation)
-                const timestamp = new Date().getTime();
+                const timestamp = new Date().getTime(); // Generate a new timestamp for cache busting
                 const pricesResponse = await fetch(`/data/heroes/${heroHandle}_trades.json?t=${timestamp}`, {
                     headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
+                        'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+                        'Pragma': 'no-cache', // HTTP 1.0
+                        'Expires': '0' // Expire immediately
                     }
                 });
-                const pricesData = await pricesResponse.json();
+                pricesData = await pricesResponse.json(); // Update this line
 
                 // Store the data in your global variables
                 tradesData = allTrades;

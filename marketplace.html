@@ -44,6 +44,116 @@
         .sortable.asc i {
             opacity: 1;
         }
+        
+        /* Tooltip styles */
+        .listed-count {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .seller-icon {
+            color: #808080;
+            cursor: pointer;
+            font-size: 0.75em;
+        }
+        .seller-icon.active {
+            color: #1DA1F2; /* Blue color when active */
+        }
+        .seller-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            width: 200px;
+            display: none;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px; /* Add space between tooltip and icon */
+        }
+        /* Fix column width */
+        .marketplace-table th, .marketplace-table td {
+            width: auto;
+            white-space: nowrap;
+        }
+        .marketplace-table th:nth-child(8),
+        .marketplace-table th:nth-child(12),
+        .marketplace-table th:nth-child(16),
+        .marketplace-table th:nth-child(20) {
+            width: 60px; /* Set a fixed width for the Listed columns */
+        }
+        /* Make tooltip stay visible */
+        .seller-icon:hover ~ .seller-tooltip {
+            display: block;
+        }
+        .seller-tooltip {
+            pointer-events: auto; /* Enable interactions */
+        }
+        .seller-tooltip:hover {
+            display: block; /* Stay visible when hovering over the tooltip itself */
+        }
+        .seller-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .seller-pfp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .seller-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .seller-twitter {
+            color: #1DA1F2;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+        .seller-twitter:hover {
+            text-decoration: underline;
+        }
+        .seller-id {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .copy-icon {
+            cursor: pointer;
+            color: #808080;
+            transition: color 0.2s;
+        }
+        .copy-icon:hover {
+            color: #1DA1F2;
+        }
+        .copy-feedback {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .copy-feedback.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -55,12 +165,46 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        // Function to toggle tooltip visibility
+        function toggleTooltip(icon) {
+            // Close all other open tooltips
+            document.querySelectorAll('.seller-icon.active').forEach(activeIcon => {
+                if (activeIcon !== icon) {
+                    activeIcon.classList.remove('active');
+                    activeIcon.nextElementSibling.style.display = 'none';
+                }
+            });
+            
+            // Toggle this tooltip
+            const tooltip = icon.nextElementSibling;
+            const isVisible = tooltip.style.display === 'block';
+            
+            icon.classList.toggle('active', !isVisible);
+            tooltip.style.display = isVisible ? 'none' : 'block';
+            
+            // Close tooltip when clicking outside
+            if (!isVisible) {
+                const closeTooltip = function(e) {
+                    if (!tooltip.contains(e.target) && e.target !== icon) {
+                        icon.classList.remove('active');
+                        tooltip.style.display = 'none';
+                        document.removeEventListener('click', closeTooltip);
+                    }
+                };
+                
+                // Use setTimeout to avoid immediate triggering
+                setTimeout(() => {
+                    document.addEventListener('click', closeTooltip);
+                }, 0);
+            }
+        }
+
         // Fetch and display marketplace data
         async function loadMarketplaceData() {
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr')
+                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -92,10 +236,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-' },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-' },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-' },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-' }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            epic: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            rare: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            common: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null }
                         };
                     }
                     
@@ -104,7 +248,13 @@
                     acc[item.hero_handle][rarityKey] = {
                         floor: Number(item.floor).toFixed(4),
                         highest_bid: item.highest_bid || '-',
-                        listed_count: item.listed_count || '-'
+                        listed_count: item.listed_count || '-',
+                        seller_info: item.listed_count && item.listed_count > 0 ? {
+                            name: item.seller_name,
+                            handle: item.seller_handle,
+                            pfp_url: item.seller_pfp_url,
+                            seller_id: item.seller_id
+                        } : null
                     };
                     
                     return acc;
@@ -299,19 +449,107 @@
                                     <td class="rarity-divider rarity-divider-legendary"></td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}</td>
-                                    <td class="rarity-section-legendary">${item.legendary.listed_count}</td>
-                                    <td class="rarity-divider"></td>
+                                    <td class="rarity-section-legendary">
+                                        <div class="listed-count">
+                                            ${item.legendary.listed_count}
+                                            ${item.legendary.seller_info ? `
+                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
+                                                <div class="seller-tooltip">
+                                                    <div class="seller-info">
+                                                        <img src="${item.legendary.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                                                        <span class="seller-name">${item.legendary.seller_info.name}</span>
+                                                        <a href="https://x.com/${item.legendary.seller_info.handle}" target="_blank" class="seller-twitter">
+                                                            <i class="fab fa-x-twitter"></i> @${item.legendary.seller_info.handle}
+                                                        </a>
+                                                        ${item.legendary.seller_info.seller_id ? `
+                                                            <div class="seller-id">
+                                                                ID: ${shortenId(item.legendary.seller_info.seller_id)}
+                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.legendary.seller_info.seller_id}', event)"></i>
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </td>
+                                    <td class="rarity-divider rarity-divider-epic"></td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}</td>
-                                    <td class="rarity-section-epic">${item.epic.listed_count}</td>
-                                    <td class="rarity-divider"></td>
+                                    <td class="rarity-section-epic">
+                                        <div class="listed-count">
+                                            ${item.epic.listed_count}
+                                            ${item.epic.seller_info ? `
+                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
+                                                <div class="seller-tooltip">
+                                                    <div class="seller-info">
+                                                        <img src="${item.epic.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                                                        <span class="seller-name">${item.epic.seller_info.name}</span>
+                                                        <a href="https://x.com/${item.epic.seller_info.handle}" target="_blank" class="seller-twitter">
+                                                            <i class="fab fa-x-twitter"></i> @${item.epic.seller_info.handle}
+                                                        </a>
+                                                        ${item.epic.seller_info.seller_id ? `
+                                                            <div class="seller-id">
+                                                                ID: ${shortenId(item.epic.seller_info.seller_id)}
+                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.epic.seller_info.seller_id}', event)"></i>
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </td>
+                                    <td class="rarity-divider rarity-divider-rare"></td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}</td>
-                                    <td class="rarity-section-rare">${item.rare.listed_count}</td>
-                                    <td class="rarity-divider"></td>
+                                    <td class="rarity-section-rare">
+                                        <div class="listed-count">
+                                            ${item.rare.listed_count}
+                                            ${item.rare.seller_info ? `
+                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
+                                                <div class="seller-tooltip">
+                                                    <div class="seller-info">
+                                                        <img src="${item.rare.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                                                        <span class="seller-name">${item.rare.seller_info.name}</span>
+                                                        <a href="https://x.com/${item.rare.seller_info.handle}" target="_blank" class="seller-twitter">
+                                                            <i class="fab fa-x-twitter"></i> @${item.rare.seller_info.handle}
+                                                        </a>
+                                                        ${item.rare.seller_info.seller_id ? `
+                                                            <div class="seller-id">
+                                                                ID: ${shortenId(item.rare.seller_info.seller_id)}
+                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.rare.seller_info.seller_id}', event)"></i>
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </td>
+                                    <td class="rarity-divider rarity-divider-common"></td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
                                     <td class="rarity-section-common">${formatValue(item.common.highest_bid)}</td>
-                                    <td class="rarity-section-common">${item.common.listed_count}</td>
+                                    <td class="rarity-section-common">
+                                        <div class="listed-count">
+                                            ${item.common.listed_count}
+                                            ${item.common.seller_info ? `
+                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
+                                                <div class="seller-tooltip">
+                                                    <div class="seller-info">
+                                                        <img src="${item.common.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                                                        <span class="seller-name">${item.common.seller_info.name}</span>
+                                                        <a href="https://x.com/${item.common.seller_info.handle}" target="_blank" class="seller-twitter">
+                                                            <i class="fab fa-x-twitter"></i> @${item.common.seller_info.handle}
+                                                        </a>
+                                                        ${item.common.seller_info.seller_id ? `
+                                                            <div class="seller-id">
+                                                                ID: ${shortenId(item.common.seller_info.seller_id)}
+                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.common.seller_info.seller_id}', event)"></i>
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </td>
                                 </tr>
                                 `).join('')}
                             </tbody>
@@ -323,7 +561,7 @@
                 window.exportToCSV = function() {
                     // Convert the raw data to CSV format
                     const csvRows = [];
-                    const headers = ['Hero Handle', 'Hero Name', 'Score', 'Score 24hr', 'Stars', 'Inflation Degree', 'Rarity', 'Floor', 'Highest Bid', 'Listed Count'];
+                    const headers = ['Hero Handle', 'Hero Name', 'Score', 'Score 24hr', 'Stars', 'Inflation Degree', 'Rarity', 'Floor', 'Highest Bid', 'Listed Count', 'Seller ID'];
                     csvRows.push(headers.join(','));
 
                     heroesArray.forEach(item => {
@@ -337,7 +575,8 @@
                             'Legendary',
                             item.legendary.floor,
                             item.legendary.highest_bid || '',
-                            item.legendary.listed_count || ''
+                            item.legendary.listed_count || '',
+                            item.legendary.seller_info ? item.legendary.seller_info.seller_id : ''
                         ].map(value => `"${value}"`);
                         csvRows.push(row.join(','));
 
@@ -351,7 +590,8 @@
                             'Epic',
                             item.epic.floor,
                             item.epic.highest_bid || '',
-                            item.epic.listed_count || ''
+                            item.epic.listed_count || '',
+                            item.epic.seller_info ? item.epic.seller_info.seller_id : ''
                         ].map(value => `"${value}"`);
                         csvRows.push(epicRow.join(','));
 
@@ -365,7 +605,8 @@
                             'Rare',
                             item.rare.floor,
                             item.rare.highest_bid || '',
-                            item.rare.listed_count || ''
+                            item.rare.listed_count || '',
+                            item.rare.seller_info ? item.rare.seller_info.seller_id : ''
                         ].map(value => `"${value}"`);
                         csvRows.push(rareRow.join(','));
 
@@ -379,7 +620,8 @@
                             'Common',
                             item.common.floor,
                             item.common.highest_bid || '',
-                            item.common.listed_count || ''
+                            item.common.listed_count || '',
+                            item.common.seller_info ? item.common.seller_info.seller_id : ''
                         ].map(value => `"${value}"`);
                         csvRows.push(commonRow.join(','));
                     });
@@ -484,6 +726,41 @@
 
         // Load data when page loads
         window.onload = loadMarketplaceData;
+
+        // Add this function to the script section
+        function copyToClipboard(text, event) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'copy-feedback';
+                feedback.textContent = 'Copied!';
+                
+                // Position near the click
+                feedback.style.left = `${event.clientX}px`;
+                feedback.style.top = `${event.clientY - 30}px`;
+                
+                document.body.appendChild(feedback);
+                
+                // Show the feedback
+                setTimeout(() => feedback.classList.add('show'), 10);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(feedback), 300);
+                }, 1500);
+            });
+            
+            // Stop event propagation to prevent tooltip from closing
+            event.stopPropagation();
+        }
+
+        // Add this helper function to shorten IDs
+        function shortenId(id) {
+            if (!id) return '';
+            if (id.length <= 8) return id;
+            return `${id.substring(0, 5)}...${id.substring(id.length - 3)}`;
+        }
     </script>
 </body>
 </html>

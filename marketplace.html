@@ -60,7 +60,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated')
+                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -90,6 +90,7 @@
                             hero_pfp_url: item.hero_pfp_url,
                             inflation_degree: item.inflation_degree,
                             score: item.score,
+                            score_24hr: item.score_24hr,
                             stars: item.stars,
                             legendary: { floor: '-', highest_bid: '-', listed_count: '-' },
                             epic: { floor: '-', highest_bid: '-', listed_count: '-' },
@@ -250,6 +251,7 @@
                                 <tr>
                                     <th>Hero</th>
                                     <th class="sortable" data-sort="score">Score <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="score_24hr">Score 24hr <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
                                     <th class="rarity-divider rarity-divider-legendary"></th>
@@ -262,7 +264,7 @@
                                     <th colspan="3" class="rarity-header-common">Common</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="4"></th>
+                                    <th colspan="5"></th>
                                     <th class="rarity-divider"></th>
                                     <th>Floor</th>
                                     <th>Bid</th>
@@ -291,6 +293,7 @@
                                         </div>
                                     </td>
                                     <td>${Math.round(item.score)}</td>
+                                    <td>${Math.round(item.score_24hr)}</td>
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
                                     <td class="rarity-divider rarity-divider-legendary"></td>
@@ -320,7 +323,7 @@
                 window.exportToCSV = function() {
                     // Convert the raw data to CSV format
                     const csvRows = [];
-                    const headers = ['Hero Handle', 'Hero Name', 'Score', 'Stars', 'Inflation Degree', 'Rarity', 'Floor', 'Highest Bid', 'Listed Count'];
+                    const headers = ['Hero Handle', 'Hero Name', 'Score', 'Score 24hr', 'Stars', 'Inflation Degree', 'Rarity', 'Floor', 'Highest Bid', 'Listed Count'];
                     csvRows.push(headers.join(','));
 
                     heroesArray.forEach(item => {
@@ -328,6 +331,7 @@
                             item.hero_handle,
                             item.hero_name,
                             item.score,
+                            item.score_24hr,
                             item.stars,
                             item.inflation_degree,
                             'Legendary',
@@ -441,13 +445,17 @@
                                         aVal = parseFloat(a.children[1].textContent);
                                         bVal = parseFloat(b.children[1].textContent);
                                         break;
-                                    case 'stars':
+                                    case 'score_24hr':
                                         aVal = parseFloat(a.children[2].textContent);
                                         bVal = parseFloat(b.children[2].textContent);
                                         break;
-                                    case 'inflation':
+                                    case 'stars':
                                         aVal = parseFloat(a.children[3].textContent);
                                         bVal = parseFloat(b.children[3].textContent);
+                                        break;
+                                    case 'inflation':
+                                        aVal = parseFloat(a.children[4].textContent);
+                                        bVal = parseFloat(b.children[4].textContent);
                                         break;
                                 }
                                 

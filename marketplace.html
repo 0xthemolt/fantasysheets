@@ -154,6 +154,70 @@
         .copy-feedback.show {
             opacity: 1;
         }
+        .rarity-divider {
+            width: 0.1px !important; /* Force override with !important */
+            min-width: 0.1px !important; /* Ensure min-width doesn't override */
+            max-width: 0.1px !important; /* Ensure max-width doesn't override */
+        }
+
+        .rarity-divider-legendary, 
+        .rarity-divider-epic, 
+        .rarity-divider-rare, 
+        .rarity-divider-common {
+            width: 0.1px !important;
+            min-width: 0.1px !important;
+            max-width: 0.1px !important;
+        }
+
+        /* Make sure table cell widths respect our settings */
+        .marketplace-table th.rarity-divider,
+        .marketplace-table td.rarity-divider {
+            width: 0.1px !important;
+            min-width: 0.1px !important;
+            max-width: 0.1px !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        /* Search box styles */
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+            max-width: 250px; /* Set a predefined width */
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 7.5px 15px; /* Reduced by 25% from 10px */
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(30, 30, 30, 0.6);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            height: 36px; /* Explicitly set height (reduced from typical ~48px) */
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -382,7 +446,28 @@
                         .rarity-header-common { color: #93FF01; }
                         
                         .rarity-divider {
-                            width: 1px;
+                            width: 0.1px !important; /* Force override with !important */
+                            min-width: 0.1px !important; /* Ensure min-width doesn't override */
+                            max-width: 0.1px !important; /* Ensure max-width doesn't override */
+                        }
+
+                        .rarity-divider-legendary, 
+                        .rarity-divider-epic, 
+                        .rarity-divider-rare, 
+                        .rarity-divider-common {
+                            width: 0.1px !important;
+                            min-width: 0.1px !important;
+                            max-width: 0.1px !important;
+                        }
+
+                        /* Make sure table cell widths respect our settings */
+                        .marketplace-table th.rarity-divider,
+                        .marketplace-table td.rarity-divider {
+                            width: 0.1px !important;
+                            min-width: 0.1px !important;
+                            max-width: 0.1px !important;
+                            padding-left: 0 !important;
+                            padding-right: 0 !important;
                         }
                         .marketplace-table td, .marketplace-table th {
                             border: none;
@@ -390,13 +475,19 @@
                         }
                     </style>
                     <div class="marketplace-container">
-                        <div class="export-container">
+                        <div class="export-container" style="text-align: right;">
                             <button class="export-button" onclick="exportToCSV()">
                                 <i class="fas fa-file-export"></i>
                                 Export CSV
                             </button>
-                            <span id="db-updated" style="display: block; font-size: 0.8em; color: grey;">${minDbUpdated !== 'N/A' ? formatDate(minDbUpdated) : 'N/A'} UTC (${timeAgo} min ago)</span>
+                            <span id="db-updated" style="display: block; font-size: 0.8em; color: grey; margin-top: 5px; text-align: right;">${minDbUpdated !== 'N/A' ? formatDate(minDbUpdated) : 'N/A'} UTC (${timeAgo} min ago)</span>
                         </div>
+                        
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        
                         <table class="marketplace-table">
                             <thead>
                                 <tr>
@@ -567,6 +658,7 @@
                                 `).join('')}
                             </tbody>
                         </table>
+                        <div id="no-results" class="no-results" style="display: none;">No heroes found matching your search.</div>
                     </div>
                 `;
 
@@ -729,6 +821,37 @@
                     });
                 }
 
+                // Add search functionality
+                function initializeSearch() {
+                    const searchInput = document.getElementById('hero-search');
+                    const tableRows = document.querySelectorAll('.marketplace-table tbody tr');
+                    const noResultsMessage = document.getElementById('no-results');
+                    
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase().trim();
+                        let visibleCount = 0;
+                        
+                        tableRows.forEach(row => {
+                            const heroCell = row.querySelector('.hero-cell');
+                            const heroHandle = heroCell.querySelector('span').textContent.toLowerCase();
+                            const heroName = heroCell.querySelector('span').getAttribute('data-hero-name').toLowerCase();
+                            
+                            if (heroHandle.includes(searchTerm) || heroName.includes(searchTerm)) {
+                                row.style.display = '';
+                                visibleCount++;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                        
+                        // Show/hide no results message
+                        noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                    });
+                }
+
+                // Call initializeSearch after the table is created
+                initializeSearch();
+                
                 // Call initializeSorting after the table is created
                 initializeSorting();
             } catch (error) {

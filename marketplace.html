@@ -302,6 +302,59 @@
         .export-button:hover {
             background: rgba(255, 255, 255, 0.1);
         }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-option {
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 30, 30, 0.6);
+        }
+
+        .filter-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-option.active {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Style for rare and common options */
+        .filter-option-rare {
+            color: #00FFDF; /* Rare color */
+        }
+
+        .filter-option-common {
+            color: #93FF01; /* Common color */
+        }
+
+        .filter-option-clear {
+            color: #aaa;
+            font-size: 0.8em;
+            padding: 6px 8px;
+        }
     </style>
 </head>
 <body>
@@ -650,6 +703,15 @@
                         <div class="search-container">
                             <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
                             <i class="fas fa-search search-icon"></i>
+                        </div>
+
+                        <div class="filter-container">
+                            <div class="filter-label">Bid Floor Spread:</div>
+                            <div class="filter-options">
+                                <div class="filter-option filter-option-rare" id="rare-spread-filter" data-rarity="rare">Rare</div>
+                                <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
+                                <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
+                            </div>
                         </div>
                         
                         <table class="marketplace-table">
@@ -1028,6 +1090,115 @@
                 
                 // Call initializeSorting after the table is created
                 initializeSorting();
+
+                // Add bid floor spread sorting functionality
+                function initializeBidFloorSpreadSorting() {
+                    const rareSpreadFilter = document.getElementById('rare-spread-filter');
+                    const commonSpreadFilter = document.getElementById('common-spread-filter');
+                    const clearSpreadFilter = document.getElementById('clear-spread-filter');
+                    const tbody = document.querySelector('.marketplace-table tbody');
+                    
+                    // Function to calculate spread and sort
+                    function sortBySpread(rarity) {
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+                        
+                        // Calculate spread for each row
+                        rows.forEach(row => {
+                            let floorCell, bidCell;
+                            
+                            if (rarity === 'rare') {
+                                floorCell = row.querySelector('.rarity-section-rare:nth-child(15)'); // Rare floor cell
+                                bidCell = row.querySelector('.rarity-section-rare:nth-child(16)');   // Rare bid cell
+                            } else if (rarity === 'common') {
+                                floorCell = row.querySelector('.rarity-section-common:nth-child(19)'); // Common floor cell
+                                bidCell = row.querySelector('.rarity-section-common:nth-child(20)');   // Common bid cell
+                            }
+                            
+                            const floorValue = floorCell ? parseFloat(floorCell.textContent) : NaN;
+                            const bidValue = bidCell ? parseFloat(bidCell.textContent) : NaN;
+                            
+                            // Calculate spread only if both values are valid numbers
+                            if (!isNaN(floorValue) && !isNaN(bidValue) && floorValue !== '-' && bidValue !== '-') {
+                                row.dataset[`${rarity}Spread`] = (floorValue - bidValue).toFixed(4);
+                            } else {
+                                row.dataset[`${rarity}Spread`] = '-999'; // Use a very negative value for rows without valid spread
+                            }
+                        });
+                        
+                        // Sort rows by spread (descending)
+                        rows.sort((a, b) => {
+                            const aSpread = parseFloat(a.dataset[`${rarity}Spread`]);
+                            const bSpread = parseFloat(b.dataset[`${rarity}Spread`]);
+                            return bSpread - aSpread; // Descending order
+                        });
+                        
+                        // Reorder the rows
+                        rows.forEach(row => tbody.appendChild(row));
+                    }
+                    
+                    // Function to clear all filters
+                    function clearFilters() {
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // Reset to default sort (by score)
+                        const scoreHeader = document.querySelector('.sortable[data-sort="score"]');
+                        if (scoreHeader) {
+                            scoreHeader.classList.add('desc');
+                            scoreHeader.classList.remove('asc');
+                            
+                            const rows = Array.from(tbody.querySelectorAll('tr'));
+                            rows.sort((a, b) => {
+                                const aScore = parseFloat(a.children[1].textContent);
+                                const bScore = parseFloat(b.children[1].textContent);
+                                return bScore - aScore; // Descending order by score
+                            });
+                            
+                            rows.forEach(row => tbody.appendChild(row));
+                        }
+                    }
+                    
+                    // Add event listeners to toggle buttons
+                    rareSpreadFilter.addEventListener('click', function() {
+                        const isActive = this.classList.contains('active');
+                        
+                        // Clear all active states first
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // If it wasn't active before, make it active and sort
+                        if (!isActive) {
+                            this.classList.add('active');
+                            sortBySpread('rare');
+                        } else {
+                            // If it was already active, just deactivate (clear filters)
+                            clearFilters();
+                        }
+                    });
+                    
+                    commonSpreadFilter.addEventListener('click', function() {
+                        const isActive = this.classList.contains('active');
+                        
+                        // Clear all active states first
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // If it wasn't active before, make it active and sort
+                        if (!isActive) {
+                            this.classList.add('active');
+                            sortBySpread('common');
+                        } else {
+                            // If it was already active, just deactivate (clear filters)
+                            clearFilters();
+                        }
+                    });
+                    
+                    // Add event listener for clear button
+                    clearSpreadFilter.addEventListener('click', clearFilters);
+                }
+
+                // Call the function after the table is created
+                initializeBidFloorSpreadSorting();
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('marketplace-container').innerHTML = 'Error loading marketplace data';

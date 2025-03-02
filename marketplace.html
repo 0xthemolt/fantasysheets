@@ -781,10 +781,23 @@
                                 if (h !== header) h.classList.remove('asc', 'desc');
                             });
                             
-                            // Toggle sorting direction
+                            // Determine sorting direction
                             const isAsc = header.classList.contains('asc');
-                            header.classList.toggle('asc', !isAsc);
-                            header.classList.toggle('desc', isAsc);
+                            const isDesc = header.classList.contains('desc');
+                            
+                            // Clear both classes first
+                            header.classList.remove('asc', 'desc');
+                            
+                            // If it wasn't sorted before or was ascending, make it descending (high to low)
+                            // If it was descending, make it ascending (low to high)
+                            if (!isDesc) {
+                                header.classList.add('desc');
+                            } else {
+                                header.classList.add('asc');
+                            }
+                            
+                            // Get the new state after toggling
+                            const isDescending = header.classList.contains('desc');
                             
                             // Sort the rows
                             rows.sort((a, b) => {
@@ -809,10 +822,12 @@
                                         break;
                                 }
                                 
-                                if (isNaN(aVal)) aVal = isAsc ? Infinity : -Infinity;
-                                if (isNaN(bVal)) bVal = isAsc ? Infinity : -Infinity;
+                                if (isNaN(aVal)) aVal = isDescending ? -Infinity : Infinity;
+                                if (isNaN(bVal)) bVal = isDescending ? -Infinity : Infinity;
                                 
-                                return isAsc ? bVal - aVal : aVal - bVal;
+                                // For descending order (high to low), we want b - a
+                                // For ascending order (low to high), we want a - b
+                                return isDescending ? bVal - aVal : aVal - bVal;
                             });
                             
                             // Reorder the rows

@@ -204,7 +204,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url')
+                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -253,7 +253,8 @@
                             name: item.seller_name,
                             handle: item.seller_handle,
                             pfp_url: item.seller_pfp_url,
-                            seller_id: item.seller_id
+                            seller_id: item.seller_id,
+                            seller_port_value: item.seller_port_value
                         } : null
                     };
                     
@@ -463,10 +464,13 @@
                                                         </a>
                                                         ${item.legendary.seller_info.seller_id ? `
                                                             <div class="seller-id">
-                                                                ID: ${shortenId(item.legendary.seller_info.seller_id)}
+                                                                ${shortenId(item.legendary.seller_info.seller_id)}
                                                                 <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.legendary.seller_info.seller_id}', event)"></i>
                                                             </div>
                                                         ` : ''}
+                                                        <div class="seller-port-value">
+                                                            Portfolio: ${format_eth(item.legendary.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ` : ''}
@@ -489,10 +493,13 @@
                                                         </a>
                                                         ${item.epic.seller_info.seller_id ? `
                                                             <div class="seller-id">
-                                                                ID: ${shortenId(item.epic.seller_info.seller_id)}
+                                                                ${shortenId(item.epic.seller_info.seller_id)}
                                                                 <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.epic.seller_info.seller_id}', event)"></i>
                                                             </div>
                                                         ` : ''}
+                                                        <div class="seller-port-value">
+                                                            Portfolio: ${format_eth(item.epic.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ` : ''}
@@ -515,10 +522,13 @@
                                                         </a>
                                                         ${item.rare.seller_info.seller_id ? `
                                                             <div class="seller-id">
-                                                                ID: ${shortenId(item.rare.seller_info.seller_id)}
+                                                                ${shortenId(item.rare.seller_info.seller_id)}
                                                                 <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.rare.seller_info.seller_id}', event)"></i>
                                                             </div>
                                                         ` : ''}
+                                                        <div class="seller-port-value">
+                                                            Portfolio: ${format_eth(item.rare.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ` : ''}
@@ -541,10 +551,13 @@
                                                         </a>
                                                         ${item.common.seller_info.seller_id ? `
                                                             <div class="seller-id">
-                                                                ID: ${shortenId(item.common.seller_info.seller_id)}
+                                                                ${shortenId(item.common.seller_info.seller_id)}
                                                                 <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.common.seller_info.seller_id}', event)"></i>
                                                             </div>
                                                         ` : ''}
+                                                        <div class="seller-port-value">
+                                                            Portfolio: ${format_eth(item.common.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ` : ''}
@@ -760,6 +773,19 @@
             if (!id) return '';
             if (id.length <= 8) return id;
             return `${id.substring(0, 5)}...${id.substring(id.length - 3)}`;
+        }
+
+        function format_eth(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-'; // Handle invalid values
+
+            const num = parseFloat(value);
+            if (num > 10) {
+                return num.toFixed(0); // Format as ## for values greater than 10
+            } else if (num > 1) {
+                return num.toFixed(1); // Format as #.# for values greater than 1
+            } else {
+                return num.toFixed(2); // Format as #.## for values less than or equal to 1
+            }
         }
     </script>
 </body>

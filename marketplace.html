@@ -218,6 +218,90 @@
             color: rgba(255, 255, 255, 0.7);
             font-style: italic;
         }
+        
+        /* Global floors styling */
+        .global-floors {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .floor-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .floor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        .floor-legendary {
+            background: linear-gradient(135deg, rgba(251, 231, 255, 0.15), rgba(251, 231, 255, 0.05));
+            border: 1px solid rgba(251, 231, 255, 0.3);
+        }
+        .floor-epic {
+            background: linear-gradient(135deg, rgba(241, 163, 253, 0.15), rgba(241, 163, 253, 0.05));
+            border: 1px solid rgba(241, 163, 253, 0.3);
+        }
+        .floor-rare {
+            background: linear-gradient(135deg, rgba(0, 255, 223, 0.15), rgba(0, 255, 223, 0.05));
+            border: 1px solid rgba(0, 255, 223, 0.3);
+        }
+        .floor-common {
+            background: linear-gradient(135deg, rgba(147, 255, 1, 0.15), rgba(147, 255, 1, 0.05));
+            border: 1px solid rgba(147, 255, 1, 0.3);
+        }
+        .floor-title {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .floor-legendary .floor-title { color: #FBE7FF; }
+        .floor-epic .floor-title { color: #F1A3FD; }
+        .floor-rare .floor-title { color: #00FFDF; }
+        .floor-common .floor-title { color: #93FF01; }
+        .floor-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .floor-value::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url('../icons/eth.webp');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .export-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .export-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -261,6 +345,67 @@
                     document.addEventListener('click', closeTooltip);
                 }, 0);
             }
+        }
+
+        // Load data when page loads
+        window.onload = loadMarketplaceData;
+
+        // Helper function to format values
+        function formatValue(value) {
+            if (value === '-' || value === '' || value === null || value === undefined) return '-';
+            const num = parseFloat(value);
+            if (isNaN(num)) return '-';
+            return num >= 0.1 ? num.toFixed(2) : num.toFixed(3);
+        }
+
+        // Calculate and display global floors
+        function updateGlobalFloors(heroesArray) {
+            // Initialize with high values
+            let lowestLegendary = Infinity;
+            let lowestEpic = Infinity;
+            let lowestRare = Infinity;
+            let lowestCommon = Infinity;
+            
+            // Find the lowest floor for each rarity
+            heroesArray.forEach(hero => {
+                // Check legendary floor
+                if (hero.legendary.floor !== '-') {
+                    const legendaryFloor = parseFloat(hero.legendary.floor);
+                    if (!isNaN(legendaryFloor) && legendaryFloor < lowestLegendary) {
+                        lowestLegendary = legendaryFloor;
+                    }
+                }
+                
+                // Check epic floor
+                if (hero.epic.floor !== '-') {
+                    const epicFloor = parseFloat(hero.epic.floor);
+                    if (!isNaN(epicFloor) && epicFloor < lowestEpic) {
+                        lowestEpic = epicFloor;
+                    }
+                }
+                
+                // Check rare floor
+                if (hero.rare.floor !== '-') {
+                    const rareFloor = parseFloat(hero.rare.floor);
+                    if (!isNaN(rareFloor) && rareFloor < lowestRare) {
+                        lowestRare = rareFloor;
+                    }
+                }
+                
+                // Check common floor
+                if (hero.common.floor !== '-') {
+                    const commonFloor = parseFloat(hero.common.floor);
+                    if (!isNaN(commonFloor) && commonFloor < lowestCommon) {
+                        lowestCommon = commonFloor;
+                    }
+                }
+            });
+            
+            // Update the UI with the lowest floors
+            document.getElementById('legendary-floor').textContent = lowestLegendary === Infinity ? '-' : formatValue(lowestLegendary);
+            document.getElementById('epic-floor').textContent = lowestEpic === Infinity ? '-' : formatValue(lowestEpic);
+            document.getElementById('rare-floor').textContent = lowestRare === Infinity ? '-' : formatValue(lowestRare);
+            document.getElementById('common-floor').textContent = lowestCommon === Infinity ? '-' : formatValue(lowestCommon);
         }
 
         // Fetch and display marketplace data
@@ -483,6 +628,25 @@
                             <span id="db-updated" style="display: block; font-size: 0.8em; color: grey; margin-top: 5px; text-align: right;">${minDbUpdated !== 'N/A' ? formatDate(minDbUpdated) : 'N/A'} UTC (${timeAgo} min ago)</span>
                         </div>
                         
+                        <div class="global-floors">
+                            <div class="floor-card floor-legendary">
+                                <div class="floor-title">Legendary</div>
+                                <div class="floor-value" id="legendary-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-epic">
+                                <div class="floor-title">Epic</div>
+                                <div class="floor-value" id="epic-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-rare">
+                                <div class="floor-title">Rare</div>
+                                <div class="floor-value" id="rare-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-common">
+                                <div class="floor-title">Common</div>
+                                <div class="floor-value" id="common-floor">-</div>
+                            </div>
+                        </div>
+                        
                         <div class="search-container">
                             <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
                             <i class="fas fa-search search-icon"></i>
@@ -662,6 +826,9 @@
                     </div>
                 `;
 
+                // Move this call here, after the HTML is generated
+                updateGlobalFloors(heroesArray);
+
                 // Add the export function
                 window.exportToCSV = function() {
                     // Convert the raw data to CSV format
@@ -746,14 +913,6 @@
                         document.body.removeChild(link);
                     }
                 };
-
-                // Add formatting function
-                function formatValue(value) {
-                    if (value === '-' || value === '' || value === null || value === undefined) return '-';
-                    const num = parseFloat(value);
-                    if (isNaN(num)) return '-';
-                    return num >= 0.1 ? num.toFixed(2) : num.toFixed(3);
-                }
 
                 // New function to format the date
                 function formatDate(date) {
@@ -874,9 +1033,6 @@
                 document.getElementById('marketplace-container').innerHTML = 'Error loading marketplace data';
             }
         }
-
-        // Load data when page loads
-        window.onload = loadMarketplaceData;
 
         // Add this function to the script section
         function copyToClipboard(text, event) {

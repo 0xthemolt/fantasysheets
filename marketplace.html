@@ -459,6 +459,129 @@
             margin-top: 15px;
             font-size: 14px;
         }
+
+        /* Modal styles */
+        .seller-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .seller-modal {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            width: 160px;
+            max-width: 90vw;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .seller-modal-close {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .seller-modal-close:hover {
+            color: white;
+        }
+        
+        .seller-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .seller-modal-pfp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hero-card-image {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            border-radius: 4px;
+            margin-top: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-floor-info {
+            margin-top: 5px;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .seller-modal-name {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .seller-modal-twitter {
+            color: #1DA1F2;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 6px;
+            background: rgba(29, 161, 242, 0.1);
+            border-radius: 10px;
+            transition: background 0.2s;
+            font-size: 0.8em;
+        }
+        
+        .seller-modal-twitter:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+        
+        .seller-modal-id {
+            font-size: 0.7em;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px 6px;
+            border-radius: 10px;
+        }
+        
+        .seller-modal-portfolio {
+            margin-top: 5px;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -470,40 +593,142 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Function to toggle tooltip visibility
+        // Function to toggle tooltip (show seller modal)
         function toggleTooltip(icon) {
-            // Close all other open tooltips
-            document.querySelectorAll('.seller-icon.active').forEach(activeIcon => {
-                if (activeIcon !== icon) {
-                    activeIcon.classList.remove('active');
-                    activeIcon.nextElementSibling.style.display = 'none';
-                }
-            });
+            // Get seller info from data attributes
+            const sellerId = icon.getAttribute('data-seller-id');
+            const sellerName = icon.getAttribute('data-seller-name');
+            const sellerHandle = icon.getAttribute('data-seller-handle');
+            const sellerPfpUrl = icon.getAttribute('data-seller-pfp-url');
+            const sellerPortValue = icon.getAttribute('data-seller-port-value');
             
-            // Toggle this tooltip
-            const tooltip = icon.nextElementSibling;
-            const isVisible = tooltip.style.display === 'block';
-            
-            icon.classList.toggle('active', !isVisible);
-            tooltip.style.display = isVisible ? 'none' : 'block';
-            
-            // Close tooltip when clicking outside
-            if (!isVisible) {
-                const closeTooltip = function(e) {
-                    if (!tooltip.contains(e.target) && e.target !== icon) {
-                        icon.classList.remove('active');
-                        tooltip.style.display = 'none';
-                        document.removeEventListener('click', closeTooltip);
-                    }
-                };
-                
-                // Use setTimeout to avoid immediate triggering
-                setTimeout(() => {
-                    document.addEventListener('click', closeTooltip);
-                }, 0);
-            }
+            // Show modal with seller info
+            showSellerModal(sellerId, sellerName, sellerHandle, sellerPfpUrl, sellerPortValue);
         }
 
+        // Function to show seller modal
+        function showSellerModal(sellerId, sellerName, sellerHandle, sellerPfpUrl, sellerPortValue) {
+            // Create modal if it doesn't exist
+            let modalOverlay = document.getElementById('seller-modal-overlay');
+            if (!modalOverlay) {
+                modalOverlay = document.createElement('div');
+                modalOverlay.id = 'seller-modal-overlay';
+                modalOverlay.className = 'seller-modal-overlay';
+                
+                const modalHTML = `
+                    <div class="seller-modal">
+                        <div class="seller-modal-close" onclick="closeSellerModal()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <img id="seller-modal-pfp" class="seller-modal-pfp" src="" alt="Seller" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                            <div class="seller-modal-name" id="seller-modal-name"></div>
+                            <a id="seller-modal-twitter" class="seller-modal-twitter" href="" target="_blank">
+                                <i class="fab fa-x-twitter"></i> <span id="seller-modal-handle"></span>
+                            </a>
+                            <div class="seller-modal-id" id="seller-modal-id">
+                                <span id="seller-modal-id-text"></span>
+                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard(document.getElementById('seller-modal-id').getAttribute('data-seller-id'), event)"></i>
+                            </div>
+                            <div class="seller-modal-portfolio" id="seller-modal-portfolio">
+                                Portfolio: <span id="seller-modal-portfolio-value"></span>
+                                <img src="../icons/eth.webp" alt="ETH Icon" style="width: 18px; height: 18px; vertical-align: middle;">
+                            </div>
+                            <img id="hero-card-image" class="hero-card-image" src="" alt="Hero Card" style="display: none;">
+                            <div id="card-floor-info" class="card-floor-info" style="display: none;">
+                                Floor: <span id="card-floor-value"></span>
+                                <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modalOverlay.innerHTML = modalHTML;
+                document.body.appendChild(modalOverlay);
+                
+                // Close modal when clicking outside
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) {
+                        closeSellerModal();
+                    }
+                });
+            }
+            
+            // Update modal content
+            document.getElementById('seller-modal-pfp').src = sellerPfpUrl;
+            document.getElementById('seller-modal-name').textContent = sellerName;
+            document.getElementById('seller-modal-handle').textContent = '@' + sellerHandle;
+            document.getElementById('seller-modal-twitter').href = 'https://x.com/' + sellerHandle;
+            
+            if (sellerId) {
+                document.getElementById('seller-modal-id').style.display = 'flex';
+                document.getElementById('seller-modal-id-text').textContent = shortenId(sellerId);
+                document.getElementById('seller-modal-id').setAttribute('data-seller-id', sellerId);
+            } else {
+                document.getElementById('seller-modal-id').style.display = 'none';
+            }
+            
+            document.getElementById('seller-modal-portfolio-value').textContent = format_eth(sellerPortValue);
+            
+            // Get hero card data from the clicked element
+            const heroId = event.currentTarget.getAttribute('data-hero-id');
+            const rarity = event.currentTarget.getAttribute('data-rarity');
+            const stars = event.currentTarget.getAttribute('data-stars');
+            const floorPrice = event.currentTarget.getAttribute('data-floor-price');
+            
+            // If we have hero card data, show the image
+            if (heroId && rarity && stars) {
+                const heroCardImage = document.getElementById('hero-card-image');
+                const imageUrl = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                console.log('Hero Card Image URL:', {
+                    heroId,
+                    rarity,
+                    stars,
+                    fullUrl: imageUrl
+                });
+                heroCardImage.src = imageUrl;
+                heroCardImage.style.display = 'block';
+                
+                // Add error handling for the image
+                heroCardImage.onerror = function() {
+                    console.log('Image failed to load:', imageUrl);
+                    this.style.display = 'none';
+                };
+                
+                // Show floor price if available
+                if (floorPrice) {
+                    document.getElementById('card-floor-value').textContent = format_eth(floorPrice);
+                    document.getElementById('card-floor-info').style.display = 'flex';
+                } else {
+                    document.getElementById('card-floor-info').style.display = 'none';
+                }
+            } else {
+                console.log('Missing hero card data:', { heroId, rarity, stars });
+                document.getElementById('hero-card-image').style.display = 'none';
+                document.getElementById('card-floor-info').style.display = 'none';
+            }
+            
+            // Show modal
+            modalOverlay.style.display = 'flex';
+            
+            // Prevent scrolling on body
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Function to close seller modal
+        function closeSellerModal() {
+            const modalOverlay = document.getElementById('seller-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            
+            // Re-enable scrolling
+            document.body.style.overflow = '';
+        }
+        
+        // Make closeSellerModal globally accessible
+        window.closeSellerModal = closeSellerModal;
+        
         // Load data when page loads
         window.onload = loadMarketplaceData;
 
@@ -570,7 +795,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -596,6 +821,7 @@
                     if (!acc[item.hero_handle]) {
                         acc[item.hero_handle] = {
                             hero_handle: item.hero_handle,
+                            hero_id: item.hero_id,
                             hero_name: item.hero_name,
                             hero_pfp_url: item.hero_pfp_url,
                             inflation_degree: item.inflation_degree,
@@ -889,25 +1115,17 @@
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
                                             ${item.legendary.seller_info ? `
-                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
-                                                <div class="seller-tooltip">
-                                                    <div class="seller-info">
-                                                        <img src="${item.legendary.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
-                                                        <span class="seller-name">${item.legendary.seller_info.name}</span>
-                                                        <a href="https://x.com/${item.legendary.seller_info.handle}" target="_blank" class="seller-twitter">
-                                                            <i class="fab fa-x-twitter"></i> @${item.legendary.seller_info.handle}
-                                                        </a>
-                                                        ${item.legendary.seller_info.seller_id ? `
-                                                            <div class="seller-id">
-                                                                ${shortenId(item.legendary.seller_info.seller_id)}
-                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.legendary.seller_info.seller_id}', event)"></i>
-                                                            </div>
-                                                        ` : ''}
-                                                        <div class="seller-port-value">
-                                                            Portfolio: ${format_eth(item.legendary.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <i class="fas fa-user seller-icon" 
+                                                   onclick="toggleTooltip(this)"
+                                                   data-seller-id="${item.legendary.seller_info.seller_id}"
+                                                   data-seller-name="${item.legendary.seller_info.name}"
+                                                   data-seller-handle="${item.legendary.seller_info.handle}"
+                                                   data-seller-pfp-url="${item.legendary.seller_info.pfp_url}"
+                                                   data-seller-port-value="${item.legendary.seller_info.seller_port_value}"
+                                                   data-hero-id="${item.hero_id}"
+                                                   data-rarity="Legendary"
+                                                   data-stars="${item.stars}"
+                                                   data-floor-price="${item.legendary.floor}"></i>
                                             ` : ''}
                                         </div>
                                     </td>
@@ -918,25 +1136,17 @@
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
                                             ${item.epic.seller_info ? `
-                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
-                                                <div class="seller-tooltip">
-                                                    <div class="seller-info">
-                                                        <img src="${item.epic.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
-                                                        <span class="seller-name">${item.epic.seller_info.name}</span>
-                                                        <a href="https://x.com/${item.epic.seller_info.handle}" target="_blank" class="seller-twitter">
-                                                            <i class="fab fa-x-twitter"></i> @${item.epic.seller_info.handle}
-                                                        </a>
-                                                        ${item.epic.seller_info.seller_id ? `
-                                                            <div class="seller-id">
-                                                                ${shortenId(item.epic.seller_info.seller_id)}
-                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.epic.seller_info.seller_id}', event)"></i>
-                                                            </div>
-                                                        ` : ''}
-                                                        <div class="seller-port-value">
-                                                            Portfolio: ${format_eth(item.epic.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <i class="fas fa-user seller-icon" 
+                                                   onclick="toggleTooltip(this)"
+                                                   data-seller-id="${item.epic.seller_info.seller_id}"
+                                                   data-seller-name="${item.epic.seller_info.name}"
+                                                   data-seller-handle="${item.epic.seller_info.handle}"
+                                                   data-seller-pfp-url="${item.epic.seller_info.pfp_url}"
+                                                   data-seller-port-value="${item.epic.seller_info.seller_port_value}"
+                                                   data-hero-id="${item.hero_id}"
+                                                   data-rarity="Epic"
+                                                   data-stars="${item.stars}"
+                                                   data-floor-price="${item.epic.floor}"></i>
                                             ` : ''}
                                         </div>
                                     </td>
@@ -947,25 +1157,17 @@
                                         <div class="listed-count">
                                             ${item.rare.listed_count}
                                             ${item.rare.seller_info ? `
-                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
-                                                <div class="seller-tooltip">
-                                                    <div class="seller-info">
-                                                        <img src="${item.rare.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
-                                                        <span class="seller-name">${item.rare.seller_info.name}</span>
-                                                        <a href="https://x.com/${item.rare.seller_info.handle}" target="_blank" class="seller-twitter">
-                                                            <i class="fab fa-x-twitter"></i> @${item.rare.seller_info.handle}
-                                                        </a>
-                                                        ${item.rare.seller_info.seller_id ? `
-                                                            <div class="seller-id">
-                                                                ${shortenId(item.rare.seller_info.seller_id)}
-                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.rare.seller_info.seller_id}', event)"></i>
-                                                            </div>
-                                                        ` : ''}
-                                                        <div class="seller-port-value">
-                                                            Portfolio: ${format_eth(item.rare.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <i class="fas fa-user seller-icon" 
+                                                   onclick="toggleTooltip(this)"
+                                                   data-seller-id="${item.rare.seller_info.seller_id}"
+                                                   data-seller-name="${item.rare.seller_info.name}"
+                                                   data-seller-handle="${item.rare.seller_info.handle}"
+                                                   data-seller-pfp-url="${item.rare.seller_info.pfp_url}"
+                                                   data-seller-port-value="${item.rare.seller_info.seller_port_value}"
+                                                   data-hero-id="${item.hero_id}"
+                                                   data-rarity="Rare"
+                                                   data-stars="${item.stars}"
+                                                   data-floor-price="${item.rare.floor}"></i>
                                             ` : ''}
                                         </div>
                                     </td>
@@ -976,25 +1178,17 @@
                                         <div class="listed-count">
                                             ${item.common.listed_count}
                                             ${item.common.seller_info ? `
-                                                <i class="fas fa-user seller-icon" onclick="toggleTooltip(this)"></i>
-                                                <div class="seller-tooltip">
-                                                    <div class="seller-info">
-                                                        <img src="${item.common.seller_info.pfp_url}" alt="Seller" class="seller-pfp" onerror="this.onerror=null; this.src='../icons/fan.webp';">
-                                                        <span class="seller-name">${item.common.seller_info.name}</span>
-                                                        <a href="https://x.com/${item.common.seller_info.handle}" target="_blank" class="seller-twitter">
-                                                            <i class="fab fa-x-twitter"></i> @${item.common.seller_info.handle}
-                                                        </a>
-                                                        ${item.common.seller_info.seller_id ? `
-                                                            <div class="seller-id">
-                                                                ${shortenId(item.common.seller_info.seller_id)}
-                                                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard('${item.common.seller_info.seller_id}', event)"></i>
-                                                            </div>
-                                                        ` : ''}
-                                                        <div class="seller-port-value">
-                                                            Portfolio: ${format_eth(item.common.seller_info.seller_port_value)} <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <i class="fas fa-user seller-icon" 
+                                                   onclick="toggleTooltip(this)"
+                                                   data-seller-id="${item.common.seller_info.seller_id}"
+                                                   data-seller-name="${item.common.seller_info.name}"
+                                                   data-seller-handle="${item.common.seller_info.handle}"
+                                                   data-seller-pfp-url="${item.common.seller_info.pfp_url}"
+                                                   data-seller-port-value="${item.common.seller_info.seller_port_value}"
+                                                   data-hero-id="${item.hero_id}"
+                                                   data-rarity="Common"
+                                                   data-stars="${item.stars}"
+                                                   data-floor-price="${item.common.floor}"></i>
                                             ` : ''}
                                         </div>
                                     </td>
@@ -1288,23 +1482,6 @@
                         if (!isActive) {
                             this.classList.add('active');
                             sortBySpread('rare');
-                        } else {
-                            // If it was already active, just deactivate (clear filters)
-                            clearFilters();
-                        }
-                    });
-                    
-                    commonSpreadFilter.addEventListener('click', function() {
-                        const isActive = this.classList.contains('active');
-                        
-                        // Clear all active states first
-                        rareSpreadFilter.classList.remove('active');
-                        commonSpreadFilter.classList.remove('active');
-                        
-                        // If it wasn't active before, make it active and sort
-                        if (!isActive) {
-                            this.classList.add('active');
-                            sortBySpread('common');
                         } else {
                             // If it was already active, just deactivate (clear filters)
                             clearFilters();

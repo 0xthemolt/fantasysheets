@@ -355,6 +355,110 @@
             font-size: 0.8em;
             padding: 6px 8px;
         }
+
+        .star-filter-container {
+            margin: 15px 0;
+        }
+
+        /* Double Range Slider Styles */
+        .double_range_slider_box {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 36px; /* Match the search input height */
+            background: rgba(30, 30, 30, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 6px; /* Match search input border-radius */
+            padding: 0 50px; /* Adjusted padding to maintain space for labels */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 40px; /* Add margin to make room for labels */
+            box-sizing: border-box; /* Ensure padding is included in height */
+        }
+
+        .double_range_slider {
+            position: relative;
+            width: 90%;
+            height: 4px; /* Slightly reduced for better proportions */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .range_track {
+            position: absolute;
+            height: 100%;
+            background: #FACC15;
+            border-radius: 5px;
+            top: 0;
+        }
+
+        .double_range_slider input[type="range"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            position: absolute;
+            background: transparent;
+            pointer-events: none;
+            top: 0;
+            height: 5px;
+            margin: 0;
+        }
+
+        .double_range_slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FACC15;
+            cursor: pointer;
+            pointer-events: auto;
+            margin-top: -2px;
+            border: 2px solid #FACC15;
+        }
+
+        .double_range_slider input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FACC15;
+            cursor: pointer;
+            pointer-events: auto;
+            border: 2px solid #FACC15;
+            margin-top: -2px;
+        }
+
+        .minvalue, .maxvalue {
+            position: absolute;
+            font-size: 12px;
+            color: #fff;
+            background: rgba(30, 30, 30, 0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5; /* Ensure they appear above other elements */
+        }
+        
+        .minvalue {
+            left: -40px; /* Move further left */
+            transform: translateY(-50%);
+        }
+        
+        .maxvalue {
+            right: -40px; /* Move further right */
+            transform: translateY(-50%);
+        }
+
+        .filter-label {
+            color: #fff;
+            margin-top: 15px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -700,15 +804,22 @@
                             </div>
                         </div>
                         
-                        <div class="search-container">
-                            <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
-                            <i class="fas fa-search search-icon"></i>
-                        </div>
-
-                        <div class="stars-filter-container">
-                            <div class="stars-filter-label">Stars: <span id="stars-range-value">1 - 8</span></div>
-                            <div class="range-slider-container">
-                                <div class="range-slider" id="stars-range-slider"></div>
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+                            <div class="search-container" style="margin-bottom: 0;">
+                                <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            
+                            <div class="star-filter-container" style="margin: 0; flex: 1;">
+                                <div class="double_range_slider_box">
+                                    <div class="double_range_slider">
+                                        <span class="range_track" id="range_track"></span>
+                                        <input type="range" class="min" id="min-stars" min="1" max="8" value="1" step="1">
+                                        <input type="range" class="max" id="max-stars" min="1" max="8" value="8" step="1">
+                                        <div class="minvalue">1★</div>
+                                        <div class="maxvalue">8★</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1206,6 +1317,12 @@
 
                 // Call the function after the table is created
                 initializeBidFloorSpreadSorting();
+
+                // After the table HTML is generated and inserted into the DOM
+                // Initialize the star range slider
+                setTimeout(() => {
+                    initializeStarRangeSlider();
+                }, 100);
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('marketplace-container').innerHTML = 'Error loading marketplace data';
@@ -1258,6 +1375,90 @@
             } else {
                 return num.toFixed(2); // Format as #.## for values less than or equal to 1
             }
+        }
+
+        // Function to initialize the star range slider
+        function initializeStarRangeSlider() {
+            const minStars = document.getElementById('min-stars');
+            const maxStars = document.getElementById('max-stars');
+            const rangeTrack = document.getElementById('range_track');
+            const minValue = document.querySelector('.minvalue');
+            const maxValue = document.querySelector('.maxvalue');
+            
+            if (!minStars || !maxStars || !rangeTrack || !minValue || !maxValue) {
+                console.warn('Star range slider elements not found');
+                return;
+            }
+            
+            // Initialize the range track
+            function updateRangeTrack() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                const minPercent = ((minVal - 1) / 7) * 100;
+                const maxPercent = ((maxVal - 1) / 7) * 100;
+                
+                rangeTrack.style.left = minPercent + '%';
+                rangeTrack.style.width = (maxPercent - minPercent) + '%';
+                
+                minValue.textContent = minVal + '★';
+                maxValue.textContent = maxVal + '★';
+                
+                // Filter the marketplace table
+                filterMarketplaceByStars(minVal, maxVal);
+            }
+            
+            // Filter marketplace table based on star values
+            function filterMarketplaceByStars(min, max) {
+                const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+                let visibleCount = 0;
+                
+                marketplaceRows.forEach(row => {
+                    const starsCell = row.querySelector('td:nth-child(4)'); // Stars column
+                    if (!starsCell) return;
+                    
+                    const heroStars = parseInt(starsCell.textContent.trim());
+                    
+                    if (heroStars >= min && heroStars <= max) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                const noResultsMessage = document.getElementById('no-results');
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
+            }
+            
+            // Prevent min from exceeding max
+            minStars.addEventListener('input', function() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                
+                if (minVal > maxVal) {
+                    minStars.value = maxVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Prevent max from being less than min
+            maxStars.addEventListener('input', function() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                
+                if (maxVal < minVal) {
+                    maxStars.value = minVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Initialize the slider
+            updateRangeTrack();
         }
     </script>
 </body>

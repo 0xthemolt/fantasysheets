@@ -621,6 +621,7 @@
                             <i class="fas fa-times"></i>
                         </div>
                         <div class="seller-modal-content">
+                            <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Seller</div>
                             <img id="seller-modal-pfp" class="seller-modal-pfp" src="" alt="Seller" onerror="this.onerror=null; this.src='../icons/fan.webp';">
                             <div class="seller-modal-name" id="seller-modal-name"></div>
                             <a id="seller-modal-twitter" class="seller-modal-twitter" href="" target="_blank">
@@ -636,7 +637,7 @@
                             </div>
                             <img id="hero-card-image" class="hero-card-image" src="" alt="Hero Card" style="display: none;">
                             <div id="card-floor-info" class="card-floor-info" style="display: none;">
-                                Floor: <span id="card-floor-value"></span>
+                                Ask: <span id="card-floor-value"></span>
                                 <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
                             </div>
                         </div>
@@ -703,7 +704,6 @@
                     document.getElementById('card-floor-info').style.display = 'none';
                 }
             } else {
-                console.log('Missing hero card data:', { heroId, rarity, stars });
                 document.getElementById('hero-card-image').style.display = 'none';
                 document.getElementById('card-floor-info').style.display = 'none';
             }
@@ -1482,6 +1482,24 @@
                         if (!isActive) {
                             this.classList.add('active');
                             sortBySpread('rare');
+                        } else {
+                            // If it was already active, just deactivate (clear filters)
+                            clearFilters();
+                        }
+                    });
+                    
+                    // Add event listener for common spread filter
+                    commonSpreadFilter.addEventListener('click', function() {
+                        const isActive = this.classList.contains('active');
+                        
+                        // Clear all active states first
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // If it wasn't active before, make it active and sort
+                        if (!isActive) {
+                            this.classList.add('active');
+                            sortBySpread('common');
                         } else {
                             // If it was already active, just deactivate (clear filters)
                             clearFilters();

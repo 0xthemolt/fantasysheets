@@ -284,7 +284,7 @@
         ],
         preview: [
             { filename: 'tournaments.html', title: 'Deck / Player Registration Stats' }, 
-            { filename: 'monad/tournaments.html', title: 'Monad Tournaments' , isNew: true},
+            { filename: 'monad/tournaments.html', title: 'Monad Tournaments', isNew: true, customColor: '#1F0053' },
             //{ filename: 'index.html', title: 'PaperHands (in development)' },
             //{ filename: 'index.html', title: 'Marketplace Trends (in development)' },
             // { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
@@ -313,6 +313,11 @@
                 const link = document.createElement('a');
                 link.href = page.filename;
                 link.className = 'nav-link';
+                
+                if (page.customColor) {
+                    link.style.backgroundColor = page.customColor;
+                    link.style.color = '#fff'; // Setting text color to white for better contrast
+                }
                 
                 if (page.icon) {
                     const icon = document.createElement('i');

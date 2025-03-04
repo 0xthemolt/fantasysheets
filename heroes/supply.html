@@ -101,7 +101,8 @@
                         stars: record.stars,
                         score: record.score,
                         currentSupply: {},
-                        growthRates: {}
+                        growthRates: {},
+                        absoluteChanges: {}
                     });
                 }
                 
@@ -118,7 +119,7 @@
                     };
                 }
                 
-                // Get growth rates for different time periods
+                // Get growth rates and calculate absolute changes for different time periods
                 const timePeriods = ['~6 hours', '~12 hours', '~24 hours', '~48 hours', '~7 days', '~14 days'];
                 if (timePeriods.includes(record.time_period)) {
                     hero.growthRates[record.time_period] = {
@@ -127,6 +128,15 @@
                         rare: record.rare_pct_change,
                         common: record.common_pct_change,
                         aggregate: record.aggregate_pct_change
+                    };
+                    
+                    // Calculate absolute changes
+                    hero.absoluteChanges[record.time_period] = {
+                        legendary: record.current_legendary - record.legendary_cards,
+                        epic: record.current_epic - record.epic_cards,
+                        rare: record.current_rare - record.rare_cards,
+                        common: record.current_common - record.common_cards,
+                        aggregate: record.current_aggregate - record.aggregate_cards
                     };
                 }
             });
@@ -160,6 +170,14 @@
                             '48h': hero.growthRates['~48 hours'] ? hero.growthRates['~48 hours'][rarity.key] : 'N/A',
                             '7d': hero.growthRates['~7 days'] ? hero.growthRates['~7 days'][rarity.key] : 'N/A',
                             '14d': hero.growthRates['~14 days'] ? hero.growthRates['~14 days'][rarity.key] : 'N/A'
+                        },
+                        absoluteChange: {
+                            '6h': hero.absoluteChanges['~6 hours'] ? hero.absoluteChanges['~6 hours'][rarity.key] : null,
+                            '12h': hero.absoluteChanges['~12 hours'] ? hero.absoluteChanges['~12 hours'][rarity.key] : null,
+                            '24h': hero.absoluteChanges['~24 hours'] ? hero.absoluteChanges['~24 hours'][rarity.key] : null,
+                            '48h': hero.absoluteChanges['~48 hours'] ? hero.absoluteChanges['~48 hours'][rarity.key] : null,
+                            '7d': hero.absoluteChanges['~7 days'] ? hero.absoluteChanges['~7 days'][rarity.key] : null,
+                            '14d': hero.absoluteChanges['~14 days'] ? hero.absoluteChanges['~14 days'][rarity.key] : null
                         }
                     };
                     
@@ -378,6 +396,11 @@
                 .table-container {
                     overflow-x: auto;
                 }
+                
+                .absolute-change {
+                    font-size: 12px;
+                    opacity: 0.8;
+                }
             `;
             document.head.appendChild(style);
             
@@ -435,11 +458,22 @@
                 ['6h', '12h', '24h', '48h', '7d', '14d'].forEach(period => {
                     const growthCell = document.createElement('td');
                     const growthValue = row.growth[period];
+                    const absoluteChange = row.absoluteChange[period];
                     
                     if (growthValue !== 'N/A') {
                         // Format to 1 decimal place and add % sign
                         const numericValue = parseFloat(growthValue);
-                        growthCell.textContent = numericValue.toFixed(1) + '%';
+                        let cellContent = numericValue.toFixed(1) + '%';
+                        
+                        // Add absolute change in parentheses if available
+                        if (absoluteChange !== null) {
+                            const formattedChange = absoluteChange > 0 ? 
+                                '+' + absoluteChange.toLocaleString() : 
+                                absoluteChange.toLocaleString();
+                            cellContent += `<br><span class="absolute-change">(${formattedChange})</span>`;
+                        }
+                        
+                        growthCell.innerHTML = cellContent;
                         
                         // Add color based on growth rate
                         if (numericValue > 0) {
@@ -462,7 +496,30 @@
         function sortTable(key, headerElement) {
             const table = headerElement.closest('table');
             const tbody = document.getElementById('hero-supply-tbody');
-            const data = JSON.parse(table.dataset.tableData);
+            
+            // Get the current filtered data instead of the original data
+            const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
+            const rarityFilters = Array.from(document.querySelectorAll('.dropdown-menu input:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const originalData = JSON.parse(table.dataset.tableData);
+            
+            // Apply filters first
+            const filteredData = originalData.filter(row => {
+                // Check if rarity is selected
+                if (!rarityFilters.includes(row.rarityType)) {
+                    return false;
+                }
+                
+                // Check if search term matches hero name or handle
+                if (searchTerm) {
+                    const heroName = row.heroName.toLowerCase();
+                    const heroHandle = row.heroHandle.toLowerCase();
+                    return heroName.includes(searchTerm) || heroHandle.includes(searchTerm);
+                }
+                
+                return true;
+            });
             
             // Get current sort direction
             const currentDirection = headerElement.classList.contains('sort-asc') ? 'asc' : 
@@ -478,8 +535,8 @@
             const newDirection = currentDirection === 'desc' ? 'asc' : 'desc';
             headerElement.classList.add(`sort-${newDirection}`);
             
-            // Sort the data
-            data.sort((a, b) => {
+            // Sort the filtered data
+            filteredData.sort((a, b) => {
                 let valueA = a[key];
                 let valueB = b[key];
                 
@@ -499,8 +556,8 @@
                 }
             });
             
-            // Re-render the table with sorted data
-            renderRows(data, tbody);
+            // Re-render the table with sorted and filtered data
+            renderRows(filteredData, tbody);
         }
 
         // Add CSS for the filters
@@ -514,9 +571,15 @@
                 gap: 15px;
             }
             
+            .search-box {
+                /* Add this to ensure no border on the search-box container */
+                border: none;
+            }
+            
             .search-box input {
                 max-width: 250px;
                 padding: 8px 12px;
+                border: 1px solid #444;
                 border-radius: 4px;
                 background-color: rgba(30, 30, 30, 0.7);
                 color: #fff;
@@ -558,6 +621,10 @@
                 border-radius: 4px;
                 padding: 8px;
                 margin-top: 4px;
+            }
+            
+            .dropdown-menu.show {
+                display: block;
             }
             
             .dropdown-menu label {

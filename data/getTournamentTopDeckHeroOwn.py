@@ -27,8 +27,8 @@ with base_records as (
         t.tournament_unique_key,
         t2.league,
         t.hero_handle,
-        t.card_picture_url,
-        t.hero_fantasy_score,
+        t.hero_id,
+        ghwst.fantasy_score,
         t.tournament_player_deck_id,
         t.player_rank,
         card_stars.hero_stars,
@@ -47,7 +47,11 @@ with base_records as (
 			end) ,0) as reward_value_added,
         t.db_updated_cst + INTERVAL '6 hours' as db_updated_utc
     from agg.tournamentownership t 
-    join flatten.get_tournaments t2 on t.tournament_id = t2.tournament_id
+    join flatten.get_tournaments t2 
+    	on t.tournament_id = t2.tournament_id
+    left join flatten.get_heros_with_stats_tournament ghwst 
+    	on t.hero_id = ghwst.hero_id
+    	and t.tournament_unique_key = ghwst.tournament_unique_key
     left join flatten.get_cards_flags_stars card_stars
 	    ON t.hero_id = card_stars.hero_id
 	    and t2.start_timestamp between card_stars.start_datetime and card_stars.end_datetime
@@ -58,7 +62,7 @@ with base_records as (
     where t.tournament_unique_key = 'Main 41'
 )
 ,reward_value_added as (
-select tournament_id,tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
+select tournament_id,tournament_unique_key,league,hero_handle,hero_id,fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
 from base_records
 group by 1,2,3,4,5,6,7,8,9
 order by 3 desc
@@ -76,6 +80,7 @@ itm_records as (
 	    and br.player_rank between rewards.range_start and rewards.range_end 
 	    and rewards.reward_type = 'ETH'
 ),
+--select * from itm_records where league = 'Silver' order by player_rank  asc;
 deck_counts as (
     select tournament_id,'top50' as category, count(distinct tournament_player_deck_id) as total_decks
     from top50_records
@@ -91,8 +96,8 @@ hero_stats as (
         t.tournament_unique_key,
         t.league,
         t.hero_handle,
-        t.card_picture_url,
-        t.hero_fantasy_score,
+        t.hero_id,
+        t.fantasy_score,
         t.hero_stars,
         t.db_updated_utc,
         count(*) as hero_count,
@@ -105,8 +110,8 @@ hero_stats as (
         t.tournament_unique_key,
         t.league,
         t.hero_handle,
-        t.card_picture_url,
-        t.hero_fantasy_score,
+        t.hero_id,
+        t.fantasy_score,
         t.hero_stars,
         t.db_updated_utc,
         count(*) as hero_count,
@@ -123,11 +128,11 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
+select tournament_unique_key,league,hero_handle,concat('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
 from base
 where rnk <= 10
 union all
-select tournament_unique_key,league,hero_handle,card_picture_url,hero_fantasy_score as fantasy_score,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
+select tournament_unique_key,league,hero_handle,concat('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
 from reward_value_added
 where rnk <= 10
 order by tournament_unique_key,category,rnk asc

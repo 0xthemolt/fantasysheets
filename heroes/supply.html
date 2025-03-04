@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Font Awesome for the Twitter/X icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -25,18 +27,12 @@
                 <input type="text" id="heroSearch" placeholder="Search heroes..." maxlength="50">
             </div>
             <div class="rarity-filter">
-                <div class="dropdown">
-                    <button class="dropdown-toggle">Filter by Rarity <span class="caret">▼</span></button>
-                    <div class="dropdown-menu">
-                        <label><input type="checkbox" value="Legendary" checked> Legendary</label>
-                        <label><input type="checkbox" value="Epic" checked> Epic</label>
-                        <label><input type="checkbox" value="Rare" checked> Rare</label>
-                        <label><input type="checkbox" value="Common" checked> Common</label>
-                        <label><input type="checkbox" value="Aggregate" checked> Aggregate</label>
-                        <div class="dropdown-actions">
-                            <button id="applyFilter">Apply</button>
-                        </div>
-                    </div>
+                <div class="filter-options">
+                    <label class="filter-option legendary"><input type="checkbox" value="Legendary" checked> Legendary</label>
+                    <label class="filter-option epic"><input type="checkbox" value="Epic" checked> Epic</label>
+                    <label class="filter-option rare"><input type="checkbox" value="Rare" checked> Rare</label>
+                    <label class="filter-option common"><input type="checkbox" value="Common" checked> Common</label>
+                    <label class="filter-option aggregate"><input type="checkbox" value="Aggregate" checked> Aggregate</label>
                 </div>
             </div>
         </div>
@@ -66,10 +62,12 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('hero_supply_trends')
-                    .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, current_legendary, current_epic, current_rare, current_common, current_aggregate, legendary_pct_change, epic_pct_change, rare_pct_change, common_pct_change, aggregate_pct_change, start_datetime, hours_ago, days_ago, time_period')
+                    .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, inflation, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, current_legendary, current_epic, current_rare, current_common, current_aggregate, legendary_pct_change, epic_pct_change, rare_pct_change, common_pct_change, aggregate_pct_change, start_datetime, hours_ago, days_ago, time_period')
                     .order('start_datetime', { ascending: false });
 
                 if (error) throw error;
+
+                console.log('Fetched Data:', data); // Log the fetched data
                 
                 // Process the data
                 const processedData = processHeroData(data);
@@ -100,6 +98,7 @@
                         heroPfpUrl: record.hero_pfp_url,
                         stars: record.stars,
                         score: record.score,
+                        inflation: record.inflation,
                         currentSupply: {},
                         growthRates: {},
                         absoluteChanges: {}
@@ -116,7 +115,7 @@
                         rare: record.current_rare,
                         common: record.current_common,
                         aggregate: record.current_aggregate
-                    };
+                    }
                 }
                 
                 // Get growth rates and calculate absolute changes for different time periods
@@ -161,6 +160,7 @@
                         heroPfpUrl: hero.heroPfpUrl,
                         stars: hero.stars,
                         score: hero.score,
+                        inflation: hero.inflation,
                         rarityType: rarity.name,
                         currentSupply: hero.currentSupply[rarity.key],
                         growth: {
@@ -205,6 +205,7 @@
                 { id: 'hero', label: 'Hero', sortable: false },
                 { id: 'stats', label: 'Stats', sortable: true, sortKey: 'score' },
                 { id: 'rarity', label: 'Rarity', sortable: false },
+                { id: 'inflation', label: 'Inflation', sortable: true, sortKey: 'inflation' },
                 { id: 'currentSupply', label: 'Current Supply', sortable: true, sortKey: 'currentSupply' },
                 { id: '6h', label: '6h Growth', sortable: true, sortKey: 'growth6h' },
                 { id: '12h', label: '12h Growth', sortable: true, sortKey: 'growth12h' },
@@ -425,9 +426,8 @@
                             <div class="hero-name">${row.heroName}</div>
                             <div class="hero-handle">
                                 <a href="https://x.com/${row.heroHandle}" target="_blank">
-                                    <i class="fab fa-twitter"></i>
+                                    <i class="fab fa-x-twitter"></i>
                                 </a>
-                                @${row.heroHandle}
                             </div>
                         </div>
                     </div>
@@ -448,6 +448,21 @@
                 rarityCell.className = `rarity-${row.rarityType.toLowerCase()}`;
                 rarityCell.textContent = row.rarityType;
                 tr.appendChild(rarityCell);
+                
+                // Inflation column
+                const inflationCell = document.createElement('td');
+                inflationCell.textContent = row.inflation !== undefined ? Math.round(row.inflation) : 'N/A';
+                
+                // Conditional formatting for inflation
+                if (row.inflation >= 75) {
+                    inflationCell.className = 'high-inflation'; // Bad inflation
+                } else if (row.inflation >= 50) {
+                    inflationCell.className = 'medium-inflation'; // Moderate inflation
+                } else {
+                    inflationCell.className = 'low-inflation'; // Good inflation
+                }
+                
+                tr.appendChild(inflationCell);
                 
                 // Current supply
                 const currentSupplyCell = document.createElement('td');
@@ -499,7 +514,7 @@
             
             // Get the current filtered data instead of the original data
             const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
-            const rarityFilters = Array.from(document.querySelectorAll('.dropdown-menu input:checked'))
+            const rarityFilters = Array.from(document.querySelectorAll('.filter-options input:checked'))
                 .map(checkbox => checkbox.value);
             
             const originalData = JSON.parse(table.dataset.tableData);
@@ -590,94 +605,51 @@
                 color: #aaa;
             }
             
-            .dropdown {
-                position: relative;
-                display: inline-block;
-            }
-            
-            .dropdown-toggle {
-                padding: 8px 12px;
-                background-color: rgba(30, 30, 30, 0.7);
-                color: #fff;
-                border: 1px solid #444;
-                border-radius: 4px;
-                cursor: pointer;
+            .filter-options {
                 display: flex;
-                align-items: center;
+                flex-wrap: wrap;
                 gap: 8px;
             }
             
-            .caret {
-                font-size: 10px;
-            }
-            
-            .dropdown-menu {
-                display: none;
-                position: absolute;
-                background-color: rgba(40, 40, 40, 0.95);
-                min-width: 160px;
-                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
-                z-index: 1;
-                border-radius: 4px;
-                padding: 8px;
-                margin-top: 4px;
-            }
-            
-            .dropdown-menu.show {
-                display: block;
-            }
-            
-            .dropdown-menu label {
-                display: block;
-                padding: 6px 8px;
-                color: #fff;
-                cursor: pointer;
-            }
-            
-            .dropdown-menu input {
-                margin-right: 8px;
-            }
-            
-            .dropdown-actions {
-                display: flex;
-                justify-content: flex-end;
-                margin-top: 8px;
-                padding-top: 8px;
-                border-top: 1px solid #444;
-            }
-            
-            .dropdown-actions button {
-                background-color: rgba(60, 60, 60, 0.8);
-                color: #fff;
-                border: none;
+            .filter-option {
+                display: inline-flex;
+                align-items: center;
                 padding: 5px 10px;
-                border-radius: 3px;
+                background-color: rgba(30, 30, 30, 0.7);
+                border-radius: 4px;
+                color: #fff;
                 cursor: pointer;
-                font-size: 12px;
+                font-size: 0.9em;
+                border: 1px solid #444;
+                transition: all 0.2s ease;
             }
             
-            .dropdown-actions button:hover {
-                background-color: rgba(80, 80, 80, 0.8);
+            .filter-option input {
+                margin-right: 5px;
             }
             
-            /* Rarity colors for checkboxes */
-            .dropdown-menu label:nth-child(1) {
+            .filter-option:hover {
+                background-color: rgba(50, 50, 50, 0.8);
+            }
+            
+            /* Rarity colors for filter options */
+            .filter-option.legendary {
                 border-left: 3px solid #FBE7FF;
             }
             
-            .dropdown-menu label:nth-child(2) {
+            .filter-option.epic {
                 border-left: 3px solid #F1A3FD;
             }
             
-            .dropdown-menu label:nth-child(3) {
+            .filter-option.rare {
                 border-left: 3px solid #00FFDF;
             }
             
-            .dropdown-menu label:nth-child(4) {
+            .filter-option.common {
                 border-left: 3px solid #93FF01;
             }
             
-            .dropdown-menu label:nth-child(5) {
+            .filter-option.aggregate {
                 border-left: 3px solid #32CD32;
             }
         `;
@@ -686,7 +658,7 @@
         // Function to handle filtering
         function filterTable() {
             const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
-            const rarityFilters = Array.from(document.querySelectorAll('.dropdown-menu input:checked'))
+            const rarityFilters = Array.from(document.querySelectorAll('.filter-options input:checked'))
                 .map(checkbox => checkbox.value);
             
             const table = document.querySelector('.hero-supply-table');
@@ -718,40 +690,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchHeroSupplyData();
             
-            // Toggle dropdown
-            document.querySelector('.dropdown-toggle').addEventListener('click', function() {
-                document.querySelector('.dropdown-menu').classList.toggle('show');
-            });
-            
-            // Close dropdown when clicking outside
-            window.addEventListener('click', function(event) {
-                if (!event.target.matches('.dropdown-toggle') && 
-                    !event.target.matches('.caret') && 
-                    !event.target.closest('.dropdown-menu')) {
-                    const dropdowns = document.getElementsByClassName('dropdown-menu');
-                    for (let i = 0; i < dropdowns.length; i++) {
-                        if (dropdowns[i].classList.contains('show')) {
-                            dropdowns[i].classList.remove('show');
-                            filterTable(); // Apply filter when closing dropdown
-                        }
-                    }
-                }
-            });
-            
-            // Apply filter button
-            document.getElementById('applyFilter').addEventListener('click', function() {
-                filterTable();
-                document.querySelector('.dropdown-menu').classList.remove('show');
-            });
-            
             // Add event listener for search input
             document.getElementById('heroSearch').addEventListener('input', filterTable);
             
-            // Remove immediate filtering on checkbox change
-            const checkboxes = document.querySelectorAll('.dropdown-menu input');
+            // Add event listeners for checkboxes
+            const checkboxes = document.querySelectorAll('.filter-option input');
             checkboxes.forEach(checkbox => {
-                // We no longer apply filter immediately on checkbox change
-                // The filter will be applied when clicking Apply or clicking outside
+                checkbox.addEventListener('change', filterTable);
             });
         });
     </script>

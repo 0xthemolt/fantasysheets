@@ -18,9 +18,6 @@
     <div class="container">
         <h1>Hero Supply Data</h1>
         <div id="loading">Loading data...</div>
-        <div>
-            <input type="text" id="searchBox" class="search-input" placeholder="Search heroes..." oninput="filterHeroes()" />
-        </div>
         <div id="heroSupplyTable" class="table-container"></div>
     </div>
 
@@ -325,7 +322,7 @@
                 // Add a separator row between heroes
                 const separatorRow = document.createElement('tr');
                 separatorRow.className = 'hero-separator';
-                separatorRow.style.backgroundColor = 'black';
+                separatorRow.style.backgroundColor = 'transparent';
                 separatorRow.innerHTML = '<td colspan="17"></td>';
                 tbody.appendChild(separatorRow);
             });
@@ -428,96 +425,12 @@
                 .table-container {
                     overflow-x: auto;
                 }
-                
-                .search-input {
-                    width: 100%;
-                    padding: 7.5px 15px;
-                    border-radius: 6px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    background-color: rgba(30, 30, 30, 0.6);
-                    color: white;
-                    font-size: 16px;
-                    box-sizing: border-box;
-                    height: 36px;
-                    max-width: 250px;
-                }
-                
-                .search-input:focus {
-                    outline: none;
-                    border-color: rgba(255, 255, 255, 0.3);
-                    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
-                }
-                
-                .search-icon {
-                    position: absolute;
-                    right: 15px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: rgba(255, 255, 255, 0.5);
-                }
             `;
             document.head.appendChild(style);
         }
 
         // Load data when the page loads
         document.addEventListener('DOMContentLoaded', fetchHeroSupplyData);
-
-        // Update the filterHeroes function to check all rows for each hero
-        function filterHeroes() {
-            const searchValue = document.getElementById('searchBox').value.toLowerCase();
-            
-            // If search is empty, show all heroes
-            if (searchValue === '') {
-                document.querySelectorAll('tr').forEach(row => {
-                    row.style.display = '';
-                });
-                return;
-            }
-            
-            // First, identify which heroes match the search
-            const matchingHeroes = new Set();
-            
-            // Check the raw data for matches
-            heroSupplyData.forEach(hero => {
-                const heroName = hero.heroName.toLowerCase();
-                const heroHandle = hero.heroHandle.toLowerCase();
-                
-                if (heroName.includes(searchValue) || heroHandle.includes(searchValue)) {
-                    matchingHeroes.add(hero.heroName); // Use heroName as the identifier
-                }
-            });
-            
-            // Now show/hide rows based on whether they belong to a matching hero
-            document.querySelectorAll('tr').forEach(row => {
-                // Skip header rows and separator rows
-                if (row.classList.contains('hero-separator') || row.parentElement.tagName === 'THEAD') {
-                    return;
-                }
-                
-                const heroNameElement = row.querySelector('.hero-name');
-                if (heroNameElement) {
-                    const rowHeroName = heroNameElement.textContent;
-                    
-                    if (matchingHeroes.has(rowHeroName)) {
-                        row.style.display = ''; // Show this row
-                        
-                        // Also show the separator row if it exists
-                        const nextRow = row.nextElementSibling;
-                        if (nextRow && nextRow.classList.contains('hero-separator')) {
-                            nextRow.style.display = '';
-                        }
-                    } else {
-                        row.style.display = 'none'; // Hide this row
-                        
-                        // Also hide the separator row if it exists
-                        const nextRow = row.nextElementSibling;
-                        if (nextRow && nextRow.classList.contains('hero-separator')) {
-                            nextRow.style.display = 'none';
-                        }
-                    }
-                }
-            });
-        }
     </script>
 </body>
 </html>

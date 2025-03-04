@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero Supply</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Hero Supply Data</h1>
+        <div id="loading">Loading data...</div>
+        <div>
+            <input type="text" id="searchBox" class="search-input" placeholder="Search heroes..." oninput="filterHeroes()" />
+        </div>
+        <div id="heroSupplyTable" class="table-container"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Helper function to format dates
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Helper function to calculate growth percentage
+        function calculateGrowth(current, previous) {
+            if (!previous || previous === 0) return 'N/A';
+            return ((current - previous) / previous * 100).toFixed(2) + '%';
+        }
+
+        // Fetch hero supply data
+        async function fetchHeroSupplyData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('hero_supply')
+                    .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, start_datetime')
+                    .order('start_datetime', { ascending: false });
+
+                if (error) throw error;
+                
+                // Process the data
+                const processedData = processHeroData(data);
+                
+                // Render the table
+                renderHeroSupplyTable(processedData);
+                
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                console.error('Error fetching hero supply data:', error);
+                document.getElementById('loading').textContent = 'Error loading data. Please try again later.';
+            }
+        }
+
+        // Process hero data to organize by hero and calculate growth rates
+        function processHeroData(data) {
+            // Group data by hero
+            const heroesMap = new Map();
+            
+            data.forEach(record => {
+                const heroId = record.hero_id;
+                if (!heroesMap.has(heroId)) {
+                    heroesMap.set(heroId, {
+                        heroId: heroId,
+                        heroHandle: record.hero_handle,
+                        heroName: record.hero_name,
+                        heroPfpUrl: record.hero_pfp_url,
+                        stars: record.stars,
+                        score: record.score,
+                        records: []
+                    });
+                }
+                
+                heroesMap.get(heroId).records.push({
+                    datetime: new Date(record.start_datetime),
+                    legendary: record.legendary_cards,
+                    epic: record.epic_cards,
+                    rare: record.rare_cards,
+                    common: record.common_cards,
+                    aggregate: record.aggregate_cards
+                });
+            });
+            
+            // Sort records by date for each hero
+            heroesMap.forEach(hero => {
+                hero.records.sort((a, b) => b.datetime - a.datetime);
+            });
+            
+            // Calculate time slices and growth rates
+            const result = [];
+            const now = new Date();
+            
+            heroesMap.forEach(hero => {
+                const rarityTypes = [
+                    { name: 'Legendary', key: 'legendary' },
+                    { name: 'Epic', key: 'epic' },
+                    { name: 'Rare', key: 'rare' },
+                    { name: 'Common', key: 'common' },
+                    { name: 'Aggregate', key: 'aggregate' }
+                ];
+                
+                rarityTypes.forEach(rarity => {
+                    const rowData = {
+                        heroId: hero.heroId,
+                        heroHandle: hero.heroHandle,
+                        heroName: hero.heroName,
+                        heroPfpUrl: hero.heroPfpUrl,
+                        stars: hero.stars,
+                        score: hero.score,
+                        rarityType: rarity.name,
+                        dailyData: [],
+                        growth: {}
+                    };
+                    
+                    // Get the most recent record
+                    const latestRecord = hero.records[0];
+                    if (!latestRecord) return;
+                    
+                    // Current supply
+                    rowData.currentSupply = latestRecord[rarity.key];
+                    
+                    // Daily data for the last 7 days
+                    for (let i = 0; i < 7; i++) {
+                        const targetDate = new Date(now);
+                        targetDate.setDate(now.getDate() - i);
+                        const dateStr = formatDate(targetDate);
+                        
+                        // Find the closest record to this date
+                        const closestRecord = hero.records.find(r => 
+                            formatDate(r.datetime) === dateStr
+                        );
+                        
+                        rowData.dailyData.push({
+                            date: dateStr,
+                            supply: closestRecord ? closestRecord[rarity.key] : null
+                        });
+                    }
+                    
+                    // Calculate growth rates
+                    // 7-day growth
+                    const day7Record = hero.records.find(r => 
+                        (now - r.datetime) >= 7 * 24 * 60 * 60 * 1000
+                    );
+                    rowData.growth['7d'] = calculateGrowth(
+                        latestRecord[rarity.key], 
+                        day7Record ? day7Record[rarity.key] : null
+                    );
+                    
+                    // 14-day growth
+                    const day14Record = hero.records.find(r => 
+                        (now - r.datetime) >= 14 * 24 * 60 * 60 * 1000
+                    );
+                    rowData.growth['14d'] = calculateGrowth(
+                        latestRecord[rarity.key], 
+                        day14Record ? day14Record[rarity.key] : null
+                    );
+                    
+                    // 12-hour growth
+                    const hour12Record = hero.records.find(r => 
+                        (now - r.datetime) >= 12 * 60 * 60 * 1000
+                    );
+                    rowData.growth['12h'] = calculateGrowth(
+                        latestRecord[rarity.key], 
+                        hour12Record ? hour12Record[rarity.key] : null
+                    );
+                    
+                    // 24-hour growth
+                    const hour24Record = hero.records.find(r => 
+                        (now - r.datetime) >= 24 * 60 * 60 * 1000
+                    );
+                    rowData.growth['24h'] = calculateGrowth(
+                        latestRecord[rarity.key], 
+                        hour24Record ? hour24Record[rarity.key] : null
+                    );
+                    
+                    // 48-hour growth
+                    const hour48Record = hero.records.find(r => 
+                        (now - r.datetime) >= 48 * 60 * 60 * 1000
+                    );
+                    rowData.growth['48h'] = calculateGrowth(
+                        latestRecord[rarity.key], 
+                        hour48Record ? hour48Record[rarity.key] : null
+                    );
+                    
+                    result.push(rowData);
+                });
+            });
+            
+            return result;
+        }
+
+        // Render the hero supply table
+        function renderHeroSupplyTable(data) {
+            const container = document.getElementById('heroSupplyTable');
+            
+            // Group data by hero
+            const heroGroups = {};
+            data.forEach(row => {
+                if (!heroGroups[row.heroId]) {
+                    heroGroups[row.heroId] = [];
+                }
+                heroGroups[row.heroId].push(row);
+            });
+            
+            // Create table
+            const table = document.createElement('table');
+            table.className = 'hero-supply-table';
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // Hero info columns
+            headerRow.innerHTML = `
+                <th>Hero</th>
+                <th>Rarity</th>
+                <th>Current Supply</th>
+                <th colspan="7">Last 7 Days Supply</th>
+                <th>7d Growth</th>
+                <th>14d Growth</th>
+                <th>12h Growth</th>
+                <th>24h Growth</th>
+                <th>48h Growth</th>
+            `;
+            thead.appendChild(headerRow);
+            
+            // Add subheader for daily columns
+            const subHeaderRow = document.createElement('tr');
+            subHeaderRow.innerHTML = `
+                <th colspan="3"></th>
+                ${Array.from({ length: 7 }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    return `<th>${formatDate(date)}</th>`;
+                }).join('')}
+                <th colspan="5"></th>
+            `;
+            thead.appendChild(subHeaderRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            // Add rows for each hero and rarity
+            Object.values(heroGroups).forEach(heroRows => {
+                const firstRow = heroRows[0];
+                
+                heroRows.forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    // Only show hero info in the first row of each hero group
+                    if (index === 0) {
+                        tr.innerHTML = `
+                            <td rowspan="5" class="hero-info">
+                                <div class="hero-profile">
+                                    <img src="${row.heroPfpUrl}" alt="${row.heroName}" class="hero-avatar">
+                                    <div class="hero-details">
+                                        <div class="hero-name">${row.heroName}</div>
+                                        <div class="hero-handle">
+                                            <a href="https://x.com/${row.heroHandle}" target="_blank">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                            @${row.heroHandle}
+                                        </div>
+                                        <div class="hero-stars">${index === 0 ? (row.stars ? '&#9733;'.repeat(row.stars) : 'N/A') : ''}</div>
+                                        <div class="hero-score">${index === 0 ? ('Score: ' + (row.score !== undefined ? Math.floor(row.score) : 'N/A')) : ''}</div>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    }
+                    
+                    // Add rarity and supply data
+                    const rarityCell = document.createElement('td');
+                    rarityCell.className = `rarity-${row.rarityType.toLowerCase()}`;
+                    rarityCell.textContent = row.rarityType;
+                    tr.appendChild(rarityCell);
+                    
+                    // Current supply
+                    const currentSupplyCell = document.createElement('td');
+                    currentSupplyCell.textContent = row.currentSupply?.toLocaleString() || 'N/A';
+                    tr.appendChild(currentSupplyCell);
+                    
+                    // Daily supply data
+                    row.dailyData.forEach(day => {
+                        const dayCell = document.createElement('td');
+                        dayCell.textContent = day.supply?.toLocaleString() || '-';
+                        tr.appendChild(dayCell);
+                    });
+                    
+                    // Growth rates
+                    ['7d', '14d', '12h', '24h', '48h'].forEach(period => {
+                        const growthCell = document.createElement('td');
+                        growthCell.textContent = row.growth[period];
+                        
+                        // Add color based on growth rate
+                        if (row.growth[period] !== 'N/A') {
+                            const growthValue = parseFloat(row.growth[period]);
+                            if (growthValue > 0) {
+                                growthCell.className = 'positive-growth';
+                            } else if (growthValue < 0) {
+                                growthCell.className = 'negative-growth';
+                            }
+                        }
+                        
+                        tr.appendChild(growthCell);
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+                
+                // Add a separator row between heroes
+                const separatorRow = document.createElement('tr');
+                separatorRow.className = 'hero-separator';
+                separatorRow.style.backgroundColor = 'black';
+                separatorRow.innerHTML = '<td colspan="17"></td>';
+                tbody.appendChild(separatorRow);
+            });
+            
+            table.appendChild(tbody);
+            container.appendChild(table);
+            
+            // Add CSS for the table
+            const style = document.createElement('style');
+            style.textContent = `
+                .hero-supply-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                    font-size: 14px;
+                }
+                
+                .hero-info {
+                    text-align: left;
+                    vertical-align: middle;
+                }
+                
+                .hero-profile {
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .hero-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                }
+                
+                .hero-details {
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .hero-name {
+                    font-weight: bold;
+                }
+                
+                .hero-handle {
+                    color: #666;
+                    font-size: 12px;
+                }
+                
+                .hero-stars {
+                    color: gold;
+                }
+                
+                .hero-score {
+                    color: #666;
+                    font-size: 12px;
+                }
+                
+                .rarity-legendary {
+                    color: #FBE7FF;
+                    background-color: rgba(251, 231, 255, 0.5);
+                    font-weight: bold;
+                }
+                
+                .rarity-epic {
+                    color: #F1A3FD;
+                    background-color: rgba(241, 163, 253, 0.5);
+                    font-weight: bold;
+                }
+                
+                .rarity-rare {
+                    color: #00FFDF;
+                    background-color: rgba(0, 255, 223, 0.5);
+                    font-weight: bold;
+                }
+                
+                .rarity-common {
+                    color: #93FF01;
+                    background-color: rgba(147, 255, 1, 0.5);
+                    font-weight: bold;
+                }
+                
+                .rarity-aggregate {
+                    background-color: rgba(50, 205, 50, 0.2);
+                    font-weight: bold;
+                }
+                
+                .positive-growth {
+                    color: green;
+                }
+                
+                .negative-growth {
+                    color: red;
+                }
+                
+                .hero-separator {
+                    height: 10px;
+                    background-color: #f9f9f9;
+                }
+                
+                .table-container {
+                    overflow-x: auto;
+                }
+                
+                .search-input {
+                    width: 100%;
+                    padding: 7.5px 15px;
+                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background-color: rgba(30, 30, 30, 0.6);
+                    color: white;
+                    font-size: 16px;
+                    box-sizing: border-box;
+                    height: 36px;
+                    max-width: 250px;
+                }
+                
+                .search-input:focus {
+                    outline: none;
+                    border-color: rgba(255, 255, 255, 0.3);
+                    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+                }
+                
+                .search-icon {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: rgba(255, 255, 255, 0.5);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Load data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchHeroSupplyData);
+
+        // Update the filterHeroes function to check all rows for each hero
+        function filterHeroes() {
+            const searchValue = document.getElementById('searchBox').value.toLowerCase();
+            
+            // If search is empty, show all heroes
+            if (searchValue === '') {
+                document.querySelectorAll('tr').forEach(row => {
+                    row.style.display = '';
+                });
+                return;
+            }
+            
+            // First, identify which heroes match the search
+            const matchingHeroes = new Set();
+            
+            // Check the raw data for matches
+            heroSupplyData.forEach(hero => {
+                const heroName = hero.heroName.toLowerCase();
+                const heroHandle = hero.heroHandle.toLowerCase();
+                
+                if (heroName.includes(searchValue) || heroHandle.includes(searchValue)) {
+                    matchingHeroes.add(hero.heroName); // Use heroName as the identifier
+                }
+            });
+            
+            // Now show/hide rows based on whether they belong to a matching hero
+            document.querySelectorAll('tr').forEach(row => {
+                // Skip header rows and separator rows
+                if (row.classList.contains('hero-separator') || row.parentElement.tagName === 'THEAD') {
+                    return;
+                }
+                
+                const heroNameElement = row.querySelector('.hero-name');
+                if (heroNameElement) {
+                    const rowHeroName = heroNameElement.textContent;
+                    
+                    if (matchingHeroes.has(rowHeroName)) {
+                        row.style.display = ''; // Show this row
+                        
+                        // Also show the separator row if it exists
+                        const nextRow = row.nextElementSibling;
+                        if (nextRow && nextRow.classList.contains('hero-separator')) {
+                            nextRow.style.display = '';
+                        }
+                    } else {
+                        row.style.display = 'none'; // Hide this row
+                        
+                        // Also hide the separator row if it exists
+                        const nextRow = row.nextElementSibling;
+                        if (nextRow && nextRow.classList.contains('hero-separator')) {
+                            nextRow.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -699,7 +699,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -732,10 +732,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
+                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
+                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
+                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null }
                         };
                     }
                     
@@ -745,6 +745,7 @@
                         floor: Number(item.floor).toFixed(4),
                         highest_bid: item.highest_bid || '-',
                         listed_count: item.listed_count || '-',
+                        floor_bid_spread: item.floor_bid_spread || '-999',
                         seller_info: item.listed_count && item.listed_count > 0 ? {
                             name: item.seller_name,
                             handle: item.seller_handle,
@@ -976,7 +977,12 @@
                             </thead>
                             <tbody>
                                 ${heroesArray.map(item => `
-                                <tr>
+                                <tr 
+                                    data-legendary-spread="${item.legendary.floor_bid_spread || '-999'}"
+                                    data-epic-spread="${item.epic.floor_bid_spread || '-999'}"
+                                    data-rare-spread="${item.rare.floor_bid_spread || '-999'}"
+                                    data-common-spread="${item.common.floor_bid_spread || '-999'}"
+                                >
                                     <td>
                                         <div class="hero-cell">
                                             <img src="${item.hero_pfp_url}" alt="Hero Profile">
@@ -1289,33 +1295,12 @@
                     function sortBySpread(rarity) {
                         const rows = Array.from(tbody.querySelectorAll('tr'));
                         
-                        // Calculate spread for each row
-                        rows.forEach(row => {
-                            let floorCell, bidCell;
-                            
-                            if (rarity === 'rare') {
-                                floorCell = row.querySelector('.rarity-section-rare:nth-child(15)'); // Rare floor cell
-                                bidCell = row.querySelector('.rarity-section-rare:nth-child(16)');   // Rare bid cell
-                            } else if (rarity === 'common') {
-                                floorCell = row.querySelector('.rarity-section-common:nth-child(19)'); // Common floor cell
-                                bidCell = row.querySelector('.rarity-section-common:nth-child(20)');   // Common bid cell
-                            }
-                            
-                            const floorValue = floorCell ? parseFloat(floorCell.textContent) : NaN;
-                            const bidValue = bidCell ? parseFloat(bidCell.textContent) : NaN;
-                            
-                            // Calculate spread only if both values are valid numbers
-                            if (!isNaN(floorValue) && !isNaN(bidValue) && floorValue !== '-' && bidValue !== '-') {
-                                row.dataset[`${rarity}Spread`] = (floorValue - bidValue).toFixed(4);
-                            } else {
-                                row.dataset[`${rarity}Spread`] = '-999'; // Use a very negative value for rows without valid spread
-                            }
-                        });
-                        
-                        // Sort rows by spread (descending)
+                        // Sort rows by the pre-calculated floor_bid_spread (descending)
                         rows.sort((a, b) => {
-                            const aSpread = parseFloat(a.dataset[`${rarity}Spread`]);
-                            const bSpread = parseFloat(b.dataset[`${rarity}Spread`]);
+                            // Get the spread value from the data attribute we'll add to each row
+                            const aSpread = parseFloat(a.getAttribute(`data-${rarity}-spread`) || '-999');
+                            const bSpread = parseFloat(b.getAttribute(`data-${rarity}-spread`) || '-999');
+                            
                             return bSpread - aSpread; // Descending order
                         });
                         
@@ -1345,44 +1330,31 @@
                         }
                     }
                     
-                    // Add event listeners to toggle buttons
-                    rareSpreadFilter.addEventListener('click', function() {
-                        const isActive = this.classList.contains('active');
-                        
-                        // Clear all active states first
-                        rareSpreadFilter.classList.remove('active');
+                    // Add event listeners for the filter buttons
+                    document.getElementById('rare-spread-filter').addEventListener('click', function() {
+                        // Toggle active state
+                        rareSpreadFilter.classList.toggle('active');
                         commonSpreadFilter.classList.remove('active');
                         
-                        // If it wasn't active before, make it active and sort
-                        if (!isActive) {
-                            this.classList.add('active');
-                            sortBySpread('rare');
-                        } else {
-                            // If it was already active, just deactivate (clear filters)
-                            clearFilters();
-                        }
+                        // Call the function to sort by rare spread
+                        sortBySpread('rare');
                     });
-                    
-                    // Add event listener for common spread filter
-                    commonSpreadFilter.addEventListener('click', function() {
-                        const isActive = this.classList.contains('active');
+
+                    document.getElementById('common-spread-filter').addEventListener('click', function() {
+                        // Toggle active state
+                        commonSpreadFilter.classList.toggle('active');
+                        rareSpreadFilter.classList.remove('active');
                         
-                        // Clear all active states first
+                        // Call the function to sort by common spread
+                        sortBySpread('common');
+                    });
+
+                    document.getElementById('clear-spread-filter').addEventListener('click', function() {
+                        clearFilters();
+                        // Remove active state from all filter buttons
                         rareSpreadFilter.classList.remove('active');
                         commonSpreadFilter.classList.remove('active');
-                        
-                        // If it wasn't active before, make it active and sort
-                        if (!isActive) {
-                            this.classList.add('active');
-                            sortBySpread('common');
-                        } else {
-                            // If it was already active, just deactivate (clear filters)
-                            clearFilters();
-                        }
                     });
-                    
-                    // Add event listener for clear button
-                    clearSpreadFilter.addEventListener('click', clearFilters);
                 }
 
                 // Call the function after the table is created

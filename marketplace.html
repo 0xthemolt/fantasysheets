@@ -173,7 +173,7 @@
 
         .filter-container {
             display: flex;
-            align-items: center;
+            align-items: left;
             margin-bottom: 15px;
             gap: 10px;
         }
@@ -225,7 +225,7 @@
         }
 
         .star-filter-container {
-            margin: 15px 0;
+            margin: 5px 0;
         }
 
         /* Double Range Slider Styles */
@@ -471,6 +471,20 @@
             align-items: center;
             justify-content: center; /* Center horizontally */
             width: 100%; /* Take full width of the cell */
+        }
+
+        /* Add this new section for score slider */
+        .score-filter-container {
+            margin: 5px 0;
+        }
+        
+        /* Add label for score slider */
+        .slider-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -799,6 +813,11 @@
                             width: 100%;
                             table-layout: fixed;
                         }
+                        /* Make hero column twice as wide */
+                        .marketplace-table th:first-child,
+                        .marketplace-table td:first-child {
+                            width: 150px;  /* Adjust this value based on your needs */
+                        }
                         .marketplace-table tbody tr:hover {
                             background-color: rgba(255, 255, 255, 0.05) !important;  /* Use !important to override rarity section backgrounds */
                         }
@@ -853,18 +872,6 @@
                         .rarity-header-rare { color: #00FFDF; }
                         .rarity-header-common { color: #93FF01; }
                         
-                        /* Fix column width */
-                        .marketplace-table th, .marketplace-table td {
-                            width: auto;
-                            white-space: nowrap;
-                        }
-                        .marketplace-table th:nth-child(8),
-                        .marketplace-table th:nth-child(11),
-                        .marketplace-table th:nth-child(14),
-                        .marketplace-table th:nth-child(17) {
-                            width: 60px; /* Set a fixed width for the Listed columns */
-                        }
-                        
                         .marketplace-table td, .marketplace-table th {
                             border: none;
                             padding: 8px;
@@ -898,8 +905,8 @@
                             </div>
                         </div>
                         
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
-                            <div class="search-container" style="margin-bottom: 0;">
+                        <div class="range-filter-container" style="display: flex; align-items: left; gap: 10px; margin-bottom: 15px;">
+                            <div class="search-container" style="margin: 0; flex: 1;">
                                 <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
                                 <i class="fas fa-search search-icon"></i>
                             </div>
@@ -915,8 +922,20 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
+                            <div class="score-filter-container" style="margin: 0; flex: 1;">
+                                <div class="double_range_slider_box">
+                                    <div class="double_range_slider">
+                                        <span class="range_track" id="score_range_track"></span>
+                                        <input type="range" class="min" id="min-score" min="0" max="1000" value="0" step="10">
+                                        <input type="range" class="max" id="max-score" min="0" max="1000" value="1000" step="10">
+                                        <div class="minvalue" id="score-minvalue">0</div>
+                                        <div class="maxvalue" id="score-maxvalue">1000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="filter-container">
                             <div class="filter-label">Bid Floor Spread:</div>
                             <div class="filter-options">
@@ -1373,6 +1392,7 @@
                 // Initialize the star range slider
                 setTimeout(() => {
                     initializeStarRangeSlider();
+                    initializeScoreRangeSlider(); // Add this line to initialize the score slider
                 }, 100);
             } catch (error) {
                 console.error('Error:', error);
@@ -1510,6 +1530,130 @@
             
             // Initialize the slider
             updateRangeTrack();
+        }
+
+        // Add this new function for the score range slider
+        function initializeScoreRangeSlider() {
+            const minScore = document.getElementById('min-score');
+            const maxScore = document.getElementById('max-score');
+            const rangeTrack = document.getElementById('score_range_track');
+            const minValue = document.getElementById('score-minvalue');
+            const maxValue = document.getElementById('score-maxvalue');
+            
+            if (!minScore || !maxScore || !rangeTrack || !minValue || !maxValue) {
+                console.warn('Score range slider elements not found');
+                return;
+            }
+            
+            // Initialize the range track
+            function updateRangeTrack() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                const minPercent = (minVal / 1000) * 100;
+                const maxPercent = (maxVal / 1000) * 100;
+                
+                rangeTrack.style.left = minPercent + '%';
+                rangeTrack.style.width = (maxPercent - minPercent) + '%';
+                
+                minValue.textContent = minVal;
+                maxValue.textContent = maxVal;
+                
+                // Filter the marketplace table
+                filterMarketplaceByScore(minVal, maxVal);
+            }
+            
+            // Filter marketplace table based on score values
+            function filterMarketplaceByScore(min, max) {
+                const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+                let visibleCount = 0;
+                
+                marketplaceRows.forEach(row => {
+                    const scoreCell = row.querySelector('td:nth-child(2)'); // Score column
+                    if (!scoreCell) return;
+                    
+                    const heroScore = parseInt(scoreCell.textContent.trim());
+                    
+                    // Check if the row is already hidden by star filter
+                    const isHiddenByStar = row.style.display === 'none';
+                    
+                    if (heroScore >= min && heroScore <= max) {
+                        // Only show if not hidden by star filter
+                        if (!isHiddenByStar) {
+                            row.style.display = '';
+                            visibleCount++;
+                        }
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                const noResultsMessage = document.getElementById('no-results');
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
+            }
+            
+            // Prevent min from exceeding max
+            minScore.addEventListener('input', function() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                
+                if (minVal > maxVal) {
+                    minScore.value = maxVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Prevent max from being less than min
+            maxScore.addEventListener('input', function() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                
+                if (maxVal < minVal) {
+                    maxScore.value = minVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Initialize the slider
+            updateRangeTrack();
+        }
+        
+        // Modify the existing filterMarketplaceByStars function to work with score filter
+        function filterMarketplaceByStars(min, max) {
+            const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+            let visibleCount = 0;
+            
+            // Get current score filter values
+            const minScore = parseInt(document.getElementById('min-score').value);
+            const maxScore = parseInt(document.getElementById('max-score').value);
+            
+            marketplaceRows.forEach(row => {
+                const starsCell = row.querySelector('td:nth-child(4)'); // Stars column
+                const scoreCell = row.querySelector('td:nth-child(2)'); // Score column
+                if (!starsCell || !scoreCell) return;
+                
+                const heroStars = parseInt(starsCell.textContent.trim());
+                const heroScore = parseInt(scoreCell.textContent.trim());
+                
+                // Check if both filters pass
+                if (heroStars >= min && heroStars <= max && 
+                    heroScore >= minScore && heroScore <= maxScore) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            const noResultsMessage = document.getElementById('no-results');
+            if (noResultsMessage) {
+                noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
         }
     </script>
 </body>

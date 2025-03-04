@@ -582,6 +582,65 @@
             padding: 4px 8px;
             border-radius: 4px;
         }
+
+        /* View toggle styles */
+        .view-toggle-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(30, 30, 30, 0.6);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #FACC15;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9em;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -795,7 +854,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -828,10 +887,38 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null }
+                            legendary: { 
+                                floor: '-', 
+                                highest_bid: '-', 
+                                listed_count: '-', 
+                                seller_info: null,
+                                sweep_5_cards_price: '-',
+                                sweep_5_avg_price: '-'
+                            },
+                            epic: { 
+                                floor: '-', 
+                                highest_bid: '-', 
+                                listed_count: '-', 
+                                seller_info: null,
+                                sweep_5_cards_price: '-',
+                                sweep_5_avg_price: '-'
+                            },
+                            rare: { 
+                                floor: '-', 
+                                highest_bid: '-', 
+                                listed_count: '-', 
+                                seller_info: null,
+                                sweep_5_cards_price: '-',
+                                sweep_5_avg_price: '-'
+                            },
+                            common: { 
+                                floor: '-', 
+                                highest_bid: '-', 
+                                listed_count: '-', 
+                                seller_info: null,
+                                sweep_5_cards_price: '-',
+                                sweep_5_avg_price: '-'
+                            }
                         };
                     }
                     
@@ -847,7 +934,9 @@
                             pfp_url: item.seller_pfp_url,
                             seller_id: item.seller_id,
                             seller_port_value: item.seller_port_value
-                        } : null
+                        } : null,
+                        sweep_5_cards_price: item.sweep_5_cards_price || '-',
+                        sweep_5_avg_price: item.sweep_5_avg_price || '-'
                     };
                     
                     return acc;
@@ -863,7 +952,7 @@
                         .marketplace-container {
                             position: relative;
                             padding-top: 40px;  /* Space for export button */
-                            max-width: 80%;
+                            max-width: 90%;
                             margin: 0 auto;  /* Center the container */
                             width: 100%;
                         }
@@ -912,7 +1001,7 @@
                         /* Make hero column twice as wide */
                         .marketplace-table th:first-child,
                         .marketplace-table td:first-child {
-                            width: 200px;  /* Adjust this value based on your needs */
+                            width: 150px;  /* Adjust this value based on your needs */
                         }
                         .marketplace-table tbody tr:hover {
                             background-color: rgba(255, 255, 255, 0.05) !important;  /* Use !important to override rarity section backgrounds */
@@ -1058,6 +1147,16 @@
                             </div>
                         </div>
                         
+                        <div class="view-toggle-container">
+                            <div class="filter-label">View Mode:</div>
+                            <div class="toggle-label">Normal</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="view-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div class="toggle-label">Sweep 5</div>
+                        </div>
+                        
                         <table class="marketplace-table">
                             <thead>
                                 <tr>
@@ -1066,33 +1165,37 @@
                                     <th class="sortable" data-sort="score_24hr">Score 24hr <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
-                                    <th class="rarity-divider rarity-divider-legendary"></th>
-                                    <th colspan="3" class="rarity-header-legendary">Legendary</th>
-                                    <th class="rarity-divider rarity-divider-epic"></th>
-                                    <th colspan="3" class="rarity-header-epic">Epic</th>
-                                    <th class="rarity-divider rarity-divider-rare"></th>
-                                    <th colspan="3" class="rarity-header-rare">Rare</th>
-                                    <th class="rarity-divider rarity-divider-common"></th>
-                                    <th colspan="3" class="rarity-header-common">Common</th>
+                                    <th colspan="3" class="rarity-header-legendary normal-view">Legendary</th>
+                                    <th colspan="3" class="rarity-header-legendary sweep-view" style="display: none;">Legendary</th>
+                                    <th colspan="3" class="rarity-header-epic normal-view">Epic</th>
+                                    <th colspan="3" class="rarity-header-epic sweep-view" style="display: none;">Epic</th>
+                                    <th colspan="3" class="rarity-header-rare normal-view">Rare</th>
+                                    <th colspan="3" class="rarity-header-rare sweep-view" style="display: none;">Rare</th>
+                                    <th colspan="3" class="rarity-header-common normal-view">Common</th>
+                                    <th colspan="3" class="rarity-header-common sweep-view" style="display: none;">Common</th>
                                 </tr>
                                 <tr>
                                     <th colspan="5"></th>
-                                    <th class="rarity-divider"></th>
                                     <th>Floor</th>
-                                    <th>Bid</th>
-                                    <th>Listed</th>
-                                    <th class="rarity-divider"></th>
+                                    <th class="bid-column">Bid</th>
+                                    <th class="listed-column">Listed</th>
+                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
+                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
                                     <th>Floor</th>
-                                    <th>Bid</th>
-                                    <th>Listed</th>
-                                    <th class="rarity-divider"></th>
+                                    <th class="bid-column">Bid</th>
+                                    <th class="listed-column">Listed</th>
+                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
+                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
                                     <th>Floor</th>
-                                    <th>Bid</th>
-                                    <th>Listed</th>
-                                    <th class="rarity-divider"></th>
+                                    <th class="bid-column">Bid</th>
+                                    <th class="listed-column">Listed</th>
+                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
+                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
                                     <th>Floor</th>
-                                    <th>Bid</th>
-                                    <th>Listed</th>
+                                    <th class="bid-column">Bid</th>
+                                    <th class="listed-column">Listed</th>
+                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
+                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1108,10 +1211,9 @@
                                     <td>${Math.round(item.score_24hr)}</td>
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
-                                    <td class="rarity-divider rarity-divider-legendary"></td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}</td>
-                                    <td class="rarity-section-legendary">
+                                    <td class="rarity-section-legendary bid-column">${formatValue(item.legendary.highest_bid)}</td>
+                                    <td class="rarity-section-legendary listed-column">
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
                                             ${item.legendary.seller_info ? `
@@ -1129,10 +1231,11 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-divider rarity-divider-epic"></td>
+                                    <td class="rarity-section-legendary sweep-total-column" style="display: none;">${formatValue(item.legendary.sweep_5_cards_price)}</td>
+                                    <td class="rarity-section-legendary sweep-avg-column" style="display: none;">${formatValue(item.legendary.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}</td>
-                                    <td class="rarity-section-epic">
+                                    <td class="rarity-section-epic bid-column">${formatValue(item.epic.highest_bid)}</td>
+                                    <td class="rarity-section-epic listed-column">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
                                             ${item.epic.seller_info ? `
@@ -1150,10 +1253,11 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-divider rarity-divider-rare"></td>
+                                    <td class="rarity-section-epic sweep-total-column" style="display: none;">${formatValue(item.epic.sweep_5_cards_price)}</td>
+                                    <td class="rarity-section-epic sweep-avg-column" style="display: none;">${formatValue(item.epic.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
-                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}</td>
-                                    <td class="rarity-section-rare">
+                                    <td class="rarity-section-rare bid-column">${formatValue(item.rare.highest_bid)}</td>
+                                    <td class="rarity-section-rare listed-column">
                                         <div class="listed-count">
                                             ${item.rare.listed_count}
                                             ${item.rare.seller_info ? `
@@ -1171,10 +1275,11 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-divider rarity-divider-common"></td>
+                                    <td class="rarity-section-rare sweep-total-column" style="display: none;">${formatValue(item.rare.sweep_5_cards_price)}</td>
+                                    <td class="rarity-section-rare sweep-avg-column" style="display: none;">${formatValue(item.rare.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
-                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}</td>
-                                    <td class="rarity-section-common">
+                                    <td class="rarity-section-common bid-column">${formatValue(item.common.highest_bid)}</td>
+                                    <td class="rarity-section-common listed-column">
                                         <div class="listed-count">
                                             ${item.common.listed_count}
                                             ${item.common.seller_info ? `
@@ -1192,6 +1297,8 @@
                                             ` : ''}
                                         </div>
                                     </td>
+                                    <td class="rarity-section-common sweep-total-column" style="display: none;">${formatValue(item.common.sweep_5_cards_price)}</td>
+                                    <td class="rarity-section-common sweep-avg-column" style="display: none;">${formatValue(item.common.sweep_5_avg_price)}</td>
                                 </tr>
                                 `).join('')}
                             </tbody>
@@ -1512,6 +1619,46 @@
 
                 // Call the function after the table is created
                 initializeBidFloorSpreadSorting();
+
+                // Initialize view toggle
+                function initializeViewToggle() {
+                    const viewToggle = document.getElementById('view-toggle');
+                    
+                    if (!viewToggle) {
+                        console.warn('View toggle element not found');
+                        return;
+                    }
+                    
+                    viewToggle.addEventListener('change', function() {
+                        const bidColumns = document.querySelectorAll('.bid-column');
+                        const listedColumns = document.querySelectorAll('.listed-column');
+                        const sweepTotalColumns = document.querySelectorAll('.sweep-total-column');
+                        const sweepAvgColumns = document.querySelectorAll('.sweep-avg-column');
+                        const normalViewHeaders = document.querySelectorAll('.normal-view');
+                        const sweepViewHeaders = document.querySelectorAll('.sweep-view');
+                        
+                        if (this.checked) {
+                            // Switch to Sweep 5 view
+                            bidColumns.forEach(col => col.style.display = 'none');
+                            listedColumns.forEach(col => col.style.display = 'none');
+                            sweepTotalColumns.forEach(col => col.style.display = '');
+                            sweepAvgColumns.forEach(col => col.style.display = '');
+                            normalViewHeaders.forEach(header => header.style.display = 'none');
+                            sweepViewHeaders.forEach(header => header.style.display = '');
+                        } else {
+                            // Switch to Normal view
+                            bidColumns.forEach(col => col.style.display = '');
+                            listedColumns.forEach(col => col.style.display = '');
+                            sweepTotalColumns.forEach(col => col.style.display = 'none');
+                            sweepAvgColumns.forEach(col => col.style.display = 'none');
+                            normalViewHeaders.forEach(header => header.style.display = '');
+                            sweepViewHeaders.forEach(header => header.style.display = 'none');
+                        }
+                    });
+                }
+
+                // Call initializeViewToggle after the table is created
+                initializeViewToggle();
 
                 // After the table HTML is generated and inserted into the DOM
                 // Initialize the star range slider

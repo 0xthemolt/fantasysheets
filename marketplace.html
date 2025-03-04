@@ -22,10 +22,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .rarity-legendary { color: #ffd700; }
-        .rarity-epic { color: #9400d3; }
-        .rarity-rare { color: #0080ff; }
-        .rarity-common { color: #808080; }
         .sortable {
             cursor: pointer;
             user-select: none;
@@ -45,138 +41,10 @@
             opacity: 1;
         }
         
-        /* Tooltip styles */
-        .listed-count {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .seller-icon {
-            color: #808080;
-            cursor: pointer;
-            font-size: 0.75em;
-        }
-        .seller-icon.active {
-            color: #1DA1F2; /* Blue color when active */
-        }
-        .seller-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 100;
-            width: 200px;
-            display: none;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px; /* Add space between tooltip and icon */
-        }
         /* Fix column width */
         .marketplace-table th, .marketplace-table td {
             width: auto;
             white-space: nowrap;
-        }
-        .marketplace-table th:nth-child(8),
-        .marketplace-table th:nth-child(12),
-        .marketplace-table th:nth-child(16),
-        .marketplace-table th:nth-child(20) {
-            width: 60px; /* Set a fixed width for the Listed columns */
-        }
-        /* Make tooltip stay visible */
-        .seller-icon:hover ~ .seller-tooltip {
-            display: block;
-        }
-        .seller-tooltip {
-            pointer-events: auto; /* Enable interactions */
-        }
-        .seller-tooltip:hover {
-            display: block; /* Stay visible when hovering over the tooltip itself */
-        }
-        .seller-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        .seller-pfp {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .seller-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .seller-twitter {
-            color: #1DA1F2;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9em;
-        }
-        .seller-twitter:hover {
-            text-decoration: underline;
-        }
-        .seller-id {
-            font-size: 0.8em;
-            color: #aaa;
-            margin-top: 2px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .copy-icon {
-            cursor: pointer;
-            color: #808080;
-            transition: color 0.2s;
-        }
-        .copy-icon:hover {
-            color: #1DA1F2;
-        }
-        .copy-feedback {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7em;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .copy-feedback.show {
-            opacity: 1;
-        }
-        .rarity-divider {
-            width: 0.1px !important; /* Force override with !important */
-            min-width: 0.1px !important; /* Ensure min-width doesn't override */
-            max-width: 0.1px !important; /* Ensure max-width doesn't override */
-        }
-
-        .rarity-divider-legendary, 
-        .rarity-divider-epic, 
-        .rarity-divider-rare, 
-        .rarity-divider-common {
-            width: 0.1px !important;
-            min-width: 0.1px !important;
-            max-width: 0.1px !important;
-        }
-
-        /* Make sure table cell widths respect our settings */
-        .marketplace-table th.rarity-divider,
-        .marketplace-table td.rarity-divider {
-            width: 0.1px !important;
-            min-width: 0.1px !important;
-            max-width: 0.1px !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
         }
         
         /* Search box styles */
@@ -583,63 +451,26 @@
             border-radius: 4px;
         }
 
-        /* View toggle styles */
-        .view-toggle-container {
+        /* Update seller icon styles with hover color effect */
+        .seller-icon {
+            font-size: 0.75em; /* Make icon 25% smaller */
+            margin-left: 8px; /* Add more space between icon and number */
+            opacity: 0.8; /* Slightly reduce opacity for better visual balance */
+            cursor: pointer;
+            transition: color 0.2s, opacity 0.2s; /* Smooth transition for hover effects */
+        }
+        
+        .seller-icon:hover {
+            opacity: 1;
+            color: #FACC15; /* Change to yellow color on hover */
+        }
+        
+        /* Center align the listed-count container */
+        .listed-count {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            gap: 10px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(30, 30, 30, 0.6);
-            transition: .4s;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: #FACC15;
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        .toggle-label {
-            font-size: 0.9em;
-            color: #fff;
+            justify-content: center; /* Center horizontally */
+            width: 100%; /* Take full width of the cell */
         }
     </style>
 </head>
@@ -887,38 +718,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { 
-                                floor: '-', 
-                                highest_bid: '-', 
-                                listed_count: '-', 
-                                seller_info: null,
-                                sweep_5_cards_price: '-',
-                                sweep_5_avg_price: '-'
-                            },
-                            epic: { 
-                                floor: '-', 
-                                highest_bid: '-', 
-                                listed_count: '-', 
-                                seller_info: null,
-                                sweep_5_cards_price: '-',
-                                sweep_5_avg_price: '-'
-                            },
-                            rare: { 
-                                floor: '-', 
-                                highest_bid: '-', 
-                                listed_count: '-', 
-                                seller_info: null,
-                                sweep_5_cards_price: '-',
-                                sweep_5_avg_price: '-'
-                            },
-                            common: { 
-                                floor: '-', 
-                                highest_bid: '-', 
-                                listed_count: '-', 
-                                seller_info: null,
-                                sweep_5_cards_price: '-',
-                                sweep_5_avg_price: '-'
-                            }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            epic: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            rare: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null },
+                            common: { floor: '-', highest_bid: '-', listed_count: '-', seller_info: null }
                         };
                     }
                     
@@ -934,9 +737,7 @@
                             pfp_url: item.seller_pfp_url,
                             seller_id: item.seller_id,
                             seller_port_value: item.seller_port_value
-                        } : null,
-                        sweep_5_cards_price: item.sweep_5_cards_price || '-',
-                        sweep_5_avg_price: item.sweep_5_avg_price || '-'
+                        } : null
                     };
                     
                     return acc;
@@ -998,11 +799,6 @@
                             width: 100%;
                             table-layout: fixed;
                         }
-                        /* Make hero column twice as wide */
-                        .marketplace-table th:first-child,
-                        .marketplace-table td:first-child {
-                            width: 150px;  /* Adjust this value based on your needs */
-                        }
                         .marketplace-table tbody tr:hover {
                             background-color: rgba(255, 255, 255, 0.05) !important;  /* Use !important to override rarity section backgrounds */
                         }
@@ -1052,40 +848,23 @@
                         .rarity-section-rare { background-color: rgba(0, 255, 223, 0.1); }
                         .rarity-section-common { background-color: rgba(147, 255, 1, 0.1); }
                         
-                        .rarity-divider-legendary { background-color: rgba(251, 231, 255, 0.05); }
-                        .rarity-divider-epic { background-color: rgba(241, 163, 253, 0.05); }
-                        .rarity-divider-rare { background-color: rgba(0, 255, 223, 0.05); }
-                        .rarity-divider-common { background-color: rgba(147, 255, 1, 0.05); }
-                        
                         .rarity-header-legendary { color: #FBE7FF; }
                         .rarity-header-epic { color: #F1A3FD; }
                         .rarity-header-rare { color: #00FFDF; }
                         .rarity-header-common { color: #93FF01; }
                         
-                        .rarity-divider {
-                            width: 0.1px !important; /* Force override with !important */
-                            min-width: 0.1px !important; /* Ensure min-width doesn't override */
-                            max-width: 0.1px !important; /* Ensure max-width doesn't override */
+                        /* Fix column width */
+                        .marketplace-table th, .marketplace-table td {
+                            width: auto;
+                            white-space: nowrap;
                         }
-
-                        .rarity-divider-legendary, 
-                        .rarity-divider-epic, 
-                        .rarity-divider-rare, 
-                        .rarity-divider-common {
-                            width: 0.1px !important;
-                            min-width: 0.1px !important;
-                            max-width: 0.1px !important;
+                        .marketplace-table th:nth-child(8),
+                        .marketplace-table th:nth-child(11),
+                        .marketplace-table th:nth-child(14),
+                        .marketplace-table th:nth-child(17) {
+                            width: 60px; /* Set a fixed width for the Listed columns */
                         }
-
-                        /* Make sure table cell widths respect our settings */
-                        .marketplace-table th.rarity-divider,
-                        .marketplace-table td.rarity-divider {
-                            width: 0.1px !important;
-                            min-width: 0.1px !important;
-                            max-width: 0.1px !important;
-                            padding-left: 0 !important;
-                            padding-right: 0 !important;
-                        }
+                        
                         .marketplace-table td, .marketplace-table th {
                             border: none;
                             padding: 8px;
@@ -1147,16 +926,6 @@
                             </div>
                         </div>
                         
-                        <div class="view-toggle-container">
-                            <div class="filter-label">View Mode:</div>
-                            <div class="toggle-label">Normal</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="view-toggle">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div class="toggle-label">Sweep 5</div>
-                        </div>
-                        
                         <table class="marketplace-table">
                             <thead>
                                 <tr>
@@ -1165,37 +934,25 @@
                                     <th class="sortable" data-sort="score_24hr">Score 24hr <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
-                                    <th colspan="3" class="rarity-header-legendary normal-view">Legendary</th>
-                                    <th colspan="3" class="rarity-header-legendary sweep-view" style="display: none;">Legendary</th>
-                                    <th colspan="3" class="rarity-header-epic normal-view">Epic</th>
-                                    <th colspan="3" class="rarity-header-epic sweep-view" style="display: none;">Epic</th>
-                                    <th colspan="3" class="rarity-header-rare normal-view">Rare</th>
-                                    <th colspan="3" class="rarity-header-rare sweep-view" style="display: none;">Rare</th>
-                                    <th colspan="3" class="rarity-header-common normal-view">Common</th>
-                                    <th colspan="3" class="rarity-header-common sweep-view" style="display: none;">Common</th>
+                                    <th colspan="3" class="rarity-header-legendary">Legendary</th>
+                                    <th colspan="3" class="rarity-header-epic">Epic</th>
+                                    <th colspan="3" class="rarity-header-rare">Rare</th>
+                                    <th colspan="3" class="rarity-header-common">Common</th>
                                 </tr>
                                 <tr>
                                     <th colspan="5"></th>
                                     <th>Floor</th>
-                                    <th class="bid-column">Bid</th>
-                                    <th class="listed-column">Listed</th>
-                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
-                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
                                     <th>Floor</th>
-                                    <th class="bid-column">Bid</th>
-                                    <th class="listed-column">Listed</th>
-                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
-                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
                                     <th>Floor</th>
-                                    <th class="bid-column">Bid</th>
-                                    <th class="listed-column">Listed</th>
-                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
-                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
                                     <th>Floor</th>
-                                    <th class="bid-column">Bid</th>
-                                    <th class="listed-column">Listed</th>
-                                    <th class="sweep-total-column" style="display: none;">Sweep 5 Total</th>
-                                    <th class="sweep-avg-column" style="display: none;">Sweep 5 Avg</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1212,8 +969,8 @@
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary bid-column">${formatValue(item.legendary.highest_bid)}</td>
-                                    <td class="rarity-section-legendary listed-column">
+                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}</td>
+                                    <td class="rarity-section-legendary">
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
                                             ${item.legendary.seller_info ? `
@@ -1231,11 +988,9 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-section-legendary sweep-total-column" style="display: none;">${formatValue(item.legendary.sweep_5_cards_price)}</td>
-                                    <td class="rarity-section-legendary sweep-avg-column" style="display: none;">${formatValue(item.legendary.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic bid-column">${formatValue(item.epic.highest_bid)}</td>
-                                    <td class="rarity-section-epic listed-column">
+                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}</td>
+                                    <td class="rarity-section-epic">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
                                             ${item.epic.seller_info ? `
@@ -1253,11 +1008,9 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-section-epic sweep-total-column" style="display: none;">${formatValue(item.epic.sweep_5_cards_price)}</td>
-                                    <td class="rarity-section-epic sweep-avg-column" style="display: none;">${formatValue(item.epic.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
-                                    <td class="rarity-section-rare bid-column">${formatValue(item.rare.highest_bid)}</td>
-                                    <td class="rarity-section-rare listed-column">
+                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}</td>
+                                    <td class="rarity-section-rare">
                                         <div class="listed-count">
                                             ${item.rare.listed_count}
                                             ${item.rare.seller_info ? `
@@ -1275,11 +1028,9 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-section-rare sweep-total-column" style="display: none;">${formatValue(item.rare.sweep_5_cards_price)}</td>
-                                    <td class="rarity-section-rare sweep-avg-column" style="display: none;">${formatValue(item.rare.sweep_5_avg_price)}</td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
-                                    <td class="rarity-section-common bid-column">${formatValue(item.common.highest_bid)}</td>
-                                    <td class="rarity-section-common listed-column">
+                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}</td>
+                                    <td class="rarity-section-common">
                                         <div class="listed-count">
                                             ${item.common.listed_count}
                                             ${item.common.seller_info ? `
@@ -1297,8 +1048,6 @@
                                             ` : ''}
                                         </div>
                                     </td>
-                                    <td class="rarity-section-common sweep-total-column" style="display: none;">${formatValue(item.common.sweep_5_cards_price)}</td>
-                                    <td class="rarity-section-common sweep-avg-column" style="display: none;">${formatValue(item.common.sweep_5_avg_price)}</td>
                                 </tr>
                                 `).join('')}
                             </tbody>
@@ -1619,46 +1368,6 @@
 
                 // Call the function after the table is created
                 initializeBidFloorSpreadSorting();
-
-                // Initialize view toggle
-                function initializeViewToggle() {
-                    const viewToggle = document.getElementById('view-toggle');
-                    
-                    if (!viewToggle) {
-                        console.warn('View toggle element not found');
-                        return;
-                    }
-                    
-                    viewToggle.addEventListener('change', function() {
-                        const bidColumns = document.querySelectorAll('.bid-column');
-                        const listedColumns = document.querySelectorAll('.listed-column');
-                        const sweepTotalColumns = document.querySelectorAll('.sweep-total-column');
-                        const sweepAvgColumns = document.querySelectorAll('.sweep-avg-column');
-                        const normalViewHeaders = document.querySelectorAll('.normal-view');
-                        const sweepViewHeaders = document.querySelectorAll('.sweep-view');
-                        
-                        if (this.checked) {
-                            // Switch to Sweep 5 view
-                            bidColumns.forEach(col => col.style.display = 'none');
-                            listedColumns.forEach(col => col.style.display = 'none');
-                            sweepTotalColumns.forEach(col => col.style.display = '');
-                            sweepAvgColumns.forEach(col => col.style.display = '');
-                            normalViewHeaders.forEach(header => header.style.display = 'none');
-                            sweepViewHeaders.forEach(header => header.style.display = '');
-                        } else {
-                            // Switch to Normal view
-                            bidColumns.forEach(col => col.style.display = '');
-                            listedColumns.forEach(col => col.style.display = '');
-                            sweepTotalColumns.forEach(col => col.style.display = 'none');
-                            sweepAvgColumns.forEach(col => col.style.display = 'none');
-                            normalViewHeaders.forEach(header => header.style.display = '');
-                            sweepViewHeaders.forEach(header => header.style.display = 'none');
-                        }
-                    });
-                }
-
-                // Call initializeViewToggle after the table is created
-                initializeViewToggle();
 
                 // After the table HTML is generated and inserted into the DOM
                 // Initialize the star range slider

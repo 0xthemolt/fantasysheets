@@ -26,7 +26,7 @@ def get_image_url(hero_id, stars, rarity):
 
 def download_hero_image(hero_id, stars, rarity):
     # Create directory if it doesn't exist
-    rarity_dir = Path(f"cards/{rarity.lower()}")
+    rarity_dir = Path(f"pages/cards/{rarity.lower()}")
     rarity_dir.mkdir(parents=True, exist_ok=True)
     
     # Define file path

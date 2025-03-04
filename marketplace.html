@@ -584,7 +584,8 @@
             // If we have hero card data, show the image
             if (heroId && rarity && stars) {
                 const heroCardImage = document.getElementById('hero-card-image');
-                const imageUrl = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                // Try with absolute path from root
+                const imageUrl = `/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                 console.log('Hero Card Image URL:', {
                     heroId,
                     rarity,
@@ -597,7 +598,14 @@
                 // Add error handling for the image
                 heroCardImage.onerror = function() {
                     console.log('Image failed to load:', imageUrl);
-                    this.style.display = 'none';
+                    // Try fallback path if first attempt fails
+                    this.src = `../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                    
+                    // Add second error handler for fallback path
+                    this.onerror = function() {
+                        console.log('Fallback image also failed to load');
+                        this.style.display = 'none';
+                    };
                 };
                 
                 // Show floor price if available

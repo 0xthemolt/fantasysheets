@@ -18,6 +18,29 @@
     <div class="container">
         <h1>Hero Supply Data</h1>
         <div id="loading">Loading data...</div>
+        
+        <!-- Filter container -->
+        <div class="filter-container">
+            <div class="search-box">
+                <input type="text" id="heroSearch" placeholder="Search heroes..." maxlength="50">
+            </div>
+            <div class="rarity-filter">
+                <div class="dropdown">
+                    <button class="dropdown-toggle">Filter by Rarity <span class="caret">▼</span></button>
+                    <div class="dropdown-menu">
+                        <label><input type="checkbox" value="Legendary" checked> Legendary</label>
+                        <label><input type="checkbox" value="Epic" checked> Epic</label>
+                        <label><input type="checkbox" value="Rare" checked> Rare</label>
+                        <label><input type="checkbox" value="Common" checked> Common</label>
+                        <label><input type="checkbox" value="Aggregate" checked> Aggregate</label>
+                        <div class="dropdown-actions">
+                            <button id="applyFilter">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div id="heroSupplyTable" class="table-container"></div>
     </div>
 
@@ -42,8 +65,8 @@
         async function fetchHeroSupplyData() {
             try {
                 const { data, error } = await supabaseClient
-                    .from('hero_supply')
-                    .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, start_datetime')
+                    .from('hero_supply_trends')
+                    .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, current_legendary, current_epic, current_rare, current_common, current_aggregate, legendary_pct_change, epic_pct_change, rare_pct_change, common_pct_change, aggregate_pct_change, start_datetime, hours_ago, days_ago, time_period')
                     .order('start_datetime', { ascending: false });
 
                 if (error) throw error;
@@ -77,28 +100,39 @@
                         heroPfpUrl: record.hero_pfp_url,
                         stars: record.stars,
                         score: record.score,
-                        records: []
+                        currentSupply: {},
+                        growthRates: {}
                     });
                 }
                 
-                heroesMap.get(heroId).records.push({
-                    datetime: new Date(record.start_datetime),
-                    legendary: record.legendary_cards,
-                    epic: record.epic_cards,
-                    rare: record.rare_cards,
-                    common: record.common_cards,
-                    aggregate: record.aggregate_cards
-                });
+                const hero = heroesMap.get(heroId);
+                
+                // Get current supply values
+                if (record.time_period === 'current') {
+                    hero.currentSupply = {
+                        legendary: record.current_legendary,
+                        epic: record.current_epic,
+                        rare: record.current_rare,
+                        common: record.current_common,
+                        aggregate: record.current_aggregate
+                    };
+                }
+                
+                // Get growth rates for different time periods
+                const timePeriods = ['~6 hours', '~12 hours', '~24 hours', '~48 hours', '~7 days', '~14 days'];
+                if (timePeriods.includes(record.time_period)) {
+                    hero.growthRates[record.time_period] = {
+                        legendary: record.legendary_pct_change,
+                        epic: record.epic_pct_change,
+                        rare: record.rare_pct_change,
+                        common: record.common_pct_change,
+                        aggregate: record.aggregate_pct_change
+                    };
+                }
             });
             
-            // Sort records by date for each hero
-            heroesMap.forEach(hero => {
-                hero.records.sort((a, b) => b.datetime - a.datetime);
-            });
-            
-            // Calculate time slices and growth rates
+            // Format the data for rendering
             const result = [];
-            const now = new Date();
             
             heroesMap.forEach(hero => {
                 const rarityTypes = [
@@ -118,79 +152,16 @@
                         stars: hero.stars,
                         score: hero.score,
                         rarityType: rarity.name,
-                        dailyData: [],
-                        growth: {}
+                        currentSupply: hero.currentSupply[rarity.key],
+                        growth: {
+                            '6h': hero.growthRates['~6 hours'] ? hero.growthRates['~6 hours'][rarity.key] : 'N/A',
+                            '12h': hero.growthRates['~12 hours'] ? hero.growthRates['~12 hours'][rarity.key] : 'N/A',
+                            '24h': hero.growthRates['~24 hours'] ? hero.growthRates['~24 hours'][rarity.key] : 'N/A',
+                            '48h': hero.growthRates['~48 hours'] ? hero.growthRates['~48 hours'][rarity.key] : 'N/A',
+                            '7d': hero.growthRates['~7 days'] ? hero.growthRates['~7 days'][rarity.key] : 'N/A',
+                            '14d': hero.growthRates['~14 days'] ? hero.growthRates['~14 days'][rarity.key] : 'N/A'
+                        }
                     };
-                    
-                    // Get the most recent record
-                    const latestRecord = hero.records[0];
-                    if (!latestRecord) return;
-                    
-                    // Current supply
-                    rowData.currentSupply = latestRecord[rarity.key];
-                    
-                    // Daily data for the last 7 days
-                    for (let i = 0; i < 7; i++) {
-                        const targetDate = new Date(now);
-                        targetDate.setDate(now.getDate() - i);
-                        const dateStr = formatDate(targetDate);
-                        
-                        // Find the closest record to this date
-                        const closestRecord = hero.records.find(r => 
-                            formatDate(r.datetime) === dateStr
-                        );
-                        
-                        rowData.dailyData.push({
-                            date: dateStr,
-                            supply: closestRecord ? closestRecord[rarity.key] : null
-                        });
-                    }
-                    
-                    // Calculate growth rates
-                    // 7-day growth
-                    const day7Record = hero.records.find(r => 
-                        (now - r.datetime) >= 7 * 24 * 60 * 60 * 1000
-                    );
-                    rowData.growth['7d'] = calculateGrowth(
-                        latestRecord[rarity.key], 
-                        day7Record ? day7Record[rarity.key] : null
-                    );
-                    
-                    // 14-day growth
-                    const day14Record = hero.records.find(r => 
-                        (now - r.datetime) >= 14 * 24 * 60 * 60 * 1000
-                    );
-                    rowData.growth['14d'] = calculateGrowth(
-                        latestRecord[rarity.key], 
-                        day14Record ? day14Record[rarity.key] : null
-                    );
-                    
-                    // 12-hour growth
-                    const hour12Record = hero.records.find(r => 
-                        (now - r.datetime) >= 12 * 60 * 60 * 1000
-                    );
-                    rowData.growth['12h'] = calculateGrowth(
-                        latestRecord[rarity.key], 
-                        hour12Record ? hour12Record[rarity.key] : null
-                    );
-                    
-                    // 24-hour growth
-                    const hour24Record = hero.records.find(r => 
-                        (now - r.datetime) >= 24 * 60 * 60 * 1000
-                    );
-                    rowData.growth['24h'] = calculateGrowth(
-                        latestRecord[rarity.key], 
-                        hour24Record ? hour24Record[rarity.key] : null
-                    );
-                    
-                    // 48-hour growth
-                    const hour48Record = hero.records.find(r => 
-                        (now - r.datetime) >= 48 * 60 * 60 * 1000
-                    );
-                    rowData.growth['48h'] = calculateGrowth(
-                        latestRecord[rarity.key], 
-                        hour48Record ? hour48Record[rarity.key] : null
-                    );
                     
                     result.push(rowData);
                 });
@@ -203,15 +174,6 @@
         function renderHeroSupplyTable(data) {
             const container = document.getElementById('heroSupplyTable');
             
-            // Group data by hero
-            const heroGroups = {};
-            data.forEach(row => {
-                if (!heroGroups[row.heroId]) {
-                    heroGroups[row.heroId] = [];
-                }
-                heroGroups[row.heroId].push(row);
-            });
-            
             // Create table
             const table = document.createElement('table');
             table.className = 'hero-supply-table';
@@ -220,112 +182,68 @@
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             
-            // Hero info columns
-            headerRow.innerHTML = `
-                <th>Hero</th>
-                <th>Rarity</th>
-                <th>Current Supply</th>
-                <th colspan="7">Last 7 Days Supply</th>
-                <th>7d Growth</th>
-                <th>14d Growth</th>
-                <th>12h Growth</th>
-                <th>24h Growth</th>
-                <th>48h Growth</th>
-            `;
-            thead.appendChild(headerRow);
+            // Define columns with sorting info
+            const columns = [
+                { id: 'hero', label: 'Hero', sortable: false },
+                { id: 'stats', label: 'Stats', sortable: true, sortKey: 'score' },
+                { id: 'rarity', label: 'Rarity', sortable: false },
+                { id: 'currentSupply', label: 'Current Supply', sortable: true, sortKey: 'currentSupply' },
+                { id: '6h', label: '6h Growth', sortable: true, sortKey: 'growth6h' },
+                { id: '12h', label: '12h Growth', sortable: true, sortKey: 'growth12h' },
+                { id: '24h', label: '24h Growth', sortable: true, sortKey: 'growth24h' },
+                { id: '48h', label: '48h Growth', sortable: true, sortKey: 'growth48h' },
+                { id: '7d', label: '7d Growth', sortable: true, sortKey: 'growth7d' },
+                { id: '14d', label: '14d Growth', sortable: true, sortKey: 'growth14d' }
+            ];
             
-            // Add subheader for daily columns
-            const subHeaderRow = document.createElement('tr');
-            subHeaderRow.innerHTML = `
-                <th colspan="3"></th>
-                ${Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    return `<th>${formatDate(date)}</th>`;
-                }).join('')}
-                <th colspan="5"></th>
-            `;
-            thead.appendChild(subHeaderRow);
+            // Create header cells
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.id = `header-${column.id}`;
+                th.innerHTML = column.label;
+                
+                if (column.sortable) {
+                    th.className = 'sortable';
+                    th.innerHTML += ' <span class="sort-icon"></span>';
+                    th.addEventListener('click', () => sortTable(column.sortKey, th));
+                }
+                
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
             table.appendChild(thead);
             
             // Create table body
             const tbody = document.createElement('tbody');
+            tbody.id = 'hero-supply-tbody';
             
-            // Add rows for each hero and rarity
-            Object.values(heroGroups).forEach(heroRows => {
-                const firstRow = heroRows[0];
+            // Process data for sorting
+            const processedData = data.map(row => {
+                // Convert growth values to numbers for sorting
+                const growth6h = row.growth['6h'] !== 'N/A' ? parseFloat(row.growth['6h']) : null;
+                const growth12h = row.growth['12h'] !== 'N/A' ? parseFloat(row.growth['12h']) : null;
+                const growth24h = row.growth['24h'] !== 'N/A' ? parseFloat(row.growth['24h']) : null;
+                const growth48h = row.growth['48h'] !== 'N/A' ? parseFloat(row.growth['48h']) : null;
+                const growth7d = row.growth['7d'] !== 'N/A' ? parseFloat(row.growth['7d']) : null;
+                const growth14d = row.growth['14d'] !== 'N/A' ? parseFloat(row.growth['14d']) : null;
                 
-                heroRows.forEach((row, index) => {
-                    const tr = document.createElement('tr');
-                    
-                    // Only show hero info in the first row of each hero group
-                    if (index === 0) {
-                        tr.innerHTML = `
-                            <td rowspan="5" class="hero-info">
-                                <div class="hero-profile">
-                                    <img src="${row.heroPfpUrl}" alt="${row.heroName}" class="hero-avatar">
-                                    <div class="hero-details">
-                                        <div class="hero-name">${row.heroName}</div>
-                                        <div class="hero-handle">
-                                            <a href="https://x.com/${row.heroHandle}" target="_blank">
-                                                <i class="fab fa-twitter"></i>
-                                            </a>
-                                            @${row.heroHandle}
-                                        </div>
-                                        <div class="hero-stars">${index === 0 ? (row.stars ? '&#9733;'.repeat(row.stars) : 'N/A') : ''}</div>
-                                        <div class="hero-score">${index === 0 ? ('Score: ' + (row.score !== undefined ? Math.floor(row.score) : 'N/A')) : ''}</div>
-                                    </div>
-                                </div>
-                            </td>
-                        `;
-                    }
-                    
-                    // Add rarity and supply data
-                    const rarityCell = document.createElement('td');
-                    rarityCell.className = `rarity-${row.rarityType.toLowerCase()}`;
-                    rarityCell.textContent = row.rarityType;
-                    tr.appendChild(rarityCell);
-                    
-                    // Current supply
-                    const currentSupplyCell = document.createElement('td');
-                    currentSupplyCell.textContent = row.currentSupply?.toLocaleString() || 'N/A';
-                    tr.appendChild(currentSupplyCell);
-                    
-                    // Daily supply data
-                    row.dailyData.forEach(day => {
-                        const dayCell = document.createElement('td');
-                        dayCell.textContent = day.supply?.toLocaleString() || '-';
-                        tr.appendChild(dayCell);
-                    });
-                    
-                    // Growth rates
-                    ['7d', '14d', '12h', '24h', '48h'].forEach(period => {
-                        const growthCell = document.createElement('td');
-                        growthCell.textContent = row.growth[period];
-                        
-                        // Add color based on growth rate
-                        if (row.growth[period] !== 'N/A') {
-                            const growthValue = parseFloat(row.growth[period]);
-                            if (growthValue > 0) {
-                                growthCell.className = 'positive-growth';
-                            } else if (growthValue < 0) {
-                                growthCell.className = 'negative-growth';
-                            }
-                        }
-                        
-                        tr.appendChild(growthCell);
-                    });
-                    
-                    tbody.appendChild(tr);
-                });
-                
-                // Add a separator row between heroes
-                const separatorRow = document.createElement('tr');
-                separatorRow.className = 'hero-separator';
-                separatorRow.style.backgroundColor = 'transparent';
-                separatorRow.innerHTML = '<td colspan="17"></td>';
-                tbody.appendChild(separatorRow);
+                return {
+                    ...row,
+                    growth6h,
+                    growth12h,
+                    growth24h,
+                    growth48h,
+                    growth7d,
+                    growth14d
+                };
             });
+            
+            // Store the data for sorting
+            table.dataset.tableData = JSON.stringify(processedData);
+            
+            // Render rows
+            renderRows(processedData, tbody);
             
             table.appendChild(tbody);
             container.appendChild(table);
@@ -334,10 +252,41 @@
             const style = document.createElement('style');
             style.textContent = `
                 .hero-supply-table {
-                    width: 100%;
+                    width: 90%;
+                    max-width: 90%;
+                    margin: 20px auto;
                     border-collapse: collapse;
-                    margin-top: 20px;
                     font-size: 14px;
+                    table-layout: fixed;
+                }
+                
+                .sortable {
+                    cursor: pointer;
+                    position: relative;
+                }
+                
+                .sortable:hover {
+                    background-color: #e0e0e0;
+                }
+                
+                .sort-icon {
+                    display: inline-block;
+                    width: 0;
+                    height: 0;
+                    margin-left: 5px;
+                    vertical-align: middle;
+                }
+                
+                .sort-asc .sort-icon {
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-bottom: 5px solid #333;
+                }
+                
+                .sort-desc .sort-icon {
+                    border-left: 5px solid transparent;
+                    border-right: 5px solid transparent;
+                    border-top: 5px solid #333;
                 }
                 
                 .hero-info {
@@ -371,13 +320,22 @@
                     font-size: 12px;
                 }
                 
+                .hero-stats {
+                    text-align: center;
+                    padding: 8px;
+                    vertical-align: middle;
+                }
+                
                 .hero-stars {
                     color: gold;
+                    font-size: 16px;
+                    margin-bottom: 4px;
                 }
                 
                 .hero-score {
                     color: #666;
-                    font-size: 12px;
+                    font-size: 14px;
+                    font-weight: bold;
                 }
                 
                 .rarity-legendary {
@@ -417,20 +375,318 @@
                     color: red;
                 }
                 
-                .hero-separator {
-                    height: 10px;
-                    background-color: #f9f9f9;
-                }
-                
                 .table-container {
                     overflow-x: auto;
                 }
             `;
             document.head.appendChild(style);
+            
+            // Sort by current supply by default (descending)
+            sortTable('currentSupply', document.getElementById('header-currentSupply'));
+        }
+        
+        // Function to render table rows
+        function renderRows(data, tbody) {
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Hero info column
+                const heroCell = document.createElement('td');
+                heroCell.className = 'hero-info';
+                heroCell.innerHTML = `
+                    <div class="hero-profile">
+                        <img src="${row.heroPfpUrl}" alt="${row.heroName}" class="hero-avatar">
+                        <div class="hero-details">
+                            <div class="hero-name">${row.heroName}</div>
+                            <div class="hero-handle">
+                                <a href="https://x.com/${row.heroHandle}" target="_blank">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                @${row.heroHandle}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                tr.appendChild(heroCell);
+                
+                // Stats column (stars and score)
+                const statsCell = document.createElement('td');
+                statsCell.className = 'hero-stats';
+                statsCell.innerHTML = `
+                    <div class="hero-stars">${row.stars ? '&#9733;'.repeat(row.stars) : 'N/A'}</div>
+                    <div class="hero-score">${row.score !== undefined ? Math.floor(row.score) : 'N/A'}</div>
+                `;
+                tr.appendChild(statsCell);
+                
+                // Rarity column
+                const rarityCell = document.createElement('td');
+                rarityCell.className = `rarity-${row.rarityType.toLowerCase()}`;
+                rarityCell.textContent = row.rarityType;
+                tr.appendChild(rarityCell);
+                
+                // Current supply
+                const currentSupplyCell = document.createElement('td');
+                currentSupplyCell.textContent = row.currentSupply?.toLocaleString() || 'N/A';
+                tr.appendChild(currentSupplyCell);
+                
+                // Growth rates
+                ['6h', '12h', '24h', '48h', '7d', '14d'].forEach(period => {
+                    const growthCell = document.createElement('td');
+                    const growthValue = row.growth[period];
+                    
+                    if (growthValue !== 'N/A') {
+                        // Format to 1 decimal place and add % sign
+                        const numericValue = parseFloat(growthValue);
+                        growthCell.textContent = numericValue.toFixed(1) + '%';
+                        
+                        // Add color based on growth rate
+                        if (numericValue > 0) {
+                            growthCell.className = 'positive-growth';
+                        } else if (numericValue < 0) {
+                            growthCell.className = 'negative-growth';
+                        }
+                    } else {
+                        growthCell.textContent = 'N/A';
+                    }
+                    
+                    tr.appendChild(growthCell);
+                });
+                
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // Function to sort the table
+        function sortTable(key, headerElement) {
+            const table = headerElement.closest('table');
+            const tbody = document.getElementById('hero-supply-tbody');
+            const data = JSON.parse(table.dataset.tableData);
+            
+            // Get current sort direction
+            const currentDirection = headerElement.classList.contains('sort-asc') ? 'asc' : 
+                                    headerElement.classList.contains('sort-desc') ? 'desc' : null;
+            
+            // Remove sort classes from all headers
+            const headers = table.querySelectorAll('th');
+            headers.forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Determine new sort direction (default to desc on first click)
+            const newDirection = currentDirection === 'desc' ? 'asc' : 'desc';
+            headerElement.classList.add(`sort-${newDirection}`);
+            
+            // Sort the data
+            data.sort((a, b) => {
+                let valueA = a[key];
+                let valueB = b[key];
+                
+                // Handle null/undefined values
+                if (valueA === null || valueA === undefined) return 1;
+                if (valueB === null || valueB === undefined) return -1;
+                
+                // Compare values
+                if (typeof valueA === 'string') {
+                    return newDirection === 'asc' ? 
+                        valueA.localeCompare(valueB) : 
+                        valueB.localeCompare(valueA);
+                } else {
+                    return newDirection === 'asc' ? 
+                        valueA - valueB : 
+                        valueB - valueA;
+                }
+            });
+            
+            // Re-render the table with sorted data
+            renderRows(data, tbody);
         }
 
-        // Load data when the page loads
-        document.addEventListener('DOMContentLoaded', fetchHeroSupplyData);
+        // Add CSS for the filters
+        const style = document.createElement('style');
+        style.textContent = `
+            .filter-container {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .search-box input {
+                max-width: 250px;
+                padding: 8px 12px;
+                border-radius: 4px;
+                background-color: rgba(30, 30, 30, 0.7);
+                color: #fff;
+                font-size: 14px;
+            }
+            
+            .search-box input::placeholder {
+                color: #aaa;
+            }
+            
+            .dropdown {
+                position: relative;
+                display: inline-block;
+            }
+            
+            .dropdown-toggle {
+                padding: 8px 12px;
+                background-color: rgba(30, 30, 30, 0.7);
+                color: #fff;
+                border: 1px solid #444;
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .caret {
+                font-size: 10px;
+            }
+            
+            .dropdown-menu {
+                display: none;
+                position: absolute;
+                background-color: rgba(40, 40, 40, 0.95);
+                min-width: 160px;
+                box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+                z-index: 1;
+                border-radius: 4px;
+                padding: 8px;
+                margin-top: 4px;
+            }
+            
+            .dropdown-menu label {
+                display: block;
+                padding: 6px 8px;
+                color: #fff;
+                cursor: pointer;
+            }
+            
+            .dropdown-menu input {
+                margin-right: 8px;
+            }
+            
+            .dropdown-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #444;
+            }
+            
+            .dropdown-actions button {
+                background-color: rgba(60, 60, 60, 0.8);
+                color: #fff;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            
+            .dropdown-actions button:hover {
+                background-color: rgba(80, 80, 80, 0.8);
+            }
+            
+            /* Rarity colors for checkboxes */
+            .dropdown-menu label:nth-child(1) {
+                border-left: 3px solid #FBE7FF;
+            }
+            
+            .dropdown-menu label:nth-child(2) {
+                border-left: 3px solid #F1A3FD;
+            }
+            
+            .dropdown-menu label:nth-child(3) {
+                border-left: 3px solid #00FFDF;
+            }
+            
+            .dropdown-menu label:nth-child(4) {
+                border-left: 3px solid #93FF01;
+            }
+            
+            .dropdown-menu label:nth-child(5) {
+                border-left: 3px solid #32CD32;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Function to handle filtering
+        function filterTable() {
+            const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
+            const rarityFilters = Array.from(document.querySelectorAll('.dropdown-menu input:checked'))
+                .map(checkbox => checkbox.value);
+            
+            const table = document.querySelector('.hero-supply-table');
+            if (!table) return;
+            
+            const data = JSON.parse(table.dataset.tableData);
+            
+            const filteredData = data.filter(row => {
+                // Check if rarity is selected
+                if (!rarityFilters.includes(row.rarityType)) {
+                    return false;
+                }
+                
+                // Check if search term matches hero name or handle
+                if (searchTerm) {
+                    const heroName = row.heroName.toLowerCase();
+                    const heroHandle = row.heroHandle.toLowerCase();
+                    return heroName.includes(searchTerm) || heroHandle.includes(searchTerm);
+                }
+                
+                return true;
+            });
+            
+            // Re-render with filtered data
+            renderRows(filteredData, document.getElementById('hero-supply-tbody'));
+        }
+
+        // Add event listeners for filters
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchHeroSupplyData();
+            
+            // Toggle dropdown
+            document.querySelector('.dropdown-toggle').addEventListener('click', function() {
+                document.querySelector('.dropdown-menu').classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            window.addEventListener('click', function(event) {
+                if (!event.target.matches('.dropdown-toggle') && 
+                    !event.target.matches('.caret') && 
+                    !event.target.closest('.dropdown-menu')) {
+                    const dropdowns = document.getElementsByClassName('dropdown-menu');
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        if (dropdowns[i].classList.contains('show')) {
+                            dropdowns[i].classList.remove('show');
+                            filterTable(); // Apply filter when closing dropdown
+                        }
+                    }
+                }
+            });
+            
+            // Apply filter button
+            document.getElementById('applyFilter').addEventListener('click', function() {
+                filterTable();
+                document.querySelector('.dropdown-menu').classList.remove('show');
+            });
+            
+            // Add event listener for search input
+            document.getElementById('heroSearch').addEventListener('input', filterTable);
+            
+            // Remove immediate filtering on checkbox change
+            const checkboxes = document.querySelectorAll('.dropdown-menu input');
+            checkboxes.forEach(checkbox => {
+                // We no longer apply filter immediately on checkbox change
+                // The filter will be applied when clicking Apply or clicking outside
+            });
+        });
     </script>
 </body>
 </html>

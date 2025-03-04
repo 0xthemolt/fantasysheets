@@ -164,12 +164,12 @@
                         rarityType: rarity.name,
                         currentSupply: hero.currentSupply[rarity.key],
                         growth: {
-                            '6h': hero.growthRates['~6 hours'] ? hero.growthRates['~6 hours'][rarity.key] : 'N/A',
-                            '12h': hero.growthRates['~12 hours'] ? hero.growthRates['~12 hours'][rarity.key] : 'N/A',
-                            '24h': hero.growthRates['~24 hours'] ? hero.growthRates['~24 hours'][rarity.key] : 'N/A',
-                            '48h': hero.growthRates['~48 hours'] ? hero.growthRates['~48 hours'][rarity.key] : 'N/A',
-                            '7d': hero.growthRates['~7 days'] ? hero.growthRates['~7 days'][rarity.key] : 'N/A',
-                            '14d': hero.growthRates['~14 days'] ? hero.growthRates['~14 days'][rarity.key] : 'N/A'
+                            '6h': hero.growthRates['~6 hours'] ? Math.round(hero.growthRates['~6 hours'][rarity.key]) : 'N/A',
+                            '12h': hero.growthRates['~12 hours'] ? Math.round(hero.growthRates['~12 hours'][rarity.key]) : 'N/A',
+                            '24h': hero.growthRates['~24 hours'] ? Math.round(hero.growthRates['~24 hours'][rarity.key]) : 'N/A',
+                            '48h': hero.growthRates['~48 hours'] ? Math.round(hero.growthRates['~48 hours'][rarity.key]) : 'N/A',
+                            '7d': hero.growthRates['~7 days'] ? Math.round(hero.growthRates['~7 days'][rarity.key]) : 'N/A',
+                            '14d': hero.growthRates['~14 days'] ? Math.round(hero.growthRates['~14 days'][rarity.key]) : 'N/A'
                         },
                         absoluteChange: {
                             '6h': hero.absoluteChanges['~6 hours'] ? hero.absoluteChanges['~6 hours'][rarity.key] : null,
@@ -463,7 +463,7 @@
                     if (growthValue !== 'N/A') {
                         // Format to 1 decimal place and add % sign
                         const numericValue = parseFloat(growthValue);
-                        let cellContent = numericValue.toFixed(1) + '%';
+                        let cellContent = Math.round(numericValue) + '%';
                         
                         // Add absolute change in parentheses if available
                         if (absoluteChange !== null) {

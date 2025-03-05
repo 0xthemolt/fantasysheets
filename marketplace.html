@@ -543,21 +543,17 @@
 
         .lowest-price-highlight {
             position: relative;
-            border-radius: 4px;
-            box-shadow: 0 0 0 2px #FACC15;
-            animation: pulse 2s infinite;
+            background: rgba(250, 204, 21, 0.15);
+            border-radius: 0;
+            border: none;
+            font-weight: bold;
+            color: #FACC15;
         }
 
+        /* Remove any previous animation or box-shadow styles */
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
-            }
+            0% { box-shadow: none; }
+            100% { box-shadow: none; }
         }
     </style>
 </head>

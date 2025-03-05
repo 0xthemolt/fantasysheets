@@ -97,13 +97,18 @@
         // Create HTML for hero cards
         const cardsHTML = topHeroes.map(hero => `
             <div class="hero-card">
-                <img src="${hero.hero_pfp_url || 'default-avatar.png'}" alt="${hero.hero_name}" class="hero-avatar">
+                <img src="/cards/argent/${hero.hero_id}_${hero.stars}.png" alt="${hero.hero_name}" class="hero-avatar">
                 <div class="hero-info">
                     <h3>${hero.hero_name}</h3>
                     <p class="hero-handle">@${hero.hero_handle}</p>
+                    <div class="supply-info">
+                        <span class="supply-label">Supply:</span>
+                        <span class="supply-value">${hero.current_aggregate.toLocaleString()}</span>
+                        <span class="previous-supply">(was ${hero.aggregate_cards.toLocaleString()})</span>
+                    </div>
                     <div class="growth-info">
                         <span class="growth-value">+${hero.absoluteGrowth.toLocaleString()}</span>
-                        <span class="growth-percent">(${hero.aggregate_pct_change})</span>
+                        <span class="growth-percent">(${parseInt(hero.aggregate_pct_change)}%)</span>
                     </div>
                 </div>
             </div>
@@ -138,7 +143,6 @@
     
     .hero-card {
         display: flex;
-        background-color: #f8f9fa;
         border-radius: 10px;
         padding: 15px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -171,6 +175,26 @@
         color: #6c757d;
         margin: 0 0 10px 0;
         font-size: 14px;
+    }
+    
+    .supply-info {
+        margin-bottom: 5px;
+    }
+    
+    .supply-label {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .supply-value {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 5px;
+    }
+    
+    .previous-supply {
+        font-size: 14px;
+        color: #6c757d;
     }
     
     .growth-info {

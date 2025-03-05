@@ -28,11 +28,11 @@
             </div>
             <div class="rarity-filter">
                 <div class="filter-options">
-                    <label class="filter-option legendary"><input type="checkbox" value="Legendary" checked> Legendary</label>
-                    <label class="filter-option epic"><input type="checkbox" value="Epic" checked> Epic</label>
-                    <label class="filter-option rare"><input type="checkbox" value="Rare" checked> Rare</label>
-                    <label class="filter-option common"><input type="checkbox" value="Common" checked> Common</label>
-                    <label class="filter-option aggregate"><input type="checkbox" value="Aggregate" checked> Aggregate</label>
+                    <div class="filter-option legendary active" data-rarity="Legendary">Legendary</div>
+                    <div class="filter-option epic active" data-rarity="Epic">Epic</div>
+                    <div class="filter-option rare active" data-rarity="Rare">Rare</div>
+                    <div class="filter-option common active" data-rarity="Common">Common</div>
+                    <div class="filter-option aggregate active" data-rarity="Aggregate">Aggregate</div>
                 </div>
             </div>
         </div>
@@ -514,15 +514,15 @@
             
             // Get the current filtered data instead of the original data
             const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
-            const rarityFilters = Array.from(document.querySelectorAll('.filter-options input:checked'))
-                .map(checkbox => checkbox.value);
+            const activeFilters = Array.from(document.querySelectorAll('.filter-option.active'))
+                .map(button => button.dataset.rarity);
             
             const originalData = JSON.parse(table.dataset.tableData);
             
             // Apply filters first
             const filteredData = originalData.filter(row => {
                 // Check if rarity is selected
-                if (!rarityFilters.includes(row.rarityType)) {
+                if (!activeFilters.includes(row.rarityType)) {
                     return false;
                 }
                 
@@ -609,48 +609,57 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
+                /* Remove any potential border on the filter-options container */
+                border: none;
             }
             
             .filter-option {
                 display: inline-flex;
                 align-items: center;
-                padding: 5px 10px;
-                background-color: rgba(30, 30, 30, 0.7);
+                justify-content: center;
+                padding: 8px 15px;
                 border-radius: 4px;
                 color: #fff;
                 cursor: pointer;
                 font-size: 0.9em;
-                border: 1px solid #444;
                 transition: all 0.2s ease;
-            }
-            
-            .filter-option input {
-                margin-right: 5px;
+                user-select: none;
+                min-width: 90px;
+                text-align: center;
+                opacity: 0.6;
+                border: none; /* Remove the border */
             }
             
             .filter-option:hover {
-                background-color: rgba(50, 50, 50, 0.8);
+                opacity: 0.9;
+            }
+            
+            .filter-option.active {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                /* Remove the border for active state as well */
+                border: none;
             }
             
             /* Rarity colors for filter options */
             .filter-option.legendary {
-                border-left: 3px solid #FBE7FF;
+                background: linear-gradient(135deg, rgba(251, 231, 255, 0.8), rgba(200, 180, 220, 0.5));
             }
             
             .filter-option.epic {
-                border-left: 3px solid #F1A3FD;
+                background: linear-gradient(135deg, rgba(241, 163, 253, 0.8), rgba(190, 120, 200, 0.5));
             }
             
             .filter-option.rare {
-                border-left: 3px solid #00FFDF;
+                background: linear-gradient(135deg, rgba(0, 255, 223, 0.8), rgba(0, 200, 180, 0.5));
             }
             
             .filter-option.common {
-                border-left: 3px solid #93FF01;
+                background: linear-gradient(135deg, rgba(147, 255, 1, 0.8), rgba(100, 200, 0, 0.5));
             }
             
             .filter-option.aggregate {
-                border-left: 3px solid #32CD32;
+                background: linear-gradient(135deg, rgba(50, 205, 50, 0.8), rgba(30, 150, 30, 0.5));
             }
         `;
         document.head.appendChild(style);
@@ -658,8 +667,8 @@
         // Function to handle filtering
         function filterTable() {
             const searchTerm = document.getElementById('heroSearch').value.toLowerCase();
-            const rarityFilters = Array.from(document.querySelectorAll('.filter-options input:checked'))
-                .map(checkbox => checkbox.value);
+            const activeFilters = Array.from(document.querySelectorAll('.filter-option.active'))
+                .map(button => button.dataset.rarity);
             
             const table = document.querySelector('.hero-supply-table');
             if (!table) return;
@@ -668,7 +677,7 @@
             
             const filteredData = data.filter(row => {
                 // Check if rarity is selected
-                if (!rarityFilters.includes(row.rarityType)) {
+                if (!activeFilters.includes(row.rarityType)) {
                     return false;
                 }
                 
@@ -693,10 +702,20 @@
             // Add event listener for search input
             document.getElementById('heroSearch').addEventListener('input', filterTable);
             
-            // Add event listeners for checkboxes
-            const checkboxes = document.querySelectorAll('.filter-option input');
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', filterTable);
+            // Add event listeners for rarity filter buttons
+            document.querySelectorAll('.filter-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Toggle active class
+                    button.classList.toggle('active');
+                    
+                    // Make sure at least one filter is active
+                    const activeFilters = document.querySelectorAll('.filter-option.active');
+                    if (activeFilters.length === 0) {
+                        button.classList.add('active');
+                    }
+                    
+                    filterTable();
+                });
             });
         });
     </script>

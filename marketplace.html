@@ -486,6 +486,79 @@
             color: #fff;
             font-size: 0.9em;
         }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-right: 10px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #FACC15;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9em;
+            color: #fff;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .lowest-price-highlight {
+            position: relative;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px #FACC15;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -952,6 +1025,16 @@
                                 <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
                                 <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
                             </div>
+                            <div class="filter-container">
+                                <div class="filter-label">Common Equivalent:</div>
+                                <div class="filter-options">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="common-equivalent-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label" id="common-equivalent-label">Off</span>
+                                </div>
+                            </div>
                         </div>
                         
                         <table class="marketplace-table">
@@ -1372,7 +1455,8 @@
                 // Initialize the star range slider
                 setTimeout(() => {
                     initializeStarRangeSlider();
-                    initializeScoreRangeSlider(); // Add this line to initialize the score slider
+                    initializeScoreRangeSlider();
+                    initializeCommonEquivalentToggle();
                 }, 100);
             } catch (error) {
                 console.error('Error:', error);
@@ -1634,6 +1718,102 @@
             if (noResultsMessage) {
                 noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
             }
+        }
+
+        // Add this to your existing JavaScript, after the table is created
+        function initializeCommonEquivalentToggle() {
+            const toggle = document.getElementById('common-equivalent-toggle');
+            if (!toggle) {
+                console.warn('Common equivalent toggle not found');
+                return;
+            }
+            
+            const toggleLabel = document.getElementById('common-equivalent-label');
+            if (!toggleLabel) {
+                console.warn('Toggle label element not found');
+                return;
+            }
+            
+            toggle.addEventListener('change', function() {
+                toggleLabel.textContent = this.checked ? 'On' : 'Off';
+                updateCommonEquivalentPrices(this.checked);
+            });
+        }
+
+        function updateCommonEquivalentPrices(isEnabled) {
+            const rows = document.querySelectorAll('.marketplace-table tbody tr');
+            
+            rows.forEach(row => {
+                // Get all floor price cells for each rarity
+                const legendaryFloorCell = row.querySelector('td:nth-child(6)');
+                const epicFloorCell = row.querySelector('td:nth-child(9)');
+                const rareFloorCell = row.querySelector('td:nth-child(12)');
+                const commonFloorCell = row.querySelector('td:nth-child(15)');
+                
+                // Skip if any cell is null
+                if (!legendaryFloorCell || !epicFloorCell || !rareFloorCell || !commonFloorCell) {
+                    return;
+                }
+                
+                // Store original values if not already stored
+                if (!legendaryFloorCell.hasAttribute('data-original-value')) {
+                    legendaryFloorCell.setAttribute('data-original-value', legendaryFloorCell.textContent);
+                    epicFloorCell.setAttribute('data-original-value', epicFloorCell.textContent);
+                    rareFloorCell.setAttribute('data-original-value', rareFloorCell.textContent);
+                    commonFloorCell.setAttribute('data-original-value', commonFloorCell.textContent);
+                }
+                
+                // Remove any existing highlights
+                legendaryFloorCell.classList.remove('lowest-price-highlight');
+                epicFloorCell.classList.remove('lowest-price-highlight');
+                rareFloorCell.classList.remove('lowest-price-highlight');
+                commonFloorCell.classList.remove('lowest-price-highlight');
+                
+                if (isEnabled) {
+                    // Calculate common equivalents
+                    const legendaryValue = parseFloat(legendaryFloorCell.getAttribute('data-original-value'));
+                    const epicValue = parseFloat(epicFloorCell.getAttribute('data-original-value'));
+                    const rareValue = parseFloat(rareFloorCell.getAttribute('data-original-value'));
+                    const commonValue = parseFloat(commonFloorCell.getAttribute('data-original-value'));
+                    
+                    // Convert to common equivalents
+                    const legendaryEquiv = !isNaN(legendaryValue) ? legendaryValue / 125 : Infinity;
+                    const epicEquiv = !isNaN(epicValue) ? epicValue / 25 : Infinity;
+                    const rareEquiv = !isNaN(rareValue) ? rareValue / 5 : Infinity;
+                    
+                    // Display the equivalent values
+                    if (!isNaN(legendaryValue)) {
+                        legendaryFloorCell.innerHTML = `${formatValue(legendaryEquiv)} <small>(÷125)</small>`;
+                    }
+                    if (!isNaN(epicValue)) {
+                        epicFloorCell.innerHTML = `${formatValue(epicEquiv)} <small>(÷25)</small>`;
+                    }
+                    if (!isNaN(rareValue)) {
+                        rareFloorCell.innerHTML = `${formatValue(rareEquiv)} <small>(÷5)</small>`;
+                    }
+                    
+                    // Find the lowest equivalent price
+                    const prices = [
+                        { cell: legendaryFloorCell, value: legendaryEquiv },
+                        { cell: epicFloorCell, value: epicEquiv },
+                        { cell: rareFloorCell, value: rareEquiv },
+                        { cell: commonFloorCell, value: commonValue }
+                    ].filter(item => !isNaN(item.value) && item.value !== Infinity);
+                    
+                    if (prices.length > 0) {
+                        // Sort by value to find the lowest
+                        prices.sort((a, b) => a.value - b.value);
+                        // Highlight the lowest price
+                        prices[0].cell.classList.add('lowest-price-highlight');
+                    }
+                } else {
+                    // Restore original values
+                    legendaryFloorCell.textContent = legendaryFloorCell.getAttribute('data-original-value');
+                    epicFloorCell.textContent = epicFloorCell.getAttribute('data-original-value');
+                    rareFloorCell.textContent = rareFloorCell.getAttribute('data-original-value');
+                    commonFloorCell.textContent = commonFloorCell.getAttribute('data-original-value');
+                }
+            });
         }
     </script>
 </body>

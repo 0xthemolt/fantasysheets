@@ -97,7 +97,7 @@
         // Create HTML for hero cards
         const cardsHTML = topHeroes.map(hero => `
             <div class="hero-card">
-                <img src="/cards/argent/${hero.hero_id}_${hero.stars}.png" alt="${hero.hero_name}" class="hero-avatar">
+                <img src="/cards/argent/${hero.hero_id}_${hero.stars}.png" alt="${hero.hero_name}" class="card-avatar">
                 <div class="hero-info">
                     <h3>${hero.hero_name}</h3>
                     <p class="hero-handle">@${hero.hero_handle}</p>
@@ -154,11 +154,9 @@
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
-    .hero-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
+    .card-avatar {
+        width: 48px;
+        height: 74px;
         margin-right: 15px;
     }
     

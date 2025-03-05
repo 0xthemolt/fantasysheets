@@ -22,11 +22,15 @@ def get_hero_ids():
         return []
 
 def get_image_url(hero_id, stars, rarity):
-    return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/{rarity.lower()}/{hero_id}_{stars}.png"
+    # return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/{rarity.lower()}/{hero_id}_{stars}.png"
+    return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/{hero_id}_{stars}.png" 
 
 def download_hero_image(hero_id, stars, rarity):
     # Create directory if it doesn't exist
-    rarity_dir = Path(f"pages/cards/{rarity.lower()}")
+    if rarity.lower() == "argent":
+        rarity_dir = Path(f"pages/cards/{rarity.lower()}")
+    else:
+        rarity_dir = Path(f"pages/cards/{rarity.lower()}")
     rarity_dir.mkdir(parents=True, exist_ok=True)
     
     # Define file path
@@ -55,7 +59,9 @@ def download_all_hero_images():
     hero_ids = get_hero_ids()
     print(f"Found {len(hero_ids)} heroes")
     
-    rarities = ["legendary", "epic", "rare", "common"]
+    # Comment out the old rarities but keep them in the code
+    # rarities = ["legendary", "epic", "rare", "common"]
+    rarities = ["argent"]  # Only download argent rarity
     stars_range = range(1, 9)  # 1 to 8 stars
     
     # Create a list of all download tasks

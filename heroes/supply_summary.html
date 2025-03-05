@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero Supply Summary</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Font Awesome for the Twitter/X icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<script>
+    // Initialize Supabase
+    const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Helper function to format dates
+    function formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    // Helper function to calculate growth percentage
+    function calculateGrowth(current, previous) {
+        if (!previous || previous === 0) return 'N/A';
+        return ((current - previous) / previous * 100).toFixed(2) + '%';
+    }
+
+    // Fetch hero supply data
+    async function fetchHeroSupplyData() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('hero_supply_trends')
+                .select('hero_id, hero_handle, hero_name, hero_pfp_url, stars, score, inflation, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, current_legendary, current_epic, current_rare, current_common, current_aggregate, legendary_pct_change, epic_pct_change, rare_pct_change, common_pct_change, aggregate_pct_change, start_datetime, hours_ago, days_ago, time_period')
+                .order('start_datetime', { ascending: false });
+
+            if (error) throw error;
+
+            console.log('Fetched Data:', data); // Log the fetched data
+            
+            // Skip processing and table rendering for now since those functions aren't defined
+            // const processedData = processHeroData(data);
+            // renderHeroSupplyTable(processedData);
+            
+            // Render top 10 heroes by aggregate growth
+            renderTopHeroesByAggregateGrowth(data);
+            
+            // Hide loading indicator
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching hero supply data:', error);
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.textContent = 'Error loading data. Please try again later.';
+            } else {
+                console.error('Loading element not found');
+            }
+        }
+    }
+    
+    // Function to render top 10 heroes by aggregate growth
+    function renderTopHeroesByAggregateGrowth(data) {
+        // Filter data for the ~6 hours time period
+        const sixHourData = data.filter(item => item.time_period === '~6 hours');
+        
+        if (!sixHourData.length) {
+            document.getElementById('top-heroes-growth').innerHTML = '<p>No data available for the 6-hour time period.</p>';
+            return;
+        }
+        
+        // Calculate absolute growth for each hero
+        const heroesWithGrowth = sixHourData.map(hero => {
+            const absoluteGrowth = hero.current_aggregate - hero.aggregate_cards;
+            return {
+                ...hero,
+                absoluteGrowth
+            };
+        });
+        
+        // Sort by absolute growth (descending) and take top 10
+        const topHeroes = heroesWithGrowth
+            .sort((a, b) => b.absoluteGrowth - a.absoluteGrowth)
+            .slice(0, 10);
+            
+        // Create HTML for hero cards
+        const cardsHTML = topHeroes.map(hero => `
+            <div class="hero-card">
+                <img src="${hero.hero_pfp_url || 'default-avatar.png'}" alt="${hero.hero_name}" class="hero-avatar">
+                <div class="hero-info">
+                    <h3>${hero.hero_name}</h3>
+                    <p class="hero-handle">@${hero.hero_handle}</p>
+                    <div class="growth-info">
+                        <span class="growth-value">+${hero.absoluteGrowth.toLocaleString()}</span>
+                        <span class="growth-percent">(${hero.aggregate_pct_change})</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add the cards to the page
+        document.getElementById('top-heroes-growth').innerHTML = `
+            <h2>Top 10 Heroes by Aggregate Card Growth (Last ~6 Hours)</h2>
+            <div class="hero-cards-container">
+                ${cardsHTML}
+            </div>
+        `;
+    }
+    
+    // Add this line to call the function when the page loads
+    document.addEventListener('DOMContentLoaded', fetchHeroSupplyData);
+</script>
+
+<!-- Add this HTML section to your page -->
+<div id="top-heroes-growth" class="section">
+    <div class="loading-spinner">Loading top heroes...</div>
+</div>
+
+<!-- Add this CSS to your page or stylesheet -->
+<style>
+    .hero-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .hero-card {
+        display: flex;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .hero-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .hero-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+    }
+    
+    .hero-info {
+        flex: 1;
+    }
+    
+    .hero-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+    }
+    
+    .hero-handle {
+        color: #6c757d;
+        margin: 0 0 10px 0;
+        font-size: 14px;
+    }
+    
+    .growth-info {
+        display: flex;
+        align-items: baseline;
+    }
+    
+    .growth-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #28a745;
+        margin-right: 5px;
+    }
+    
+    .growth-percent {
+        font-size: 14px;
+        color: #28a745;
+    }
+    
+    .section h2 {
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+</style>
+
+</body>
+</html>

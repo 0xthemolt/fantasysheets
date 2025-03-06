@@ -242,12 +242,6 @@
                     </div>
                 </div>
             </div>
-            <div id="cardPortfolio" style="display: none; margin: 20px; color: #fff;">
-                <h3>Card Portfolio</h3>
-                <p id="totalBidValue">Bid Value: $0 
-                    <i class="fas fa-table" id="openTableModal" style="cursor: pointer; margin-left: 10px;" title="View Details"></i>
-                </p>
-            </div>
             <div id="cardCounts" style="margin-top: 15px; color: #fff; font-size: 14px;">
                 <span id="totalCards">Total Cards: 0</span>
                 <div style="display: flex; gap: 10px; margin-top: 5px; justify-content: center;">
@@ -382,28 +376,6 @@
         </style>
     </div>
 
-    <!-- Modal Structure -->
-    <div id="tableModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px;">
-            <h2>Card Details</h2>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th>Hero Handle</th>
-                        <th>Hero Rarity</th>
-                        <th>Card Number</th>
-                        <th>Common Bid Value</th>
-                        <th>Total Rarity Value</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Table rows will be populated here -->
-                </tbody>
-            </table>
-            <button id="closeModalButton" style="margin-top: 20px; padding: 10px; background: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">Close</button>
-        </div>
-    </div>
-
     <script>
         // Move this to the top of your script
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
@@ -424,7 +396,7 @@
                 
                 const { data, error } = await supabaseClient
                     .from('marketplace') // Querying the marketplace table
-                    .select('hero_id, highest_bid') // Selecting all fields
+                    .select('hero_id, floor, highest_bid') // Selecting all fields
                     .eq('rarity', 'common'); // Filtering by rarity = 'common'
                 
                 if (error) {
@@ -541,26 +513,9 @@
             return rarityMap[rarity] || 'Unknown';
         };
 
-        // function fixImageUrl(card) {
-        //     // Clone the card to avoid modifying the original data
-        //     const fixedCard = { ...card };
-        //     
-        //     // Fix specific hero_id cases
-        //     if (card.hero_id === '3063147623') {
-        //         fixedCard.picture = card.picture.replace('djenn', 'jenndefer');
-        //     }   
-        //     if (card.hero_id === '1423031747432783872') {
-        //         fixedCard.picture = card.picture.replace('zagabond', 'ZAGABOND');
-        //     }
-        //
-        //     return fixedCard;
-        // }
-
         function organizeCardsIntoMatrix(data) {
             // First, group cards by their unique properties and count occurrences
             const cardGroups = data.reduce((acc, card) => {
-                // Fix image URL before grouping
-                // const fixedCard = fixImageUrl(card); // Removed this line
                 const key = `${card.rarity}-${card.picture}`; // Updated to use card directly
                 
                 if (!acc[key]) {
@@ -989,9 +944,6 @@
             document.getElementById('rareCount').textContent = rarityCounts.Rare;
             document.getElementById('commonCount').textContent = rarityCounts.Common;
 
-            // Calculate total bid value
-            await calculateTotalBidValue(allCards);
-
             // Log rarity counts for debugging
             console.log(`Legendary: ${rarityCounts.Legendary}, Epic: ${rarityCounts.Epic}, Rare: ${rarityCounts.Rare}, Common: ${rarityCounts.Common}`);
             
@@ -999,35 +951,12 @@
             return allCards;
         }
 
-        async function calculateTotalBidValue(cards) {
-            const heroPrices = await fetchHeroPriceFromSupabase();
-            let totalBidValue = 0;
-
-            cards.forEach(card => {
-                console.log(`Looking for price for hero_id: ${card.hero_id}, rarity: ${getRarityLabel(card.rarity)}`);
-                const priceEntry = heroPrices.find(price => price.hero_id === card.hero_id);
-                
-                if (priceEntry) {
-                    console.log(`Found price: ${priceEntry.highest_bid}`);
-                    totalBidValue += card.card_number * priceEntry.highest_bid;
-                } else {
-                    console.log('No price found');
-                }
-            });
-
-            document.getElementById('totalBidValue').innerHTML = `Bid Value: ${totalBidValue.toFixed(2)} <img src="../icons/eth.webp" style="height: 14px; vertical-align: middle; margin-left: 2px;"> 
-                <i class="fas fa-table" id="openTableModal" style="cursor: pointer; margin-left: 10px;" title="View Details"></i>`;
-            
-            // Show the cardPortfolio div after calculating the total bid value
-            document.getElementById('cardPortfolio').style.display = 'block'; // Ensure the cardPortfolio is visible
-        }
 
         function organizeCardsByScore(data) {
             if (!data) return [];
             
             // Group cards by unique hero (picture) and apply fixImageUrl first
             const uniqueCards = Object.values(data.reduce((acc, card) => {
-                // const fixedCard = fixImageUrl(card); // Removed this line
                 const key = card.picture;
                 if (!acc[key]) {
                     acc[key] = {
@@ -1193,9 +1122,6 @@
                     const matrixElement = renderMatrix(matrix);
                     starView.innerHTML = '';
                     starView.appendChild(matrixElement);
-
-                    // Calculate total bid value
-                    await calculateTotalBidValue(allCards);
                 } else {
                     loadingDiv.textContent = 'No cards found for this address';
                     loadingDiv.style.display = 'block';
@@ -1570,50 +1496,6 @@
             }
         });
 
-        // Function to open the modal and populate the table
-        document.getElementById('openTableModal').addEventListener('click', async function() {
-            console.log('Table icon clicked!'); // Add this line for debugging
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // Clear previous data
-
-            // Fetch hero prices
-            const heroPrices = await fetchHeroPriceFromSupabase(); // Fetch hero prices if needed
-            window.currentCardData.forEach(card => {
-                const priceEntry = heroPrices.find(price => price.hero_id === card.hero_id);
-                const commonBidValue = priceEntry ? priceEntry.highest_bid : 0;
-                
-                // Apply rarity multiplier based on card rarity
-                let rarityMultiplier = 1; // Default for Common
-                const rarity = getRarityLabel(card.rarity);
-                
-                if (rarity === 'Legendary') {
-                    rarityMultiplier = 125;
-                } else if (rarity === 'Epic') {
-                    rarityMultiplier = 25;
-                } else if (rarity === 'Rare') {
-                    rarityMultiplier = 3;
-                }
-                
-                const totalRarityValue = commonBidValue * card.card_number * rarityMultiplier;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${card.hero_handle || 'N/A'}</td>
-                    <td>${rarity}</td>
-                    <td>${card.card_number}</td>
-                    <td>${commonBidValue.toFixed(2)} <img src="../icons/eth.webp" style="height: 12px; vertical-align: middle;"></td>
-                    <td>${totalRarityValue.toFixed(2)} <img src="../icons/eth.webp" style="height: 12px; vertical-align: middle;"></td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            document.getElementById('tableModal').style.display = 'flex'; // Show the modal
-        });
-
-        // Close modal functionality
-        document.getElementById('closeModalButton').addEventListener('click', function() {
-            document.getElementById('tableModal').style.display = 'none'; // Hide the modal
-        });
 
     </script>
 </body>

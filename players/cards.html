@@ -377,6 +377,11 @@
         </style>
     </div>
 
+    <div id="cardPortfolio" style="display: none; margin: 20px; color: #fff;">
+        <h3>Card Portfolio</h3>
+        <p id="totalBidValue">Bid Value: $0</p>
+    </div>
+
     <script>
         // Add these global variables at the top of the script
         let heroMetadata = [];
@@ -384,8 +389,34 @@
         let starRangesData = []; // Variable to store star ranges from Supabase
         let heroStats = []; // Generalized variable to store hero stats from Supabase
         let activeRarityFilters = ['Legendary', 'Epic', 'Rare', 'Common']; // Default: all rarities are active
+        let heroPriceData = []; // Variable to store hero price data
 
-        // Add this function to fetch hero stats from Supabase
+        async function fetchHeroPriceFromSupabase() {
+            try {
+                console.log('Fetching hero price data from Supabase...');
+                const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                const { data, error } = await supabaseClient
+                    .from('marketplace') // Querying the marketplace table
+                    .select('hero_id, highest_bid') // Selecting all fields
+                    .eq('rarity', 'common'); // Filtering by rarity = 'common'
+                
+                if (error) {
+                    throw new Error(`Supabase error: ${error.message}`);
+                }
+                
+                heroPriceData = data || [];
+                console.log(`Loaded ${heroPriceData.length} hero price entries from Supabase`);
+                
+                return heroPriceData;
+            } catch (error) {
+                console.error('Error fetching hero price data:', error);
+                return [];
+            }
+        }
+
         async function fetchHeroStatsFromSupabase() {
             try {
                 console.log('Fetching hero stats from Supabase...');
@@ -492,31 +523,14 @@
             return rarityMap[rarity] || 'Unknown';
         };
 
-        // function fixImageUrl(card) {
-        //     // Clone the card to avoid modifying the original data
-        //     const fixedCard = { ...card };
-        //     
-        //     // Fix specific hero_id cases
-        //     if (card.hero_id === '3063147623') {
-        //         fixedCard.picture = card.picture.replace('djenn', 'jenndefer');
-        //     }   
-        //     if (card.hero_id === '1423031747432783872') {
-        //         fixedCard.picture = card.picture.replace('zagabond', 'ZAGABOND');
-        //     }
-        //
-        //     return fixedCard;
-        // }
-
         function organizeCardsIntoMatrix(data) {
             // First, group cards by their unique properties and count occurrences
             const cardGroups = data.reduce((acc, card) => {
-                // Fix image URL before grouping
-                // const fixedCard = fixImageUrl(card); // Removed this line
-                const key = `${card.rarity}-${card.picture}`; // Updated to use card directly
+                const key = `${card.rarity}-${card.picture}`;
                 
                 if (!acc[key]) {
                     acc[key] = {
-                        ...card, // Use card directly
+                        ...card,
                         count: 1
                     };
                 } else {
@@ -952,11 +966,10 @@
             
             // Group cards by unique hero (picture) and apply fixImageUrl first
             const uniqueCards = Object.values(data.reduce((acc, card) => {
-                // const fixedCard = fixImageUrl(card); // Removed this line
                 const key = card.picture;
                 if (!acc[key]) {
                     acc[key] = {
-                        ...card, // Use card directly
+                        ...card,
                         score: Math.floor(Math.random() * 1001), // Random score 0-1000
                         count: 1
                     };
@@ -1118,6 +1131,9 @@
                     const matrixElement = renderMatrix(matrix);
                     starView.innerHTML = '';
                     starView.appendChild(matrixElement);
+
+                    // Calculate total bid value
+                    await calculateTotalBidValue(allCards);
                 } else {
                     loadingDiv.textContent = 'No cards found for this address';
                     loadingDiv.style.display = 'block';
@@ -1136,7 +1152,8 @@
             Promise.all([
                 loadHeroData(),
                 fetchStarRangesFromSupabase(),
-                fetchHeroStatsFromSupabase()
+                fetchHeroStatsFromSupabase(),
+                fetchHeroPriceFromSupabase()
             ])
             .then(() => {
                 console.log('All data loaded successfully');
@@ -1490,6 +1507,20 @@
                 addressModal.style.display = 'none'; // Hide modal after search
             }
         });
+
+        async function calculateTotalBidValue(cards) {
+            const heroPrices = await fetchHeroPriceFromSupabase();
+            let totalBidValue = 0;
+
+            cards.forEach(card => {
+                const priceEntry = heroPrices.find(price => price.hero_id === card.hero_id);
+                if (priceEntry) {
+                    totalBidValue += card.card_number * priceEntry.highest_bid;
+                }
+            });
+
+            document.getElementById('totalBidValue').textContent = `Bid Value: $${totalBidValue.toFixed(2)}`;
+        }
 
     </script>
 </body>

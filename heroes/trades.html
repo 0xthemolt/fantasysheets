@@ -332,12 +332,11 @@
                 <thead>
                     <tr>
                         <th>Hero</th>
-                        <th>Rarity <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
-                        <th>Date</th>
+                        <th>Rarity <i class="fa-solid fa-filter filter-icon" style="cursor: pointer; font-size: 0.8em; margin-left: 4px; color: #aaa"></i></th>
                         <th>Time Ago</th>
-                        <th>Buyer</th>
-                        <th>Seller</th>
-                        <th>Price <i class="fa-solid fa-filter filter-icon" style="font-size: 0.8em; margin-left: 4px;"></i></th>
+                        <th>Buyer <i class="fa-solid fa-user buyer-header-filter" style="cursor: pointer; font-size: 0.8em; margin-left: 4px; color: #aaa;" title="Filter by buyer"></i></th>
+                        <th>Seller <i class="fa-solid fa-user seller-header-filter" style="cursor: pointer; font-size: 0.8em; margin-left: 4px; color: #aaa" title="Filter by seller"></i></th>
+                        <th>Price <i class="fa-solid fa-filter filter-icon" style="cursor: pointer; font-size: 0.8em; margin-left: 4px; color: #aaa"></i></th>
                         <th>Change</th>
                     </tr>
                 </thead>
@@ -615,10 +614,13 @@
         // Add this variable at the top of your script to track the current chart
         let currentChart = null;
 
-        // Add these variables at the top of your script
-        let activeFilters = {
-            rarity: new Set(),
-            price: {
+        // Add this at the top of your script to track filter state
+        let filterState = {
+            playerHandle: null,
+            buyerActive: false,
+            sellerActive: false,
+            rarity: new Set(),  // Add this property
+            price: {            // Add this property
                 min: null,
                 max: null
             }
@@ -647,7 +649,7 @@
                             .map(rarity => `
                                 <div class="filter-option">
                                     <input type="checkbox" id="rarity-${rarity}" value="${rarity}" 
-                                        ${activeFilters.rarity.has(rarity) ? 'checked' : ''}>
+                                        ${filterState.rarity.has(rarity) ? 'checked' : ''}>
                                     <label for="rarity-${rarity}" style="color: ${getRarityColor(rarity)}">${rarity}</label>
                                 </div>
                             `).join('');
@@ -675,7 +677,7 @@
                         }
 
                         // Update icon state
-                        if (activeFilters.price.min !== null || activeFilters.price.max !== null) {
+                        if (filterState.price.min !== null || filterState.price.max !== null) {
                             icon.classList.add('active');
                         } else {
                             icon.classList.remove('active');
@@ -693,17 +695,17 @@
             
             rarityFilter.querySelector('.apply').addEventListener('click', () => {
                 const checkboxes = rarityFilter.querySelectorAll('input[type="checkbox"]');
-                activeFilters.rarity.clear();
+                filterState.rarity.clear();
                 
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
-                        activeFilters.rarity.add(checkbox.value);
+                        filterState.rarity.add(checkbox.value);
                     }
                 });
                 
                 const icon = document.querySelector('th:nth-child(2) .filter-icon');
                 if (icon) {
-                    if (activeFilters.rarity.size > 0) {
+                    if (filterState.rarity.size > 0) {
                         icon.classList.add('active');
                     } else {
                         icon.classList.remove('active');
@@ -717,7 +719,7 @@
             rarityFilter.querySelector('.clear').addEventListener('click', () => {
                 const checkboxes = rarityFilter.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(checkbox => checkbox.checked = false);
-                activeFilters.rarity.clear();
+                filterState.rarity.clear();
                 
                 const icon = document.querySelector('th:nth-child(2) .filter-icon');
                 if (icon) {
@@ -736,11 +738,11 @@
                 const maxInput = document.getElementById('maxPrice');
                 const icon = document.querySelector('th:nth-child(7) .filter-icon');
                 
-                activeFilters.price.min = minInput.value ? parseFloat(minInput.value) : null;
-                activeFilters.price.max = maxInput.value ? parseFloat(maxInput.value) : null;
+                filterState.price.min = minInput.value ? parseFloat(minInput.value) : null;
+                filterState.price.max = maxInput.value ? parseFloat(maxInput.value) : null;
                 
                 if (icon) {
-                    if (activeFilters.price.min !== null || activeFilters.price.max !== null) {
+                    if (filterState.price.min !== null || filterState.price.max !== null) {
                         icon.classList.add('active');
                     } else {
                         icon.classList.remove('active');
@@ -758,8 +760,8 @@
                 
                 minInput.value = '';
                 maxInput.value = '';
-                activeFilters.price.min = null;
-                activeFilters.price.max = null;
+                filterState.price.min = null;
+                filterState.price.max = null;
                 
                 if (icon) {
                     icon.classList.remove('active');
@@ -787,11 +789,26 @@
                 const rarity = row.cells[1].textContent.trim();
                 const price = parseFloat(row.cells[6].textContent);
                 
-                const rarityMatch = activeFilters.rarity.size === 0 || activeFilters.rarity.has(rarity);
-                const priceMatch = (activeFilters.price.min === null || price >= activeFilters.price.min) &&
-                                  (activeFilters.price.max === null || price <= activeFilters.price.max);
+                const rarityMatch = filterState.rarity.size === 0 || filterState.rarity.has(rarity);
+                const priceMatch = (filterState.price.min === null || price >= filterState.price.min) &&
+                                  (filterState.price.max === null || price <= filterState.price.max);
                 
-                row.style.display = rarityMatch && priceMatch ? '' : 'none';
+                // Apply buyer/seller filters as well
+                let playerMatch = true;
+            if (filterState.playerHandle && (filterState.buyerActive || filterState.sellerActive)) {
+                    const buyerHandle = row.querySelector('td:nth-child(4)').getAttribute('data-handle');
+                    const sellerHandle = row.querySelector('td:nth-child(5)').getAttribute('data-handle');
+                    
+                    if (filterState.buyerActive && filterState.sellerActive) {
+                        playerMatch = buyerHandle === filterState.playerHandle || sellerHandle === filterState.playerHandle;
+                    } else if (filterState.buyerActive) {
+                        playerMatch = buyerHandle === filterState.playerHandle;
+                    } else if (filterState.sellerActive) {
+                        playerMatch = sellerHandle === filterState.playerHandle;
+                    }
+                }
+                
+                row.style.display = rarityMatch && priceMatch && playerMatch ? '' : 'none';
             });
         }
 
@@ -892,7 +909,7 @@
                     try {
                         // Show loading indicator
                         const tbody = document.querySelector('#tradesTable tbody');
-                        tbody.innerHTML = `<tr><td colspan="8" class="text-center">Loading trade data...</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading trade data...</td></tr>`;
                         
                         // Fetch the trade data for this hero
                         const tradeData = await fetchHeroTradeData(heroHandle);
@@ -905,7 +922,7 @@
                         
                         // Show error message in table
                         const tbody = document.querySelector('#tradesTable tbody');
-                        tbody.innerHTML = `<tr><td colspan="8" class="text-center">Error loading trade data. Please try again.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="7" class="text-center">Error loading trade data. Please try again.</td></tr>`;
                     }
                 }
             });
@@ -1033,8 +1050,26 @@
          * Updates the trades table with data from Supabase
          * @param {Array} tradeData - Array of trade data objects from Supabase
          */
-        function updateTradesTable(tradeData) {
-            console.log('🔄 Updating trades table with fetched data');
+        function updateTradesTable(tradeData, isRefetch = true) {
+            if (isRefetch) {
+                console.log('🔄 Updating trades table with fetched data');
+                // Store the original trade data for filtering
+                window.originalTradeData = tradeData;
+                
+                // Reset filter state when new data is fetched
+                filterState = {
+                    playerHandle: localStorage.getItem('selectedPlayerHandle') || null,
+                    buyerActive: localStorage.getItem('buyerFilterActive') === 'true',
+                    sellerActive: localStorage.getItem('sellerFilterActive') === 'true',
+                    rarity: new Set(),  // Initialize empty rarity set
+                    price: {            // Initialize price filter
+                        min: null,
+                        max: null
+                    }
+                };
+            } else {
+                console.log('🔍 Applying filters to existing trade data');
+            }
             
             if (!tradeData || tradeData.length === 0) {
                 console.log('⚠️ No trade data to display');
@@ -1043,25 +1078,43 @@
                 return;
             }
             
+            // Apply filters if active
+            let filteredData = [...tradeData];
+            
+            if (filterState.playerHandle && (filterState.buyerActive || filterState.sellerActive)) {
+                filteredData = filteredData.filter(trade => {
+                    // Apply OR condition between buyer and seller filters
+                    if (filterState.buyerActive && filterState.sellerActive) {
+                        return trade.buyer_handle === filterState.playerHandle || 
+                               trade.seller_handle === filterState.playerHandle;
+                    } else if (filterState.buyerActive) {
+                        return trade.buyer_handle === filterState.playerHandle;
+                    } else if (filterState.sellerActive) {
+                        return trade.seller_handle === filterState.playerHandle;
+                    }
+                    return true;
+                });
+            }
+            
             const tbody = document.querySelector('#tradesTable tbody');
             
-            tbody.innerHTML = tradeData.map((trade, index) => {
-                // Get selected player handle from localStorage and log it
+            tbody.innerHTML = filteredData.map((trade, index) => {
+                // Get selected player handle from localStorage
                 const selectedPlayer = localStorage.getItem('selectedPlayerHandle');
                 
                 // Determine row background color based on buyer/seller match
                 let rowClass = '';
                 if (selectedPlayer) {
-                    if (trade.buyer_name === selectedPlayer) {
+                    if (trade.buyer_handle === selectedPlayer) {
                         rowClass = 'buyer-match';
-                    } else if (trade.seller_name === selectedPlayer) {
+                    } else if (trade.seller_handle === selectedPlayer) {
                         rowClass = 'seller-match';
                     }
                 }
                 
                 // Find the most recent previous trade with the same rarity
                 let priceChange = '';
-                const prevTradeWithSameRarity = tradeData.slice(index + 1).find(t => t.card_rarity === trade.card_rarity);
+                const prevTradeWithSameRarity = filteredData.slice(index + 1).find(t => t.card_rarity === trade.card_rarity);
                 
                 if (prevTradeWithSameRarity) {
                     const prevPrice = parseFloat(prevTradeWithSameRarity.price);
@@ -1094,7 +1147,6 @@
                         <td>
                             <img src="${trade.card_url}" alt="${trade.hero_handle}" 
                                  style="width: 30px; height: 40px; vertical-align: middle; margin-right: 8px;">
-                            ${trade.hero_handle}
                         </td>
                         <td style="color: ${getRarityColor(trade.card_rarity)}">${trade.card_rarity}</td>
                         <td title="${formattedDate}">${calculateTimeDifference(
@@ -1102,19 +1154,23 @@
                             new Date(trade.trade_timestamp)  // Trade timestamp
                         )}</td>
                         <td>
-                            <div style="display: flex; align-items: center;">
-                                <img src="${trade.buyer_pfp_url || defaultPfp}" alt="Buyer" 
-                                     style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"
-                                     onerror="this.onerror=null; this.src='/icons/fan.webp';">
-                                <span title="${trade.buyer_name || 'Unknown'}">${buyerName}</span>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center;">
+                                    <img src="${trade.buyer_pfp_url || defaultPfp}" alt="Buyer" 
+                                         style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"
+                                         onerror="this.onerror=null; this.src='/icons/fan.webp';">
+                                    <span title="${trade.buyer_name || 'Unknown'}">${buyerName}</span>
+                                </div>
                             </div>
                         </td>
                         <td>
-                            <div style="display: flex; align-items: center;">
-                                <img src="${trade.seller_pfp_url || defaultPfp}" alt="Seller" 
-                                     style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"
-                                     onerror="this.onerror=null; this.src='/icons/fan.webp';">
-                                <span title="${trade.seller_name || 'Unknown'}">${sellerName}</span>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center;">
+                                    <img src="${trade.seller_pfp_url || defaultPfp}" alt="Seller" 
+                                         style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;"
+                                         onerror="this.onerror=null; this.src='/icons/fan.webp';">
+                                    <span title="${trade.seller_name || 'Unknown'}">${sellerName}</span>
+                                </div>
                             </div>
                         </td>
                         <td>${formatPrice(trade.price)}</td>
@@ -1123,8 +1179,114 @@
                 `;
             }).join('');
             
-            console.log(`✅ Updated trades table with ${tradeData.length} rows`);
+            // Add event listeners to the filter icons
+            document.querySelectorAll('.buyer-filter').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const handle = this.getAttribute('data-handle');
+                    toggleBuyerFilter(handle);
+                });
+            });
+            
+            document.querySelectorAll('.seller-filter').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const handle = this.getAttribute('data-handle');
+                    toggleSellerFilter(handle);
+                });
+            });
+            
+            console.log(`✅ Updated trades table with ${filteredData.length} rows`);
+
+            // Update filter icon colors
+            updateFilterIcons();
         }
+
+        function updateFilterIcons() {
+            document.querySelector('.buyer-header-filter').style.color = filterState.buyerActive ? '#4a9eca' : '#aaa';
+            document.querySelector('.seller-header-filter').style.color = filterState.sellerActive ? '#4a9eca' : '#aaa';
+        }
+
+        /**
+         * Toggles the buyer filter
+         * @param {string} handle - The buyer handle to filter by
+         */
+        function toggleBuyerFilter(handle) {
+            // Update the selected player if it's different
+            if (filterState.playerHandle !== handle) {
+                filterState.playerHandle = handle;
+                filterState.buyerActive = true;
+                // Don't turn off seller filter automatically
+            } else {
+                // Toggle the buyer filter
+                filterState.buyerActive = !filterState.buyerActive;
+            }
+            
+            // Save state to localStorage
+            localStorage.setItem('selectedPlayerHandle', filterState.playerHandle);
+            localStorage.setItem('buyerFilterActive', filterState.buyerActive.toString());
+            
+            // Re-render the table with the original data and new filters
+            if (window.originalTradeData) {
+                updateTradesTable(window.originalTradeData, false);
+            }
+        }
+
+        /**
+         * Toggles the seller filter
+         * @param {string} handle - The seller handle to filter by
+         */
+        function toggleSellerFilter(handle) {
+            // Update the selected player if it's different
+            if (filterState.playerHandle !== handle) {
+                filterState.playerHandle = handle;
+                filterState.sellerActive = true;
+                // Don't turn off buyer filter automatically
+            } else {
+                // Toggle the seller filter
+                filterState.sellerActive = !filterState.sellerActive;
+            }
+            
+            // Save state to localStorage
+            localStorage.setItem('selectedPlayerHandle', filterState.playerHandle);
+            localStorage.setItem('sellerFilterActive', filterState.sellerActive.toString());
+            
+            // Re-render the table with the original data and new filters
+            if (window.originalTradeData) {
+                updateTradesTable(window.originalTradeData, false);
+            }
+        }
+
+        // Update the header filter click handlers
+        document.querySelector('.buyer-header-filter').addEventListener('click', function() {
+            const selectedPlayer = filterState.playerHandle;
+            
+            if (selectedPlayer) {
+                filterState.buyerActive = !filterState.buyerActive;
+                localStorage.setItem('buyerFilterActive', filterState.buyerActive.toString());
+                
+                // Re-render the table with the original data and new filters
+                if (window.originalTradeData) {
+                    updateTradesTable(window.originalTradeData, false);
+                }
+            } else {
+                alert('Please select a player first by clicking on a buyer or seller in the table.');
+            }
+        });
+
+        document.querySelector('.seller-header-filter').addEventListener('click', function() {
+            const selectedPlayer = filterState.playerHandle;
+            
+            if (selectedPlayer) {
+                filterState.sellerActive = !filterState.sellerActive;
+                localStorage.setItem('sellerFilterActive', filterState.sellerActive.toString());
+                
+                // Re-render the table with the original data and new filters
+                if (window.originalTradeData) {
+                    updateTradesTable(window.originalTradeData, false);
+                }
+            } else {
+                alert('Please select a player first by clicking on a buyer or seller in the table.');
+            }
+        });
     </script>
 </body>
 </html>

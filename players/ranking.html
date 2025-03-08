@@ -185,16 +185,77 @@
             left: 50px;
         }
     }
+
+    .toggle-container {
+        display: inline-flex;
+        margin-left: 8px;
+        background-color: #e0e0e0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        height: 22px;
+        padding: 2px;
+    }
+
+    .toggle-button {
+        padding: 2px 8px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        line-height: 1.2;
+        border: none;
+        background: none;
+        position: relative;
+        z-index: 2;
+        transition: color 0.3s ease;
+        color: #666;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .toggle-button.active {
+        color: #000;
+        font-weight: 600;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        height: calc(100% - 4px);
+        width: calc(50% - 4px);
+        background-color: white;
+        border-radius: 3px;
+        transition: transform 0.3s ease;
+        z-index: 1;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* When Last 5 is active, move the slider to the right */
+    .toggle-button:last-child.active ~ .toggle-slider {
+        transform: translateX(100%);
+    }
+
+    .info-div {
+        text-align: center;
+        color: #888;
+        font-size: 0.9em;
+        margin-left: 10px;
+    }
 </style>
 <body>
-    <header>
-        <h1>FantasySheets Player Rankings</h1>
-        <div style="text-align: center; color: #888; font-size: 0.9em;">
+    <div class="title-container" style="display: flex; align-items: flex-end; justify-content: center;">
+        <h1 class="title-header" style="margin: 0;">
+            <a href="index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            FantasySheets Player Rankings
+        </h1>
+        <div class="info-div">
             As of Main 41
             <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria to be ranked: >0 total ETH won in last 3 mains"></i>
         </div>
-    </header>
-
+    </div>
     <main>
         <div class="controls-container">
             <div class="controls-row">
@@ -228,6 +289,11 @@
                         </th>
                         <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
                             <i class="fa-solid fa-trophy"></i> Performance
+                            <div class="toggle-container">
+                                <button id="toggle-all" class="toggle-button active">All</button>
+                                <button id="toggle-last5" class="toggle-button">Last 5</button>
+                                <div class="toggle-slider"></div>
+                            </div>
                         </th>
                         <th class="column-header section-end" colspan="2">
                             <i class="fa-solid fa-store"></i> Marketplace
@@ -405,11 +471,11 @@
                     silver: Math.round(player.silver_norm_rank),
                     bronze: Math.round(player.bronze_norm_rank),
                     reverse: Math.round(player.reverse_norm_rank),
-                    elite_norm_score: player.elite_norm_score.toFixed(3),
-                    gold_norm_score: player.gold_norm_score.toFixed(3),
-                    silver_norm_score: player.silver_norm_score.toFixed(3),
-                    bronze_norm_score: player.bronze_norm_score.toFixed(3),
-                    reverse_norm_score: player.reverse_norm_score.toFixed(3),
+                    elite_l5: Math.round(player.elite_norm_rank_l5),
+                    gold_l5: Math.round(player.gold_norm_rank_l5),
+                    silver_l5: Math.round(player.silver_norm_rank_l5),
+                    bronze_l5: Math.round(player.bronze_norm_rank_l5),
+                    reverse_l5: Math.round(player.reverse_norm_rank_l5),
                     buyVol: player.buy_vol.toFixed(3),
                     netVol: player.net_vol.toFixed(3)
                 }));
@@ -453,7 +519,7 @@
                         ${player.elo_score !== undefined ? `<span style="color: grey; font-size: 0.8em;"> (${formatInt(player.elo_score)})</span>` : ''}
                     </td>
                     <td>${formatInt(player.decks)}</td>
-                    <td style="background-color: #a8ccde26">
+                    <td data-column="league_norm_rank" style="background-color: #a8ccde26">
                         ${player.elite == 0 ? '-' : 
                           player.elite == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.elite == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
@@ -461,7 +527,15 @@
                           player.elite <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elite)}</span>` :
                           formatInt(player.elite)}
                     </td>
-                    <td style="background-color: #dacc8626">
+                    <td data-column="league_norm_rank_l5" style="background-color: #a8ccde26; display: none;">
+                        ${player.elite_l5 == 0 ? '-' : 
+                          player.elite_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.elite_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.elite_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.elite_l5 <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elite_l5)}</span>` :
+                          formatInt(player.elite_l5)}
+                    </td>
+                    <td data-column="league_norm_rank" style="background-color: #dacc8626">
                         ${player.gold == 0 ? '-' : 
                           player.gold == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.gold == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
@@ -469,7 +543,15 @@
                           player.gold <= 10 ? `<span style="display: inline-block; background-color: #b5a642; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold)}</span>` :
                           formatInt(player.gold)}
                     </td>
-                    <td style="background-color: #8b8b8b26">
+                    <td data-column="league_norm_rank_l5" style="background-color: #dacc8626; display: none;">
+                        ${player.gold_l5 == 0 ? '-' : 
+                          player.gold_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.gold_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.gold_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.gold_l5 <= 10 ? `<span style="display: inline-block; background-color: #b5a642; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold_l5)}</span>` :
+                          formatInt(player.gold_l5)}
+                    </td>
+                    <td data-column="league_norm_rank" style="background-color: #8b8b8b26">
                         ${player.silver == 0 ? '-' : 
                           player.silver == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.silver == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
@@ -477,7 +559,15 @@
                           player.silver <= 10 ? `<span style="display: inline-block; background-color: #8b8b8b; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver)}</span>` :
                           formatInt(player.silver)}
                     </td>
-                    <td style="background-color: #a97e4826">
+                    <td data-column="league_norm_rank_l5" style="background-color: #8b8b8b26; display: none;">
+                        ${player.silver_l5 == 0 ? '-' : 
+                          player.silver_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.silver_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.silver_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.silver_l5 <= 10 ? `<span style="display: inline-block; background-color: #8b8b8b; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver_l5)}</span>` :
+                          formatInt(player.silver_l5)}
+                    </td>
+                    <td data-column="league_norm_rank" style="background-color: #a97e4826">
                         ${player.bronze == 0 ? '-' : 
                           player.bronze == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.bronze == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
@@ -485,13 +575,29 @@
                           player.bronze <= 10 ? `<span style="display: inline-block; background-color: #CD7F32; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze)}</span>` :
                           formatInt(player.bronze)}
                     </td>
-                    <td class="section-end" style="background-color: #82EA8926">
+                    <td data-column="league_norm_rank_l5" style="background-color: #a97e4826; display: none;">
+                        ${player.bronze_l5 == 0 ? '-' : 
+                          player.bronze_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.bronze_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.bronze_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.bronze_l5 <= 10 ? `<span style="display: inline-block; background-color: #CD7F32; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze_l5)}</span>` :
+                          formatInt(player.bronze_l5)}
+                    </td>
+                    <td data-column="league_norm_rank" class="section-end" style="background-color: #82EA8926">
                         ${player.reverse == 0 ? '-' : 
                           player.reverse == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.reverse == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.reverse == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
                           player.reverse <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse)}</span>` :
                           formatInt(player.reverse)}
+                    </td>
+                    <td data-column="league_norm_rank_l5" class="section-end" style="background-color: #82EA8926; display: none;">
+                        ${player.reverse_l5 == 0 ? '-' : 
+                          player.reverse_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.reverse_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.reverse_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.reverse_l5 <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse_l5)}</span>` :
+                          formatInt(player.reverse_l5)}
                     </td>
                     <td>${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
@@ -612,13 +718,23 @@
                         h.querySelector('.sort-arrow').className = 'sort-arrow';
                     });
 
+                    // Check if we're viewing "Last 5" data
+                    const isLast5Active = document.getElementById('toggle-last5').classList.contains('active');
+                    
+                    // Determine the actual column to sort by (add _l5 suffix if Last 5 is active)
+                    let sortColumn = column;
+                    if (isLast5Active && ['elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
+                        sortColumn = `${column}_l5`;
+                    }
+
                     // Update sort direction
-                    if (currentSort.column === column) {
+                    if (currentSort.column === sortColumn) {
                         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
                     } else {
-                        currentSort.column = column;
+                        currentSort.column = sortColumn;
                         // Set specific columns to sort ascending by default
-                        currentSort.direction = (['elo_rank', 'elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) ? 'asc' : 'desc';
+                        const baseColumn = sortColumn.replace('_l5', '');
+                        currentSort.direction = (['elo_rank', 'elite', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
                     }
 
                     // Update arrow on clicked header
@@ -633,8 +749,8 @@
                         const aPlayer = players.find(p => p.player_id === aPlayerId);
                         const bPlayer = players.find(p => p.player_id === bPlayerId);
 
-                        let aValue = aPlayer[column];
-                        let bValue = bPlayer[column];
+                        let aValue = aPlayer[sortColumn];
+                        let bValue = bPlayer[sortColumn];
 
                         // Handle null/missing values
                         if (column === 'player') {
@@ -667,6 +783,35 @@
             if (rankingsTableContainer && window.innerWidth <= 768) {
                 // Force scroll to left edge on mobile
                 rankingsTableContainer.scrollLeft = 0;
+            }
+
+            const toggleAll = document.getElementById('toggle-all');
+            const toggleLast5 = document.getElementById('toggle-last5');
+
+            toggleAll.addEventListener('click', function() {
+                toggleAll.classList.add('active');
+                toggleLast5.classList.remove('active');
+                updateTableColumn('league_norm_rank');
+            });
+
+            toggleLast5.addEventListener('click', function() {
+                toggleLast5.classList.add('active');
+                toggleAll.classList.remove('active');
+                updateTableColumn('league_norm_rank_l5');
+            });
+
+            function updateTableColumn(columnName) {
+                const table = document.querySelector('.rankings-table');
+                const rows = table.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td, th');
+                    cells.forEach(cell => {
+                        if (cell.dataset.column === 'league_norm_rank' || cell.dataset.column === 'league_norm_rank_l5') {
+                            cell.style.display = cell.dataset.column === columnName ? '' : 'none';
+                        }
+                    });
+                });
             }
         });
     </script>

@@ -41,14 +41,14 @@ group by 1--,2
 having suM(reward_eth) <> 0
 )
 ,touranment_rankings as (
-select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp
+select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp,t.tournament_seq_nbr
 ,tplayers.player_id,gpbd.player_name,gpbd.profile_picture 
 ,tplayers.player_rank
 ,1 - (tplayers.player_rank - 1) / (t.registered_decks) normalized_rank  --x min = total registered / worse place, x max = best (rank 1)
 ,coalesce(reward,0) eth_reward
 ,row_number() over (partition by t.tournament_league_unique_key,tplayers.player_id order by tplayers.player_rank asc) as best_deck_rank
  FROM flatten.GET_TOURNAMENT_PAST_PLAYERS tplayers
- join flatten.GET_TOURNAMENTS t  
+ join flatten.GET_TOURNAMENTS t
 	on tplayers.tournament_id  = t.tournament_id 
 left join  flatten.GET_TOURNAMENT_BY_ID rewards_eth
 	on tplayers.tournament_id = rewards_eth.tournament_id
@@ -71,6 +71,16 @@ select league,player_id
 from touranment_rankings
 where best_deck_rank = 1
 --and league = 'Silver'
+group by 1,2
+having count(*) >= 2 --at least 2 tournaments
+)
+,league_ranking_l5 as (
+select league,player_id
+,avg(normalized_rank) as avg_best_deck_norm_score
+,case when avg(normalized_rank) is null then null else dense_rank() over (partition by league order by avg(normalized_rank)  desc) end as avg_best_deck_norm_rank
+from touranment_rankings
+where best_deck_rank = 1
+and tournament_seq_nbr <= 5
 group by 1,2
 having count(*) >= 2 --at least 2 tournaments
 )
@@ -152,16 +162,16 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,max(elo.elo_image) as elo_image
 ,sum(tournaments.deck_count) as decks
 ,suM(players.number_of_cards) as cards
-,max(touranment_rankings_elite.avg_best_deck_norm_score) as elite_norm_score
 ,max(touranment_rankings_elite.avg_best_deck_norm_rank) as elite_norm_rank
-,max(touranment_rankings_gold.avg_best_deck_norm_score) as gold_norm_score
+,max(touranment_rankings_elite_l5.avg_best_deck_norm_rank) as elite_norm_rank_l5
 ,max(touranment_rankings_gold.avg_best_deck_norm_rank) as gold_norm_rank
-,max(touranment_rankings_silver.avg_best_deck_norm_score) as silver_norm_score
+,max(touranment_rankings_gold_l5.avg_best_deck_norm_rank) as gold_norm_rank_l5
 ,max(touranment_rankings_silver.avg_best_deck_norm_rank) as silver_norm_rank
-,max(touranment_rankings_bronze.avg_best_deck_norm_score) as bronze_norm_score
+,max(touranment_rankings_silver_l5.avg_best_deck_norm_rank) as silver_norm_rank_l5
 ,max(touranment_rankings_bronze.avg_best_deck_norm_rank) as bronze_norm_rank
-,max(touranment_rankings_reverse.avg_best_deck_norm_score) as reverse_norm_score
+,max(touranment_rankings_bronze_l5.avg_best_deck_norm_rank) as bronze_norm_rank_l5
 ,max(touranment_rankings_reverse.avg_best_deck_norm_rank) as reverse_norm_rank
+,max(touranment_rankings_reverse_l5.avg_best_deck_norm_rank) as reverse_norm_rank_l5
 ,max(coalesce(tvbp.buy_volume,0)) as buy_vol
 ,max(coalesce(tvbp.buy_volume,0) - coalesce(tvbp.sell_volume,0)) as net_vol
 ,max(coalesce(tvbp.trade_count,0)) as trade_count
@@ -197,7 +207,22 @@ left join league_ranking touranment_rankings_bronze
 left join league_ranking touranment_rankings_reverse
     on players.player_id = touranment_rankings_reverse.player_id
     and touranment_rankings_reverse.league = 'Reverse'
---where players.player_id = '0xDdb0d23E0AaE161b817A5Dfd5FA70077D5d1172D'
+left join league_ranking_l5 touranment_rankings_elite_l5
+    on players.player_id = touranment_rankings_elite_l5.player_id
+    and touranment_rankings_elite_l5.league = 'Elite'
+left join league_ranking_l5 touranment_rankings_gold_l5
+    on players.player_id = touranment_rankings_gold_l5.player_id
+    and touranment_rankings_gold_l5.league = 'Gold'
+left join league_ranking_l5 touranment_rankings_silver_l5
+    on players.player_id = touranment_rankings_silver_l5.player_id
+    and touranment_rankings_silver_l5.league = 'Silver'
+left join league_ranking_l5 touranment_rankings_bronze_l5
+    on players.player_id = touranment_rankings_bronze_l5.player_id
+    and touranment_rankings_bronze_l5.league = 'Bronze'
+left join league_ranking_l5 touranment_rankings_reverse_l5
+    on players.player_id = touranment_rankings_reverse_l5.player_id
+    and touranment_rankings_reverse_l5.league = 'Reverse'
+--where players.player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --	and t_hist.tournament_unique_key  = 'Main 32'
 group by 1,2,3,4,5
 order by sum(players.fan_pts + referral_pts)  desc"""
@@ -215,13 +240,8 @@ os.makedirs(output_dir, exist_ok=True)
 player_ranking_df['freshness_timestamp'] = player_ranking_df['freshness_timestamp'].astype(str)
 
 # Handle NaN values in norm rank columns
-rank_columns = ['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank']
+rank_columns = ['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank','elite_norm_rank_l5','gold_norm_rank_l5','silver_norm_rank_l5','bronze_norm_rank_l5','reverse_norm_rank_l5']
 for col in rank_columns:
-    player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
-
-# Handle NaN values in norm rank columns
-score_columns = ['elite_norm_score', 'gold_norm_score', 'silver_norm_score', 'bronze_norm_score', 'reverse_norm_score']
-for col in score_columns:
     player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 
 # Handle NaN values in norm rank columns

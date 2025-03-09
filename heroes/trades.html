@@ -619,8 +619,8 @@
             playerHandle: null,
             buyerActive: false,
             sellerActive: false,
-            rarity: new Set(),  // Add this property
-            price: {            // Add this property
+            rarity: new Set(),  // Empty set means no filtering (show all)
+            price: {
                 min: null,
                 max: null
             }
@@ -653,6 +653,44 @@
                                     <label for="rarity-${rarity}" style="color: ${getRarityColor(rarity)}">${rarity}</label>
                                 </div>
                             `).join('');
+                        
+                        // Add click handler to each rarity option
+                        setTimeout(() => {
+                            filterPopup.querySelectorAll('.filter-option').forEach(option => {
+                                option.addEventListener('click', (e) => {
+                                    const checkbox = option.querySelector('input[type="checkbox"]');
+                                    const rarity = checkbox.value;
+                                    
+                                    // Clear existing rarities and add only the clicked one
+                                    filterState.rarity.clear();
+                                    
+                                    // If the checkbox was already checked, we're toggling it off
+                                    // Otherwise, add this rarity to the filter
+                                    if (!checkbox.checked) {
+                                        filterState.rarity.add(rarity);
+                                        checkbox.checked = true;
+                                    }
+                                    
+                                    // Update the icon state
+                                    const icon = document.querySelector('th:nth-child(2) .filter-icon');
+                                    if (icon) {
+                                        if (filterState.rarity.size > 0) {
+                                            icon.classList.add('active');
+                                            icon.style.color = getRarityColor(rarity);
+                                        } else {
+                                            icon.classList.remove('active');
+                                            icon.style.color = '#aaa';
+                                        }
+                                    }
+                                    
+                                    // Apply the filter and close the popup
+                                    applyFilters();
+                                    filterPopup.style.display = 'none';
+                                    
+                                    e.preventDefault(); // Prevent default checkbox behavior
+                                });
+                            });
+                        }, 0);
                     } else if (column === 'price') {
                         // Get min/max prices from current trades
                         const prices = Array.from(document.querySelectorAll('#tradesTable tbody tr'))
@@ -690,13 +728,14 @@
                 });
             });
 
-            // Setup rarity filter actions
+            // Update rarity filter actions
             const rarityFilter = document.getElementById('rarityFilter');
             
             rarityFilter.querySelector('.apply').addEventListener('click', () => {
                 const checkboxes = rarityFilter.querySelectorAll('input[type="checkbox"]');
                 filterState.rarity.clear();
                 
+                // Get all checked rarities
                 checkboxes.forEach(checkbox => {
                     if (checkbox.checked) {
                         filterState.rarity.add(checkbox.value);
@@ -707,8 +746,16 @@
                 if (icon) {
                     if (filterState.rarity.size > 0) {
                         icon.classList.add('active');
+                        // If only one rarity is selected, use its color
+                        if (filterState.rarity.size === 1) {
+                            const selectedRarity = Array.from(filterState.rarity)[0];
+                            icon.style.color = getRarityColor(selectedRarity);
+                        } else {
+                            icon.style.color = '#4a9eca'; // Default blue for multiple selections
+                        }
                     } else {
                         icon.classList.remove('active');
+                        icon.style.color = '#aaa';
                     }
                 }
                 
@@ -724,13 +771,14 @@
                 const icon = document.querySelector('th:nth-child(2) .filter-icon');
                 if (icon) {
                     icon.classList.remove('active');
+                    icon.style.color = '#aaa';
                 }
                 
                 applyFilters();
                 rarityFilter.style.display = 'none';
             });
 
-            // Update price filter actions
+            // Price filter actions remain the same
             const priceFilter = document.getElementById('priceFilter');
             
             priceFilter.querySelector('.apply').addEventListener('click', () => {
@@ -789,15 +837,23 @@
                 const rarity = row.cells[1].textContent.trim();
                 const price = parseFloat(row.cells[6].textContent);
                 
+                // If no rarities are selected, show all rarities
+                // Otherwise, only show the selected rarities
                 const rarityMatch = filterState.rarity.size === 0 || filterState.rarity.has(rarity);
+                
                 const priceMatch = (filterState.price.min === null || price >= filterState.price.min) &&
                                   (filterState.price.max === null || price <= filterState.price.max);
                 
                 // Apply buyer/seller filters as well
                 let playerMatch = true;
-            if (filterState.playerHandle && (filterState.buyerActive || filterState.sellerActive)) {
-                    const buyerHandle = row.querySelector('td:nth-child(4)').getAttribute('data-handle');
-                    const sellerHandle = row.querySelector('td:nth-child(5)').getAttribute('data-handle');
+                if (filterState.playerHandle && (filterState.buyerActive || filterState.sellerActive)) {
+                    // Get buyer and seller handles from the data attributes
+                    const buyerCell = row.querySelector('td:nth-child(4)');
+                    const sellerCell = row.querySelector('td:nth-child(5)');
+                    
+                    // Use the data attributes if available, otherwise fallback to cell content
+                    const buyerHandle = buyerCell.getAttribute('data-handle') || buyerCell.textContent.trim();
+                    const sellerHandle = sellerCell.getAttribute('data-handle') || sellerCell.textContent.trim();
                     
                     if (filterState.buyerActive && filterState.sellerActive) {
                         playerMatch = buyerHandle === filterState.playerHandle || sellerHandle === filterState.playerHandle;
@@ -908,7 +964,7 @@
                     
                     try {
                         // Show loading indicator
-                        const tbody = document.querySelector('#tradesTable tbody');
+                const tbody = document.querySelector('#tradesTable tbody');
                         tbody.innerHTML = `<tr><td colspan="7" class="text-center">Loading trade data...</td></tr>`;
                         
                         // Fetch the trade data for this hero
@@ -1100,31 +1156,31 @@
             
             tbody.innerHTML = filteredData.map((trade, index) => {
                 // Get selected player handle from localStorage
-                const selectedPlayer = localStorage.getItem('selectedPlayerHandle');
-                
-                // Determine row background color based on buyer/seller match
-                let rowClass = '';
-                if (selectedPlayer) {
+                    const selectedPlayer = localStorage.getItem('selectedPlayerHandle');
+                    
+                    // Determine row background color based on buyer/seller match
+                    let rowClass = '';
+                    if (selectedPlayer) {
                     if (trade.buyer_handle === selectedPlayer) {
-                        rowClass = 'buyer-match';
+                            rowClass = 'buyer-match';
                     } else if (trade.seller_handle === selectedPlayer) {
-                        rowClass = 'seller-match';
+                            rowClass = 'seller-match';
+                        }
                     }
-                }
-                
-                // Find the most recent previous trade with the same rarity
-                let priceChange = '';
+                    
+                    // Find the most recent previous trade with the same rarity
+                    let priceChange = '';
                 const prevTradeWithSameRarity = filteredData.slice(index + 1).find(t => t.card_rarity === trade.card_rarity);
-                
-                if (prevTradeWithSameRarity) {
+                    
+                    if (prevTradeWithSameRarity) {
                     const prevPrice = parseFloat(prevTradeWithSameRarity.price);
                     const currentPrice = parseFloat(trade.price);
                     const changePercent = ((currentPrice - prevPrice) / prevPrice) * 100;
-                    const triangle = changePercent >= 0 ? '▲' : '▼';
-                    const color = changePercent >= 0 ? '#22c55e' : '#ef4444';
-                    priceChange = `<span style="color: ${color}">${triangle} ${Math.abs(Math.round(changePercent))}%</span>`;
-                }
-                
+                        const triangle = changePercent >= 0 ? '▲' : '▼';
+                        const color = changePercent >= 0 ? '#22c55e' : '#ef4444';
+                        priceChange = `<span style="color: ${color}">${triangle} ${Math.abs(Math.round(changePercent))}%</span>`;
+                    }
+                    
                 // Default profile picture
                 const defaultPfp = '/icons/fan.webp';
                 
@@ -1134,12 +1190,12 @@
                 
                 // Format the date for the tooltip
                 const formattedDate = new Date(trade.trade_timestamp).toLocaleString('en-US', {
-                    month: 'short',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false
+                                month: 'short',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false
                 }).replace(',', '');
                 
                 return `
@@ -1150,9 +1206,9 @@
                         </td>
                         <td style="color: ${getRarityColor(trade.card_rarity)}">${trade.card_rarity}</td>
                         <td title="${formattedDate}">${calculateTimeDifference(
-                            new Date(),  // Current time
+                                new Date(),  // Current time
                             new Date(trade.trade_timestamp)  // Trade timestamp
-                        )}</td>
+                            )}</td>
                         <td>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div style="display: flex; align-items: center;">
@@ -1173,12 +1229,12 @@
                                 </div>
                             </div>
                         </td>
-                        <td>${formatPrice(trade.price)}</td>
-                        <td>${priceChange}</td>
-                    </tr>
-                `;
-            }).join('');
-            
+                            <td>${formatPrice(trade.price)}</td>
+                            <td>${priceChange}</td>
+                        </tr>
+                    `;
+                }).join('');
+
             // Add event listeners to the filter icons
             document.querySelectorAll('.buyer-filter').forEach(icon => {
                 icon.addEventListener('click', function() {

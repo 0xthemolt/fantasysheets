@@ -605,9 +605,14 @@
         function formatPrice(price) {
             const numPrice = parseFloat(price);
             if (numPrice >= 1) {
-                return numPrice.toFixed(4);
+                // For prices >= 1, show one decimal place
+                return numPrice.toFixed(1);
+            } else if (numPrice >= 0.1) {
+                // For prices >= 0.1 but < 1, show two decimal places
+                return numPrice.toFixed(2);
             } else {
-                return numPrice.toFixed(4).replace(/^0/, '');
+                // For prices < 0.1, show three decimal places
+                return numPrice.toFixed(3).replace(/^0/, '');
             }
         }
 
@@ -924,12 +929,28 @@
             }
         }
 
-        function calculateTimeDifference(currentDate, tradeDate) {
-            const diffMs = currentDate - tradeDate;
+        function calculateTimeDifference(tradeDate) {
+            // Get current time in UTC milliseconds
+            const currentUTC = new Date().getTime();
+            
+            // Ensure tradeDate is converted to milliseconds since epoch
+            // If tradeDate is already a Date object, get its time, otherwise parse it
+            const tradeDateMs = tradeDate instanceof Date ? 
+                tradeDate.getTime() : new Date(tradeDate).getTime();
+            
+            // Calculate difference in milliseconds
+            const diffMs = currentUTC - tradeDateMs;
+            
+            // If we're getting negative values, there might be timezone issues
+            if (diffMs < 0) {
+                // Return a placeholder or handle the error
+                return "just now";
+            }
+            
             const diffMinutes = Math.floor(diffMs / (1000 * 60));
             
             if (diffMinutes < 60) {
-                return `${diffMinutes}m ago`;
+                return diffMinutes <= 0 ? "just now" : `${diffMinutes}m ago`;
             }
             
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -1188,15 +1209,21 @@
                 const buyerName = truncateString(trade.buyer_name, 15);
                 const sellerName = truncateString(trade.seller_name, 15);
                 
-                // Format the date for the tooltip
-                const formattedDate = new Date(trade.trade_timestamp).toLocaleString('en-US', {
-                                month: 'short',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: false
-                }).replace(',', '');
+                // Format the date for the tooltip with timezone information
+                const tradeDate = new Date(trade.trade_timestamp);
+                const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                const formattedDate = tradeDate.toLocaleString('en-US', {
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZone: userTimeZone
+                }).replace(',', '') + ' ' + userTimeZone;
+                
+                const timeDiff = calculateTimeDifference(trade.trade_timestamp);
                 
                 return `
                     <tr class="${rowClass}">
@@ -1205,10 +1232,7 @@
                                  style="width: 30px; height: 40px; vertical-align: middle; margin-right: 8px;">
                         </td>
                         <td style="color: ${getRarityColor(trade.card_rarity)}">${trade.card_rarity}</td>
-                        <td title="${formattedDate}">${calculateTimeDifference(
-                                new Date(),  // Current time
-                            new Date(trade.trade_timestamp)  // Trade timestamp
-                            )}</td>
+                        <td title="${formattedDate}">${timeDiff}</td>
                         <td>
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <div style="display: flex; align-items: center;">

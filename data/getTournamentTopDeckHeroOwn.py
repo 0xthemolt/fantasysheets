@@ -30,19 +30,19 @@ with base_records as (
         t.hero_id,
         ghwst.fantasy_score,
         t.tournament_player_deck_id,
-        t.player_rank,
+        t.unique_player_rank as player_rank,
         card_stars.hero_stars,
         coalesce(
         	(case 
         	      when t2.league = 'Reverse'  then
         	      	case when t.player_score = 0 then gtbi.reward / 5
         	 	    else  
-        	 	    (1 - (hero_fantasy_score::decimal / NULLIF(player_score, 0)::decimal)) / 
-         				SUM(1 - (hero_fantasy_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * gtbi.reward
+        	 	    (1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) / 
+         				SUM(1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * gtbi.reward
         	 	    end
         	 	  when t2.league <>  'Reverse'  then
-        	 	  	case when t.hero_fantasy_score  = 0 then 0 
-					else (hero_fantasy_score::float / t.player_score) * gtbi.reward
+        	 	  	case when t.hero_score  = 0 then 0 
+					else (t.hero_score::float / t.player_score) * gtbi.reward
 					end
 			end) ,0) as reward_value_added,
         t.db_updated_cst + INTERVAL '6 hours' as db_updated_utc

@@ -1685,7 +1685,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                 handle: player[`card${i}_hero_handle`],
                                                 stars: player[`card${i}_hero_stars`],
                                                 score: player[`card${i}_score`],
-                                                url: player[`card${i}_picture_url`],
+                                                url: `/cards/${player[`card${i}_hero_rarity`]}/${player[`card${i}_hero_id`]}_${player[`card${i}_hero_stars`]}.png`,
                                                 rarity: player[`card${i}_hero_rarity`] // Added hero rarity
                                             }))
                                             .sort((a, b) => b.score - a.score)
@@ -1878,8 +1878,8 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                 handle: group.best_deck[`card${i}_hero_handle`],
                                                 stars: group.best_deck[`card${i}_hero_stars`],
                                                 score: group.best_deck[`card${i}_score`],
-                                                url: group.best_deck[`card${i}_picture_url`],
-                                                rarity: group.best_deck[`card${i}_hero_rarity`] // Ensure rarity is included
+                                                url: `/cards/${group.best_deck[`card${i}_hero_rarity`]}/${group.best_deck[`card${i}_hero_id`]}_${group.best_deck[`card${i}_hero_stars`]}.png`,
+                                                rarity: group.best_deck[`card${i}_hero_rarity`] // Added hero rarity
                                             }))
                                             .sort((a, b) => b.score - a.score)
                                             .map(hero => `
@@ -1950,11 +1950,11 @@ function updateTableWithData(data, preserveFiltered = false) {
         }
 
         const heroes = [
-            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: player.card1_picture_url, rarity: player.card1_hero_rarity }, 
-            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: player.card2_picture_url, rarity: player.card2_hero_rarity },
-            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: player.card3_picture_url, rarity: player.card3_hero_rarity },
-            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: player.card4_picture_url, rarity: player.card4_hero_rarity },
-            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: player.card5_picture_url, rarity: player.card5_hero_rarity }
+            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: `/cards/${player.card1_hero_rarity}/${player.card1_hero_id}_${player.card1_hero_stars}.png`, rarity: player.card1_hero_rarity }, 
+            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: `/cards/${player.card2_hero_rarity}/${player.card2_hero_id}_${player.card2_hero_stars}.png`, rarity: player.card2_hero_rarity },
+            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: `/cards/${player.card3_hero_rarity}/${player.card3_hero_id}_${player.card3_hero_stars}.png`, rarity: player.card3_hero_rarity },
+            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: `/cards/${player.card4_hero_rarity}/${player.card4_hero_id}_${player.card4_hero_stars}.png`, rarity: player.card4_hero_rarity },
+            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: `/cards/${player.card5_hero_rarity}/${player.card5_hero_id}_${player.card5_hero_stars}.png`, rarity: player.card5_hero_rarity }
         ];
 
         const row = document.createElement('tr');

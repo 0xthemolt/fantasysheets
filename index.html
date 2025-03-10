@@ -209,6 +209,24 @@
             height: 100%;
             box-sizing: border-box;
         }
+
+        /* Add this new CSS for side-by-side buttons */
+        .side-by-side-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .side-by-side-container .nav-item {
+            flex: 1;
+            margin: 0;
+        }
+        
+        .side-by-side-container .nav-link {
+            height: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -259,19 +277,16 @@
             { filename: 'index.html', title: 'FantasyScreener (in devleopment)' },
         ],
         heroes: [
-            { filename: 'hero_scorecenter.html', title: 'Hero Score v1' },
-            { filename: '/tournaments/hero_scores.html', title: 'Hero Scores v2' },   
+            { filename: 'hero_scorecenter.html', title: 'Scores v1' },
+            { filename: '/tournaments/hero_scores.html', title: 'Scores v2' },   
             { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking'},
             { filename: 'hero_utilization.html', title: 'Hero Utilization' },
             // { filename: 'heroes/heroes.html', title: 'Hero Trends', isNew: true },
-            { filename: '/tournaments/league_winners.html', title: 'League Winners (v1)' },   
+            { filename: '/tournaments/league_winners.html', title: 'League Winners' },   
         ],
         players: [
             { filename: '/players/ranking.html', title: 'Overall Player Ranking'},
             { filename: '/players/cards.html', title: 'Player Cards', isNew: true},
-            { filename: '/tournaments/decks.html', title: 'Tournament Decks v2' , isNew: true},
-            { filename: 'player_decks.html', title: 'Tournament Decks v1' },
-            { filename: 'player_rewards.html', title: 'Tournament Rewards Leaders' },
             // { filename: 'player_rewards_history.html', title: 'Player Rewards Charts/Totals (FUTURE)' },
         ],
         rewards: [
@@ -284,6 +299,9 @@
         ],
         preview: [
             { filename: 'tournaments.html', title: 'Deck / Player Registration Stats' }, 
+            { filename: 'player_rewards.html', title: 'Tournament Rewards Leaders' },
+            { filename: '/tournaments/decks.html', title: 'Decks'},
+            { filename: 'player_decks.html', title: 'Player Decks' },
             { filename: 'monad/tournaments.html', title: 'Monad Tournaments', isNew: true, customColor: '#1F0053' },
             //{ filename: 'index.html', title: 'PaperHands (in development)' },
             //{ filename: 'index.html', title: 'Marketplace Trends (in development)' },
@@ -306,43 +324,160 @@
         const otherList = document.getElementById('otherList');
 
         function createLinks(pageArray, container) {
-            pageArray.forEach(page => {
-                const li = document.createElement('li');
-                li.className = 'nav-item';
+            let currentIndex = 0;
+            
+            while (currentIndex < pageArray.length) {
+                const page = pageArray[currentIndex];
                 
-                const link = document.createElement('a');
-                link.href = page.filename;
-                link.className = 'nav-link';
-                
-                if (page.customColor) {
-                    link.style.backgroundColor = page.customColor;
-                    link.style.color = '#fff'; // Setting text color to white for better contrast
+                // Check if this is one of the deck pages that should be side by side
+                if ((page.filename === '/tournaments/decks.html' || page.filename === 'player_decks.html') && 
+                    container === previewList) {
+                    
+                    // Create a container for the side-by-side items
+                    const sideContainer = document.createElement('div');
+                    sideContainer.className = 'side-by-side-container';
+                    
+                    // Process both deck pages
+                    for (let i = 0; i < 2 && currentIndex < pageArray.length; i++) {
+                        const deckPage = pageArray[currentIndex];
+                        if ((deckPage.filename === '/tournaments/decks.html' || deckPage.filename === 'player_decks.html')) {
+                            const li = document.createElement('li');
+                            li.className = 'nav-item';
+                            
+                            const link = document.createElement('a');
+                            link.href = deckPage.filename;
+                            link.className = 'nav-link';
+                            
+                            if (deckPage.customColor) {
+                                link.style.backgroundColor = deckPage.customColor;
+                                link.style.color = '#fff';
+                            }
+                            
+                            if (deckPage.icon) {
+                                const icon = document.createElement('i');
+                                icon.className = deckPage.icon;
+                                link.appendChild(icon);
+                            }
+                            
+                            link.appendChild(document.createTextNode(deckPage.title));
+                            
+                            if (deckPage.isNew) {
+                                const newLabel = document.createElement('img');
+                                newLabel.src = 'icons/new.png';
+                                newLabel.style.position = 'absolute';
+                                newLabel.style.right = '0px';
+                                newLabel.style.top = '50%';
+                                newLabel.style.transform = 'translateY(-70%)';
+                                newLabel.style.height = '30px';
+                                newLabel.style.width = 'auto';
+                                link.style.position = 'relative';
+                                link.appendChild(newLabel);
+                            }
+                            
+                            li.appendChild(link);
+                            sideContainer.appendChild(li);
+                            currentIndex++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    container.appendChild(sideContainer);
+                } 
+                // Add this new condition for hero score pages
+                else if ((page.filename === 'hero_scorecenter.html' || page.filename === '/tournaments/hero_scores.html') && 
+                        container === heroList) {
+                    
+                    // Create a container for the side-by-side items
+                    const sideContainer = document.createElement('div');
+                    sideContainer.className = 'side-by-side-container';
+                    
+                    // Process both hero score pages
+                    for (let i = 0; i < 2 && currentIndex < pageArray.length; i++) {
+                        const scorePage = pageArray[currentIndex];
+                        if ((scorePage.filename === 'hero_scorecenter.html' || scorePage.filename === '/tournaments/hero_scores.html')) {
+                            const li = document.createElement('li');
+                            li.className = 'nav-item';
+                            
+                            const link = document.createElement('a');
+                            link.href = scorePage.filename;
+                            link.className = 'nav-link';
+                            
+                            if (scorePage.customColor) {
+                                link.style.backgroundColor = scorePage.customColor;
+                                link.style.color = '#fff';
+                            }
+                            
+                            if (scorePage.icon) {
+                                const icon = document.createElement('i');
+                                icon.className = scorePage.icon;
+                                link.appendChild(icon);
+                            }
+                            
+                            link.appendChild(document.createTextNode(scorePage.title));
+                            
+                            if (scorePage.isNew) {
+                                const newLabel = document.createElement('img');
+                                newLabel.src = 'icons/new.png';
+                                newLabel.style.position = 'absolute';
+                                newLabel.style.right = '0px';
+                                newLabel.style.top = '50%';
+                                newLabel.style.transform = 'translateY(-70%)';
+                                newLabel.style.height = '30px';
+                                newLabel.style.width = 'auto';
+                                link.style.position = 'relative';
+                                link.appendChild(newLabel);
+                            }
+                            
+                            li.appendChild(link);
+                            sideContainer.appendChild(li);
+                            currentIndex++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    container.appendChild(sideContainer);
+                } else {
+                    // Regular item processing (unchanged)
+                    const li = document.createElement('li');
+                    li.className = 'nav-item';
+                    
+                    const link = document.createElement('a');
+                    link.href = page.filename;
+                    link.className = 'nav-link';
+                    
+                    if (page.customColor) {
+                        link.style.backgroundColor = page.customColor;
+                        link.style.color = '#fff';
+                    }
+                    
+                    if (page.icon) {
+                        const icon = document.createElement('i');
+                        icon.className = page.icon;
+                        link.appendChild(icon);
+                    }
+                    
+                    link.appendChild(document.createTextNode(page.title));
+                    
+                    if (page.isNew) {
+                        const newLabel = document.createElement('img');
+                        newLabel.src = 'icons/new.png';
+                        newLabel.style.position = 'absolute';
+                        newLabel.style.right = '0px';
+                        newLabel.style.top = '50%';
+                        newLabel.style.transform = 'translateY(-70%)';
+                        newLabel.style.height = '30px';
+                        newLabel.style.width = 'auto';
+                        link.style.position = 'relative';
+                        link.appendChild(newLabel);
+                    }
+                    
+                    li.appendChild(link);
+                    container.appendChild(li);
+                    currentIndex++;
                 }
-                
-                if (page.icon) {
-                    const icon = document.createElement('i');
-                    icon.className = page.icon;
-                    link.appendChild(icon);
-                }
-                
-                link.appendChild(document.createTextNode(page.title));
-                
-                if (page.isNew) {
-                    const newLabel = document.createElement('img');
-                    newLabel.src = 'icons/new.png';
-                    newLabel.style.position = 'absolute';
-                    newLabel.style.right = '0px';
-                    newLabel.style.top = '50%';
-                    newLabel.style.transform = 'translateY(-70%)';
-                    newLabel.style.height = '30px';
-                    newLabel.style.width = 'auto';
-                    link.style.position = 'relative';
-                    link.appendChild(newLabel);
-                }
-
-                li.appendChild(link);
-                container.appendChild(li);
-            });
+            }
         }
 
         // createLinks(pages.pro, proList);

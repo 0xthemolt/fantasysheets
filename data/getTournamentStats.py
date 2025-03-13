@@ -7,9 +7,9 @@ import pandas as pd
 def supabase_db_connection():
     return psycopg2.connect(
         dbname="postgres",
-        user="postgres",
+        user="postgres.hhcuqhvmzwmehdsaamhn",
         password="$&roct8&rgp4NE",
-        host="db.hhcuqhvmzwmehdsaamhn.supabase.co",
+        host="aws-0-us-west-1.pooler.supabase.com",
         port="5432"
     )
 
@@ -21,7 +21,7 @@ def fantasysheets_db_connection():
         host="viaduct.proxy.rlwy.net",
         port="38391"
     )
-
+# postgresql://postgres.hhcuqhvmzwmehdsaamhn:$&roct8&rgp4NE@aws-0-us-west-1.pooler.supabase.com:5432/postgres
 
 # First query into league_decks_df
 conn = supabase_db_connection()

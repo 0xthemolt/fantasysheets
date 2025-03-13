@@ -13,7 +13,11 @@
     <script>
         Chart.register(ChartDataLabels);
         async function fetchData() {
-            const response = await fetch('/data/tournaments/tournaments_stats_view_growth.json');
+            // Get the current timestamp
+            const timestamp = new Date().getTime();
+
+            // Fetch the data with cache busting
+            const response = await fetch(`/data/tournaments/tournaments_stats_view_growth.json?ts=${timestamp}`);
             const data = await response.json();
             
             // Find the latest tournament number

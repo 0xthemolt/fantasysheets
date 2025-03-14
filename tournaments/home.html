@@ -79,7 +79,7 @@
             const { data, error } = await supabaseClient
                 .from('all_tournaments')
                 .select('tournament_id,tournament_unique_key,league,star_cap,legendary_cap,epic_cap,common_cap,tournament_status,start_timestamp,end_timestamp,tournament_duration_hours')
-                .gte('start_timestamp', '2024-07-01')
+                .gte('start_timestamp', '2024-04-01')
                 .order('tournament_seq_nbr', { ascending: false })
 
             if (error) {

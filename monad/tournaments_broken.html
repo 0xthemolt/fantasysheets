@@ -115,13 +115,20 @@
                 method: 'GET',
                 headers: {
                     'sec-ch-ua-platform': 'Windows',
+                    'Authorization': 'Bearer eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdQNzVsMHZVbEkwemJBU1RPbnpfTDhPcXhIN0VQYUlsUWNHalNyMGxqM3cifQ.eyJjciI6IjE3Mzk5NzM2MzQiLCJsaW5rZWRfYWNjb3VudHMiOiJbe1widHlwZVwiOlwidHdpdHRlcl9vYXV0aFwiLFwic3ViamVjdFwiOlwiMjgwMjc2MDc0NlwiLFwidXNlcm5hbWVcIjpcIjB4dGhlbW9sdFwiLFwibmFtZVwiOlwidGhlbW9sdFwiLFwicGZwXCI6XCJodHRwczovL3Bicy50d2ltZy5jb20vcHJvZmlsZV9pbWFnZXMvMTc5NDA3MDEyMjc3ODIyMjU5Mi9FalhfOFpQQ19ub3JtYWwuanBnXCIsXCJsdlwiOjE3NDAzNDAxOTB9LHtcInR5cGVcIjpcIndhbGxldFwiLFwiYWRkcmVzc1wiOlwiMHgwYjAxNTVjMDdCRTFkZDAwMEMwNzI0MDMxZjkxNTdiNGY5ZmUwMUNDXCIsXCJjaGFpbl90eXBlXCI6XCJldGhlcmV1bVwiLFwid2FsbGV0X2NsaWVudF90eXBlXCI6XCJwcml2eVwiLFwibHZcIjoxNzM5OTczNjM3fV0iLCJpc3MiOiJwcml2eS5pbyIsImlhdCI6MTc0MjIxNzUzNSwiYXVkIjoiY202ZXp6eTY2MDI5N3pnZGs3dDNnbGN6NSIsInN1YiI6ImRpZDpwcml2eTpjbTdiemRsMmswMDJwcnBvenN5aWk4bzZvIiwiZXhwIjoxNzQyMjIxMTM1fQ.etuqJ4YEb8V1Nsi4x-wBHmMkWIdifaWkXj_M0BZNCxzoQ1fTGx1z8MNoN_DNWoq4daR1gZ_XZ5E7OgTvF_W8xQ',
                     'Referer': 'https://monad.fantasy.top/',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
                     'Accept': 'application/json, text/plain, */*',
-                    'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+                    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"',
                     'sec-ch-ua-mobile': '?0'
-                }
+                },
+                cache: 'no-cache'
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             displayTournaments(data);
         }
@@ -318,6 +325,20 @@
             bronze: "#4D2E1E",
             reverse: "#78B15A"
         };
+
+        // Add a refresh button or auto-refresh functionality
+        function refreshData() {
+            // Clear any stored data
+            localStorage.removeItem('tournamentData');
+            
+            // Fetch fresh data
+            fetchTournaments()
+                .then(data => {
+                    // Update your UI with the new data
+                    displayTournaments(data);
+                })
+                .catch(error => console.error('Error fetching tournaments:', error));
+        }
 
         fetchTournaments();
     </script>

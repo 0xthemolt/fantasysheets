@@ -15,17 +15,18 @@
             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
-        /* Basic table styles */
+        /* Base table styles */
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;  /* Changed from collapse to separate */
+            border-spacing: 0 8px;     /* Add spacing between rows */
             font-size: 14px;
         }
 
         th, td {
             padding: 8px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: none;  /* Remove bottom border */
         }
 
         th {
@@ -48,11 +49,11 @@
 
             /* Transaction container styling */
             tr {
-                border-bottom: 1px solid #eaeaea;
+                border-bottom: none;  /* Remove bottom border */
                 margin-bottom: 12px;
-                padding: 12px;
-                background: transparent;
-                position: relative;
+                padding: 16px;  /* Increased padding */
+                background: rgba(255, 255, 255, 0.05);  /* Subtle background */
+                border-radius: 12px;  /* Rounded corners */
             }
 
             /* Reset td styles */
@@ -61,14 +62,16 @@
                 padding: 0;
                 text-align: left;
                 position: static;
+                background: transparent;  /* explicitly set transparent background */
             }
 
             /* Header row with time and price */
             .mobile-header {
                 display: flex;
                 justify-content: space-between;
-                align-items: flex-start; /* Align to top for labels */
+                align-items: center;  /* Changed to center alignment */
                 margin-bottom: 12px;
+                padding: 0 8px;  /* Added padding */
             }
 
             /* Label styling */
@@ -93,8 +96,14 @@
 
             /* Price styling */
             .price {
-                font-weight: bold;
-                color: #4CAF50;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .price img {
+                width: 16px;
+                height: 16px;
             }
 
             /* Hero cards container */
@@ -159,16 +168,115 @@
             min-width: 120px;
             max-width: 120px;
         }
+
+        /* Add these new styles */
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .toggle-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 12px;
+            position: relative;
+            width: 300px;  /* Fixed width for better sliding */
+        }
+
+        .toggle-option {
+            flex: 1;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            color: #666;
+            background: none;
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;  /* Remove tap highlight on mobile */
+            outline: none;  /* Remove focus outline */
+        }
+
+        /* Sliding background element */
+        .toggle-group::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(33.33% - 4px);
+            height: calc(100% - 8px);
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        /* Sliding positions */
+        .toggle-group[data-active="all"]::after {
+            transform: translateX(0);
+        }
+
+        .toggle-group[data-active="paid"]::after {
+            transform: translateX(100%);
+        }
+
+        .toggle-group[data-active="free"]::after {
+            transform: translateX(200%);
+        }
+
+        /* Active state */
+        .toggle-option.active {
+            color: #4CAF50;
+        }
+
+        /* Remove hover styles */
+        .toggle-option:hover {
+            background: none;
+        }
+
+        /* Remove focus styles */
+        .toggle-option:focus {
+            outline: none;
+        }
+
+        /* Update the price styling section */
+        /* Price styling */
+        .price {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .price img {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        /* Remove any duplicate .price img styles if they exist elsewhere */
     </style>
 </head>
 <body>
     <h1>Player Mints</h1>
+    <div class="filter-container">
+        <div class="toggle-group">
+            <button class="toggle-option active" data-filter="all">All</button>
+            <button class="toggle-option" data-filter="paid">Paid</button>
+            <button class="toggle-option" data-filter="free">Free</button>
+        </div>
+    </div>
     <div id="table-container"></div>
 
     <script>
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let mintData = []; // Store the original data
 
         async function fetchAndDisplayMints() {
             try {
@@ -178,47 +286,52 @@
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
-
-                const tableHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Price (ETH)</th>
-                                <th>Heroes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(row => `
-                                <tr>
-                                    <td>
-                                        <div class="mobile-header">
-                                            <div class="mobile-value-container">
-                                                <div class="mobile-label">Time</div>
-                                                ${formatTimestamp(row.timestamp, row.tx_hash)}
-                                            </div>
-                                            <div class="mobile-value-container">
-                                                <div class="mobile-label">Price</div>
-                                                <span class="price">${formatPrice(row.price)} ETH</span>
-                                            </div>
-                                        </div>
-                                        <div class="hero-cards">
-                                            ${formatHeroDetails(row.hero_details)}
-                                        </div>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-
-                document.getElementById('table-container').innerHTML = tableHTML;
+                
+                mintData = data; // Store the data
+                displayMints(data); // Display all data initially
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('table-container').innerHTML = `
                     <p style="color: red;">Error loading data: ${error.message}</p>
                 `;
             }
+        }
+
+        function displayMints(data) {
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Price (ETH)</th>
+                            <th>Heroes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                <td>
+                                    <div class="mobile-header">
+                                        <div class="mobile-value-container">
+                                            <div class="mobile-label">Time</div>
+                                            ${formatTimestamp(row.timestamp, row.tx_hash)}
+                                        </div>
+                                        <div class="mobile-value-container">
+                                            <div class="mobile-label">Price</div>
+                                            ${formatPrice(row.price)}
+                                        </div>
+                                    </div>
+                                    <div class="hero-cards">
+                                        ${formatHeroDetails(row.hero_details)}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('table-container').innerHTML = tableHTML;
         }
 
         function shortenAddress(address) {
@@ -254,7 +367,7 @@
                 <div class="time-container">
                     <span class="timestamp" title="${formatFullTimestamp(timestamp)}">${formatTimeAgo(timestamp)}</span>
                     <img 
-                        src="/icons/blast_favicon.ico" 
+                        src="../icons/blast_favicon.ico"
                         class="blast-icon" 
                         title="${shortenAddress(txHash)}"
                         onclick="window.open('https://blastscan.io/tx/${txHash}', '_blank')"
@@ -266,7 +379,12 @@
 
         function formatPrice(price) {
             if (!price) return '0';
-            return Number(price).toFixed(4);
+            return `
+                <span class="price">
+                    ${Number(price).toFixed(4)}
+                    <img src="../icons/eth.webp" alt="ETH" />
+                </span>
+            `;
         }
 
         function formatHeroDetails(details) {
@@ -293,8 +411,49 @@
             }
         }
 
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', fetchAndDisplayMints);
+        // Add this new function
+        function initializeFilter() {
+            const toggleGroup = document.querySelector('.toggle-group');
+            const options = toggleGroup.querySelectorAll('.toggle-option');
+            
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Remove active class from all options
+                    options.forEach(opt => opt.classList.remove('active'));
+                    // Add active class to clicked option
+                    option.classList.add('active');
+                    
+                    const filterValue = option.dataset.filter;
+                    // You can implement the actual filtering logic here
+                    filterMints(filterValue);
+                });
+            });
+        }
+
+        function filterMints(filterType) {
+            const toggleGroup = document.querySelector('.toggle-group');
+            toggleGroup.dataset.active = filterType;
+
+            let filteredData;
+            switch(filterType) {
+                case 'paid':
+                    filteredData = mintData.filter(row => Number(row.price) > 0);
+                    break;
+                case 'free':
+                    filteredData = mintData.filter(row => Number(row.price) === 0);
+                    break;
+                default:
+                    filteredData = mintData;
+            }
+            
+            displayMints(filteredData);
+        }
+
+        // Update the DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndDisplayMints();
+            initializeFilter();
+        });
     </script>
 </body>
 </html>

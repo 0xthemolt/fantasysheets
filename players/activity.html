@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Mints</title>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <style>
+        /* Base table container styles */
+        #table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        /* Basic table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            white-space: nowrap;
+        }
+
+        /* Mobile-first approach */
+        @media screen and (max-width: 768px) {
+            /* Reset table styles */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            /* Hide table headers on mobile */
+            thead {
+                display: none;
+            }
+
+            /* Transaction container styling */
+            tr {
+                border-bottom: 1px solid #eaeaea;
+                margin-bottom: 12px;
+                padding: 12px;
+                background: transparent;
+                position: relative;
+            }
+
+            /* Reset td styles */
+            td {
+                border: none;
+                padding: 0;
+                text-align: left;
+                position: static;
+            }
+
+            /* Header row with time and price */
+            .mobile-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start; /* Align to top for labels */
+                margin-bottom: 12px;
+            }
+
+            /* Label styling */
+            .mobile-label {
+                font-size: 0.8em;
+                color: #666;
+                margin-bottom: 4px;
+            }
+
+            /* Value container */
+            .mobile-value-container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Time container */
+            .time-container {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Price styling */
+            .price {
+                font-weight: bold;
+                color: #4CAF50;
+            }
+
+            /* Hero cards container */
+            .hero-cards {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: flex-start;
+            }
+
+            /* Individual hero card */
+            .hero-card {
+                flex: 0 0 auto;
+            }
+        }
+
+        /* Keep your existing hero card styles */
+        .hero-cards {
+            display: flex;
+            gap: 10px;
+        }
+        .hero-card {
+            text-align: center;
+        }
+        .hero-card img {
+            width: 50px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .hero-card .token-id {
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Update timestamp styles */
+        .timestamp {
+            cursor: help;
+        }
+        
+        /* Style for the Blast icon */
+        .blast-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        
+        /* Container for timestamp and icon */
+        .time-container {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        /* Update time column width */
+        td[data-label="Time"],
+        th:nth-child(1) {
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Player Mints</h1>
+    <div id="table-container"></div>
+
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function fetchAndDisplayMints() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('player_mints')
+                    .select('buyer_address, tx_hash, timestamp, price, hero_details')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                const tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Price (ETH)</th>
+                                <th>Heroes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    <td>
+                                        <div class="mobile-header">
+                                            <div class="mobile-value-container">
+                                                <div class="mobile-label">Time</div>
+                                                ${formatTimestamp(row.timestamp, row.tx_hash)}
+                                            </div>
+                                            <div class="mobile-value-container">
+                                                <div class="mobile-label">Price</div>
+                                                <span class="price">${formatPrice(row.price)} ETH</span>
+                                            </div>
+                                        </div>
+                                        <div class="hero-cards">
+                                            ${formatHeroDetails(row.hero_details)}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                document.getElementById('table-container').innerHTML = tableHTML;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('table-container').innerHTML = `
+                    <p style="color: red;">Error loading data: ${error.message}</p>
+                `;
+            }
+        }
+
+        function shortenAddress(address) {
+            if (!address) return '';
+            return `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+
+        function formatTimeAgo(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            
+            return diffDays >= 1 ? `${diffDays}d ago` : `${diffHours}h ago`;
+        }
+
+        function formatFullTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'UTC'
+            }) + ' UTC';
+        }
+
+        function formatTimestamp(timestamp, txHash) {
+            return `
+                <div class="time-container">
+                    <span class="timestamp" title="${formatFullTimestamp(timestamp)}">${formatTimeAgo(timestamp)}</span>
+                    <img 
+                        src="/icons/blast_favicon.ico" 
+                        class="blast-icon" 
+                        title="${shortenAddress(txHash)}"
+                        onclick="window.open('https://blastscan.io/tx/${txHash}', '_blank')"
+                        alt="View on Blastscan"
+                    >
+                </div>
+            `;
+        }
+
+        function formatPrice(price) {
+            if (!price) return '0';
+            return Number(price).toFixed(4);
+        }
+
+        function formatHeroDetails(details) {
+            if (!details) return '';
+            try {
+                if (typeof details === 'string') {
+                    details = JSON.parse(details);
+                }
+                
+                // Create HTML for each hero card
+                const heroCards = details.map(hero => `
+                    <div class="hero-card">
+                        <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
+                             alt="Hero ${hero.token_id}"
+                             >
+                        <div class="token-id">ID: ${hero.token_id}</div>
+                    </div>
+                `).join('');
+
+                return `<div class="hero-cards">${heroCards}</div>`;
+            } catch (e) {
+                console.error('Error formatting hero details:', e);
+                return 'Invalid Details';
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', fetchAndDisplayMints);
+    </script>
+</body>
+</html>

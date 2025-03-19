@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Mints</title>
+    <title>Player Activity</title>
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
@@ -258,10 +258,36 @@
         }
 
         /* Remove any duplicate .price img styles if they exist elsewhere */
+
+        /* Add these styles */
+        .level-up-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 8px;
+        }
+
+        .from-cards {
+            display: flex;
+            gap: 8px;
+        }
+
+        .arrow-icon {
+            color: #4CAF50;
+            font-size: 24px;
+            margin: 0 8px;
+        }
     </style>
 </head>
 <body>
-    <h1>Player Mints</h1>
+    <h1>Player Activity</h1>
+    <div class="view-selector">
+        <div class="view-toggle" data-active="mints">
+            <button class="view-option active" data-view="mints">Mints</button>
+            <button class="view-option" data-view="levelups">Level Ups</button>
+        </div>
+    </div>
     <div class="filter-container">
         <div class="toggle-group">
             <button class="toggle-option active" data-filter="all">All</button>
@@ -277,12 +303,13 @@
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         let mintData = []; // Store the original data
+        let levelUpData = []; // Store level up data
 
         async function fetchAndDisplayMints() {
             try {
                 const { data, error } = await supabaseClient
                     .from('player_mints')
-                    .select('buyer_address, tx_hash, timestamp, price, hero_details')
+                    .select('player_address, tx_hash, timestamp, price, hero_details')
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
@@ -449,10 +476,118 @@
             displayMints(filteredData);
         }
 
+        async function fetchLevelUps() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('player_levelups')
+                    .select('player_address, tx_hash, timestamp, from_hero_details, to_hero_details')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+                
+                levelUpData = data;
+                return data;
+            } catch (error) {
+                console.error('Error fetching level ups:', error);
+                return [];
+            }
+        }
+
+        function displayLevelUps(data) {
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Level Up</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
+                            <tr>
+                                <td>
+                                    <div class="mobile-header">
+                                        <div class="mobile-value-container">
+                                            <div class="mobile-label">Time</div>
+                                            ${formatTimestamp(row.timestamp, row.tx_hash)}
+                                        </div>
+                                    </div>
+                                    <div class="level-up-container">
+                                        ${formatLevelUpDetails(row.from_hero_details, row.to_hero_details)}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('table-container').innerHTML = tableHTML;
+        }
+
+        function formatLevelUpDetails(fromDetails, toDetails) {
+            try {
+                const from = typeof fromDetails === 'string' ? JSON.parse(fromDetails) : fromDetails;
+                const to = typeof toDetails === 'string' ? JSON.parse(toDetails) : toDetails;
+
+                const fromHero = from[0];
+                const toHero = to[0];
+
+                return `
+                    <div class="from-cards">
+                        <div class="hero-card">
+                            <img src="/cards/${fromHero.hero_rarity}/${fromHero.hero_id_stars}.png" 
+                                 alt="From Hero">
+                        </div>
+                        <div class="hero-card">
+                            <img src="/cards/${fromHero.hero_rarity}/${fromHero.hero_id_stars}.png" 
+                                 alt="From Hero">
+                        </div>
+                    </div>
+                    <div class="arrow-icon">→</div>
+                    <div class="hero-card">
+                        <img src="/cards/${toHero.hero_rarity}/${toHero.hero_id_stars}.png" 
+                             alt="To Hero">
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Error formatting level up details:', e);
+                return 'Invalid Details';
+            }
+        }
+
+        // Update the initialization to handle view switching
+        function initializeViewToggle() {
+            const viewToggle = document.querySelector('.view-toggle');
+            const options = viewToggle.querySelectorAll('.view-option');
+            
+            options.forEach(option => {
+                option.addEventListener('click', async () => {
+                    options.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    const view = option.dataset.view;
+                    viewToggle.dataset.active = view;
+                    
+                    if (view === 'mints') {
+                        displayMints(mintData);
+                        document.querySelector('.filter-container').style.display = 'flex';
+                    } else {
+                        if (levelUpData.length === 0) {
+                            levelUpData = await fetchLevelUps();
+                        }
+                        displayLevelUps(levelUpData);
+                        document.querySelector('.filter-container').style.display = 'none';
+                    }
+                });
+            });
+        }
+
         // Update the DOMContentLoaded event listener
         document.addEventListener('DOMContentLoaded', () => {
             fetchAndDisplayMints();
             initializeFilter();
+            initializeViewToggle();
         });
     </script>
 </body>

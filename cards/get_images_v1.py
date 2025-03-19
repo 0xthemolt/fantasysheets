@@ -5,7 +5,7 @@ from pathlib import Path
 import concurrent.futures
 
 HERO_QUERY = """
-    select distinct hero_id from flatten.heroes_current where is_deleted = 0
+    select distinct hero_id, hero_handle from flatten.heroes_current where is_deleted = 1 and hero_id is not null
 """
 
 def get_hero_ids():
@@ -15,17 +15,17 @@ def get_hero_ids():
             "postgresql://postgres.hhcuqhvmzwmehdsaamhn:$&roct8&rgp4NE@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
         ) as conn, conn.cursor() as cur:
             cur.execute(HERO_QUERY)
-            hero_ids = [row[0] for row in cur.fetchall()]
-            return hero_ids
+            # Return both hero_id and hero_handle
+            return [(row[0], row[1]) for row in cur.fetchall()]
     except Exception as e:
         print(f"Error fetching hero IDs: {e}")
         return []
 
-def get_image_url(hero_id, stars, rarity):
-    # return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/{rarity.lower()}/{hero_id}_{stars}.png"
-    return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/{hero_id}_{stars}.png" 
+def get_image_url(hero_id, hero_handle, stars, rarity):
+    # Use hero_handle in URL path
+    return f"https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/{rarity.lower()}/{hero_handle}_{stars}.png"
 
-def download_hero_image(hero_id, stars, rarity):
+def download_hero_image(hero_id, hero_handle, stars, rarity):
     # Create directory if it doesn't exist
     if rarity.lower() == "argent":
         rarity_dir = Path(f"pages/cards/{rarity.lower()}")
@@ -33,11 +33,11 @@ def download_hero_image(hero_id, stars, rarity):
         rarity_dir = Path(f"pages/cards/{rarity.lower()}")
     rarity_dir.mkdir(parents=True, exist_ok=True)
     
-    # Define file path
+    # Define file path using hero_id
     file_path = rarity_dir / f"{hero_id}_{stars}.png"
     
-    # Construct image URL
-    image_url = get_image_url(hero_id, stars, rarity)
+    # Construct image URL using hero_handle
+    image_url = get_image_url(hero_id, hero_handle, stars, rarity)
     
     try:
         # Download the image
@@ -60,16 +60,16 @@ def download_all_hero_images():
     print(f"Found {len(hero_ids)} heroes")
     
     # Comment out the old rarities but keep them in the code
-    # rarities = ["legendary", "epic", "rare", "common"]
-    rarities = ["argent"]  # Only download argent rarity
+    rarities = ["legendary", "epic", "rare", "common"]
+    # rarities = ["argent"]  # Only download argent rarity
     stars_range = range(1, 9)  # 1 to 8 stars
     
     # Create a list of all download tasks
     download_tasks = []
-    for hero_id in hero_ids:
+    for hero_id, hero_handle in hero_ids:
         for rarity in rarities:
             for stars in stars_range:
-                download_tasks.append((hero_id, stars, rarity))
+                download_tasks.append((hero_id, hero_handle, stars, rarity))
     
     total_images = len(download_tasks)
     success_count = 0
@@ -80,13 +80,13 @@ def download_all_hero_images():
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         # Submit all tasks to the executor
         future_to_task = {
-            executor.submit(download_hero_image, hero_id, stars, rarity): (hero_id, stars, rarity)
-            for hero_id, stars, rarity in download_tasks
+            executor.submit(download_hero_image, hero_id, hero_handle, stars, rarity): (hero_id, hero_handle, stars, rarity)
+            for hero_id, hero_handle, stars, rarity in download_tasks
         }
         
         # Process results as they complete
         for future in concurrent.futures.as_completed(future_to_task):
-            hero_id, stars, rarity = future_to_task[future]
+            hero_id, hero_handle, stars, rarity = future_to_task[future]
             try:
                 success = future.result()
                 if success:

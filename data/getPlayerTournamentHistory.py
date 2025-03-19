@@ -151,6 +151,7 @@ select
     hr.best_bronze as bronze_rank,
     hr.best_reverse as sub_rank,
     hr.best_other as other_rank,
+    0 as reward_value,
     COALESCE(hr.reward_eth, 0) as reward_eth,
     COALESCE(hr.reward_pack, 0) as reward_pack,
     COALESCE(hr.reward_fan, 0) as reward_fan,
@@ -194,6 +195,7 @@ select
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0075), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,
@@ -223,7 +225,7 @@ cursor.execute(query)
 rows = cursor.fetchall()
 
 # Find the max latest_score_timestamp
-max_timestamp = max(row[18] for row in rows if row[18] is not None)
+max_timestamp = max(row[19] for row in rows if row[19] is not None)
 
 # Convert the results to a list of dictionaries
 player_history = []
@@ -241,14 +243,15 @@ for row in rows:
         'bronze_rank': row[8],
         'sub_rank': row[9],
         'other_rank': row[10],
-        'reward_eth': float(row[11]) if row[11] else 0.0,
-        'reward_pack': int(row[12]) if row[12] else 0,
-        'reward_fan': int(row[13]) if row[13] else 0,
-        'reward_frag': int(row[14]) if row[14] else 0,
-        'reward_gold': int(row[15]) if row[15] else 0,
-        'decks': int(row[16]) if row[16] else 0,
-        'itm_decks': int(row[17]) if row[17] else 0,
-        'timestamp': row[18]
+        'reward_value': float(row[11]) if row[11] else 0.0,
+        'reward_eth': float(row[12]) if row[12] else 0.0,
+        'reward_pack': int(row[13]) if row[13] else 0,
+        'reward_fan': int(row[14]) if row[14] else 0,
+        'reward_frag': int(row[15]) if row[15] else 0,
+        'reward_gold': int(row[16]) if row[16] else 0,
+        'decks': int(row[17]) if row[17] else 0,
+        'itm_decks': int(row[18]) if row[18] else 0,
+        'timestamp': row[19]
     }
     player_history.append(player_data)
 

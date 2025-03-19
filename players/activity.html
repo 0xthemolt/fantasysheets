@@ -381,7 +381,7 @@
     <div class="filter-container">
         <div class="toggle-group mint-filters">
             <button class="toggle-option active" data-filter="all">All <span class="count">(0)</span></button>
-            <button class="toggle-option" data-filter="paid">Paid <span class="count">(0)</span></button>
+            <button class="toggle-option" data-filter="paid">VRGDA <span class="count">(0)</span></button>
             <button class="toggle-option" data-filter="free">Free <span class="count">(0)</span></button>
         </div>
         <div class="levelup-filters">
@@ -392,6 +392,14 @@
             <button class="filter-chip" data-filter="rare-legendary">Rare → Leg <span class="count">(0)</span></button>
         </div>
     </div>
+
+    <!-- Add price summary container, initially hidden -->
+    <div id="price-summary" style="display: none; margin: 10px 20px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; text-align: center; border: 1px solid rgba(76, 175, 80, 0.2);">
+        <span style="font-weight: bold; color: #4CAF50;">
+            VRGDA Pack Total: <span class="total-price">0</span> ETH
+        </span>
+    </div>
+
     <div id="table-container"></div>
 
     <script>
@@ -558,17 +566,30 @@
         function filterMints(filterType) {
             const toggleGroup = document.querySelector('.toggle-group');
             toggleGroup.dataset.active = filterType;
-
+            
             let filteredData;
+            const priceSummary = document.getElementById('price-summary');
+            
             switch(filterType) {
                 case 'paid':
                     filteredData = mintData.filter(row => Number(row.price) > 0);
+                    
+                    // Calculate total price of all paid mints
+                    const totalPrice = filteredData.reduce((sum, row) => sum + Number(row.price), 0);
+                    
+                    // Update and show price summary
+                    document.querySelector('.total-price').textContent = totalPrice.toFixed(4);
+                    priceSummary.style.display = 'block';
                     break;
+                    
                 case 'free':
                     filteredData = mintData.filter(row => Number(row.price) === 0);
+                    priceSummary.style.display = 'none';
                     break;
+                    
                 default:
                     filteredData = mintData;
+                    priceSummary.style.display = 'none';
             }
             
             displayMints(filteredData);
@@ -706,6 +727,7 @@
             const options = viewToggle.querySelectorAll('.view-option');
             const mintFilters = document.querySelector('.mint-filters');
             const levelupFilters = document.querySelector('.levelup-filters');
+            const priceSummary = document.getElementById('price-summary');
             
             options.forEach(option => {
                 option.addEventListener('click', async () => {
@@ -720,6 +742,9 @@
                         updateMintCounts();
                         mintFilters.style.display = 'flex';
                         levelupFilters.style.display = 'none';
+                        // Check if we need to show price summary
+                        const activeFilter = document.querySelector('.toggle-option.active').dataset.filter;
+                        priceSummary.style.display = activeFilter === 'paid' ? 'block' : 'none';
                     } else {
                         if (levelUpData.length === 0) {
                             levelUpData = await fetchLevelUps();
@@ -729,6 +754,7 @@
                         displayLevelUps(levelUpData);
                         mintFilters.style.display = 'none';
                         levelupFilters.style.display = 'flex';
+                        priceSummary.style.display = 'none';
                     }
                 });
             });

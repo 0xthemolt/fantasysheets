@@ -278,6 +278,96 @@
             font-size: 24px;
             margin: 0 8px;
         }
+
+        /* Update view selector styles */
+        .view-selector {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 12px;
+            position: relative;
+            width: 300px;
+        }
+
+        .view-option {
+            flex: 1;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            color: #666;
+            background: none;
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        /* Sliding background for view toggle */
+        .view-toggle::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .view-toggle[data-active="mints"]::after {
+            transform: translateX(0);
+        }
+
+        .view-toggle[data-active="levelups"]::after {
+            transform: translateX(100%);
+        }
+
+        .view-option.active {
+            color: #4CAF50;
+        }
+
+        /* Level up filter styles */
+        .levelup-filters {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #666;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .filter-chip.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        /* Add these to your existing styles */
+        .count {
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -289,10 +379,17 @@
         </div>
     </div>
     <div class="filter-container">
-        <div class="toggle-group">
-            <button class="toggle-option active" data-filter="all">All</button>
-            <button class="toggle-option" data-filter="paid">Paid</button>
-            <button class="toggle-option" data-filter="free">Free</button>
+        <div class="toggle-group mint-filters">
+            <button class="toggle-option active" data-filter="all">All <span class="count">(0)</span></button>
+            <button class="toggle-option" data-filter="paid">Paid <span class="count">(0)</span></button>
+            <button class="toggle-option" data-filter="free">Free <span class="count">(0)</span></button>
+        </div>
+        <div class="levelup-filters">
+            <button class="filter-chip active" data-filter="all">All <span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="skip">Skip <span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="common-epic">Common → Epic <span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="common-legendary">Common → Leg <span class="count">(0)</span></button>
+            <button class="filter-chip" data-filter="rare-legendary">Rare → Leg <span class="count">(0)</span></button>
         </div>
     </div>
     <div id="table-container"></div>
@@ -313,9 +410,10 @@
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
-                
-                mintData = data; // Store the data
-                displayMints(data); // Display all data initially
+
+                mintData = data;
+                displayMints(data);
+                updateMintCounts();
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('table-container').innerHTML = `
@@ -325,40 +423,40 @@
         }
 
         function displayMints(data) {
-            const tableHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Price (ETH)</th>
-                            <th>Heroes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(row => `
+                const tableHTML = `
+                    <table>
+                        <thead>
                             <tr>
-                                <td>
-                                    <div class="mobile-header">
-                                        <div class="mobile-value-container">
-                                            <div class="mobile-label">Time</div>
-                                            ${formatTimestamp(row.timestamp, row.tx_hash)}
-                                        </div>
-                                        <div class="mobile-value-container">
-                                            <div class="mobile-label">Price</div>
-                                            ${formatPrice(row.price)}
-                                        </div>
-                                    </div>
-                                    <div class="hero-cards">
-                                        ${formatHeroDetails(row.hero_details)}
-                                    </div>
-                                </td>
+                                <th>Time</th>
+                                <th>Price (ETH)</th>
+                                <th>Heroes</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    <td>
+                                        <div class="mobile-header">
+                                            <div class="mobile-value-container">
+                                                <div class="mobile-label">Time</div>
+                                                ${formatTimestamp(row.timestamp, row.tx_hash)}
+                                            </div>
+                                            <div class="mobile-value-container">
+                                                <div class="mobile-label">Price</div>
+                                            ${formatPrice(row.price)}
+                                            </div>
+                                        </div>
+                                        <div class="hero-cards">
+                                            ${formatHeroDetails(row.hero_details)}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
 
-            document.getElementById('table-container').innerHTML = tableHTML;
+                document.getElementById('table-container').innerHTML = tableHTML;
         }
 
         function shortenAddress(address) {
@@ -480,12 +578,13 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('player_levelups')
-                    .select('player_address, tx_hash, timestamp, from_hero_details, to_hero_details')
+                    .select('player_address, tx_hash, "timestamp", is_skip, is_common_to_epic, is_common_to_legendary, is_rare_to_legendary, from_hero_details, to_hero_details')
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
                 
                 levelUpData = data;
+                updateLevelUpCounts();
                 return data;
             } catch (error) {
                 console.error('Error fetching level ups:', error);
@@ -556,10 +655,57 @@
             }
         }
 
-        // Update the initialization to handle view switching
+        function initializeLevelUpFilters() {
+            const filterChips = document.querySelectorAll('.filter-chip');
+            const activeFilters = new Set();
+            
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chip.classList.toggle('active');
+                    const filter = chip.dataset.filter;
+                    
+                    if (activeFilters.has(filter)) {
+                        activeFilters.delete(filter);
+                    } else {
+                        activeFilters.add(filter);
+                    }
+                    
+                    filterLevelUps(Array.from(activeFilters));
+                });
+            });
+        }
+
+        function filterLevelUps(activeFilters) {
+            let filteredData = levelUpData;
+            
+            if (activeFilters.length > 0) {
+                filteredData = levelUpData.filter(row => {
+                    return activeFilters.some(filter => {
+                        switch(filter) {
+                            case 'skip':
+                                return row.is_skip;
+                            case 'common-epic':
+                                return row.is_common_to_epic;
+                            case 'common-legendary':
+                                return row.is_common_to_legendary;
+                            case 'rare-legendary':
+                                return row.is_rare_to_legendary;
+                            default:
+                                return true;
+                        }
+                    });
+                });
+            }
+            
+            displayLevelUps(filteredData);
+        }
+
+        // Update the view switching logic
         function initializeViewToggle() {
             const viewToggle = document.querySelector('.view-toggle');
             const options = viewToggle.querySelectorAll('.view-option');
+            const mintFilters = document.querySelector('.mint-filters');
+            const levelupFilters = document.querySelector('.levelup-filters');
             
             options.forEach(option => {
                 option.addEventListener('click', async () => {
@@ -571,16 +717,49 @@
                     
                     if (view === 'mints') {
                         displayMints(mintData);
-                        document.querySelector('.filter-container').style.display = 'flex';
+                        updateMintCounts();
+                        mintFilters.style.display = 'flex';
+                        levelupFilters.style.display = 'none';
                     } else {
                         if (levelUpData.length === 0) {
                             levelUpData = await fetchLevelUps();
+                        } else {
+                            updateLevelUpCounts();
                         }
                         displayLevelUps(levelUpData);
-                        document.querySelector('.filter-container').style.display = 'none';
+                        mintFilters.style.display = 'none';
+                        levelupFilters.style.display = 'flex';
                     }
                 });
             });
+        }
+
+        // Add this new function to update mint counts
+        function updateMintCounts() {
+            const allCount = mintData.length;
+            const paidCount = mintData.filter(row => Number(row.price) > 0).length;
+            const freeCount = mintData.filter(row => Number(row.price) === 0).length;
+
+            const mintFilters = document.querySelector('.mint-filters');
+            mintFilters.querySelector('[data-filter="all"] .count').textContent = `(${allCount})`;
+            mintFilters.querySelector('[data-filter="paid"] .count').textContent = `(${paidCount})`;
+            mintFilters.querySelector('[data-filter="free"] .count').textContent = `(${freeCount})`;
+        }
+
+        // Add this new function to update level up counts
+        function updateLevelUpCounts() {
+            const allCount = levelUpData.length;
+            const skipCount = levelUpData.filter(row => row.is_skip).length;
+            const commonEpicCount = levelUpData.filter(row => row.is_common_to_epic).length;
+            const commonLegendaryCount = levelUpData.filter(row => row.is_common_to_legendary).length;
+            const rareLegendaryCount = levelUpData.filter(row => row.is_rare_to_legendary).length;
+
+            const levelupFilters = document.querySelector('.levelup-filters');
+            levelupFilters.querySelector('[data-filter="all"] .count').textContent = `(${allCount})`;
+            levelupFilters.querySelector('[data-filter="skip"] .count').textContent = `(${skipCount})`;
+            levelupFilters.querySelector('[data-filter="common-epic"] .count').textContent = `(${commonEpicCount})`;
+            levelupFilters.querySelector('[data-filter="common-legendary"] .count').textContent = `(${commonLegendaryCount})`;
+            levelupFilters.querySelector('[data-filter="rare-legendary"] .count').textContent = `(${rareLegendaryCount})`;
         }
 
         // Update the DOMContentLoaded event listener
@@ -588,6 +767,7 @@
             fetchAndDisplayMints();
             initializeFilter();
             initializeViewToggle();
+            initializeLevelUpFilters();
         });
     </script>
 </body>

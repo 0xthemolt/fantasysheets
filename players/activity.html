@@ -35,6 +35,19 @@
             white-space: nowrap;
         }
 
+        tr {
+                border-bottom: none;  /* Remove bottom border */
+                margin-bottom: 12px;
+                padding: 16px;  /* Increased padding */
+                background: rgba(255, 255, 255, 0.05);  /* Subtle background */
+                border-radius: 12px;  /* Rounded corners */
+            }
+
+        thead {
+                display: none;
+        }
+
+
         /* Mobile-first approach */
         @media screen and (max-width: 768px) {
             /* Reset table styles */
@@ -133,11 +146,6 @@
             height: auto;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .hero-card .token-id {
-            font-size: 0.7em;
-            color: #666;
-            margin-top: 2px;
         }
 
         /* Update timestamp styles */
@@ -368,6 +376,7 @@
             font-size: 0.85em;
             opacity: 0.7;
         }
+
     </style>
 </head>
 <body>
@@ -533,7 +542,6 @@
                         <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
                              alt="Hero ${hero.token_id}"
                              >
-                        <div class="token-id">ID: ${hero.token_id}</div>
                     </div>
                 `).join('');
 

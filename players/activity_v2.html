@@ -10,9 +10,12 @@
 <style>
         .hero-cards {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-start;
         }
         .hero-card {
+            flex: 0 0 auto;
             text-align: center;
         }
         .hero-card img {
@@ -20,6 +23,25 @@
             height: auto;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .price {
+            text-align: right; /* Align text to the right */
+            display: block; /* Ensure it takes the full width */
+        }
+
+        .price img {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        .blast-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-left: 8px;
+            cursor: pointer;
         }
 
        .filter-container {
@@ -203,6 +225,22 @@
             font-size: 0.85em;
             opacity: 0.7;
         }
+
+        /* Add styles for mint rows */
+        .mint-row {
+            background-color:rgba(255, 255, 255, 0.05);  
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Add margin to mint hero details */
+        .mint-hero-details {
+            margin-top: 8px;
+        }
 </style>
 <body>
     <h1>Player Activity</h1>
@@ -310,7 +348,7 @@
         }
 
         function formatPrice(price) {
-            if (!price) return '0.00 ETH';
+            if (!price) return '';
             return `
                 <span class="price">
                     ${Number(price).toFixed(3)}
@@ -410,6 +448,8 @@
                 return [];
             }
         }
+
+        
 
         function initializeLevelUpFilters() {
             const filterChips = document.querySelectorAll('.filter-chip');
@@ -555,11 +595,63 @@
             const tableContainer = document.getElementById('table-container');
             tableContainer.innerHTML = data.map(mint => `
                 <div class="mint-row">
-                    <div class="mint-timestamp">${formatTimeAgo(mint.timestamp)}</div>
-                    <div class="mint-price">${formatPrice(mint.price)}</div>
+                    <div class="mint-metadata" style="display: flex; justify-content: space-between; width: 100%;">
+                        <div class="mint-timestamp" style="width: 50%; text-align: left;">${formatTimestamp(mint.timestamp, mint.tx_hash)}</div>
+                        <div class="mint-price" style="width: 50%; text-align: right;">${formatPrice(mint.price)}</div>
+                    </div>
                     <div class="mint-hero-details">${formatHeroDetails(mint.hero_details)}</div>
                 </div>
             `).join('');
+        }
+
+        function displayLevelUps(data) {
+            const tableContainer = document.getElementById('table-container');
+            tableContainer.innerHTML = data.map(row => `
+                <div class="mint-row"> <!-- Using same styling as mint-row for consistency -->
+                    <div class="mint-metadata" style="display: flex; justify-content: space-between; width: 100%;">
+                        <div class="mint-timestamp" style="width: 50%; text-align: left;">${formatTimeAgo(row.timestamp)}</div>
+                    </div>
+                    <div class="mint-hero-details">${formatLevelUpDetails(row.from_hero_details, row.to_hero_details)}</div>
+                </div>
+            `).join('');
+        }
+
+        function formatLevelUpDetails(fromDetails, toDetails) {
+            if (!fromDetails || !toDetails) return '';
+            
+            try {
+                // Parse the hero details if they're strings
+                const fromHeroes = typeof fromDetails === 'string' ? JSON.parse(fromDetails) : fromDetails;
+                const toHeroes = typeof toDetails === 'string' ? JSON.parse(toDetails) : toDetails;
+                
+                // Format the level up display
+                return `
+                    <div class="level-up-container">
+                        <div class="from-cards">
+                            ${fromHeroes.map(hero => `
+                                <div class="hero-card">
+                                    <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
+                                         alt="Hero ${hero.token_id}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="arrow-icon">→</div>
+                        
+                        <div class="to-cards">
+                            ${toHeroes.map(hero => `
+                                <div class="hero-card">
+                                    <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
+                                         alt="Hero ${hero.token_id}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                console.error('Error formatting level up details:', e);
+                return 'Invalid Details';
+            }
         }
 
         // Update the DOMContentLoaded event listener

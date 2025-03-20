@@ -56,6 +56,77 @@
         #playerProfilePicture:hover {
             transform: scale(1.05);
         }
+        
+        /* Autocomplete dropdown styles */
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .autocomplete-results.show {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s ease;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover, .autocomplete-item.active {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .autocomplete-item img {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        .autocomplete-item-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .autocomplete-item-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .autocomplete-item-handle {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .autocomplete-highlight {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -79,13 +150,15 @@
 
     <div id="playerSearchContainer" style="display: none; width: 100%; max-width: 400px; margin: 0 auto;">
         <div style="display: flex; align-items: center; width: 100%;">
-            <input 
-                type="text" 
-                id="playerSearch" 
-                placeholder="Enter 0xAddress"
-                style="padding: 10px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
-                value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
-            >
+            <div class="autocomplete-container" style="flex-grow: 1;">
+                <input 
+                    type="text" 
+                    id="playerSearch" 
+                    placeholder="0xAddress/Handle/Name"
+                    style="padding: 10px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
+                >
+                <div id="autocompleteResults" class="autocomplete-results"></div>
+            </div>
             <button id="playerSearchButton" style="margin-left: 10px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
                 <i class="fas fa-search"></i>
             </button>
@@ -192,24 +265,6 @@
             });
         });
 
-        // Modal functionality
-        const modalSearchIcon = document.getElementById('modalSearchIcon');
-        const addressModal = document.getElementById('addressModal');
-        const closeModalButton = document.getElementById('closeModalButton');
-        const searchAddressButton = document.getElementById('searchAddressButton');
-        const addressInput = document.getElementById('addressInput');
-
-        // Search functionality
-        searchAddressButton.addEventListener('click', () => {
-            const ownerAddress = addressInput.value.trim();
-            if (ownerAddress) {
-                // Call the fetchCardData function with the entered address
-                document.getElementById('playerSearch').value = ownerAddress; // Set the value in the main search input
-                fetchCardData(); // Trigger the search
-                addressModal.style.display = 'none'; // Hide modal after search
-            }
-        });
-
     // Fetch player data and store it
     async function fetchPlayerData() {
         try {
@@ -271,22 +326,178 @@
         }
     });
 
-    // Optional: Function to populate search suggestions based on playerData
+    // Replace your existing populatePlayerSearch function with this enhanced version
     function populatePlayerSearch() {
         const playerSearchInput = document.getElementById('playerSearch');
-        if (!playerSearchInput) return;
+        const autocompleteResults = document.getElementById('autocompleteResults');
+        if (!playerSearchInput || !autocompleteResults) return;
         
-        // You could implement autocomplete functionality here
-        // For example:
-        playerSearchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const matches = playerData.filter(player => 
-                player.player_handle.toLowerCase().includes(searchTerm) || 
-                (player.player_name && player.player_name.toLowerCase().includes(searchTerm))
-            ).slice(0, 5); // Limit to top 5 matches
+        let selectedIndex = -1;
+        let filteredResults = [];
+        
+        // Function to highlight matching text
+        function highlightMatch(text, searchTerm) {
+            if (!text) return '';
             
-            // Update UI with matches
-            // This depends on how you want to display the suggestions
+            // Simple case-insensitive highlight
+            const regex = new RegExp(`(${searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="autocomplete-highlight">$1</span>');
+        }
+        
+        // Function to render autocomplete results
+        function renderAutocomplete() {
+            if (filteredResults.length === 0) {
+                autocompleteResults.classList.remove('show');
+                return;
+            }
+            
+            autocompleteResults.innerHTML = '';
+            const searchTerm = playerSearchInput.value.toLowerCase();
+            
+            filteredResults.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.className = `autocomplete-item ${index === selectedIndex ? 'active' : ''}`;
+                
+                // Use default image if profile picture is missing
+                const profilePic = player.profile_picture || '../icons/ft_logo.webp';
+                
+                // Highlight matching parts of name and handle
+                const highlightedName = highlightMatch(player.player_name || '', searchTerm);
+                const highlightedHandle = highlightMatch(player.player_handle || '', searchTerm);
+                const highlightedId = highlightMatch(player.player_id || '', searchTerm);
+                
+                item.innerHTML = `
+                    <img src="${profilePic}" onerror="this.src='../icons/ft_logo.webp';" alt="${player.player_handle || 'Player'}">
+                    <div class="autocomplete-item-text">
+                        <div class="autocomplete-item-name">${highlightedName || highlightedId}</div>
+                        <div class="autocomplete-item-handle">${highlightedHandle}</div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    playerSearchInput.value = player.player_handle || player.player_id;
+                    autocompleteResults.classList.remove('show');
+                    // Optional: trigger search immediately
+                    // playerSearchButton.click();
+                });
+                
+                autocompleteResults.appendChild(item);
+            });
+            
+            autocompleteResults.classList.add('show');
+        }
+        
+        // Fuzzy search function
+        function fuzzySearch(items, searchTerm) {
+            if (!searchTerm || searchTerm.length < 2) return [];
+            
+            searchTerm = searchTerm.toLowerCase();
+            
+            return items.filter(item => {
+                const name = (item.player_name || '').toLowerCase();
+                const handle = (item.player_handle || '').toLowerCase();
+                const id = (item.player_id || '').toLowerCase();
+                
+                // Check if any field contains the search term
+                return name.includes(searchTerm) || 
+                       handle.includes(searchTerm) || 
+                       id.includes(searchTerm);
+            }).slice(0, 8); // Limit to 8 matches for better performance
+        }
+        
+        // Input event for search term changes
+        playerSearchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.trim();
+            
+            if (searchTerm.length < 2) {
+                autocompleteResults.classList.remove('show');
+                return;
+            }
+            
+            filteredResults = fuzzySearch(playerData, searchTerm);
+            selectedIndex = -1;
+            renderAutocomplete();
+        });
+        
+        // Handle keyboard navigation
+        playerSearchInput.addEventListener('keydown', function(e) {
+            if (!autocompleteResults.classList.contains('show')) return;
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, filteredResults.length - 1);
+                    renderAutocomplete();
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    renderAutocomplete();
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && selectedIndex < filteredResults.length) {
+                        playerSearchInput.value = filteredResults[selectedIndex].player_handle || 
+                                                  filteredResults[selectedIndex].player_id;
+                        autocompleteResults.classList.remove('show');
+                        // Optional: automatically trigger search
+                        // playerSearchButton.click();
+                    } else {
+                        // Just let the normal search happen
+                        playerSearchButton.click();
+                    }
+                    break;
+                    
+                case 'Escape':
+                    autocompleteResults.classList.remove('show');
+                    break;
+            }
+        });
+        
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!playerSearchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                autocompleteResults.classList.remove('show');
+            }
+        });
+        
+        // Close autocomplete when search input loses focus
+        playerSearchInput.addEventListener('blur', function(e) {
+            // Small delay to allow for item clicks
+            setTimeout(() => {
+                if (!autocompleteResults.contains(document.activeElement)) {
+                    autocompleteResults.classList.remove('show');
+                }
+            }, 150);
+        });
+    }
+
+    // Modal functionality (only if elements exist)
+    const modalSearchIcon = document.getElementById('modalSearchIcon');
+    const addressModal = document.getElementById('addressModal');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const searchAddressButton = document.getElementById('searchAddressButton');
+    const addressInput = document.getElementById('addressInput');
+
+    // Only add event listener if element exists
+    if (searchAddressButton) {
+        searchAddressButton.addEventListener('click', () => {
+            const ownerAddress = addressInput?.value.trim() || '';
+            if (ownerAddress) {
+                // Call the fetchCardData function with the entered address
+                const playerSearch = document.getElementById('playerSearch');
+                if (playerSearch) playerSearch.value = ownerAddress; // Set the value in the main search input
+                
+                if (typeof fetchCardData === 'function') {
+                    fetchCardData(); // Trigger the search if function exists
+                } else {
+                    console.warn('fetchCardData function not found');
+                }
+                
+                if (addressModal) addressModal.style.display = 'none'; // Hide modal after search
+            }
         });
     }
 

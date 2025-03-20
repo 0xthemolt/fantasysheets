@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Cards</title>
+    <!-- Add Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .profile-picture-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, rgba(40, 40, 40, 0.6), rgba(20, 20, 20, 0.8));
+            transition: all 0.3s ease;
+        }
+        
+        .profile-picture-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        #playerProfilePicture {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-picture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+            pointer-events: none;
+        }
+        
+        #playerProfilePicture:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="playerInfoContent" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 10px; width: 100%;">
+        <div id="playerInfo" style="display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 10px;">
+            <div class="profile-picture-container">
+                <img id="playerProfilePicture" src="" alt="Profile Picture">
+                <div class="profile-picture-overlay"></div>
+            </div>
+            <div style="margin-left: 15px; text-align: left;">
+                <h2 id="playerName" style="color: #fff; margin: 0 5px 5px 0; display: inline-block;"></h2>
+                <a id="playerTwitterLink" href="#" target="_blank" style="text-decoration: none;">
+                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                </a>
+                <div id="modalSearchIcon" style="cursor: pointer; display: inline-block; margin-left: 10px;">
+                    <i class="fas fa-search" style="color: #fff; font-size: 16px;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="playerSearchContainer" style="display: none; width: 100%; max-width: 400px; margin: 0 auto;">
+        <div style="display: flex; align-items: center; width: 100%;">
+            <input 
+                type="text" 
+                id="playerSearch" 
+                placeholder="Enter 0xAddress"
+                style="padding: 10px; width: 100%; background-color: #292828; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; font-size: 14px; transition: all 0.2s ease;"
+                value="0x82bB89019CB01567Ee4756F25E9508EF9BB5713c"
+            >
+            <button id="playerSearchButton" style="margin-left: 10px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-search"></i>
+            </button>
+            <button id="cancelSearchButton" style="margin-left: 10px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</body>
+<script>
+
+    // Move this to the top of your script
+    const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    
+    // Add this code to handle the player info search transition
+    document.addEventListener('DOMContentLoaded', function() {
+            // Setup player info search transition
+            const modalSearchIcon = document.getElementById('modalSearchIcon');
+            const playerInfoContent = document.getElementById('playerInfoContent');
+            const playerSearchContainer = document.getElementById('playerSearchContainer');
+            const playerSearch = document.getElementById('playerSearch');
+            const playerSearchButton = document.getElementById('playerSearchButton');
+            const cancelSearchButton = document.getElementById('cancelSearchButton');
+            
+            // Show search when clicking the search icon
+            modalSearchIcon.addEventListener('click', function() {
+                // Clear the search input field
+                playerSearch.value = '';
+                
+                // Hide player info content with animation
+                playerInfoContent.style.transition = 'opacity 0.3s ease';
+                playerInfoContent.style.opacity = '0';
+                
+                setTimeout(() => {
+                    playerInfoContent.style.display = 'none';
+                    
+                    // Show search container with animation
+                    playerSearchContainer.style.display = 'block';
+                    playerSearchContainer.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        playerSearchContainer.style.opacity = '1';
+                        playerSearch.focus();
+                    }, 50);
+                }, 300);
+            });
+            
+            // Hide search when clicking cancel button
+            cancelSearchButton.addEventListener('click', function() {
+                // Hide search container with animation
+                playerSearchContainer.style.transition = 'opacity 0.3s ease';
+                playerSearchContainer.style.opacity = '0';
+                
+                setTimeout(() => {
+                    playerSearchContainer.style.display = 'none';
+                    
+                    // Show player info content with animation
+                    playerInfoContent.style.display = 'flex';
+                    playerInfoContent.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        playerInfoContent.style.opacity = '1';
+                    }, 50);
+                }, 300);
+            });
+            
+            // Search functionality
+            playerSearchButton.addEventListener('click', function() {
+                const ownerAddress = playerSearch.value.trim();
+                if (ownerAddress) {
+                    // Set the value in the main search input
+                    document.getElementById('playerSearch').value = ownerAddress;
+                    
+                    // Hide search container with animation
+                    playerSearchContainer.style.transition = 'opacity 0.3s ease';
+                    playerSearchContainer.style.opacity = '0';
+                    
+                    // Clear or reset the previous player data immediately
+                    document.getElementById('playerName').textContent = '';
+                    document.getElementById('playerProfilePicture').src = '';
+                    // Show loading indicator
+                    document.getElementById('loading').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        playerSearchContainer.style.display = 'none';
+                        
+                        // Keep playerInfoContent hidden until new data is loaded
+                        playerInfoContent.style.display = 'none';
+                        
+                        // Trigger the search
+                        fetchCardData();
+                    }, 300);
+                }
+            });
+            
+            // Handle Enter key in search input
+            playerSearch.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    playerSearchButton.click();
+                }
+            });
+        });
+
+        // Modal functionality
+        const modalSearchIcon = document.getElementById('modalSearchIcon');
+        const addressModal = document.getElementById('addressModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const searchAddressButton = document.getElementById('searchAddressButton');
+        const addressInput = document.getElementById('addressInput');
+
+        // Search functionality
+        searchAddressButton.addEventListener('click', () => {
+            const ownerAddress = addressInput.value.trim();
+            if (ownerAddress) {
+                // Call the fetchCardData function with the entered address
+                document.getElementById('playerSearch').value = ownerAddress; // Set the value in the main search input
+                fetchCardData(); // Trigger the search
+                addressModal.style.display = 'none'; // Hide modal after search
+            }
+        });
+
+    // Fetch player data and store it
+    async function fetchPlayerData() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('players')
+                .select(`
+                    player_id, 
+                    player_name, 
+                    player_handle, 
+                    profile_picture, 
+                    fan_pts, 
+                    referral_pts, 
+                    fan_pts_plus_referrals, 
+                    league, 
+                    gold, 
+                    stars, 
+                    portfolio_value, 
+                    total_score, 
+                    number_of_cards, 
+                    first_trade_timestamp, 
+                    last_trade_timestamp, 
+                    first_tournament, 
+                    last_tournament, 
+                    updated, 
+                    filename
+                `);
+
+            if (error) {
+                console.error('Error fetching player data:', error);
+                return [];
+            }
+
+            console.log('Player data fetched successfully:', data.length, 'records');
+            return data;
+        } catch (err) {
+            console.error('Exception while fetching player data:', err);
+            return [];
+        }
+    }
+
+    // Load the player data when the page loads
+    let playerData = [];
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Show loading indicator if you have one
+        // document.getElementById('loading').style.display = 'block';
+        
+        // Fetch the player data
+        playerData = await fetchPlayerData();
+        
+        // Hide loading indicator
+        // document.getElementById('loading').style.display = 'none';
+        
+        console.log('Player data loaded with', playerData.length, 'records');
+        
+        // You can now use the playerData array for player search, display, etc.
+        // For example, you could populate a dropdown with player names:
+        if (playerData.length > 0) {
+            populatePlayerSearch();
+        }
+    });
+
+    // Optional: Function to populate search suggestions based on playerData
+    function populatePlayerSearch() {
+        const playerSearchInput = document.getElementById('playerSearch');
+        if (!playerSearchInput) return;
+        
+        // You could implement autocomplete functionality here
+        // For example:
+        playerSearchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const matches = playerData.filter(player => 
+                player.player_handle.toLowerCase().includes(searchTerm) || 
+                (player.player_name && player.player_name.toLowerCase().includes(searchTerm))
+            ).slice(0, 5); // Limit to top 5 matches
+            
+            // Update UI with matches
+            // This depends on how you want to display the suggestions
+        });
+    }
+
+</script>
+</html>

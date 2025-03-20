@@ -228,18 +228,25 @@
 
         /* Add styles for mint rows */
         .mint-row {
-            background-color:rgba(255, 255, 255, 0.05);  
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-            max-width: 600px;
-            width: 100%;
-            box-sizing: border-box;
+            background-color:  rgba(255, 255, 255, 0.05);  /* Subtle background */
+            border-radius: 8px; /* Rounded borders */
+            padding: 10px; /* Padding inside the row */
+            margin-bottom: 10px; /* Gap between each row */
+            max-width: 600px; /* Set a maximum width */
+            width: 100%; /* Ensure it takes full width of the container */
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+        
+        /* Special styling for skip level-ups */
+        .skip-levelup {
+            border: 2px solid #FFD700; /* Golden border */
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); /* Subtle golden glow */
+            background-color:  rgba(255, 255, 255, 0.05);  /* Subtle background */
         }
 
         /* Add margin to mint hero details */
         .mint-hero-details {
-            margin-top: 8px;
+            margin-top: 8px; /* Increase gap between mint row and hero details */
         }
 </style>
 <body>
@@ -607,9 +614,9 @@
         function displayLevelUps(data) {
             const tableContainer = document.getElementById('table-container');
             tableContainer.innerHTML = data.map(row => `
-                <div class="mint-row"> <!-- Using same styling as mint-row for consistency -->
+                <div class="mint-row ${row.is_skip ? 'skip-levelup' : ''}"> <!-- Add special class for skips -->
                     <div class="mint-metadata" style="display: flex; justify-content: space-between; width: 100%;">
-                        <div class="mint-timestamp" style="width: 50%; text-align: left;">${formatTimeAgo(row.timestamp)}</div>
+                        <div class="mint-timestamp" style="width: 100%; text-align: left;">${formatTimeAgo(row.timestamp)}</div>
                     </div>
                     <div class="mint-hero-details">${formatLevelUpDetails(row.from_hero_details, row.to_hero_details)}</div>
                 </div>
@@ -629,6 +636,10 @@
                     <div class="level-up-container">
                         <div class="from-cards">
                             ${fromHeroes.map(hero => `
+                                <div class="hero-card">
+                                    <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
+                                         alt="Hero ${hero.token_id}">
+                                </div>
                                 <div class="hero-card">
                                     <img src="/cards/${hero.hero_rarity}/${hero.hero_id_stars}.png" 
                                          alt="Hero ${hero.token_id}">

@@ -17,10 +17,13 @@
 
         /* Base table styles */
         table {
-            width: 100%;
+            width: 50%; /* Set table width to 50% */
+            margin: 0 auto; /* Center the table */
             border-collapse: separate;  /* Changed from collapse to separate */
             border-spacing: 0 8px;     /* Add spacing between rows */
             font-size: 14px;
+            border-radius: 12px; /* Add border radius to the table */
+            overflow: hidden; /* Ensure the border radius is applied correctly */
         }
 
         th, td {
@@ -36,17 +39,16 @@
         }
 
         tr {
-                border-bottom: none;  /* Remove bottom border */
-                margin-bottom: 12px;
-                padding: 16px;  /* Increased padding */
-                background: rgba(255, 255, 255, 0.05);  /* Subtle background */
-                border-radius: 12px;  /* Rounded corners */
-            }
-
-        thead {
-                display: none;
+            border-bottom: none;  /* Remove bottom border */
+            margin-bottom: 12px;
+            padding: 16px;  /* Increased padding */
+            background: rgba(255, 255, 255, 0.05);  /* Subtle background */
+            border-radius: 12px;  /* Rounded corners */
         }
 
+        thead {
+            display: none;
+        }
 
         /* Mobile-first approach */
         @media screen and (max-width: 768px) {
@@ -254,9 +256,8 @@
         /* Update the price styling section */
         /* Price styling */
         .price {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            text-align: right; /* Align text to the right */
+            display: block; /* Ensure it takes the full width */
         }
 
         .price img {
@@ -377,6 +378,24 @@
             opacity: 0.7;
         }
 
+        /* Update transaction container styling for desktop */
+        tr {
+            border-bottom: none;  /* Remove bottom border */
+            margin-bottom: 12px;
+            padding: 16px;  /* Increased padding */
+            background: rgba(255, 255, 255, 0.05);  /* Subtle background */
+            border-radius: 12px;  /* Rounded corners */
+        }
+
+        /* Ensure td styles are consistent */
+        td {
+            border: none;
+            padding: 0;
+            text-align: left;
+            position: static;
+            background: transparent;  /* explicitly set transparent background */
+        }
+
     </style>
 </head>
 <body>
@@ -440,40 +459,40 @@
         }
 
         function displayMints(data) {
-                const tableHTML = `
-                    <table>
-                        <thead>
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Price (ETH)</th>
+                            <th>Heroes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(row => `
                             <tr>
-                                <th>Time</th>
-                                <th>Price (ETH)</th>
-                                <th>Heroes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(row => `
-                                <tr>
-                                    <td>
-                                        <div class="mobile-header">
-                                            <div class="mobile-value-container">
-                                                <div class="mobile-label">Time</div>
-                                                ${formatTimestamp(row.timestamp, row.tx_hash)}
-                                            </div>
-                                            <div class="mobile-value-container">
-                                                <div class="mobile-label">Price</div>
+                                <td>
+                                    <div class="mobile-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">
+                                        <div class="mobile-value-container" style="flex: 1; width: 50%;">
+                                            <div class="mobile-label">Time</div>
+                                            ${formatTimestamp(row.timestamp, row.tx_hash)}
+                                        </div>
+                                        <div class="mobile-value-container" style="flex: 1; width: 50%; text-align: right;">
+                                            <div class="mobile-label">Price</div>
                                             ${formatPrice(row.price)}
-                                            </div>
                                         </div>
-                                        <div class="hero-cards">
-                                            ${formatHeroDetails(row.hero_details)}
-                                        </div>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
+                                    </div>
+                                    <div class="hero-cards" style="margin-top: 8px;">
+                                        ${formatHeroDetails(row.hero_details)}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
 
-                document.getElementById('table-container').innerHTML = tableHTML;
+            document.getElementById('table-container').innerHTML = tableHTML;
         }
 
         function shortenAddress(address) {

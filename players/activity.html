@@ -381,7 +381,7 @@
     <div class="filter-container">
         <div class="toggle-group mint-filters">
             <button class="toggle-option active" data-filter="all">All <span class="count">(0)</span></button>
-            <button class="toggle-option" data-filter="paid">VRGDA <span class="count">(0)</span></button>
+            <button class="toggle-option" data-filter="paid">Pack <span class="count">(0)</span></button>
             <button class="toggle-option" data-filter="free">Free <span class="count">(0)</span></button>
         </div>
         <div class="levelup-filters">
@@ -396,7 +396,7 @@
     <!-- Add price summary container, initially hidden -->
     <div id="price-summary" style="display: none; margin: 10px 20px; padding: 10px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; text-align: center; border: 1px solid rgba(76, 175, 80, 0.2);">
         <span style="font-weight: bold; color: #4CAF50;">
-            VRGDA Pack Total: <span class="total-price">0</span> ETH
+            Pack Total: <span class="total-price">0</span> ETH
         </span>
     </div>
 
@@ -511,10 +511,10 @@
         }
 
         function formatPrice(price) {
-            if (!price) return '0';
+            if (!price) return '0.00 ETH';
             return `
                 <span class="price">
-                    ${Number(price).toFixed(4)}
+                    ${Number(price).toFixed(3)}
                     <img src="../icons/eth.webp" alt="ETH" />
                 </span>
             `;
@@ -577,8 +577,8 @@
                     // Calculate total price of all paid mints
                     const totalPrice = filteredData.reduce((sum, row) => sum + Number(row.price), 0);
                     
-                    // Update and show price summary
-                    document.querySelector('.total-price').textContent = totalPrice.toFixed(4);
+                    // Update and show price summary with formatted total
+                    document.querySelector('.total-price').textContent = totalPrice.toFixed(2); // Format to 2 decimal places
                     priceSummary.style.display = 'block';
                     break;
                     

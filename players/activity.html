@@ -678,20 +678,48 @@
 
         function initializeLevelUpFilters() {
             const filterChips = document.querySelectorAll('.filter-chip');
-            const activeFilters = new Set();
+            const allFilterChip = document.querySelector('.filter-chip[data-filter="all"]');
             
             filterChips.forEach(chip => {
                 chip.addEventListener('click', () => {
-                    chip.classList.toggle('active');
                     const filter = chip.dataset.filter;
                     
-                    if (activeFilters.has(filter)) {
-                        activeFilters.delete(filter);
-                    } else {
-                        activeFilters.add(filter);
+                    // If clicking on "All", deactivate all other filters
+                    if (filter === 'all') {
+                        filterChips.forEach(otherChip => {
+                            if (otherChip.dataset.filter !== 'all') {
+                                otherChip.classList.remove('active');
+                            }
+                        });
+                        allFilterChip.classList.add('active');
+                    } 
+                    // If clicking on a specific filter
+                    else {
+                        // Toggle this specific filter
+                        chip.classList.toggle('active');
+                        
+                        // Check if any specific filter is active
+                        const anySpecificActive = Array.from(filterChips).some(
+                            c => c.dataset.filter !== 'all' && c.classList.contains('active')
+                        );
+                        
+                        // If any specific filter is active, deactivate "All"
+                        // If no specific filter is active, activate "All"
+                        if (anySpecificActive) {
+                            allFilterChip.classList.remove('active');
+                        } else {
+                            allFilterChip.classList.add('active');
+                        }
                     }
                     
-                    filterLevelUps(Array.from(activeFilters));
+                    // Get all active filters
+                    const activeFilters = Array.from(filterChips)
+                        .filter(c => c.classList.contains('active'))
+                        .map(c => c.dataset.filter);
+                    
+                    // Apply filters - don't include "all" in the filters array
+                    const filtersToApply = activeFilters.filter(f => f !== 'all');
+                    filterLevelUps(filtersToApply);
                 });
             });
         }

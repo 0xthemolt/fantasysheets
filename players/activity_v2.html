@@ -8,7 +8,20 @@
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
 <style>
-       /* Add these new styles */
+        .hero-cards {
+            display: flex;
+            gap: 10px;
+        }
+        .hero-card {
+            text-align: center;
+        }
+        .hero-card img {
+            width: 50px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
        .filter-container {
             margin-bottom: 20px;
             display: flex;
@@ -241,6 +254,7 @@
                 if (error) throw error;
 
                 mintData = data;
+                displayMints(data);
                 updateMintCounts();
             } catch (error) {
                 console.error('Error:', error);
@@ -249,6 +263,8 @@
                 `;
             }
         }
+
+        
 
         function shortenAddress(address) {
             if (!address) return '';
@@ -533,6 +549,17 @@
             levelupFilters.querySelector('[data-filter="common-epic"] .count').textContent = `(${commonEpicCount})`;
             levelupFilters.querySelector('[data-filter="common-legendary"] .count').textContent = `(${commonLegendaryCount})`;
             levelupFilters.querySelector('[data-filter="rare-legendary"] .count').textContent = `(${rareLegendaryCount})`;
+        }
+
+        function displayMints(data) {
+            const tableContainer = document.getElementById('table-container');
+            tableContainer.innerHTML = data.map(mint => `
+                <div class="mint-row">
+                    <div class="mint-timestamp">${formatTimeAgo(mint.timestamp)}</div>
+                    <div class="mint-price">${formatPrice(mint.price)}</div>
+                    <div class="mint-hero-details">${formatHeroDetails(mint.hero_details)}</div>
+                </div>
+            `).join('');
         }
 
         // Update the DOMContentLoaded event listener

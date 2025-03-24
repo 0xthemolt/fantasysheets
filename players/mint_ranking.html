@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Player Rankings</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    .controls-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    #search-container {
+        flex: 1;
+    }
+
+    #comparison-controls {
+        margin-left: 1rem;
+        display: none;
+    }
+
+    .text-link {
+    cursor: pointer;
+    }
+
+    .text-link:hover {
+        text-decoration: underline;
+    }
+
+    th.sortable {
+        padding-right: 2px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    th[data-sort="name"] {
+        min-width: 100px;
+    }
+
+    .sort-arrow {
+        position: absolute;
+        right: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .rankings-table {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .rankings-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        box-sizing: border-box;
+        max-width: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 8px 4px;
+    }
+
+    th.sortable {
+        padding-right: 2px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    td img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    .placeholder {
+        background-color: #ccc;
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+    }
+
+    th[data-sort="rank"] { width: 40px; }
+    th[data-sort="player"] { width: 180px; }
+    th[data-sort="firstTournament"] { width: 80px; }
+    th[data-sort="hoursSinceLastActivity"] { width: 60px; }
+    th[data-sort="portfolio"] { width: 60px; }
+    th[data-sort="cards"] { width: 60px; }
+    th[data-sort="fanPoints"],
+    th[data-sort="rewardEth"],
+    th[data-sort="rewardFrag"],
+    th[data-sort="blastGold"],
+    th[data-sort="stars"] { width: 70px; }
+    th[data-sort="decks"] { width: 60px; }
+    th[data-sort="elite"],
+    th[data-sort="gold"],
+    th[data-sort="silver"],
+    th[data-sort="bronze"],
+    th[data-sort="reverse"] { width: 50px; }
+    th[data-sort="buyVol"],
+    th[data-sort="netVol"] { width: 70px; }
+    th:last-child { width: 40px; }
+
+    td[player-handle] {
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    tbody tr:hover {
+        background-color: #1f2123;
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover td {
+        background-color: #1f2123;
+    }
+
+    tbody tr:hover td.section-end {
+        border-right: 1px solid var(--border-color);
+    }
+
+    .player-handle {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+        .rankings-table {
+            margin: 0;
+            padding: 0 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            display: block;
+            white-space: nowrap;
+            max-width: 350px;
+        }
+        
+        th {
+            font-size: 0.85rem;
+        }
+        
+        th[data-sort="rank"],
+        th[data-sort="player"],
+        td:nth-child(1),
+        td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background-color: var(--background-color);
+            z-index: 2;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+        
+        th[data-sort="player"],
+        td:nth-child(2) {
+            left: 50px;
+        }
+    }
+
+    .info-div {
+        text-align: center;
+        color: #888;
+        font-size: 0.9em;
+        margin-left: 10px;
+    }
+</style>
+<body>
+    <div class="title-container" style="display: flex; align-items: flex-end; justify-content: center;">
+        <h1 class="title-header" style="margin: 0;">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            FantasySheets Player Rankings
+        </h1>
+        <div class="info-div">
+            As of Main 43
+            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria to be ranked: >0 total ETH won in last 3 mains"></i>
+        </div>
+    </div>
+    <main>
+        <div class="controls-container">
+            <div class="controls-row">
+                <div id="search-container">
+                    <input 
+                        type="text" 
+                        class="search-box" 
+                        id="playerSearch" 
+                        placeholder="Search players..." 
+                        autocomplete="off"
+                        aria-label="Search players">
+                    <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
+                </div>
+        </div>
+
+        <section class="rankings-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="column-header section-end" colspan="3">
+                            <i class="fa-solid fa-user"></i> Player
+                        </th>
+                        <th class="column-header section-end" colspan="5">
+                            <i class="fa-solid fa-coins"></i> Packs
+                        </th>
+                        <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
+                            <i class="fa-solid fa-trophy"></i> Level Up
+                        </th>
+                        <th class="column-header section-end" colspan="2">
+                            <i class="fa-solid fa-store"></i> Marketplace
+                        </th>
+                        <th class="column-header section-end">Compare</th>
+                    </tr>
+                    <tr>
+                        <th class="sortable" data-sort="rank">
+                            Rank
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="player">
+                            Player
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="hoursSinceLastActivity" title="Time since last trade or tournament start">
+                            Last Activity
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="fanPoints">
+                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="rewardEth">
+                            <img src="../icons/eth.webp" alt="Reward ETH" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="rewardFrag">
+                            <img src="../icons/fragment.webp" alt="Reward Frag" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="blastGold">
+                            <img src="../icons/blast.webp" alt="Blast Gold" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="stars">
+                            <img src="../icons/stars.webp" alt="Stars" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="elo_rank">
+                            <img src="../icons/elo.webp" alt="Elo" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="decks">
+                            Decks
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="elite">
+                            <img src="../icons/elite.webp" alt="Elite" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="gold">
+                            <img src="../icons/gold.webp" alt="Gold" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="silver">
+                            <img src="../icons/silver.webp" alt="Silver" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="bronze">
+                            <img src="../icons/bronze.webp" alt="Bronze" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="reverse">
+                            <img src="../icons/reverse.webp" alt="Reverse" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="buyVol">
+                            Buy Vol
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="netVol" title="Buy vol minus Sell Vol">
+                            Net Vol
+                            <div class="sort-arrow"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="21" style="text-align: center; padding: 2rem;">
+                            Loading player data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>

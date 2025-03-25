@@ -45,11 +45,73 @@
                 height: 30px;
             }
         }
+
+        /* New styles for filter container and autocomplete */
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 99;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .autocomplete-items div:hover {
+            background-color: #555;
+        }
+        .autocomplete-active {
+            background-color: #555 !important;
+        }
+        .clear-filter {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #555;
+            font-size: 14px;
+        }
+        .active-filter {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #555;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Card Holders</h1>
+        
+        <!-- New filter container -->
+        <div class="filter-container">
+            <div class="search-container">
+                <input type="text" id="heroSearch" class="search-input" placeholder="Search by hero handle...">
+                <div id="autocompleteResults" class="autocomplete-items"></div>
+            </div>
+            <div id="activeFilter" style="display:none;" class="active-filter">
+                Filtering by: <span id="activeFilterName"></span>
+                <span class="clear-filter" onclick="clearFilter()">✕</span>
+            </div>
+        </div>
+        
         <div class="table-container">
             <table id="cardHoldersTable">
                 <thead>
@@ -73,13 +135,53 @@
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let allHeroHandles = [];
+        let currentFilter = null;
 
-        async function fetchCardHolders() {
+        // Get all unique hero handles for autocomplete
+        async function fetchHeroHandles() {
             try {
                 const { data, error } = await supabaseClient
                     .from('card_holders')
+                    .select('hero_handle')
+                    .order('hero_handle');
+                
+                if (error) {
+                    console.error('Error fetching hero handles:', error);
+                    return;
+                }
+                
+                // Extract unique hero handles
+                const heroHandles = data.map(item => item.hero_handle);
+                allHeroHandles = [...new Set(heroHandles)].filter(Boolean); // Remove duplicates and null values
+                
+                // Initialize autocomplete
+                initAutocomplete();
+            } catch (err) {
+                console.error('Exception when fetching hero handles:', err);
+            }
+        }
+
+        async function fetchCardHolders(heroHandle = null) {
+            try {
+                let query = supabaseClient
+                    .from('card_holders')
                     .select('player_name, profile_picture, hero_handle, hero_id, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
                     .order('aggregate_cards', { ascending: false });
+                
+                // Apply hero_handle filter if provided
+                if (heroHandle) {
+                    query = query.eq('hero_handle', heroHandle);
+                    
+                    // Display active filter
+                    document.getElementById('activeFilterName').textContent = heroHandle;
+                    document.getElementById('activeFilter').style.display = 'inline-block';
+                } else {
+                    document.getElementById('activeFilter').style.display = 'none';
+                }
+                
+                const { data, error } = await query;
 
                 if (error) {
                     console.error('Error fetching data:', error);
@@ -134,8 +236,99 @@
             return cell;
         }
 
+        function initAutocomplete() {
+            const searchInput = document.getElementById('heroSearch');
+            const autocompleteResults = document.getElementById('autocompleteResults');
+            
+            // Clear results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== searchInput && e.target !== autocompleteResults) {
+                    autocompleteResults.innerHTML = '';
+                }
+            });
+            
+            // Input event listener
+            searchInput.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                autocompleteResults.innerHTML = '';
+                
+                if (!value) return;
+                
+                // Filter hero handles based on input
+                const filteredHandles = allHeroHandles.filter(handle => 
+                    handle.toLowerCase().includes(value)
+                );
+                
+                // Show max 10 results
+                filteredHandles.slice(0, 10).forEach(handle => {
+                    const div = document.createElement('div');
+                    div.textContent = handle;
+                    div.addEventListener('click', function() {
+                        searchInput.value = handle;
+                        autocompleteResults.innerHTML = '';
+                        currentFilter = handle;
+                        fetchCardHolders(handle);
+                    });
+                    autocompleteResults.appendChild(div);
+                });
+            });
+            
+            // Key navigation
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const active = document.querySelector('.autocomplete-active');
+                    if (active) {
+                        e.preventDefault();
+                        searchInput.value = active.textContent;
+                        autocompleteResults.innerHTML = '';
+                        currentFilter = active.textContent;
+                        fetchCardHolders(active.textContent);
+                    } else if (searchInput.value && allHeroHandles.includes(searchInput.value)) {
+                        currentFilter = searchInput.value;
+                        fetchCardHolders(searchInput.value);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    navigateAutocomplete(1);
+                } else if (e.key === 'ArrowUp') {
+                    navigateAutocomplete(-1);
+                }
+            });
+        }
+        
+        function navigateAutocomplete(direction) {
+            const items = document.querySelectorAll('.autocomplete-items div');
+            if (!items.length) return;
+            
+            const active = document.querySelector('.autocomplete-active');
+            if (!active) {
+                // No active item, select first or last depending on direction
+                items[direction > 0 ? 0 : items.length - 1].classList.add('autocomplete-active');
+            } else {
+                // Get current index
+                let currentIndex = Array.from(items).indexOf(active);
+                active.classList.remove('autocomplete-active');
+                
+                // Calculate new index
+                currentIndex += direction;
+                if (currentIndex >= items.length) currentIndex = 0;
+                if (currentIndex < 0) currentIndex = items.length - 1;
+                
+                items[currentIndex].classList.add('autocomplete-active');
+            }
+        }
+        
+        function clearFilter() {
+            document.getElementById('heroSearch').value = '';
+            document.getElementById('activeFilter').style.display = 'none';
+            currentFilter = null;
+            fetchCardHolders();
+        }
+
         // Load data when the page loads
-        document.addEventListener('DOMContentLoaded', fetchCardHolders);
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchHeroHandles();
+            fetchCardHolders();
+        });
     </script>
 </body>
 </html>

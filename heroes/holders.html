@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Player Rankings</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    
+    <style>
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .profile-picture {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            #cardHoldersTable {
+                font-size: 14px;
+            }
+            #cardHoldersTable th, #cardHoldersTable td {
+                padding: 8px;
+            }
+            .profile-picture {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Card Holders</h1>
+        <div class="table-container">
+            <table id="cardHoldersTable">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Legendary</th>
+                        <th>Epic</th>
+                        <th>Rare</th>
+                        <th>Common</th>
+                        <th>Total Cards</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function fetchCardHolders() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('card_holders')
+                    .select('player_name, profile_picture, hero_handle, hero_id, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
+                    .order('aggregate_cards', { ascending: false });
+
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    return;
+                }
+
+                populateTable(data);
+            } catch (err) {
+                console.error('Exception when fetching data:', err);
+            }
+        }
+
+        function populateTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            data.forEach(holder => {
+                const row = document.createElement('tr');
+                
+                // Player column with profile picture and name
+                const playerCell = document.createElement('td');
+                playerCell.className = 'player-cell';
+                
+                if (holder.profile_picture) {
+                    const img = document.createElement('img');
+                    img.src = holder.profile_picture;
+                    img.alt = holder.player_name;
+                    img.className = 'profile-picture';
+                    playerCell.appendChild(img);
+                }
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = holder.player_name;
+                playerCell.appendChild(nameSpan);
+                
+                row.appendChild(playerCell);
+                
+                // Card counts
+                row.appendChild(createCell(holder.legendary_cards || 0));
+                row.appendChild(createCell(holder.epic_cards || 0));
+                row.appendChild(createCell(holder.rare_cards || 0));
+                row.appendChild(createCell(holder.common_cards || 0));
+                row.appendChild(createCell(holder.aggregate_cards || 0));
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        function createCell(value) {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            return cell;
+        }
+
+        // Load data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchCardHolders);
+    </script>
+</body>
+</html>

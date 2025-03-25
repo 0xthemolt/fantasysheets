@@ -152,7 +152,7 @@
                             </th>
                         </tr>
                         <tr>
-                            <th class="sortable" data-sort="rank">Rank<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="rank"><div class="sort-arrow"></div></th>
                             <th class="sortable section-end" data-sort="player">Player<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="vrgda_packs">Packs<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="total_spend">Spend<div class="sort-arrow"></div></th>
@@ -250,8 +250,8 @@ async function fetchAndDisplayRankings() {
                 <td>${player.max_price ? '.' + player.max_price.toFixed(3).split('.')[1] : '-'}</td>
                 <td class="section-end" style="padding: 0; position: relative; height: 30px;" 
                     title="${player.avg_spend ? `Avg Spend: .${player.avg_spend.toFixed(2).split('.')[1]} ETH
-                            Global Min: ${player.global_min_price.toFixed(2)} ETH
-                            Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
+                    Global Min: ${player.global_min_price.toFixed(2)} ETH
+                    Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
                     ${player.avg_spend && player.global_min_price && player.global_max_price ? `
                     <div style="
                         width: calc(100% - 20px);
@@ -366,19 +366,11 @@ async function fetchAndDisplayRankings() {
 
 function initializeSearch(players) {
     const searchBox = document.getElementById('playerSearch');
-    const clearButton = document.getElementById('clearSearch');
-    
-    if (!searchBox || !clearButton) {
-        console.error('Search elements not found');
-        return;
-    }
-
     // Search functionality
     searchBox.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const rows = document.querySelectorAll('tbody tr');
         
-        clearButton.style.display = searchTerm ? 'flex' : 'none';
         
         rows.forEach(row => {
             const playerCell = row.children[1];
@@ -392,13 +384,6 @@ function initializeSearch(players) {
         });
     });
 
-    // Clear search
-    clearButton.addEventListener('click', function() {
-        searchBox.value = '';
-        const rows = document.querySelectorAll('tbody tr');
-        rows.forEach(row => row.style.display = '');
-        this.style.display = 'none';
-    });
 }
 
 function getCardStyle(value, allValues, type) {

@@ -71,9 +71,8 @@
     }
 
     .rankings-table table {
-        width: 100%;
-        border-collapse: collapse;
         table-layout: fixed;
+        width: 100%;
     }
 
     th, td {
@@ -106,35 +105,27 @@
         border-radius: 50%;
     }
 
-    th[data-sort="rank"] { width: 50px; }
-    th[data-sort="player"] { width: 100px; }
-    th[data-sort="packs"] { width: 60px; }
-    th[data-sort="spend"] { width: 70px; }
-    th[data-sort="min"] { width: 60px; }
-    th[data-sort="max"] { width: 60px; }
-    th[data-sort="avg"] { width: 70px; }
+
+    th[data-sort="vrgda_packs"] { width: 60px; }
+    th[data-sort="total_spend"] { width: 70px; }
+    th[data-sort="min_price"] { width: 60px; }
+    th[data-sort="max_price"] { width: 60px; }
+    th[data-sort="avg_spend"] { width: 70px; }
     th[data-sort="level_ups"] { width: 80px; }
     th[data-sort="level_up_skips"] { width: 80px; }
     th[data-sort="pct_skip"] { width: 80px; }
-    th[data-sort="common_to_epic"] { width: 100px; }
-    th[data-sort="common_to_legendary"] { width: 100px; }
-    th[data-sort="rare_to_legendary"] { width: 100px; }
+    th[data-sort="common_to_epic_skips"] { width: 100px; }
+    th[data-sort="common_to_legendary_skips"] { width: 100px; }
+    th[data-sort="rare_to_legendary_skips"] { width: 100px; }
     th[data-sort="discounted_packs"] { width: 100px; }
     th[data-sort="launch_spend"] { width: 80px; }
 
-    td[player-handle] {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+  
 
     .name-container {
-        display: inline-block;
-        vertical-align: middle;
+        max-width: calc(100% - 60px); /* Account for profile picture and padding */
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: calc(100% - 40px);
     }
 
     tbody tr:hover {
@@ -186,9 +177,9 @@
             box-shadow: 2px 0 4px rgba(0,0,0,0.1);
         }
         
-        th[data-sort="player"],
-        td:nth-child(2) {
-            left: 50px;
+        th[data-sort="player"] {
+            min-width: 200px;
+            width: 200px;
         }
     }
 
@@ -231,11 +222,11 @@
                 <table class="sortable">
                     <thead>
                         <tr>
-                            <th class="column-header section-end" colspan="2">
+                            <th class="column-header section-end" colspan="1">
                                 <i class="fa-solid fa-user"></i> Player
                             </th>
                             <th class="column-header section-end" colspan="5">
-                                <i class="fa-solid fa-coins"></i> Packs
+                                <i class="fa-solid fa-bag-shopping"></i> VRGDA Packs
                             </th>
                             <th class="column-header section-end" colspan="6">
                                 <i class="fa-solid fa-turn-up"></i> Level Up
@@ -245,19 +236,18 @@
                             </th>
                         </tr>
                         <tr>
-                            <th class="sortable" data-sort="rank">Rank<div class="sort-arrow"></div></th>
                             <th class="sortable section-end data-sort="player">Player<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="packs">Packs<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="spend">Spend<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="min">Min<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="max">Max<div class="sort-arrow"></div></th>
-                            <th class="sortable section-end" data-sort="avg">Avg Price<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="vrgda_packs">Packs<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="total_spend">Spend<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="min_price">Min<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="max_price">Max<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end" data-sort="avg_spend">Avg Price<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="level_ups" data-sort-method="number">Level Ups<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="level_up_skips" data-sort-method="number">Skips<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="pct_skip" data-sort-method="number">Skip %<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="common_to_epic" data-sort-method="number">Com 2 Epic<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="common_to_legendary" data-sort-method="number">Com 2 Leg<div class="sort-arrow"></div></th>
-                            <th class="sortable section-end" data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="common_to_epic_skips" data-sort-method="number">Com 2 Epic<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="common_to_legendary_skips" data-sort-method="number">Com 2 Leg<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end" data-sort="rare_to_legendary_skips" data-sort-method="number">Rare 2 Leg<div class="sort-arrow"></div></th>
                             <th data-sort="discounted_packs" data-sort-method="number" title=".033 / .066 pack counts. Rewards for Testnet and other communities">.033 / .066 </th>
                             <th class="sortable" data-sort="launch_spend" data-sort-method="number">Spend<div class="sort-arrow"></div></th>
                         </tr>
@@ -272,15 +262,20 @@ const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+// Store the data globally for sorting
+let tableData;
+
 async function fetchAndDisplayRankings() {
     try {
         // Fetch data from Supabase
         const { data, error } = await supabaseClient
             .from('player_mint_leaders')
-            .select('player_id, player_name, player_handle, profile_picture, elo_image, "name", ".33_packs", ".66_packs", launch_spend, vrgda_packs, total_spend, avg_spend, min_price, max_price, global_min_price, global_max_price, global_min_total_spend, global_max_total_spend, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips')
-            .order('total_spend', { ascending: false });
+            .select('player_id, player_name, player_handle, profile_picture, elo_image, "name", ".33_packs", ".66_packs", launch_spend, vrgda_packs, total_spend, avg_spend, min_price, max_price, global_min_price, global_max_price, global_min_total_spend, global_max_total_spend, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_legendary_skips')
+            .order('total_spend', { ascending: false, nullsLast: true });
 
         if (error) throw error;
+
+        tableData = data; // Store the data for sorting
 
         // Get the table body
         const tableBody = document.querySelector('table tbody');
@@ -292,11 +287,13 @@ async function fetchAndDisplayRankings() {
         data.forEach((player, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td data-sort="${index + 1}">${index + 1}</td>
-                <td class="section-end"  player-handle="${player.player_handle}" 
+                <td class="section-end" player-handle="${player.player_handle}" 
                     data-player-id="${player.player_id}" 
                     data-player-name="${player.player_name}"
                     style="display: flex; align-items: center;">
+                    <div style="min-width: 30px; margin-right: 8px; color: #666;">
+                        ${index + 1}
+                    </div>
                     <img src="${player.profile_picture}" alt="${player.name}" 
                             onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
                     <div class="name-container">
@@ -346,15 +343,19 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                     ">${player.avg_spend.toFixed(2)}</div>
                     ` : '<div style="text-align: center; color: #666;">-</div>'}
                 </td>
-                <td data-sort="${player.level_ups}">${player.level_ups}</td>
+                <td data-sort="${player.level_ups}">
+                    ${player.level_ups ?? '-'}
+                </td>
                 <td data-sort="${player.level_up_skips}">
-                    ${player.level_up_skips}
+                    ${player.level_up_skips ?? '-'}
                     ${isTopSkipper(player, data) ? 
                         '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
+                        isTopNoSkipper(player, data) ?
+                        '<i class="fa-solid fa-snowflake" style="color: #77b5fe; margin-left: 4px; font-size: 0.9em;"></i>' :
                         ''}
                 </td>
                 <td data-sort="${player.pct_skip}">
-                    ${(player.pct_skip * 100).toFixed(1)}%
+                    ${player.pct_skip ? `${(player.pct_skip * 100).toFixed(0)}%` : '-'}
                     ${isTopSkipper(player, data) ? 
                         '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
                         ''}
@@ -372,7 +373,7 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                             min-width: 19px;
                             text-align: center;
                         ">${player.common_to_epic_skips}</div>` : 
-                        player.common_to_epic_skips}
+                        (player.common_to_epic_skips ?? '-')}
                 </td>
                 <td data-sort="${player.common_to_legendary_skips}">
                     ${getCardStyle(player.common_to_legendary_skips, data.map(p => p.common_to_legendary_skips), 'legendary') ? 
@@ -387,12 +388,12 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                             min-width: 19px;
                             text-align: center;
                         ">${player.common_to_legendary_skips}</div>` : 
-                        player.common_to_legendary_skips}
+                        (player.common_to_legendary_skips ?? '-')}
                 </td>
-                <td class="section-end" data-sort="${player.rare_to_epic_skips}">
-                    ${getCardStyle(player.rare_to_epic_skips, data.map(p => p.rare_to_epic_skips), 'legendary') ? 
+                <td class="section-end" data-sort="${player.rare_to_legendary_skips}">
+                    ${getCardStyle(player.rare_to_legendary_skips, data.map(p => p.rare_to_legendary_skips), 'legendary') ? 
                         `<div style="
-                            ${getCardStyle(player.rare_to_epic_skips, data.map(p => p.rare_to_epic_skips), 'legendary')}; 
+                            ${getCardStyle(player.rare_to_legendary_skips, data.map(p => p.rare_to_legendary_skips), 'legendary')}; 
                             padding: 4px 4px;
                             border-radius: 4px;
                             display: inline-flex;
@@ -401,8 +402,8 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                             min-height: 19px;
                             min-width: 19px;
                             text-align: center;
-                        ">${player.rare_to_epic_skips}</div>` : 
-                        player.rare_to_epic_skips}
+                        ">${player.rare_to_legendary_skips}</div>` : 
+                        (player.rare_to_legendary_skips ?? '-')}
                 </td>
                 <td data-sort="${(player['.33_packs'] || 0) + (player['.66_packs'] || 0)}">
                     ${player['.33_packs'] ? player['.33_packs'] : '-'} / ${player['.66_packs'] ? player['.66_packs'] : '-'}
@@ -490,82 +491,91 @@ function isTopSkipper(player, allPlayers) {
     return isTopTotalSkips || isTopPctSkips;
 }
 
-           // Add sorting functionality
-           const table = document.querySelector('table');
-            const headers = table.querySelectorAll('th.sortable');
-            let currentSort = { column: null, direction: 'asc' };
+function isTopNoSkipper(player, allPlayers) {
+    // Only consider players with no skips
+    const noSkipPlayers = allPlayers.filter(p => p.level_up_skips === 0);
+    
+    // Sort by level_ups descending
+    const sortedByLevelUps = [...noSkipPlayers].sort((a, b) => 
+        (b.level_ups || 0) - (a.level_ups || 0));
+    
+    // Check if player is in top 5 of no-skip players
+    return sortedByLevelUps.slice(0, 5).some(p => p.player_id === player.player_id);
+}
 
-            headers.forEach(header => {
-                header.addEventListener('click', function() {
-                    const column = this.dataset.sort;
-                    const tbody = table.querySelector('tbody');
-                    const rows = Array.from(tbody.querySelectorAll('tr'));
-                    
-                    // Reset all arrows
-                    headers.forEach(h => {
-                        h.querySelector('.sort-arrow').className = 'sort-arrow';
-                    });
+// Add sorting functionality
+const table = document.querySelector('table');
+const headers = table.querySelectorAll('th[data-sort]'); // Changed to match your HTML
+let currentSort = { column: null, direction: 'asc' };
 
-                    // Check if we're viewing "Last 5" data
-                    const isLast5Active = document.getElementById('toggle-last5').classList.contains('active');
-                    
-                    // Determine the actual column to sort by (add _l5 suffix if Last 5 is active)
-                    let sortColumn = column;
-                    if (isLast5Active && ['elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
-                        sortColumn = `${column}_l5`;
-                    }
+headers.forEach(header => {
+    // Add sort arrows to headers if they don't exist
+    if (!header.querySelector('.sort-arrow')) {
+        header.innerHTML += '<span class="sort-arrow"></span>';
+    }
 
-                    // Update sort direction
-                    if (currentSort.column === sortColumn) {
-                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSort.column = sortColumn;
-                        // Set specific columns to sort ascending by default
-                        const baseColumn = sortColumn.replace('_l5', '');
-                        currentSort.direction = (['elo_rank', 'elite', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
-                    }
+    header.addEventListener('click', function() {
+        const column = this.dataset.sort;
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Reset all arrows
+        headers.forEach(h => {
+            const arrow = h.querySelector('.sort-arrow');
+            if (arrow) arrow.className = 'sort-arrow';
+        });
 
-                    // Update arrow on clicked header
-                    const arrow = this.querySelector('.sort-arrow');
-                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+        // Update sort direction
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'desc'; // Default to descending
+        }
 
-                    // Sort rows and update ranks
-                    rows.sort((a, b) => {
-                        const aPlayerId = a.querySelector('[data-player-id]').dataset.playerId;
-                        const bPlayerId = b.querySelector('[data-player-id]').dataset.playerId;
-                        
-                        const aPlayer = players.find(p => p.player_id === aPlayerId);
-                        const bPlayer = players.find(p => p.player_id === bPlayerId);
+        // Update arrow on clicked header
+        const arrow = this.querySelector('.sort-arrow');
+        if (arrow) {
+            arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+        }
 
-                        let aValue = aPlayer[sortColumn];
-                        let bValue = bPlayer[sortColumn];
+        // Sort rows and update ranks
+        rows.sort((a, b) => {
+            const aPlayerId = a.querySelector('[data-player-id]').dataset.playerId;
+            const bPlayerId = b.querySelector('[data-player-id]').dataset.playerId;
+            
+            const aPlayer = tableData.find(p => p.player_id === aPlayerId);
+            const bPlayer = tableData.find(p => p.player_id === bPlayerId);
 
-                        // Handle null/missing values
-                        if (column === 'player') {
-                            return currentSort.direction === 'asc' ? 
-                                aValue.localeCompare(bValue) : 
-                                bValue.localeCompare(aValue);
-                        }
+            let aValue = aPlayer[column]; // Use column instead of sortColumn
+            let bValue = bPlayer[column];
 
-                        // Put null/undefined/NaN values and zeros (displayed as '-') at the end
-                        if ((!aValue && aValue !== 0) || aValue === 0) return 1;
-                        if ((!bValue && bValue !== 0) || bValue === 0) return -1;
-                        if ((!aValue && !bValue) || (aValue === 0 && bValue === 0)) return 0;
+            // Handle null/missing values
+            if (column === 'player') {
+                return currentSort.direction === 'asc' ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            }
 
-                        return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
-                    });
+            // Put null/undefined/NaN values and zeros at the end
+            if ((!aValue && aValue !== 0) || aValue === 0) return 1;
+            if ((!bValue && bValue !== 0) || bValue === 0) return -1;
+            if ((!aValue && !bValue) || (aValue === 0 && bValue === 0)) return 0;
 
-                    // Update displayed ranks only when sorting
-                    rows.forEach((row, index) => {
-                        const rankCell = row.children[0];
-                        rankCell.textContent = index + 1;
-                    });
+            return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        });
 
-                    // Reorder table
-                    tbody.innerHTML = '';
-                    rows.forEach(row => tbody.appendChild(row));
-                });
-            });
+        // Update displayed ranks
+        rows.forEach((row, index) => {
+            const rankCell = row.children[0];
+            rankCell.textContent = index + 1;
+        });
+
+        // Reorder table
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
 
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', fetchAndDisplayRankings);

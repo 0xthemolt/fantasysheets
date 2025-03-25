@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
 </head>
 <style>
     .controls-row {
@@ -232,12 +233,8 @@
                             <i class="fa-solid fa-coins"></i> Packs
                         </th>
                         <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
-                            <i class="fa-solid fa-trophy"></i> Level Up
+                            <i class="fa-solid fa-turn-up"></i> Level Up
                         </th>
-                        <th class="column-header section-end" colspan="2">
-                            <i class="fa-solid fa-store"></i> Marketplace
-                        </th>
-                        <th class="column-header section-end">Compare</th>
                     </tr>
                     <tr>
                         <th class="sortable" data-sort="rank">
@@ -272,40 +269,28 @@
                             <img src="../icons/stars.webp" alt="Stars" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="elo_rank">
-                            <img src="../icons/elo.webp" alt="Elo" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable" data-sort="level_ups">
+                            Level Ups
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="decks">
-                            Decks
+                        <th class="sortable" data-sort="level_up_skips">
+                            Skips
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="elite">
-                            <img src="../icons/elite.webp" alt="Elite" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable" data-sort="pct_level_up_skips">
+                            Pct Skip
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="gold">
-                            <img src="../icons/gold.webp" alt="Gold" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable" data-sort="common_epic_skip">
+                            Com2Epic
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="silver">
-                            <img src="../icons/silver.webp" alt="Silver" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable" data-sort="common_legendary_skip">
+                            Com2Leg
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="bronze">
-                            <img src="../icons/bronze.webp" alt="Bronze" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable section-end" data-sort="reverse">
-                            <img src="../icons/reverse.webp" alt="Reverse" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="buyVol">
-                            Buy Vol
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable section-end" data-sort="netVol" title="Buy vol minus Sell Vol">
-                            Net Vol
+                        <th class="sortable" data-sort="rare_epic_skip">
+                            Rare2Epic
                             <div class="sort-arrow"></div>
                         </th>
                     </tr>
@@ -320,3 +305,54 @@
             </table>
         </section>
     </main>
+    <script>
+const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function fetchAndDisplayRankings() {
+    try {
+        // Fetch data from Supabase
+        const { data, error } = await supabaseClient
+            .from('player_mint_leaders')
+            .select('player_id, player_name, player_handle, profile_picture, elo_image, name, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips');
+
+        if (error) throw error;
+
+        // Get the table body
+        const tableBody = document.querySelector('table tbody');
+        
+        // Clear existing table content
+        tableBody.innerHTML = '';
+
+        // Create table rows from the data
+        data.forEach((player, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td data-sort="${index + 1}">${index + 1}</td>
+                <td player-handle="${player.handle}" data-player-id="${player.player_id}" style="display: flex; align-items: center;">
+                    <img src="${player.profile_picture}" alt="${player.name}" 
+                        onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
+                    <div style="display: flex; align-items: center; margin-left: 6px;">
+                        <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
+                            <span class="player-handle">${player.name}</span>
+                        </a>
+                        <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
+                        <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                    </div>
+                </td>
+                <!-- Add other columns as needed -->
+            `;
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error('Error fetching rankings:', error);
+    }
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', fetchAndDisplayRankings);
+    </script>

@@ -34,10 +34,6 @@
         flex: 1;
     }
 
-    #comparison-controls {
-        margin-left: 1rem;
-        display: none;
-    }
 
     .text-link {
     cursor: pointer;
@@ -47,46 +43,25 @@
         text-decoration: underline;
     }
 
-    th.sortable {
-        padding-right: 2px;
-        position: relative;
-        white-space: nowrap;
+    
+    tbody tr:hover {
+        background-color: #1f2123;
+        transition: background-color 0.2s ease;
     }
 
-    th[data-sort="name"] {
-        min-width: 100px;
+    tbody tr:hover td {
+        background-color: #1f2123;
     }
 
-    .sort-arrow {
-        position: absolute;
-        right: 1px;
-        top: 50%;
-        transform: translateY(-50%);
+    tbody tr:hover td.section-end {
+        border-right: 1px solid var(--border-color);
     }
 
-    .rankings-table {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .rankings-table table {
-        table-layout: fixed;
-        width: 100%;
-    }
-
-    th, td {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        padding: 8px 4px;
-        box-sizing: border-box;
-    }
-
-    th.sortable {
-        padding-right: 2px;
-        position: relative;
-        white-space: nowrap;
+    .info-div {
+        text-align: center;
+        color: #888;
+        font-size: 0.9em;
+        margin-left: 10px;
     }
 
     td img {
@@ -106,89 +81,6 @@
     }
 
 
-    th[data-sort="vrgda_packs"] { width: 60px; }
-    th[data-sort="total_spend"] { width: 70px; }
-    th[data-sort="min_price"] { width: 60px; }
-    th[data-sort="max_price"] { width: 60px; }
-    th[data-sort="avg_spend"] { width: 70px; }
-    th[data-sort="level_ups"] { width: 80px; }
-    th[data-sort="level_up_skips"] { width: 80px; }
-    th[data-sort="pct_skip"] { width: 80px; }
-    th[data-sort="common_to_epic_skips"] { width: 100px; }
-    th[data-sort="common_to_legendary_skips"] { width: 100px; }
-    th[data-sort="rare_to_legendary_skips"] { width: 100px; }
-    th[data-sort="discounted_packs"] { width: 100px; }
-    th[data-sort="launch_spend"] { width: 80px; }
-
-  
-
-    .name-container {
-        max-width: calc(100% - 60px); /* Account for profile picture and padding */
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    tbody tr:hover {
-        background-color: #1f2123;
-        transition: background-color 0.2s ease;
-    }
-
-    tbody tr:hover td {
-        background-color: #1f2123;
-    }
-
-    tbody tr:hover td.section-end {
-        border-right: 1px solid var(--border-color);
-    }
-
-    .player-handle {
-        max-width: 100px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    @media (max-width: 768px) {
-        .rankings-table {
-            margin: 0;
-            padding: 0 1rem;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            width: 100%;
-            display: block;
-            white-space: nowrap;
-            max-width: 350px;
-        }
-        
-        th {
-            font-size: 0.85rem;
-        }
-        
-        th[data-sort="rank"],
-        th[data-sort="player"],
-        td:nth-child(1),
-        td:nth-child(2) {
-            position: sticky;
-            left: 0;
-            background-color: var(--background-color);
-            z-index: 2;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-        }
-        
-        th[data-sort="player"] {
-            min-width: 200px;
-            width: 200px;
-        }
-    }
-
-    .info-div {
-        text-align: center;
-        color: #888;
-        font-size: 0.9em;
-        margin-left: 10px;
-    }
 </style>
 <body>
     <div class="title-container" style="display: flex; align-items: flex-end; justify-content: center;">
@@ -298,7 +190,9 @@ async function fetchAndDisplayRankings() {
                             onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
                     <div class="name-container">
                         ${player.player_name}
-                        <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
+                        ${player.elo_image ? 
+                            `<img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">` 
+                            : ''}
                         <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
                                     <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                                 </a>
@@ -509,21 +403,21 @@ const headers = table.querySelectorAll('th[data-sort]'); // Changed to match you
 let currentSort = { column: null, direction: 'asc' };
 
 headers.forEach(header => {
-    // Add sort arrows to headers if they don't exist
-    if (!header.querySelector('.sort-arrow')) {
+    // Comment out or remove this block to temporarily disable sort arrows
+    /*if (!header.querySelector('.sort-arrow')) {
         header.innerHTML += '<span class="sort-arrow"></span>';
-    }
+    }*/
 
     header.addEventListener('click', function() {
         const column = this.dataset.sort;
         const tbody = table.querySelector('tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
         
-        // Reset all arrows
-        headers.forEach(h => {
-            const arrow = h.querySelector('.sort-arrow');
-            if (arrow) arrow.className = 'sort-arrow';
-        });
+        // // Reset all arrows
+        // headers.forEach(h => {
+        //     const arrow = h.querySelector('.sort-arrow');
+        //     if (arrow) arrow.className = 'sort-arrow';
+        // });
 
         // Update sort direction
         if (currentSort.column === column) {
@@ -533,11 +427,11 @@ headers.forEach(header => {
             currentSort.direction = 'desc'; // Default to descending
         }
 
-        // Update arrow on clicked header
-        const arrow = this.querySelector('.sort-arrow');
-        if (arrow) {
-            arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
-        }
+        // // Update arrow on clicked header
+        // const arrow = this.querySelector('.sort-arrow');
+        // if (arrow) {
+        //     arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+        // }
 
         // Sort rows and update ranks
         rows.sort((a, b) => {

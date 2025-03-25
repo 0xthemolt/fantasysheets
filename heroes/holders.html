@@ -94,6 +94,21 @@
             border-radius: 4px;
             margin-top: 10px;
         }
+
+        /* Card cell styling */
+        .card-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-image {
+            width: 30px; /* 75% smaller than original */
+            height: auto;
+            object-fit: contain;
+        }
+        .card-count {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -133,7 +148,7 @@
 
     <script>
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         let allHeroHandles = [];
@@ -167,7 +182,7 @@
             try {
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, profile_picture, hero_handle, hero_id, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
+                    .select('player_name, profile_picture, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter if provided
@@ -194,48 +209,7 @@
             }
         }
 
-        function populateTable(data) {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
-
-            data.forEach(holder => {
-                const row = document.createElement('tr');
-                
-                // Player column with profile picture and name
-                const playerCell = document.createElement('td');
-                playerCell.className = 'player-cell';
-                
-                if (holder.profile_picture) {
-                    const img = document.createElement('img');
-                    img.src = holder.profile_picture;
-                    img.alt = holder.player_name;
-                    img.className = 'profile-picture';
-                    playerCell.appendChild(img);
-                }
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = holder.player_name;
-                playerCell.appendChild(nameSpan);
-                
-                row.appendChild(playerCell);
-                
-                // Card counts
-                row.appendChild(createCell(holder.legendary_cards || 0));
-                row.appendChild(createCell(holder.epic_cards || 0));
-                row.appendChild(createCell(holder.rare_cards || 0));
-                row.appendChild(createCell(holder.common_cards || 0));
-                row.appendChild(createCell(holder.aggregate_cards || 0));
-                
-                tableBody.appendChild(row);
-            });
-        }
-
-        function createCell(value) {
-            const cell = document.createElement('td');
-            cell.textContent = value;
-            return cell;
-        }
-
+        
         function initAutocomplete() {
             const searchInput = document.getElementById('heroSearch');
             const autocompleteResults = document.getElementById('autocompleteResults');

@@ -108,7 +108,11 @@
 
     th[data-sort="rank"] { width: 50px; }
     th[data-sort="player"] { width: 100px; }
-    th:empty { width: 60px; }
+    th[data-sort="packs"] { width: 60px; }
+    th[data-sort="spend"] { width: 70px; }
+    th[data-sort="min"] { width: 60px; }
+    th[data-sort="max"] { width: 60px; }
+    th[data-sort="avg"] { width: 70px; }
     th[data-sort="level_ups"] { width: 80px; }
     th[data-sort="level_up_skips"] { width: 80px; }
     th[data-sort="pct_skip"] { width: 80px; }
@@ -241,21 +245,21 @@
                             </th>
                         </tr>
                         <tr>
-                            <th data-sort="rank">Rank</th>
-                            <th class="sortable section-end data-sort="player">Player</th>
-                            <th>Packs</th>
-                            <th>Spend</th>
-                            <th>Min</th>
-                            <th>Max</th>
-                            <th class="sortable section-end">Avg Price</th>
-                            <th data-sort="level_ups" data-sort-method="number">Level Ups</th>
-                            <th data-sort="level_up_skips" data-sort-method="number">Skips</th>
-                            <th data-sort="pct_skip" data-sort-method="number">Skip %</th>
-                            <th data-sort="common_to_epic" data-sort-method="number">Com 2 Epic</th>
-                            <th data-sort="common_to_legendary" data-sort-method="number">Com 2 Leg</th>
-                            <th class="sortable section-end" data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg</th>
+                            <th class="sortable" data-sort="rank">Rank<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end data-sort="player">Player<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="packs">Packs<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="spend">Spend<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="min">Min<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="max">Max<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end" data-sort="avg">Avg Price<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="level_ups" data-sort-method="number">Level Ups<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="level_up_skips" data-sort-method="number">Skips<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="pct_skip" data-sort-method="number">Skip %<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="common_to_epic" data-sort-method="number">Com 2 Epic<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="common_to_legendary" data-sort-method="number">Com 2 Leg<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end" data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg<div class="sort-arrow"></div></th>
                             <th data-sort="discounted_packs" data-sort-method="number" title=".033 / .066 pack counts. Rewards for Testnet and other communities">.033 / .066 </th>
-                            <th data-sort="launch_spend" data-sort-method="number">Spend</th>
+                            <th class="sortable" data-sort="launch_spend" data-sort-method="number">Spend<div class="sort-arrow"></div></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -273,7 +277,8 @@ async function fetchAndDisplayRankings() {
         // Fetch data from Supabase
         const { data, error } = await supabaseClient
             .from('player_mint_leaders')
-            .select('player_id, player_name, player_handle, profile_picture, elo_image, "name", ".33_packs", ".66_packs", launch_spend, vrgda_packs, total_spend, avg_spend, min_price, max_price, global_min_price, global_max_price, global_min_total_spend, global_max_total_spend, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips');
+            .select('player_id, player_name, player_handle, profile_picture, elo_image, "name", ".33_packs", ".66_packs", launch_spend, vrgda_packs, total_spend, avg_spend, min_price, max_price, global_min_price, global_max_price, global_min_total_spend, global_max_total_spend, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips')
+            .order('total_spend', { ascending: false });
 
         if (error) throw error;
 
@@ -312,11 +317,12 @@ Global Min: ${player.global_min_price.toFixed(2)} ETH
 Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
                     ${player.avg_spend && player.global_min_price && player.global_max_price ? `
                     <div style="
-                        width: 100%;
+                        width: calc(100% - 20px);
                         height: 8px;
                         background: linear-gradient(to right, #22c55e, #ef4444);
                         position: absolute;
                         top: 40%;
+                        left: 10px;
                         transform: translateY(-50%);
                         border-radius: 4px;
                     "></div>
@@ -325,14 +331,14 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                         height: 16px;
                         background: #3b82f6;
                         position: absolute;
-                        left: ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * 100)}%;
+                        left: calc(10px + ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * (100 - 20))}%);
                         top: 40%;
                         transform: translate(-50%, -50%);
                         border-radius: 2px;
                     "></div>
                     <div style="
                         position: absolute;
-                        left: ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * 100)}%;
+                        left: calc(10px + ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * (100 - 20))}%);
                         top: 65%;
                         transform: translateX(-50%);
                         font-size: 0.8em;
@@ -341,11 +347,63 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                     ` : '<div style="text-align: center; color: #666;">-</div>'}
                 </td>
                 <td data-sort="${player.level_ups}">${player.level_ups}</td>
-                <td data-sort="${player.level_up_skips}">${player.level_up_skips}</td>
-                <td data-sort="${player.pct_skip}">${(player.pct_skip * 100).toFixed(1)}%</td>
-                <td data-sort="${player.common_to_epic_skips}">${player.common_to_epic_skips}</td>
-                <td data-sort="${player.common_to_legendary_skips}">${player.common_to_legendary_skips}</td>
-                <td class="section-end" data-sort="${player.rare_to_epic_skips}">${player.rare_to_epic_skips}</td>
+                <td data-sort="${player.level_up_skips}">
+                    ${player.level_up_skips}
+                    ${isTopSkipper(player, data) ? 
+                        '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
+                        ''}
+                </td>
+                <td data-sort="${player.pct_skip}">
+                    ${(player.pct_skip * 100).toFixed(1)}%
+                    ${isTopSkipper(player, data) ? 
+                        '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
+                        ''}
+                </td>
+                <td data-sort="${player.common_to_epic_skips}">
+                    ${getCardStyle(player.common_to_epic_skips, data.map(p => p.common_to_epic_skips), 'epic') ? 
+                        `<div style="
+                            ${getCardStyle(player.common_to_epic_skips, data.map(p => p.common_to_epic_skips), 'epic')}; 
+                            padding: 4px 4px;
+                            border-radius: 4px;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 19px;
+                            min-width: 19px;
+                            text-align: center;
+                        ">${player.common_to_epic_skips}</div>` : 
+                        player.common_to_epic_skips}
+                </td>
+                <td data-sort="${player.common_to_legendary_skips}">
+                    ${getCardStyle(player.common_to_legendary_skips, data.map(p => p.common_to_legendary_skips), 'legendary') ? 
+                        `<div style="
+                            ${getCardStyle(player.common_to_legendary_skips, data.map(p => p.common_to_legendary_skips), 'legendary')}; 
+                            padding: 4px 4px;
+                            border-radius: 4px;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 19px;
+                            min-width: 19px;
+                            text-align: center;
+                        ">${player.common_to_legendary_skips}</div>` : 
+                        player.common_to_legendary_skips}
+                </td>
+                <td class="section-end" data-sort="${player.rare_to_epic_skips}">
+                    ${getCardStyle(player.rare_to_epic_skips, data.map(p => p.rare_to_epic_skips), 'legendary') ? 
+                        `<div style="
+                            ${getCardStyle(player.rare_to_epic_skips, data.map(p => p.rare_to_epic_skips), 'legendary')}; 
+                            padding: 4px 4px;
+                            border-radius: 4px;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 19px;
+                            min-width: 19px;
+                            text-align: center;
+                        ">${player.rare_to_epic_skips}</div>` : 
+                        player.rare_to_epic_skips}
+                </td>
                 <td data-sort="${(player['.33_packs'] || 0) + (player['.66_packs'] || 0)}">
                     ${player['.33_packs'] ? player['.33_packs'] : '-'} / ${player['.66_packs'] ? player['.66_packs'] : '-'}
                 </td>
@@ -400,6 +458,36 @@ function initializeSearch(players) {
         rows.forEach(row => row.style.display = '');
         this.style.display = 'none';
     });
+}
+
+function getCardStyle(value, allValues, type) {
+    if (!value && value !== 0) return null;
+    
+    const sortedValues = [...new Set(allValues.filter(v => v !== null && v !== undefined))]
+        .sort((a, b) => b - a);
+    
+    if (value === sortedValues[0]) {
+        if (type === 'legendary') {
+            return 'background: linear-gradient(to right, #E3C8F9, #BED0F6, #fbffff); color: black';
+        } else if (type === 'epic') {
+            return 'background: #fa99fc; color: black';
+        }
+    }
+    return null;
+}
+
+function isTopSkipper(player, allPlayers) {
+    // Get top 5 total skips
+    const sortedByTotalSkips = [...allPlayers].sort((a, b) => 
+        (b.level_up_skips || 0) - (a.level_up_skips || 0));
+    const isTopTotalSkips = sortedByTotalSkips.slice(0, 5).some(p => p.player_id === player.player_id);
+    
+    // Get top 5 skip % (for players with >10 level ups)
+    const qualifiedPlayers = allPlayers.filter(p => p.level_ups > 10);
+    const sortedByPctSkip = [...qualifiedPlayers].sort((a, b) => b.pct_skip - a.pct_skip);
+    const isTopPctSkips = sortedByPctSkip.slice(0, 5).some(p => p.player_id === player.player_id);
+    
+    return isTopTotalSkips || isTopPctSkips;
 }
 
            // Add sorting functionality

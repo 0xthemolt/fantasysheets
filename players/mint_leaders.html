@@ -80,6 +80,30 @@
         border-radius: 50%;
     }
 
+    /* Update padding for all cells */
+    th, td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 8px 8px;  /* Increase horizontal padding from 4px to 8px */
+        box-sizing: border-box;
+    }
+
+    /* Ensure header text has room for sort arrows */
+    th.sortable {
+        padding-right: 16px;  /* Give more room for sort arrows */
+        position: relative;
+        white-space: nowrap;
+    }
+
+    /* Adjust sort arrow position */
+    .sort-arrow {
+        position: absolute;
+        right: 4px;  /* Adjust position to account for new padding */
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
 
 </style>
 <body>
@@ -91,7 +115,7 @@
             FantasySheets Player Mint Leaders
         </h1>
         <div class="info-div">
-            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="At least 5 level ups OR  5 packs or a major skip"></i>
+            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria: 10+ level ups OR 10+ packs OR 1+ skip"></i>
         </div>
     </div>
     <main>
@@ -114,7 +138,7 @@
                 <table class="sortable">
                     <thead>
                         <tr>
-                            <th class="column-header section-end" colspan="1">
+                            <th class="column-header section-end" colspan="2">
                                 <i class="fa-solid fa-user"></i> Player
                             </th>
                             <th class="column-header section-end" colspan="5">
@@ -128,7 +152,8 @@
                             </th>
                         </tr>
                         <tr>
-                            <th class="sortable section-end data-sort="player">Player<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="rank">Rank<div class="sort-arrow"></div></th>
+                            <th class="sortable section-end" data-sort="player">Player<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="vrgda_packs">Packs<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="total_spend">Spend<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="min_price">Min<div class="sort-arrow"></div></th>
@@ -137,14 +162,29 @@
                             <th class="sortable" data-sort="level_ups" data-sort-method="number">Level Ups<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="level_up_skips" data-sort-method="number">Skips<div class="sort-arrow"></div></th>
                             <th class="sortable" data-sort="pct_skip" data-sort-method="number">Skip %<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="common_to_epic_skips" data-sort-method="number">Com 2 Epic<div class="sort-arrow"></div></th>
-                            <th class="sortable" data-sort="common_to_legendary_skips" data-sort-method="number">Com 2 Leg<div class="sort-arrow"></div></th>
-                            <th class="sortable section-end" data-sort="rare_to_legendary_skips" data-sort-method="number">Rare 2 Leg<div class="sort-arrow"></div></th>
+                            <th class="sortable" data-sort="common_to_epic_skips" data-sort-method="number">
+                                Com <i class="fas fa-arrow-right" style="color: #777; font-size: 0.8em;"></i> Epic
+                                <div class="sort-arrow"></div>
+                            </th>
+                            <th class="sortable" data-sort="common_to_legendary_skips" data-sort-method="number">
+                                Com <i class="fas fa-arrow-right" style="color: #777; font-size: 0.8em;"></i> Leg
+                                <div class="sort-arrow"></div>
+                            </th>
+                            <th class="sortable section-end" data-sort="rare_to_legendary_skips" data-sort-method="number">
+                                Rare <i class="fas fa-arrow-right" style="color: #777; font-size: 0.8em;"></i> Leg
+                                <div class="sort-arrow"></div>
+                            </th>
                             <th data-sort="discounted_packs" data-sort-method="number" title=".033 / .066 pack counts. Rewards for Testnet and other communities">.033 / .066 </th>
                             <th class="sortable" data-sort="launch_spend" data-sort-method="number">Spend<div class="sort-arrow"></div></th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                        <tr>
+                            <td colspan="21" style="text-align: center; padding: 2rem;">
+                                Loading player data...
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -159,6 +199,16 @@ let tableData;
 
 async function fetchAndDisplayRankings() {
     try {
+        // Show loading message
+        const tableBody = document.querySelector('table tbody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="21" style="text-align: center; padding: 2rem;">
+                    Loading player data...
+                </td>
+            </tr>
+        `;
+
         // Fetch data from Supabase
         const { data, error } = await supabaseClient
             .from('player_mint_leaders')
@@ -169,9 +219,6 @@ async function fetchAndDisplayRankings() {
 
         tableData = data; // Store the data for sorting
 
-        // Get the table body
-        const tableBody = document.querySelector('table tbody');
-        
         // Clear existing table content
         tableBody.innerHTML = '';
 
@@ -179,33 +226,32 @@ async function fetchAndDisplayRankings() {
         data.forEach((player, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="section-end" player-handle="${player.player_handle}" 
+                <td data-sort="${index + 1}">${index + 1}</td>
+                <td class="section-end" data-player-handle="${player.player_handle}" 
                     data-player-id="${player.player_id}" 
                     data-player-name="${player.player_name}"
-                    style="display: flex; align-items: center;">
-                    <div style="min-width: 30px; margin-right: 8px; color: #666;">
-                        ${index + 1}
-                    </div>
+                    style="cursor: default; vertical-align: middle; text-align: left; padding-left: 8px;">           
                     <img src="${player.profile_picture}" alt="${player.name}" 
-                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
-                    <div class="name-container">
+                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';"
+                            style="cursor: default; vertical-align: middle;">
+                    <span style="margin-left: 8px;">
                         ${player.player_name}
                         ${player.elo_image ? 
                             `<img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">` 
                             : ''}
-                        <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
-                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                                </a>
-                    </div>
+                        <a href="https://x.com/${player.player_handle}" target="_blank" style="margin-left: 4px;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                    </span>
                 </td>
                 <td>${player.vrgda_packs ? player.vrgda_packs : '-'}</td>
-                <td>${player.total_spend ? player.total_spend.toFixed(1) : '-'}</td>
-                <td>${player.min_price ? player.min_price.toFixed(2) : '-'}</td>
-                <td>${player.max_price ? player.max_price.toFixed(2) : '-'}</td>
+                <td>${player.total_spend ? player.total_spend.toFixed(1) : '-'} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                <td>${player.min_price ? '.' + player.min_price.toFixed(3).split('.')[1] : '-'}</td>
+                <td>${player.max_price ? '.' + player.max_price.toFixed(3).split('.')[1] : '-'}</td>
                 <td class="section-end" style="padding: 0; position: relative; height: 30px;" 
-                    title="${player.avg_spend ? `Avg Spend: ${player.avg_spend.toFixed(2)} ETH
-Global Min: ${player.global_min_price.toFixed(2)} ETH
-Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
+                    title="${player.avg_spend ? `Avg Spend: .${player.avg_spend.toFixed(2).split('.')[1]} ETH
+                            Global Min: ${player.global_min_price.toFixed(2)} ETH
+                            Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
                     ${player.avg_spend && player.global_min_price && player.global_max_price ? `
                     <div style="
                         width: calc(100% - 20px);
@@ -249,7 +295,7 @@ Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data availabl
                         ''}
                 </td>
                 <td data-sort="${player.pct_skip}">
-                    ${player.pct_skip ? `${(player.pct_skip * 100).toFixed(0)}%` : '-'}
+                    ${player.pct_skip !== null ? `${(player.pct_skip * 100).toFixed(0)}%` : '-'}
                     ${isTopSkipper(player, data) ? 
                         '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
                         ''}
@@ -403,10 +449,11 @@ const headers = table.querySelectorAll('th[data-sort]'); // Changed to match you
 let currentSort = { column: null, direction: 'asc' };
 
 headers.forEach(header => {
-    // Comment out or remove this block to temporarily disable sort arrows
-    /*if (!header.querySelector('.sort-arrow')) {
-        header.innerHTML += '<span class="sort-arrow"></span>';
-    }*/
+    if (!header.querySelector('.sort-arrow')) {
+        const sortArrow = document.createElement('span');
+        sortArrow.className = 'sort-arrow';
+        header.appendChild(sortArrow);
+    }
 
     header.addEventListener('click', function() {
         const column = this.dataset.sort;
@@ -414,10 +461,10 @@ headers.forEach(header => {
         const rows = Array.from(tbody.querySelectorAll('tr'));
         
         // // Reset all arrows
-        // headers.forEach(h => {
-        //     const arrow = h.querySelector('.sort-arrow');
-        //     if (arrow) arrow.className = 'sort-arrow';
-        // });
+        headers.forEach(h => {
+            const arrow = h.querySelector('.sort-arrow');
+            if (arrow) arrow.className = 'sort-arrow';
+        });
 
         // Update sort direction
         if (currentSort.column === column) {
@@ -428,10 +475,10 @@ headers.forEach(header => {
         }
 
         // // Update arrow on clicked header
-        // const arrow = this.querySelector('.sort-arrow');
-        // if (arrow) {
-        //     arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
-        // }
+        const arrow = this.querySelector('.sort-arrow');
+        if (arrow) {
+            arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+        }
 
         // Sort rows and update ranks
         rows.sort((a, b) => {
@@ -441,7 +488,7 @@ headers.forEach(header => {
             const aPlayer = tableData.find(p => p.player_id === aPlayerId);
             const bPlayer = tableData.find(p => p.player_id === bPlayerId);
 
-            let aValue = aPlayer[column]; // Use column instead of sortColumn
+            let aValue = aPlayer[column];
             let bValue = bPlayer[column];
 
             // Handle null/missing values
@@ -459,15 +506,16 @@ headers.forEach(header => {
             return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
         });
 
-        // Update displayed ranks
+        // Update the table
+        tbody.textContent = '';
         rows.forEach((row, index) => {
-            const rankCell = row.children[0];
-            rankCell.textContent = index + 1;
+            // Update the index cell with new number
+            const indexCell = row.firstElementChild;
+            indexCell.textContent = index + 1;
+            indexCell.dataset.sort = index + 1;
+            
+            tbody.appendChild(row);
         });
-
-        // Reorder table
-        tbody.innerHTML = '';
-        rows.forEach(row => tbody.appendChild(row));
     });
 });
 

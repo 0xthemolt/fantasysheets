@@ -16,11 +16,11 @@ DB_CONFIGS = {
         'port': "5432"
     },
     'prices': {
-        'dbname': "fantasysheets",
-        'user': "postgres",
-        'password': "WIKrjPIYtqCWApMIXculsqbMIQcGotEg",
-        'host': "viaduct.proxy.rlwy.net",
-        'port': "38391"
+        'dbname' : "postgres",
+        'user' : "postgres.hhcuqhvmzwmehdsaamhn",
+        'password' : "$&roct8&rgp4NE",
+        'host' : "aws-0-us-west-1.pooler.supabase.com",
+        'port' : "5432"
     }
 }
 
@@ -49,33 +49,26 @@ and buyer <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
 and timestamp >= NOW() at time zone 'UTC' - interval '90 days'
 """
 
-prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor,ghwss.hero_pfp_image_url,ghwss.seven_day_fantasy_score
-FROM flatten.vwhero_stats_bids  prices
-left join flatten.herohandlehistory handles
-on prices.hero = handles.hero_handle
-and handles.latest_hero_handle  = 1
-join flatten.get_heros_with_stats_snapshot ghwss 
-on handles.current_hero_handle  = ghwss.hero_handle 
-and ghwss.is_deleted  = 0
-and ghwss.snapshot_rank  = 1
-and ghwss.start_datetime  >= NOW() - interval '5 days'
-order by 1 asc
+prices_query = f"""SELECT prices.hero_id,prices.hero_handle, prices.hero_rarity as rarity,prices.bid_price as bid,prices.floor_price as floor
+    FROM flatten.marketplace_basic  prices
+    where hero_rarity in ('rare','common')
+    order by 1 asc
 """
 
 last_trades_query = """
-SELECT hero_handle, rarity, 
+  SELECT hero_handle, card_rarity as rarity, 
        price as last_price,
-       timestamp as last_trade_time
-FROM flatten.get_hero_last_trades
-WHERE hero_rarity_trade_history_rank = 1
+       trade_timestamp  as last_trade_time
+FROM flatten.hero_Trades
+WHERE flatten.hero_trades.hero_rarity_id_history_rank  = 1
 """
 
 sell_orders_query = """
-with heros_five_listings as (select hero_handle,rarity ,1 has_five from flatten.GET_SELL_ORDERS_BY_HERO_RARITY_INDEX group by 1,2 having max(hero_price_rank_qty) >= 5)
+  with heros_five_listings as (select hero_handle,rarity ,1 has_five from flatten.sell_orders_detail group by 1,2 having max(flatten.sell_orders_detail.hero_rarity_sell_order_rnk) >= 5)
 select base.hero_handle,base.rarity,count(*) as sell_orders
-,avg(case  when hero_price_rank_qty <= 5 and has_five = 1 then price else null end) buy_5_avg
-,suM(case  when hero_price_rank_qty <= 5 and has_five = 1  then price else 0 end) buy_5_sum 
-from flatten.GET_SELL_ORDERS_BY_HERO_RARITY_INDEX base 
+,avg(case  when hero_rarity_sell_order_rnk <= 5 and has_five = 1 then price else null end) buy_5_avg
+,suM(case  when hero_rarity_sell_order_rnk <= 5 and has_five = 1  then price else 0 end) buy_5_sum 
+from flatten.sell_orders_detail base 
 left join heros_five_listings five 
 	on base.hero_handle = five.hero_handle
 	and base.rarity = five.rarity
@@ -211,7 +204,7 @@ def process_marketplace():
                 market_stats.at[mask.idxmax(), 'timeframe_stats'] = timeframe_stats
 
         # Merge with prices data and last trade
-        last_trades = fetch_dataframe(last_trades_query, 'main')
+        last_trades = fetch_dataframe(last_trades_query, 'prices')
         market_data = pd.merge(
             market_stats,
             prices_df[['hero_handle', 'rarity', 'floor', 'bid']],

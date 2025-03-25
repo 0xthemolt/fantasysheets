@@ -16,13 +16,14 @@ DB_CONFIGS = {
         'port': "5432"
     },
     'prices': {
-        'dbname': "fantasysheets",
-        'user': "postgres",
-        'password': "WIKrjPIYtqCWApMIXculsqbMIQcGotEg",
-        'host': "viaduct.proxy.rlwy.net",
-        'port': "38391"
+        'dbname' : "postgres",
+        'user' : "postgres.hhcuqhvmzwmehdsaamhn",
+        'password' : "$&roct8&rgp4NE",
+        'host' : "aws-0-us-west-1.pooler.supabase.com",
+        'port' : "5432"
     }
 }
+
 
 
 @contextmanager
@@ -116,16 +117,9 @@ with get_db_connection('main') as conn:
 # Use different connection for prices if needed
 with get_db_connection('prices') as conn:
     cursor = conn.cursor()
-    prices_query = f"""SELECT ghwss.hero_id,ghwss.hero_handle, prices.rarity,prices.bid,prices.floor
-    FROM flatten.vwhero_stats_bids  prices
-    left join flatten.herohandlehistory handles
-    on prices.hero = handles.hero_handle
-    left join flatten.get_heros_with_stats_snapshot ghwss 
-    on handles.current_hero_handle  = ghwss.hero_handle 
-    and ghwss.is_deleted  = 0
-    and ghwss.snapshot_rank  = 1
-    and ghwss.start_datetime  >= NOW() - interval '5 days'
-    where rarity in ('rare','common')
+    prices_query = f"""SELECT prices.hero_id,prices.hero_handle, prices.hero_rarity as rarity,prices.bid_price as bid,prices.floor_price as floor
+    FROM flatten.marketplace_basic  prices
+    where hero_rarity in ('rare','common')
     order by 1 asc
     """
     cursor.execute(prices_query)

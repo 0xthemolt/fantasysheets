@@ -73,15 +73,15 @@
     .rankings-table table {
         width: 100%;
         border-collapse: collapse;
+        table-layout: fixed;
     }
 
     th, td {
-        box-sizing: border-box;
-        max-width: none;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         padding: 8px 4px;
+        box-sizing: border-box;
     }
 
     th.sortable {
@@ -106,19 +106,31 @@
         border-radius: 50%;
     }
 
-    th[data-sort="rank"] { width: 40px; }
-    th[data-sort="player"] { width: 180px; }
+    th[data-sort="rank"] { width: 50px; }
+    th[data-sort="player"] { width: 100px; }
+    th:empty { width: 60px; }
     th[data-sort="level_ups"] { width: 80px; }
     th[data-sort="level_up_skips"] { width: 80px; }
-    th[data-sort="pct_skip"] { width: 70px; }
+    th[data-sort="pct_skip"] { width: 80px; }
     th[data-sort="common_to_epic"] { width: 100px; }
     th[data-sort="common_to_legendary"] { width: 100px; }
     th[data-sort="rare_to_legendary"] { width: 100px; }
-    th:last-child { width: 40px; }
+    th[data-sort="discounted_packs"] { width: 100px; }
+    th[data-sort="launch_spend"] { width: 80px; }
 
     td[player-handle] {
-        text-align: left;
-        padding-left: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .name-container {
+        display: inline-block;
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: calc(100% - 40px);
     }
 
     tbody tr:hover {
@@ -189,11 +201,10 @@
             <a href="../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            FantasySheets Player Rankings
+            FantasySheets Player Mint Leaders
         </h1>
         <div class="info-div">
-            As of Main 43
-            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria to be ranked: >0 total ETH won in last 3 mains"></i>
+            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="At least 5 level ups OR  5 packs or a major skip"></i>
         </div>
     </div>
     <main>
@@ -219,28 +230,32 @@
                             <th class="column-header section-end" colspan="2">
                                 <i class="fa-solid fa-user"></i> Player
                             </th>
-                            <th class="column-header section-end" colspan="6">
+                            <th class="column-header section-end" colspan="5">
                                 <i class="fa-solid fa-coins"></i> Packs
                             </th>
                             <th class="column-header section-end" colspan="6">
                                 <i class="fa-solid fa-turn-up"></i> Level Up
                             </th>
+                            <th class="column-header section-end" colspan="2">
+                                <i class="fa-solid fa-rocket"></i> Launch Packs
+                            </th>
                         </tr>
                         <tr>
                             <th data-sort="rank">Rank</th>
-                            <th data-sort="player">Player</th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <th class="sortable section-end data-sort="player">Player</th>
+                            <th>Packs</th>
+                            <th>Spend</th>
+                            <th>Min</th>
+                            <th>Max</th>
+                            <th class="sortable section-end">Avg Price</th>
                             <th data-sort="level_ups" data-sort-method="number">Level Ups</th>
                             <th data-sort="level_up_skips" data-sort-method="number">Skips</th>
                             <th data-sort="pct_skip" data-sort-method="number">Skip %</th>
                             <th data-sort="common_to_epic" data-sort-method="number">Com 2 Epic</th>
                             <th data-sort="common_to_legendary" data-sort-method="number">Com 2 Leg</th>
-                            <th data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg</th>
+                            <th class="sortable section-end" data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg</th>
+                            <th data-sort="discounted_packs" data-sort-method="number" title=".033 / .066 pack counts. Rewards for Testnet and other communities">.033 / .066 </th>
+                            <th data-sort="launch_spend" data-sort-method="number">Spend</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -258,7 +273,7 @@ async function fetchAndDisplayRankings() {
         // Fetch data from Supabase
         const { data, error } = await supabaseClient
             .from('player_mint_leaders')
-            .select('player_id, player_name, player_handle, profile_picture, elo_image, name, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips');
+            .select('player_id, player_name, player_handle, profile_picture, elo_image, "name", ".33_packs", ".66_packs", launch_spend, vrgda_packs, total_spend, avg_spend, min_price, max_price, global_min_price, global_max_price, global_min_total_spend, global_max_total_spend, level_ups, level_up_skips, pct_skip, common_to_epic_skips, common_to_legendary_skips, rare_to_epic_skips');
 
         if (error) throw error;
 
@@ -273,7 +288,7 @@ async function fetchAndDisplayRankings() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td data-sort="${index + 1}">${index + 1}</td>
-                <td player-handle="${player.player_handle}" 
+                <td class="section-end"  player-handle="${player.player_handle}" 
                     data-player-id="${player.player_id}" 
                     data-player-name="${player.player_name}"
                     style="display: flex; align-items: center;">
@@ -287,18 +302,57 @@ async function fetchAndDisplayRankings() {
                                 </a>
                     </div>
                 </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>${player.vrgda_packs ? player.vrgda_packs : '-'}</td>
+                <td>${player.total_spend ? player.total_spend.toFixed(1) : '-'}</td>
+                <td>${player.min_price ? player.min_price.toFixed(2) : '-'}</td>
+                <td>${player.max_price ? player.max_price.toFixed(2) : '-'}</td>
+                <td class="section-end" style="padding: 0; position: relative; height: 30px;" 
+                    title="${player.avg_spend ? `Avg Spend: ${player.avg_spend.toFixed(2)} ETH
+Global Min: ${player.global_min_price.toFixed(2)} ETH
+Global Max: ${player.global_max_price.toFixed(2)} ETH` : 'No spend data available'}">
+                    ${player.avg_spend && player.global_min_price && player.global_max_price ? `
+                    <div style="
+                        width: 100%;
+                        height: 8px;
+                        background: linear-gradient(to right, #22c55e, #ef4444);
+                        position: absolute;
+                        top: 40%;
+                        transform: translateY(-50%);
+                        border-radius: 4px;
+                    "></div>
+                    <div style="
+                        width: 4px;
+                        height: 16px;
+                        background: #3b82f6;
+                        position: absolute;
+                        left: ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * 100)}%;
+                        top: 40%;
+                        transform: translate(-50%, -50%);
+                        border-radius: 2px;
+                    "></div>
+                    <div style="
+                        position: absolute;
+                        left: ${((player.avg_spend - player.global_min_price) / (player.global_max_price - player.global_min_price) * 100)}%;
+                        top: 65%;
+                        transform: translateX(-50%);
+                        font-size: 0.8em;
+                        color: #666;
+                    ">${player.avg_spend.toFixed(2)}</div>
+                    ` : '<div style="text-align: center; color: #666;">-</div>'}
+                </td>
                 <td data-sort="${player.level_ups}">${player.level_ups}</td>
                 <td data-sort="${player.level_up_skips}">${player.level_up_skips}</td>
                 <td data-sort="${player.pct_skip}">${(player.pct_skip * 100).toFixed(1)}%</td>
                 <td data-sort="${player.common_to_epic_skips}">${player.common_to_epic_skips}</td>
                 <td data-sort="${player.common_to_legendary_skips}">${player.common_to_legendary_skips}</td>
-                <td data-sort="${player.rare_to_epic_skips}">${player.rare_to_epic_skips}</td>
+                <td class="section-end" data-sort="${player.rare_to_epic_skips}">${player.rare_to_epic_skips}</td>
+                <td data-sort="${(player['.33_packs'] || 0) + (player['.66_packs'] || 0)}">
+                    ${player['.33_packs'] ? player['.33_packs'] : '-'} / ${player['.66_packs'] ? player['.66_packs'] : '-'}
+                </td>
+                <td data-sort="${player.launch_spend || 0}">
+                    ${player.launch_spend ? player.launch_spend.toFixed(2) : '-'}
+                </td>
+
             `;
             tableBody.appendChild(row);
         });

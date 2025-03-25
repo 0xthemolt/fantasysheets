@@ -108,23 +108,12 @@
 
     th[data-sort="rank"] { width: 40px; }
     th[data-sort="player"] { width: 180px; }
-    th[data-sort="firstTournament"] { width: 80px; }
-    th[data-sort="hoursSinceLastActivity"] { width: 60px; }
-    th[data-sort="portfolio"] { width: 60px; }
-    th[data-sort="cards"] { width: 60px; }
-    th[data-sort="fanPoints"],
-    th[data-sort="rewardEth"],
-    th[data-sort="rewardFrag"],
-    th[data-sort="blastGold"],
-    th[data-sort="stars"] { width: 70px; }
-    th[data-sort="decks"] { width: 60px; }
-    th[data-sort="elite"],
-    th[data-sort="gold"],
-    th[data-sort="silver"],
-    th[data-sort="bronze"],
-    th[data-sort="reverse"] { width: 50px; }
-    th[data-sort="buyVol"],
-    th[data-sort="netVol"] { width: 70px; }
+    th[data-sort="level_ups"] { width: 80px; }
+    th[data-sort="level_up_skips"] { width: 80px; }
+    th[data-sort="pct_skip"] { width: 70px; }
+    th[data-sort="common_to_epic"] { width: 100px; }
+    th[data-sort="common_to_legendary"] { width: 100px; }
+    th[data-sort="rare_to_legendary"] { width: 100px; }
     th:last-child { width: 40px; }
 
     td[player-handle] {
@@ -223,86 +212,40 @@
         </div>
 
         <section class="rankings-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="column-header section-end" colspan="3">
-                            <i class="fa-solid fa-user"></i> Player
-                        </th>
-                        <th class="column-header section-end" colspan="5">
-                            <i class="fa-solid fa-coins"></i> Packs
-                        </th>
-                        <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
-                            <i class="fa-solid fa-turn-up"></i> Level Up
-                        </th>
-                    </tr>
-                    <tr>
-                        <th class="sortable" data-sort="rank">
-                            Rank
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="player">
-                            Player
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="hoursSinceLastActivity" title="Time since last trade or tournament start">
-                            Last Activity
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="fanPoints">
-                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="rewardEth">
-                            <img src="../icons/eth.webp" alt="Reward ETH" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="rewardFrag">
-                            <img src="../icons/fragment.webp" alt="Reward Frag" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="blastGold">
-                            <img src="../icons/blast.webp" alt="Blast Gold" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable section-end" data-sort="stars">
-                            <img src="../icons/stars.webp" alt="Stars" style="height: 16px; vertical-align: middle;">
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="level_ups">
-                            Level Ups
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="level_up_skips">
-                            Skips
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="pct_level_up_skips">
-                            Pct Skip
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="common_epic_skip">
-                            Com2Epic
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="common_legendary_skip">
-                            Com2Leg
-                            <div class="sort-arrow"></div>
-                        </th>
-                        <th class="sortable" data-sort="rare_epic_skip">
-                            Rare2Epic
-                            <div class="sort-arrow"></div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="21" style="text-align: center; padding: 2rem;">
-                            Loading player data...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="tableContainer">
+                <table class="sortable">
+                    <thead>
+                        <tr>
+                            <th class="column-header section-end" colspan="2">
+                                <i class="fa-solid fa-user"></i> Player
+                            </th>
+                            <th class="column-header section-end" colspan="6">
+                                <i class="fa-solid fa-coins"></i> Packs
+                            </th>
+                            <th class="column-header section-end" colspan="6">
+                                <i class="fa-solid fa-turn-up"></i> Level Up
+                            </th>
+                        </tr>
+                        <tr>
+                            <th data-sort="rank">Rank</th>
+                            <th data-sort="player">Player</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th data-sort="level_ups" data-sort-method="number">Level Ups</th>
+                            <th data-sort="level_up_skips" data-sort-method="number">Skips</th>
+                            <th data-sort="pct_skip" data-sort-method="number">Skip %</th>
+                            <th data-sort="common_to_epic" data-sort-method="number">Com 2 Epic</th>
+                            <th data-sort="common_to_legendary" data-sort-method="number">Com 2 Leg</th>
+                            <th data-sort="rare_to_legendary" data-sort-method="number">Rare → Leg</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </section>
     </main>
     <script>
@@ -330,28 +273,157 @@ async function fetchAndDisplayRankings() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td data-sort="${index + 1}">${index + 1}</td>
-                <td player-handle="${player.handle}" data-player-id="${player.player_id}" style="display: flex; align-items: center;">
+                <td player-handle="${player.player_handle}" 
+                    data-player-id="${player.player_id}" 
+                    data-player-name="${player.player_name}"
+                    style="display: flex; align-items: center;">
                     <img src="${player.profile_picture}" alt="${player.name}" 
-                        onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
-                    <div style="display: flex; align-items: center; margin-left: 6px;">
-                        <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
-                            <span class="player-handle">${player.name}</span>
-                        </a>
+                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
+                    <div class="name-container">
+                        ${player.player_name}
                         <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
                         <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
-                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                        </a>
+                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                </a>
                     </div>
                 </td>
-                <!-- Add other columns as needed -->
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td data-sort="${player.level_ups}">${player.level_ups}</td>
+                <td data-sort="${player.level_up_skips}">${player.level_up_skips}</td>
+                <td data-sort="${player.pct_skip}">${(player.pct_skip * 100).toFixed(1)}%</td>
+                <td data-sort="${player.common_to_epic_skips}">${player.common_to_epic_skips}</td>
+                <td data-sort="${player.common_to_legendary_skips}">${player.common_to_legendary_skips}</td>
+                <td data-sort="${player.rare_to_epic_skips}">${player.rare_to_epic_skips}</td>
             `;
             tableBody.appendChild(row);
         });
+
+        // Initialize search functionality after data is loaded
+        initializeSearch(data);
 
     } catch (error) {
         console.error('Error fetching rankings:', error);
     }
 }
+
+function initializeSearch(players) {
+    const searchBox = document.getElementById('playerSearch');
+    const clearButton = document.getElementById('clearSearch');
+    
+    if (!searchBox || !clearButton) {
+        console.error('Search elements not found');
+        return;
+    }
+
+    // Search functionality
+    searchBox.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        
+        clearButton.style.display = searchTerm ? 'flex' : 'none';
+        
+        rows.forEach(row => {
+            const playerCell = row.children[1];
+            if (!playerCell) return;
+
+            const playerName = playerCell.textContent.toLowerCase();
+            const playerHandle = playerCell.getAttribute('data-player-handle')?.toLowerCase() || '';
+            const isVisible = playerName.includes(searchTerm) || playerHandle.includes(searchTerm);
+            
+            row.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    // Clear search
+    clearButton.addEventListener('click', function() {
+        searchBox.value = '';
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => row.style.display = '');
+        this.style.display = 'none';
+    });
+}
+
+           // Add sorting functionality
+           const table = document.querySelector('table');
+            const headers = table.querySelectorAll('th.sortable');
+            let currentSort = { column: null, direction: 'asc' };
+
+            headers.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = this.dataset.sort;
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    // Reset all arrows
+                    headers.forEach(h => {
+                        h.querySelector('.sort-arrow').className = 'sort-arrow';
+                    });
+
+                    // Check if we're viewing "Last 5" data
+                    const isLast5Active = document.getElementById('toggle-last5').classList.contains('active');
+                    
+                    // Determine the actual column to sort by (add _l5 suffix if Last 5 is active)
+                    let sortColumn = column;
+                    if (isLast5Active && ['elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
+                        sortColumn = `${column}_l5`;
+                    }
+
+                    // Update sort direction
+                    if (currentSort.column === sortColumn) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = sortColumn;
+                        // Set specific columns to sort ascending by default
+                        const baseColumn = sortColumn.replace('_l5', '');
+                        currentSort.direction = (['elo_rank', 'elite', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
+                    }
+
+                    // Update arrow on clicked header
+                    const arrow = this.querySelector('.sort-arrow');
+                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+
+                    // Sort rows and update ranks
+                    rows.sort((a, b) => {
+                        const aPlayerId = a.querySelector('[data-player-id]').dataset.playerId;
+                        const bPlayerId = b.querySelector('[data-player-id]').dataset.playerId;
+                        
+                        const aPlayer = players.find(p => p.player_id === aPlayerId);
+                        const bPlayer = players.find(p => p.player_id === bPlayerId);
+
+                        let aValue = aPlayer[sortColumn];
+                        let bValue = bPlayer[sortColumn];
+
+                        // Handle null/missing values
+                        if (column === 'player') {
+                            return currentSort.direction === 'asc' ? 
+                                aValue.localeCompare(bValue) : 
+                                bValue.localeCompare(aValue);
+                        }
+
+                        // Put null/undefined/NaN values and zeros (displayed as '-') at the end
+                        if ((!aValue && aValue !== 0) || aValue === 0) return 1;
+                        if ((!bValue && bValue !== 0) || bValue === 0) return -1;
+                        if ((!aValue && !bValue) || (aValue === 0 && bValue === 0)) return 0;
+
+                        return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+                    });
+
+                    // Update displayed ranks only when sorting
+                    rows.forEach((row, index) => {
+                        const rankCell = row.children[0];
+                        rankCell.textContent = index + 1;
+                    });
+
+                    // Reorder table
+                    tbody.innerHTML = '';
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
 
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', fetchAndDisplayRankings);

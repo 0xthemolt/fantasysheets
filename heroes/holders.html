@@ -26,7 +26,63 @@
         .table-container {
             overflow-x: auto;
             margin: 20px 0;
+            width: 100%;
         }
+        
+        table {
+            width: 1200px; /* Fixed width for the entire table */
+            table-layout: fixed; /* This ensures our column widths are respected */
+            border-collapse: collapse;
+        }
+        
+        /* Column width definitions */
+        .col-player,
+        td:first-child {
+            width: 250px;
+        }
+        
+        .col-legendary,
+        .col-epic,
+        .col-rare,
+        .col-common {
+            width: 200px;
+        }
+        
+        .col-total {
+            width: 150px;
+        }
+
+        /* Ensure content doesn't overflow */
+        table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 8px;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            table {
+                width: 800px;
+            }
+            
+            .col-player,
+            td:first-child {
+                width: 180px;
+            }
+            
+            .col-legendary,
+            .col-epic,
+            .col-rare,
+            .col-common {
+                width: 140px;
+            }
+            
+            .col-total {
+                width: 100px;
+            }
+        }
+
         .profile-picture {
             width: 40px;
             height: 40px;
@@ -131,12 +187,12 @@
             <table id="cardHoldersTable">
                 <thead>
                     <tr>
-                        <th>Player</th>
-                        <th>Legendary</th>
-                        <th>Epic</th>
-                        <th>Rare</th>
-                        <th>Common</th>
-                        <th>Total Cards</th>
+                        <th class="col-player">Player</th>
+                        <th class="col-legendary">Legendary</th>
+                        <th class="col-epic">Epic</th>
+                        <th class="col-rare">Rare</th>
+                        <th class="col-common">Common</th>
+                        <th class="col-total">Total Cards</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -148,7 +204,7 @@
 
     <script>
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         let allHeroHandles = [];

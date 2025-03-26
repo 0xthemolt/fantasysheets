@@ -130,33 +130,12 @@
             font-weight: bold;
         }
         
-        /* Search input container with clear button */
-        .search-input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
         #heroHandleSearch {
             width: 100%;
             padding: 8px;
-            padding-right: 30px; /* Space for the X icon */
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
-        }
-        
-        .clear-search-icon {
-            position: absolute;
-            right: 10px;
-            color: #f44336;
-            cursor: pointer;
-            font-size: 14px;
-            display: none; /* Hidden by default */
-        }
-        
-        .clear-search-icon:hover {
-            color: #d32f2f;
         }
         
         .autocomplete-results {
@@ -174,6 +153,7 @@
             padding: 8px 10px;
             cursor: pointer;
         }
+        
         
         .clear-button {
             padding: 8px 15px;
@@ -348,10 +328,7 @@
         <div class="filter-container">
             <div class="search-box">
                 <label for="heroHandleSearch">Search by Hero Handle:</label>
-                <div class="search-input-container">
-                    <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
-                    <span id="clearSearch" class="clear-search-icon"><i class="fas fa-times"></i></span>
-                </div>
+                <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
             
@@ -372,6 +349,8 @@
                     </label>
                 </div>
             </div>
+            
+            <button id="clearFilter" class="clear-button">Clear Filter</button>
         </div>
 
         <div class="table-container">
@@ -664,27 +643,15 @@
                 
                 // Set up search input event listeners
                 const searchInput = document.getElementById('heroHandleSearch');
-                const clearSearchIcon = document.getElementById('clearSearch');
                 
-                // Show/hide clear button based on input content
                 searchInput.addEventListener('input', () => {
                     showAutocompleteResults(searchInput.value);
-                    clearSearchIcon.style.display = searchInput.value ? 'block' : 'none';
                 });
                 
                 searchInput.addEventListener('focus', () => {
                     if (searchInput.value) {
                         showAutocompleteResults(searchInput.value);
-                        clearSearchIcon.style.display = 'block';
                     }
-                });
-                
-                // Clear search on X click
-                clearSearchIcon.addEventListener('click', () => {
-                    searchInput.value = '';
-                    currentFilter = null;
-                    clearSearchIcon.style.display = 'none';
-                    fetchAndDisplayCardHolders();
                 });
                 
                 // Handle clicks outside the autocomplete dropdown
@@ -694,14 +661,26 @@
                     }
                 });
                 
+                // Clear filter button
+                document.getElementById('clearFilter').addEventListener('click', () => {
+                    // Clear hero handle search
+                    document.getElementById('heroHandleSearch').value = '';
+                    currentFilter = null;
+                    
+                    // Uncheck all filter checkboxes
+                    document.getElementById('filterLegendary').checked = false;
+                    document.getElementById('filterEpic').checked = false;
+                    document.getElementById('filterRare').checked = false;
+                    document.getElementById('filterCommon').checked = false;
+                    
+                    fetchAndDisplayCardHolders();
+                });
+                
                 // Set up filter checkbox listeners
                 setupFilterListeners();
                 
                 // Initial load with filter for travisbickle0x
                 searchInput.value = currentFilter;
-                if (currentFilter) {
-                    clearSearchIcon.style.display = 'block';
-                }
                 fetchAndDisplayCardHolders(currentFilter);
                 
             } catch (error) {

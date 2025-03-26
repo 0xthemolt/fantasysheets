@@ -36,9 +36,34 @@
             transition: transform 0.2s ease;
         }
         
+        /* Profile picture styling */
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            vertical-align: middle;
+            border: 2px solid #ddd;
+        }
+        
+        .profile-pic-placeholder {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .player-name {
+            vertical-align: middle;
+        }
+        
         /* Table layout styling */
         #cardHoldersTable {
-            width: 60%;
+            width: 70%;
             margin: 0 auto;
             border-collapse: collapse;
             table-layout: fixed; /* This ensures the column widths are respected */
@@ -48,7 +73,14 @@
         .col-player {
             width: 25%; /* Player name gets more space */
         }
-        
+
+        .col-last-trade {
+            width: 15%;
+        }
+
+        .col-last-tournament {
+            width: 15%;
+        }
         .col-legendary {
             width: 15%;
         }
@@ -156,6 +188,8 @@
                 <thead>
                     <tr>
                         <th class="col-player">Player</th>
+                        <th class="col-last-trade">Last Trade</th>
+                        <th class="col-last-tournament">Last Tournament</th>
                         <th class="col-legendary">Legendary</th>
                         <th class="col-epic">Epic</th>
                         <th class="col-rare">Rare</th>
@@ -178,6 +212,25 @@
         
         let allHeroHandles = [];
         let currentFilter = 'travisbickle0x'; // Set initial filter
+
+        // Function to calculate days since a given timestamp
+        function getDaysSince(timestamp) {
+            if (!timestamp) return 'N/A';
+            
+            // Current time in UTC
+            const now = new Date();
+            
+            // Convert timestamp to Date object if it's not already
+            const pastDate = new Date(timestamp);
+            
+            // Calculate difference in milliseconds
+            const diffMs = now - pastDate;
+            
+            // Convert to days (ms to seconds to minutes to hours to days)
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
 
         // Function to fetch all unique hero handles
         async function fetchUniqueHeroHandles() {
@@ -213,7 +266,7 @@
             try {
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, profile_picture, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
+                    .select('player_name, profile_picture, last_trade_timestamp, last_tournament,hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter if specified
@@ -235,7 +288,25 @@
                 data.forEach(holder => {
                     tableBody.innerHTML += `
                         <tr>
-                            <td class="col-player">${holder.player_name}</td>
+                            <td class="col-player">
+                                ${holder.profile_picture ? 
+                                  `<img src="${holder.profile_picture}" alt="${holder.player_name}" class="profile-pic">` : 
+                                  `<div class="profile-pic-placeholder"></div>`}
+                                <span class="player-name">${holder.player_name}</span>
+                                 <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px;">
+                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                </a>
+                            </td>
+                            <td class="col-last-trade">
+                                ${holder.last_trade_timestamp ? 
+                                  `${getDaysSince(holder.last_trade_timestamp)}d ago` : 
+                                  'N/A'}
+                            </td>
+                            <td class="col-last-tournament">
+                                ${holder.last_tournament ? 
+                                  `${(holder.last_tournament)}` : 
+                                  'N/A'}
+                            </td>
                             <td class="col-legendary">
                                 ${holder.legendary_cards > 0 ? 
                                     `${holder.legendary_cards}

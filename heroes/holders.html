@@ -109,13 +109,13 @@
         
         /* Filter container styles */
         .filter-container {
-            width: 60%;
+            width: 80%; /* Increased width to accommodate the new filters */
             margin: 0 auto 20px auto;
             padding: 15px;
             border-radius: 5px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .search-box {
@@ -168,6 +168,136 @@
         .clear-button:hover {
             background-color: #d32f2f;
         }
+        
+        .order-count {
+            flex: 1;
+            font-size: 0.8em;
+            color: #888;
+            text-align: left;
+            padding-left: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .order-count i {
+            margin-right: 0;
+            color: #888;
+        }
+
+        /* Position the number over the cart icon - simplified centering */
+        .cart-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .cart-number {
+            position: absolute;
+            top: -10px; /* Move slightly higher */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Ensure perfect centering */
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        /* Simple tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip:hover::after {
+            content: "Cards listed for sale";
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        /* Card cell styling */
+        .card-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .card-count {
+            flex: 1;
+            text-align: right;
+            padding-right: 8px;
+            font-weight: bold;
+        }
+
+        .card-icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+        }
+
+        .card-icon:hover {
+            transform: scale(1.5);
+            transition: transform 0.2s ease;
+        }
+
+        /* Sell orders filter styling */
+        .sell-orders-filter {
+            margin: 0 15px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .sell-orders-filter > label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 3px;
+            user-select: none;
+        }
+
+        .checkbox-label input {
+            margin-right: 5px;
+        }
+
+        /* Rarity-specific colors */
+        .checkbox-label.legendary {
+            border-left: 3px solid #ff9d00;
+        }
+
+        .checkbox-label.epic {
+            border-left: 3px solid #c600ff;
+        }
+
+        .checkbox-label.rare {
+            border-left: 3px solid #0070dd;
+        }
+
+        .checkbox-label.common {
+            border-left: 3px solid #1eff00;
+        }
     </style>
 </head>
 <body>
@@ -180,6 +310,25 @@
                 <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
+            
+            <div class="sell-orders-filter">
+                <label>Show sellers with:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label legendary">
+                        <input type="checkbox" id="filterLegendary"> Legendary
+                    </label>
+                    <label class="checkbox-label epic">
+                        <input type="checkbox" id="filterEpic"> Epic
+                    </label>
+                    <label class="checkbox-label rare">
+                        <input type="checkbox" id="filterRare"> Rare
+                    </label>
+                    <label class="checkbox-label common">
+                        <input type="checkbox" id="filterCommon"> Common
+                    </label>
+                </div>
+            </div>
+            
             <button id="clearFilter" class="clear-button">Clear Filter</button>
         </div>
 
@@ -264,9 +413,16 @@
         // Function to fetch and display card holders data
         async function fetchAndDisplayCardHolders(heroHandle = null) {
             try {
+                // Get filter states
+                const filterLegendary = document.getElementById('filterLegendary').checked;
+                const filterEpic = document.getElementById('filterEpic').checked;
+                const filterRare = document.getElementById('filterRare').checked;
+                const filterCommon = document.getElementById('filterCommon').checked;
+                
+                // Base query
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, profile_picture, last_trade_timestamp, last_tournament,hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards')
+                    .select('player_name, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_order_count')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter if specified
@@ -274,6 +430,7 @@
                     query = query.eq('hero_handle', heroHandle);
                 }
                 
+                // Fetch data
                 const { data, error } = await query;
                 
                 if (error) {
@@ -284,8 +441,29 @@
                 const tableBody = document.getElementById('tableBody');
                 tableBody.innerHTML = ''; // Clear any existing content
                 
-                // Populate the table with data
-                data.forEach(holder => {
+                // Filter data based on seller_order_count and selected rarities
+                const filteredData = data.filter(holder => {
+                    // If no rarity filters are selected, show all data
+                    if (!filterLegendary && !filterEpic && !filterRare && !filterCommon) {
+                        return true;
+                    }
+                    
+                    // If seller has no orders, filter them out when any filter is selected
+                    if (holder.seller_order_count === 0 || holder.seller_order_count === null) {
+                        return false;
+                    }
+                    
+                    // Check if the holder has cards of the selected rarities
+                    if (filterLegendary && holder.legendary_cards > 0) return true;
+                    if (filterEpic && holder.epic_cards > 0) return true;
+                    if (filterRare && holder.rare_cards > 0) return true;
+                    if (filterCommon && holder.common_cards > 0) return true;
+                    
+                    return false;
+                });
+                
+                // Populate the table with filtered data
+                filteredData.forEach(holder => {
                     tableBody.innerHTML += `
                         <tr>
                             <td class="col-player">
@@ -309,26 +487,74 @@
                             </td>
                             <td class="col-legendary">
                                 ${holder.legendary_cards > 0 ? 
-                                    `${holder.legendary_cards}
-                                    <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">` : 
+                                    `<div class="card-cell">
+                                        <div class="card-count">${holder.legendary_cards}</div>
+                                        <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
+                                        <div class="order-count">
+                                            ${holder.seller_order_count > 0 ? 
+                                                `<span class="tooltip">
+                                                    <div class="cart-container">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                        <span class="cart-number">${holder.seller_order_count}</span>
+                                                    </div>
+                                                </span>` : 
+                                                ''}
+                                        </div>
+                                     </div>` : 
                                     ''}
                             </td>
                             <td class="col-epic">
                                 ${holder.epic_cards > 0 ? 
-                                    `${holder.epic_cards}
-                                    <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">` : 
+                                    `<div class="card-cell">
+                                        <div class="card-count">${holder.epic_cards}</div>
+                                        <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
+                                        <div class="order-count">
+                                            ${holder.seller_order_count > 0 ? 
+                                                `<span class="tooltip">
+                                                    <div class="cart-container">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                        <span class="cart-number">${holder.seller_order_count}</span>
+                                                    </div>
+                                                </span>` : 
+                                                ''}
+                                        </div>
+                                     </div>` : 
                                     ''}
                             </td>
                             <td class="col-rare">
                                 ${holder.rare_cards > 0 ? 
-                                    `${holder.rare_cards}
-                                    <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">` : 
+                                    `<div class="card-cell">
+                                        <div class="card-count">${holder.rare_cards}</div>
+                                        <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
+                                        <div class="order-count">
+                                            ${holder.seller_order_count > 0 ? 
+                                                `<span class="tooltip">
+                                                    <div class="cart-container">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                        <span class="cart-number">${holder.seller_order_count}</span>
+                                                    </div>
+                                                </span>` : 
+                                                ''}
+                                        </div>
+                                     </div>` : 
                                     ''}
                             </td>
                             <td class="col-common">
                                 ${holder.common_cards > 0 ? 
-                                    `${holder.common_cards}
-                                    <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">` : 
+                                    `<div class="card-cell">
+                                        <div class="card-count">${holder.common_cards}</div>
+                                        <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
+                                        <div class="order-count">
+                                            ${holder.seller_order_count > 0 ? 
+                                                `<span class="tooltip">
+                                                    <div class="cart-container">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                        <span class="cart-number">${holder.seller_order_count}</span>
+                                                    </div>
+                                                </span>` : 
+                                                ''}
+                                        </div>
+                                     </div>` : 
                                     ''}
                             </td>
                             <td class="col-total">${holder.aggregate_cards || 0}</td>
@@ -416,10 +642,21 @@
                 
                 // Clear filter button
                 document.getElementById('clearFilter').addEventListener('click', () => {
-                    searchInput.value = '';
+                    // Clear hero handle search
+                    document.getElementById('heroHandleSearch').value = '';
                     currentFilter = null;
+                    
+                    // Uncheck all filter checkboxes
+                    document.getElementById('filterLegendary').checked = false;
+                    document.getElementById('filterEpic').checked = false;
+                    document.getElementById('filterRare').checked = false;
+                    document.getElementById('filterCommon').checked = false;
+                    
                     fetchAndDisplayCardHolders();
                 });
+                
+                // Set up filter checkbox listeners
+                setupFilterListeners();
                 
                 // Initial load with filter for travisbickle0x
                 searchInput.value = currentFilter;
@@ -429,6 +666,23 @@
                 console.error('Error initializing page:', error);
             }
         });
+
+        // Add event listeners for checkboxes
+        function setupFilterListeners() {
+            const checkboxes = [
+                document.getElementById('filterLegendary'),
+                document.getElementById('filterEpic'),
+                document.getElementById('filterRare'),
+                document.getElementById('filterCommon')
+            ];
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const heroHandle = document.getElementById('heroHandleSearch').value || null;
+                    fetchAndDisplayCardHolders(heroHandle);
+                });
+            });
+        }
     </script>
 </body>
 </html>

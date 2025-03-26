@@ -301,22 +301,58 @@
         /* Add color to column headers */
         th.col-legendary {
             color: #CACBD4;
+            position: relative;
+        }
+        th.col-legendary::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
             border-bottom: 2px solid #CACBD4;
         }
 
         th.col-epic {
             color: #E890FE;
+            position: relative;
+        }
+        th.col-epic::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
             border-bottom: 2px solid #E890FE;
         }
 
         th.col-rare {
             color: #00FFE2;
+            position: relative;
+        }
+        th.col-rare::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
             border-bottom: 2px solid #00FFE2;
         }
 
         th.col-common {
             color: #94FF00;
+            position: relative;
+        }
+        th.col-common::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
             border-bottom: 2px solid #94FF00;
+        }
+
+        th {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -358,7 +394,7 @@
                     <tr>
                         <th class="col-player">Player</th>
                         <th class="col-last-trade">Last Trade</th>
-                        <th class="col-last-tournament">Last Tournament</th>
+                        <th class="col-last-tournament">Last Main</th>
                         <th class="col-legendary">Legendary</th>
                         <th class="col-epic">Epic</th>
                         <th class="col-rare">Rare</th>
@@ -501,7 +537,7 @@
                                   `${getDaysSince(holder.last_trade_timestamp)}d ago` : 
                                   'N/A'}
                             </td>
-                            <td class="col-last-tournament">
+                            <td class="col-last-tournament">MT
                                 ${holder.last_tournament ? 
                                   `${(holder.last_tournament)}` : 
                                   'N/A'}

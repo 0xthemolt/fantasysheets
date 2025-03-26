@@ -104,6 +104,13 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #pricesTable {
+            margin-bottom: 20px;
         }
         
         /* Filter container styles */
@@ -389,6 +396,53 @@
         </div>
 
         <div class="table-container">
+            <table id="pricesTable" style="display: block; width: 70%; margin: 0 auto 20px auto; border-collapse: collapse; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th class="col-player" style="width: 25%;">Player</th>
+                        <th class="col-last-trade" style="width: 15%;">Last Trade</th>
+                        <th class="col-last-tournament" style="width: 15%;">Last Main</th>
+                        <th class="col-legendary" style="width: 15%;">Legendary</th>
+                        <th class="col-epic" style="width: 15%;">Epic</th>
+                        <th class="col-rare" style="width: 15%;">Rare</th>
+                        <th class="col-common" style="width: 15%;">Common</th>
+                        <th class="col-total" style="width: 15%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: right; padding-right: 10px;">Bid</td>
+                        <td class="col-legendary" style="text-align: center;">1250</td>
+                        <td class="col-epic" style="text-align: center;">750</td>
+                        <td class="col-rare" style="text-align: center;">400</td>
+                        <td class="col-common" style="text-align: center;">200</td>
+                        <td class="col-total"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: right; padding-right: 10px;">Last Sale</td>
+                        <td class="col-legendary" style="text-align: center;">1300</td>
+                        <td class="col-epic" style="text-align: center;">800</td>
+                        <td class="col-rare" style="text-align: center;">450</td>
+                        <td class="col-common" style="text-align: center;">225</td>
+                        <td class="col-total"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: right; padding-right: 10px;">Floor</td>
+                        <td class="col-legendary" style="text-align: center;">1200</td>
+                        <td class="col-epic" style="text-align: center;">725</td>
+                        <td class="col-rare" style="text-align: center;">375</td>
+                        <td class="col-common" style="text-align: center;">190</td>
+                        <td class="col-total"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
             <table id="cardHoldersTable">
                 <thead>
                     <tr>

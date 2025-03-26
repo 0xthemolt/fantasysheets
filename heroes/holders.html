@@ -104,13 +104,6 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        #pricesTable {
-            margin-bottom: 20px;
         }
         
         /* Filter container styles */
@@ -396,52 +389,6 @@
         </div>
 
         <div class="table-container">
-            <table id="pricesTable" style="display: block; width: 70%; margin: 0 auto 20px auto; border-collapse: collapse; table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th class="col-player" style="width: 25%;">Player</th>
-                        <th class="col-last-trade" style="width: 15%;">Last Trade</th>
-                        <th class="col-last-tournament" style="width: 15%;">Last Main</th>
-                        <th class="col-legendary" style="width: 15%;">Legendary</th>
-                        <th class="col-epic" style="width: 15%;">Epic</th>
-                        <th class="col-rare" style="width: 15%;">Rare</th>
-                        <th class="col-common" style="width: 15%;">Common</th>
-                        <th class="col-total" style="width: 15%;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td style="text-align: right; padding-right: 10px;">Bid</td>
-                        <td class="col-legendary" style="text-align: center;">1250</td>
-                        <td class="col-epic" style="text-align: center;">750</td>
-                        <td class="col-rare" style="text-align: center;">400</td>
-                        <td class="col-common" style="text-align: center;">200</td>
-                        <td class="col-total"></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td style="text-align: right; padding-right: 10px;">Last Sale</td>
-                        <td class="col-legendary" style="text-align: center;">1300</td>
-                        <td class="col-epic" style="text-align: center;">800</td>
-                        <td class="col-rare" style="text-align: center;">450</td>
-                        <td class="col-common" style="text-align: center;">225</td>
-                        <td class="col-total"></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td style="text-align: right; padding-right: 10px;">Floor</td>
-                        <td class="col-legendary" style="text-align: center;">1200</td>
-                        <td class="col-epic" style="text-align: center;">725</td>
-                        <td class="col-rare" style="text-align: center;">375</td>
-                        <td class="col-common" style="text-align: center;">190</td>
-                        <td class="col-total"></td>
-                    </tr>
-                </tbody>
-            </table>
             
             <table id="cardHoldersTable">
                 <thead>
@@ -532,7 +479,7 @@
                 // Base query
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_order_count')
+                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_order_count')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter if specified
@@ -582,9 +529,14 @@
                                      class="profile-pic"
                                      onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
                                 <span class="player-name">${holder.player_name}</span>
-                                <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px;">
+                                <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
                                     <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                                 </a>
+                                <i class="fas fa-copy copy-icon" 
+                                   style="font-size: 0.8em; color: #777; margin-left: 4px; cursor: pointer; text-decoration: none;"
+                                   data-handle="${holder.player_handle.replace(/[_]/g, '\\_')}"
+                                   title="@${holder.player_handle.slice(0,5)}...${holder.player_handle.slice(-4)}"
+                                   onclick="copyToClipboard('${holder.player_handle.replace(/'/g, "\\'")}')"></i>
                             </td>
                             <td class="col-last-trade">
                                 ${holder.last_trade_timestamp ? 
@@ -792,6 +744,21 @@
                     const heroHandle = document.getElementById('heroHandleSearch').value || null;
                     fetchAndDisplayCardHolders(heroHandle);
                 });
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Optional: Show a brief visual feedback that the copy worked
+                const copyIcon = event.target;
+                copyIcon.classList.remove('fa-copy');
+                copyIcon.classList.add('fa-check');
+                setTimeout(() => {
+                    copyIcon.classList.remove('fa-check');
+                    copyIcon.classList.add('fa-copy');
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
             });
         }
     </script>

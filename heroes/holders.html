@@ -130,12 +130,33 @@
             font-weight: bold;
         }
         
+        /* Search input container with clear button */
+        .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
         #heroHandleSearch {
             width: 100%;
             padding: 8px;
+            padding-right: 30px; /* Space for the X icon */
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+        }
+        
+        .clear-search-icon {
+            position: absolute;
+            right: 10px;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 14px;
+            display: none; /* Hidden by default */
+        }
+        
+        .clear-search-icon:hover {
+            color: #d32f2f;
         }
         
         .autocomplete-results {
@@ -153,7 +174,6 @@
             padding: 8px 10px;
             cursor: pointer;
         }
-        
         
         .clear-button {
             padding: 8px 15px;
@@ -284,19 +304,40 @@
 
         /* Rarity-specific colors */
         .checkbox-label.legendary {
-            border-left: 3px solid #ff9d00;
+            border-left: 3px solid #CACBD4;
         }
 
         .checkbox-label.epic {
-            border-left: 3px solid #c600ff;
+            border-left: 3px solid #E890FE;
         }
 
         .checkbox-label.rare {
-            border-left: 3px solid #0070dd;
+            border-left: 3px solid #00FFE2;
         }
 
         .checkbox-label.common {
-            border-left: 3px solid #1eff00;
+            border-left: 3px solid #94FF00;
+        }
+
+        /* Add color to column headers */
+        th.col-legendary {
+            color: #CACBD4;
+            border-bottom: 2px solid #CACBD4;
+        }
+
+        th.col-epic {
+            color: #E890FE;
+            border-bottom: 2px solid #E890FE;
+        }
+
+        th.col-rare {
+            color: #00FFE2;
+            border-bottom: 2px solid #00FFE2;
+        }
+
+        th.col-common {
+            color: #94FF00;
+            border-bottom: 2px solid #94FF00;
         }
     </style>
 </head>
@@ -307,7 +348,10 @@
         <div class="filter-container">
             <div class="search-box">
                 <label for="heroHandleSearch">Search by Hero Handle:</label>
-                <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
+                <div class="search-input-container">
+                    <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
+                    <span id="clearSearch" class="clear-search-icon"><i class="fas fa-times"></i></span>
+                </div>
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
             
@@ -328,8 +372,6 @@
                     </label>
                 </div>
             </div>
-            
-            <button id="clearFilter" class="clear-button">Clear Filter</button>
         </div>
 
         <div class="table-container">
@@ -622,15 +664,27 @@
                 
                 // Set up search input event listeners
                 const searchInput = document.getElementById('heroHandleSearch');
+                const clearSearchIcon = document.getElementById('clearSearch');
                 
+                // Show/hide clear button based on input content
                 searchInput.addEventListener('input', () => {
                     showAutocompleteResults(searchInput.value);
+                    clearSearchIcon.style.display = searchInput.value ? 'block' : 'none';
                 });
                 
                 searchInput.addEventListener('focus', () => {
                     if (searchInput.value) {
                         showAutocompleteResults(searchInput.value);
+                        clearSearchIcon.style.display = 'block';
                     }
+                });
+                
+                // Clear search on X click
+                clearSearchIcon.addEventListener('click', () => {
+                    searchInput.value = '';
+                    currentFilter = null;
+                    clearSearchIcon.style.display = 'none';
+                    fetchAndDisplayCardHolders();
                 });
                 
                 // Handle clicks outside the autocomplete dropdown
@@ -640,26 +694,14 @@
                     }
                 });
                 
-                // Clear filter button
-                document.getElementById('clearFilter').addEventListener('click', () => {
-                    // Clear hero handle search
-                    document.getElementById('heroHandleSearch').value = '';
-                    currentFilter = null;
-                    
-                    // Uncheck all filter checkboxes
-                    document.getElementById('filterLegendary').checked = false;
-                    document.getElementById('filterEpic').checked = false;
-                    document.getElementById('filterRare').checked = false;
-                    document.getElementById('filterCommon').checked = false;
-                    
-                    fetchAndDisplayCardHolders();
-                });
-                
                 // Set up filter checkbox listeners
                 setupFilterListeners();
                 
                 // Initial load with filter for travisbickle0x
                 searchInput.value = currentFilter;
+                if (currentFilter) {
+                    clearSearchIcon.style.display = 'block';
+                }
                 fetchAndDisplayCardHolders(currentFilter);
                 
             } catch (error) {

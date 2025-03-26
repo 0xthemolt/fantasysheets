@@ -44,7 +44,6 @@
             object-fit: cover;
             margin-right: 10px;
             vertical-align: middle;
-            border: 2px solid #ddd;
         }
         
         .profile-pic-placeholder {
@@ -488,11 +487,12 @@
                     tableBody.innerHTML += `
                         <tr>
                             <td class="col-player">
-                                ${holder.profile_picture ? 
-                                  `<img src="${holder.profile_picture}" alt="${holder.player_name}" class="profile-pic">` : 
-                                  `<div class="profile-pic-placeholder"></div>`}
+                                <img src="${holder.profile_picture}" 
+                                     alt="${holder.player_name}" 
+                                     class="profile-pic"
+                                     onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
                                 <span class="player-name">${holder.player_name}</span>
-                                 <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px;">
+                                <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px;">
                                     <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                                 </a>
                             </td>

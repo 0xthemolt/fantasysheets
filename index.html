@@ -230,7 +230,7 @@
     </style>
 </head>
 <body>
-    <h1>FantasySheets - Tournament Analytics</h1>
+    <h1>FantasySheets</h1>
     <div class="nav-container">
         <div class="grid-layout">
             <!-- <div class="column-container pro-container">
@@ -242,8 +242,8 @@
                 <ul class="nav-list" id="heroList"></ul>
             </div>
             <div class="column-container">
-                <h2 class="column-title">Players</h2>
-                <ul class="nav-list" id="playerList"></ul>
+                <h2 class="column-title">Leaders</h2>
+                <ul class="nav-list" id="leaderList"></ul>
             </div>
             <div class="column-container">
                 <h2 class="column-title">Rewards</h2>
@@ -281,28 +281,25 @@
             { filename: '/tournaments/hero_scores.html', title: 'Scores v2' },   
             { filename: 'hero_score_tracking.html', title: 'Hero Score Tracking'},
             { filename: 'hero_utilization.html', title: 'Hero Utilization' },
-            // { filename: 'heroes/heroes.html', title: 'Hero Trends', isNew: true },
             { filename: '/tournaments/league_winners.html', title: 'League Winners' },   
         ],
-        players: [
-            { filename: '/players/ranking.html', title: 'Overall Player Ranking'},
-            { filename: '/players/cards.html', title: 'Player Cards', isNew: true},
-            // { filename: 'player_rewards_history.html', title: 'Player Rewards Charts/Totals (FUTURE)' },
+        leaders: [
+            { filename: '/leaders/overall.html', title: 'Overall Leaderboard'},
+            { filename: '/leaders/mints.html', title: 'Mint Leaderboard'},
         ],
         rewards: [
-            { filename: 'league_rewards_itm.html', title: 'League Rewards ITM' },
-            { filename: 'league_rewards_itm_v2.html', title: 'League Rewards ITM v2'},
-            { filename: 'tournament_reward_history.html', title: 'League Reward History'},
+            { filename: 'league_rewards_itm.html', title: 'Rewards ITM' },
+            { filename: 'league_rewards_itm_v2.html', title: 'Rewards ITM v2'},
+            { filename: 'tournament_reward_history.html', title: 'Reward History'},
         ],
         marketplace: [
             { filename: 'marketplace.html', title: 'Marketplace'},
         ],
         preview: [
             { filename: 'tournaments.html', title: 'Deck / Player Registration Stats' }, 
-            { filename: 'player_rewards.html', title: 'Tournament Rewards Leaders' },
+            { filename: 'player_rewards.html', title: 'Rewards Leaders' },
             { filename: '/tournaments/decks.html', title: 'Decks'},
             { filename: 'player_decks.html', title: 'Player Decks' },
-            { filename: 'monad/tournaments.html', title: 'Monad Tournaments', customColor: '#1F0053' },
             //{ filename: 'index.html', title: 'PaperHands (in development)' },
             //{ filename: 'index.html', title: 'Marketplace Trends (in development)' },
             // { filename: 'index.html', title: 'Hero Mindshare Tree Map + Archetype (brainstorming)' },
@@ -310,6 +307,7 @@
 
         other: [
             //{ filename: 'tier_maker.html', title: 'Tier Maker'},
+            { filename: '/players/cards.html', title: 'Player Cards'},
             { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
             { filename: 'settings.html', title: 'Settings', icon: 'fas fa-cog' },
         ],
@@ -318,7 +316,7 @@
     function loadPages() {
         const proList = document.getElementById('proList');
         const heroList = document.getElementById('heroList');
-        const playerList = document.getElementById('playerList');
+        const leaderList = document.getElementById('leaderList');
         const rewardList = document.getElementById('rewardList');
         const previewList = document.getElementById('previewList');
         const otherList = document.getElementById('otherList');
@@ -482,7 +480,7 @@
 
         // createLinks(pages.pro, proList);
         createLinks(pages.heroes, heroList);
-        createLinks(pages.players, playerList);
+        createLinks(pages.leaders, leaderList);
         createLinks(pages.rewards, rewardList);
         createLinks(pages.preview, previewList);
         createLinks(pages.marketplace, marketplaceList);

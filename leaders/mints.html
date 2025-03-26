@@ -104,7 +104,41 @@
         transform: translateY(-50%);
     }
 
+    
 
+    @media (max-width: 768px) {
+        .rankings-table {
+            margin: 0;
+            padding: 0 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            display: block;
+            white-space: nowrap;
+            max-width: 350px;
+        }
+        
+        th {
+            font-size: 0.85rem;
+        }
+        
+        th[data-sort="rank"],
+        th[data-sort="player"],
+        td:nth-child(1),
+        td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background-color: var(--background-color);
+            z-index: 2;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+        
+        th[data-sort="player"],
+        td:nth-child(2) {
+            left: 50px;
+        }
+    }
+    
 </style>
 <body>
     <div class="title-container" style="display: flex; align-items: flex-end; justify-content: center;">
@@ -296,7 +330,7 @@ async function fetchAndDisplayRankings() {
                 </td>
                 <td data-sort="${player.pct_skip}">
                     ${player.pct_skip !== null ? `${(player.pct_skip * 100).toFixed(0)}%` : '-'}
-                    ${isTopSkipper(player, data) ? 
+                    ${isTopPctSkipper(player, data) ? 
                         '<i class="fas fa-fire" style="color: #ff4444; margin-left: 4px; font-size: 0.9em;"></i>' : 
                         ''}
                 </td>
@@ -402,18 +436,24 @@ function getCardStyle(value, allValues, type) {
     return null;
 }
 
-function isTopSkipper(player, allPlayers) {
-    // Get top 5 total skips
-    const sortedByTotalSkips = [...allPlayers].sort((a, b) => 
-        (b.level_up_skips || 0) - (a.level_up_skips || 0));
-    const isTopTotalSkips = sortedByTotalSkips.slice(0, 5).some(p => p.player_id === player.player_id);
-    
+
+function isTopPctSkipper(player, allPlayers) {
     // Get top 5 skip % (for players with >10 level ups)
     const qualifiedPlayers = allPlayers.filter(p => p.level_ups > 10);
     const sortedByPctSkip = [...qualifiedPlayers].sort((a, b) => b.pct_skip - a.pct_skip);
-    const isTopPctSkips = sortedByPctSkip.slice(0, 5).some(p => p.player_id === player.player_id);
+    return sortedByPctSkip.slice(0, 10).some(p => p.player_id === player.player_id);
+}
+
+function isTopSkipper(player, allPlayers) {
+    // Sort by total skips
+    const sortedByTotalSkips = [...allPlayers].sort((a, b) => 
+        (b.level_up_skips || 0) - (a.level_up_skips || 0));
     
-    return isTopTotalSkips || isTopPctSkips;
+    // Get the 10th place skip count (to handle ties)
+    const tenthPlaceSkips = sortedByTotalSkips[9]?.level_up_skips || 0;
+    
+    // Return true if player has >= skips than 10th place
+    return (player.level_up_skips || 0) >= tenthPlaceSkips;
 }
 
 function isTopNoSkipper(player, allPlayers) {

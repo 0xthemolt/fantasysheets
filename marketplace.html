@@ -429,27 +429,6 @@
             background: rgba(29, 161, 242, 0.2);
         }
         
-        .seller-modal-id {
-            font-size: 0.7em;
-            color: #aaa;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 3px 6px;
-            border-radius: 10px;
-        }
-        
-        .seller-modal-portfolio {
-            margin-top: 5px;
-            font-size: 0.8em;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
 
         /* Update seller icon styles with hover color effect */
         .seller-icon {
@@ -644,16 +623,11 @@
                             <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Seller</div>
                             <img id="seller-modal-pfp" class="seller-modal-pfp" src="" alt="Seller" onerror="this.onerror=null; this.src='../icons/fan.webp';">
                             <div class="seller-modal-name" id="seller-modal-name"></div>
-                            <a id="seller-modal-twitter" class="seller-modal-twitter" href="" target="_blank">
-                                <i class="fab fa-x-twitter"></i> <span id="seller-modal-handle"></span>
-                            </a>
-                            <div class="seller-modal-id" id="seller-modal-id">
-                                <span id="seller-modal-id-text"></span>
-                                <i class="fas fa-copy copy-icon" onclick="copyToClipboard(document.getElementById('seller-modal-id').getAttribute('data-seller-id'), event)"></i>
-                            </div>
-                            <div class="seller-modal-portfolio" id="seller-modal-portfolio">
-                                Portfolio: <span id="seller-modal-portfolio-value"></span>
-                                <img src="../icons/eth.webp" alt="ETH Icon" style="width: 18px; height: 18px; vertical-align: middle;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <a id="seller-modal-twitter" href="https://x.com/${sellerHandle}" target="_blank" style="text-decoration: none;">
+                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                </a>
+                                <i class="fas fa-copy" onclick="copyToClipboard('${sellerHandle}', event)" style="font-size: 0.7em; color: #777; cursor: pointer;"></i>
                             </div>
                             <img id="hero-card-image" class="hero-card-image" src="" alt="Hero Card" style="display: none;">
                             <div id="card-floor-info" class="card-floor-info" style="display: none;">
@@ -678,18 +652,7 @@
             // Update modal content
             document.getElementById('seller-modal-pfp').src = sellerPfpUrl;
             document.getElementById('seller-modal-name').textContent = sellerName;
-            document.getElementById('seller-modal-handle').textContent = '@' + sellerHandle;
-            document.getElementById('seller-modal-twitter').href = 'https://x.com/' + sellerHandle;
-            
-            if (sellerId) {
-                document.getElementById('seller-modal-id').style.display = 'flex';
-                document.getElementById('seller-modal-id-text').textContent = shortenId(sellerId);
-                document.getElementById('seller-modal-id').setAttribute('data-seller-id', sellerId);
-            } else {
-                document.getElementById('seller-modal-id').style.display = 'none';
-            }
-            
-            document.getElementById('seller-modal-portfolio-value').textContent = format_eth(sellerPortValue);
+            document.getElementById('seller-modal-twitter').href = `https://x.com/${sellerHandle}`;
             
             // Get hero card data from the clicked element
             const heroId = event.currentTarget.getAttribute('data-hero-id');
@@ -1980,7 +1943,7 @@
                                                 </a>
                                                 <i class="fas fa-copy" 
                                                    onclick="copyToClipboard('${bid.player_handle}', event)" 
-                                                   style="cursor: pointer; color: #aaa; font-size: 0.9em; margin-left: 4px;"></i>
+                                                   style="cursor: pointer; color: #aaa; font-size: 0.8em; margin-left: 4px;"></i>
                                             </div>
                                         </td>
                                         <td style="padding: 8px;">${expirationText}</td>

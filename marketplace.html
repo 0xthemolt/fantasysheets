@@ -1826,45 +1826,12 @@
             });
         }
 
-        // Add this function to convert rarity name to number
-        function getRarityNumber(rarity) {
-            const rarityMap = {
-                'common': 1,
-                'rare': 2,
-                'epic': 3,
-                'legendary': 4
-            };
-            return rarityMap[rarity.toLowerCase()];
-        }
-
-        // Add function to convert wei to ETH
-        function weiToEth(weiValue) {
-            return Number(weiValue) / 1e18;
-        }
-
-        // Update the showBidModal function to fetch from API
-        async function showBidModal(encodedBids, heroId, rarity, stars) {
+        // Add this new function to handle bid modal display
+        function showBidModal(encodedBids, heroId, rarity, stars) {
             try {
-                const rarityNum = getRarityNumber(rarity);
-                const apiUrl = `https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarityNum}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`;
+                const bids = JSON.parse(decodeURIComponent(encodedBids));
                 
-                // Fetch data from API
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                // Process the highest_five_bids array
-                const processedBids = data.highest_five_bids
-                    .map(bid => ({
-                        rank: 0, // Will be set after sorting
-                        bid: weiToEth(bid.price),
-                        player_name: bid.bidder_handle,
-                        player_handle: bid.bidder_handle,
-                        expiration_timestamp: Number(bid.expiration_time) * 1000 // Convert Unix timestamp to milliseconds
-                    }))
-                    .sort((a, b) => b.bid - a.bid) // Sort by bid amount descending
-                    .map((bid, index) => ({ ...bid, rank: index + 1 })); // Add ranks after sorting
-
-                // Create or update modal with the processed bids
+                // Create modal if it doesn't exist
                 let modalOverlay = document.getElementById('bid-modal-overlay');
                 if (!modalOverlay) {
                     modalOverlay = document.createElement('div');
@@ -1872,7 +1839,7 @@
                     modalOverlay.className = 'seller-modal-overlay';
                     
                     const modalHTML = `
-                        <div class="seller-modal" style="width: 500px;">
+                        <div class="seller-modal" style="width: 500px;">  <!-- Increased from 450px to 500px -->
                             <div class="seller-modal-close" onclick="closeBidModal()">
                                 <i class="fas fa-times"></i>
                             </div>
@@ -1886,7 +1853,7 @@
                                     <div>
                                         <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Active Bids</div>
                                         <div class="bid-list" style="width: 100%;">
-                                            ${formatBidsList(processedBids)}
+                                            ${formatBidsList(bids)}
                                         </div>
                                     </div>
                                 </div>
@@ -1897,12 +1864,14 @@
                     modalOverlay.innerHTML = modalHTML;
                     document.body.appendChild(modalOverlay);
                     
+                    // Close modal when clicking outside
                     modalOverlay.addEventListener('click', function(e) {
                         if (e.target === modalOverlay) {
                             closeBidModal();
                         }
                     });
                 } else {
+                    // Update existing modal content
                     const heroCardImage = modalOverlay.querySelector('#hero-card-image');
                     if (heroCardImage) {
                         heroCardImage.src = `/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
@@ -1910,13 +1879,17 @@
                             this.src = `../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                         };
                     }
+                    // Fix: Use the correct class 'bid-list' instead of 'bid-list-container'
                     const bidList = modalOverlay.querySelector('.bid-list');
                     if (bidList) {
-                        bidList.innerHTML = formatBidsList(processedBids);
+                        bidList.innerHTML = formatBidsList(bids);
                     }
                 }
                 
+                // Show modal
                 modalOverlay.style.display = 'flex';
+                
+                // Prevent scrolling on body
                 document.body.style.overflow = 'hidden';
             } catch (error) {
                 console.error('Error showing bid modal:', error);

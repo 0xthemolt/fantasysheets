@@ -776,7 +776,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -809,10 +809,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
+                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
+                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
+                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] }
                         };
                     }
                     
@@ -829,7 +829,8 @@
                             pfp_url: item.seller_pfp_url,
                             seller_id: item.seller_id,
                             seller_port_value: item.seller_port_value
-                        } : null
+                        } : null,
+                        bids: Array.isArray(item.bids) ? item.bids : [] // Check if it's already an array
                     };
                     
                     return acc;
@@ -1037,8 +1038,8 @@
                             <thead>
                                 <tr>
                                     <th>Hero</th>
-                                    <th class="sortable" data-sort="score">Score <i class="fas fa-sort-up"></i></th>
-                                    <th class="sortable" data-sort="score_24hr">Score 24hr <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="score">7d <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="score_24hr">24hr <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
                                     <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
                                     <th colspan="3" class="rarity-header-legendary">Legendary</th>
@@ -1084,7 +1085,7 @@
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}</td>
+                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
                                     <td class="rarity-section-legendary">
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
@@ -1104,7 +1105,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}</td>
+                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
                                     <td class="rarity-section-epic">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
@@ -1124,7 +1125,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
-                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}</td>
+                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}${item.rare.bids && item.rare.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
                                     <td class="rarity-section-rare">
                                         <div class="listed-count">
                                             ${item.rare.listed_count}
@@ -1144,7 +1145,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
-                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}</td>
+                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}${item.common.bids && item.common.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>                     
                                     <td class="rarity-section-common">
                                         <div class="listed-count">
                                             ${item.common.listed_count}

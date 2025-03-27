@@ -555,6 +555,53 @@
             0% { box-shadow: none; }
             100% { box-shadow: none; }
         }
+
+        .bid-modal-container {
+            display: flex;
+            align-items: stretch;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .bid-card-container {
+            display: flex;
+            align-items: center;  /* This will center the card vertically */
+            width: 80px;         /* Fixed width to match the image */
+        }
+
+        .bid-card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .bid-content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bid-header {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .bid-list-container {
+            width: 100%;
+        }
+
+        /* Add this CSS to the existing <style> section */
+        .fa-copy {
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s ease;
+        }
+
+        .fa-copy:active {
+            transform: scale(0.95); /* Slight shrink when clicked */
+        }
     </style>
 </head>
 <body>
@@ -1085,7 +1132,7 @@
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
+                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-legendary">
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
@@ -1105,7 +1152,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
+                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-epic">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
@@ -1125,7 +1172,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
-                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}${item.rare.bids && item.rare.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>
+                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}${item.rare.bids && item.rare.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-rare">
                                         <div class="listed-count">
                                             ${item.rare.listed_count}
@@ -1145,7 +1192,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
-                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}${item.common.bids && item.common.bids.length > 0 ? `<i class="fas fa-user seller-icon"></i>` : ''}</td>                     
+                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}${item.common.bids && item.common.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>` : ''}</td>                     
                                     <td class="rarity-section-common">
                                         <div class="listed-count">
                                             ${item.common.listed_count}
@@ -1815,6 +1862,153 @@
                 }
             });
         }
+
+        // Add this new function to handle bid modal display
+        function showBidModal(encodedBids, heroId, rarity, stars) {
+            try {
+                const bids = JSON.parse(decodeURIComponent(encodedBids));
+                
+                // Create modal if it doesn't exist
+                let modalOverlay = document.getElementById('bid-modal-overlay');
+                if (!modalOverlay) {
+                    modalOverlay = document.createElement('div');
+                    modalOverlay.id = 'bid-modal-overlay';
+                    modalOverlay.className = 'seller-modal-overlay';
+                    
+                    const modalHTML = `
+                        <div class="seller-modal" style="width: 500px;">  <!-- Increased from 450px to 500px -->
+                            <div class="seller-modal-close" onclick="closeBidModal()">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div class="seller-modal-content">
+                                <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
+                                    <img id="hero-card-image" 
+                                         src="/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                         alt="Hero Card"
+                                         style="width: 80px; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
+                                         onerror="this.onerror=null; this.src='../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png'">
+                                    <div>
+                                        <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Active Bids</div>
+                                        <div class="bid-list" style="width: 100%;">
+                                            ${formatBidsList(bids)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    modalOverlay.innerHTML = modalHTML;
+                    document.body.appendChild(modalOverlay);
+                    
+                    // Close modal when clicking outside
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            closeBidModal();
+                        }
+                    });
+                } else {
+                    // Update existing modal content
+                    const heroCardImage = modalOverlay.querySelector('#hero-card-image');
+                    if (heroCardImage) {
+                        heroCardImage.src = `/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                        heroCardImage.onerror = function() {
+                            this.src = `../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                        };
+                    }
+                    // Fix: Use the correct class 'bid-list' instead of 'bid-list-container'
+                    const bidList = modalOverlay.querySelector('.bid-list');
+                    if (bidList) {
+                        bidList.innerHTML = formatBidsList(bids);
+                    }
+                }
+                
+                // Show modal
+                modalOverlay.style.display = 'flex';
+                
+                // Prevent scrolling on body
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error showing bid modal:', error);
+            }
+        }
+
+        // Helper function to format the bids list
+        function formatBidsList(bidsJson) {
+            try {
+                const bids = Array.isArray(bidsJson) ? bidsJson : JSON.parse(bidsJson);
+                return `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 8px; text-align: left;">Rank</th>
+                                <th style="padding: 8px; text-align: left;">Bid</th>
+                                <th style="padding: 8px; text-align: left; width: 180px;">Player</th>  <!-- Increased width -->
+                                <th style="padding: 8px; text-align: left;">Expires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bids.map(bid => {
+                                const expirationDate = new Date(bid.expiration_timestamp);
+                                const now = new Date();
+                                const diffHours = (expirationDate - now) / (1000 * 60 * 60);
+                                
+                                let expirationText;
+                                if (diffHours >= 24) {
+                                    const days = Math.floor(diffHours / 24);
+                                    expirationText = `in ${days} days`;
+                                } else if (diffHours >= 2) {
+                                    expirationText = `in ${Math.floor(diffHours)} hours`;
+                                } else {
+                                    const minutes = Math.max(0, Math.floor(diffHours * 60));
+                                    expirationText = `in ${minutes} minutes`;
+                                }
+                                
+                                return `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 8px;">${bid.rank}</td>
+                                        <td style="padding: 8px; font-size: 0.9em;">${Number(bid.bid).toFixed(4)}</td>
+                                        <td style="padding: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <img src="${bid.profile_picture}" 
+                                                     alt="Profile" 
+                                                     style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
+                                                     onerror="this.src='../icons/fan.webp'">
+                                                <span>${bid.player_name}</span>
+                                                <a href="https://x.com/${bid.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
+                                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                                </a>
+                                                <i class="fas fa-copy" 
+                                                   onclick="copyToClipboard('${bid.player_handle}', event)" 
+                                                   style="cursor: pointer; color: #aaa; font-size: 0.9em; margin-left: 4px;"></i>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 8px;">${expirationText}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error formatting bids:', error);
+                return '<div style="color: red;">Error formatting bids data</div>';
+            }
+        }
+
+        // Add close function for bid modal
+        function closeBidModal() {
+            const modalOverlay = document.getElementById('bid-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            
+            // Re-enable scrolling
+            document.body.style.overflow = '';
+        }
+
+        // Make closeBidModal globally accessible
+        window.closeBidModal = closeBidModal;
     </script>
 </body>
 </html>

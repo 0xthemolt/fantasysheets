@@ -786,7 +786,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -819,10 +819,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [] }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
+                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
+                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
+                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] }
                         };
                     }
                     
@@ -840,7 +840,8 @@
                             seller_id: item.seller_id,
                             seller_port_value: item.seller_port_value
                         } : null,
-                        bids: Array.isArray(item.bids) ? item.bids : [] // Check if it's already an array
+                        bids: Array.isArray(item.bids) ? item.bids : [], // Check if it's already an array
+                        trades: Array.isArray(item.trades) ? item.trades : [] // Add trades to the rarity object
                     };
                     
                     return acc;
@@ -1095,7 +1096,11 @@
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>` : ''}</td>
+                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? 
+                                        `<i class="fas fa-user seller-icon" 
+                                            onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}', '${encodeURIComponent(JSON.stringify(item.legendary.trades || []))}')"
+                                            ></i>` 
+                                        : ''}</td>
                                     <td class="rarity-section-legendary">
                                         <div class="listed-count">
                                             ${item.legendary.listed_count}
@@ -1115,7 +1120,11 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>` : ''}</td>
+                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? 
+                                        `<i class="fas fa-user seller-icon" 
+                                            onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}', '${encodeURIComponent(JSON.stringify(item.epic.trades || []))}')"
+                                            ></i>` 
+                                        : ''}</td>
                                     <td class="rarity-section-epic">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}
@@ -1827,41 +1836,16 @@
         }
 
         // Add this new function to handle bid modal display
-        function showBidModal(encodedBids, heroId, rarity, stars) {
+        function showBidModal(encodedBids, heroId, rarity, stars, encodedTrades) {
             try {
                 const bids = JSON.parse(decodeURIComponent(encodedBids));
                 
-                // Create modal if it doesn't exist
+                // Create or get existing modal overlay
                 let modalOverlay = document.getElementById('bid-modal-overlay');
                 if (!modalOverlay) {
                     modalOverlay = document.createElement('div');
                     modalOverlay.id = 'bid-modal-overlay';
                     modalOverlay.className = 'seller-modal-overlay';
-                    
-                    const modalHTML = `
-                        <div class="seller-modal" style="width: 500px;">  <!-- Increased from 450px to 500px -->
-                            <div class="seller-modal-close" onclick="closeBidModal()">
-                                <i class="fas fa-times"></i>
-                            </div>
-                            <div class="seller-modal-content">
-                                <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
-                                    <img id="hero-card-image" 
-                                         src="/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png"
-                                         alt="Hero Card"
-                                         style="width: 80px; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
-                                         onerror="this.onerror=null; this.src='../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png'">
-                                    <div>
-                                        <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Active Bids</div>
-                                        <div class="bid-list" style="width: 100%;">
-                                            ${formatBidsList(bids)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    modalOverlay.innerHTML = modalHTML;
                     document.body.appendChild(modalOverlay);
                     
                     // Close modal when clicking outside
@@ -1870,27 +1854,91 @@
                             closeBidModal();
                         }
                     });
-                } else {
-                    // Update existing modal content
-                    const heroCardImage = modalOverlay.querySelector('#hero-card-image');
-                    if (heroCardImage) {
-                        heroCardImage.src = `/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
-                        heroCardImage.onerror = function() {
-                            this.src = `../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
-                        };
-                    }
-                    // Fix: Use the correct class 'bid-list' instead of 'bid-list-container'
-                    const bidList = modalOverlay.querySelector('.bid-list');
-                    if (bidList) {
-                        bidList.innerHTML = formatBidsList(bids);
-                    }
                 }
                 
+                // Update the entire modal content each time
+                modalOverlay.innerHTML = `
+                    <div class="seller-modal" style="width: 500px;">
+                        <div class="seller-modal-close" onclick="closeBidModal()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div class="bid-content" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                                <img id="hero-card-image-${heroId}" 
+                                     src="/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                     alt="Hero Card"
+                                     style="width: 80px; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
+                                     onerror="this.onerror=null; this.src='../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png'">
+                                <div>
+                                    <div style="font-size: 0.8em; color: #aaa;">
+                                        Active Bids as of <span style="color: white; font-weight: bold;">${calculateMinutesAgo(bids[0].db_updated_utc)} min ago</span>
+                                    </div>
+                                    <div class="bid-list" style="width: 100%;">
+                                        ${formatBidsList(bids)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trade history in its own container -->
+                        <div class="trade_history" style="margin-top: 15px; width: 100%; padding: 0 10px;">
+                            <div style="font-size: 0.8em; color: #aaa; margin-bottom: 8px;">Trade History</div>
+                            <div class="price-range-container" style="position: relative; height: 24px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 8px;">
+                                <!-- Range bar and markers will be added dynamically -->
+                            </div>
+                            <div class="price-labels" style="display: flex; justify-content: space-between; font-size: 0.8em; color: #aaa;">
+                                <!-- Price labels will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                `;
+
                 // Show modal
                 modalOverlay.style.display = 'flex';
                 
+                // Handle trade data
+                if (encodedTrades && encodedTrades !== '[]') {
+                    try {
+                        const trades = JSON.parse(decodeURIComponent(encodedTrades));
+                        if (trades && trades.length > 0) {
+                            const trade = trades[0];
+                            const priceRange = modalOverlay.querySelector('.price-range-container');
+                            const priceLabels = modalOverlay.querySelector('.price-labels');
+                            
+                            const range = trade.max_price - trade.min_price;
+                            const floorPosition = ((trade.floor_price - trade.min_price) / range) * 100;
+                            const lastTradePosition = ((trade.last_trade - trade.min_price) / range) * 100;
+                            
+                            priceRange.innerHTML = `
+                                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(250, 204, 21, 0.3); transform: translateY(-50%);"></div>
+                                <div style="position: absolute; top: 4px; left: ${floorPosition}%; width: 2px; height: 16px; background: #00FFDF;" title="Floor: ${trade.floor_price.toFixed(4)}"></div>
+                                <div style="position: absolute; top: 4px; left: ${lastTradePosition}%; width: 2px; height: 16px; background: #F1A3FD;" title="Last Trade: ${trade.last_trade.toFixed(4)}"></div>
+                            `;
+                            
+                            priceLabels.innerHTML = `
+                                <span>${trade.min_price.toFixed(4)}</span>
+                                <div style="display: flex; gap: 12px; color: #aaa;">
+                                    <span style="color: #00FFDF;">Floor: ${trade.floor_price.toFixed(4)}</span>
+                                    <span style="color: #F1A3FD;">Last: ${trade.last_trade.toFixed(4)}</span>
+                                </div>
+                                <span>${trade.max_price.toFixed(4)}</span>
+                            `;
+                            
+                            modalOverlay.querySelector('.trade_history').style.display = 'block';
+                        } else {
+                            modalOverlay.querySelector('.trade_history').style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Error parsing trade data:', error);
+                        modalOverlay.querySelector('.trade_history').style.display = 'none';
+                    }
+                } else {
+                    modalOverlay.querySelector('.trade_history').style.display = 'none';
+                }
+                
                 // Prevent scrolling on body
                 document.body.style.overflow = 'hidden';
+                
             } catch (error) {
                 console.error('Error showing bid modal:', error);
             }
@@ -1972,6 +2020,14 @@
 
         // Make closeBidModal globally accessible
         window.closeBidModal = closeBidModal;
+
+        function calculateMinutesAgo(dbUpdatedUtc) {
+            const dbTime = new Date(dbUpdatedUtc);
+            const now = new Date();
+            const nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000); // Convert local time to UTC
+            const diffMinutes = Math.floor((nowUtc - dbTime) / (1000 * 60));
+            return Math.max(0, diffMinutes); // Ensure we don't show negative minutes
+        }
     </script>
 </body>
 </html>

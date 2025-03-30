@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Real-time Data Feed</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const { createClient } = supabase;
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #data-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .data-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .new-item {
+            animation: highlight 2s ease-out;
+        }
+        @keyframes highlight {
+            0% { background-color: #fffacd; }
+            100% { background-color: white; }
+        }
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .data-item table {
+            margin-top: 10px;
+        }
+        
+        .data-item table td {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-item table td:first-child {
+            width: 150px;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Real-time Data Feed</h1>
+    
+    <div id="connection-status" class="connection-status disconnected">
+        Connecting to database...
+    </div>
+    
+    <div id="data-container">
+        <p id="loading-message">Loading data...</p>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Set up variables
+        const dataContainer = document.getElementById('data-container');
+        const connectionStatus = document.getElementById('connection-status');
+        const tableName = 'fantasy_activity'; // Replace with your table name
+        
+        // Function to update connection status display
+        function updateConnectionStatus(isConnected) {
+            if (isConnected) {
+                connectionStatus.textContent = 'Connected to Supabase real-time feed';
+                connectionStatus.classList.remove('disconnected');
+                connectionStatus.classList.add('connected');
+            } else {
+                connectionStatus.textContent = 'Disconnected from Supabase';
+                connectionStatus.classList.remove('connected');
+                connectionStatus.classList.add('disconnected');
+            }
+        }
+        
+        // Function to format data item as HTML
+        function formatDataItem(item) {
+            return `
+                <div class="data-item new-item">
+                    <table style="width:100%; border-collapse: collapse;">
+                        <tr>
+                            <td><strong>Transaction Hash:</strong></td>
+                            <td>${item.tx_hash}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFT Contract:</strong></td>
+                            <td>${item.nft_contract}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gas Used:</strong></td>
+                            <td>${item.gas_used}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Method:</strong></td>
+                            <td>${item.method_function} (${item.method_id})</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Block:</strong></td>
+                            <td>#${item.block_number} at ${new Date(item.block_datetime).toLocaleString()}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Price:</strong></td>
+                            <td>${item.price}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Token/Hero ID:</strong></td>
+                            <td>${item.token_id} / ${item.hero_id}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rarity:</strong></td>
+                            <td>${item.rarity} (Index: ${item.hero_rarity_index})</td>
+                        </tr>
+                        <tr>
+                            <td><strong>From:</strong></td>
+                            <td>${item.nft_from_address}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>To:</strong></td>
+                            <td>${item.nft_to_address}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Function to fetch initial data
+        async function fetchInitialData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from(tableName)
+                    .select('tx_hash, nft_contract, gas_used, method_id, method_function, block_number, block_datetime, price, token_id, hero_id, hero_rarity_index, rarity, nft_from_address, nft_to_address')
+                    .order('block_datetime', { ascending: false })
+                    .limit(10);
+                    
+                if (error) {
+                    console.error('Supabase query error:', error);
+                    dataContainer.innerHTML = `<p>Error loading data: ${error.message}</p>
+                                             <button onclick="fetchInitialData()">Retry</button>`;
+                    return;
+                }
+                
+                // Clear loading message
+                dataContainer.innerHTML = '';
+                
+                // Display data
+                if (data.length === 0) {
+                    dataContainer.innerHTML = '<p>No data available yet.</p>';
+                } else {
+                    data.forEach(item => {
+                        const itemHtml = formatDataItem(item);
+                        dataContainer.innerHTML += itemHtml;
+                    });
+                    
+                    // Remove the "new-item" class after animation completes
+                    setTimeout(() => {
+                        document.querySelectorAll('.new-item').forEach(el => {
+                            el.classList.remove('new-item');
+                        });
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                dataContainer.innerHTML = `<p>Error loading data: ${error.message}</p>
+                                         <button onclick="fetchInitialData()">Retry</button>`;
+            }
+        }
+        
+        // Subscribe to real-time changes
+        function subscribeToChanges() {
+            const subscription = supabaseClient
+                .channel('table-changes')
+                .on('postgres_changes', {
+                    event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+                    schema: 'public',
+                    table: tableName
+                }, payload => {
+                    console.log('Change received!', payload);
+                    handleRealtimeUpdate(payload);
+                })
+                .subscribe((status) => {
+                    console.log('Subscription status:', status);
+                    updateConnectionStatus(status === 'SUBSCRIBED');
+                });
+                
+            return subscription;
+        }
+        
+        // Handle real-time updates
+        function handleRealtimeUpdate(payload) {
+            const eventType = payload.eventType;
+            const newRecord = payload.new;
+            const oldRecord = payload.old;
+            
+            if (eventType === 'INSERT') {
+                // Add new record at the top
+                const itemHtml = formatDataItem(newRecord);
+                dataContainer.insertAdjacentHTML('afterbegin', itemHtml);
+                
+                // Remove the "new-item" class after animation completes
+                setTimeout(() => {
+                    document.querySelectorAll('.new-item').forEach(el => {
+                        el.classList.remove('new-item');
+                    });
+                }, 2000);
+            } 
+            else if (eventType === 'UPDATE') {
+                // Find and update the existing record
+                const recordId = oldRecord.id;
+                const existingElements = document.querySelectorAll('.data-item');
+                
+                for (let i = 0; i < existingElements.length; i++) {
+                    const element = existingElements[i];
+                    // This assumes each element has the record ID stored somewhere
+                    // You might need to adapt this to your specific implementation
+                    if (element.textContent.includes(`id: ${recordId}`)) {
+                        const updatedHtml = formatDataItem(newRecord);
+                        element.outerHTML = updatedHtml;
+                        break;
+                    }
+                }
+            }
+            else if (eventType === 'DELETE') {
+                // Find and remove the deleted record
+                const recordId = oldRecord.id;
+                const existingElements = document.querySelectorAll('.data-item');
+                
+                for (let i = 0; i < existingElements.length; i++) {
+                    const element = existingElements[i];
+                    if (element.textContent.includes(`id: ${recordId}`)) {
+                        element.remove();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Initialize the application
+        async function init() {
+            await fetchInitialData();
+            const subscription = subscribeToChanges();
+            
+            // Clean up on page unload
+            window.addEventListener('beforeunload', () => {
+                subscription.unsubscribe();
+            });
+        }
+        
+        // Start the application when the page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

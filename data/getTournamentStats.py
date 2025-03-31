@@ -13,14 +13,6 @@ def supabase_db_connection():
         port="5432"
     )
 
-def fantasysheets_db_connection():
-    return psycopg2.connect(
-        dbname="fantasysheets",
-        user="postgres",
-        password="WIKrjPIYtqCWApMIXculsqbMIQcGotEg",
-        host="viaduct.proxy.rlwy.net",
-        port="38391"
-    )
 # postgresql://postgres.hhcuqhvmzwmehdsaamhn:$&roct8&rgp4NE@aws-0-us-west-1.pooler.supabase.com:5432/postgres
 
 # First query into league_decks_df
@@ -89,14 +81,14 @@ order by gt.start_timestamp asc"""
 card_rarity_df = pd.read_sql_query(rarity_query, conn)
 cursor.close()
 
-conn_two = fantasysheets_db_connection()
+conn_two = supabase_db_connection()
 cursor_two = conn_two.cursor()
 tournament_views_query = f"""with base as (
 select ghwst.tournament_unique_key
-,ROUND(EXTRACT(EPOCH FROM (ghwst.db_updated_cst::timestamp -  ghwst.start_timestamp::timestamp)) / 3600,0) AS hours_since_start
-,ghwst.db_updated_cst::timestamp
+,ROUND(EXTRACT(EPOCH FROM (ghwst.db_updated::timestamp -  ghwst.start_datetime::timestamp)) / 3600,0) AS hours_since_start
+,ghwst.db_updated::timestamp
 ,sum(views) views
-from flatten.get_heros_with_stats_tournament ghwst 
+from flatten.hero_stats_Tournament ghwst 
 join flatten.get_tournaments gt  
 	on ghwst.tournament_id = gt.tournament_id
 where 1=1

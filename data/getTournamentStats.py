@@ -85,9 +85,11 @@ conn_two = supabase_db_connection()
 cursor_two = conn_two.cursor()
 tournament_views_query = f"""with base as (
 select ghwst.tournament_unique_key
-,ROUND(EXTRACT(EPOCH FROM (ghwst.db_updated::timestamp -  ghwst.start_datetime::timestamp)) / 3600,0) AS hours_since_start
-,ghwst.db_updated::timestamp
+,ROUND(EXTRACT(EPOCH FROM (ghwst.db_updated_utc -  gt.start_timestamp at time zone 'UTC')) / 3600,0) AS hours_since_start
+,gt.start_timestamp  at time zone 'UTC'
+,ghwst.db_updated_utc
 ,sum(views) views
+,sum(case when score = 0 then 1 else 0 end) score_0_count
 from flatten.hero_stats_Tournament ghwst 
 join flatten.get_tournaments gt  
 	on ghwst.tournament_id = gt.tournament_id
@@ -95,15 +97,17 @@ where 1=1
 --hero_handle = 'CryptoKaleo'
 --and ghwst.tournament_unique_key  = 'Main 33'
 and gt.tournament_status <> 'not started'
-and gt.tournament_seq_nbr <= 8
-group by 1,2,3
+and gt.tournament_seq_nbr <= 12
+group by 1,2,3,4
 )
 select tournament_unique_key
 ,hours_since_start
 ,max(views) views
+,max(score_0_count) score_0_count
 from base
 where hours_since_Start <= (24*3)
-group by 1,2"""
+group by 1,2
+order by 1,2"""
 tournament_views_df = pd.read_sql_query(tournament_views_query, conn_two)
 print(f"Number of records in tournament_views_df: {len(tournament_views_df)}")
 cursor_two.close()
@@ -155,16 +159,23 @@ tournament_views_data = {}
 print("Debug: Number of rows in tournament_views_df:", len(tournament_views_df))
 for _, row in tournament_views_df.iterrows():
     tournament_key = row['tournament_unique_key']
+    hours = int(row['hours_since_start'])
     # print(f"Debug: Processing tournament {tournament_key}, hours: {row['hours_since_start']}, views: {row['views']}")
-    if tournament_key not in tournament_views_data:
-        tournament_views_data[tournament_key] = []
     
-    tournament_views_data[tournament_key].append({
-        'hours_since_start': int(row['hours_since_start']),
-        'views': int(row['views'])
-    })
+    if tournament_key not in tournament_views_data:
+        tournament_views_data[tournament_key] = {}
+    
+    # If we already have this hour and it's not a duplicate, skip it
+    # If it's a duplicate, we'll overwrite with the latest data
+    tournament_views_data[tournament_key][hours] = {
+        'hours_since_start': hours,
+        'views': int(row['views']),
+        'score_0_count': int(row['score_0_count'])
+    }
 
-# print("Debug: Final tournament_views_data structure:", json.dumps(tournament_views_data, indent=2))
+# Convert the hour dictionaries back to lists for JSON serialization
+for tournament_key in tournament_views_data:
+    tournament_views_data[tournament_key] = list(tournament_views_data[tournament_key].values())
 
 # Get the absolute path for the output directory
 script_dir = os.path.dirname(os.path.abspath(__file__))

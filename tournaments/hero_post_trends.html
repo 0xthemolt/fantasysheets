@@ -10,6 +10,10 @@
         <canvas id="viewsChart"></canvas>
     </div>
 
+    <div style="width: 80%; margin: auto; margin-top: 50px;">
+        <canvas id="scoreZeroChart"></canvas>
+    </div>
+
     <script>
         Chart.register(ChartDataLabels);
         async function fetchData() {
@@ -24,7 +28,8 @@
             const latestTournament = Math.max(...Object.keys(data)
                 .map(key => parseInt(key.match(/\d+/)[0])));
             
-            const datasets = Object.entries(data).map(([tournament, values]) => ({
+            // Create dataset for views chart
+            const viewsDatasets = Object.entries(data).map(([tournament, values]) => ({
                 label: tournament,
                 data: values.map(item => ({
                     x: item.hours_since_start,
@@ -32,22 +37,62 @@
                 })),
                 fill: false,
                 tension: 0.4,
-                borderDash: tournament.includes(latestTournament.toString()) ? [5, 5] : [] // Make latest tournament dashed
+                borderDash: tournament.includes(latestTournament.toString()) ? [5, 5] : [], // Make latest tournament dashed
+                pointHoverRadius: 8, // Larger hover radius for points
+                pointHitRadius: 20   // Larger hit detection radius
             }));
 
+            // Create dataset for score_0_count chart
+            const scoreZeroDatasets = Object.entries(data).map(([tournament, values]) => ({
+                label: tournament,
+                data: values.map(item => ({
+                    x: item.hours_since_start,
+                    y: item.score_0_count
+                })),
+                fill: false,
+                tension: 0.4,
+                borderDash: tournament.includes(latestTournament.toString()) ? [5, 5] : [], // Make latest tournament dashed
+                pointHoverRadius: 8, // Larger hover radius for points
+                pointHitRadius: 20   // Larger hit detection radius
+            }));
+
+            // Common tooltip configuration
+            const tooltipConfig = {
+                enabled: true,
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleFont: {
+                    size: 14
+                },
+                bodyFont: {
+                    size: 13
+                },
+                padding: 10,
+                displayColors: true,
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderWidth: 1
+            };
+
+            // Views Chart
             new Chart(document.getElementById('viewsChart'), {
                 type: 'line',
                 data: {
-                    datasets: datasets.map(dataset => ({
+                    datasets: viewsDatasets.map(dataset => ({
                         ...dataset,
                         pointRadius: 0,
-                        pointHoverRadius: 0
+                        pointHoverRadius: 6
                     }))
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
                     aspectRatio: 1.875,
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
                     scales: {
                         x: {
                             type: 'linear',
@@ -64,9 +109,67 @@
                         }
                     },
                     plugins: {
+                        tooltip: tooltipConfig,
                         title: {
                             display: true,
                             text: 'Tournament Views Growth Over Time'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        datalabels: {
+                            display: function(context) {
+                                return context.dataIndex === context.dataset.data.length - 1;
+                            },
+                            align: 'right',
+                            anchor: 'end',
+                            formatter: function(value, context) {
+                                return context.dataset.label;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Score Zero Chart
+            new Chart(document.getElementById('scoreZeroChart'), {
+                type: 'line',
+                data: {
+                    datasets: scoreZeroDatasets.map(dataset => ({
+                        ...dataset,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.875,
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Hours Since Start'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '0 Scores'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: tooltipConfig,
+                        title: {
+                            display: true,
+                            text: '0 Scores Over Time'
                         },
                         legend: {
                             position: 'bottom'

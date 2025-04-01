@@ -99,7 +99,7 @@
         .col-total {
             width: 15%;
         }
-
+        
         /* Make the table container ensure the table doesn't overflow on small screens */
         .table-container {
             width: 100%;
@@ -195,7 +195,7 @@
             border: 1px solid #333;
             border-radius: 6px;
             margin-top: 4px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             z-index: 1000;
             display: none;
@@ -203,14 +203,14 @@
         }
         
         .autocomplete-item {
-            padding: 10px 12px;
+            padding: 4px 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             transition: background-color 0.2s;
             color: #fff;
-            border-bottom: 1px solid #333;
+            font-size: 12px;
         }
         
         .autocomplete-item:last-child {
@@ -222,8 +222,8 @@
         }
         
         .hero-preview-pic {
-            width: 28px;
-            height: 28px;
+            width: 21px;
+            height: 21px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid #444;
@@ -270,9 +270,27 @@
         
         .checkbox-label input {
             margin-right: 6px;
+            accent-color: transparent;
         }
         
-        /* Rarity-specific colors */
+        /* Rarity-specific colors for checked state */
+        .checkbox-label.legendary input:checked {
+            accent-color: #CACBD4;
+        }
+        
+        .checkbox-label.epic input:checked {
+            accent-color: #E890FE;
+        }
+        
+        .checkbox-label.rare input:checked {
+            accent-color: #00FFE2;
+        }
+        
+        .checkbox-label.common input:checked {
+            accent-color: #94FF00;
+        }
+        
+        /* Rarity-specific colors for label border */
         .checkbox-label.legendary {
             border-left: 3px solid #CACBD4;
         }
@@ -437,6 +455,28 @@
 
         th {
             border-bottom: none;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        th::after {
+            content: '↕';
+            position: absolute;
+            right: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        th.asc::after {
+            content: '↑';
+            color: #fff;
+        }
+
+        th.desc::after {
+            content: '↓';
+            color: #fff;
         }
 
         /* Scrollbar styling */
@@ -515,7 +555,7 @@
                 <label for="heroHandleSearch">Search by Hero Handle:</label>
                 <div class="search-input-container">
                     <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
-                    <button class="clear-search">×</button>
+                    <button class="clear-search"></button>
                 </div>
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
@@ -546,14 +586,14 @@
             <table id="cardHoldersTable">
                 <thead>
                     <tr>
-                        <th class="col-player">Player</th>
-                        <th class="col-last-trade">Last Trade</th>
-                        <th class="col-last-tournament">Last Main</th>
-                        <th class="col-legendary">Legendary</th>
-                        <th class="col-epic">Epic</th>
-                        <th class="col-rare">Rare</th>
-                        <th class="col-common">Common</th>
-                        <th class="col-total">Total Cards</th>
+                        <th class="col-player" data-sort="text">Player</th>
+                        <th class="col-last-trade" data-sort="number">Last Trade</th>
+                        <th class="col-last-tournament" data-sort="number">Last Main</th>
+                        <th class="col-legendary" data-sort="number">Legendary</th>
+                        <th class="col-epic" data-sort="number">Epic</th>
+                        <th class="col-rare" data-sort="number">Rare</th>
+                        <th class="col-common" data-sort="number">Common</th>
+                        <th class="col-total" data-sort="number">Total Cards</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -597,31 +637,27 @@
             try {
                 console.log('Executing query: Fetching unique hero handles with profile pictures');
                 const { data, error } = await supabaseClient
-                    .from('card_holders')
+                    .from('heroes')
                     .select('hero_handle, hero_pfp_url')
-                    .not('hero_handle', 'is', null)
-                    .order('hero_handle')
-                    .limit(1000);
+                    .eq('is_deleted', 0);
                 
                 if (error) {
                     console.error('Error fetching hero handles:', error);
                     return;
                 }
                 
-                // Extract unique hero handles with their profile pictures
-                const uniqueHandles = new Map();
-                data.forEach(item => {
-                    if (item.hero_handle && !uniqueHandles.has(item.hero_handle)) {
-                        uniqueHandles.set(item.hero_handle, item.hero_pfp_url);
-                    }
-                });
-                
-                allHeroHandles = Array.from(uniqueHandles.entries())
-                    .map(([handle, pfp]) => ({ handle, pfp }))
+                // Sort the handles alphabetically
+                allHeroHandles = data
+                    .map(item => ({ handle: item.hero_handle, pfp: item.hero_pfp_url }))
                     .sort((a, b) => a.handle.localeCompare(b.handle));
                 
                 console.log('Total unique hero handles loaded:', allHeroHandles.length);
                 console.log('First 10 handles:', allHeroHandles.slice(0, 10));
+                
+                // If we have handles, show the first 10 by default
+                if (allHeroHandles.length > 0) {
+                    showAutocompleteResults('');
+                }
                 
             } catch (error) {
                 console.error('Unexpected error fetching hero handles:', error);
@@ -846,9 +882,9 @@
             
             let matchingHandles;
             if (!inputValue || inputValue.trim() === '') {
-                // If no input, show first 10 handles
-                matchingHandles = allHeroHandles.slice(0, 10);
-                console.log('Showing first 10 handles:', matchingHandles.length);
+                // Show all handles if no input
+                matchingHandles = allHeroHandles;
+                console.log('Showing all handles:', matchingHandles.length);
             } else {
                 // Filter handles based on input
                 matchingHandles = allHeroHandles.filter(item => 
@@ -960,7 +996,6 @@
                 const searchInput = document.getElementById('heroHandleSearch');
                 const clearButton = document.createElement('button');
                 clearButton.className = 'clear-search';
-                clearButton.innerHTML = '×';
                 clearButton.title = 'Clear search';
                 searchInput.parentNode.appendChild(clearButton);
                 
@@ -999,6 +1034,9 @@
                     console.log('Setting initial search input value to:', currentFilter);
                     selectHeroHandle(currentFilter);
                 }
+                
+                // Set up table sorting
+                setupTableSorting();
                 
             } catch (error) {
                 console.error('Error initializing page:', error);
@@ -1045,6 +1083,68 @@
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
+        }
+
+        // Add sorting functionality
+        function setupTableSorting() {
+            const table = document.getElementById('cardHoldersTable');
+            const headers = table.querySelectorAll('th');
+            let currentSort = { column: null, direction: null };
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.cellIndex;
+                    const sortType = header.dataset.sort;
+                    
+                    // Remove sort classes from all headers
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+                    
+                    // Determine sort direction
+                    let direction = 'asc';
+                    if (currentSort.column === column) {
+                        direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    }
+                    
+                    // Update sort classes
+                    header.classList.add(direction);
+                    currentSort = { column, direction };
+                    
+                    // Sort the data
+                    sortTableData(column, direction, sortType);
+                });
+            });
+        }
+
+        function sortTableData(column, direction, sortType) {
+            const tbody = document.getElementById('tableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                let aValue = a.cells[column].textContent;
+                let bValue = b.cells[column].textContent;
+                
+                // Handle different sort types
+                switch(sortType) {
+                    case 'number':
+                        // Extract number from text (e.g., "5d ago" -> 5)
+                        aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, '')) || 0;
+                        bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, '')) || 0;
+                        break;
+                    case 'text':
+                        // Use text directly for alphabetical sorting
+                        aValue = aValue.toLowerCase();
+                        bValue = bValue.toLowerCase();
+                        break;
+                }
+                
+                // Compare values
+                if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Reorder the rows
+            rows.forEach(row => tbody.appendChild(row));
         }
     </script>
 </body>

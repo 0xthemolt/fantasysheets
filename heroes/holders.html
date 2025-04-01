@@ -490,18 +490,6 @@
             font-size: 12px;
         }
 
-        .sort-arrow.active {
-            color: #fff;
-        }
-
-        .sort-arrow.active.up::after {
-            content: '↑';
-        }
-
-        .sort-arrow.active.down::after {
-            content: '↓';
-        }
-
         /* Scrollbar styling */
         .autocomplete-results::-webkit-scrollbar {
             width: 6px;
@@ -1137,6 +1125,13 @@
             const table = document.getElementById('cardHoldersTable');
             const headers = table.querySelectorAll('th');
             let currentSort = { column: null, direction: 'asc' };
+
+            // Set initial sort on Total Cards column (descending)
+            const totalCardsHeader = headers[7]; // Total Cards column
+            const totalCardsArrow = totalCardsHeader.querySelector('.sort-arrow');
+            totalCardsArrow.className = 'sort-arrow active down';
+            currentSort = { column: 7, direction: 'desc' };
+            sortTableData(7, 'desc', 'number');
 
             headers.forEach(header => {
                 header.addEventListener('click', function() {

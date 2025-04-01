@@ -129,31 +129,72 @@
             font-weight: bold;
         }
         
+        .search-input-container {
+            position: relative;
+            width: 100%;
+        }
+        
         #heroHandleSearch {
             width: 100%;
             padding: 8px;
+            padding-right: 35px; /* Make room for the clear button */
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            background: #1a1a1a;
+            color: #fff;
         }
         
-        .autocomplete-results {
+        .clear-search {
             position: absolute;
-            width: 100%;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-top: none;
-            z-index: 100;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            padding: 4px;
             display: none;
+            font-size: 14px;
+        }
+        
+        .clear-search:hover {
+            color: #fff;
+        }
+        
+        .clear-search.visible {
+            display: block;
+        }
+        
+        .hero-preview-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #444;
         }
         
         .autocomplete-item {
             padding: 8px 10px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+            color: #fff;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
         }
-        
-        
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #2a2a2a;
+        }
+
         .clear-button {
             padding: 8px 15px;
             background-color: #f44336;
@@ -354,6 +395,24 @@
         th {
             border-bottom: none;
         }
+
+        /* Scrollbar styling */
+        .autocomplete-results::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .autocomplete-results::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .autocomplete-results::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        .autocomplete-results::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body>
@@ -363,7 +422,10 @@
         <div class="filter-container">
             <div class="search-box">
                 <label for="heroHandleSearch">Search by Hero Handle:</label>
-                <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
+                <div class="search-input-container">
+                    <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
+                    <button class="clear-search">×</button>
+                </div>
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
             
@@ -418,6 +480,7 @@
         
         let allHeroHandles = [];
         let currentFilter = 'travisbickle0x'; // Set initial filter
+        let currentData = []; // Store the current data for client-side filtering
 
         // Function to calculate days since a given timestamp
         function getDaysSince(timestamp) {
@@ -438,54 +501,214 @@
             return diffDays;
         }
 
-        // Function to fetch all unique hero handles
+        // Function to fetch all unique hero handles with profile pictures
         async function fetchUniqueHeroHandles() {
             try {
+                console.log('Executing query: Fetching unique hero handles with profile pictures');
                 const { data, error } = await supabaseClient
                     .from('card_holders')
-                    .select('hero_handle')
-                    .not('hero_handle', 'is', null); // Correct syntax for "is not null"
+                    .select('hero_handle, hero_pfp_url')
+                    .not('hero_handle', 'is', null)
+                    .order('hero_handle')
+                    .limit(1000);
                 
                 if (error) {
                     console.error('Error fetching hero handles:', error);
                     return;
                 }
                 
-                // Extract unique hero handles
-                const uniqueHandles = new Set();
+                // Extract unique hero handles with their profile pictures
+                const uniqueHandles = new Map();
                 data.forEach(item => {
-                    if (item.hero_handle) {
-                        uniqueHandles.add(item.hero_handle);
+                    if (item.hero_handle && !uniqueHandles.has(item.hero_handle)) {
+                        uniqueHandles.set(item.hero_handle, item.hero_pfp_url);
                     }
                 });
                 
-                allHeroHandles = Array.from(uniqueHandles).sort();
-                console.log('Fetched hero handles:', allHeroHandles);
+                allHeroHandles = Array.from(uniqueHandles.entries())
+                    .map(([handle, pfp]) => ({ handle, pfp }))
+                    .sort((a, b) => a.handle.localeCompare(b.handle));
+                
+                console.log('Processed hero handles count:', allHeroHandles.length);
                 
             } catch (error) {
                 console.error('Unexpected error fetching hero handles:', error);
             }
         }
 
+        // Function to filter and display data
+        function filterAndDisplayData() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            // Get filter states
+            const filterLegendary = document.getElementById('filterLegendary').checked;
+            const filterEpic = document.getElementById('filterEpic').checked;
+            const filterRare = document.getElementById('filterRare').checked;
+            const filterCommon = document.getElementById('filterCommon').checked;
+            
+            // Filter data based on seller_order_count and selected rarities
+            const filteredData = currentData.filter(holder => {
+                // If no rarity filters are selected, show all data
+                if (!filterLegendary && !filterEpic && !filterRare && !filterCommon) {
+                    return true;
+                }
+                
+                // If seller has no orders, filter them out when any filter is selected
+                const totalOrders = (holder.seller_legendary_order_count || 0) + 
+                                    (holder.seller_epic_order_count || 0) + 
+                                    (holder.seller_rare_order_count || 0) + 
+                                    (holder.seller_common_order_count || 0);
+                if (totalOrders === 0) {
+                    return false;
+                }
+                
+                // Check if the holder has cards of ANY of the selected rarities (OR logic)
+                if (filterLegendary && holder.legendary_cards > 0) return true;
+                if (filterEpic && holder.epic_cards > 0) return true;
+                if (filterRare && holder.rare_cards > 0) return true;
+                if (filterCommon && holder.common_cards > 0) return true;
+                
+                return false;
+            });
+            
+            console.log('Filtered data count:', filteredData.length);
+            
+            // Populate the table with filtered data
+            filteredData.forEach(holder => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="col-player">
+                        <img src="${holder.profile_picture}" 
+                             alt="${holder.player_name}" 
+                             class="profile-pic"
+                             onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
+                        <span class="player-name">${escapeHtml(holder.player_name)}</span>
+                        <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                        <i class="fas fa-copy copy-icon" 
+                           style="font-size: 0.8em; color: #777; margin-left: 4px; cursor: pointer; text-decoration: none;"
+                           data-handle="${holder.player_handle.replace(/[_]/g, '\\_')}"
+                           title="@${holder.player_handle.slice(0,5)}...${holder.player_handle.slice(-4)}"
+                           onclick="copyToClipboard('${holder.player_handle.replace(/'/g, "\\'")}', event)"></i>
+                    </td>
+                    <td class="col-last-trade">
+                        ${holder.last_trade_timestamp ? 
+                          `${getDaysSince(holder.last_trade_timestamp)}d ago` : 
+                          'N/A'}
+                    </td>
+                    <td class="col-last-tournament">MT
+                        ${holder.last_tournament ? 
+                          `${(holder.last_tournament)}` : 
+                          'N/A'}
+                    </td>
+                    <td class="col-legendary">
+                        ${holder.legendary_cards > 0 ? 
+                            `<div class="card-cell">
+                                <div class="card-count">${holder.legendary_cards}</div>
+                                <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
+                                <div class="order-count">
+                                    ${holder.seller_legendary_order_count > 0 ? 
+                                        `<span class="tooltip">
+                                            <div class="cart-container">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span class="cart-number">${holder.seller_legendary_order_count}</span>
+                                            </div>
+                                        </span>` : 
+                                        ''}
+                                </div>
+                             </div>` : 
+                            ''}
+                    </td>
+                    <td class="col-epic">
+                        ${holder.epic_cards > 0 ? 
+                            `<div class="card-cell">
+                                <div class="card-count">${holder.epic_cards}</div>
+                                <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
+                                <div class="order-count">
+                                    ${holder.seller_epic_order_count > 0 ? 
+                                        `<span class="tooltip">
+                                            <div class="cart-container">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span class="cart-number">${holder.seller_epic_order_count}</span>
+                                            </div>
+                                        </span>` : 
+                                        ''}
+                                </div>
+                             </div>` : 
+                            ''}
+                    </td>
+                    <td class="col-rare">
+                        ${holder.rare_cards > 0 ? 
+                            `<div class="card-cell">
+                                <div class="card-count">${holder.rare_cards}</div>
+                                <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
+                                <div class="order-count">
+                                    ${holder.seller_rare_order_count > 0 ? 
+                                        `<span class="tooltip">
+                                            <div class="cart-container">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span class="cart-number">${holder.seller_rare_order_count}</span>
+                                            </div>
+                                        </span>` : 
+                                        ''}
+                                </div>
+                             </div>` : 
+                            ''}
+                    </td>
+                    <td class="col-common">
+                        ${holder.common_cards > 0 ? 
+                            `<div class="card-cell">
+                                <div class="card-count">${holder.common_cards}</div>
+                                <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
+                                <div class="order-count">
+                                    ${holder.seller_common_order_count > 0 ? 
+                                        `<span class="tooltip">
+                                            <div class="cart-container">
+                                                <i class="fas fa-shopping-cart"></i>
+                                                <span class="cart-number">${holder.seller_common_order_count}</span>
+                                            </div>
+                                        </span>` : 
+                                        ''}
+                                </div>
+                             </div>` : 
+                            ''}
+                    </td>
+                    <td class="col-total">${holder.aggregate_cards || 0}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            console.log('Table populated with rows:', tableBody.children.length);
+        }
+
         // Function to fetch and display card holders data
         async function fetchAndDisplayCardHolders(heroHandle = null) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading...</td></tr>';
+            
             try {
-                // Get filter states
-                const filterLegendary = document.getElementById('filterLegendary').checked;
-                const filterEpic = document.getElementById('filterEpic').checked;
-                const filterRare = document.getElementById('filterRare').checked;
-                const filterCommon = document.getElementById('filterCommon').checked;
+                console.log('fetchAndDisplayCardHolders called with heroHandle:', heroHandle);
                 
                 // Base query
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_order_count')
+                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count, holder_freshness_utc, sellorder_freshness_utc')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter if specified
                 if (heroHandle) {
+                    console.log('Applying hero_handle filter:', heroHandle);
                     query = query.eq('hero_handle', heroHandle);
                 }
+                
+                console.log('Executing query with parameters:', {
+                    table: 'card_holders',
+                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count, holder_freshness_utc, sellorder_freshness_utc',
+                    order: 'aggregate_cards DESC',
+                    filter: heroHandle ? `hero_handle = ${heroHandle}` : 'none'
+                });
                 
                 // Fetch data
                 const { data, error } = await query;
@@ -495,137 +718,19 @@
                     return;
                 }
                 
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = ''; // Clear any existing content
+                console.log('Query result count:', data.length);
+                if (data.length > 0) {
+                    console.log('First record:', data[0]);
+                }
                 
-                // Filter data based on seller_order_count and selected rarities
-                const filteredData = data.filter(holder => {
-                    // If no rarity filters are selected, show all data
-                    if (!filterLegendary && !filterEpic && !filterRare && !filterCommon) {
-                        return true;
-                    }
-                    
-                    // If seller has no orders, filter them out when any filter is selected
-                    if (holder.seller_order_count === 0 || holder.seller_order_count === null) {
-                        return false;
-                    }
-                    
-                    // Check if the holder has cards of the selected rarities
-                    if (filterLegendary && holder.legendary_cards > 0) return true;
-                    if (filterEpic && holder.epic_cards > 0) return true;
-                    if (filterRare && holder.rare_cards > 0) return true;
-                    if (filterCommon && holder.common_cards > 0) return true;
-                    
-                    return false;
-                });
+                // Store the fetched data
+                currentData = data;
                 
-                // Populate the table with filtered data
-                filteredData.forEach(holder => {
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td class="col-player">
-                                <img src="${holder.profile_picture}" 
-                                     alt="${holder.player_name}" 
-                                     class="profile-pic"
-                                     onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
-                                <span class="player-name">${holder.player_name}</span>
-                                <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
-                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                                </a>
-                                <i class="fas fa-copy copy-icon" 
-                                   style="font-size: 0.8em; color: #777; margin-left: 4px; cursor: pointer; text-decoration: none;"
-                                   data-handle="${holder.player_handle.replace(/[_]/g, '\\_')}"
-                                   title="@${holder.player_handle.slice(0,5)}...${holder.player_handle.slice(-4)}"
-                                   onclick="copyToClipboard('${holder.player_handle.replace(/'/g, "\\'")}')"></i>
-                            </td>
-                            <td class="col-last-trade">
-                                ${holder.last_trade_timestamp ? 
-                                  `${getDaysSince(holder.last_trade_timestamp)}d ago` : 
-                                  'N/A'}
-                            </td>
-                            <td class="col-last-tournament">MT
-                                ${holder.last_tournament ? 
-                                  `${(holder.last_tournament)}` : 
-                                  'N/A'}
-                            </td>
-                            <td class="col-legendary">
-                                ${holder.legendary_cards > 0 ? 
-                                    `<div class="card-cell">
-                                        <div class="card-count">${holder.legendary_cards}</div>
-                                        <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
-                                        <div class="order-count">
-                                            ${holder.seller_order_count > 0 ? 
-                                                `<span class="tooltip">
-                                                    <div class="cart-container">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                        <span class="cart-number">${holder.seller_order_count}</span>
-                                                    </div>
-                                                </span>` : 
-                                                ''}
-                                        </div>
-                                     </div>` : 
-                                    ''}
-                            </td>
-                            <td class="col-epic">
-                                ${holder.epic_cards > 0 ? 
-                                    `<div class="card-cell">
-                                        <div class="card-count">${holder.epic_cards}</div>
-                                        <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
-                                        <div class="order-count">
-                                            ${holder.seller_order_count > 0 ? 
-                                                `<span class="tooltip">
-                                                    <div class="cart-container">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                        <span class="cart-number">${holder.seller_order_count}</span>
-                                                    </div>
-                                                </span>` : 
-                                                ''}
-                                        </div>
-                                     </div>` : 
-                                    ''}
-                            </td>
-                            <td class="col-rare">
-                                ${holder.rare_cards > 0 ? 
-                                    `<div class="card-cell">
-                                        <div class="card-count">${holder.rare_cards}</div>
-                                        <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
-                                        <div class="order-count">
-                                            ${holder.seller_order_count > 0 ? 
-                                                `<span class="tooltip">
-                                                    <div class="cart-container">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                        <span class="cart-number">${holder.seller_order_count}</span>
-                                                    </div>
-                                                </span>` : 
-                                                ''}
-                                        </div>
-                                     </div>` : 
-                                    ''}
-                            </td>
-                            <td class="col-common">
-                                ${holder.common_cards > 0 ? 
-                                    `<div class="card-cell">
-                                        <div class="card-count">${holder.common_cards}</div>
-                                        <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
-                                        <div class="order-count">
-                                            ${holder.seller_order_count > 0 ? 
-                                                `<span class="tooltip">
-                                                    <div class="cart-container">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                        <span class="cart-number">${holder.seller_order_count}</span>
-                                                    </div>
-                                                </span>` : 
-                                                ''}
-                                        </div>
-                                     </div>` : 
-                                    ''}
-                            </td>
-                            <td class="col-total">${holder.aggregate_cards || 0}</td>
-                        </tr>
-                    `;
-                });
+                // Filter and display the data
+                filterAndDisplayData();
                 
             } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Error loading data</td></tr>';
                 console.error('Unexpected error:', error);
             }
         }
@@ -635,65 +740,102 @@
             const resultsContainer = document.getElementById('autocompleteResults');
             resultsContainer.innerHTML = '';
             
-            if (!inputValue) {
-                resultsContainer.style.display = 'none';
-                return;
-            }
-            
             // Check if we have hero handles loaded
             if (!allHeroHandles || allHeroHandles.length === 0) {
                 console.warn('No hero handles available for autocomplete');
                 return;
             }
             
-            const matchingHandles = allHeroHandles.filter(handle => 
-                handle.toLowerCase().includes(inputValue.toLowerCase())
-            );
+            let matchingHandles;
+            if (!inputValue) {
+                // If no input, show first 10 handles
+                matchingHandles = allHeroHandles.slice(0, 10);
+            } else {
+                // Filter handles based on input
+                matchingHandles = allHeroHandles.filter(item => 
+                    item.handle.toLowerCase().includes(inputValue.toLowerCase())
+                );
+            }
             
-            if (matchingHandles.length === 0) {
+            displayHeroHandles(matchingHandles);
+        }
+
+        function displayHeroHandles(handles) {
+            const resultsContainer = document.getElementById('autocompleteResults');
+            
+            if (handles.length === 0) {
                 resultsContainer.style.display = 'none';
                 return;
             }
             
-            // Limit to top 10 matches for better performance
-            const limitedMatches = matchingHandles.slice(0, 10);
-            
-            limitedMatches.forEach(handle => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                item.textContent = handle;
-                item.addEventListener('click', () => {
-                    document.getElementById('heroHandleSearch').value = handle;
+            handles.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                
+                const img = document.createElement('img');
+                img.src = item.pfp || '/icons/ft_logo.webp';
+                img.alt = item.handle;
+                img.className = 'hero-preview-pic';
+                img.onerror = function() {
+                    this.src = '/icons/ft_logo.webp';
+                };
+                
+                const span = document.createElement('span');
+                span.textContent = item.handle;
+                
+                div.appendChild(img);
+                div.appendChild(span);
+                
+                div.addEventListener('click', () => {
+                    document.getElementById('heroHandleSearch').value = item.handle;
                     resultsContainer.style.display = 'none';
-                    currentFilter = handle;
-                    fetchAndDisplayCardHolders(handle);
+                    currentFilter = item.handle;
+                    fetchAndDisplayCardHolders(item.handle);
                 });
-                resultsContainer.appendChild(item);
+                
+                resultsContainer.appendChild(div);
             });
             
-            // Only show if we have results
-            if (limitedMatches.length > 0) {
-                resultsContainer.style.display = 'block';
-            }
+            resultsContainer.style.display = 'block';
         }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                console.log('Initializing page with currentFilter:', currentFilter);
+                
                 // Fetch unique hero handles for autocomplete
                 await fetchUniqueHeroHandles();
                 
                 // Set up search input event listeners
                 const searchInput = document.getElementById('heroHandleSearch');
+                const clearButton = document.createElement('button');
+                clearButton.className = 'clear-search';
+                clearButton.innerHTML = '×';
+                clearButton.title = 'Clear search';
+                searchInput.parentNode.appendChild(clearButton);
+                
+                // Show/hide clear button based on input value
+                function updateClearButton() {
+                    clearButton.classList.toggle('visible', searchInput.value.length > 0);
+                }
+                
+                clearButton.addEventListener('click', () => {
+                    searchInput.value = '';
+                    currentFilter = null;
+                    updateClearButton();
+                    showAutocompleteResults('');
+                    fetchAndDisplayCardHolders();
+                });
                 
                 searchInput.addEventListener('input', () => {
+                    updateClearButton();
                     showAutocompleteResults(searchInput.value);
                 });
                 
                 searchInput.addEventListener('focus', () => {
-                    if (searchInput.value) {
-                        showAutocompleteResults(searchInput.value);
-                    }
+                    // Always show results on focus, regardless of input value
+                    showAutocompleteResults(searchInput.value);
                 });
                 
                 // Handle clicks outside the autocomplete dropdown
@@ -703,27 +845,14 @@
                     }
                 });
                 
-                // Clear filter button
-                document.getElementById('clearFilter').addEventListener('click', () => {
-                    // Clear hero handle search
-                    document.getElementById('heroHandleSearch').value = '';
-                    currentFilter = null;
-                    
-                    // Uncheck all filter checkboxes
-                    document.getElementById('filterLegendary').checked = false;
-                    document.getElementById('filterEpic').checked = false;
-                    document.getElementById('filterRare').checked = false;
-                    document.getElementById('filterCommon').checked = false;
-                    
-                    fetchAndDisplayCardHolders();
-                });
-                
                 // Set up filter checkbox listeners
                 setupFilterListeners();
                 
                 // Initial load with filter for travisbickle0x
+                console.log('Setting initial search input value to:', currentFilter);
                 searchInput.value = currentFilter;
-                fetchAndDisplayCardHolders(currentFilter);
+                console.log('Fetching initial data with filter:', currentFilter);
+                await fetchAndDisplayCardHolders(currentFilter);
                 
             } catch (error) {
                 console.error('Error initializing page:', error);
@@ -741,15 +870,15 @@
             
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
-                    const heroHandle = document.getElementById('heroHandleSearch').value || null;
-                    fetchAndDisplayCardHolders(heroHandle);
+                    // Filter the existing data instead of fetching again
+                    filterAndDisplayData();
                 });
             });
         }
 
-        function copyToClipboard(text) {
+        function copyToClipboard(text, event) {
+            if (!event) return;
             navigator.clipboard.writeText(text).then(() => {
-                // Optional: Show a brief visual feedback that the copy worked
                 const copyIcon = event.target;
                 copyIcon.classList.remove('fa-copy');
                 copyIcon.classList.add('fa-check');
@@ -760,6 +889,16 @@
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
             });
+        }
+
+        // Add a helper function:
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>

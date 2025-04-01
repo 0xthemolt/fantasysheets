@@ -461,7 +461,8 @@
             padding-right: 20px;
         }
 
-        th::after {
+        /* Remove these old arrow styles */
+        /* th::after {
             content: '↕';
             position: absolute;
             right: 5px;
@@ -477,6 +478,28 @@
         th.desc::after {
             content: '↓';
             color: #fff;
+        } */
+
+        /* Keep only the new sort arrow styles */
+        .sort-arrow {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 12px;
+        }
+
+        .sort-arrow.active {
+            color: #fff;
+        }
+
+        .sort-arrow.active.up::after {
+            content: '↑';
+        }
+
+        .sort-arrow.active.down::after {
+            content: '↓';
         }
 
         /* Scrollbar styling */
@@ -586,14 +609,38 @@
             <table id="cardHoldersTable">
                 <thead>
                     <tr>
-                        <th class="col-player" data-sort="text">Player</th>
-                        <th class="col-last-trade" data-sort="number">Last Trade</th>
-                        <th class="col-last-tournament" data-sort="number">Last Main</th>
-                        <th class="col-legendary" data-sort="number">Legendary</th>
-                        <th class="col-epic" data-sort="number">Epic</th>
-                        <th class="col-rare" data-sort="number">Rare</th>
-                        <th class="col-common" data-sort="number">Common</th>
-                        <th class="col-total" data-sort="number">Total Cards</th>
+                        <th class="col-player" data-sort="text">
+                            Player
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-last-trade" data-sort="number">
+                            Last Trade
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-last-tournament" data-sort="number">
+                            Last Main
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-legendary" data-sort="number">
+                            Legendary
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-epic" data-sort="number">
+                            Epic
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-rare" data-sort="number">
+                            Rare
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-common" data-sort="number">
+                            Common
+                            <span class="sort-arrow"></span>
+                        </th>
+                        <th class="col-total" data-sort="number">
+                            Total Cards
+                            <span class="sort-arrow"></span>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -1089,28 +1136,35 @@
         function setupTableSorting() {
             const table = document.getElementById('cardHoldersTable');
             const headers = table.querySelectorAll('th');
-            let currentSort = { column: null, direction: null };
+            let currentSort = { column: null, direction: 'asc' };
 
             headers.forEach(header => {
-                header.addEventListener('click', () => {
-                    const column = header.cellIndex;
-                    const sortType = header.dataset.sort;
+                header.addEventListener('click', function() {
+                    const column = this.cellIndex;
+                    const sortType = this.dataset.sort;
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
                     
-                    // Remove sort classes from all headers
-                    headers.forEach(h => h.classList.remove('asc', 'desc'));
-                    
-                    // Determine sort direction
-                    let direction = 'asc';
+                    // Reset all arrows
+                    headers.forEach(h => {
+                        h.querySelector('.sort-arrow').className = 'sort-arrow';
+                    });
+
+                    // Update sort direction
                     if (currentSort.column === column) {
-                        direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        // Set default sort direction based on column type
+                        currentSort.direction = sortType === 'text' ? 'asc' : 'desc';
                     }
-                    
-                    // Update sort classes
-                    header.classList.add(direction);
-                    currentSort = { column, direction };
+
+                    // Update arrow on clicked header
+                    const arrow = this.querySelector('.sort-arrow');
+                    arrow.className = `sort-arrow active ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
                     
                     // Sort the data
-                    sortTableData(column, direction, sortType);
+                    sortTableData(column, currentSort.direction, sortType);
                 });
             });
         }

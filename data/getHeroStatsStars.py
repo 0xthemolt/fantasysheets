@@ -41,7 +41,7 @@ with get_db_connection('main') as conn:
     cursor = conn.cursor()
     
     # Get star ranges
-    star_ranges_query = f"""CALL master.update_star_ranges();
+    star_ranges_query = f"""CALL master.update_star_ranges();  
     select * from master.star_ranges
     """
     cursor.execute(star_ranges_query)
@@ -53,7 +53,7 @@ with get_db_connection('main') as conn:
     # Get hero stats
     hero_stats_query = f"""
    with l3_main as (
-    select ghwst.hero_id , PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ghwst.fantasy_score_afk) l3_main_median  
+    select ghwst.hero_id , PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ghwst.fantasy_Score) l3_main_median  
     from flatten.get_heros_with_stats_tournament ghwst 
     join flatten.get_tournaments gt 
         on ghwst.tournament_id  = gt.tournament_id 
@@ -65,7 +65,7 @@ with get_db_connection('main') as conn:
     group by 1
     )
     ,last_main as ( 
-    select ghwst.hero_id , ghwst.fantasy_score_afk last_main  
+    select ghwst.hero_id , ghwst.fantasy_Score last_main  
     from flatten.get_heros_with_stats_tournament ghwst 
     join flatten.get_tournaments gt 
         on ghwst.tournament_id  = gt.tournament_id 
@@ -77,8 +77,8 @@ with get_db_connection('main') as conn:
     select ghss.hero_handle,ghss.hero_name,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
     ,ghss.seven_day_fantasy_score  as seven_day_score
     ,gcfs.hero_stars as current_stars
-    ,projected_star.stars as projected_stars
-    ,projected_star.stars - gcfs.hero_stars  as projected_stars_diff
+    ,projected_star.hero_stars as projected_stars
+    ,projected_star.hero_stars - gcfs.hero_stars  as projected_stars_diff
     ,current_star.top_range
     ,ghss.seven_day_fantasy_score
     ,l3_main.l3_main_median
@@ -97,8 +97,8 @@ with get_db_connection('main') as conn:
         and gcfs.snapshot_rank = 1
     left join master.star_ranges current_star
         on gcfs.hero_stars = current_star.stars 
-    left join master.star_ranges projected_star
-        on ghss.seven_day_fantasy_score  between projected_star.bottom_range and projected_star.top_range
+    left join master.hero_stars  projected_star
+        on ghss.hero_id  = projected_star.hero_id
     left join l3_main
         on ghss.hero_id  = l3_main.hero_id
     left join last_main
@@ -142,9 +142,15 @@ final_merged_df = (hero_stats_df
 
 # Calculate score_per_eth
 final_merged_df['score_per_eth'] = (
-    (final_merged_df['seven_day_fantasy_score'] + final_merged_df['last_main']) / 2 / 
-    final_merged_df['common_floor']
-) / 100
+    ((final_merged_df['seven_day_fantasy_score'].astype(float) + final_merged_df['last_main'].astype(float)) / 2 / 
+    final_merged_df['common_floor'].astype(float).replace(0, float('inf')))
+    / 100
+).where(
+    ((final_merged_df['seven_day_fantasy_score'] != 0) | (final_merged_df['last_main'] != 0)) & 
+    (final_merged_df['common_floor'].notna()) & 
+    (final_merged_df['common_floor'] != 0), 
+    0
+)
 
 # Add debug print for final merged DataFrame
 print("\n=== Final Merged DataFrame ===")

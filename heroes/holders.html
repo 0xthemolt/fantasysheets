@@ -746,7 +746,7 @@
                              alt="${holder.player_name}" 
                              class="profile-pic"
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
-                        <span class="player-name">${escapeHtml(holder.player_name)}</span>
+                        <span class="player-name">${escapeHtml(holder.player_name.length > 18 ? holder.player_name.substring(0, 18) + '...' : holder.player_name)}</span>
                         <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
                             <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                         </a>

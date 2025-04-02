@@ -865,7 +865,7 @@
                 // Base query
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count, holder_freshness_utc, sellorder_freshness_utc')
+                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter
@@ -874,7 +874,7 @@
                 
                 console.log('Executing query with parameters:', {
                     table: 'card_holders',
-                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count, holder_freshness_utc, sellorder_freshness_utc',
+                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc',
                     order: 'aggregate_cards DESC',
                     filter: `hero_handle = ${heroHandle}`
                 });

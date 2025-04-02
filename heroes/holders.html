@@ -332,9 +332,68 @@
             align-items: center;
         }
 
-        .order-count i {
-            margin-right: 0;
+        .seller-details {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #2a2a2a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            min-height: 24px;
+        }
+
+        .seller-details .cart-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-right: 4px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .seller-details .cart-number {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #444;
+            color: #fff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 14px;
+            min-height: 14px;
+        }
+
+        .seller-details .price {
+            font-size: 0.8em;
+            color: #94FF00;
+            margin-left: 4px;
+        }
+
+        .seller-details i {
+            font-size: 0.9em;
             color: #888;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seller-details:hover {
+            background: #3a3a3a;
+        }
+
+        .seller-details:hover i {
+            color: #aaa;
+        }
+
+        .seller-details:hover .price {
+            color: #B4FF33;
         }
 
         /* Position the number over the cart icon - simplified centering */
@@ -773,12 +832,13 @@
                                 <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
                                 <div class="order-count">
                                     ${holder.seller_legendary_order_count > 0 ? 
-                                        `<span class="tooltip">
+                                        `<div class="seller-details">
                                             <div class="cart-container">
                                                 <i class="fas fa-shopping-cart"></i>
                                                 <span class="cart-number">${holder.seller_legendary_order_count}</span>
                                             </div>
-                                        </span>` : 
+                                            <span class="price">${(holder.seller_legendary_price || 0).toFixed(3)}</span>
+                                        </div>` : 
                                         ''}
                                 </div>
                              </div>` : 
@@ -791,12 +851,13 @@
                                 <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
                                 <div class="order-count">
                                     ${holder.seller_epic_order_count > 0 ? 
-                                        `<span class="tooltip">
+                                        `<div class="seller-details">
                                             <div class="cart-container">
                                                 <i class="fas fa-shopping-cart"></i>
                                                 <span class="cart-number">${holder.seller_epic_order_count}</span>
                                             </div>
-                                        </span>` : 
+                                            <span class="price">${(holder.seller_epic_price || 0).toFixed(3)}</span>
+                                        </div>` : 
                                         ''}
                                 </div>
                              </div>` : 
@@ -809,12 +870,13 @@
                                 <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
                                 <div class="order-count">
                                     ${holder.seller_rare_order_count > 0 ? 
-                                        `<span class="tooltip">
+                                        `<div class="seller-details">
                                             <div class="cart-container">
                                                 <i class="fas fa-shopping-cart"></i>
                                                 <span class="cart-number">${holder.seller_rare_order_count}</span>
                                             </div>
-                                        </span>` : 
+                                            <span class="price">${(holder.seller_rare_price || 0).toFixed(3)}</span>
+                                        </div>` : 
                                         ''}
                                 </div>
                              </div>` : 
@@ -827,12 +889,13 @@
                                 <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
                                 <div class="order-count">
                                     ${holder.seller_common_order_count > 0 ? 
-                                        `<span class="tooltip">
+                                        `<div class="seller-details">
                                             <div class="cart-container">
                                                 <i class="fas fa-shopping-cart"></i>
                                                 <span class="cart-number">${holder.seller_common_order_count}</span>
                                             </div>
-                                        </span>` : 
+                                            <span class="price">${(holder.seller_common_price || 0).toFixed(3)}</span>
+                                        </div>` : 
                                         ''}
                                 </div>
                              </div>` : 

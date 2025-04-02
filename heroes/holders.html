@@ -1175,9 +1175,17 @@
                 // Handle different sort types
                 switch(sortType) {
                     case 'number':
-                        // Extract number from text (e.g., "5d ago" -> 5)
-                        aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, '')) || 0;
-                        bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, '')) || 0;
+                        // For rarity columns (3-6), extract the card count from the card-count div
+                        if (column >= 3 && column <= 6) {
+                            const aCardCount = a.cells[column].querySelector('.card-count')?.textContent || '0';
+                            const bCardCount = b.cells[column].querySelector('.card-count')?.textContent || '0';
+                            aValue = parseFloat(aCardCount) || 0;
+                            bValue = parseFloat(bCardCount) || 0;
+                        } else {
+                            // For other number columns, extract number from text (e.g., "5d ago" -> 5)
+                            aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, '')) || 0;
+                            bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, '')) || 0;
+                        }
                         break;
                     case 'text':
                         // Use text directly for alphabetical sorting

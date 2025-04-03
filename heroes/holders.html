@@ -327,35 +327,37 @@
             background-color: #3a3a3a;
         }
         
-        .order-count {
+        .order-content {
             flex: 1;
             font-size: 0.8em;
             color: #888;
-            text-align: left;
+            text-align: right;
             padding-left: 8px;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
         }
 
-        .order-count i {
-            margin-right: 0;
+        .order-price {
+            font-weight: 500;
             color: #888;
+            margin-right: 4px;
         }
 
-        /* Position the number over the cart icon - simplified centering */
         .cart-container {
-            position: relative;
-            display: inline-block;
-            margin-right: 5px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
         }
 
         .cart-number {
-            position: absolute;
-            top: -10px; /* Move slightly higher */
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Ensure perfect centering */
-            font-size: 0.9em;
+            font-size: 1em;
             font-weight: bold;
+        }
+
+        .cart-icon {
+            font-size: 11px;
+            color: #888;
         }
 
         /* Simple tooltip */
@@ -387,11 +389,18 @@
             text-align: center;
         }
 
-        .card-count {
-            flex: 1;
-            text-align: right;
+        .card-content {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
             padding-right: 8px;
+        }
+
+        .card-count {
             font-weight: bold;
+            min-width: 20px;
+            text-align: left;
         }
 
         .card-icon {
@@ -463,7 +472,12 @@
             cursor: pointer;
             user-select: none;
             position: relative;
-            padding-right: 20px;
+            text-align: center !important; /* Center all headers */
+        }
+
+        /* Keep the player column left-aligned since it has profile pics and names */
+        th.col-player {
+            text-align: left !important;
         }
 
         /* Remove these old arrow styles */
@@ -602,8 +616,7 @@
             font-size: 8px;
             font-weight: bold;
             color: white;
-            margin: 2px auto;
-            text-align: center;
+            margin: 2px;
         }
 
         .cat-week { background-color: rgba(46, 204, 113, 0.5); }
@@ -689,28 +702,27 @@
     font-size: 14px;
     }
 
-        td.col-last-trade {
-            text-align: center;
-            vertical-align: middle;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
+        td.col-last-trade, td.col-last-tournament {
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 8px 4px !important;
         }
-        
-        /* Tournament circles styling improvements */
-        td.col-last-tournament {
-            text-align: center;
-            vertical-align: middle;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+
+        th.col-last-trade, th.col-last-tournament {
+            text-align: center !important;
         }
     </style>
 </head>
 <body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Card Holders
+        </h1>
+    </div>
     <div class="container">
-        <h1>Card Holders</h1>
 
         <div class="filter-container">
             <div class="search-box">
@@ -912,22 +924,20 @@
                 
                 // Check trade activity filters
                 let passesTradeFilter = true;
-                if (filterWeek || filterMonth || filterQuarter || filterInactive) {
-                    const daysAgo = holder.last_trade_timestamp ? getDaysSince(holder.last_trade_timestamp) : null;
+                const daysAgo = holder.last_trade_timestamp ? getDaysSince(holder.last_trade_timestamp) : null;
+                
+                // If no trade activity filters are selected, show all
+                if (!filterWeek && !filterMonth && !filterQuarter && !filterInactive) {
+                    passesTradeFilter = true;
+                } else {
+                    passesTradeFilter = false;
                     
-                    // If no trade activity filters are selected, show all
-                    if (!filterWeek && !filterMonth && !filterQuarter && !filterInactive) {
+                    if (daysAgo !== null) {
+                        if (daysAgo <= 7 && filterWeek) passesTradeFilter = true;
+                        if (daysAgo > 7 && daysAgo <= 30 && filterMonth) passesTradeFilter = true;
+                        if (daysAgo > 30 && daysAgo <= 90 && filterQuarter) passesTradeFilter = true;
+                    } else if (filterInactive) {
                         passesTradeFilter = true;
-                    } else {
-                        passesTradeFilter = false;
-                        
-                        if (daysAgo !== null) {
-                            if (daysAgo <= 7 && filterWeek) passesTradeFilter = true;
-                            if (daysAgo <= 30 && filterMonth) passesTradeFilter = true;
-                            if (daysAgo <= 90 && filterQuarter) passesTradeFilter = true;
-                        } else if (filterInactive) {
-                            passesTradeFilter = true;
-                        }
                     }
                 }
                 
@@ -1025,15 +1035,18 @@
                         <td class="col-legendary">
                             ${holder.legendary_cards > 0 ? 
                                 `<div class="card-cell">
-                                    <div class="card-count">${holder.legendary_cards}</div>
-                                    <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
-                                    <div class="order-count">
+                                    <div class="card-content">
+                                        <div class="card-count">${holder.legendary_cards}</div>
+                                        <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
+                                    </div>
+                                    <div class="order-content">
                                         ${holder.seller_legendary_order_count > 0 ? 
                                             `<span class="tooltip">
                                                 <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
                                                     <span class="cart-number">${holder.seller_legendary_order_count}</span>
+                                                    <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
+                                                <div class="order-price">${holder.seller_legendary_price}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1043,15 +1056,18 @@
                         <td class="col-epic">
                             ${holder.epic_cards > 0 ? 
                                 `<div class="card-cell">
-                                    <div class="card-count">${holder.epic_cards}</div>
-                                    <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
-                                    <div class="order-count">
+                                    <div class="card-content">
+                                        <div class="card-count">${holder.epic_cards}</div>
+                                        <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
+                                    </div>
+                                    <div class="order-content">
                                         ${holder.seller_epic_order_count > 0 ? 
                                             `<span class="tooltip">
                                                 <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
                                                     <span class="cart-number">${holder.seller_epic_order_count}</span>
+                                                    <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
+                                                <div class="order-price">${holder.seller_epic_price}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1061,15 +1077,18 @@
                         <td class="col-rare">
                             ${holder.rare_cards > 0 ? 
                                 `<div class="card-cell">
-                                    <div class="card-count">${holder.rare_cards}</div>
-                                    <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
-                                    <div class="order-count">
+                                    <div class="card-content">
+                                        <div class="card-count">${holder.rare_cards}</div>
+                                        <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
+                                    </div>
+                                    <div class="order-content">
                                         ${holder.seller_rare_order_count > 0 ? 
                                             `<span class="tooltip">
                                                 <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
                                                     <span class="cart-number">${holder.seller_rare_order_count}</span>
+                                                    <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
+                                                <div class="order-price">${holder.seller_rare_price}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1079,15 +1098,18 @@
                         <td class="col-common">
                             ${holder.common_cards > 0 ? 
                                 `<div class="card-cell">
-                                    <div class="card-count">${holder.common_cards}</div>
-                                    <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
-                                    <div class="order-count">
+                                    <div class="card-content">
+                                        <div class="card-count">${holder.common_cards}</div>
+                                        <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
+                                    </div>
+                                    <div class="order-content">
                                         ${holder.seller_common_order_count > 0 ? 
                                             `<span class="tooltip">
                                                 <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
                                                     <span class="cart-number">${holder.seller_common_order_count}</span>
+                                                    <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
+                                                <div class="order-price">${holder.seller_common_price}</div>
                                             </span>` : 
                                             ''}
                                     </div>

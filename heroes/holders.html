@@ -62,7 +62,7 @@
         
         /* Table layout styling */
         #cardHoldersTable {
-            width: 70%;
+            width: 80%;
             margin: 0 auto;
             border-collapse: collapse;
             table-layout: fixed; /* This ensures the column widths are respected */
@@ -378,8 +378,12 @@
         .card-cell {
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
+            justify-content: flex-start;
+            text-align: left;
+            width: 50%;
+            float: left;
+            height: 100%;
+            min-height: 40px;
         }
 
         .card-count {
@@ -644,6 +648,55 @@
         .checkbox-label.inactive input:checked {
             accent-color: rgba(149, 165, 166, 0.5);
         }
+
+        .marketplace-stacked {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 50%;
+            float: right;
+            padding-right: 8px;
+            height: 100%;
+            min-height: 40px;
+        }
+
+        .marketplace-stacked i {
+            color: #4a5568;
+            font-size: 16px;
+            margin-right: 8px;
+        }
+
+        .marketplace-stacked .data {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .marketplace-stacked .qty-label, 
+        .marketplace-stacked .price-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 2px;
+        }
+
+        .marketplace-stacked .qty-value, 
+        .marketplace-stacked .price-value {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* Add a clearfix to ensure proper row height */
+        td[class^="col-"] {
+            position: relative;
+            min-height: 40px;
+        }
+
+        td[class^="col-"]::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
     </style>
 </head>
 <body>
@@ -712,7 +765,7 @@
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-last-tournament" data-sort="number">
-                            Main Participation
+                            Main Activity
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-legendary" data-sort="number">
@@ -965,15 +1018,17 @@
                                 `<div class="card-cell">
                                     <div class="card-count">${holder.legendary_cards}</div>
                                     <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
-                                    <div class="order-count">
-                                        ${holder.seller_legendary_order_count > 0 ? 
-                                            `<span class="tooltip">
-                                                <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
-                                                    <span class="cart-number">${holder.seller_legendary_order_count}</span>
-                                                </div>
-                                            </span>` : 
-                                            ''}
+                                 </div>
+                                 <div class="marketplace-stacked">
+                                    <div class="data">
+                                        <div class="qty-row">
+                                        <span class="qty-label">QTY</span>
+                                        <span class="qty-value">24</span>
+                                        </div>
+                                        <div class="price-row">
+                                        <span class="price-label">TOTAL</span>
+                                        <span class="price-value">$1,920</span>
+                                        </div>
                                     </div>
                                  </div>` : 
                                 ''}
@@ -983,15 +1038,11 @@
                                 `<div class="card-cell">
                                     <div class="card-count">${holder.epic_cards}</div>
                                     <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
-                                    <div class="order-count">
-                                        ${holder.seller_epic_order_count > 0 ? 
-                                            `<span class="tooltip">
-                                                <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
-                                                    <span class="cart-number">${holder.seller_epic_order_count}</span>
-                                                </div>
-                                            </span>` : 
-                                            ''}
+                                 </div>
+                                 <div class="marketplace-stacked">
+                                    <div class="data">
+                                        <div class="qty-label">QTY</div>
+                                        <div class="qty-value">1</div>
                                     </div>
                                  </div>` : 
                                 ''}
@@ -1001,15 +1052,11 @@
                                 `<div class="card-cell">
                                     <div class="card-count">${holder.rare_cards}</div>
                                     <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
-                                    <div class="order-count">
-                                        ${holder.seller_rare_order_count > 0 ? 
-                                            `<span class="tooltip">
-                                                <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
-                                                    <span class="cart-number">${holder.seller_rare_order_count}</span>
-                                                </div>
-                                            </span>` : 
-                                            ''}
+                                 </div>
+                                 <div class="marketplace-stacked">
+                                    <div class="data">
+                                        <div class="qty-label">QTY</div>
+                                        <div class="qty-value">1</div>
                                     </div>
                                  </div>` : 
                                 ''}
@@ -1019,15 +1066,17 @@
                                 `<div class="card-cell">
                                     <div class="card-count">${holder.common_cards}</div>
                                     <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
-                                    <div class="order-count">
-                                        ${holder.seller_common_order_count > 0 ? 
-                                            `<span class="tooltip">
-                                                <div class="cart-container">
-                                                    <i class="fas fa-shopping-cart"></i>
-                                                    <span class="cart-number">${holder.seller_common_order_count}</span>
-                                                </div>
-                                            </span>` : 
-                                            ''}
+                                 </div>
+                                 <div class="marketplace-stacked">
+                                    <div class="data">
+                                        <div class="qty-row">
+                                        <span class="qty-value">24</span>
+                                        <i class="fas fa-shopping-cart"></i>
+                                        </div>
+                                        <div class="price-row">
+                                        <span class="price-value">1,920</span>
+                                        <svg width="12" height="12" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>
+                                        </div>
                                     </div>
                                  </div>` : 
                                 ''}

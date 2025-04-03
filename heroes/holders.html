@@ -734,6 +734,14 @@
             margin-left: 28px;
             display: flex;
             gap: 5px;
+            align-items: center;
+        }
+
+        .info-icon {
+            color: #666;
+            font-size: 12px;
+            margin-left: 4px;
+            cursor: help;
         }
     </style>
 </head>
@@ -748,6 +756,7 @@
     </div>
     <div class="data-freshness">
         <span>Holders: <span id="holdersTimeAgo"></span></span>
+        <i class="fas fa-info-circle info-icon" title="Holder data will be updated 2x per day until it's available and automated via fantasy api"></i>
         <span>Sell Orders: <span id="sellOrdersTimeAgo"></span></span>
     </div>
     <div class="container">

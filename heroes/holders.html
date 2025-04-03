@@ -971,7 +971,7 @@
         function formatEthPrice(price) {
             if (!price) return '0';
             const num = parseFloat(price);
-            return num < 0.1 ? num.toFixed(4) : num.toFixed(3);
+            return num < 0.1 ? num.toFixed(4) : num.toFixed(2);
         }
 
         // Function to find lowest prices and highlight best deals

@@ -555,6 +555,50 @@
         .selected-hero-tag {
             display: none;
         }
+
+        /* Add tournament circles styling */
+        .tournament-circles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 4px;
+            width: 30px;
+            height: 30px;
+            margin: 0 auto;
+        }
+
+        .tournament-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 68, 68, 0.5);
+            margin: 0 auto;
+        }
+
+        .tournament-circle.filled {
+            background-color: rgba(68, 255, 68, 0.5);
+            border-color: rgba(68, 255, 68, 0.5);
+        }
+
+        .tournament-circle.empty {
+            background-color: transparent;
+        }
+
+        .day-category {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin: 2px;
+        }
+
+        .cat-today { background-color: #2ecc71; }
+        .cat-week { background-color: #3498db; }
+        .cat-month { background-color: #f39c12; }
+        .cat-quarter { background-color: #e74c3c; }
+        .cat-inactive { background-color: #95a5a6; }
     </style>
 </head>
 <body>
@@ -606,7 +650,7 @@
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-last-tournament" data-sort="number">
-                            Last Main
+                            Main Participation
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-legendary" data-sort="number">
@@ -758,13 +802,24 @@
                     </td>
                     <td class="col-last-trade">
                         ${holder.last_trade_timestamp ? 
-                          `${getDaysSince(holder.last_trade_timestamp)}d ago` : 
-                          'N/A'}
+                          (() => {
+                              const daysAgo = getDaysSince(holder.last_trade_timestamp);
+                              const category = getCategoryLabel(daysAgo);
+                              return `<span class="day-category ${category.class}" title="${daysAgo}d ago">${category.label}</span>`;
+                          })() : 
+                          '<span class="day-category cat-inactive" title="No trades">INACTIVE</span>'}
                     </td>
-                    <td class="col-last-tournament">MT
-                        ${holder.last_tournament ? 
-                          `${(holder.last_tournament)}` : 
-                          'N/A'}
+                    <td class="col-last-tournament">
+                        <div class="tournament-circles">
+                            ${Object.entries(holder.tournament_participation || {})
+                                .sort(([a], [b]) => parseInt(b) - parseInt(a)) // Sort by tournament number descending
+                                .slice(0, 4) // Take only the 4 most recent tournaments
+                                .map(([tournamentNumber, participated]) => `
+                                    <div class="tournament-circle ${participated ? 'filled' : 'empty'}" 
+                                         title="MT${tournamentNumber}:${participated ? ' yes' : ' no'}">
+                                    </div>
+                                `).join('')}
+                        </div>
                     </td>
                     <td class="col-legendary">
                         ${holder.legendary_cards > 0 ? 
@@ -865,7 +920,7 @@
                 // Base query
                 let query = supabaseClient
                     .from('card_holders')
-                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc')
+                    .select('player_name, player_handle, profile_picture, last_trade_timestamp, tournament_participation, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc')
                     .order('aggregate_cards', { ascending: false });
                 
                 // Apply hero_handle filter
@@ -874,7 +929,7 @@
                 
                 console.log('Executing query with parameters:', {
                     table: 'card_holders',
-                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, last_tournament, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc',
+                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, tournament_participation, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc',
                     order: 'aggregate_cards DESC',
                     filter: `hero_handle = ${heroHandle}`
                 });
@@ -968,6 +1023,14 @@
             
             resultsContainer.style.display = 'block';
             console.log('Displayed handles count:', handles.length);
+        }
+
+        function getCategoryLabel(daysAgo) {
+            if (daysAgo === 0) return { class: 'cat-today', label: 'TODAY' };
+            if (daysAgo <= 7) return { class: 'cat-week', label: 'THIS WEEK' };
+            if (daysAgo <= 30) return { class: 'cat-month', label: 'THIS MONTH' };
+            if (daysAgo <= 90) return { class: 'cat-quarter', label: 'LAST QUARTER' };
+            return { class: 'cat-inactive', label: 'INACTIVE' };
         }
 
         function selectHeroHandle(handle) {

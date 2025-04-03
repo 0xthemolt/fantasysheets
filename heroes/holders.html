@@ -588,17 +588,62 @@
             display: inline-block;
             padding: 3px 8px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 8px;
             font-weight: bold;
             color: white;
             margin: 2px;
         }
 
-        .cat-today { background-color: #2ecc71; }
-        .cat-week { background-color: #3498db; }
-        .cat-month { background-color: #f39c12; }
-        .cat-quarter { background-color: #e74c3c; }
-        .cat-inactive { background-color: #95a5a6; }
+        .cat-week { background-color: rgba(46, 204, 113, 0.5); }
+        .cat-month { background-color: rgba(52, 152, 219, 0.5); }
+        .cat-quarter { background-color: rgba(243, 156, 18, 0.5); }
+        .cat-inactive { background-color: rgba(149, 165, 166, 0.5); }
+
+        .trade-activity-filter {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        
+        .trade-activity-filter > label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .checkbox-label.week {
+            border-left: 3px solid rgba(46, 204, 113, 0.5);
+        }
+        
+        .checkbox-label.month {
+            border-left: 3px solid rgba(52, 152, 219, 0.5);
+        }
+        
+        .checkbox-label.quarter {
+            border-left: 3px solid rgba(243, 156, 18, 0.5);
+        }
+        
+        .checkbox-label.inactive {
+            border-left: 3px solid rgba(149, 165, 166, 0.5);
+        }
+        
+        .checkbox-label.week input:checked {
+            accent-color: rgba(46, 204, 113, 0.5);
+        }
+        
+        .checkbox-label.month input:checked {
+            accent-color: rgba(52, 152, 219, 0.5);
+        }
+        
+        .checkbox-label.quarter input:checked {
+            accent-color: rgba(243, 156, 18, 0.5);
+        }
+        
+        .checkbox-label.inactive input:checked {
+            accent-color: rgba(149, 165, 166, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -632,7 +677,24 @@
                     </label>
                 </div>
             </div>
-            
+            <div class="trade-activity-filter">
+                <label>Trade Activity:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label week">
+                        <input type="checkbox" id="filterWeek"> This Week
+                    </label>
+                    <label class="checkbox-label month">
+                        <input type="checkbox" id="filterMonth"> This Month
+                    </label>
+                    <label class="checkbox-label quarter">
+                        <input type="checkbox" id="filterQuarter"> Last Quarter
+                    </label>
+                    <label class="checkbox-label inactive">
+                        <input type="checkbox" id="filterInactive"> Inactive
+                    </label>
+                </div>
+            </div>
+
             <button id="clearFilter" class="clear-button">Clear Filter</button>
         </div>
 
@@ -646,7 +708,7 @@
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-last-trade" data-sort="number">
-                            Last Trade
+                            Trade Activity
                             <span class="sort-arrow"></span>
                         </th>
                         <th class="col-last-tournament" data-sort="number">
@@ -746,7 +808,6 @@
         // Function to filter and display data
         function filterAndDisplayData() {
             const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
             
             // Get filter states
             const filterLegendary = document.getElementById('filterLegendary').checked;
@@ -754,151 +815,63 @@
             const filterRare = document.getElementById('filterRare').checked;
             const filterCommon = document.getElementById('filterCommon').checked;
             
-            // Filter data based on seller_order_count and selected rarities
-            const filteredData = currentData.filter(holder => {
-                // If no rarity filters are selected, show all data
-                if (!filterLegendary && !filterEpic && !filterRare && !filterCommon) {
-                    return true;
+            // Get trade activity filter states
+            const filterWeek = document.getElementById('filterWeek').checked;
+            const filterMonth = document.getElementById('filterMonth').checked;
+            const filterQuarter = document.getElementById('filterQuarter').checked;
+            const filterInactive = document.getElementById('filterInactive').checked;
+            
+            // Get all rows
+            const rows = tableBody.querySelectorAll('tr');
+            
+            // Filter and update visibility
+            rows.forEach(row => {
+                const holder = row.dataset.holderData ? JSON.parse(row.dataset.holderData) : null;
+                if (!holder) return;
+                
+                // Check rarity filters
+                let passesRarityFilter = true;
+                if (filterLegendary || filterEpic || filterRare || filterCommon) {
+                    // If seller has no orders, filter them out when any filter is selected
+                    const totalOrders = (holder.seller_legendary_order_count || 0) + 
+                                        (holder.seller_epic_order_count || 0) + 
+                                        (holder.seller_rare_order_count || 0) + 
+                                        (holder.seller_common_order_count || 0);
+                    if (totalOrders === 0) {
+                        passesRarityFilter = false;
+                    }
+                    
+                    // Check if the holder has cards of ANY of the selected rarities (OR logic)
+                    if (filterLegendary && holder.legendary_cards > 0) passesRarityFilter = true;
+                    if (filterEpic && holder.epic_cards > 0) passesRarityFilter = true;
+                    if (filterRare && holder.rare_cards > 0) passesRarityFilter = true;
+                    if (filterCommon && holder.common_cards > 0) passesRarityFilter = true;
                 }
                 
-                // If seller has no orders, filter them out when any filter is selected
-                const totalOrders = (holder.seller_legendary_order_count || 0) + 
-                                    (holder.seller_epic_order_count || 0) + 
-                                    (holder.seller_rare_order_count || 0) + 
-                                    (holder.seller_common_order_count || 0);
-                if (totalOrders === 0) {
-                    return false;
+                // Check trade activity filters
+                let passesTradeFilter = true;
+                if (filterWeek || filterMonth || filterQuarter || filterInactive) {
+                    const daysAgo = holder.last_trade_timestamp ? getDaysSince(holder.last_trade_timestamp) : null;
+                    
+                    // If no trade activity filters are selected, show all
+                    if (!filterWeek && !filterMonth && !filterQuarter && !filterInactive) {
+                        passesTradeFilter = true;
+                    } else {
+                        passesTradeFilter = false;
+                        
+                        if (daysAgo !== null) {
+                            if (daysAgo <= 7 && filterWeek) passesTradeFilter = true;
+                            if (daysAgo <= 30 && filterMonth) passesTradeFilter = true;
+                            if (daysAgo <= 90 && filterQuarter) passesTradeFilter = true;
+                        } else if (filterInactive) {
+                            passesTradeFilter = true;
+                        }
+                    }
                 }
                 
-                // Check if the holder has cards of ANY of the selected rarities (OR logic)
-                if (filterLegendary && holder.legendary_cards > 0) return true;
-                if (filterEpic && holder.epic_cards > 0) return true;
-                if (filterRare && holder.rare_cards > 0) return true;
-                if (filterCommon && holder.common_cards > 0) return true;
-                
-                return false;
+                // Update row visibility
+                row.style.display = passesRarityFilter && passesTradeFilter ? '' : 'none';
             });
-            
-            console.log('Filtered data count:', filteredData.length);
-            
-            // Populate the table with filtered data
-            filteredData.forEach(holder => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="col-player">
-                        <img src="${holder.profile_picture}" 
-                             alt="${holder.player_name}" 
-                             class="profile-pic"
-                             onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
-                        <span class="player-name">${escapeHtml(holder.player_name.length > 18 ? holder.player_name.substring(0, 18) + '...' : holder.player_name)}</span>
-                        <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
-                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                        </a>
-                        <i class="fas fa-copy copy-icon" 
-                           style="font-size: 0.8em; color: #777; margin-left: 4px; cursor: pointer; text-decoration: none;"
-                           data-handle="${holder.player_handle.replace(/[_]/g, '\\_')}"
-                           title="@${holder.player_handle.slice(0,5)}...${holder.player_handle.slice(-4)}"
-                           onclick="copyToClipboard('${holder.player_handle.replace(/'/g, "\\'")}', event)"></i>
-                    </td>
-                    <td class="col-last-trade">
-                        ${holder.last_trade_timestamp ? 
-                          (() => {
-                              const daysAgo = getDaysSince(holder.last_trade_timestamp);
-                              const category = getCategoryLabel(daysAgo);
-                              return `<span class="day-category ${category.class}" title="${daysAgo}d ago">${category.label}</span>`;
-                          })() : 
-                          '<span class="day-category cat-inactive" title="No trades">INACTIVE</span>'}
-                    </td>
-                    <td class="col-last-tournament">
-                        <div class="tournament-circles">
-                            ${Object.entries(holder.tournament_participation || {})
-                                .sort(([a], [b]) => parseInt(b) - parseInt(a)) // Sort by tournament number descending
-                                .slice(0, 4) // Take only the 4 most recent tournaments
-                                .map(([tournamentNumber, participated]) => `
-                                    <div class="tournament-circle ${participated ? 'filled' : 'empty'}" 
-                                         title="MT${tournamentNumber}:${participated ? ' yes' : ' no'}">
-                                    </div>
-                                `).join('')}
-                        </div>
-                    </td>
-                    <td class="col-legendary">
-                        ${holder.legendary_cards > 0 ? 
-                            `<div class="card-cell">
-                                <div class="card-count">${holder.legendary_cards}</div>
-                                <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
-                                <div class="order-count">
-                                    ${holder.seller_legendary_order_count > 0 ? 
-                                        `<span class="tooltip">
-                                            <div class="cart-container">
-                                                <i class="fas fa-shopping-cart"></i>
-                                                <span class="cart-number">${holder.seller_legendary_order_count}</span>
-                                            </div>
-                                        </span>` : 
-                                        ''}
-                                </div>
-                             </div>` : 
-                            ''}
-                    </td>
-                    <td class="col-epic">
-                        ${holder.epic_cards > 0 ? 
-                            `<div class="card-cell">
-                                <div class="card-count">${holder.epic_cards}</div>
-                                <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
-                                <div class="order-count">
-                                    ${holder.seller_epic_order_count > 0 ? 
-                                        `<span class="tooltip">
-                                            <div class="cart-container">
-                                                <i class="fas fa-shopping-cart"></i>
-                                                <span class="cart-number">${holder.seller_epic_order_count}</span>
-                                            </div>
-                                        </span>` : 
-                                        ''}
-                                </div>
-                             </div>` : 
-                            ''}
-                    </td>
-                    <td class="col-rare">
-                        ${holder.rare_cards > 0 ? 
-                            `<div class="card-cell">
-                                <div class="card-count">${holder.rare_cards}</div>
-                                <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
-                                <div class="order-count">
-                                    ${holder.seller_rare_order_count > 0 ? 
-                                        `<span class="tooltip">
-                                            <div class="cart-container">
-                                                <i class="fas fa-shopping-cart"></i>
-                                                <span class="cart-number">${holder.seller_rare_order_count}</span>
-                                            </div>
-                                        </span>` : 
-                                        ''}
-                                </div>
-                             </div>` : 
-                            ''}
-                    </td>
-                    <td class="col-common">
-                        ${holder.common_cards > 0 ? 
-                            `<div class="card-cell">
-                                <div class="card-count">${holder.common_cards}</div>
-                                <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
-                                <div class="order-count">
-                                    ${holder.seller_common_order_count > 0 ? 
-                                        `<span class="tooltip">
-                                            <div class="cart-container">
-                                                <i class="fas fa-shopping-cart"></i>
-                                                <span class="cart-number">${holder.seller_common_order_count}</span>
-                                            </div>
-                                        </span>` : 
-                                        ''}
-                                </div>
-                             </div>` : 
-                            ''}
-                    </td>
-                    <td class="col-total">${holder.aggregate_cards || 0}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-            
-            console.log('Table populated with rows:', tableBody.children.length);
         }
 
         // Function to fetch and display card holders data
@@ -927,13 +900,6 @@
                 console.log('Applying hero_handle filter:', heroHandle);
                 query = query.eq('hero_handle', heroHandle);
                 
-                console.log('Executing query with parameters:', {
-                    table: 'card_holders',
-                    select: 'player_name, player_handle, profile_picture, last_trade_timestamp, tournament_participation, hero_handle, hero_name, hero_pfp_url, hero_id, stars, legendary_cards, epic_cards, rare_cards, common_cards, aggregate_cards, seller_legendary_order_count, seller_epic_order_count, seller_rare_order_count, seller_common_order_count,seller_legendary_price, seller_epic_price, seller_rare_price, seller_common_price, holder_freshness_utc, sellorder_freshness_utc',
-                    order: 'aggregate_cards DESC',
-                    filter: `hero_handle = ${heroHandle}`
-                });
-                
                 // Fetch data
                 const { data, error } = await query;
                 
@@ -950,7 +916,128 @@
                 // Store the fetched data
                 currentData = data;
                 
-                // Filter and display the data
+                // Clear and populate the table
+                tableBody.innerHTML = '';
+                data.forEach(holder => {
+                    const row = document.createElement('tr');
+                    // Store the holder data in the row for filtering
+                    row.dataset.holderData = JSON.stringify(holder);
+                    
+                    row.innerHTML = `
+                        <td class="col-player">
+                            <img src="${holder.profile_picture}" 
+                                 alt="${holder.player_name}" 
+                                 class="profile-pic"
+                                 onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
+                            <span class="player-name">${escapeHtml(holder.player_name.length > 18 ? holder.player_name.substring(0, 18) + '...' : holder.player_name)}</span>
+                            <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
+                                <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                            </a>
+                            <i class="fas fa-copy copy-icon" 
+                               style="font-size: 0.8em; color: #777; margin-left: 4px; cursor: pointer; text-decoration: none;"
+                               data-handle="${holder.player_handle.replace(/[_]/g, '\\_')}"
+                               title="@${holder.player_handle.slice(0,5)}...${holder.player_handle.slice(-4)}"
+                               onclick="copyToClipboard('${holder.player_handle.replace(/'/g, "\\'")}', event)"></i>
+                        </td>
+                        <td class="col-last-trade">
+                            ${holder.last_trade_timestamp ? 
+                              (() => {
+                                  const daysAgo = getDaysSince(holder.last_trade_timestamp);
+                                  const category = getCategoryLabel(daysAgo);
+                                  return `<span class="day-category ${category.class}" title="${daysAgo}d ago">${category.label}</span>`;
+                              })() : 
+                              '<span class="day-category cat-inactive" title="No trades">INACTIVE</span>'}
+                        </td>
+                        <td class="col-last-tournament">
+                            <div class="tournament-circles">
+                                ${Object.entries(holder.tournament_participation || {})
+                                    .sort(([a], [b]) => parseInt(b) - parseInt(a))
+                                    .slice(0, 4)
+                                    .map(([tournamentNumber, participated]) => `
+                                        <div class="tournament-circle ${participated ? 'filled' : 'empty'}" 
+                                             title="MT${tournamentNumber}:${participated ? ' yes' : ' no'}">
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </td>
+                        <td class="col-legendary">
+                            ${holder.legendary_cards > 0 ? 
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.legendary_cards}</div>
+                                    <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_legendary_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_legendary_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
+                                 </div>` : 
+                                ''}
+                        </td>
+                        <td class="col-epic">
+                            ${holder.epic_cards > 0 ? 
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.epic_cards}</div>
+                                    <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_epic_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_epic_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
+                                 </div>` : 
+                                ''}
+                        </td>
+                        <td class="col-rare">
+                            ${holder.rare_cards > 0 ? 
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.rare_cards}</div>
+                                    <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_rare_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_rare_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
+                                 </div>` : 
+                                ''}
+                        </td>
+                        <td class="col-common">
+                            ${holder.common_cards > 0 ? 
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.common_cards}</div>
+                                    <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_common_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_common_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
+                                 </div>` : 
+                                ''}
+                        </td>
+                        <td class="col-total">${holder.aggregate_cards || 0}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Apply initial filters
                 filterAndDisplayData();
                 
             } catch (error) {
@@ -1026,7 +1113,6 @@
         }
 
         function getCategoryLabel(daysAgo) {
-            if (daysAgo === 0) return { class: 'cat-today', label: 'TODAY' };
             if (daysAgo <= 7) return { class: 'cat-week', label: 'THIS WEEK' };
             if (daysAgo <= 30) return { class: 'cat-month', label: 'THIS MONTH' };
             if (daysAgo <= 90) return { class: 'cat-quarter', label: 'LAST QUARTER' };
@@ -1147,12 +1233,15 @@
                 document.getElementById('filterLegendary'),
                 document.getElementById('filterEpic'),
                 document.getElementById('filterRare'),
-                document.getElementById('filterCommon')
+                document.getElementById('filterCommon'),
+                document.getElementById('filterWeek'),
+                document.getElementById('filterMonth'),
+                document.getElementById('filterQuarter'),
+                document.getElementById('filterInactive')
             ];
             
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
-                    // Filter the existing data instead of fetching again
                     filterAndDisplayData();
                 });
             });

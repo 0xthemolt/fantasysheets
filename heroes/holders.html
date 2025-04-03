@@ -20,15 +20,14 @@
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
     
     <style>
         .card-icon {
             height: 24px;
             width: auto;
             vertical-align: middle;
-            margin-left: 0;
-            display: inline-block;
+            margin-left: 5px;
         }
         
         /* Optional: Add hover effect to enlarge cards slightly */
@@ -65,43 +64,13 @@
         #cardHoldersTable {
             width: 80%;
             margin: 0 auto;
-            border-collapse: separate;
-            border-spacing: 0 12px; /* Add vertical spacing between rows */
+            border-collapse: collapse;
             table-layout: fixed; /* This ensures the column widths are respected */
-        }
-        
-        #cardHoldersTable tr {
-            margin-bottom: 8px;
-        }
-        
-        #cardHoldersTable tbody tr {
-            background-color: #1a1a1a;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        #cardHoldersTable tbody tr:hover {
-            background-color: #222;
-        }
-        
-        #cardHoldersTable td {
-            padding: 10px 5px;
-        }
-        
-        #cardHoldersTable tbody td:first-child {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-        }
-        
-        #cardHoldersTable tbody td:last-child {
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
         }
         
         /* Column widths by specific class names */
         .col-player {
-            width: 25%; /* Player name gets more space */
+            width: 30%; /* Player name gets more space */
         }
 
         .col-last-trade {
@@ -139,7 +108,7 @@
         
         /* Filter container styles */
         .filter-container {
-            width: 80%;
+            width: 70%;
             margin: 0 auto 20px auto;
             padding: 20px;
             background: #1a1a1a;
@@ -148,14 +117,15 @@
             align-items: flex-start;
             gap: 20px;
             flex-wrap: wrap;
+            font-size: 80%; /* Reduce text size by 20% */
         }
         
         .search-box {
-            flex: 1;
-            min-width: 300px;
+            flex: 0 0 auto; /* Change from flex: 1 to prevent expansion */
+            width: 180px; /* Reduced width (was approximately 300px) */
             position: relative;
             background: #2a2a2a;
-            padding: 15px;
+            padding: 12px;
             border-radius: 6px;
             border: 1px solid #333;
         }
@@ -165,6 +135,7 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: #fff;
+            font-size: 80%; /* Reduce text size by 20% */
         }
         
         .search-input-container {
@@ -176,11 +147,11 @@
         #heroHandleSearch {
             width: 100%;
             box-sizing: border-box;
-            padding: 10px 12px;
+            padding: 8px 10px; /* Slightly smaller padding */
             padding-right: 35px;
             border: 1px solid #333;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 11px; /* Reduced from default (~14px) */
             background: #1a1a1a;
             color: #fff;
             transition: border-color 0.2s;
@@ -196,16 +167,16 @@
         
         .clear-search {
             position: absolute;
-            right: 10px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             color: #666;
             cursor: pointer;
-            padding: 4px;
+            padding: 3px; /* Reduced from 4px */
             display: none;
-            font-size: 20px;
+            font-size: 14px; /* Reduce to fit narrower box */
             transition: color 0.2s;
         }
         
@@ -221,7 +192,7 @@
             position: absolute;
             top: 100%;
             left: 0;
-            right: 0;
+            width: 100%; /* Use 100% of the container, which matches search box */
             background: #2a2a2a;
             border: 1px solid #333;
             border-radius: 6px;
@@ -263,30 +234,31 @@
         /* Sell orders filter styling */
         .sell-orders-filter {
             background: #2a2a2a;
-            padding: 15px;
+            padding: 12px; /* Reduced from 15px */
             border-radius: 6px;
             border: 1px solid #333;
         }
         
         .sell-orders-filter > label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 500;
             color: #fff;
+            font-size: 11px; /* Reduced size */
         }
         
         .checkbox-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px; /* Slightly reduced gap */
         }
         
         .checkbox-label {
             display: flex;
             align-items: center;
-            font-size: 14px;
+            font-size: 11px; /* Reduced from 14px */
             cursor: pointer;
-            padding: 6px 10px;
+            padding: 5px 8px; /* Slightly smaller padding */
             border-radius: 4px;
             user-select: none;
             color: #fff;
@@ -302,6 +274,7 @@
         .checkbox-label input {
             margin-right: 6px;
             accent-color: transparent;
+            transform: scale(0.8); /* Reduce checkbox size by 20% */
         }
         
         /* Rarity-specific colors for checked state */
@@ -339,7 +312,7 @@
         }
         
         .clear-button {
-            padding: 10px 20px;
+            padding: 8px 16px; /* Slightly smaller padding */
             background-color: #2a2a2a;
             color: #fff;
             border: 1px solid #333;
@@ -347,6 +320,7 @@
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.2s;
+            font-size: 11px; /* Reduced from default */
         }
         
         .clear-button:hover {
@@ -409,34 +383,21 @@
         .card-cell {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            text-align: left;
-            width: 50%;
-            height: 100%;
-            min-height: 40px;
-            gap: 0px; /* Control spacing between elements */
-            box-sizing: border-box;
-            float: none;
+            justify-content: center;
+            text-align: center;
         }
 
         .card-count {
-            flex: 0 0 auto;
-            text-align: left;
-            padding-left: 8px;
+            flex: 1;
+            text-align: right;
+            padding-right: 8px;
             font-weight: bold;
-            padding-right: 0px; /* Reduce padding on the right side */
-            margin-right: 4px;
-            width: 20px; /* Add fixed width to control space */
-            display: inline-block;
-            font-size: 14px; /* Ensure the text is visible */
         }
 
         .card-icon {
             height: 24px;
             width: auto;
             vertical-align: middle;
-            margin-left: 0;
-            display: inline-block;
         }
 
         .card-icon:hover {
@@ -558,27 +519,33 @@
             align-items: center;
             background: #333;
             color: #fff;
-            padding: 6px 12px;
+            padding: 4px 8px;
             border-radius: 20px;
-            margin: 4px;
-            font-size: 14px;
+            margin: 4px 0;
+            font-size: 11px;
             position: relative;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .selected-hero-tag .remove-hero {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #444;
             color: #fff;
             border: none;
-            margin-left: 8px;
+            margin-left: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
             transition: background-color 0.2s;
+            min-width: 16px;
+            flex-shrink: 0;
         }
 
         .selected-hero-tag .remove-hero:hover {
@@ -635,7 +602,8 @@
             font-size: 8px;
             font-weight: bold;
             color: white;
-            margin: 2px;
+            margin: 2px auto;
+            text-align: center;
         }
 
         .cat-week { background-color: rgba(46, 204, 113, 0.5); }
@@ -643,18 +611,20 @@
         .cat-quarter { background-color: rgba(243, 156, 18, 0.5); }
         .cat-inactive { background-color: rgba(149, 165, 166, 0.5); }
 
+        /* Trade activity filter styling */
         .trade-activity-filter {
             background: #2a2a2a;
-            padding: 15px;
+            padding: 12px; /* Reduced from 15px */
             border-radius: 6px;
             border: 1px solid #333;
         }
         
         .trade-activity-filter > label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 500;
             color: #fff;
+            font-size: 11px; /* Reduced size */
         }
         
         .checkbox-label.week {
@@ -690,81 +660,51 @@
         }
 
         .marketplace-stacked {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            width: 50%;
-            float: none;
-            padding-right: 8px;
-            height: 100%;
-            min-height: 40px;
-            box-sizing: border-box;
-            font-size: 12px; /* Ensure text is visible */
-        }
+    display: flex;
+    align-items: center;
+    }
 
-        .marketplace-stacked i {
-            color: #4a5568;
-            font-size: 16px;
-            margin-right: 8px;
-        }
+    .marketplace-stacked i {
+    color: #4a5568;
+    font-size: 16px;
+    margin-right: 8px;
+    }
 
-        .marketplace-stacked .data {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            width: 100%;
-        }
+    .marketplace-stacked .data {
+    display: flex;
+    flex-direction: column;
+    }
 
-        .marketplace-stacked .qty-row, 
-        .marketplace-stacked .price-row {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            width: 100%;
-            margin-bottom: 2px;
-        }
+    .marketplace-stacked .qty-label, 
+    .marketplace-stacked .price-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #718096;
+    margin-bottom: 2px;
+    }
 
-        .marketplace-stacked .qty-value, 
-        .marketplace-stacked .price-value {
-            font-weight: 500;
-            font-size: 10px;
-            color: grey;
-            margin-right: 4px;
-        }
+    .marketplace-stacked .qty-value, 
+    .marketplace-stacked .price-value {
+    font-weight: 500;
+    font-size: 14px;
+    }
 
-        .marketplace-stacked i.fa-shopping-cart {
-            font-size: 0.75em !important;
-            margin-left: 4px;
-            color: #888;
-        }
-
-        .marketplace-stacked svg {
+        td.col-last-trade {
+            text-align: center;
             vertical-align: middle;
-            margin-left: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
-
-        /* Add a clearfix to ensure proper row height */
-        td[class^="col-"] {
-            position: relative;
-            min-height: 40px;
-            padding: 0;
-            font-size: 0; /* Remove whitespace between inline elements */
-        }
-
-        /* Add specific font-size override for the player column to make text visible */
-        td.col-player {
-            font-size: 14px; /* Reset font size for player column */
-        }
-
-        td[class^="col-"]::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        /* Fix font-size for all rarity column cells */
-        td.col-legendary, td.col-epic, td.col-rare, td.col-common {
-            font-size: 14px; /* Reset font size for rarity columns */
+        
+        /* Tournament circles styling improvements */
+        td.col-last-tournament {
+            text-align: center;
+            vertical-align: middle;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -1051,7 +991,7 @@
                                  alt="${holder.player_name}" 
                                  class="profile-pic"
                                  onerror="this.onerror=null; this.src='/icons/ft_logo.webp';">
-                            <span class="player-name">${escapeHtml(holder.player_name.length > 18 ? holder.player_name.substring(0, 18) + '...' : holder.player_name)}</span>
+                            <span class="player-name">${escapeHtml(holder.player_name.length > 15 ? holder.player_name.substring(0, 15) + '...' : holder.player_name)}</span>
                             <a href="https://x.com/${holder.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
                                 <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                             </a>
@@ -1084,89 +1024,73 @@
                         </td>
                         <td class="col-legendary">
                             ${holder.legendary_cards > 0 ? 
-                                `<div style="display: flex; width: 100%; align-items: center; height: 100%; font-size: 14px;">
-                                    <div class="card-cell">
-                                        <div class="card-count">${holder.legendary_cards}</div>
-                                        <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
-                                     </div>
-                                     <div class="marketplace-stacked">
-                                        <div class="data">
-                                            <div class="qty-row">
-                                                <span class="qty-value">24</span>
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </div>
-                                            <div class="price-row">
-                                                <span class="price-value">$1,920</span>
-                                                <svg width="10" height="10" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>
-                                            </div>
-                                        </div>
-                                     </div>
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.legendary_cards}</div>
+                                    <img src="/cards/legendary/${holder.hero_id}_${holder.stars}.png" alt="Legendary card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_legendary_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_legendary_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
                                  </div>` : 
                                 ''}
                         </td>
                         <td class="col-epic">
                             ${holder.epic_cards > 0 ? 
-                                `<div style="display: flex; width: 100%; align-items: center; height: 100%; font-size: 14px;">
-                                    <div class="card-cell">
-                                        <div class="card-count">${holder.epic_cards}</div>
-                                        <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
-                                     </div>
-                                     <div class="marketplace-stacked">
-                                        <div class="data">
-                                            <div class="qty-row">
-                                                <span class="qty-value">1</span>
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </div>
-                                            <div class="price-row">
-                                                <span class="price-value">$80</span>
-                                                <svg width="10" height="10" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>
-                                            </div>
-                                        </div>
-                                     </div>
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.epic_cards}</div>
+                                    <img src="/cards/epic/${holder.hero_id}_${holder.stars}.png" alt="Epic card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_epic_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_epic_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
                                  </div>` : 
                                 ''}
                         </td>
                         <td class="col-rare">
                             ${holder.rare_cards > 0 ? 
-                                `<div style="display: flex; width: 100%; align-items: center; height: 100%; font-size: 14px;">
-                                    <div class="card-cell">
-                                        <div class="card-count">${holder.rare_cards}</div>
-                                        <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
-                                     </div>
-                                     <div class="marketplace-stacked">
-                                        <div class="data">
-                                            <div class="qty-row">
-                                                <span class="qty-value">1</span>
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </div>
-                                            <div class="price-row">
-                                                <span class="price-value">$40</span>
-                                                <svg width="10" height="10" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>
-                                            </div>
-                                        </div>
-                                     </div>
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.rare_cards}</div>
+                                    <img src="/cards/rare/${holder.hero_id}_${holder.stars}.png" alt="Rare card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_rare_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_rare_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
                                  </div>` : 
                                 ''}
                         </td>
                         <td class="col-common">
                             ${holder.common_cards > 0 ? 
-                                `<div style="display: flex; width: 100%; align-items: center; height: 100%; font-size: 14px;">
-                                    <div class="card-cell">
-                                        <div class="card-count">${holder.common_cards}</div>
-                                        <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
-                                     </div>
-                                     <div class="marketplace-stacked">
-                                        <div class="data">
-                                            <div class="qty-row">
-                                                <span class="qty-value">24</span>
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </div>
-                                            <div class="price-row">
-                                                <span class="price-value">1,920</span>
-                                                <svg width="10" height="10" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>
-                                            </div>
-                                        </div>
-                                     </div>
+                                `<div class="card-cell">
+                                    <div class="card-count">${holder.common_cards}</div>
+                                    <img src="/cards/common/${holder.hero_id}_${holder.stars}.png" alt="Common card" class="card-icon">
+                                    <div class="order-count">
+                                        ${holder.seller_common_order_count > 0 ? 
+                                            `<span class="tooltip">
+                                                <div class="cart-container">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <span class="cart-number">${holder.seller_common_order_count}</span>
+                                                </div>
+                                            </span>` : 
+                                            ''}
+                                    </div>
                                  </div>` : 
                                 ''}
                         </td>
@@ -1178,9 +1102,9 @@
                 // Apply initial filters
                 filterAndDisplayData();
                 
-            } catch (error) {
+            } catch (err) {
                 tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Error loading data</td></tr>';
-                console.error('Unexpected error:', error);
+                console.error('Unexpected error:', err);
             }
         }
 

@@ -62,7 +62,7 @@
         
         /* Table layout styling */
         #cardHoldersTable {
-            width: 80%;
+            width: 70%;
             margin: 0 auto;
             border-collapse: collapse;
             table-layout: fixed; /* This ensures the column widths are respected */
@@ -108,7 +108,7 @@
         
         /* Filter container styles */
         .filter-container {
-            width: 70%;
+            width: 65%;
             margin: 0 auto 20px auto;
             padding: 20px;
             background: #1a1a1a;
@@ -726,6 +726,15 @@
         .order-content.best-deal .order-price {
             color: #FACC15 !important;
         }
+
+        .data-freshness {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            margin-left: 28px;
+            display: flex;
+            gap: 5px;
+        }
     </style>
 </head>
 <body>
@@ -735,8 +744,11 @@
                 <i class="fas fa-home"></i>
             </a>
             Card Holders
-            <div class="data-freshness">Holders: <span id="holderFreshness"></span></div>
         </h1>
+    </div>
+    <div class="data-freshness">
+        <span>Holders: <span id="holdersTimeAgo"></span></span>
+        <span>Sell Orders: <span id="sellOrdersTimeAgo"></span></span>
     </div>
     <div class="container">
 
@@ -959,7 +971,7 @@
         function formatEthPrice(price) {
             if (!price) return '0';
             const num = parseFloat(price);
-            return num < 0.1 ? num.toFixed(4) : num.toFixed(2);
+            return num < 0.1 ? num.toFixed(4) : num.toFixed(3);
         }
 
         // Function to find lowest prices and highlight best deals
@@ -1053,6 +1065,43 @@
                 
                 // Store the fetched data
                 currentData = data;
+                
+                // Update holder freshness timestamp
+                if (data.length > 0) {
+                    // Find the minimum holder_freshness_utc
+                    const minHolderFreshness = data.reduce((min, holder) => {
+                        const holderTime = new Date(holder.holder_freshness_utc);
+                        return holderTime < min ? holderTime : min;
+                    }, new Date(data[0].holder_freshness_utc));
+                    
+                    // Find the minimum sellorder_freshness_utc
+                    const minSellOrderFreshness = data.reduce((min, holder) => {
+                        if (!holder.sellorder_freshness_utc) return min;
+                        const holderTime = new Date(holder.sellorder_freshness_utc);
+                        return holderTime < min ? holderTime : min;
+                    }, new Date('9999-12-31')); // Start with a future date
+                    
+                    // Calculate time differences in minutes
+                    const now = new Date();
+                    const holderDiffMinutes = Math.floor((now - minHolderFreshness) / (1000 * 60));
+                    const sellOrderDiffMinutes = minSellOrderFreshness.getFullYear() === 9999 
+                        ? null 
+                        : Math.floor((now - minSellOrderFreshness) / (1000 * 60));
+                    
+                    // Format the time ago text
+                    const formatTimeAgo = (minutes) => {
+                        if (minutes === null) return 'N/A';
+                        if (minutes < 60) {
+                            return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                        } else {
+                            const hours = Math.floor(minutes / 60);
+                            return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                        }
+                    };
+                    
+                    document.getElementById('holdersTimeAgo').textContent = formatTimeAgo(holderDiffMinutes);
+                    document.getElementById('sellOrdersTimeAgo').textContent = formatTimeAgo(sellOrderDiffMinutes);
+                }
                 
                 // Clear and populate the table
                 tableBody.innerHTML = '';
@@ -1398,6 +1447,20 @@
                     filterAndDisplayData();
                 });
             });
+
+            // Add clear button functionality
+            document.getElementById('clearFilter').addEventListener('click', () => {
+                // Clear all checkboxes
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Clear hero handle selection
+                removeHeroHandle();
+                
+                // Reapply filters (which will show all rows since all filters are cleared)
+                filterAndDisplayData();
+            });
         }
 
         function copyToClipboard(text, event) {
@@ -1509,6 +1572,5 @@
             rows.forEach(row => tbody.appendChild(row));
         }
     </script>
-     <script src="/js/timeUtils.js" defer></script>
 </body>
 </html>

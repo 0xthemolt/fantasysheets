@@ -328,35 +328,38 @@
         }
         
         .order-content {
-            flex: 1;
+            flex: 0 0 50%;
             font-size: 0.8em;
             color: #888;
             text-align: right;
-            padding-left: 8px;
+            padding-left: 2px;
+            padding-right: 4px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            box-sizing: border-box;
         }
 
         .order-price {
             font-weight: 500;
             color: #888;
-            margin-right: 4px;
         }
 
         .cart-container {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 2px;
+            margin-left: auto;
+            padding-bottom: 2px;
         }
 
         .cart-number {
             font-size: 1em;
-            font-weight: bold;
         }
 
         .cart-icon {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
         }
 
@@ -385,8 +388,9 @@
         .card-cell {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             text-align: center;
+            width: 100%;
         }
 
         .card-content {
@@ -394,12 +398,13 @@
             align-items: center;
             justify-content: flex-start;
             gap: 4px;
-            padding-right: 8px;
+            padding-right: 0px;
+            width: 50%;
         }
 
         .card-count {
             font-weight: bold;
-            min-width: 20px;
+            min-width: 15px;
             text-align: left;
         }
 
@@ -711,6 +716,16 @@
         th.col-last-trade, th.col-last-tournament {
             text-align: center !important;
         }
+
+        .order-content.best-deal {
+            color: #FACC15 !important;
+        }
+
+        .order-content.best-deal .cart-icon,
+        .order-content.best-deal .cart-number,
+        .order-content.best-deal .order-price {
+            color: #FACC15 !important;
+        }
     </style>
 </head>
 <body>
@@ -720,6 +735,7 @@
                 <i class="fas fa-home"></i>
             </a>
             Card Holders
+            <div class="data-freshness">Holders: <span id="holderFreshness"></span></div>
         </h1>
     </div>
     <div class="container">
@@ -906,20 +922,13 @@
                 // Check rarity filters
                 let passesRarityFilter = true;
                 if (filterLegendary || filterEpic || filterRare || filterCommon) {
-                    // If seller has no orders, filter them out when any filter is selected
-                    const totalOrders = (holder.seller_legendary_order_count || 0) + 
-                                        (holder.seller_epic_order_count || 0) + 
-                                        (holder.seller_rare_order_count || 0) + 
-                                        (holder.seller_common_order_count || 0);
-                    if (totalOrders === 0) {
-                        passesRarityFilter = false;
-                    }
+                    passesRarityFilter = false; // Start with false, will be set to true if any selected rarity has orders
                     
-                    // Check if the holder has cards of ANY of the selected rarities (OR logic)
-                    if (filterLegendary && holder.legendary_cards > 0) passesRarityFilter = true;
-                    if (filterEpic && holder.epic_cards > 0) passesRarityFilter = true;
-                    if (filterRare && holder.rare_cards > 0) passesRarityFilter = true;
-                    if (filterCommon && holder.common_cards > 0) passesRarityFilter = true;
+                    // Check if ANY of the selected rarities have orders (OR logic)
+                    if (filterLegendary && holder.seller_legendary_order_count > 0) passesRarityFilter = true;
+                    if (filterEpic && holder.seller_epic_order_count > 0) passesRarityFilter = true;
+                    if (filterRare && holder.seller_rare_order_count > 0) passesRarityFilter = true;
+                    if (filterCommon && holder.seller_common_order_count > 0) passesRarityFilter = true;
                 }
                 
                 // Check trade activity filters
@@ -943,6 +952,63 @@
                 
                 // Update row visibility
                 row.style.display = passesRarityFilter && passesTradeFilter ? '' : 'none';
+            });
+        }
+
+        // Function to format ETH price
+        function formatEthPrice(price) {
+            if (!price) return '0';
+            const num = parseFloat(price);
+            return num < 0.1 ? num.toFixed(4) : num.toFixed(2);
+        }
+
+        // Function to find lowest prices and highlight best deals
+        function highlightBestDeals(data) {
+            // Initialize lowest prices with a high number
+            const lowestPrices = {
+                legendary: Infinity,
+                epic: Infinity,
+                rare: Infinity,
+                common: Infinity
+            };
+
+            // Find lowest prices for each rarity
+            data.forEach(holder => {
+                if (holder.seller_legendary_price && holder.seller_legendary_price < lowestPrices.legendary) {
+                    lowestPrices.legendary = holder.seller_legendary_price;
+                }
+                if (holder.seller_epic_price && holder.seller_epic_price < lowestPrices.epic) {
+                    lowestPrices.epic = holder.seller_epic_price;
+                }
+                if (holder.seller_rare_price && holder.seller_rare_price < lowestPrices.rare) {
+                    lowestPrices.rare = holder.seller_rare_price;
+                }
+                if (holder.seller_common_price && holder.seller_common_price < lowestPrices.common) {
+                    lowestPrices.common = holder.seller_common_price;
+                }
+            });
+
+            // Add best-deal class to elements with lowest prices
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const holder = JSON.parse(row.dataset.holderData);
+                
+                // Check each rarity column
+                const cells = row.querySelectorAll('td[class*="col-"]');
+                cells.forEach(cell => {
+                    if (cell.classList.contains('col-legendary') && holder.seller_legendary_price === lowestPrices.legendary) {
+                        cell.querySelector('.order-content')?.classList.add('best-deal');
+                    }
+                    if (cell.classList.contains('col-epic') && holder.seller_epic_price === lowestPrices.epic) {
+                        cell.querySelector('.order-content')?.classList.add('best-deal');
+                    }
+                    if (cell.classList.contains('col-rare') && holder.seller_rare_price === lowestPrices.rare) {
+                        cell.querySelector('.order-content')?.classList.add('best-deal');
+                    }
+                    if (cell.classList.contains('col-common') && holder.seller_common_price === lowestPrices.common) {
+                        cell.querySelector('.order-content')?.classList.add('best-deal');
+                    }
+                });
             });
         }
 
@@ -1046,7 +1112,7 @@
                                                     <span class="cart-number">${holder.seller_legendary_order_count}</span>
                                                     <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
-                                                <div class="order-price">${holder.seller_legendary_price}</div>
+                                                <div class="order-price">${formatEthPrice(holder.seller_legendary_price)}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1067,7 +1133,7 @@
                                                     <span class="cart-number">${holder.seller_epic_order_count}</span>
                                                     <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
-                                                <div class="order-price">${holder.seller_epic_price}</div>
+                                                <div class="order-price">${formatEthPrice(holder.seller_epic_price)}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1088,7 +1154,7 @@
                                                     <span class="cart-number">${holder.seller_rare_order_count}</span>
                                                     <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
-                                                <div class="order-price">${holder.seller_rare_price}</div>
+                                                <div class="order-price">${formatEthPrice(holder.seller_rare_price)}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1109,7 +1175,7 @@
                                                     <span class="cart-number">${holder.seller_common_order_count}</span>
                                                     <i class="fas fa-shopping-cart cart-icon"></i>
                                                 </div>
-                                                <div class="order-price">${holder.seller_common_price}</div>
+                                                <div class="order-price">${formatEthPrice(holder.seller_common_price)}</div>
                                             </span>` : 
                                             ''}
                                     </div>
@@ -1123,6 +1189,9 @@
                 
                 // Apply initial filters
                 filterAndDisplayData();
+                
+                // Highlight best deals after table is populated
+                highlightBestDeals(data);
                 
             } catch (err) {
                 tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Error loading data</td></tr>';
@@ -1440,5 +1509,6 @@
             rows.forEach(row => tbody.appendChild(row));
         }
     </script>
+     <script src="/js/timeUtils.js" defer></script>
 </body>
 </html>

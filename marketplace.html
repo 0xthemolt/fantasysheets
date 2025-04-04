@@ -786,7 +786,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, can_be_packed, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -816,6 +816,7 @@
                             hero_name: item.hero_name,
                             hero_pfp_url: item.hero_pfp_url,
                             inflation_degree: item.inflation_degree,
+                            can_be_packed: item.can_be_packed,
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
@@ -1094,7 +1095,7 @@
                                     <td>${Math.round(item.score)}</td>
                                     <td>${Math.round(item.score_24hr)}</td>
                                     <td>${item.stars}</td>
-                                    <td>${item.inflation_degree}</td>
+                                    <td>${item.inflation_degree}${item.can_be_packed === false ? ' <i class="fa-solid fa-circle-pause" style="color: rgba(255, 0, 0, 0.7);"></i>' : ''}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? 
                                         `<i class="fas fa-user seller-icon" 

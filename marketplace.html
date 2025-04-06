@@ -581,6 +581,47 @@
         .fa-copy:active {
             transform: scale(0.95); /* Slight shrink when clicked */
         }
+
+        .marketplace-container {
+            position: relative;
+            padding-top: 40px;  /* Space for export button */
+            max-width: 90%;
+            margin: 0 auto;  /* Center the container */
+            width: 100%;
+            overflow-x: auto; /* Enable horizontal scrolling */
+        }
+
+        .marketplace-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 1200px; /* Set fixed width */
+            min-width: 1200px; /* Set minimum width */
+            table-layout: fixed; /* Fixed table layout */
+            border: none;
+            position: relative;
+        }
+
+        /* Maintain thead and tbody styling */
+        .marketplace-table tbody {
+            display: block;
+            max-height: calc(80vh - 80px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+            width: 100%;
+        }
+
+        .marketplace-table thead {
+            display: table;
+            width: calc(100% - 6px); /* Account for scrollbar */
+            table-layout: fixed;
+        }
+
+        .marketplace-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
     </style>
 </head>
 <body>
@@ -861,6 +902,7 @@
                             max-width: 90%;
                             margin: 0 auto;  /* Center the container */
                             width: 100%;
+                            overflow-x: auto; /* Enable horizontal scrolling */
                         }
                         .export-button {
                             position: absolute;
@@ -882,10 +924,11 @@
                         .marketplace-table {
                             border-collapse: separate;
                             border-spacing: 0;
-                            width: 100%;
+                            width: 1200px; /* Set fixed width */
+                            min-width: 1200px; /* Set minimum width */
+                            table-layout: fixed; /* Fixed table layout */
                             border: none;
                             position: relative;
-                            min-width: min-content;  /* Ensures table doesn't shrink below content width */
                         }
                         .marketplace-table tbody {
                             display: block;

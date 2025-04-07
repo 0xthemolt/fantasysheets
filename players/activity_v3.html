@@ -959,7 +959,7 @@
                                     const imagePathV2 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity}/${heroId}_${heroStars}.png`;
                                     
                                     // Fallback URL (v1) - uses hero_id and hero_stars
-                                    const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroHandle}_${heroStars}.png`;
+                                    const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroId}_${heroStars}.png`;
                                     
                                     imagesHTML += `
                                         <div style="flex: 0 0 auto; margin-bottom: 2px; margin-right: 2px;">
@@ -1051,8 +1051,8 @@
                 // Fetch data on initial load
                 loadData();
                 
-                // REPLACE the current setRowClass implementation with getRowClass
-                gridOptions.getRowClass = function(params) {
+                // Apply custom row class to rows with hero cards
+                gridOptions.api.setRowClass(function(params) {
                     if (params.data && params.data.hero_details) {
                         try {
                             const heroCards = typeof params.data.hero_details === 'string' 
@@ -1065,7 +1065,7 @@
                         } catch (e) {}
                     }
                     return '';
-                };
+                });
                 
                 // Handle window resize
                 window.addEventListener('resize', () => {

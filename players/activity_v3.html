@@ -358,14 +358,18 @@
         /* Add styles for the player dropdown */
         .player-dropdown {
             position: absolute;
-            background-color: var(--header-bg);
-            color: var(--text-color);
+            top: 100%;
+            left: 0;
+            width: 90%; /* Reduced from 100% */
+            max-width: 320px; /* Add maximum width */
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: var(--container-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            margin-top: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         /* Add these styles for the player search dropdown */
@@ -379,7 +383,8 @@
             position: absolute;
             top: 100%;
             left: 0;
-            width: 100%;
+            width: 90%; /* Reduced from 100% */
+            max-width: 320px; /* Add maximum width */
             max-height: 300px;
             overflow-y: auto;
             background-color: var(--container-bg);
@@ -413,6 +418,7 @@
         .player-item-name {
             color: var(--text-color);
             font-weight: 500;
+            font-size: 0.9em; /* Reduced font size */
         }
 
         .player-item-handle {
@@ -440,6 +446,104 @@
         .player-dropdown::-webkit-scrollbar-thumb {
             background-color: var(--border-color);
             border-radius: 4px;
+        }
+
+        /* Increase row height for hero cards */
+        .ag-row-with-cards {
+            height: auto !important;
+            min-height: 100px; /* Increased from 80px */
+        }
+
+        /* Add styles for the cards modal */
+        .cards-modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .cards-modal {
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cards-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cards-modal-header h3 {
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .cards-modal-content {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(90vh - 70px);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .card-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-item img {
+            width: 80px;
+            height: 110px;
+            border-radius: 5px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            margin-bottom: 5px;
+        }
+
+        .card-info {
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .card-id {
+            color: var(--text-color);
+            margin-bottom: 2px;
+        }
+
+        .card-rarity {
+            color: var(--primary-color);
+            text-transform: capitalize;
+        }
+
+        .view-all-cards-btn:hover {
+            background-color: #0077cc !important;
         }
     </style>
 </head>
@@ -579,6 +683,31 @@
                 }
             });
 
+            // Add a click event to playerFilterInput to show dropdown on click
+            playerFilterInput.addEventListener('click', function() {
+                if (players.length === 0) {
+                    fetchPlayers(); // Make sure we have players data
+                }
+                
+                // Always show dropdown when clicking in the input
+                const query = this.value.trim().toLowerCase();
+                
+                // Get first 10 players, filtered if there's a query
+                let matchedPlayers;
+                if (query) {
+                    matchedPlayers = players.filter(player => {
+                        const name = (player.player_name || '').toLowerCase();
+                        const handle = (player.player_handle || '').toLowerCase();
+                        return name.includes(query) || handle.includes(query);
+                    }).slice(0, 10);
+                } else {
+                    // If no query, just show first 10 players
+                    matchedPlayers = players.slice(0, 10);
+                }
+                
+                renderPlayerDropdown(matchedPlayers);
+            });
+
             // Function to render the player dropdown
             function renderPlayerDropdown(matchedPlayers) {
                 // Clear previous results
@@ -635,7 +764,7 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('player_mints')
-                        .select('player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, price, hero_details')
+                        .select('player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, price, cards,hero_details')
                         .eq('player_handle', playerFilterInput.value.trim());
                         
                     if (error) {
@@ -698,8 +827,11 @@
                         filter: false,
                         sortable: false,
                         cellRenderer: params => {
-                            const imgUrl = params.value || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-                            return `<div class="avatar-container"><img src="${imgUrl}" alt="Avatar" class="player-avatar"></div>`;
+                            const imgUrl = params.value || '/icons/fan.webp';
+                            return `<div class="avatar-container">
+                                <img src="${imgUrl}" alt="Avatar" class="player-avatar" 
+                                     onerror="this.onerror=null; this.src='/icons/fan.webp';">
+                            </div>`;
                         }
                     },
                     { headerName: 'Player Name', field: 'player_name', filter: 'agTextColumnFilter' },
@@ -715,13 +847,30 @@
                         }
                     },
                     { 
-                        headerName: 'Timestamp', 
+                        headerName: 'Time', 
                         field: 'timestamp', 
                         filter: 'agDateColumnFilter',
                         sort: 'desc',
                         cellRenderer: params => {
                             if (!params.value) return '';
-                            return new Date(params.value).toLocaleString();
+                            
+                            const timestamp = new Date(params.value);
+                            const now = new Date();
+                            const diffMs = now - timestamp;
+                            const diffMins = Math.floor(diffMs / 60000);
+                            const diffHours = Math.floor(diffMs / 3600000);
+                            const diffDays = Math.floor(diffMs / 86400000);
+                            
+                            // Format as relative time
+                            if (diffDays > 0) {
+                                return `${diffDays}d ago`;
+                            } else if (diffHours > 0) {
+                                return `${diffHours}h ago`;
+                            } else if (diffMins > 0) {
+                                return `${diffMins}m ago`;
+                            } else {
+                                return 'Just now';
+                            }
                         }
                     },
                     { 
@@ -730,28 +879,55 @@
                         filter: 'agNumberColumnFilter',
                         cellRenderer: params => {
                             if (params.value === null || params.value === undefined) return '';
-                            return `${params.value.toFixed(3)} <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>`;
+                            
+                            // Get the transaction hash from the row data
+                            const txHash = params.data.tx_hash;
+                            const blastLink = txHash ? 
+                                `<a href="https://blastscan.io/tx/${txHash}" target="_blank" title="View on BlastScan" style="margin-left: 5px;">
+                                    <img src="/icons/blast.webp" alt="BlastScan" style="width: 11px; height: 11px; vertical-align: middle; cursor: pointer;">
+                                </a>` : '';
+                                
+                            // Special handling for zero price (mints)
+                            if (params.value === 0) {
+                                return blastLink; // Only show blast link for mints
+                            } else {
+                                // For non-zero prices (packs), show price with ETH icon and blast link
+                                return `${params.value.toFixed(3)} <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>${blastLink}`;
+                            }
                         }
                     },
                     { 
-                        headerName: 'Transaction', 
-                        field: 'tx_hash',
+                        headerName: 'Cards', 
+                        field: 'cards',
+                        width: 80,
+                        flex: 0,
+                        filter: 'agNumberColumnFilter',
+                        cellStyle: {
+                            'text-align': 'center'
+                        },
                         cellRenderer: params => {
-                            const txHash = params.value;
-                            if (!txHash) return '';
-                            return `<a href="https://etherscan.io/tx/${txHash}" target="_blank">${txHash.substring(0, 8)}...${txHash.substring(txHash.length - 6)}</a>`;
+                            if (params.value === null || params.value === undefined) return '';
+                            
+                            // Ensure the value is within 1-99 range for display
+                            const cardCount = Math.min(Math.max(1, params.value), 99);
+                            
+                            return `<span style="font-weight: 500;">${cardCount}</span>`;
                         }
                     },
                     { 
-                        headerName: 'Hero Details', 
+                        headerName: 'Hero Cards', 
                         field: 'hero_details',
+                        flex: 2,
+                        minWidth: 250,
                         valueFormatter: params => {
                             if (!params.value) return 'N/A';
                             
+                            // Handle object by converting it to a string representation
                             if (typeof params.value === 'object') {
                                 return JSON.stringify(params.value);
                             }
                             
+                            // If it's already a string, return it directly
                             return params.value;
                         },
                         cellRenderer: params => {
@@ -759,11 +935,79 @@
                             if (!details) return 'N/A';
                             
                             try {
-                                // If hero_details is stored as a JSON string
-                                const heroData = typeof details === 'string' ? JSON.parse(details) : details;
-                                return `${heroData.name || 'Unknown'} (${heroData.rarity || 'N/A'})`;
+                                // Parse hero_details from JSON if it's a string
+                                const heroCards = typeof details === 'string' ? JSON.parse(details) : details;
+                                
+                                if (!Array.isArray(heroCards) || heroCards.length === 0) {
+                                    return 'No cards';
+                                }
+                                
+                                // Determine if we need to show "View All" button (more than 15 cards)
+                                const showViewAllButton = heroCards.length > 15;
+                                const cardsToShow = showViewAllButton ? heroCards.slice(0, 15) : heroCards;
+                                
+                                // Create card images HTML with natural wrapping
+                                let imagesHTML = '<div style="display: flex; flex-wrap: wrap; gap: 3px; width: 100%;">';
+                                
+                                cardsToShow.forEach(card => {
+                                    const rarity = card.hero_rarity || 'common';
+                                    const heroId = card.hero_id || '';
+                                    const heroHandle = card.hero_handle || '';
+                                    const heroStars = card.hero_stars || '';
+                                    
+                                    // Primary URL (v2) - uses hero_handle and hero_stars
+                                    const imagePathV2 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity}/${heroId}_${heroStars}.png`;
+                                    
+                                    // Fallback URL (v1) - uses hero_id and hero_stars
+                                    const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroHandle}_${heroStars}.png`;
+                                    
+                                    imagesHTML += `
+                                        <div style="flex: 0 0 auto; margin-bottom: 2px; margin-right: 2px;">
+                                            <img 
+                                                src="${imagePathV2}" 
+                                                alt="${rarity} card" 
+                                                style="width: 22px; height: 30px; border-radius: 2px; object-fit: cover;"
+                                                onerror="if(this.src !== '${imagePathV1}') { this.src='${imagePathV1}'; } else { this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/card_placeholder.png'; this.style.opacity='0.7'; }"
+                                                title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}"
+                                            />
+                                        </div>
+                                    `;
+                                });
+                                
+                                if (showViewAllButton) {
+                                    // IMPORTANT: Use a unique identifier for each cell to prevent conflicts
+                                    const uniqueId = 'btn_' + Math.random().toString(36).substr(2, 9);
+                                    
+                                    imagesHTML += `
+                                        <div style="margin-left: 5px; display: flex; align-items: center;">
+                                            <button 
+                                                id="${uniqueId}"
+                                                class="view-all-cards-btn" 
+                                                style="background-color: var(--primary-color); color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 11px;">
+                                                View All (${heroCards.length})
+                                            </button>
+                                        </div>
+                                    `;
+                                    
+                                    // Use requestAnimationFrame to ensure the DOM is ready
+                                    window.requestAnimationFrame(() => {
+                                        const button = document.getElementById(uniqueId);
+                                        if (button) {
+                                            // Store cards data directly in a function closure instead of as an attribute
+                                            button.addEventListener('click', (e) => {
+                                                e.stopPropagation();
+                                                showCardsModal(heroCards);
+                                            });
+                                        }
+                                    });
+                                }
+                                
+                                imagesHTML += '</div>';
+                                return imagesHTML;
+                                
                             } catch (e) {
-                                return String(details);
+                                console.error('Error rendering hero cards:', e);
+                                return 'Error displaying cards';
                             }
                         }
                     }
@@ -782,7 +1026,7 @@
                 
                 // Row settings
                 rowSelection: 'single',
-                rowHeight: 40,
+                rowHeight: 50, // Increased from 40
                 headerHeight: 40,
                 
                 // Other settings
@@ -806,6 +1050,22 @@
             function onGridReady(params) {
                 // Fetch data on initial load
                 loadData();
+                
+                // REPLACE the current setRowClass implementation with getRowClass
+                gridOptions.getRowClass = function(params) {
+                    if (params.data && params.data.hero_details) {
+                        try {
+                            const heroCards = typeof params.data.hero_details === 'string' 
+                                ? JSON.parse(params.data.hero_details) 
+                                : params.data.hero_details;
+                            
+                            if (Array.isArray(heroCards) && heroCards.length > 5) {
+                                return 'ag-row-with-cards';
+                            }
+                        } catch (e) {}
+                    }
+                    return '';
+                };
                 
                 // Handle window resize
                 window.addEventListener('resize', () => {
@@ -923,6 +1183,73 @@
                 };
                 
                 return CustomPaginationComp;
+            }
+
+            // Add this at the end of your DOMContentLoaded event function
+
+            // Create modal container element
+            const modalContainer = document.createElement('div');
+            modalContainer.className = 'cards-modal-container';
+            modalContainer.style.display = 'none';
+            document.body.appendChild(modalContainer);
+
+            // Function to show the modal with all cards
+            function showCardsModal(cards) {
+                // Create modal content
+                modalContainer.innerHTML = `
+                    <div class="cards-modal">
+                        <div class="cards-modal-header">
+                            <h3>All Cards (${cards.length})</h3>
+                            <button class="close-modal-btn">&times;</button>
+                        </div>
+                        <div class="cards-modal-content">
+                            <div class="cards-grid">
+                                ${cards.map(card => {
+                                    const rarity = card.hero_rarity || 'common';
+                                    const heroId = card.hero_id || '';
+                                    const heroHandle = card.hero_handle || '';
+                                    const heroStars = card.hero_stars || '';
+                                    
+                                    // Primary URL (v2) - uses hero_handle and hero_stars
+                                    const imagePathV2 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity}/${heroHandle}_${heroStars}.png`;
+                                    
+                                    // Fallback URL (v1) - uses hero_id and hero_stars
+                                    const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroId}_${heroStars}.png`;
+                                    
+                                    return `
+                                        <div class="card-item">
+                                            <img 
+                                                src="${imagePathV2}" 
+                                                alt="${rarity} card" 
+                                                onerror="if(this.src !== '${imagePathV1}') { this.src='${imagePathV1}'; } else { this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/card_placeholder.png'; this.style.opacity='0.7'; }"
+                                                title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}"
+                                            >
+                                            <div class="card-info">
+                                                <div class="card-id">ID: ${card.token_id || 'N/A'}</div>
+                                                <div class="card-rarity">${rarity}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Show the modal
+                modalContainer.style.display = 'flex';
+                
+                // Add event listener to close button
+                document.querySelector('.close-modal-btn').addEventListener('click', function() {
+                    modalContainer.style.display = 'none';
+                });
+                
+                // Close modal when clicking outside
+                modalContainer.addEventListener('click', function(e) {
+                    if (e.target === modalContainer) {
+                        modalContainer.style.display = 'none';
+                    }
+                });
             }
         });
     </script>

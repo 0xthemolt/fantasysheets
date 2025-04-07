@@ -12,11 +12,14 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #34a853;
-            --background-color: #f8f9fa;
-            --text-color: #202124;
-            --border-color: #dadce0;
+            --primary-color: #0099ff;
+            --background-color: #000000;
+            --container-bg: #121212;
+            --text-color: #ffffff;
+            --border-color: #333333;
+            --header-bg: #1a1a1a;
+            --cell-bg: #0a0a0a;
+            --alt-row-bg: #0f0f0f;
         }
         
         * {
@@ -36,10 +39,16 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         header {
             margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
         }
         
         h1 {
@@ -50,6 +59,65 @@
         .grid-container {
             height: 70vh;
             width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Simple, clean dark theme for AG Grid */
+        .ag-theme-alpine {
+            --ag-background-color: var(--cell-bg);
+            --ag-header-background-color: var(--header-bg);
+            --ag-odd-row-background-color: var(--cell-bg);
+            --ag-even-row-background-color: var(--alt-row-bg);
+            --ag-header-foreground-color: var(--text-color);
+            --ag-foreground-color: var(--text-color);
+            --ag-border-color: var(--border-color);
+            --ag-row-border-color: var(--border-color);
+        }
+        
+        /* Override core elements to ensure dark theme */
+        .ag-root-wrapper {
+            background-color: black !important;
+        }
+        
+        .ag-header {
+            background-color: var(--header-bg) !important;
+            color: white !important;
+        }
+        
+        .ag-header-cell {
+            background-color: var(--header-bg) !important;
+            color: white !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+        
+        .ag-cell {
+            background-color: transparent !important;
+            color: white !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+        
+        .ag-row-odd {
+            background-color: var(--cell-bg) !important;
+        }
+        
+        .ag-row-even {
+            background-color: var(--alt-row-bg) !important;
+        }
+        
+        .ag-floating-filter-body input,
+        .ag-floating-filter-button {
+            background-color: var(--header-bg) !important;
+            color: white !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        
+        .ag-menu {
+            background-color: var(--header-bg) !important;
+            color: white !important;
         }
         
         .loading-overlay {
@@ -58,7 +126,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -79,12 +147,13 @@
         }
         
         .error-message {
-            background-color: #fdeded;
-            color: #5f2120;
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
             padding: 16px;
             border-radius: 4px;
             margin-bottom: 20px;
             display: none;
+            border: 1px solid #b71c1c;
         }
         
         .filter-bar {
@@ -98,9 +167,15 @@
             flex: 1;
             min-width: 200px;
             padding: 8px 12px;
+            background-color: var(--header-bg);
+            color: var(--text-color);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 14px;
+        }
+        
+        .filter-input::placeholder {
+            color: #aaaaaa;
         }
         
         .refresh-btn {
@@ -114,14 +189,27 @@
         }
         
         .refresh-btn:hover {
-            background-color: #0d62c9;
+            background-color: #0077cc;
+            box-shadow: 0 0 8px rgba(0, 153, 255, 0.5);
         }
         
         footer {
             margin-top: 30px;
             text-align: center;
             font-size: 14px;
-            color: #70757a;
+            color: #aaaaaa;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+        
+        /* Link styling */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
         }
         
         /* Mobile Responsiveness */
@@ -137,6 +225,221 @@
             .filter-input {
                 min-width: 100%;
             }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        /* Add these styles to fix pagination and scrolling */
+        .ag-theme-alpine .ag-paging-panel {
+            background-color: var(--header-bg) !important;
+            color: var(--text-color) !important;
+            border-top: 1px solid var(--border-color) !important;
+            padding: 8px;
+        }
+        
+        .ag-theme-alpine .ag-paging-button {
+            color: var(--text-color) !important;
+        }
+        
+        .ag-theme-alpine .ag-paging-button-wrapper {
+            color: var(--text-color) !important;
+        }
+        
+        .ag-theme-alpine .ag-paging-description {
+            color: var(--text-color) !important;
+        }
+        
+        /* Fix scrollbar styling */
+        .ag-theme-alpine ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .ag-theme-alpine ::-webkit-scrollbar-track {
+            background: var(--cell-bg);
+        }
+        
+        .ag-theme-alpine ::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        /* Ensure the grid container has proper height calculation */
+        .grid-container {
+            height: 70vh;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Make sure rows display properly */
+        .ag-center-cols-container {
+            min-height: 100px;
+        }
+        
+        /* Add these styles to your stylesheet */
+        .custom-pagination {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        .page-size-selector {
+            background-color: var(--header-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-right: 10px;
+        }
+
+        /* Add these styles for the toggle filter */
+        .toggle-filter {
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            margin-right: 15px;
+        }
+
+        .toggle-btn {
+            background-color: var(--header-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-btn:not(:last-child) {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .toggle-btn:hover {
+            background-color: #252525;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Add these styles for the avatar */
+        .avatar-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .player-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        /* Add styles for the required player message */
+        .required-player-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+
+        /* Add styles for the player dropdown */
+        .player-dropdown {
+            position: absolute;
+            background-color: var(--header-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        /* Add these styles for the player search dropdown */
+        .player-search-container {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .player-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .player-item:hover {
+            background-color: var(--header-bg);
+        }
+
+        .player-item:last-child {
+            border-bottom: none;
+        }
+
+        .player-item-info {
+            margin-left: 10px;
+        }
+
+        .player-item-name {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .player-item-handle {
+            color: #aaaaaa;
+            font-size: 0.85em;
+        }
+
+        .player-search-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Ensure scrollbar in dropdown matches theme */
+        .player-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .player-dropdown::-webkit-scrollbar-track {
+            background: var(--cell-bg);
+        }
+
+        .player-dropdown::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -152,11 +455,22 @@
         </div>
         
         <div class="filter-bar">
-            <input type="text" id="quickFilter" class="filter-input" placeholder="Quick filter...">
+            <div class="toggle-filter">
+                <button class="toggle-btn active" data-filter="all">All</button>
+                <button class="toggle-btn" data-filter="mints">Mints</button>
+                <button class="toggle-btn" data-filter="packs">Packs</button>
+            </div>
+            <div class="player-search-container">
+                <input type="text" id="playerFilter" class="filter-input" placeholder="Filter by player...">
+                <div id="playerDropdown" class="player-dropdown">
+                    <!-- Player suggestions will be added here dynamically -->
+                </div>
+            </div>
             <button id="refreshBtn" class="refresh-btn">Refresh Data</button>
         </div>
         
-        <div id="myGrid" class="ag-theme-alpine grid-container"></div>
+        <!-- Make sure your grid container has the correct class -->
+        <div id="myGrid" class="ag-theme-alpine-dark grid-container"></div>
         
         <footer>
             <p>&copy; 2025 Fantasy Top Analysis</p>
@@ -187,9 +501,180 @@
             const gridDiv = document.querySelector('#myGrid');
             const loadingOverlay = document.querySelector('#loadingOverlay');
             const errorMessage = document.querySelector('#errorMessage');
-            const quickFilterInput = document.querySelector('#quickFilter');
+            const playerFilterInput = document.querySelector('#playerFilter');
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
             const refreshButton = document.querySelector('#refreshBtn');
-            
+            let activeFilterType = 'all'; // Default filter
+
+            // Add this after your DOM references
+            const requiredPlayerMessage = document.createElement('div');
+            requiredPlayerMessage.className = 'required-player-message';
+            requiredPlayerMessage.style.display = 'none';
+            requiredPlayerMessage.textContent = 'You must enter a player';
+            document.querySelector('.filter-bar').appendChild(requiredPlayerMessage);
+
+            // Set the default player in the filter
+            playerFilterInput.value = "OttoSuwenNFT";
+
+            // Add these variables after your existing DOM references
+            const playerDropdown = document.querySelector('#playerDropdown');
+            let players = []; // Will store all players
+            let isLoadingPlayers = false;
+
+            // Add this function to fetch all players
+            async function fetchPlayers() {
+                if (players.length > 0 || isLoadingPlayers) return;
+                
+                isLoadingPlayers = true;
+                
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('players')
+                        .select('player_address, player_name, player_pfp_url, player_handle')
+                        .order('player_name', { ascending: true });
+                        
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                    
+                    players = data || [];
+                    
+                } catch (error) {
+                    console.error('Error fetching players:', error);
+                } finally {
+                    isLoadingPlayers = false;
+                }
+            }
+
+            // Call this function early to start loading players
+            fetchPlayers();
+
+            // Modify the player filter input event to show matching players
+            playerFilterInput.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                
+                if (!query) {
+                    requiredPlayerMessage.style.display = 'block';
+                    playerDropdown.style.display = 'none';
+                    return;
+                } else {
+                    requiredPlayerMessage.style.display = 'none';
+                }
+                
+                // Filter players based on input
+                const matchedPlayers = players.filter(player => {
+                    const name = (player.player_name || '').toLowerCase();
+                    const handle = (player.player_handle || '').toLowerCase();
+                    return name.includes(query) || handle.includes(query);
+                }).slice(0, 10); // Limit to 10 results
+                
+                // Display matching players
+                renderPlayerDropdown(matchedPlayers);
+            });
+
+            // Add click event for document to close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!playerFilterInput.contains(event.target) && !playerDropdown.contains(event.target)) {
+                    playerDropdown.style.display = 'none';
+                }
+            });
+
+            // Function to render the player dropdown
+            function renderPlayerDropdown(matchedPlayers) {
+                // Clear previous results
+                playerDropdown.innerHTML = '';
+                
+                if (matchedPlayers.length === 0) {
+                    playerDropdown.style.display = 'none';
+                    return;
+                }
+                
+                // Create HTML for each player
+                matchedPlayers.forEach(player => {
+                    const playerElement = document.createElement('div');
+                    playerElement.className = 'player-item';
+                    
+                    const imgUrl = player.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+                    
+                    playerElement.innerHTML = `
+                        <img src="${imgUrl}" alt="Avatar" class="player-search-avatar">
+                        <div class="player-item-info">
+                            <div class="player-item-name">${player.player_name || 'Unknown'}</div>
+                            <div class="player-item-handle">@${player.player_handle || ''}</div>
+                        </div>
+                    `;
+                    
+                    // Add click event to select this player
+                    playerElement.addEventListener('click', function() {
+                        playerFilterInput.value = player.player_handle;
+                        playerDropdown.style.display = 'none';
+                        loadData(); // Load data for selected player
+                    });
+                    
+                    playerDropdown.appendChild(playerElement);
+                });
+                
+                // Show the dropdown
+                playerDropdown.style.display = 'block';
+            }
+
+            // Modify loadData to handle the case when a player is selected
+            async function loadData() {
+                // Check if player filter is empty
+                if (!playerFilterInput.value.trim()) {
+                    requiredPlayerMessage.style.display = 'block';
+                    showError('You must enter a player handle to view data');
+                    return;
+                } else {
+                    requiredPlayerMessage.style.display = 'none';
+                    hideError();
+                }
+                
+                showLoading(true);
+                
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('player_mints')
+                        .select('player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, price, hero_details')
+                        .eq('player_handle', playerFilterInput.value.trim());
+                        
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                    
+                    if (data.length === 0) {
+                        showError(`No data found for player: ${playerFilterInput.value}`);
+                    } else {
+                        gridOptions.api.setRowData(data);
+                        gridOptions.api.sizeColumnsToFit();
+                    }
+                    
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    showError(error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            // Add a click event to playerFilterInput to show dropdown on focus
+            playerFilterInput.addEventListener('focus', function() {
+                if (players.length === 0) {
+                    fetchPlayers(); // Make sure we have players data
+                }
+                
+                const query = this.value.trim().toLowerCase();
+                if (query) {
+                    const matchedPlayers = players.filter(player => {
+                        const name = (player.player_name || '').toLowerCase();
+                        const handle = (player.player_handle || '').toLowerCase();
+                        return name.includes(query) || handle.includes(query);
+                    }).slice(0, 10);
+                    
+                    renderPlayerDropdown(matchedPlayers);
+                }
+            });
+
             // Grid Options
             const gridOptions = {
                 // Enable features
@@ -199,15 +684,30 @@
                     filter: true,
                     sortable: true,
                     resizable: true,
+                    cellClass: 'dark-cell',
+                    headerClass: 'dark-header'
                 },
                 
-                // Column Definitions
+                // Column Definitions - keep your existing column definitions
                 columnDefs: [
+                    {
+                        headerName: '', 
+                        field: 'player_pfp_url',
+                        width: 60,
+                        flex: 0,
+                        filter: false,
+                        sortable: false,
+                        cellRenderer: params => {
+                            const imgUrl = params.value || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+                            return `<div class="avatar-container"><img src="${imgUrl}" alt="Avatar" class="player-avatar"></div>`;
+                        }
+                    },
                     { headerName: 'Player Name', field: 'player_name', filter: 'agTextColumnFilter' },
-                    { headerName: 'Handle', field: 'player_handle', filter: 'agTextColumnFilter' },
+                    { headerName: 'Handle', field: 'player_handle', filter: 'agTextColumnFilter', hide: true },
                     { 
                         headerName: 'Address', 
                         field: 'player_address',
+                        hide: true,
                         cellRenderer: params => {
                             const address = params.value;
                             if (!address) return '';
@@ -230,7 +730,7 @@
                         filter: 'agNumberColumnFilter',
                         cellRenderer: params => {
                             if (params.value === null || params.value === undefined) return '';
-                            return params.value.toFixed(2);
+                            return `${params.value.toFixed(3)} <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>`;
                         }
                     },
                     { 
@@ -245,6 +745,15 @@
                     { 
                         headerName: 'Hero Details', 
                         field: 'hero_details',
+                        valueFormatter: params => {
+                            if (!params.value) return 'N/A';
+                            
+                            if (typeof params.value === 'object') {
+                                return JSON.stringify(params.value);
+                            }
+                            
+                            return params.value;
+                        },
                         cellRenderer: params => {
                             const details = params.value;
                             if (!details) return 'N/A';
@@ -260,22 +769,34 @@
                     }
                 ],
                 
-                // Pagination
+                // Pagination settings
                 pagination: true,
                 paginationPageSize: 25,
                 
+                // Scrolling behavior
+                alwaysShowVerticalScroll: true,
+                suppressScrollOnNewData: false,
+                
+                // Layout settings
+                domLayout: 'normal',
+                
                 // Row settings
                 rowSelection: 'single',
+                rowHeight: 40,
+                headerHeight: 40,
                 
                 // Other settings
                 animateRows: true,
-                domLayout: 'autoHeight',
+                suppressDragLeaveHidesColumns: true,
                 
-                // Quick filter
-                quickFilterText: '',
+                // External filter settings
+                isExternalFilterPresent: () => {
+                    return true; // Always return true since we handle filtering in externalFilter
+                },
+                doesExternalFilterPass: externalFilter,
                 
                 // Events
-                onGridReady: onGridReady,
+                onGridReady: onGridReady
             };
             
             // Initialize AG Grid
@@ -294,35 +815,59 @@
                 });
             }
             
-            // Fetch Data from Supabase
-            async function loadData() {
-                showLoading(true);
-                hideError();
+            // Toggle Filter Functionality
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update active button styling
+                    toggleButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Set the filter type
+                    activeFilterType = this.getAttribute('data-filter');
+                    
+                    // Apply filters
+                    applyFilters();
+                });
+            });
+            
+            // Combined filter function
+            function applyFilters() {
+                const playerText = playerFilterInput.value;
                 
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('player_mints')
-                        .select('player_address, player_name, player_handle, tx_hash, timestamp, price, hero_details');
-                        
-                    if (error) {
-                        throw new Error(error.message);
-                    }
-                    
-                    gridOptions.api.setRowData(data);
-                    gridOptions.api.sizeColumnsToFit();
-                    
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                    showError(error.message);
-                } finally {
-                    showLoading(false);
-                }
+                gridOptions.api.setFilterModel(null); // Clear existing filters
+                
+                // Force refresh
+                gridOptions.api.onFilterChanged();
             }
             
-            // Quick Filter Functionality
-            quickFilterInput.addEventListener('input', function() {
-                gridOptions.api.setQuickFilter(this.value);
-            });
+            // External filter function
+            function externalFilter(node) {
+                if (!node.data) return false;
+                
+                // Always require a player handle
+                const playerText = playerFilterInput.value.toLowerCase().trim();
+                if (!playerText) return false;
+                
+                // First check if it matches the player criteria
+                const playerName = String(node.data.player_name || '').toLowerCase();
+                const playerHandle = String(node.data.player_handle || '').toLowerCase();
+                const playerAddress = String(node.data.player_address || '').toLowerCase();
+                
+                const matchesPlayer = playerHandle.includes(playerText) || 
+                                      playerName.includes(playerText) || 
+                                      playerAddress.includes(playerText);
+                                      
+                if (!matchesPlayer) return false;
+                
+                // Then check the toggle filter
+                if (activeFilterType === 'mints') {
+                    return node.data.price === 0;
+                } else if (activeFilterType === 'packs') {
+                    return node.data.price !== 0;
+                }
+                
+                return true; // For "All" filter
+            }
             
             // Refresh Button
             refreshButton.addEventListener('click', loadData);
@@ -339,6 +884,45 @@
             
             function hideError() {
                 errorMessage.style.display = 'none';
+            }
+            
+            // Create Pagination Component
+            function createPaginationComp() {
+                function CustomPaginationComp() {}
+                
+                CustomPaginationComp.prototype.init = function(params) {
+                    this.eGui = document.createElement('div');
+                    this.eGui.classList.add('custom-pagination');
+                    
+                    // Create page size selector
+                    const pageSizeSelector = document.createElement('select');
+                    pageSizeSelector.classList.add('page-size-selector');
+                    
+                    const pageSizes = [10, 25, 50, 100];
+                    pageSizes.forEach(size => {
+                        const option = document.createElement('option');
+                        option.value = size;
+                        option.text = size + ' rows';
+                        if (size === params.paginationProxy.paginationPageSize) {
+                            option.selected = true;
+                        }
+                        pageSizeSelector.appendChild(option);
+                    });
+                    
+                    // Handle page size change
+                    pageSizeSelector.addEventListener('change', function() {
+                        params.api.paginationSetPageSize(Number(this.value));
+                    });
+                    
+                    // Add to DOM
+                    this.eGui.appendChild(pageSizeSelector);
+                };
+                
+                CustomPaginationComp.prototype.getGui = function() {
+                    return this.eGui;
+                };
+                
+                return CustomPaginationComp;
             }
         });
     </script>

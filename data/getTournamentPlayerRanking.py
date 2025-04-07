@@ -6,12 +6,14 @@ import pandas as pd
 
 def get_db_connection():
     return psycopg2.connect(
-        dbname="0xthemolt",
-        user="postgres",
-        password="admin",
-        host="localhost",
-        port="5432"
+        dbname="postgres",
+    user="postgres.hhcuqhvmzwmehdsaamhn",
+    password="$&roct8&rgp4NE",
+    host="aws-0-us-west-1.pooler.supabase.com",
+    port="5432"
     )
+
+
 
 # First query into league_decks_df
 conn = get_db_connection()
@@ -23,10 +25,10 @@ select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp
 ,1 - (tplayers.player_rank - 1) / (t.registered_decks) normalized_rank  --x min = total registered / worse place, x max = best (rank 1)
 ,coalesce(reward,0) eth_reward
 ,row_number() over (partition by t.tournament_league_unique_key,tplayers.player_id order by tplayers.player_rank asc) as best_deck_rank
- FROM flatten.GET_TOURNAMENT_PAST_PLAYERS tplayers
+ FROM flatten.tournament_players tplayers
  join flatten.GET_TOURNAMENTS t  
 	on tplayers.tournament_id  = t.tournament_id 
-left join  flatten.GET_TOURNAMENT_BY_ID rewards_eth
+left join  flatten.tournament_rewards rewards_eth
 	on tplayers.tournament_id = rewards_eth.tournament_id
 	and tplayers.player_rank between  rewards_eth.range_start and rewards_eth.range_end
 	and rewards_eth.reward_type = 'ETH'

@@ -11,27 +11,30 @@ TOURNAMENT_NUMBER = config['tournament_number']
 
 # Connect to PostgreSQL
 conn = psycopg2.connect(
-    dbname="0xthemolt",
-    user="postgres",
-    password="admin",
-    host="localhost",
+    dbname="postgres",
+    user="postgres.hhcuqhvmzwmehdsaamhn",
+    password="$&roct8&rgp4NE",
+    host="aws-0-us-west-1.pooler.supabase.com",
     port="5432"
 )
+
+
 
 # Create cursor and execute query
 cursor = conn.cursor()
 query = f"""
+set statement_timeout = '2min';
 with base as (
         select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle,gtpp2.player_rank,gt2.tournament_name
         ,(gtpp2.db_updated_cst + interval '5 hour')::timestamp as timestamp
-    from flatten.get_tournament_past_players gtpp2 
+    from flatten.tournament_players gtpp2 
         join flatten.get_tournaments gt2 
             on gtpp2.tournament_id = gt2.tournament_id
    -- where gtpp2.player_handle = '0xthemolt'
        --and gtpp2.tournament_unique_key = 'Main 24'
     order by 1 desc
   )
-  ,heroes as (select distinct hero_handle,is_deleted from flatten.GET_HEROS_WITH_STATS_SNAPSHOT where  start_datetime >= '2024-07-01' and hero_handle is not null  and snapshot_rank  = 1)
+  ,heroes as (select distinct hero_handle, is_deleted from  flatten.heroes_current hc)
   ,nbc_wallets as (select distinct player_id from master.nbc_wallets)
   ,historical_rewards as (
   select player_id,tournament_id,tournament_unique_key,league,
@@ -84,24 +87,24 @@ group by 1,2
         sum(coalesce(reward_frag.reward,0)) as reward_frag,
         sum(coalesce(reward_gold.reward,0)) as reward_gold
   from base gtpp2
-    LEFT JOIN flatten.GET_TOURNAMENT_BY_ID reward_eth
+    LEFT JOIN flatten.tournament_rewards reward_eth
         ON gtpp2.rewards_tournament_id  = reward_eth.tournament_id 
         AND gtpp2.player_rank BETWEEN reward_eth.range_start AND reward_eth.range_end
         AND reward_eth.reward_type = 'ETH'
-    LEFT JOIN flatten.GET_TOURNAMENT_BY_ID reward_pack
+    LEFT JOIN flatten.tournament_rewards reward_pack
         ON gtpp2.rewards_tournament_id = reward_pack.tournament_id 
         AND gtpp2.player_rank BETWEEN reward_pack.range_start AND reward_pack.range_end
         AND reward_pack.reward_type = 'PACK'
-    LEFT JOIN flatten.GET_TOURNAMENT_BY_ID reward_fan
+    LEFT JOIN flatten.tournament_rewards reward_fan
         ON gtpp2.rewards_tournament_id = reward_fan.tournament_id 
         AND gtpp2.player_rank BETWEEN reward_fan.range_start AND reward_fan.range_end
         AND reward_fan.reward_type = 'FAN'
-    LEFT JOIN flatten.GET_TOURNAMENT_BY_ID reward_frag
+    LEFT JOIN flatten.tournament_rewards reward_frag
         ON gtpp2.rewards_tournament_id = reward_frag.tournament_id 
         AND gtpp2.player_rank BETWEEN reward_frag.range_start AND reward_frag.range_end
         AND reward_frag.reward_type = 'FRAGMENT'
         and gtpp2.start_timestamp::date >= '2024-11-09'
-  	LEFT JOIN flatten.GET_TOURNAMENT_BY_ID reward_gold
+  	LEFT JOIN flatten.tournament_rewards reward_gold
         ON gtpp2.rewards_tournament_id = reward_gold.tournament_id 
         AND gtpp2.player_rank BETWEEN reward_gold.range_start AND reward_gold.range_end
         AND reward_gold.reward_type = 'GOLD'

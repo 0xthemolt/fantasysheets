@@ -76,6 +76,7 @@ from agg.tournamentownership t
 join   flatten.get_tournaments gt
     on t.tournament_id  = gt.tournament_id 
     where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
+    and gt.tournament_number not in (45)
 group by 1,2,3,4
 order by gt.start_timestamp asc"""
 card_rarity_df = pd.read_sql_query(rarity_query, conn)

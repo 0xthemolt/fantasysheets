@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Activity Dashboard</title>
+    
+    <!-- AG Grid CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.1/styles/ag-grid.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.1/styles/ag-theme-alpine.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --background-color: #f8f9fa;
+            --text-color: #202124;
+            --border-color: #dadce0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .grid-container {
+            height: 70vh;
+            width: 100%;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background-color: #fdeded;
+            color: #5f2120;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background-color: #0d62c9;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #70757a;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .grid-container {
+                height: 60vh;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .filter-input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Player Activity Dashboard</h1>
+            <p>Track player minting activity and hero details</p>
+        </header>
+        
+        <div id="errorMessage" class="error-message">
+            An error occurred while loading data. Please try again later.
+        </div>
+        
+        <div class="filter-bar">
+            <input type="text" id="quickFilter" class="filter-input" placeholder="Quick filter...">
+            <button id="refreshBtn" class="refresh-btn">Refresh Data</button>
+        </div>
+        
+        <div id="myGrid" class="ag-theme-alpine grid-container"></div>
+        
+        <footer>
+            <p>&copy; 2025 Fantasy Top Analysis</p>
+        </footer>
+    </div>
+    
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- AG Grid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@30.2.1/dist/ag-grid-community.min.js"></script>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Supabase configuration
+            const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+            
+            // Fix: Create the Supabase client correctly
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // References to DOM elements
+            const gridDiv = document.querySelector('#myGrid');
+            const loadingOverlay = document.querySelector('#loadingOverlay');
+            const errorMessage = document.querySelector('#errorMessage');
+            const quickFilterInput = document.querySelector('#quickFilter');
+            const refreshButton = document.querySelector('#refreshBtn');
+            
+            // Grid Options
+            const gridOptions = {
+                // Enable features
+                defaultColDef: {
+                    flex: 1,
+                    minWidth: 100,
+                    filter: true,
+                    sortable: true,
+                    resizable: true,
+                },
+                
+                // Column Definitions
+                columnDefs: [
+                    { headerName: 'Player Name', field: 'player_name', filter: 'agTextColumnFilter' },
+                    { headerName: 'Handle', field: 'player_handle', filter: 'agTextColumnFilter' },
+                    { 
+                        headerName: 'Address', 
+                        field: 'player_address',
+                        cellRenderer: params => {
+                            const address = params.value;
+                            if (!address) return '';
+                            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+                        }
+                    },
+                    { 
+                        headerName: 'Timestamp', 
+                        field: 'timestamp', 
+                        filter: 'agDateColumnFilter',
+                        sort: 'desc',
+                        cellRenderer: params => {
+                            if (!params.value) return '';
+                            return new Date(params.value).toLocaleString();
+                        }
+                    },
+                    { 
+                        headerName: 'Price', 
+                        field: 'price',
+                        filter: 'agNumberColumnFilter',
+                        cellRenderer: params => {
+                            if (params.value === null || params.value === undefined) return '';
+                            return params.value.toFixed(2);
+                        }
+                    },
+                    { 
+                        headerName: 'Transaction', 
+                        field: 'tx_hash',
+                        cellRenderer: params => {
+                            const txHash = params.value;
+                            if (!txHash) return '';
+                            return `<a href="https://etherscan.io/tx/${txHash}" target="_blank">${txHash.substring(0, 8)}...${txHash.substring(txHash.length - 6)}</a>`;
+                        }
+                    },
+                    { 
+                        headerName: 'Hero Details', 
+                        field: 'hero_details',
+                        cellRenderer: params => {
+                            const details = params.value;
+                            if (!details) return 'N/A';
+                            
+                            try {
+                                // If hero_details is stored as a JSON string
+                                const heroData = typeof details === 'string' ? JSON.parse(details) : details;
+                                return `${heroData.name || 'Unknown'} (${heroData.rarity || 'N/A'})`;
+                            } catch (e) {
+                                return String(details);
+                            }
+                        }
+                    }
+                ],
+                
+                // Pagination
+                pagination: true,
+                paginationPageSize: 25,
+                
+                // Row settings
+                rowSelection: 'single',
+                
+                // Other settings
+                animateRows: true,
+                domLayout: 'autoHeight',
+                
+                // Quick filter
+                quickFilterText: '',
+                
+                // Events
+                onGridReady: onGridReady,
+            };
+            
+            // Initialize AG Grid
+            const grid = new agGrid.Grid(gridDiv, gridOptions);
+            
+            // Grid Ready Event Handler
+            function onGridReady(params) {
+                // Fetch data on initial load
+                loadData();
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    setTimeout(() => {
+                        gridOptions.api.sizeColumnsToFit();
+                    }, 100);
+                });
+            }
+            
+            // Fetch Data from Supabase
+            async function loadData() {
+                showLoading(true);
+                hideError();
+                
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('player_mints')
+                        .select('player_address, player_name, player_handle, tx_hash, timestamp, price, hero_details');
+                        
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                    
+                    gridOptions.api.setRowData(data);
+                    gridOptions.api.sizeColumnsToFit();
+                    
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    showError(error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+            
+            // Quick Filter Functionality
+            quickFilterInput.addEventListener('input', function() {
+                gridOptions.api.setQuickFilter(this.value);
+            });
+            
+            // Refresh Button
+            refreshButton.addEventListener('click', loadData);
+            
+            // Utility Functions
+            function showLoading(show) {
+                loadingOverlay.style.display = show ? 'flex' : 'none';
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message || 'An error occurred while loading data. Please try again later.';
+                errorMessage.style.display = 'block';
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

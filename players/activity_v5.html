@@ -43,8 +43,59 @@
             color: #ffffff;
         }
         
+        /* Custom DataTables controls layout */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .length-container, .search-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Filter styling */
+        .type-filter, .hero-filter {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .toggle-container {
+            display: flex;
+            background-color: #222;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .toggle-btn {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+        
+        .toggle-btn:hover {
+            background-color: #333;
+        }
+        
+        .toggle-btn.active {
+            background-color: #3498db;
+        }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1200px; /* Increased by 15% from 1200px */
             margin: 0 auto;
             padding: 20px;
         }
@@ -84,7 +135,8 @@
         
         /* Select2 custom styling for dark theme */
         .select2-container {
-            min-width: 300px;
+            min-width: 330px;
+            max-width: 100%;
         }
         
         .select2-container--default .select2-selection--single {
@@ -94,11 +146,18 @@
             height: 38px;
             padding: 4px 8px 4px 50px;
             color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             color: #fff;
             line-height: 28px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9em;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__arrow {
@@ -124,17 +183,49 @@
             color: #fff;
             border: 1px solid #444;
             padding: 8px;
+            font-size: 0.9em;
         }
         
         .select2-results__option {
             display: flex;
             align-items: center;
+            font-size: 0.9em;
+        }
+        
+        /* Custom scrollbar for Select2 dropdown */
+        .select2-results__options::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .select2-results__options::-webkit-scrollbar-track {
+            background: #222;
+        }
+        
+        .select2-results__options::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        
+        .select2-results__options::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         
         .player-option {
             display: flex;
             align-items: center;
             gap: 10px;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-option-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
         }
         
         .player-option-avatar {
@@ -189,26 +280,55 @@
         
         /* DataTables customization for dark theme */
         .dataTables_wrapper {
-            padding: 20px 0;
+            padding: 10px 0;
             font-size: 14px;
             color: #ffffff;
         }
         
         .dataTables_length, .dataTables_filter {
-            color: #ffffff;
+            color: #888888;
+            margin-bottom: 10px;
         }
         
-        .dataTables_length select, .dataTables_filter input {
+        .dataTables_length select {
             background-color: #333;
-            color: #ffffff;
+            color: #888888;
             border: 1px solid #444;
             padding: 5px;
             border-radius: 4px;
+            width: 60px;
+        }
+        
+        .dataTables_filter input {
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #444;
+            padding: 5px 10px;
+            border-radius: 4px;
+            width: 150px;
+        }
+        
+        .dataTables_length {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .dataTables_length label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .dataTables_filter label {
+            display: flex;
+            align-items: center;
         }
         
         table.dataTable {
             border-collapse: collapse;
             width: 100%;
+            min-width: 800px; /* Set minimum width */
             margin: 20px 0;
             color: #ffffff;
         }
@@ -221,6 +341,13 @@
             text-align: left;
             border-bottom: 2px solid #444;
         }
+        
+        /* Fixed column widths */
+        .type-column { width: 80px; max-width: 80px; }
+        .time-column { width: 120px; max-width: 120px; }
+        .price-column { width: 100px; max-width: 100px; }
+        .cards-column { width: 120px; max-width: 120px; }
+        .hero-column { width: 350px; max-width: 350px; }
         
         table.dataTable tbody td {
             padding: 10px 12px;
@@ -248,30 +375,71 @@
             background-color: #222 !important;
         }
         
-        .dataTables_info, .dataTables_paginate {
+        .dataTables_info {
             margin-top: 15px;
-            color: #ffffff;
+            color: #888888;
+            font-size: 0.85em;
+        }
+        
+        .dataTables_paginate {
+            margin-top: 15px;
+            color: #888888 !important;
         }
         
         .dataTables_paginate .paginate_button {
-            padding: 5px 10px;
-            margin: 0 2px;
-            border-radius: 3px;
+            padding: 6px 12px;
+            margin: 0 3px;
+            border-radius: 4px;
             cursor: pointer;
-            color: #ffffff !important;
-            background-color: #333 !important;
-            border: 1px solid #444 !important;
+            color: #888888 !important;
+            background-color: #222 !important;
+            border: none !important;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .dataTables_paginate .paginate_button.current {
             background-color: #3498db !important;
             color: white !important;
-            border: 1px solid #3498db !important;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
         }
         
         .dataTables_paginate .paginate_button:hover {
-            background-color: #444 !important;
+            background-color: #333 !important;
             color: white !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .dataTables_paginate .paginate_button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Additional overrides to ensure styles are applied */
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: #888888 !important;
+            background-color: #222 !important;
+            border: none !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            color: white !important;
+            background-color: #333 !important;
+            border: none !important;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: white !important;
+            border: none !important;
+            background: #3498db !important;
         }
         
         .player-avatar {
@@ -326,6 +494,19 @@
             letter-spacing: 0.5px;
         }
         
+        /* Match toggle button colors to table type colors */
+        .toggle-btn[data-filter="mint"].active {
+            background-color: #2ecc71;
+        }
+        
+        .toggle-btn[data-filter="pack"].active {
+            background-color: #9b59b6;
+        }
+        
+        .toggle-btn[data-filter="all"].active {
+            background-color: #3498db;
+        }
+        
         /* Vertically align ETH icon with price */
         .price-with-icon {
             display: flex;
@@ -374,11 +555,28 @@
         <div class="player-selector">
             <label for="playerSelect">Select Player:</label>
             <div class="select-with-avatar">
-                <img id="selectedPlayerAvatar" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" class="player-avatar-select" alt="Player avatar">
+                <img id="selectedPlayerAvatar" src="/icons/ft_logo.webp" onerror="this.src='/icons/ft_logo.webp'" class="player-avatar-select" alt="Player avatar">
                 <select id="playerSelect" style="padding-left: 50px;" class="js-example-basic-single">
                     <option value="">Loading players...</option>
                 </select>
             </div>
+        </div>
+        
+        <div class="type-filter">
+            <div class="filter-label">Filter Type:</div>
+            <div class="toggle-container">
+                <button class="toggle-btn active" data-filter="all">All</button>
+                <button class="toggle-btn" data-filter="mint">Mint</button>
+                <button class="toggle-btn" data-filter="pack">Pack</button>
+            </div>
+        </div>
+        
+        <div class="hero-filter">
+            <div class="filter-label">Filter Hero:</div>
+            <select id="heroSelect" class="js-example-basic-single">
+                <option value="">All Heroes</option>
+                <!-- Hero options will be populated dynamically -->
+            </select>
         </div>
         
         <div id="loadingIndicator" class="loading">
@@ -528,13 +726,15 @@
                 // Fallback URL (v1)
                 const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroId}_${heroStars}.png`;
                 
+                const heroHandle = card.hero_handle || card.hero_hande || '';
                 html += `
                     <img 
                         src="${imagePathV2}" 
                         alt="${rarity} card" 
                         class="hero-card"
                         onerror="if(this.src !== '${imagePathV1}') { this.src='${imagePathV1}'; } else { this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/card_placeholder.png'; this.style.opacity='0.7'; }"
-                        title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}"
+                        title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}, Handle: @${heroHandle}"
+                        data-hero-handle="${heroHandle}"
                     />
                 `;
             });
@@ -562,35 +762,50 @@
         // Initialize DataTable
         mintsTable = new DataTable('#mintsTable', {
             data: data,
+            dom: '<"table-controls"<"length-container"l>>rtip',
             columns: [
                 { 
                     data: 'pack_price',
-                    className: 'type-cell',
+                    className: 'type-cell type-column',
                     render: function(data) {
                         if (data === null || data === undefined || data === 0) {
                             return '<span class="type-mint">Mint</span>';
                         } else {
                             return '<span class="type-pack">Pack</span>';
                         }
+                    },
+                    // Add a custom search function for type filtering
+                    search: function(data, searchText) {
+                        if (searchText === 'mint') {
+                            return data === null || data === undefined || data === 0;
+                        } else if (searchText === 'pack') {
+                            return data !== null && data !== undefined && data !== 0;
+                        }
+                        return true; // 'all' or any other value
                     }
                 },
                 { 
                     data: 'timestamp',
-                    className: 'timestamp-cell',
+                    className: 'timestamp-cell time-column',
                     render: function(data, type, row) {
+                        // For sorting and filtering, use the raw timestamp
+                        if (type === 'sort' || type === 'type') {
+                            return data;
+                        }
+                        // For display, use the formatted timestamp
                         return formatTimestamp(data, row.tx_hash);
                     }
                 },
                 { 
                     data: 'pack_price',
-                    className: 'price-cell',
+                    className: 'price-cell price-column',
                     render: function(data) {
                         return formatPrice(data);
                     }
                 },
                 { 
                     data: 'cards',
-                    className: 'cards-cell',
+                    className: 'cards-cell cards-column',
                     render: function(data) {
                         if (data === null || data === undefined) return 'N/A';
                         return data;
@@ -598,6 +813,7 @@
                 },
                 { 
                     data: 'hero_details',
+                    className: 'hero-column',
                     render: function(data) {
                         return renderHeroCards(data);
                     }
@@ -608,12 +824,49 @@
             lengthMenu: [10, 25, 50, 100, 250],
             responsive: true,
             language: {
-                search: "Search:",
-                lengthMenu: "Show _MENU_ entries",
+                search: "",
+                searchPlaceholder: "Search hero",
+                lengthMenu: "_MENU_ entries",
                 info: "Showing _START_ to _END_ of _TOTAL_ entries",
                 infoEmpty: "Showing 0 to 0 of 0 entries",
-                infoFiltered: "(filtered from _MAX_ total entries)"
-            }
+                infoFiltered: "(filtered from _MAX_ total entries)",
+                paginate: {
+                    first: "«",
+                    last: "»",
+                    next: "›",
+                    previous: "‹"
+                }
+            },
+            // Custom search function for hero handles
+            search: {
+                caseInsensitive: true,
+                smart: true,
+                regex: false,
+                // Custom search function that only searches hero_details for hero handles
+                callback: function(settings, searchData, index, rowData) {
+                    const searchTerm = settings.oPreviousSearch.sSearch;
+                    if (!searchTerm) return true;
+                    
+                    // Only search hero_details column for hero handles
+                    const result = searchHeroHandles(rowData.hero_details, searchTerm);
+                    
+                    // For debugging - log the search results
+                    if (searchTerm && searchTerm.length > 2 && rowData.hero_details) {
+                        try {
+                            const heroCards = typeof rowData.hero_details === 'string' ? 
+                                JSON.parse(rowData.hero_details) : rowData.hero_details;
+                            if (Array.isArray(heroCards) && heroCards.length > 0) {
+                                const handles = heroCards.map(card => card.hero_handle || card.hero_hande || 'unknown').join(', ');
+                                console.debug(`Search '${searchTerm}' in [${handles}]: ${result ? 'MATCH' : 'no match'}`);
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    return result;
+                }
+            },
+            // Default sort order - most recent first
+            order: [[1, 'desc']]
         });
     }
     
@@ -634,14 +887,14 @@
         // Find default player in all players
         let defaultPlayer = allPlayers.find(p => p.player_handle === DEFAULT_PLAYER);
         let defaultPlayerFound = !!defaultPlayer;
-        let defaultPlayerAvatar = defaultPlayer?.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+        let defaultPlayerAvatar = defaultPlayer?.player_pfp_url || '/icons/ft_logo.webp';
         
         // Prepare options
         let options = '';
         
         // Add default player if not in top 10
         if (defaultPlayerFound && !topPlayers.some(p => p.player_handle === DEFAULT_PLAYER)) {
-            const playerAvatar = defaultPlayer.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+            const playerAvatar = defaultPlayer.player_pfp_url || '/icons/ft_logo.webp';
             options += `<option value="${defaultPlayer.player_handle}" data-avatar="${playerAvatar}" selected>
                 ${defaultPlayer.player_name || 'Unknown'} (@${defaultPlayer.player_handle || ''})
             </option>`;
@@ -650,7 +903,7 @@
         // Add top players
         topPlayers.forEach(player => {
             const isDefault = player.player_handle === DEFAULT_PLAYER;
-            const playerAvatar = player.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+            const playerAvatar = player.player_pfp_url || '/icons/ft_logo.webp';
             
             options += `<option value="${player.player_handle}" data-avatar="${playerAvatar}" ${isDefault ? 'selected' : ''}>
                 ${player.player_name || 'Unknown'} (@${player.player_handle || ''})
@@ -659,7 +912,7 @@
         
         // If default player not found anywhere, add it
         if (!defaultPlayerFound) {
-            options = `<option value="${DEFAULT_PLAYER}" data-avatar="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" selected>@${DEFAULT_PLAYER}</option>` + options;
+            options = `<option value="${DEFAULT_PLAYER}" data-avatar="/icons/ft_logo.webp" selected>@${DEFAULT_PLAYER}</option>` + options;
         } else {
             // Set the default player avatar
             selectedPlayerAvatar.src = defaultPlayerAvatar;
@@ -699,10 +952,26 @@
     function formatPlayerOption(player) {
         if (!player.id) return player.text;
         
+        // Truncate player text if too long
+        let displayText = player.text;
+        if (displayText.length > 25) {
+            const parts = displayText.split('(@');
+            if (parts.length > 1) {
+                // Truncate the name part but keep the handle
+                const name = parts[0].trim();
+                const handle = '@' + parts[1];
+                if (name.length > 15) {
+                    displayText = name.substring(0, 15) + '... ' + handle;
+                }
+            } else {
+                displayText = displayText.substring(0, 25) + '...';
+            }
+        }
+        
         return $(`
             <div class="player-option">
-                <img src="${player.avatar}" class="player-option-avatar" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'">
-                <div>${player.text}</div>
+                <img src="${player.avatar}" class="player-option-avatar" onerror="this.src='/icons/ft_logo.webp'">
+                <div class="player-option-text">${displayText}</div>
             </div>
         `);
     }
@@ -721,11 +990,147 @@
         try {
             const mints = await fetchPlayerMints(playerHandle || DEFAULT_PLAYER);
             initializeDataTable(mints);
+            
+            // Populate hero filter dropdown
+            populateHeroFilter(mints);
         } catch (error) {
             console.error('Error loading player data:', error);
             alert('Error loading player data. Please try again.');
         } finally {
             loadingIndicator.style.display = 'none';
+        }
+    }
+    
+    // Populate hero filter dropdown
+    function populateHeroFilter(data) {
+        const heroSelect = document.getElementById('heroSelect');
+        const uniqueHeroHandles = extractUniqueHeroHandles(data);
+        
+        // Clear previous options except the first one
+        while (heroSelect.options.length > 1) {
+            heroSelect.remove(1);
+        }
+        
+        // Add hero options
+        uniqueHeroHandles.forEach(handle => {
+            const option = document.createElement('option');
+            option.value = handle;
+            option.textContent = '@' + handle;
+            heroSelect.appendChild(option);
+        });
+        
+        // Refresh Select2
+        $('#heroSelect').trigger('change');
+    }
+    
+    // Filter table by type
+    function filterTableByType(type) {
+        if (!mintsTable) return;
+        
+        mintsTable.column(0).search(type === 'all' ? '' : type, true, false).draw();
+    }
+    
+    // Filter table by hero handle
+    function filterTableByHero(heroHandle) {
+        if (!mintsTable) return;
+        
+        // Custom filtering function for hero handles
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
+            // If no hero is selected, show all rows
+            if (!heroHandle) return true;
+            
+            try {
+                const heroDetails = rowData.hero_details;
+                if (!heroDetails) return false;
+                
+                const heroCards = typeof heroDetails === 'string' ? JSON.parse(heroDetails) : heroDetails;
+                
+                if (!Array.isArray(heroCards) || heroCards.length === 0) {
+                    return false;
+                }
+                
+                // Check if any card has the selected hero handle
+                return heroCards.some(card => {
+                    const cardHeroHandle = (card.hero_handle || card.hero_hande || '').toLowerCase();
+                    return cardHeroHandle === heroHandle.toLowerCase();
+                });
+            } catch (e) {
+                console.error('Error filtering by hero handle:', e);
+                return false;
+            }
+        });
+        
+        // Redraw the table with the filter applied
+        mintsTable.draw();
+        
+        // Remove the filter function after drawing to avoid stacking filters
+        $.fn.dataTable.ext.search.pop();
+    }
+    
+    // Extract unique hero handles from all mint data
+    function extractUniqueHeroHandles(data) {
+        const heroHandles = new Set();
+        
+        data.forEach(mint => {
+            if (!mint.hero_details) return;
+            
+            try {
+                const heroCards = typeof mint.hero_details === 'string' ? 
+                    JSON.parse(mint.hero_details) : mint.hero_details;
+                
+                if (!Array.isArray(heroCards)) return;
+                
+                heroCards.forEach(card => {
+                    const heroHandle = card.hero_handle || card.hero_hande || '';
+                    if (heroHandle) heroHandles.add(heroHandle);
+                });
+            } catch (e) {
+                console.error('Error extracting hero handles:', e);
+            }
+        });
+        
+        return Array.from(heroHandles).sort();
+    }
+    
+    // Custom search function for hero handles
+    function searchHeroHandles(data, searchTerm) {
+        if (!data || !searchTerm) return false;
+        searchTerm = searchTerm.toLowerCase().trim();
+        if (searchTerm === '') return true;
+        
+        try {
+            // Parse hero_details if it's a string
+            const heroCards = typeof data === 'string' ? JSON.parse(data) : data;
+            
+            if (!Array.isArray(heroCards) || heroCards.length === 0) {
+                return false;
+            }
+            
+            // Log the data for debugging
+            console.debug('Searching in hero cards:', heroCards);
+            
+            // Search through hero handles - more thorough search
+            for (const card of heroCards) {
+                // Check both hero_handle and hero_hande fields (to handle typo in data)
+                const heroHandle = (card.hero_handle || card.hero_hande || '').toLowerCase();
+                console.debug(`Checking hero handle: ${heroHandle}`);
+                
+                // Remove @ symbol from search term if present
+                const cleanSearchTerm = searchTerm.replace('@', '');
+                const cleanHeroHandle = heroHandle.replace('@', '');
+                
+                // Check if the handle contains the search term or if it's a partial match
+                if (cleanHeroHandle.includes(cleanSearchTerm) || 
+                    (cleanHeroHandle.length > 0 && cleanSearchTerm.includes(cleanHeroHandle))) {
+                    console.debug(`MATCH FOUND: ${cleanHeroHandle} matches ${cleanSearchTerm}`);
+                    return true;
+                }
+            }
+            
+            return false;
+        } catch (e) {
+            console.error('Error searching hero handles:', e);
+            return false;
         }
     }
     
@@ -742,5 +1147,34 @@
         
         // Show table
         document.getElementById('mintsTable').style.display = 'table';
+        
+        // Add event listeners for type filter buttons
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button
+                document.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Filter table by type
+                const filterType = this.getAttribute('data-filter');
+                filterTableByType(filterType);
+            });
+        });
+        
+        // Initialize hero select with Select2
+        $('#heroSelect').select2({
+            theme: 'classic',
+            placeholder: 'Select Hero',
+            allowClear: true,
+            width: '300px'
+        });
+        
+        // Add event listener for hero filter
+        $('#heroSelect').on('change', function() {
+            const selectedHero = $(this).val();
+            filterTableByHero(selectedHero);
+        });
     });
 </script>

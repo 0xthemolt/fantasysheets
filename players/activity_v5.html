@@ -581,6 +581,20 @@
             letter-spacing: 0.5px;
         }
         
+        .type-levelup {
+            background-color: #e74c3c; /* Red color for level up */
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
         /* Match toggle button colors to table type colors */
         .toggle-btn[data-filter="mint"].active {
             background-color: #2ecc71;
@@ -588,6 +602,10 @@
         
         .toggle-btn[data-filter="pack"].active {
             background-color: #9b59b6;
+        }
+        
+        .toggle-btn[data-filter="levelup"].active {
+            background-color: #e74c3c;
         }
         
         .toggle-btn[data-filter="all"].active {
@@ -647,6 +665,40 @@
             align-items: center;
             font-size: 0.9em;
         }
+
+        /* Add these styles for level-up cards */
+        .level-up-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .level-up-card-container {
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+
+        /* Add skip card styling */
+        .level-up-card-container.skip-card {
+            background-color: rgba(241, 196, 15, 0.1); /* Gold color for skip cards */
+            border: 1px solid rgba(241, 196, 15, 0.2);
+        }
+
+        .level-up-arrow {
+            margin: 0 8px; /* Increased margin for better spacing */
+            color: #888;
+            font-weight: 900; /* Increased from bold to 900 for thicker arrow */
+            font-size: 20px; /* Increased from 16px for larger arrow */
+        }
+
+        /* Add spacing between the duplicate "from" cards */
+        .level-up-card-before + .level-up-card-before {
+            margin-left: 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -679,6 +731,7 @@
                 <button class="toggle-btn active" data-filter="all">All</button>
                 <button class="toggle-btn" data-filter="mint">Mint</button>
                 <button class="toggle-btn" data-filter="pack">Pack</button>
+                <button class="toggle-btn" data-filter="level up">Level Up</button>
             </div>
         </div>
         
@@ -752,7 +805,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from('player_mints')
-                .select('player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, pack_price, cards, hero_details')
+                .select('type, player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, pack_price, cards, hero_details')
                 .eq('player_handle', playerHandle);
                 
             if (error) {
@@ -811,31 +864,71 @@
     // Memoize hero card rendering to avoid repeated DOM creation
     const heroCardCache = new Map();
 
-    function renderHeroCards(heroDetails) {
+    // Update the hero cards rendering function to handle level up cards differently
+    function renderHeroCards(heroDetails, type) {
         if (!heroDetails) return 'No cards';
-        
-        // Use a cache key (simple hash of the heroDetails)
-        const cacheKey = typeof heroDetails === 'string' ? heroDetails : JSON.stringify(heroDetails);
-        
-        // Return cached result if available
-        if (heroCardCache.has(cacheKey)) {
-            return heroCardCache.get(cacheKey);
-        }
         
         try {
             // Parse hero_details from JSON if it's a string
-            const heroCards = typeof heroDetails === 'string' ? 
+            const heroData = typeof heroDetails === 'string' ? 
                 JSON.parse(heroDetails) : heroDetails;
             
-            if (!Array.isArray(heroCards) || heroCards.length === 0) {
-                return 'No cards';
+            // Special rendering for level up cards
+            if (type && type.toLowerCase() === 'level up') {
+                let html = '<div class="level-up-cards">';
+                
+                // For level up, handle single object
+                const card = heroData;
+                
+                const fromRarity = card.from_rarity || 'common';
+                const toRarity = card.hero_rarity || 'common';
+                const heroId = card.hero_id || '';
+                const heroStars = card.hero_stars || '';
+                const heroHandle = card.hero_handle || '';
+                const isSkip = card.is_skip || false;
+                
+                // Create container with conditional class for skip cards
+                html += `
+                    <div class="level-up-card-container${isSkip ? ' skip-card' : ''}" 
+                         title="${isSkip ? 'Skip Level Up - ' : ''}Handle: @${heroHandle}">
+                        <!-- First "from" card -->
+                        <img 
+                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${fromRarity}/${heroId}_${heroStars}.png" 
+                            alt="${fromRarity} card" 
+                            class="hero-card level-up-card-before"
+                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${fromRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
+                            data-hero-handle="${heroHandle}"
+                        />
+                        <!-- Second "from" card -->
+                        <img 
+                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${fromRarity}/${heroId}_${heroStars}.png" 
+                            alt="${fromRarity} card" 
+                            class="hero-card level-up-card-before"
+                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${fromRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
+                            data-hero-handle="${heroHandle}"
+                        />
+                        <div class="level-up-arrow">→</div>
+                        <!-- "to" card with full tooltip -->
+                        <img 
+                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${toRarity}/${heroId}_${heroStars}.png" 
+                            alt="${toRarity} card" 
+                            class="hero-card level-up-card-after"
+                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${toRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
+                            data-hero-handle="${heroHandle}"
+                            title="ID: ${card.token_id || 'N/A'}, Rarity: ${toRarity}, Handle: @${heroHandle}"
+                        />
+                    </div>
+                `;
+                
+                html += '</div>';
+                return html;
             }
             
-            // Create HTML for cards display
+            // Regular rendering for non-level-up cards (existing array handling code)
             let html = '<div class="hero-cards">';
             
             // Show first 10 cards
-            const cardsToShow = heroCards.slice(0, 10);
+            const cardsToShow = heroData.slice(0, 10);
             
             cardsToShow.forEach(card => {
                 const rarity = card.hero_rarity || 'common';
@@ -862,17 +955,18 @@
             });
             
             // If there are more cards, show count
-            if (heroCards.length > 10) {
-                html += `<span style="margin-left: 5px; align-self: center;">+${heroCards.length - 10} more</span>`;
+            if (heroData.length > 10) {
+                html += `<span style="margin-left: 5px; align-self: center;">+${heroData.length - 10} more</span>`;
             }
             
             html += '</div>';
             
-            // Cache the result
-            heroCardCache.set(cacheKey, html);
             return html;
         } catch (e) {
-            console.error('Error rendering hero cards:', e);
+            console.error('Error rendering hero cards:', e, {
+                type: type,
+                heroDetails: heroDetails
+            });
             return 'Error displaying cards';
         }
     }
@@ -893,10 +987,20 @@
             dom: 'rt<"table-controls"<"length-container"l>ip>',
             columns: [
                 { 
-                    data: 'pack_price',
+                    data: 'type',
                     className: 'type-cell type-column',
-                    render: function(data) {
-                        if (data === null || data === undefined || data === 0) {
+                    render: function(data, type, row) {
+                        // First check the 'type' field from database
+                        if (data === 'level up') {
+                            return '<span class="type-levelup">Level Up</span>';
+                        } else if (data === 'mint') {
+                            return '<span class="type-mint">Mint</span>';
+                        } else if (data === 'pack') {
+                            return '<span class="type-pack">Pack</span>';
+                        }
+                        
+                        // Fallback to old method for backward compatibility
+                        if (row.pack_price === null || row.pack_price === undefined || row.pack_price === 0) {
                             return '<span class="type-mint">Mint</span>';
                         } else {
                             return '<span class="type-pack">Pack</span>';
@@ -905,9 +1009,11 @@
                     // Add a custom search function for type filtering
                     search: function(data, searchText) {
                         if (searchText === 'mint') {
-                            return data === null || data === undefined || data === 0;
+                            return data === 'mint' || (data === null || data === undefined || data === 0);
                         } else if (searchText === 'pack') {
-                            return data !== null && data !== undefined && data !== 0;
+                            return data === 'pack' || (data !== null && data !== undefined && data !== 0);
+                        } else if (searchText === 'levelup') {
+                            return data === 'level up';
                         }
                         return true; // 'all' or any other value
                     }
@@ -942,8 +1048,8 @@
                 { 
                     data: 'hero_details',
                     className: 'hero-column',
-                    render: function(data) {
-                        return renderHeroCards(data);
+                    render: function(data, type, row) {
+                        return renderHeroCards(data, row.type); // Pass the type to the renderer
                     }
                 }
             ],
@@ -1183,7 +1289,12 @@
     function filterTableByType(type) {
         if (!mintsTable) return;
         
-        mintsTable.column(0).search(type === 'all' ? '' : type, true, false).draw();
+        if (type === 'all') {
+            mintsTable.column(0).search('').draw();
+        } else {
+            // Use a custom search for type column
+            mintsTable.column(0).search(type, false, false).draw();
+        }
     }
     
     // Extract unique hero handles from data

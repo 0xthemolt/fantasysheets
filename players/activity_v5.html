@@ -554,7 +554,7 @@
         }
         
         .type-mint {
-            background-color: #2ecc71;
+            background-color: #F72BBC;
             color: #fff;
             padding: 4px 8px;
             border-radius: 4px;
@@ -568,7 +568,7 @@
         }
         
         .type-pack {
-            background-color: #9b59b6;
+            background-color: #F99810;
             color: #fff;
             padding: 4px 8px;
             border-radius: 4px;
@@ -582,7 +582,49 @@
         }
         
         .type-levelup {
-            background-color: #e74c3c; /* Red color for level up */
+            background-color: #BBFF00;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-sell {
+            background-color: #A855F7;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-buy {
+            background-color: #22C55E;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-burn {
+            background-color: #FF1F4B;
             color: #fff;
             padding: 4px 8px;
             border-radius: 4px;
@@ -597,15 +639,15 @@
         
         /* Match toggle button colors to table type colors */
         .toggle-btn[data-filter="mint"].active {
-            background-color: #2ecc71;
+            background-color: #F72BBC;
         }
         
         .toggle-btn[data-filter="pack"].active {
-            background-color: #9b59b6;
+            background-color: #F99810;
         }
         
-        .toggle-btn[data-filter="levelup"].active {
-            background-color: #e74c3c;
+        .toggle-btn[data-filter="level up"].active {
+            background-color: #BBFF00;
         }
         
         .toggle-btn[data-filter="all"].active {
@@ -891,6 +933,16 @@
 
             if (!heroData) return 'Error: Invalid card data';
             
+            // For regular card rendering
+            const getImagePath = (card) => {
+                const rarity = card.hero_rarity || 'common';
+                const heroId = card.hero_id || '';
+                const heroStars = card.hero_stars || '';
+                const version = card.hero_is_deleted ? 'v1' : 'v2';
+                
+                return `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${rarity}/${heroId}_${heroStars}.png`;
+            };
+
             // Special rendering for level up cards
             if (type && type.toLowerCase() === 'level up') {
                 let html = '<div class="level-up-cards">';
@@ -909,29 +961,21 @@
                 html += `
                     <div class="level-up-card-container${isSkip ? ' skip-card' : ''}" 
                          title="${isSkip ? 'Skip Level Up - ' : ''}Handle: @${heroHandle}">
-                        <!-- First "from" card -->
-                        <img 
-                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${fromRarity}/${heroId}_${heroStars}.png" 
-                            alt="${fromRarity} card" 
-                            class="hero-card level-up-card-before"
-                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${fromRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
-                            data-hero-handle="${heroHandle}"
-                        />
-                        <!-- Second "from" card -->
-                        <img 
-                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${fromRarity}/${heroId}_${heroStars}.png" 
-                            alt="${fromRarity} card" 
-                            class="hero-card level-up-card-before"
-                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${fromRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
-                            data-hero-handle="${heroHandle}"
-                        />
+                        <!-- First and Second "from" cards -->
+                        ${[1, 2].map(() => `
+                            <img 
+                                src="${getImagePath({ ...card, hero_rarity: fromRarity })}" 
+                                alt="${fromRarity} card" 
+                                class="hero-card level-up-card-before"
+                                data-hero-handle="${heroHandle}"
+                            />
+                        `).join('')}
                         <div class="level-up-arrow">→</div>
-                        <!-- "to" card with full tooltip -->
+                        <!-- "to" card -->
                         <img 
-                            src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${toRarity}/${heroId}_${heroStars}.png" 
+                            src="${getImagePath({ ...card, hero_rarity: toRarity })}" 
                             alt="${toRarity} card" 
                             class="hero-card level-up-card-after"
-                            onerror="this.onerror=null; this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${toRarity.toLowerCase()}/${heroId}_${heroStars}.png';"
                             data-hero-handle="${heroHandle}"
                             title="ID: ${card.token_id || 'N/A'}, Rarity: ${toRarity}, Handle: @${heroHandle}"
                         />
@@ -951,22 +995,13 @@
             
             cardsToShow.forEach(card => {
                 const rarity = card.hero_rarity || 'common';
-                const heroId = card.hero_id || '';
-                const heroStars = card.hero_stars || '';
-                
-                // Primary URL (v2)
-                const imagePathV2 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity}/${heroId}_${heroStars}.png`;
-                
-                // Fallback URL (v1)
-                const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroId}_${heroStars}.png`;
-                
                 const heroHandle = card.hero_handle || card.hero_hande || '';
+                
                 html += `
                     <img 
-                        src="${imagePathV2}" 
+                        src="${getImagePath(card)}" 
                         alt="${rarity} card" 
                         class="hero-card"
-                        onerror="if(this.src !== '${imagePathV1}') { this.src='${imagePathV1}'; } else { this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/card_placeholder.png'; this.style.opacity='0.7'; }"
                         title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}, Handle: @${heroHandle}"
                         data-hero-handle="${heroHandle}"
                     />
@@ -1053,7 +1088,8 @@
                     data: 'pack_price',
                     className: 'price-cell price-column',
                     render: function(data) {
-                        return formatPrice(data);
+                        if (data === null || data === undefined || data === 0) return '';
+                        return `<div class="price-with-icon" style="justify-content: flex-end;">${formatPrice(data)}</div>`;
                     }
                 },
                 { 
@@ -1061,7 +1097,7 @@
                     className: 'cards-cell cards-column',
                     render: function(data) {
                         if (data === null || data === undefined) return 'N/A';
-                        return data;
+                        return `<div style="text-align: center;">${data}</div>`;
                     }
                 },
                 { 

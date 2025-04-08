@@ -1961,9 +1961,13 @@
                         </thead>
                         <tbody>
                             ${bids.map(bid => {
-                                const expirationDate = new Date(bid.expiration_timestamp);
+                                // Convert UTC timestamp string to Date object and adjust for local timezone
+                                const expirationUTC = new Date(bid.expiration_timestamp + 'Z'); // Add 'Z' to ensure UTC parsing
                                 const now = new Date();
-                                const diffHours = (expirationDate - now) / (1000 * 60 * 60);
+                                
+                                // Calculate time difference in milliseconds
+                                const diffMs = expirationUTC - now;
+                                const diffHours = diffMs / (1000 * 60 * 60);
                                 
                                 let expirationText;
                                 if (diffHours >= 24) {

@@ -64,15 +64,94 @@
         /* Custom DataTables controls layout */
         .table-controls {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
-            margin-bottom: 10px;
+            margin: 15px 0;
+            gap: 10px;
         }
         
-        .length-container, .search-container {
+        .length-container {
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
+            margin-right: 20px;
+            min-width: 120px; /* Reduced width */
+        }
+        
+        .dataTables_info {
+            flex: 1 1 auto;
+            margin: 0;
+            font-size: 0.8em;
+            white-space: nowrap;
+            color: #888;
+            padding: 8px 0;
+        }
+        
+        .dataTables_paginate {
+            flex: 0 0 auto;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        /* Make length selector more compact */
+        .dataTables_length {
+            display: flex;
+            align-items: center;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        
+        .dataTables_length label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+        }
+        
+        .dataTables_length select {
+            width: 60px; /* Fixed width */
+            margin: 0 5px;
+            padding: 4px;
+            height: 30px;
+        }
+        
+        /* Ensure pagination buttons don't shrink too much */
+        .dataTables_paginate .paginate_button {
+            min-width: 28px;
+            height: 28px;
+            padding: 0 !important;
+            margin: 0 2px;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        /* Media queries for small screens */
+        @media (max-width: 767px) {
+            .table-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .length-container {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .dataTables_info {
+                width: 100%;
+                margin-bottom: 10px;
+                text-align: left;
+            }
+            
+            .dataTables_paginate {
+                width: 100%;
+                justify-content: center;
+            }
         }
         
         /* Filter styling */
@@ -168,6 +247,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 0.9em;
         }
         
         .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -867,16 +947,16 @@
                 }
             ],
             order: [[1, 'desc']], // Sort by timestamp descending
-            pageLength: 100,      // Show 100 records per page
-            lengthMenu: [10, 25, 50, 100, 250],
+            pageLength: 10,      // Show 100 records per page
+            lengthMenu: [10, 25, 50],
             responsive: true,
             language: {
                 search: "",
                 searchPlaceholder: "Search hero",
-                lengthMenu: "_MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                lengthMenu: "_MENU_ records",
+                info: "_START_ to _END_ of _TOTAL_ records",
                 infoEmpty: "Showing 0 to 0 of 0 entries",
-                infoFiltered: "(filtered from _MAX_ total entries)",
+                infoFiltered: "(_MAX_ total entries)",
                 paginate: {
                     first: "«",
                     last: "»",
@@ -1133,12 +1213,42 @@
     
     // Populate hero filter dropdown with unique hero handles
     function populateHeroFilter(data) {
+        if (!data || !Array.isArray(data)) return;
+        
         const heroSelect = $('#heroSelect');
         heroSelect.empty();
         heroSelect.append('<option value="">All Heroes</option>');
-        const uniqueHeroes = [...new Set(data.map(item => item.hero_handle))];
-        uniqueHeroes.forEach(hero => {
+        
+        // Extract unique hero handles from hero_details
+        const uniqueHeroes = new Set();
+        data.forEach(item => {
+            try {
+                const heroDetails = typeof item.hero_details === 'string' ? 
+                    JSON.parse(item.hero_details) : item.hero_details;
+                
+                if (Array.isArray(heroDetails)) {
+                    heroDetails.forEach(card => {
+                        const heroHandle = card.hero_handle || card.hero_hande;
+                        if (heroHandle) {
+                            uniqueHeroes.add(heroHandle);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error parsing hero details:', e);
+            }
+        });
+        
+        // Add options for each unique hero handle
+        Array.from(uniqueHeroes).sort().forEach(hero => {
             heroSelect.append(`<option value="${hero}">${hero}</option>`);
+        });
+        
+        // Initialize Select2
+        $('#heroSelect').select2({
+            dropdownParent: $('.hero-filter'),
+            placeholder: 'Select a hero',
+            allowClear: true
         });
     }
     
@@ -1146,27 +1256,45 @@
     function filterTableByHero(heroHandle) {
         if (!mintsTable) return;
         
+        console.log('Starting filter by hero:', heroHandle);
+        
         // Clear any existing custom search filters
         while ($.fn.dataTable.ext.search.length > 0) {
             $.fn.dataTable.ext.search.pop();
         }
         
         if (heroHandle) {
-            console.log('Filtering by hero:', heroHandle);
+            console.log('Setting up filter for hero:', heroHandle);
+            
             // Add custom search function
             $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
                 if (!heroHandle) return true;
                 
                 try {
+                    // Get hero_details
                     const heroDetails = typeof rowData.hero_details === 'string' ? 
                         JSON.parse(rowData.hero_details) : rowData.hero_details;
                     
-                    if (!Array.isArray(heroDetails) || heroDetails.length === 0) return false;
+                    // Debug output to see what's being processed
+                    console.debug('Row hero details for filtering:', 
+                        JSON.stringify(heroDetails).substring(0, 100) + '...');
                     
-                    // Check if any card has the selected hero handle
+                    if (!Array.isArray(heroDetails) || heroDetails.length === 0) {
+                        console.debug('No hero details found in row');
+                        return false;
+                    }
+                    
+                    // Check if any card has the selected hero handle (checking both correct and typo versions)
                     const result = heroDetails.some(card => {
-                        const cardHeroHandle = card.hero_handle || card.hero_hande || '';
-                        return cardHeroHandle.toLowerCase() === heroHandle.toLowerCase();
+                        const cardHeroHandle = (card.hero_handle || card.hero_hande || '').toLowerCase();
+                        const match = cardHeroHandle === heroHandle.toLowerCase();
+                        
+                        // Log matching attempts for debugging
+                        if (match) {
+                            console.debug(`Found match for ${heroHandle} in card: ${cardHeroHandle}`);
+                        }
+                        
+                        return match;
                     });
                     
                     return result;
@@ -1175,10 +1303,17 @@
                     return false;
                 }
             });
+            
+            console.log('Filter function installed, redrawing table');
+        } else {
+            console.log('No hero selected, showing all rows');
         }
         
         // Redraw the table with the filter applied
         mintsTable.draw();
+        
+        // Log row count after filtering
+        console.log(`Table now shows ${mintsTable.rows({search:'applied'}).count()} rows after filtering`);
     }
     
     // Custom search function for hero handles
@@ -1352,17 +1487,6 @@
             }
         `).appendTo('head');
         
-        // Extract unique hero handles and populate the hero filter
-        if (data && Array.isArray(data)) {
-            populateHeroFilter(data);
-        }
-        
-        // Add event listener for hero filter
-        $('#heroSelect').on('change', function() {
-            const selectedHero = $(this).val();
-            mintsTable.column(4).search(selectedHero ? `@${selectedHero}` : '', true, false).draw();
-        });
-        
         // Restore filters from saved state if available
         if (savedState) {
             try {
@@ -1390,6 +1514,13 @@
                 console.error('Error restoring filters from saved state:', e);
             }
         }
+        
+        // Add this event listener after initializing the hero select
+        $('#heroSelect').on('change', function() {
+            const selectedHero = $(this).val();
+            console.log('Hero selected:', selectedHero);
+            filterTableByHero(selectedHero);
+        });
     });
     
     // Store page state when user navigates away
@@ -1408,3 +1539,5 @@
         }
     });
 </script>
+</body>
+</html>

@@ -699,6 +699,13 @@
             margin-left: 2px;
         }
 
+        .skip-label {
+            color: gold;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -864,14 +871,25 @@
     // Memoize hero card rendering to avoid repeated DOM creation
     const heroCardCache = new Map();
 
-    // Update the hero cards rendering function to handle level up cards differently
+    // Update the renderHeroCards function:
     function renderHeroCards(heroDetails, type) {
         if (!heroDetails) return 'No cards';
         
         try {
-            // Parse hero_details from JSON if it's a string
-            const heroData = typeof heroDetails === 'string' ? 
-                JSON.parse(heroDetails) : heroDetails;
+            // Safely handle heroDetails whether it's a string or object
+            const heroData = (() => {
+                if (typeof heroDetails === 'string') {
+                    try {
+                        return JSON.parse(heroDetails);
+                    } catch (e) {
+                        console.error('Invalid JSON in heroDetails:', e);
+                        return null;
+                    }
+                }
+                return heroDetails;
+            })();
+
+            if (!heroData) return 'Error: Invalid card data';
             
             // Special rendering for level up cards
             if (type && type.toLowerCase() === 'level up') {
@@ -885,8 +903,7 @@
                 const heroId = card.hero_id || '';
                 const heroStars = card.hero_stars || '';
                 const heroHandle = card.hero_handle || '';
-                const isSkip = card.is_skip || false;
-                console.log('isSkip value:', isSkip);
+                const isSkip = Boolean(card.is_skip);
                 
                 // Create container with conditional class for skip cards
                 html += `
@@ -918,6 +935,7 @@
                             data-hero-handle="${heroHandle}"
                             title="ID: ${card.token_id || 'N/A'}, Rarity: ${toRarity}, Handle: @${heroHandle}"
                         />
+                        ${isSkip ? '<div class="skip-label">Skip</div>' : ''}
                     </div>
                 `;
                 

@@ -15,12 +15,347 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FantasySheets | Player Rankings</title>
+    <title>FantasySheets | Player Activity</title>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
+    
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+    
+    <!-- Select2 for better dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Supabase JS -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .player-selector {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            position: relative;
+        }
+        
+        /* Custom select with player avatar */
+        .custom-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .select-with-avatar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            width: 100%;
+        }
+        
+        .player-avatar-select {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            left: 10px;
+            z-index: 1;
+        }
+        
+        /* Select2 custom styling for dark theme */
+        .select2-container {
+            min-width: 300px;
+        }
+        
+        .select2-container--default .select2-selection--single {
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            height: 38px;
+            padding: 4px 8px 4px 50px;
+            color: #fff;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #fff;
+            line-height: 28px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        
+        .select2-dropdown {
+            background-color: #222;
+            border: 1px solid #444;
+        }
+        
+        .select2-container--default .select2-results__option {
+            padding: 8px 12px;
+            color: #fff;
+        }
+        
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #3498db;
+        }
+        
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px;
+        }
+        
+        .select2-results__option {
+            display: flex;
+            align-items: center;
+        }
+        
+        .player-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-option-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #ffffff;
+            font-size: 14px;
+            min-width: 250px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0 0h12L6 6z" fill="%23ffffff"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 30px;
+        }
+        
+        option {
+            background-color: #333;
+            color: #ffffff;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* DataTables customization for dark theme */
+        .dataTables_wrapper {
+            padding: 20px 0;
+            font-size: 14px;
+            color: #ffffff;
+        }
+        
+        .dataTables_length, .dataTables_filter {
+            color: #ffffff;
+        }
+        
+        .dataTables_length select, .dataTables_filter input {
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        table.dataTable {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            color: #ffffff;
+        }
+        
+        table.dataTable thead th {
+            background-color: #333;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #444;
+        }
+        
+        table.dataTable tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #444;
+            vertical-align: middle;
+            background-color: #222 !important; /* Force consistent background */
+        }
+        
+        table.dataTable tbody tr {
+            background-color: #222 !important; /* Force consistent background */
+        }
+        
+        table.dataTable tbody tr:hover {
+            background-color: #333 !important;
+        }
+        
+        /* Fix for alternating row colors */
+        table.dataTable.stripe tbody tr.odd, 
+        table.dataTable.display tbody tr.odd {
+            background-color: #222 !important;
+        }
+        
+        table.dataTable.stripe tbody tr.even, 
+        table.dataTable.display tbody tr.even {
+            background-color: #222 !important;
+        }
+        
+        .dataTables_info, .dataTables_paginate {
+            margin-top: 15px;
+            color: #ffffff;
+        }
+        
+        .dataTables_paginate .paginate_button {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #ffffff !important;
+            background-color: #333 !important;
+            border: 1px solid #444 !important;
+        }
+        
+        .dataTables_paginate .paginate_button.current {
+            background-color: #3498db !important;
+            color: white !important;
+            border: 1px solid #3498db !important;
+        }
+        
+        .dataTables_paginate .paginate_button:hover {
+            background-color: #444 !important;
+            color: white !important;
+        }
+        
+        .player-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .timestamp-cell {
+            white-space: nowrap;
+            background-color: #222 !important; /* Force consistent background */
+        }
+        
+        .price-cell {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        /* Type column styling */
+        .type-cell {
+            text-align: center;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .type-mint {
+            background-color: #2ecc71;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .type-pack {
+            background-color: #9b59b6;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Vertically align ETH icon with price */
+        .price-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .price-with-icon svg {
+            vertical-align: middle;
+            margin-top: -2px;
+        }
+        
+        .cards-cell {
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .hero-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        
+        .hero-card {
+            width: 22px;
+            height: 30px;
+            border-radius: 2px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
     <div class="title-container" style="display: flex; align-items: flex-end; justify-content: center;">
@@ -28,15 +363,384 @@
             <a href="../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            FantasySheets Player Mint Leaders
+            FantasySheets Player Activity
         </h1>
         <div class="info-div">
-            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria: 10+ level ups OR 10+ packs OR 1+ skip"></i>
+            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="View player minting activity and card details"></i>
         </div>
     </div>
-</body>
+    
+    <div class="container">
+        <div class="player-selector">
+            <label for="playerSelect">Select Player:</label>
+            <div class="select-with-avatar">
+                <img id="selectedPlayerAvatar" src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" class="player-avatar-select" alt="Player avatar">
+                <select id="playerSelect" style="padding-left: 50px;" class="js-example-basic-single">
+                    <option value="">Loading players...</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="loadingIndicator" class="loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <table id="mintsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Cards</th>
+                    <th>Hero Cards</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated by DataTables -->
+            </tbody>
+        </table>
+    </div>
 <script>
     const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+    
+    // Initialize the Supabase client
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    
+    // Default player handle
+    const DEFAULT_PLAYER = 'OttoSuwenNFT';
+    
+    // DataTable instance
+    let mintsTable;
+    
+    // Function to fetch all players
+    async function fetchPlayers() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('players')
+                .select('player_address, player_name, player_pfp_url, player_handle, fan_pts')
+                .order('fan_pts', { ascending: false });
+                
+            if (error) {
+                console.error('Error fetching players:', error);
+                return [];
+            }
             
+            return data || [];
+        } catch (error) {
+            console.error('Error in fetchPlayers:', error);
+            return [];
+        }
+    }
+    
+    // Function to fetch player mints for a specific player
+    async function fetchPlayerMints(playerHandle) {
+        if (!playerHandle) {
+            console.error('No player handle provided');
+            return [];
+        }
+        
+        try {
+            const { data, error } = await supabaseClient
+                .from('player_mints')
+                .select('player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, pack_price, cards, hero_details')
+                .eq('player_handle', playerHandle);
+                
+            if (error) {
+                console.error('Error fetching player mints:', error);
+                return [];
+            }
+            
+            return data || [];
+        } catch (error) {
+            console.error('Error in fetchPlayerMints:', error);
+            return [];
+        }
+    }
+    
+    // Format timestamp as relative time with BlastScan link
+    function formatTimestamp(timestamp, txHash) {
+        if (!timestamp) return 'N/A';
+        
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        let timeText;
+        if (diffDays > 0) {
+            timeText = `${diffDays}d ago`;
+        } else if (diffHours > 0) {
+            timeText = `${diffHours}h ago`;
+        } else if (diffMins > 0) {
+            timeText = `${diffMins}m ago`;
+        } else {
+            timeText = 'Just now';
+        }
+        
+        // Add BlastScan link if txHash is available
+        if (txHash) {
+            return `<a href="https://blastscan.io/tx/${txHash}" target="_blank" title="View on BlastScan" style="color: #ffffff; text-decoration: none;">${timeText}</a>`;
+        } else {
+            return timeText;
+        }
+    }
+    
+    // Format price with ETH symbol
+    function formatPrice(price) {
+        if (price === null || price === undefined || price === 0) return '';
+        
+        // ETH SVG icon
+        const ethIcon = '<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"><path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path><path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path><path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path><path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path><path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path><path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path></svg>';
+        
+        // Format price with 4 decimal places and ETH icon in a flex container for vertical alignment
+        return `<div class="price-with-icon"><span>${price.toFixed(4)}</span>${ethIcon}</div>`;
+    }
+    
+    // Render hero cards
+    function renderHeroCards(heroDetails) {
+        if (!heroDetails) return 'No cards';
+        
+        try {
+            // Parse hero_details from JSON if it's a string
+            const heroCards = typeof heroDetails === 'string' ? JSON.parse(heroDetails) : heroDetails;
+            
+            if (!Array.isArray(heroCards) || heroCards.length === 0) {
+                return 'No cards';
+            }
+            
+            // Create HTML for cards display
+            let html = '<div class="hero-cards">';
+            
+            // Show first 10 cards
+            const cardsToShow = heroCards.slice(0, 10);
+            
+            cardsToShow.forEach(card => {
+                const rarity = card.hero_rarity || 'common';
+                const heroId = card.hero_id || '';
+                const heroStars = card.hero_stars || '';
+                
+                // Primary URL (v2)
+                const imagePathV2 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/${rarity}/${heroId}_${heroStars}.png`;
+                
+                // Fallback URL (v1)
+                const imagePathV1 = `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v1/${rarity.toLowerCase()}/${heroId}_${heroStars}.png`;
+                
+                html += `
+                    <img 
+                        src="${imagePathV2}" 
+                        alt="${rarity} card" 
+                        class="hero-card"
+                        onerror="if(this.src !== '${imagePathV1}') { this.src='${imagePathV1}'; } else { this.src='https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/card_placeholder.png'; this.style.opacity='0.7'; }"
+                        title="ID: ${card.token_id || 'N/A'}, Rarity: ${rarity}"
+                    />
+                `;
+            });
+            
+            // If there are more cards, show count
+            if (heroCards.length > 10) {
+                html += `<span style="margin-left: 5px; align-self: center;">+${heroCards.length - 10} more</span>`;
+            }
+            
+            html += '</div>';
+            return html;
+        } catch (e) {
+            console.error('Error rendering hero cards:', e);
+            return 'Error displaying cards';
+        }
+    }
+    
+    // Initialize DataTable
+    function initializeDataTable(data) {
+        // Destroy existing table if it exists
+        if (mintsTable) {
+            mintsTable.destroy();
+        }
+        
+        // Initialize DataTable
+        mintsTable = new DataTable('#mintsTable', {
+            data: data,
+            columns: [
+                { 
+                    data: 'pack_price',
+                    className: 'type-cell',
+                    render: function(data) {
+                        if (data === null || data === undefined || data === 0) {
+                            return '<span class="type-mint">Mint</span>';
+                        } else {
+                            return '<span class="type-pack">Pack</span>';
+                        }
+                    }
+                },
+                { 
+                    data: 'timestamp',
+                    className: 'timestamp-cell',
+                    render: function(data, type, row) {
+                        return formatTimestamp(data, row.tx_hash);
+                    }
+                },
+                { 
+                    data: 'pack_price',
+                    className: 'price-cell',
+                    render: function(data) {
+                        return formatPrice(data);
+                    }
+                },
+                { 
+                    data: 'cards',
+                    className: 'cards-cell',
+                    render: function(data) {
+                        if (data === null || data === undefined) return 'N/A';
+                        return data;
+                    }
+                },
+                { 
+                    data: 'hero_details',
+                    render: function(data) {
+                        return renderHeroCards(data);
+                    }
+                }
+            ],
+            order: [[1, 'desc']], // Sort by timestamp descending
+            pageLength: 100,      // Show 100 records per page
+            lengthMenu: [10, 25, 50, 100, 250],
+            responsive: true,
+            language: {
+                search: "Search:",
+                lengthMenu: "Show _MENU_ entries",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                infoEmpty: "Showing 0 to 0 of 0 entries",
+                infoFiltered: "(filtered from _MAX_ total entries)"
+            }
+        });
+    }
+    
+    // Populate player dropdown with Select2 and search functionality
+    async function populatePlayerDropdown() {
+        const playerSelect = document.getElementById('playerSelect');
+        const selectedPlayerAvatar = document.getElementById('selectedPlayerAvatar');
+        const allPlayers = await fetchPlayers();
+        
+        if (allPlayers.length === 0) {
+            playerSelect.innerHTML = '<option value="">No players found</option>';
+            return;
+        }
+        
+        // Get top 10 players by fan_pts (already sorted in fetchPlayers)
+        const topPlayers = allPlayers.slice(0, 10);
+        
+        // Find default player in all players
+        let defaultPlayer = allPlayers.find(p => p.player_handle === DEFAULT_PLAYER);
+        let defaultPlayerFound = !!defaultPlayer;
+        let defaultPlayerAvatar = defaultPlayer?.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+        
+        // Prepare options
+        let options = '';
+        
+        // Add default player if not in top 10
+        if (defaultPlayerFound && !topPlayers.some(p => p.player_handle === DEFAULT_PLAYER)) {
+            const playerAvatar = defaultPlayer.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+            options += `<option value="${defaultPlayer.player_handle}" data-avatar="${playerAvatar}" selected>
+                ${defaultPlayer.player_name || 'Unknown'} (@${defaultPlayer.player_handle || ''})
+            </option>`;
+        }
+        
+        // Add top players
+        topPlayers.forEach(player => {
+            const isDefault = player.player_handle === DEFAULT_PLAYER;
+            const playerAvatar = player.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+            
+            options += `<option value="${player.player_handle}" data-avatar="${playerAvatar}" ${isDefault ? 'selected' : ''}>
+                ${player.player_name || 'Unknown'} (@${player.player_handle || ''})
+            </option>`;
+        });
+        
+        // If default player not found anywhere, add it
+        if (!defaultPlayerFound) {
+            options = `<option value="${DEFAULT_PLAYER}" data-avatar="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" selected>@${DEFAULT_PLAYER}</option>` + options;
+        } else {
+            // Set the default player avatar
+            selectedPlayerAvatar.src = defaultPlayerAvatar;
+        }
+        
+        playerSelect.innerHTML = options;
+        
+        // Initialize Select2 with custom template for options
+        $(playerSelect).select2({
+            dropdownParent: $('.select-with-avatar').parent(),
+            placeholder: 'Search for a player...',
+            allowClear: false,
+            templateResult: formatPlayerOption,
+            templateSelection: formatPlayerSelection,
+            data: allPlayers.map(player => ({
+                id: player.player_handle,
+                text: `${player.player_name || 'Unknown'} (@${player.player_handle || ''})`,
+                avatar: player.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+                player: player
+            })),
+            escapeMarkup: function(markup) {
+                return markup;
+            }
+        });
+        
+        // Update avatar when selection changes
+        $(playerSelect).on('change', function() {
+            const data = $(this).select2('data')[0];
+            if (data && data.avatar) {
+                selectedPlayerAvatar.src = data.avatar;
+            }
+            loadPlayerData(this.value);
+        });
+    }
+    
+    // Format player option for Select2 dropdown
+    function formatPlayerOption(player) {
+        if (!player.id) return player.text;
+        
+        return $(`
+            <div class="player-option">
+                <img src="${player.avatar}" class="player-option-avatar" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'">
+                <div>${player.text}</div>
+            </div>
+        `);
+    }
+    
+    // Format player selection for Select2
+    function formatPlayerSelection(player) {
+        if (!player.id) return player.text;
+        return player.text;
+    }
+    
+    // Load data for selected player
+    async function loadPlayerData(playerHandle) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        loadingIndicator.style.display = 'flex';
+        
+        try {
+            const mints = await fetchPlayerMints(playerHandle || DEFAULT_PLAYER);
+            initializeDataTable(mints);
+        } catch (error) {
+            console.error('Error loading player data:', error);
+            alert('Error loading player data. Please try again.');
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+    
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Hide table until data is loaded
+        document.getElementById('mintsTable').style.display = 'none';
+        
+        // Populate player dropdown
+        await populatePlayerDropdown();
+        
+        // Load data for default player
+        await loadPlayerData(DEFAULT_PLAYER);
+        
+        // Show table
+        document.getElementById('mintsTable').style.display = 'table';
+    });
 </script>

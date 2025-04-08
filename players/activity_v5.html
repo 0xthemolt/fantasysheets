@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) - properly deferred -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-LXJ5Q7LKKE', {
-            'send_page_view': true,
-            'cache_busting': true
-        });
-    </script>
-    
     <!-- Prevent unload event listeners that block bfcache -->
     <script>
         // Store page state in sessionStorage for back/forward cache support
@@ -820,9 +808,19 @@
         return `<div class="price-with-icon"><span>${price.toFixed(4)}</span>${ethIcon}</div>`;
     }
     
-    // Render hero cards
+    // Memoize hero card rendering to avoid repeated DOM creation
+    const heroCardCache = new Map();
+
     function renderHeroCards(heroDetails) {
         if (!heroDetails) return 'No cards';
+        
+        // Use a cache key (simple hash of the heroDetails)
+        const cacheKey = typeof heroDetails === 'string' ? heroDetails : JSON.stringify(heroDetails);
+        
+        // Return cached result if available
+        if (heroCardCache.has(cacheKey)) {
+            return heroCardCache.get(cacheKey);
+        }
         
         try {
             // Parse hero_details from JSON if it's a string
@@ -869,6 +867,9 @@
             }
             
             html += '</div>';
+            
+            // Cache the result
+            heroCardCache.set(cacheKey, html);
             return html;
         } catch (e) {
             console.error('Error rendering hero cards:', e);
@@ -1537,6 +1538,17 @@
                 console.error('Error saving state:', e);
             }
         }
+    });
+</script>
+<!-- Move from head to end of body -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LXJ5Q7LKKE', {
+        'send_page_view': true,
+        'cache_busting': true
     });
 </script>
 </body>

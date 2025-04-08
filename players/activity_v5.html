@@ -886,6 +886,7 @@
                 const heroStars = card.hero_stars || '';
                 const heroHandle = card.hero_handle || '';
                 const isSkip = card.is_skip || false;
+                console.log('isSkip value:', isSkip);
                 
                 // Create container with conditional class for skip cards
                 html += `
@@ -1049,7 +1050,16 @@
                     data: 'hero_details',
                     className: 'hero-column',
                     render: function(data, type, row) {
-                        return renderHeroCards(data, row.type); // Pass the type to the renderer
+                        // Ensure data is properly parsed if it's a string
+                        let parsedData = data;
+                        if (typeof data === 'string') {
+                            try {
+                                parsedData = JSON.parse(data);
+                            } catch (e) {
+                                console.error('Error parsing hero_details:', e);
+                            }
+                        }
+                        return renderHeroCards(parsedData, row.type);
                     }
                 }
             ],
@@ -1276,7 +1286,24 @@
         
         try {
             const mints = await fetchPlayerMints(playerHandle || DEFAULT_PLAYER);
+            
+            // Store the currently selected filter type before reinitializing table
+            const activeFilterType = document.querySelector('.toggle-btn.active')?.getAttribute('data-filter');
+            
+            // Initialize the table with new data
             initializeDataTable(mints);
+            
+            // After table initialization, reapply the filter if one was active
+            if (activeFilterType) {
+                filterTableByType(activeFilterType);
+            }
+            
+            // Also reapply hero filter if one is selected
+            const selectedHero = $('#heroSelect').val();
+            if (selectedHero) {
+                filterTableByHero(selectedHero);
+            }
+            
         } catch (error) {
             console.error('Error loading player data:', error);
             alert('Error loading player data. Please try again.');

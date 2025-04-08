@@ -1,12 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) - properly deferred -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-LXJ5Q7LKKE');
+        gtag('config', 'G-LXJ5Q7LKKE', {
+            'send_page_view': true,
+            'cache_busting': true
+        });
+    </script>
+    
+    <!-- Prevent unload event listeners that block bfcache -->
+    <script>
+        // Store page state in sessionStorage for back/forward cache support
+        window.addEventListener('pagehide', function() {
+            if (mintsTable) {
+                sessionStorage.setItem('tableState', JSON.stringify({
+                    playerHandle: document.getElementById('playerSelect').value,
+                    typeFilter: document.querySelector('.toggle-btn.active')?.getAttribute('data-filter') || 'all',
+                    heroFilter: document.getElementById('heroSelect')?.value || ''
+                }));
+            }
+        });
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +66,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 15px;
             margin-bottom: 10px;
         }
         
@@ -287,7 +306,7 @@
         
         .dataTables_length, .dataTables_filter {
             color: #888888;
-            margin-bottom: 10px;
+            margin-top: 15px;
         }
         
         .dataTables_length select {
@@ -296,7 +315,7 @@
             border: 1px solid #444;
             padding: 5px;
             border-radius: 4px;
-            width: 60px;
+            width: 50px; /* Adjusted width to better fit content */
         }
         
         .dataTables_filter input {
@@ -536,6 +555,30 @@
             border-radius: 2px;
             object-fit: cover;
         }
+        
+        /* Match select-with-avatar styles for hero-select-dropdown */
+        .hero-select-dropdown .select2-container--default .select2-selection--single {
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 4px 8px 4px 50px;
+            height: 38px;
+        }
+        
+        .hero-select-dropdown .select2-selection__rendered {
+            color: #fff;
+            line-height: 28px;
+        }
+        
+        .hero-select-dropdown .select2-selection__arrow {
+            background-color: #444;
+        }
+        
+        .hero-select-dropdown .select2-results__option {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -703,7 +746,8 @@
         
         try {
             // Parse hero_details from JSON if it's a string
-            const heroCards = typeof heroDetails === 'string' ? JSON.parse(heroDetails) : heroDetails;
+            const heroCards = typeof heroDetails === 'string' ? 
+                JSON.parse(heroDetails) : heroDetails;
             
             if (!Array.isArray(heroCards) || heroCards.length === 0) {
                 return 'No cards';
@@ -759,10 +803,13 @@
             mintsTable.destroy();
         }
         
+        // Populate hero filter with unique hero handles from data
+        populateHeroFilter(data);
+        
         // Initialize DataTable
         mintsTable = new DataTable('#mintsTable', {
             data: data,
-            dom: '<"table-controls"<"length-container"l>>rtip',
+            dom: 'rt<"table-controls"<"length-container"l>ip>',
             columns: [
                 { 
                     data: 'pack_price',
@@ -927,16 +974,67 @@
             allowClear: false,
             templateResult: formatPlayerOption,
             templateSelection: formatPlayerSelection,
+            dropdownCssClass: 'player-select-dropdown',
             data: allPlayers.map(player => ({
                 id: player.player_handle,
                 text: `${player.player_name || 'Unknown'} (@${player.player_handle || ''})`,
-                avatar: player.player_pfp_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+                avatar: player.player_pfp_url || '/icons/ft_logo.webp',
                 player: player
             })),
             escapeMarkup: function(markup) {
                 return markup;
             }
         });
+        
+        // Add custom styles for player dropdown
+        $('<style>').text(`
+            .player-select-dropdown {
+                background-color: #222 !important;
+                border: 1px solid #444 !important;
+            }
+            
+            .player-select-dropdown .select2-results__options {
+                background-color: #222 !important;
+                color: #fff !important;
+            }
+            
+            .player-select-dropdown .select2-results__option {
+                color: #fff !important;
+                padding: 8px 12px !important;
+            }
+            
+            .player-select-dropdown .select2-results__option--highlighted {
+                background-color: #333 !important;
+            }
+            
+            .player-select-dropdown .select2-results__option--selected {
+                background-color: #3498db !important;
+            }
+            
+            .player-select-dropdown .select2-search__field {
+                background-color: #333 !important;
+                color: #fff !important;
+                border: 1px solid #444 !important;
+            }
+            
+            .player-select-dropdown .select2-results__options::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            
+            .player-select-dropdown .select2-results__options::-webkit-scrollbar-track {
+                background: #222;
+            }
+            
+            .player-select-dropdown .select2-results__options::-webkit-scrollbar-thumb {
+                background: #444;
+                border-radius: 4px;
+            }
+            
+            .player-select-dropdown .select2-results__options::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        `).appendTo('head');
         
         // Update avatar when selection changes
         $(playerSelect).on('change', function() {
@@ -968,9 +1066,9 @@
             }
         }
         
+        // Only show text in dropdown for better performance
         return $(`
             <div class="player-option">
-                <img src="${player.avatar}" class="player-option-avatar" onerror="this.src='/icons/ft_logo.webp'">
                 <div class="player-option-text">${displayText}</div>
             </div>
         `);
@@ -979,6 +1077,8 @@
     // Format player selection for Select2
     function formatPlayerSelection(player) {
         if (!player.id) return player.text;
+        
+        // Only return text for the selected display (avatar is handled separately)
         return player.text;
     }
     
@@ -990,37 +1090,12 @@
         try {
             const mints = await fetchPlayerMints(playerHandle || DEFAULT_PLAYER);
             initializeDataTable(mints);
-            
-            // Populate hero filter dropdown
-            populateHeroFilter(mints);
         } catch (error) {
             console.error('Error loading player data:', error);
             alert('Error loading player data. Please try again.');
         } finally {
             loadingIndicator.style.display = 'none';
         }
-    }
-    
-    // Populate hero filter dropdown
-    function populateHeroFilter(data) {
-        const heroSelect = document.getElementById('heroSelect');
-        const uniqueHeroHandles = extractUniqueHeroHandles(data);
-        
-        // Clear previous options except the first one
-        while (heroSelect.options.length > 1) {
-            heroSelect.remove(1);
-        }
-        
-        // Add hero options
-        uniqueHeroHandles.forEach(handle => {
-            const option = document.createElement('option');
-            option.value = handle;
-            option.textContent = '@' + handle;
-            heroSelect.appendChild(option);
-        });
-        
-        // Refresh Select2
-        $('#heroSelect').trigger('change');
     }
     
     // Filter table by type
@@ -1030,66 +1105,80 @@
         mintsTable.column(0).search(type === 'all' ? '' : type, true, false).draw();
     }
     
-    // Filter table by hero handle
-    function filterTableByHero(heroHandle) {
-        if (!mintsTable) return;
-        
-        // Custom filtering function for hero handles
-        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
-            // If no hero is selected, show all rows
-            if (!heroHandle) return true;
-            
-            try {
-                const heroDetails = rowData.hero_details;
-                if (!heroDetails) return false;
-                
-                const heroCards = typeof heroDetails === 'string' ? JSON.parse(heroDetails) : heroDetails;
-                
-                if (!Array.isArray(heroCards) || heroCards.length === 0) {
-                    return false;
-                }
-                
-                // Check if any card has the selected hero handle
-                return heroCards.some(card => {
-                    const cardHeroHandle = (card.hero_handle || card.hero_hande || '').toLowerCase();
-                    return cardHeroHandle === heroHandle.toLowerCase();
-                });
-            } catch (e) {
-                console.error('Error filtering by hero handle:', e);
-                return false;
-            }
-        });
-        
-        // Redraw the table with the filter applied
-        mintsTable.draw();
-        
-        // Remove the filter function after drawing to avoid stacking filters
-        $.fn.dataTable.ext.search.pop();
-    }
-    
-    // Extract unique hero handles from all mint data
+    // Extract unique hero handles from data
     function extractUniqueHeroHandles(data) {
-        const heroHandles = new Set();
+        const uniqueHandles = new Set();
         
-        data.forEach(mint => {
-            if (!mint.hero_details) return;
-            
+        data.forEach(row => {
             try {
-                const heroCards = typeof mint.hero_details === 'string' ? 
-                    JSON.parse(mint.hero_details) : mint.hero_details;
+                const heroDetails = typeof row.hero_details === 'string' ? 
+                    JSON.parse(row.hero_details) : row.hero_details;
                 
-                if (!Array.isArray(heroCards)) return;
-                
-                heroCards.forEach(card => {
-                    const heroHandle = card.hero_handle || card.hero_hande || '';
-                    if (heroHandle) heroHandles.add(heroHandle);
-                });
+                if (Array.isArray(heroDetails)) {
+                    heroDetails.forEach(card => {
+                        const heroHandle = card.hero_handle || card.hero_hande || '';
+                        if (heroHandle) {
+                            uniqueHandles.add(heroHandle);
+                        }
+                    });
+                }
             } catch (e) {
                 console.error('Error extracting hero handles:', e);
             }
         });
         
-        return Array.from(heroHandles).sort();
+        // Convert to array and sort alphabetically
+        return Array.from(uniqueHandles).sort((a, b) => a.localeCompare(b));
+    }
+    
+    // Populate hero filter dropdown with unique hero handles
+    function populateHeroFilter(data) {
+        const heroSelect = $('#heroSelect');
+        heroSelect.empty();
+        heroSelect.append('<option value="">All Heroes</option>');
+        const uniqueHeroes = [...new Set(data.map(item => item.hero_handle))];
+        uniqueHeroes.forEach(hero => {
+            heroSelect.append(`<option value="${hero}">${hero}</option>`);
+        });
+    }
+    
+    // Filter table by hero handle
+    function filterTableByHero(heroHandle) {
+        if (!mintsTable) return;
+        
+        // Clear any existing custom search filters
+        while ($.fn.dataTable.ext.search.length > 0) {
+            $.fn.dataTable.ext.search.pop();
+        }
+        
+        if (heroHandle) {
+            console.log('Filtering by hero:', heroHandle);
+            // Add custom search function
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex, rowData) {
+                if (!heroHandle) return true;
+                
+                try {
+                    const heroDetails = typeof rowData.hero_details === 'string' ? 
+                        JSON.parse(rowData.hero_details) : rowData.hero_details;
+                    
+                    if (!Array.isArray(heroDetails) || heroDetails.length === 0) return false;
+                    
+                    // Check if any card has the selected hero handle
+                    const result = heroDetails.some(card => {
+                        const cardHeroHandle = card.hero_handle || card.hero_hande || '';
+                        return cardHeroHandle.toLowerCase() === heroHandle.toLowerCase();
+                    });
+                    
+                    return result;
+                } catch (e) {
+                    console.error('Error filtering by hero:', e, rowData);
+                    return false;
+                }
+            });
+        }
+        
+        // Redraw the table with the filter applied
+        mintsTable.draw();
     }
     
     // Custom search function for hero handles
@@ -1099,7 +1188,7 @@
         if (searchTerm === '') return true;
         
         try {
-            // Parse hero_details if it's a string
+            // Parse hero_details from JSON if it's a string
             const heroCards = typeof data === 'string' ? JSON.parse(data) : data;
             
             if (!Array.isArray(heroCards) || heroCards.length === 0) {
@@ -1142,8 +1231,24 @@
         // Populate player dropdown
         await populatePlayerDropdown();
         
-        // Load data for default player
-        await loadPlayerData(DEFAULT_PLAYER);
+        // Check for saved state from bfcache
+        const savedState = sessionStorage.getItem('tableState');
+        let playerToLoad = DEFAULT_PLAYER;
+        
+        if (savedState) {
+            try {
+                const state = JSON.parse(savedState);
+                if (state.playerHandle) {
+                    playerToLoad = state.playerHandle;
+                    console.log('Restoring state for player:', playerToLoad);
+                }
+            } catch (e) {
+                console.error('Error parsing saved state:', e);
+            }
+        }
+        
+        // Load data for player (default or from saved state)
+        await loadPlayerData(playerToLoad);
         
         // Show table
         document.getElementById('mintsTable').style.display = 'table';
@@ -1168,13 +1273,138 @@
             theme: 'classic',
             placeholder: 'Select Hero',
             allowClear: true,
-            width: '300px'
+            width: '300px',
+            dropdownCssClass: 'hero-select-dropdown',
+            selectionCssClass: 'hero-selection'
         });
+        
+        // Add custom styles to match player dropdown
+        $('<style>').text(`
+            .hero-select-dropdown {
+                background-color: #222 !important;
+                border: 1px solid #444 !important;
+            }
+            
+            .hero-select-dropdown .select2-results__options {
+                background-color: #222 !important;
+                color: #fff !important;
+            }
+            
+            .hero-select-dropdown .select2-results__option {
+                color: #fff !important;
+                padding: 8px 12px !important;
+            }
+            
+            .hero-select-dropdown .select2-results__option--highlighted {
+                background-color: #333 !important;
+            }
+            
+            .hero-select-dropdown .select2-results__option--selected {
+                background-color: #3498db !important;
+            }
+            
+            .hero-select-dropdown .select2-search__field {
+                background-color: #333 !important;
+                color: #fff !important;
+                border: 1px solid #444 !important;
+            }
+            
+            .hero-select-dropdown .select2-results__options::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            
+            .hero-select-dropdown .select2-results__options::-webkit-scrollbar-track {
+                background: #222;
+            }
+            
+            .hero-select-dropdown .select2-results__options::-webkit-scrollbar-thumb {
+                background: #444;
+                border-radius: 4px;
+            }
+            
+            .hero-select-dropdown .select2-results__options::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+            
+            #heroSelect + .select2-container .select2-selection {
+                background-color: #333 !important;
+                border: 1px solid #444 !important;
+            }
+            
+            #heroSelect + .select2-container .select2-selection__rendered {
+                color: #fff !important;
+            }
+            
+            #heroSelect + .select2-container .select2-selection__arrow {
+                background-color: #444 !important;
+            }
+            
+            /* Fix for white background in selected hero */
+            #heroSelect + .select2-container .select2-selection {
+                background-color: #333 !important;
+                border: 1px solid #444 !important;
+            }
+            
+            #heroSelect + .select2-container .select2-selection__rendered {
+                color: #fff !important;
+                background-color: #333 !important;
+            }
+        `).appendTo('head');
+        
+        // Extract unique hero handles and populate the hero filter
+        if (data && Array.isArray(data)) {
+            populateHeroFilter(data);
+        }
         
         // Add event listener for hero filter
         $('#heroSelect').on('change', function() {
             const selectedHero = $(this).val();
-            filterTableByHero(selectedHero);
+            mintsTable.column(4).search(selectedHero ? `@${selectedHero}` : '', true, false).draw();
         });
+        
+        // Restore filters from saved state if available
+        if (savedState) {
+            try {
+                const state = JSON.parse(savedState);
+                
+                // Restore type filter
+                if (state.typeFilter && state.typeFilter !== 'all') {
+                    const typeButton = document.querySelector(`.toggle-btn[data-filter="${state.typeFilter}"]`);
+                    if (typeButton) {
+                        document.querySelectorAll('.toggle-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        typeButton.classList.add('active');
+                        filterTableByType(state.typeFilter);
+                    }
+                }
+                
+                // Restore hero filter
+                if (state.heroFilter) {
+                    setTimeout(() => {
+                        $('#heroSelect').val(state.heroFilter).trigger('change');
+                    }, 500); // Small delay to ensure Select2 is fully initialized
+                }
+            } catch (e) {
+                console.error('Error restoring filters from saved state:', e);
+            }
+        }
+    });
+    
+    // Store page state when user navigates away
+    window.addEventListener('pagehide', function() {
+        if (typeof mintsTable !== 'undefined' && mintsTable) {
+            try {
+                sessionStorage.setItem('tableState', JSON.stringify({
+                    playerHandle: document.getElementById('playerSelect').value,
+                    typeFilter: document.querySelector('.toggle-btn.active')?.getAttribute('data-filter') || 'all',
+                    heroFilter: document.getElementById('heroSelect')?.value || ''
+                }));
+                console.log('State saved for back/forward cache');
+            } catch (e) {
+                console.error('Error saving state:', e);
+            }
+        }
     });
 </script>

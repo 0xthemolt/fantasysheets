@@ -429,12 +429,6 @@
             border-bottom: 2px solid #444;
         }
         
-        /* Fixed column widths */
-        .type-column { width: 80px; max-width: 80px; }
-        .time-column { width: 120px; max-width: 120px; }
-        .price-column { width: 100px; max-width: 100px; }
-        .cards-column { width: 120px; max-width: 120px; }
-        .hero-column { width: 350px; max-width: 350px; }
         
         table.dataTable tbody td {
             padding: 10px 12px;
@@ -731,8 +725,6 @@
         .level-up-card-container {
             display: flex;
             align-items: center;
-            border-radius: 4px;
-            padding: 4px 8px;
         }
 
         /* Add skip card styling */
@@ -748,9 +740,12 @@
             font-size: 20px; /* Increased from 16px for larger arrow */
         }
 
-        /* Add spacing between the duplicate "from" cards */
-        .level-up-card-before + .level-up-card-before {
-            margin-left: 2px;
+        .level-up-card-before,
+        .level-up-card-after {
+            width: 32px !important;  /* Force same width as regular cards */
+            height: 46px !important; /* Force same height as regular cards */
+            border-radius: 2px;
+            object-fit: cover;
         }
 
         .skip-label {
@@ -760,6 +755,25 @@
             font-size: 14px;
         }
 
+        /* Add these CSS rules in the <style> section */
+        .dataTables_wrapper {
+            width: 100% !important;
+            min-width: 800px !important; /* Match the table's min-width */
+            max-width: 1200px !important; /* Match your container max-width */
+            margin: 0 auto !important;
+        }
+
+        table.dataTable {
+            width: 100% !important; /* Force table width */
+            min-width: 800px !important;
+            margin: 20px 0 !important;
+            table-layout: fixed !important; /* Prevent column width from changing */
+        }
+
+        .hero-column { 
+            width: auto !important; /* Let this column take remaining space */
+            min-width: 350px !important;
+        }
     </style>
 </head>
 <body>
@@ -1097,7 +1111,8 @@
             columns: [
                 { 
                     data: 'type',
-                    className: 'type-cell type-column',
+                    className: 'type-column',
+                    width: '100px',         
                     render: function(data, type, row) {
                         // First check the 'type' field from database
                         if (data === 'level up') {
@@ -1136,7 +1151,8 @@
                 },
                 { 
                     data: 'timestamp',
-                    className: 'timestamp-cell time-column',
+                    className: 'time-column',
+                    width: '90px',
                     render: function(data, type, row) {
                         // For sorting and filtering, use the raw timestamp
                         if (type === 'sort' || type === 'type') {
@@ -1148,7 +1164,8 @@
                 },
                 { 
                     data: 'price',
-                    className: 'price-cell price-column',
+                    className: 'price-column',
+                    width: '90px', 
                     render: function(data) {
                         if (data === null || data === undefined || data === 0) return '';
                         return `<div class="price-with-icon" style="justify-content: flex-end;">${formatPrice(data)}</div>`;
@@ -1156,7 +1173,8 @@
                 },
                 { 
                     data: 'cards',
-                    className: 'cards-cell cards-column',
+                    className: 'cards-column',
+                    width: '90px', 
                     render: function(data) {
                         if (data === null || data === undefined) return 'N/A';
                         return `<div style="text-align: center;">${data}</div>`;
@@ -1179,6 +1197,7 @@
                     }
                 }
             ],
+            autoWidth: false,
             order: [[1, 'desc']], // Sort by timestamp descending
             pageLength: 10,      // Show 100 records per page
             lengthMenu: [10, 25, 50],

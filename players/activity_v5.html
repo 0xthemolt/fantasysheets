@@ -660,7 +660,11 @@
 
         .toggle-btn[data-filter="buy"].active {
             background-color: #22C55E;
-        }    
+        }   
+        
+        .toggle-btn[data-filter="burn"].active {
+            background-color: #FF1F4B;
+        }   
         
         /* Vertically align ETH icon with price */
         .price-with-icon {
@@ -791,6 +795,7 @@
                 <button class="toggle-btn" data-filter="level up">Level Up</button>
                 <button class="toggle-btn" data-filter="buy">Buy</button>
                 <button class="toggle-btn" data-filter="sell">Sell</button>
+                <button class="toggle-btn" data-filter="burn">Burn</button>
             </div>
         </div>
         
@@ -953,45 +958,92 @@
                 return `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${rarity}/${heroId}_${heroStars}.png`;
             };
 
-            // Special rendering for level up cards
-            if (type && type.toLowerCase() === 'level up') {
+            // Special rendering for level up and burn cards
+            if (type && (type.toLowerCase() === 'level up' || type.toLowerCase() === 'burn')) {
                 let html = '<div class="level-up-cards">';
                 
-                // For level up, handle single object
-                const card = heroData;
-                
-                const fromRarity = card.from_rarity || 'common';
-                const toRarity = card.hero_rarity || 'common';
-                const heroId = card.hero_id || '';
-                const heroStars = card.hero_stars || '';
-                const heroHandle = card.hero_handle || '';
-                const isSkip = Boolean(card.is_skip);
-                
-                // Create container with conditional class for skip cards
-                html += `
-                    <div class="level-up-card-container${isSkip ? ' skip-card' : ''}" 
-                         title="${isSkip ? 'Skip Level Up - ' : ''}Handle: @${heroHandle}">
-                        <!-- First and Second "from" cards -->
-                        ${[1, 2].map(() => `
+                if (type.toLowerCase() === 'level up') {
+                    // For level up, handle single object
+                    const card = heroData;
+                    
+                    const fromRarity = card.from_rarity || 'common';
+                    const toRarity = card.hero_rarity || 'common';
+                    const heroId = card.hero_id || '';
+                    const heroStars = card.hero_stars || '';
+                    const heroHandle = card.hero_handle || '';
+                    const isSkip = Boolean(card.is_skip);
+                    
+                    // Create container with conditional class for skip cards
+                    html += `
+                        <div class="level-up-card-container${isSkip ? ' skip-card' : ''}" 
+                             title="${isSkip ? 'Skip Level Up - ' : ''}Handle: @${heroHandle}">
+                            <!-- First and Second "from" cards -->
+                            ${[1, 2].map(() => `
+                                <img 
+                                    src="${getImagePath({ 
+                                        hero_id: card.hero_id,
+                                        hero_stars: card.hero_stars,
+                                        hero_rarity: fromRarity,
+                                        hero_is_deleted: card.hero_is_deleted
+                                    })}" 
+                                    alt="${fromRarity} card" 
+                                    class="hero-card level-up-card-before"
+                                    data-hero-handle="${heroHandle}"
+                                    title="ID: ${card.token_id || 'N/A'}, Rarity: ${fromRarity}, Handle: @${heroHandle}"
+                                />
+                            `).join('')}
+                            <div class="level-up-arrow">→</div>
+                            <!-- "to" card -->
                             <img 
-                                src="${getImagePath({ ...card, hero_rarity: fromRarity })}" 
-                                alt="${fromRarity} card" 
-                                class="hero-card level-up-card-before"
+                                src="${getImagePath({ 
+                                    hero_id: card.hero_id,
+                                    hero_stars: card.hero_stars,
+                                    hero_rarity: toRarity,
+                                    hero_is_deleted: card.hero_is_deleted
+                                })}" 
+                                alt="${toRarity} card" 
+                                class="hero-card level-up-card-after"
                                 data-hero-handle="${heroHandle}"
+                                title="ID: ${card.token_id || 'N/A'}, Rarity: ${toRarity}, Handle: @${heroHandle}"
                             />
-                        `).join('')}
-                        <div class="level-up-arrow">→</div>
-                        <!-- "to" card -->
-                        <img 
-                            src="${getImagePath({ ...card, hero_rarity: toRarity })}" 
-                            alt="${toRarity} card" 
-                            class="hero-card level-up-card-after"
-                            data-hero-handle="${heroHandle}"
-                            title="ID: ${card.token_id || 'N/A'}, Rarity: ${toRarity}, Handle: @${heroHandle}"
-                        />
-                        ${isSkip ? '<div class="skip-label">Skip</div>' : ''}
-                    </div>
-                `;
+                            ${isSkip ? '<div class="skip-label">Skip</div>' : ''}
+                        </div>
+                    `;
+                } else if (type.toLowerCase() === 'burn') {
+                    // For burn, handle array of objects with from and to arrays
+                    const burnData = Array.isArray(heroData) ? heroData[0] : heroData;
+                    
+                    if (burnData && burnData.from && burnData.to) {
+                        const fromCards = burnData.from;
+                        const toCard = burnData.to[0]; // Get first card from to array
+                        
+                        if (fromCards.length === 2 && toCard) {
+                            html += `
+                                <div class="level-up-card-container burn-card">
+                                    <!-- Two different "from" cards -->
+                                    ${fromCards.map(card => `
+                                        <img 
+                                            src="${getImagePath(card)}" 
+                                            alt="${card.hero_rarity} card" 
+                                            class="hero-card level-up-card-before"
+                                            data-hero-handle="${card.hero_hande || ''}"
+                                            title="ID: ${card.token_id || 'N/A'}, Rarity: ${card.hero_rarity}, Handle: @${card.hero_hande || ''}"
+                                        />
+                                    `).join('')}
+                                    <div class="level-up-arrow">→</div>
+                                    <!-- "to" card -->
+                                    <img 
+                                        src="${getImagePath(toCard)}" 
+                                        alt="${toCard.hero_rarity} card" 
+                                        class="hero-card level-up-card-after"
+                                        data-hero-handle="${toCard.hero_hande || ''}"
+                                        title="ID: ${toCard.token_id || 'N/A'}, Rarity: ${toCard.hero_rarity}, Handle: @${toCard.hero_hande || ''}"
+                                    />
+                                </div>
+                            `;
+                        }
+                    }
+                }
                 
                 html += '</div>';
                 return html;

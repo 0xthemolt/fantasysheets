@@ -653,6 +653,14 @@
         .toggle-btn[data-filter="all"].active {
             background-color: #3498db;
         }
+
+        .toggle-btn[data-filter="sell"].active {
+            background-color: #A855F7;
+        }
+
+        .toggle-btn[data-filter="buy"].active {
+            background-color: #22C55E;
+        }    
         
         /* Vertically align ETH icon with price */
         .price-with-icon {
@@ -781,6 +789,8 @@
                 <button class="toggle-btn" data-filter="mint">Mint</button>
                 <button class="toggle-btn" data-filter="pack">Pack</button>
                 <button class="toggle-btn" data-filter="level up">Level Up</button>
+                <button class="toggle-btn" data-filter="buy">Buy</button>
+                <button class="toggle-btn" data-filter="sell">Sell</button>
             </div>
         </div>
         
@@ -854,7 +864,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from('player_mints')
-                .select('type, player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, pack_price, cards, hero_details')
+                .select('type, player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, price, cards, hero_details')
                 .eq('player_handle', playerHandle);
                 
             if (error) {
@@ -1051,10 +1061,17 @@
                             return '<span class="type-mint">Mint</span>';
                         } else if (data === 'pack') {
                             return '<span class="type-pack">Pack</span>';
-                        }
+                        } else if (data === 'sell') {           
+                            return '<span class="type-sell">Sell</span>';
+                        } else if (data === 'buy') {
+                            return '<span class="type-buy">Buy</span>';
+                        } else if (data === 'burn') {
+                            return '<span class="type-burn">Burn</span>';
+                        } else if (data === 'transfer') 
+
                         
                         // Fallback to old method for backward compatibility
-                        if (row.pack_price === null || row.pack_price === undefined || row.pack_price === 0) {
+                        if (row.price === null || row.price === undefined || row.price === 0) {
                             return '<span class="type-mint">Mint</span>';
                         } else {
                             return '<span class="type-pack">Pack</span>';
@@ -1085,7 +1102,7 @@
                     }
                 },
                 { 
-                    data: 'pack_price',
+                    data: 'price',
                     className: 'price-cell price-column',
                     render: function(data) {
                         if (data === null || data === undefined || data === 0) return '';
@@ -1171,54 +1188,54 @@
     // Populate player dropdown with Select2 and search functionality
     async function populatePlayerDropdown() {
         const playerSelect = document.getElementById('playerSelect');
-        const selectedPlayerAvatar = document.getElementById('selectedPlayerAvatar');
+        const avatarElement = document.getElementById('selectedPlayerAvatar');
         const allPlayers = await fetchPlayers();
+        
+        // Get saved state early
+        const savedState = sessionStorage.getItem('tableState');
+        const savedPlayer = savedState ? JSON.parse(savedState).playerHandle : DEFAULT_PLAYER;
         
         if (allPlayers.length === 0) {
             playerSelect.innerHTML = '<option value="">No players found</option>';
             return;
         }
         
-        // Get top 10 players by fan_pts (already sorted in fetchPlayers)
+        // Get top 10 players by fan_pts
         const topPlayers = allPlayers.slice(0, 10);
         
-        // Find default player in all players
-        let defaultPlayer = allPlayers.find(p => p.player_handle === DEFAULT_PLAYER);
-        let defaultPlayerFound = !!defaultPlayer;
-        let defaultPlayerAvatar = defaultPlayer?.player_pfp_url || '/icons/ft_logo.webp';
+        // Find saved/default player in all players
+        let selectedPlayer = allPlayers.find(p => p.player_handle === savedPlayer) || 
+                            allPlayers.find(p => p.player_handle === DEFAULT_PLAYER);
+        let selectedPlayerFound = !!selectedPlayer;
+        let avatarUrl = selectedPlayer?.player_pfp_url || '/icons/ft_logo.webp';
+        
+        // Set the selected player avatar
+        avatarElement.src = avatarUrl;
         
         // Prepare options
         let options = '';
         
-        // Add default player if not in top 10
-        if (defaultPlayerFound && !topPlayers.some(p => p.player_handle === DEFAULT_PLAYER)) {
-            const playerAvatar = defaultPlayer.player_pfp_url || '/icons/ft_logo.webp';
-            options += `<option value="${defaultPlayer.player_handle}" data-avatar="${playerAvatar}" selected>
-                ${defaultPlayer.player_name || 'Unknown'} (@${defaultPlayer.player_handle || ''})
+        // Add selected player if not in top 10
+        if (selectedPlayerFound && !topPlayers.some(p => p.player_handle === selectedPlayer.player_handle)) {
+            const playerAvatar = selectedPlayer.player_pfp_url || '/icons/ft_logo.webp';
+            options += `<option value="${selectedPlayer.player_handle}" data-avatar="${playerAvatar}" selected>
+                ${selectedPlayer.player_name || 'Unknown'} (@${selectedPlayer.player_handle || ''})
             </option>`;
         }
         
         // Add top players
         topPlayers.forEach(player => {
-            const isDefault = player.player_handle === DEFAULT_PLAYER;
+            const isSelected = player.player_handle === selectedPlayer.player_handle;
             const playerAvatar = player.player_pfp_url || '/icons/ft_logo.webp';
             
-            options += `<option value="${player.player_handle}" data-avatar="${playerAvatar}" ${isDefault ? 'selected' : ''}>
+            options += `<option value="${player.player_handle}" data-avatar="${playerAvatar}" ${isSelected ? 'selected' : ''}>
                 ${player.player_name || 'Unknown'} (@${player.player_handle || ''})
             </option>`;
         });
         
-        // If default player not found anywhere, add it
-        if (!defaultPlayerFound) {
-            options = `<option value="${DEFAULT_PLAYER}" data-avatar="/icons/ft_logo.webp" selected>@${DEFAULT_PLAYER}</option>` + options;
-        } else {
-            // Set the default player avatar
-            selectedPlayerAvatar.src = defaultPlayerAvatar;
-        }
-        
         playerSelect.innerHTML = options;
         
-        // Initialize Select2 with custom template for options
+        // Initialize Select2 with the full player list
         $(playerSelect).select2({
             dropdownParent: $('.select-with-avatar').parent(),
             placeholder: 'Search for a player...',
@@ -1231,70 +1248,11 @@
                 text: `${player.player_name || 'Unknown'} (@${player.player_handle || ''})`,
                 avatar: player.player_pfp_url || '/icons/ft_logo.webp',
                 player: player
-            })),
-            escapeMarkup: function(markup) {
-                return markup;
-            }
+            }))
         });
-        
-        // Add custom styles for player dropdown
-        $('<style>').text(`
-            .player-select-dropdown {
-                background-color: #222 !important;
-                border: 1px solid #444 !important;
-            }
-            
-            .player-select-dropdown .select2-results__options {
-                background-color: #222 !important;
-                color: #fff !important;
-            }
-            
-            .player-select-dropdown .select2-results__option {
-                color: #fff !important;
-                padding: 8px 12px !important;
-            }
-            
-            .player-select-dropdown .select2-results__option--highlighted {
-                background-color: #333 !important;
-            }
-            
-            .player-select-dropdown .select2-results__option--selected {
-                background-color: #3498db !important;
-            }
-            
-            .player-select-dropdown .select2-search__field {
-                background-color: #333 !important;
-                color: #fff !important;
-                border: 1px solid #444 !important;
-            }
-            
-            .player-select-dropdown .select2-results__options::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
-            }
-            
-            .player-select-dropdown .select2-results__options::-webkit-scrollbar-track {
-                background: #222;
-            }
-            
-            .player-select-dropdown .select2-results__options::-webkit-scrollbar-thumb {
-                background: #444;
-                border-radius: 4px;
-            }
-            
-            .player-select-dropdown .select2-results__options::-webkit-scrollbar-thumb:hover {
-                background: #555;
-            }
-        `).appendTo('head');
-        
-        // Update avatar when selection changes
-        $(playerSelect).on('change', function() {
-            const data = $(this).select2('data')[0];
-            if (data && data.avatar) {
-                selectedPlayerAvatar.src = data.avatar;
-            }
-            loadPlayerData(this.value);
-        });
+
+        // Set the initial value after Select2 initialization
+        $(playerSelect).val(selectedPlayer.player_handle).trigger('change');
     }
     
     // Format player option for Select2 dropdown

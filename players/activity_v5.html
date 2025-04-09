@@ -963,8 +963,9 @@
                 let html = '<div class="level-up-cards">';
                 
                 if (type.toLowerCase() === 'level up') {
-                    // For level up, handle single object
-                    const card = heroData;
+                    // For level up, handle array structure
+                    const card = Array.isArray(heroData) ? heroData[0] : heroData;
+                    if (!card) return 'Invalid card data';
                     
                     const fromRarity = card.from_rarity || 'common';
                     const toRarity = card.hero_rarity || 'common';
@@ -972,6 +973,7 @@
                     const heroStars = card.hero_stars || '';
                     const heroHandle = card.hero_handle || '';
                     const isSkip = Boolean(card.is_skip);
+                    const version = card.hero_is_deleted ? 'v1' : 'v2';
                     
                     // Create container with conditional class for skip cards
                     html += `
@@ -980,12 +982,7 @@
                             <!-- First and Second "from" cards -->
                             ${[1, 2].map(() => `
                                 <img 
-                                    src="${getImagePath({ 
-                                        hero_id: card.hero_id,
-                                        hero_stars: card.hero_stars,
-                                        hero_rarity: fromRarity,
-                                        hero_is_deleted: card.hero_is_deleted
-                                    })}" 
+                                    src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${fromRarity}/${heroId}_${heroStars}.png" 
                                     alt="${fromRarity} card" 
                                     class="hero-card level-up-card-before"
                                     data-hero-handle="${heroHandle}"
@@ -995,12 +992,7 @@
                             <div class="level-up-arrow">→</div>
                             <!-- "to" card -->
                             <img 
-                                src="${getImagePath({ 
-                                    hero_id: card.hero_id,
-                                    hero_stars: card.hero_stars,
-                                    hero_rarity: toRarity,
-                                    hero_is_deleted: card.hero_is_deleted
-                                })}" 
+                                src="https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${toRarity}/${heroId}_${heroStars}.png" 
                                 alt="${toRarity} card" 
                                 class="hero-card level-up-card-after"
                                 data-hero-handle="${heroHandle}"

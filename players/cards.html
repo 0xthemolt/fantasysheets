@@ -870,7 +870,7 @@
         async function fetchAllCardData(ownerAddress = "0x82bB89019CB01567Ee4756F25E9508EF9BB5713c") {
             const BATCH_SIZE = 50;
             let allCards = [];
-            let currentPage = 0;
+            let currentPage = 1;
             
             // Get first batch and total count
             const firstResponse = await fetch(

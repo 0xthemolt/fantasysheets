@@ -38,7 +38,7 @@ from flatten.get_tournament_histories_by_player_id
 --where player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --and tournament_unique_key = 'Main 31'
 group by 1--,2
-having suM(reward_eth) <> 0
+having suM(reward_eth) >= .03
 )
 ,touranment_rankings as (
 select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp,t.tournament_seq_nbr

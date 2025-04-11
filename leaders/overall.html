@@ -485,17 +485,19 @@
             tbody.innerHTML = players.map(player => `
                 <tr>
                     <td>${player.rank}</td>
-                    <td player-handle="${player.handle}" data-player-id="${player.player_id}" style="display: flex; align-items: center;">
-                        <img src="${player.profilePic}" alt="${player.name}" 
-                            onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
-                        <div style="display: flex; align-items: center; margin-left: 6px;">
-                            <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
-                                <span class="player-handle">${player.name}</span>
-                            </a>
-                            <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
-                            <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
-                                <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                            </a>
+                    <td player-handle="${player.handle}" data-player-id="${player.player_id}">
+                        <div style="display: flex; align-items: center;">
+                            <img src="${player.profilePic}" alt="${player.name}" 
+                                onerror="this.onerror=null; this.src='../icons/ft_logo.webp';">
+                            <div style="display: flex; align-items: center; margin-left: 6px;">
+                                <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
+                                    <span class="player-handle">${player.name}</span>
+                                </a>
+                                <img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">
+                                <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
+                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                </a>
+                            </div>
                         </div>
                     </td>
                     <td>${player.firstTournament}</td>

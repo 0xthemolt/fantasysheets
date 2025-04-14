@@ -651,31 +651,82 @@
         "leagues": [
             {
                 "league": "Reverse",
-                "deck_count": 5381,
-                "player_count": null
+                "deck_count": 5522,
+                "player_count": 1426
             },
             {
                 "league": "Gold",
-                "deck_count": 2830,
-                "player_count": null
+                "deck_count": 2846,
+                "player_count": 882
             },
             {
                 "league": "Silver",
-                "deck_count": 4320,
-                "player_count": null
+                "deck_count": 4331,
+                "player_count": 1721
             },
             {
                 "league": "Elite",
-                "deck_count": 1857,
-                "player_count": null
+                "deck_count": 1863,
+                "player_count": 707
             },
             {
                 "league": "Bronze",
-                "deck_count": 7218,
-                "player_count": null
+                "deck_count": 7274,
+                "player_count": 2803
             }
         ],
-        "stars": [],
-        "rarity": []
+        "stars": [
+            {
+                "hero_stars": 1,
+                "card_count": 8244
+            },
+            {
+                "hero_stars": 2,
+                "card_count": 14125
+            },
+            {
+                "hero_stars": 3,
+                "card_count": 16761
+            },
+            {
+                "hero_stars": 4,
+                "card_count": 24189
+            },
+            {
+                "hero_stars": 5,
+                "card_count": 20199
+            },
+            {
+                "hero_stars": 6,
+                "card_count": 12957
+            },
+            {
+                "hero_stars": 7,
+                "card_count": 9175
+            },
+            {
+                "hero_stars": 8,
+                "card_count": 3530
+            }
+        ],
+        "rarity": [
+            {
+                "hero_rarity": "common",
+                "card_count": 86843
+            },
+            {
+                "hero_rarity": "epic",
+                "card_count": 2948
+            },
+            {
+                "hero_rarity": "legendary",
+                "card_count": 333
+            },
+            {
+                "hero_rarity": "rare",
+                "card_count": 19056
+            }
+        ],
+        "total_player_count": 4194
     }
 }

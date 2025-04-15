@@ -13,6 +13,12 @@
     <div style="width: 80%; margin: auto; margin-top: 50px;">
         <canvas id="scoreZeroChart"></canvas>
     </div>
+    
+    <!-- Add this status section -->
+    <div id="latestStats" style="width: 80%; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: grey;">
+        <h3 id="latestTournamentTitle">Latest Tournament Stats</h3>
+        <div id="latestTournamentStats"></div>
+    </div>
 
     <script>
         Chart.register(ChartDataLabels);
@@ -25,8 +31,16 @@
             const data = await response.json();
             
             // Find the latest tournament number
-            const latestTournament = Math.max(...Object.keys(data)
-                .map(key => parseInt(key.match(/\d+/)[0])));
+            const latestTournamentKey = Object.keys(data).reduce((latest, current) => {
+                const latestNum = parseInt(latest.match(/\d+/)[0]);
+                const currentNum = parseInt(current.match(/\d+/)[0]);
+                return currentNum > latestNum ? current : latest;
+            }, Object.keys(data)[0]);
+            
+            const latestTournament = parseInt(latestTournamentKey.match(/\d+/)[0]);
+            
+            // Update latest tournament stats
+            updateLatestStats(latestTournamentKey, data[latestTournamentKey]);
             
             // Create dataset for views chart
             const viewsDatasets = Object.entries(data).map(([tournament, values]) => ({
@@ -56,7 +70,7 @@
                 pointHitRadius: 20   // Larger hit detection radius
             }));
 
-            // Common tooltip configuration
+            // Update your tooltipConfig object
             const tooltipConfig = {
                 enabled: true,
                 mode: 'index',
@@ -71,7 +85,25 @@
                 padding: 10,
                 displayColors: true,
                 borderColor: 'rgba(255, 255, 255, 0.2)',
-                borderWidth: 1
+                borderWidth: 1,
+                // Add these new properties:
+                itemSort: function(a, b) {
+                    // Sort by dataset index to ensure consistent ordering
+                    return a.datasetIndex - b.datasetIndex;
+                },
+                // Set a higher limit for number of items shown
+                bodySpacing: 4,
+                callbacks: {
+                    // Optional: limit label length if needed
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += context.parsed.y;
+                        return label;
+                    }
+                }
             };
 
             // Views Chart
@@ -187,6 +219,33 @@
                     }
                 }
             });
+
+            // Function to update latest stats display
+            function updateLatestStats(tournamentName, tournamentData) {
+                const statsDiv = document.getElementById('latestTournamentStats');
+                const titleDiv = document.getElementById('latestTournamentTitle');
+                
+                // Get the last entry (highest hours_since_start)
+                const lastEntry = tournamentData.reduce((latest, current) => 
+                    current.hours_since_start > latest.hours_since_start ? current : latest, 
+                    tournamentData[0]);
+                
+                titleDiv.textContent = `${tournamentName} Stats (${lastEntry.hours_since_start} hours since start)`;
+                
+                statsDiv.innerHTML = `
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 10px;">
+                        <div>
+                            <strong>Views:</strong> ${lastEntry.views.toLocaleString()}
+                        </div>
+                        <div>
+                            <strong>Zero Scores:</strong> ${lastEntry.score_0_count}
+                        </div>
+                        <div>
+                            <strong>Views per Hour:</strong> ${Math.round(lastEntry.views / lastEntry.hours_since_start).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         fetchData();

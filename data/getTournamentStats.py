@@ -98,7 +98,7 @@ where 1=1
 --hero_handle = 'CryptoKaleo'
 --and ghwst.tournament_unique_key  = 'Main 33'
 and gt.tournament_status <> 'not started'
-and gt.tournament_seq_nbr <= 10
+and gt.tournament_seq_nbr <= 6
 group by 1,2,3,4
 )
 select tournament_unique_key

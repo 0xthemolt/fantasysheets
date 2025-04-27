@@ -49,15 +49,6 @@
                             <input type="number" id="star-count" min="0" max="99" placeholder="total deck stars" style="width: 110px;">
                             <span style="margin-left: 10px;"> Star Valid Leagues: <span class="star-cap-text" style="color: #00ff00;" data-cap="18">Bronze: 18</span> | <span class="star-cap-text" style="color: #00ff00;" data-cap="23">Silver: 23</span> | <span class="star-cap-text" style="color: #00ff00;" data-cap="25">Gold: 25</span> | <span class="star-cap-text" style="color: #00ff00;" data-cap="40">Elite: 40</span> | <span class="star-cap-text" style="color: #00ff00;" data-cap="18">Reverse: 18</span></span>
                         </div>
-                        <div class="filter-item">
-                            <label for="elo-percentage">ELO %:</label>
-                            <select id="elo-percentage">
-                                <option value="nan">select ELO</option><option value="5.0">Legend I (5.0%)</option><option value="9.0">Legend II (9.0%)</option><option value="13.0">Legend III (13.0%)</option><option value="17.0">Diamond I (17.0%)</option><option value="21.0">Diamond II (21.0%)</option><option value="25.0">Diamond III (25.0%)</option><option value="29.0">Platinum I (29.0%)</option><option value="33.0">Platinum II (33.0%)</option><option value="37.0">Platinum III (37.0%)</option><option value="41.0">Gold I (41.0%)</option><option value="45.0">Gold II (45.0%)</option><option value="49.0">Gold III (49.0%)</option><option value="53.0">Silver I (53.0%)</option><option value="57.0">Silver II (57.0%)</option><option value="61.0">Silver III (61.0%)</option><option value="65.0">Bronze I (65.0%)</option><option value="69.0">Bronze II (69.0%)</option><option value="73.0">Bronze III (73.0%)</option><option value="77.0">Iron I (77.0%)</option><option value="81.0">Iron II (81.0%)</option><option value="85.0">Iron III (85.0%)</option>
-                            </select>
-                            <div class="filter-item league_decks-display">
-                                <span id="league-size-text"> Est Decks (ELO Rank): </span>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="filter-group">
@@ -1994,63 +1985,6 @@
     
             <script>
                 // Embed the league data as a JavaScript variable
-                const leagueDeckEstimates = [{"league":"Bronze","weighted_avg_decks":8087.94},{"league":"Silver","weighted_avg_decks":4482.38},{"league":"Gold","weighted_avg_decks":2834.325},{"league":"Elite","weighted_avg_decks":1365.875}];
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    const eloDropdown = document.getElementById('elo-percentage');
-                    const leagueSizeText = document.getElementById('league-size-text');
-
-                    // Function to update league sizes based on selected ELO percentage
-                    function updateLeagueSizes() {
-                        const selectedThreshold = parseInt(eloDropdown.value);
-                        console.log('Selected ELO threshold:', selectedThreshold);
-                        
-                        leagueDeckEstimates.forEach(function(row) {
-                            const weightedAvgDecks = Math.round(row.weighted_avg_decks);
-                            const targetRank = Math.round(weightedAvgDecks * selectedThreshold / 100);
-                            const leagueName = row.league.toLowerCase();
-                            
-                            console.log(`League: ${leagueName}, Target Rank: ${targetRank}`);  // Debug logging
-                            
-                            // Find the corresponding table
-                            const table = document.getElementById(`playersTable_${leagueName}`);
-                            if (table) {
-                                // Reset all rows first
-                                table.querySelectorAll('.data-row').forEach(row => {
-                                    row.style.border = 'none';
-                                });
-                                
-                                // Find and highlight the matching row
-                                table.querySelectorAll('.data-row').forEach(row => {
-                                    const rangeStart = parseInt(row.dataset.rangeStart);
-                                    const rangeEnd = parseInt(row.dataset.rangeEnd);
-                                    
-                                    console.log(`Checking row: ${rangeStart}-${rangeEnd} against target: ${targetRank}`);  // Debug logging
-                                    
-                                    if (targetRank >= rangeStart && targetRank <= rangeEnd) {
-                                        row.style.border = '2px solid white';
-                                        console.log(`Match found! Highlighting row: ${rangeStart}-${rangeEnd}`);  // Debug logging
-                                    }
-                                });
-                            }
-                        });
-
-                        // Update the text display
-                        const leagueSizes = leagueDeckEstimates.map(function(row) {
-                            const weightedAvgDecks = Math.round(row.weighted_avg_decks);
-                            const targetRank = Math.round(weightedAvgDecks * selectedThreshold / 100);
-                            return `${row.league}: ${weightedAvgDecks} (#${targetRank})`;
-                        });
-
-                        leagueSizeText.textContent = ' Est Decks: ' + leagueSizes.join(' | ');
-                    }
-
-                    // Add event listener for ELO percentage change
-                    eloDropdown.addEventListener('change', updateLeagueSizes);
-                    
-                    // Initial update
-                    updateLeagueSizes();
-                });
 
                 // Filters toggle functionality
                 document.querySelector('.filters-toggle').addEventListener('click', function() {

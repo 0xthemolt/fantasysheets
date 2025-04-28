@@ -73,13 +73,30 @@
 </head>
 <body>
     <div class="title-container">
-        <h1 class="title-header">
-            <a href="index.html" class="home-link">
-                <i class="fas fa-home"></i>
-            </a>
-            Tournament Entry Stats
-            <span style="display: block; font-size: 0.5em; color: #888; font-weight: normal; margin-top: 5px;"></span>
-        </h1>
+        <div style="text-align: center;">
+            <h1 class="title-header" style="margin-bottom: 0;">
+                <a href="index.html" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                Tournament Entry Stats
+            </h1>
+            <div id="tournamentStatus" style="font-size: 0.6em; color: #888; margin-top: 5px;">
+                <script>
+                    fetch('./data/tournaments/tournaments_stats.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            const tournaments = Object.values(data);
+                            const lastTournament = tournaments[tournaments.length - 1];
+                            document.getElementById('tournamentStatus').innerHTML = 
+                                `${lastTournament.tournament_unique_key} | Status: ${lastTournament.tournament_status} (Deck Counts: Live)`;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('tournamentStatus').innerHTML = 'Error loading tournament status';
+                        });
+                </script>
+            </div>
+        </div>
     </div>
     <div id="tableContainer" style="margin-top: 20px;"></div>></div>
 
@@ -102,7 +119,9 @@
                 data.forEach(tournament => {
                     const tournamentNumber = tournament.tournament_number.toString(); // Convert to string
                     const playersCount = tournament.registered_players_count || 0;
-                    const league = tournament.name?.toLowerCase() || 'unknown'; // Normalize league name
+                    const league = tournament.name ? 
+                        tournament.name.replace(' Score', '').toLowerCase() : 
+                        'unknown'; // Normalize league name and remove "Score" if present
 
                     // Create tournament entry if it doesn't exist
                     if (tournamentNumber && !tournamentData.tournaments[tournamentNumber]) {
@@ -162,7 +181,7 @@
                         // Update player counts with registration data
                         tournamentData.leagues.forEach(league => {
                             console.log(`\nMatching league: ${league.league}`);
-                            console.log(`Looking for match in registration data for tournament: ${tournamentNumber}`);
+                            console.log(`Looking for match in registration data for tournament ${tournamentNumber}`);
                             
                             // Convert both league names to lowercase for comparison
                             const registrationMatch = registrationData.tournaments[tournamentNumber]?.leagues[league.league.toLowerCase()];
@@ -170,15 +189,15 @@
                             console.log(`Registration match found:`, registrationMatch);
 
                             if (registrationMatch) {
-                                console.log(`Updating player count from ${league.player_count} to ${registrationMatch.registered_players}`);
-                                league.player_count = registrationMatch.registered_players;
+                                console.log(`Updating deck count from ${league.deck_count} to ${registrationMatch.registered_players}`);
+                                league.deck_count = registrationMatch.registered_players;
                                 
-                                // Update total player count
+                                // Update total deck count
                                 const newTotal = Object.values(
                                     registrationData.tournaments[tournamentNumber].leagues
                                 ).reduce((sum, reg) => sum + reg.registered_players, 0);
-                                console.log(`Updating total player count to ${newTotal}`);
-                                tournamentData.total_player_count = newTotal;
+                                console.log(`Updating total deck count to ${newTotal}`);
+                                tournamentData.total_deck_count = newTotal;
                             }
                         });
                     }

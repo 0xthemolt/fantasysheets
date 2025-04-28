@@ -20,6 +20,7 @@ conn = supabase_db_connection()
 cursor = conn.cursor()
 league_decks_query = f"""select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+     gt.tournament_status,
     gt.start_timestamp,
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
@@ -30,7 +31,7 @@ from
     flatten.get_tournaments gt
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
     or gt.tournament_status = 'not started'
-group by 1,2,3,4,5
+group by 1,2,3,4,5,6
 order by gt.start_timestamp asc"""
 league_decks_df = pd.read_sql_query(league_decks_query, conn)
 cursor.close()
@@ -122,6 +123,8 @@ for _, row in league_decks_df.iterrows():
     if tournament_key not in tournaments_data:
         tournaments_data[tournament_key] = {
             'tournament_unique_key': row['tournament_unique_key'],
+            'tournament_status': row['tournament_status'],
+            'tournament_number': row['tournament_number'],
             'leagues': [],
             'stars': [],
             'rarity': []

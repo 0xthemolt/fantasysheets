@@ -1121,11 +1121,7 @@
                                         </div>
                                     </td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? 
-                                        `<i class="fas fa-user seller-icon" 
-                                            onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}', '${encodeURIComponent(JSON.stringify(item.epic.trades || []))}')"
-                                            ></i>` 
-                                        : ''}</td>
+                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-epic">
                                         <div class="listed-count">
                                             ${item.epic.listed_count}

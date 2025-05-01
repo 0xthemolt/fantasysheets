@@ -182,6 +182,9 @@
             font-weight: 600;
             color: #fff;
             font-size: 0.9em;
+            line-height: 24px;  /* Match height of toggle switch */
+            margin: 0;
+            padding: 0;
         }
 
         .filter-options {
@@ -471,7 +474,8 @@
             display: inline-block;
             width: 50px;
             height: 24px;
-            margin-right: 10px;
+            margin: 0;
+            vertical-align: middle;
         }
 
         .toggle-switch input {
@@ -516,8 +520,9 @@
         .toggle-label {
             font-size: 0.9em;
             color: #fff;
-            vertical-align: middle;
-            margin-left: 5px;
+            line-height: 24px;  /* Match height of toggle switch */
+            margin: 0;
+            padding: 0;
         }
 
         .lowest-price-highlight {
@@ -1039,34 +1044,40 @@
                             </div>
                         </div>
                         
-                        <div class="filter-container">
-                            <div class="filter-label">Bid Floor Spread:</div>
-                            <div class="filter-options">
-                                <div class="filter-option filter-option-rare" id="rare-spread-filter" data-rarity="rare">Rare</div>
-                                <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
-                                <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
-                            </div>
-                            <div class="filter-container">
-                                <div class="filter-label">Common Equivalent:</div>
+                        <div class="filter-container" style="display: flex; align-items: center; gap: 20px;">
+                            <!-- Bid Floor Spread Filter -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="filter-label">Bid Floor Spread:</div>
                                 <div class="filter-options">
-                                    <label class="toggle-switch">
+                                    <div class="filter-option filter-option-rare" id="rare-spread-filter" data-rarity="rare">Rare</div>
+                                    <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
+                                    <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
+                                </div>
+                            </div>
+
+                            <!-- Common Equivalent Toggle -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="filter-label" style="display: flex; align-items: center;">Common Equivalent:</div>
+                                <div class="filter-options" style="display: flex; align-items: center; gap: 8px;">
+                                    <label class="toggle-switch" style="margin: 0; display: flex; align-items: center;">
                                         <input type="checkbox" id="common-equivalent-toggle">
                                         <span class="toggle-slider"></span>
                                     </label>
-                                    <span class="toggle-label" id="common-equivalent-label">Off</span>
+                                    <span class="toggle-label" id="common-equivalent-label" style="display: flex; align-items: center;">Off</span>
                                 </div>
                             </div>
+
+                            <!-- Top Player Bids Button -->
                             <button onclick="showPlayerHighestBidsModal()" 
-        style="padding: 8px 16px; 
-               background: transparent;
-               border: 1px solid rgba(255, 255, 255, 0.1);
-               border-radius: 4px;
-               color: #fff;
-               cursor: pointer;
-               margin: 10px 0;">
-    <i class="fas fa-trophy"></i>
-    Top Player Bids
-</button>
+                                    style="padding: 8px 16px; 
+                                           background: transparent;
+                                           border: 1px solid rgba(255, 255, 255, 0.1);
+                                           border-radius: 4px;
+                                           color: #fff;
+                                           cursor: pointer;">
+                                <i class="fas fa-gavel"></i>
+                                Top Player Bids
+                            </button>
                         </div>
                         
                         <table class="marketplace-table">
@@ -2002,7 +2013,17 @@
                                 return `
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="padding: 8px;">${bid.rank}</td>
-                                        <td style="padding: 8px; font-size: 0.9em;">${Number(bid.bid).toFixed(4)}</td>
+                                        <td style="padding: 8px; text-align: right; font-family: monospace;">
+                                            ${Number(bid.bid).toFixed(4)} 
+                                            <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
+                                                <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
+                                                <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
+                                                <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
+                                                <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
+                                                <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
+                                                <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
+                                            </svg>
+                                        </td>
                                         <td style="padding: 8px;">
                                             <div style="display: flex; align-items: center; gap: 8px;">
                                                 <img src="${bid.profile_picture}" 
@@ -2056,24 +2077,28 @@
         // Add this function to your existing JavaScript code
         async function showPlayerHighestBidsModal() {
             try {
-                // Fetch data from Supabase
                 const { data: bids, error } = await supabaseClient
                     .from('vwplayer_highest_bids')
-                    .select('player_name, player_handle, profile_picture, hero_handle, bid, expiration_timestamp, db_updated_utc, rank')
+                    .select('player_name, player_handle, profile_picture, card_rarity, hero_id, stars, hero_handle, bid, expiration_timestamp, db_updated_utc, rank')
                     .limit(20);
 
                 if (error) throw error;
 
-                // Create or get modal overlay
                 let modalOverlay = document.getElementById('player-bids-modal-overlay');
                 if (!modalOverlay) {
                     modalOverlay = document.createElement('div');
                     modalOverlay.id = 'player-bids-modal-overlay';
                     modalOverlay.className = 'seller-modal-overlay';
                     document.body.appendChild(modalOverlay);
+                    
+                    // Add click event listener to close on outside click
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            closePlayerBidsModal();
+                        }
+                    });
                 }
 
-                // Generate modal content
                 modalOverlay.innerHTML = `
                     <div class="seller-modal" style="width: 800px; max-height: 80vh; overflow-y: auto;">
                         <div class="seller-modal-close" onclick="closePlayerBidsModal()">
@@ -2084,7 +2109,6 @@
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                        <th style="padding: 8px; text-align: left;">Rank</th>
                                         <th style="padding: 8px; text-align: left; width: 200px;">Player</th>
                                         <th style="padding: 8px; text-align: left;">Hero</th>
                                         <th style="padding: 8px; text-align: right;">Bid</th>
@@ -2093,7 +2117,6 @@
                                 <tbody>
                                     ${bids.map(bid => `
                                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            <td style="padding: 8px;">${bid.rank}</td>
                                             <td style="padding: 8px;">
                                                 <div style="display: flex; align-items: center; gap: 8px;">
                                                     <img src="${bid.profile_picture}" 
@@ -2106,9 +2129,25 @@
                                                     </a>
                                                 </div>
                                             </td>
-                                            <td style="padding: 8px;">${bid.hero_handle}</td>
-                                            <td style="padding: 8px; text-align: right; font-family: monospace;">
-                                                ${Number(bid.bid).toFixed(4)} Ξ
+                                            <td style="padding: 8px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <img src="../cards/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
+                                                        alt="Hero Card"
+                                                        style="width: 30px; height: auto; border-radius: 4px;"
+                                                        onerror="this.src='../icons/fan.webp'">
+                                                    <span>${bid.hero_handle}</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                ${Number(bid.bid).toFixed(4)} 
+                                                <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
+                                                    <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
+                                                    <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
+                                                    <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
+                                                    <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
+                                                    <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
+                                                    <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
+                                                </svg>
                                             </td>
                                         </tr>
                                     `).join('')}
@@ -2121,9 +2160,16 @@
                     </div>
                 `;
 
-                // Show modal
                 modalOverlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
+
+                // Add click event listener to the modal overlay
+                modalOverlay.addEventListener('click', function(e) {
+                    // Check if the click is on the overlay itself (not its children)
+                    if (e.target === modalOverlay) {
+                        closePlayerBidsModal();
+                    }
+                });
 
             } catch (error) {
                 console.error('Error loading player highest bids:', error);

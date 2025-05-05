@@ -109,6 +109,7 @@ group by 1,2
         AND gtpp2.player_rank BETWEEN reward_gold.range_start AND reward_gold.range_end
         AND reward_gold.reward_type = 'GOLD'
    --where gtpp2.tournament_unique_key = 'Main 25'
+   --where league <> 'Reverse'
    group by gtpp2.tournament_unique_key,gtpp2.player_id
  )
 ,current_main_itm as (
@@ -198,7 +199,7 @@ select
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
-    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0045), 0) as reward_value,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0047), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,

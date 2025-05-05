@@ -18,7 +18,15 @@ def supabase_db_connection():
 # First query into league_decks_df
 conn = supabase_db_connection()
 cursor = conn.cursor()
-league_decks_query = f"""select 
+league_decks_query = f"""
+with override as (
+ SELECT 'Main 50'  AS tournament_unique_key, 'Elite' as league,652 AS player_count union all
+  SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,946 AS player_count union all
+   SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,1850 AS player_count union all
+    SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,2877 AS player_count union all
+     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,1514 AS player_count 
+)
+select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
      gt.tournament_status,
     gt.start_timestamp,
@@ -26,9 +34,16 @@ league_decks_query = f"""select
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
     gt.league,
     max(gt.registered_decks) deck_count,
-    max(gt.player_count) player_count
+  CASE WHEN MAX(override.player_count) IS NOT NULL THEN
+    MAX(override.player_count)
+  ELSE 
+    MAX(gt.player_count)
+  END AS player_count
 from
     flatten.get_tournaments gt
+LEFT JOIN override
+  ON gt.tournament_unique_key = override.tournament_unique_key
+  and gt.league = override.league
 where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
     or gt.tournament_status = 'not started'
 group by 1,2,3,4,5,6
@@ -36,19 +51,31 @@ order by gt.start_timestamp asc"""
 league_decks_df = pd.read_sql_query(league_decks_query, conn)
 cursor.close()
 
-total_players_query = f"""select 
-    concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+total_players_query = """
+WITH override AS (
+  SELECT 'Main 50'  AS tournament_unique_key, 4215 AS total_player_count
+)
+SELECT 
+    CONCAT(TO_CHAR(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key) AS tournament,
     gt.start_timestamp,
     gt.tournament_unique_key,
-    substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
-    COUNT(distinct gtpp.player_id) player_count
-from
+    SUBSTRING(gt.tournament_unique_key FROM POSITION(' ' IN gt.tournament_unique_key) + 1) AS tournament_number,
+    CASE WHEN MAX(override.total_player_count) IS NOT NULL THEN
+        MAX(override.total_player_count)
+    ELSE 
+        COUNT(DISTINCT gtpp.player_id)
+    END AS player_count
+FROM
     flatten.get_tournaments gt
-join flatten.tournament_players gtpp
-    on gt.tournament_id = gtpp.tournament_id
-where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
-group by 1,2,3,4
-order by gt.start_timestamp asc"""
+JOIN flatten.tournament_players gtpp
+    ON gt.tournament_id = gtpp.tournament_id
+LEFT JOIN override
+    ON gt.tournament_unique_key = override.tournament_unique_key
+WHERE gt.start_Timestamp >= NOW() AT TIME ZONE 'UTC' - INTERVAL '60 days'
+GROUP BY 1,2,3,4
+ORDER BY gt.start_timestamp ASC
+"""
+
 total_players_df = pd.read_sql_query(total_players_query, conn)
 cursor.close()
 

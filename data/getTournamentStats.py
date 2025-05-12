@@ -24,7 +24,7 @@ with override as (
   SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,3133 as registered_decks,946 AS player_count union all
    SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,5261 as registered_decks,1850 AS player_count union all
     SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,9217 as registered_decks,2877 AS player_count union all
-     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count 
+     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count
 )
 select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Listings</title>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .card-image {
+            width: 30px;  /* This makes the image 80% smaller than original */
+            height: auto; /* Maintains aspect ratio */
+            vertical-align: middle;
+        }
+        .hero-cell {
+            text-align: left;
+            min-width: 150px;
+        }
+        table td {
+            padding: 8px;
+        }
+        .profile-pic {
+            width: 22px;  /* Increased from 20px */
+            height: 22px; /* Increased from 20px */
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .seller-info {
+            display: block;
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 2px;
+        }
+        .section-divider {
+            border-left: 1px solid #ddd;
+            padding-left: 12px;
+        }
+        .floor-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 50%;
+        }
+        
+        .floor-value {
+            text-align: right;
+            min-width: 50%;
+        }
+        .section-header {
+            background-color: #2a2a2a;
+            color: #aaa;
+            padding: 8px;
+            font-weight: bold;
+            border-top: 1px solid #404040;
+            border-bottom: 1px solid #404040;
+        }
+        .price-range {
+            position: relative;
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 2px;
+            margin: 12px 0;
+            width: 200px;
+        }
+
+        .price-range-fill {
+            position: absolute;
+            height: 100%;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .price-marker {
+            position: absolute;
+            width: 3px;
+            height: 12px;
+            transform: translateX(-50%);
+            top: -4px;
+        }
+
+        .price-marker.floor {
+            background: #48DA7E;
+        }
+
+        .price-marker.bid {
+            background: #4A9EFF;
+        }
+
+        .price-marker.last {
+            background: #7B61FF;  /* Sapphire color */
+        }
+
+        .range-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: center;
+            color: #aaa;
+            font-size: 0.9em;
+            justify-content: flex-end;  /* Right align the legend items */
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-marker {
+            width: 3px;
+            height: 12px;
+            display: inline-block;
+        }
+        
+        .legend-marker.floor { background: #48DA7E; }
+        .legend-marker.bid { background: #4A9EFF; }
+        .legend-marker.last { background: #7B61FF; }
+    </style>
+</head>
+<body>
+    <h1>Player Listings</h1>
+    <div id="tableContainer"></div>
+
+    <script>
+
+        // Add Supabase client initialization at the top of your file
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Add this function near the top of your script section
+        async function fetchSupabaseListingData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('listing_view')
+                    .select(`
+                        hero_id,
+                        hero_handle,
+                        rarity,
+                        hero_rarity_index,
+                        seller,
+                        profile_picture,
+                        listed_count,
+                        last_sale,
+                        lowest_sale,
+                        highest_sale
+                    `);
+
+                if (error) {
+                    console.error('Error fetching listing data:', error);
+                    return null;
+                }
+
+                // Store the data in localStorage for later use
+                localStorage.setItem('listingData', JSON.stringify(data));
+
+                return data;
+            } catch (error) {
+                console.error('Error in fetchSupabaseListingData:', error);
+                return null;
+            }
+        }
+
+        async function fetchListings() {
+            try {
+                // Fetch both data sources in parallel
+                const [apiResponse, supabaseData] = await Promise.all([
+                    fetch('https://api-v2.fantasy.top/player/listings/0x162F95a9364c891028d255467F616902A479681a', {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                        }
+                    }).then(res => res.json()),
+                    fetchSupabaseListingData()
+                ]);
+
+                // Add some debug logging
+                console.log('Supabase Data:', supabaseData);
+                console.log('API Response:', apiResponse);
+
+                // Create a map of Supabase data for easy lookup using hero_rarity_index
+                const supabaseMap = new Map(
+                    supabaseData.map(item => [item.hero_rarity_index.toString(), item])
+                );
+
+                // Combine the data - use hero_rarity_index for joining
+                const enrichedListings = apiResponse.map(listing => {
+                    const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
+                    console.log('Matching:', listing.hero_rarity_index, supabaseInfo);
+                    return {
+                        ...listing,
+                        supabaseInfo: supabaseInfo || {}
+                    };
+                });
+
+                displayListings(enrichedListings);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function format_eth_tight(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-'; // Handle invalid values
+
+            const num = parseFloat(value);
+            if (num > 10) {
+                return num.toFixed(0); // Format as ## for values greater than 10
+            } else if (num > 1) {
+                return num.toFixed(2); // Format as #.# for values greater than 1
+            } else {
+                return num.toFixed(3); // Format as #.## for values less than or equal to 1
+            }
+        }
+        
+        
+        function format_eth(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-'; // Handle invalid values
+
+            const num = parseFloat(value);
+            if (num > 10) {
+                return num.toFixed(2); // Format as ## for values greater than 10
+            } else if (num > 1) {
+                return num.toFixed(3); // Format as #.# for values greater than 1
+            } else {
+                return num.toFixed(5); // Format as #.## for values less than or equal to 1
+            }
+        }
+        
+        function getRarityName(rarityNumber) {
+            switch(rarityNumber) {
+                case 1: return 'legendary';
+                case 2: return 'epic';
+                case 3: return 'rare';
+                case 4: return 'common';
+                default: return 'unknown';
+            }
+        }
+
+        function formatTimeUntilExpiration(expirationTime) {
+            const now = Math.floor(Date.now() / 1000); // Current time in seconds
+            const expTime = parseInt(expirationTime);
+            const diffMinutes = Math.floor((expTime - now) / 60);
+            
+            if (diffMinutes <= 0) {
+                return 'Expired';
+            }
+            
+            if (diffMinutes <= 120) { // 2 hours = 120 minutes
+                return `${diffMinutes}m`;
+            } else if (diffMinutes <= 1440) { // 24 hours = 1440 minutes
+                const hours = Math.floor(diffMinutes / 60);
+                return `${hours}h`;
+            } else {
+                const days = Math.floor(diffMinutes / 1440); // 1440 minutes per day
+                return `${days}d`;
+            }
+        }
+
+        function calculatePosition(value, min, max) {
+            if (!value || !min || !max) return 0;
+            const position = ((parseFloat(value) - parseFloat(min)) / (parseFloat(max) - parseFloat(min))) * 100;
+            return Math.min(Math.max(position, 0), 100); // Clamp between 0 and 100
+        }
+
+        function displayListings(listings) {
+            const ethIcon = `<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
+                <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
+                <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
+                <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
+                <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
+                <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
+                <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
+            </svg>`;
+
+            // Update the legend
+            const legend = `
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-marker floor"></span>
+                        <span>Floor Price</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker bid"></span>
+                        <span>Current Bid</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker last"></span>
+                        <span>Last Sale</span>
+                    </div>
+                </div>
+            `;
+
+            // Split listings into floor and non-floor prices
+            const floorListings = listings.filter(listing => 
+                parseFloat(listing.price_numeric) <= parseFloat(listing.floor_price)
+            );
+            const otherListings = listings.filter(listing => 
+                parseFloat(listing.price_numeric) > parseFloat(listing.floor_price)
+            );
+
+            const createTableRows = (listings) => listings.map(listing => `
+                <tr>
+                    <td>
+                        <img 
+                            class="card-image" 
+                            src="https://r2.fantasy.top/v2/${getRarityName(listing.rarity)}/${listing.hero_id}_${listing.heroes.stars}.png" 
+                            alt="Hero Card"
+                            onerror="this.src='https://via.placeholder.com/100x140'"
+                        >
+                    </td>
+                    <td class="hero-cell">
+                        ${listing.heroes.name}
+                        <a href="https://x.com/${listing.heroes.handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                    </td>                   
+                    <td>${formatTimeUntilExpiration(listing.expiration_time)}</td>
+                    <td>
+                        <span style="color: ${parseFloat(listing.price_numeric) <= parseFloat(listing.floor_price) ? '#48DA7E' : 'inherit'}">
+                            ${format_eth(listing.price_numeric)}
+                        </span> 
+                        ${ethIcon}
+                    </td>
+                    <td class="section-divider">
+                        <div class="floor-container">
+                            <div class="profile-container">
+                                ${listing.supabaseInfo.profile_picture ? `
+                                    <img 
+                                        class="profile-pic" 
+                                        src="${listing.supabaseInfo.profile_picture}" 
+                                        alt="Profile"
+                                        onerror="this.style.display='none'"
+                                    >
+                                    <span class="seller-info">
+                                        ${listing.supabaseInfo.seller ? 
+                                            (listing.supabaseInfo.seller.length > 15 ? 
+                                                listing.supabaseInfo.seller.substring(0, 15) + '...' : 
+                                                listing.supabaseInfo.seller) 
+                                            : ''}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div class="floor-value">
+                                ${format_eth(listing.floor_price)} ${ethIcon}
+                            </div>
+                        </div>
+                    </td>
+                    <td colspan="3">
+                        <div class="price-range">
+                            <div class="price-range-fill"></div>
+                            ${listing.floor_price ? `
+                                <div class="price-marker floor" 
+                                     style="left: ${calculatePosition(listing.floor_price, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
+                                     title="Floor: ${format_eth(listing.floor_price)}">
+                                </div>
+                            ` : ''}
+                            ${listing.price_numeric ? `
+                                <div class="price-marker bid" 
+                                     style="left: ${calculatePosition(listing.price_numeric, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
+                                     title="Bid: ${format_eth(listing.price_numeric)}">
+                                </div>
+                            ` : ''}
+                            ${listing.supabaseInfo.last_sale ? `
+                                <div class="price-marker last" 
+                                     style="left: ${calculatePosition(listing.supabaseInfo.last_sale, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
+                                     title="Last: ${format_eth(listing.supabaseInfo.last_sale)}">
+                                </div>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            const table = `
+                ${legend}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Card</th>
+                            <th class="hero-cell">Hero</th>
+                            <th>Time Left</th>
+                            <th>Price</th>
+                            <th class="section-divider">Floor</th>
+                            <th colspan="3">Price Range L14D / L30D</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${floorListings.length > 0 ? `
+                            <tr>
+                                <td colspan="8" class="section-header">
+                                    My Floor Price LIstings (${floorListings.length})
+                                </td>
+                            </tr>
+                            ${createTableRows(floorListings)}
+                        ` : ''}
+                        ${otherListings.length > 0 ? `
+                            <tr>
+                                <td colspan="8" class="section-header" style="margin-top: 20px;">
+                                    Other Listings (${otherListings.length})
+                                </td>
+                            </tr>
+                            ${createTableRows(otherListings)}
+                        ` : ''}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('tableContainer').innerHTML = table;
+        }
+
+        // Fetch data when page loads
+        fetchListings();
+    </script>
+</body>
+</html>

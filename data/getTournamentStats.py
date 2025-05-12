@@ -20,11 +20,11 @@ conn = supabase_db_connection()
 cursor = conn.cursor()
 league_decks_query = f"""
 with override as (
- SELECT 'Main 50'  AS tournament_unique_key, 'Elite' as league,652 AS player_count union all
-  SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,946 AS player_count union all
-   SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,1850 AS player_count union all
-    SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,2877 AS player_count union all
-     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,1514 AS player_count 
+ SELECT 'Main 50'  AS tournament_unique_key, 'Elite' as league,1507 as registered_decks,652 AS player_count union all
+  SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,3133 as registered_decks,946 AS player_count union all
+   SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,5261 as registered_decks,1850 AS player_count union all
+    SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,9217 as registered_decks,2877 AS player_count union all
+     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count 
 )
 select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
@@ -33,7 +33,12 @@ select
     gt.tournament_unique_key,
     substring(gt.tournament_unique_key from position(' ' in gt.tournament_unique_key) + 1) AS tournament_number,
     gt.league,
-    max(gt.registered_decks) deck_count,
+    CASE 
+        WHEN MAX(override.registered_decks) IS NOT NULL THEN
+            MAX(override.registered_decks)
+    ELSE 
+    MAX(gt.registered_decks)
+  END deck_count,
   CASE WHEN MAX(override.player_count) IS NOT NULL THEN
     MAX(override.player_count)
   ELSE 

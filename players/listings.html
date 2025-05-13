@@ -437,7 +437,7 @@
         }
 
         function formatTimeUntilExpiration(expirationTime) {
-            const now = Math.floor(Date.now() / 1000); // Current time in seconds
+            const now = Math.floor(Date.now() / 1000);
             const expTime = parseInt(expirationTime);
             const diffMinutes = Math.floor((expTime - now) / 60);
             
@@ -445,13 +445,13 @@
                 return 'Expired';
             }
             
-            if (diffMinutes <= 120) { // 2 hours = 120 minutes
+            if (diffMinutes <= 120) {  // 2 hours
                 return `${diffMinutes}m`;
-            } else if (diffMinutes <= 1440) { // 24 hours = 1440 minutes
+            } else if (diffMinutes <= 2880) {  // 48 hours
                 const hours = Math.floor(diffMinutes / 60);
                 return `${hours}h`;
             } else {
-                const days = Math.floor(diffMinutes / 1440); // 1440 minutes per day
+                const days = Math.floor(diffMinutes / 1440);
                 return `${days}d`;
             }
         }
@@ -463,9 +463,9 @@
             const saleTime = new Date(lastSaleTime);
             const diffMinutes = Math.floor((now - saleTime) / (1000 * 60));
             
-            if (diffMinutes <= 120) {
+            if (diffMinutes <= 120) {  // 2 hours
                 return `${diffMinutes}m ago`;
-            } else if (diffMinutes <= 1440) {
+            } else if (diffMinutes <= 2880) {  // 48 hours
                 const hours = Math.floor(diffMinutes / 60);
                 return `${hours}h ago`;
             } else {
@@ -667,7 +667,7 @@
                             ` : '-'}
                         </div>
                     </td>
-                    <td colspan="3">
+                    <td class="section-divider">
                         <div class="price-range">
                             <div class="price-range-fill"></div>
                             ${listing.floor_price ? `
@@ -705,7 +705,7 @@
                             <th>Price</th>
                             <th class="section-divider">Floor</th>
                             <th class="section-divider">Last Sale</th>  <!-- Add this line -->
-                            <th colspan="3">Price Range L14D / L30D</th>
+                            <th class="section-divider">Price Range L14D / L30D</th>
                         </tr>
                     </thead>
                     <tbody>

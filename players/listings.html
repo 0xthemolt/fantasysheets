@@ -254,7 +254,6 @@
                         hero_handle,
                         rarity,
                         hero_rarity_index,
-                        listed_count,
                         last_sale,
                         last_sale_time,
                         lowest_sale,
@@ -316,6 +315,23 @@
                     }
                 });
                 const data = await response.json();
+                
+                // Sort orders by price and calculate dense rank
+                if (data.orders && data.orders.length > 0) {
+                    let currentRank = 1;
+                    let currentPrice = data.orders[0].price;
+                    let previousPrice = null;
+                    
+                    // Add rank property to each order
+                    data.orders = data.orders.map((order, index) => {
+                        if (previousPrice !== null && order.price !== previousPrice) {
+                            currentRank = index + 1; // Skip ranks for ties
+                        }
+                        previousPrice = order.price;
+                        return { ...order, dense_rank: currentRank };
+                    });
+                }
+                
                 return data.orders;
             } catch (error) {
                 console.error('Error fetching listing rank:', error);
@@ -372,6 +388,10 @@
                     const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
                     const rankOrders = rankResults[index];
                     
+                    // Find the order with matching token_id and get its dense_rank
+                    const matchingOrder = rankOrders?.find(order => order.token_id === listing.token_id);
+                    const rank = matchingOrder?.dense_rank || null;
+
                     // Get top trader info if available (get first order directly)
                     const topOrder = rankOrders?.[0];  // Changed this line
                     const topTraderAddress = topOrder?.trader?.toLowerCase();
@@ -386,9 +406,7 @@
                     return {
                         ...listing,
                         supabaseInfo: supabaseInfo || {},
-                        rank: rankOrders ? rankOrders.findIndex(order => 
-                            order.token_id === listing.token_id
-                        ) + 1 : null,
+                        rank: rank,
                         topTrader: topTraderInfo ? {
                             name: topTraderInfo.player_name,
                             pfpUrl: topTraderInfo.player_pfp_url
@@ -609,9 +627,9 @@
 
         // Add this function to create the donut chart
         function createDonutChart(bid_pct, market_pct) {
-            // Ensure values are numbers and default to 0 if undefined/null
-            bid_pct = Number(bid_pct) || 0;
-            market_pct = Number(market_pct) || 0;
+            // Convert decimal values to percentages and ensure they're numbers
+            bid_pct = Math.round((Number(bid_pct) || 0) * 100);
+            market_pct = Math.round((Number(market_pct) || 0) * 100);
             
             // Check if we have any data to show
             if (bid_pct === 0 && market_pct === 0) return '';
@@ -621,20 +639,18 @@
             const radius = (size - strokeWidth) / 2;
             const center = size / 2;
             
-            // Calculate percentages and angles
+            // Calculate angles (based on percentages that now range from 0-100)
             const total = bid_pct + market_pct;
             if (total === 0) return '';
             
-            // Calculate angles
             const bidAngle = (bid_pct / total) * 360;
             const marketAngle = (market_pct / total) * 360;
             
-            // Calculate stroke-dasharray values
             const circumference = 2 * Math.PI * radius;
             const bidDash = (bidAngle / 360) * circumference;
             const marketDash = (marketAngle / 360) * circumference;
 
-            // Determine highest percentage and its color
+            // Determine highest percentage and its color (values are already in percentage form)
             const highestPct = Math.max(bid_pct, market_pct);
             const highestColor = bid_pct >= market_pct ? "#48DA7E" : "#7B61FF";
 
@@ -671,7 +687,7 @@
                         dominant-baseline="middle" 
                         fill="${highestColor}"
                         style="font-size: 12px; font-weight: bold;"
-                    >${Math.round(highestPct)}</text>
+                    >${highestPct}</text>
                 </svg>
             `;
         }
@@ -758,11 +774,6 @@
                         <span class="listing-price">
                             ${format_eth(listing.price_numeric)}${ethIcon}
                         </span>
-                        ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
-                            <div class="price-diff" title="% diff between listing price and floor">
-                                +${formatPricePercentage(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}
-                            </div>
-                        ` : ''}
                     </td>
                     <td class="section-divider">
                         <div class="floor-container">
@@ -822,7 +833,7 @@
                             <th>Price</th>
                             <th class="section-divider">Floor</th>
                             <th class="section-divider">Last Sale</th>  <!-- Add this line -->
-                            <th class="section-divider">Price Range L14D / L30D</th>
+                            <th class="section-divider">Price Range L7D / L14D</th>
                         </tr>
                     </thead>
                     <tbody>

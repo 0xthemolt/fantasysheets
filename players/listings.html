@@ -261,7 +261,8 @@
                         highest_sale,
                         score_24hr,
                         score_7d,
-                        score_main
+                        score_main,
+                        trade_timeline
                     `);
 
                 if (error) {
@@ -543,6 +544,67 @@
             return listings.reduce((sum, listing) => sum + parseFloat(listing.price_numeric), 0);
         }
 
+        // Add this function to create the line chart
+        function createPriceChart(tradeData) {
+            if (!tradeData) return '';
+            
+            const width = 200;
+            const height = 40;
+            const padding = 4;
+            const dotRadius = 2; // Size of the dots
+            
+            // Handle both string and object inputs
+            const sortedData = (typeof tradeData === 'string' ? JSON.parse(tradeData) : tradeData)
+                .sort((a, b) => new Date(a.date_hour) - new Date(b.date_hour));
+            
+            if (!sortedData.length) return '';
+            
+            // Get min/max values for scaling
+            const timeRange = {
+                min: new Date(sortedData[0].date_hour),
+                max: new Date(sortedData[sortedData.length - 1].date_hour)
+            };
+            
+            const priceRange = {
+                min: Math.min(...sortedData.map(d => d.min_price)),
+                max: Math.max(...sortedData.map(d => d.max_price))
+            };
+            
+            // Scale functions
+            const scaleX = (date) => {
+                const percent = (new Date(date) - timeRange.min) / (timeRange.max - timeRange.min);
+                return padding + percent * (width - 2 * padding);
+            };
+            
+            const scaleY = (price) => {
+                const percent = (price - priceRange.min) / (priceRange.max - priceRange.min);
+                return height - padding - percent * (height - 2 * padding);
+            };
+            
+            // Create dots for each method
+            const marketData = sortedData.filter(d => d.method === 'market');
+            const bidData = sortedData.filter(d => d.method === 'bid');
+            
+            const createDots = (data, color) => {
+                if (!data.length) return '';
+                return data.map(d => 
+                    `<circle 
+                        cx="${scaleX(d.date_hour)}" 
+                        cy="${scaleY(d.max_price)}" 
+                        r="${dotRadius}" 
+                        fill="${color}"
+                    />`
+                ).join('');
+            };
+            
+            return `
+                <svg width="${width}" height="${height}" style="background: #2a2a2a; border-radius: 2px;">
+                    ${createDots(marketData, '#7B61FF')}
+                    ${createDots(bidData, '#48DA7E')}
+                </svg>
+            `;
+        }
+
         function displayListings(listings) {
             const ethIcon = `<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
                 <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
@@ -557,16 +619,16 @@
             const legend = `
                 <div class="legend">
                     <div class="legend-item">
-                        <span class="legend-marker floor"></span>
-                        <span>Floor Price</span>
+                        <svg width="20" height="2">
+                            <line x1="0" y1="1" x2="20" y2="1" stroke="#48DA7E" stroke-width="2"/>
+                        </svg>
+                        <span>Bid Prices</span>
                     </div>
                     <div class="legend-item">
-                        <span class="legend-marker bid"></span>
-                        <span>Current Bid</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-marker last"></span>
-                        <span>Last Sale</span>
+                        <svg width="20" height="2">
+                            <line x1="0" y1="1" x2="20" y2="1" stroke="#7B61FF" stroke-width="2"/>
+                        </svg>
+                        <span>Market Prices</span>
                     </div>
                 </div>
             `;
@@ -668,27 +730,7 @@
                         </div>
                     </td>
                     <td class="section-divider">
-                        <div class="price-range">
-                            <div class="price-range-fill"></div>
-                            ${listing.floor_price ? `
-                                <div class="price-marker floor" 
-                                     style="left: ${calculatePosition(listing.floor_price, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
-                                     title="Floor: ${format_eth(listing.floor_price)}">
-                                </div>
-                            ` : ''}
-                            ${listing.price_numeric ? `
-                                <div class="price-marker bid" 
-                                     style="left: ${calculatePosition(listing.price_numeric, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
-                                     title="Bid: ${format_eth(listing.price_numeric)}">
-                                </div>
-                            ` : ''}
-                            ${listing.supabaseInfo.last_sale ? `
-                                <div class="price-marker last" 
-                                     style="left: ${calculatePosition(listing.supabaseInfo.last_sale, listing.supabaseInfo.lowest_sale, listing.supabaseInfo.highest_sale)}%"
-                                     title="Last: ${format_eth(listing.supabaseInfo.last_sale)}">
-                                </div>
-                            ` : ''}
-                        </div>
+                        ${listing.supabaseInfo.trade_timeline ? createPriceChart(listing.supabaseInfo.trade_timeline) : ''}
                     </td>
                 </tr>
             `).join('');

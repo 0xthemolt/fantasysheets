@@ -171,6 +171,35 @@
             display: block;
             font-size: 0.9em;
         }
+
+        .rank-container {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .rank-1 {
+            background-color: #FFD700;  /* Gold */
+            color: #000;
+        }
+
+        .rank-2 {
+            background-color: #C0C0C0;  /* Silver */
+            color: #000;
+        }
+
+        .rank-3 {
+            background-color: #CD7F32;  /* Bronze */
+            color: #fff;
+        }
+
+        .rank-other {
+            background-color: #2d2d2d;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -202,7 +231,8 @@
                         lowest_sale,
                         highest_sale,
                         score_24hr,
-                        score_7d
+                        score_7d,
+                        score_main
                     `);
 
                 if (error) {
@@ -220,9 +250,25 @@
             }
         }
 
+        async function fetchListingRank(hero_rarity_index) {
+            try {
+                const response = await fetch(`https://api-v2.fantasy.top/marketplace/sell-orders/${hero_rarity_index}?type=short`, {
+                    headers: {
+                        'accept': 'application/json',
+                        'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                    }
+                });
+                const data = await response.json();
+                return data.orders;
+            } catch (error) {
+                console.error('Error fetching listing rank:', error);
+                return null;
+            }
+        }
+
         async function fetchListings() {
             try {
-                // Fetch both data sources in parallel
+                // Fetch initial data
                 const [apiResponse, supabaseData] = await Promise.all([
                     fetch('https://api-v2.fantasy.top/player/listings/0x162F95a9364c891028d255467F616902A479681a', {
                         headers: {
@@ -233,22 +279,34 @@
                     fetchSupabaseListingData()
                 ]);
 
-                // Add some debug logging
-                console.log('Supabase Data:', supabaseData);
-                console.log('API Response:', apiResponse);
-
-                // Create a map of Supabase data for easy lookup using hero_rarity_index
+                // Create map for Supabase data
                 const supabaseMap = new Map(
                     supabaseData.map(item => [item.hero_rarity_index.toString(), item])
                 );
 
-                // Combine the data - use hero_rarity_index for joining
-                const enrichedListings = apiResponse.map(listing => {
+                // Fetch rank data for each listing
+                const rankPromises = apiResponse.map(listing => 
+                    fetchListingRank(listing.hero_rarity_index)
+                );
+                const rankResults = await Promise.all(rankPromises);
+
+                // Combine all data
+                const enrichedListings = apiResponse.map((listing, index) => {
                     const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
-                    console.log('Matching:', listing.hero_rarity_index, supabaseInfo);
+                    const rankOrders = rankResults[index];
+                    
+                    // Find rank position
+                    let rank = null;
+                    if (rankOrders) {
+                        rank = rankOrders.findIndex(order => 
+                            order.token_id === listing.token_id
+                        ) + 1;
+                    }
+
                     return {
                         ...listing,
-                        supabaseInfo: supabaseInfo || {}
+                        supabaseInfo: supabaseInfo || {},
+                        rank
                     };
                 });
 
@@ -380,6 +438,10 @@
             return `rgb(${r}, ${g}, ${b})`;
         }
 
+        function calculateTotalPrice(listings) {
+            return listings.reduce((sum, listing) => sum + parseFloat(listing.price_numeric), 0);
+        }
+
         function displayListings(listings) {
             const ethIcon = `<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
                 <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
@@ -423,7 +485,7 @@
                             class="card-image" 
                             src="https://r2.fantasy.top/v2/${getRarityName(listing.rarity)}/${listing.hero_id}_${listing.heroes.stars}.png" 
                             alt="Hero Card"
-                            onerror="this.src='https://via.placeholder.com/100x140'"
+                            onerror="this.src='../icons/ft_logo.webp'"
                         >
                     </td>
                     <td class="hero-cell">
@@ -444,10 +506,23 @@
                                     7d: ${listing.supabaseInfo.score_7d ? Math.round(listing.supabaseInfo.score_7d) : '-'}
                                 </span>
                             </span>
+                            <span class="score-value score-main" title="Main score">
+                                <span style="color: ${getScoreColor(listing.supabaseInfo.score_main)}">
+                                    Main: ${listing.supabaseInfo.score_main ? Math.round(listing.supabaseInfo.score_main) : '-'}
+                                </span>
+                            </span>                      
                         </div>
                     </td>
                     <td>${formatTimeUntilExpiration(listing.expiration_time)}</td>
                     <td>
+                        ${listing.rank ? `
+                            <span class="rank-container ${
+                                listing.rank === 1 ? 'rank-1' : 
+                                listing.rank === 2 ? 'rank-2' : 
+                                listing.rank === 3 ? 'rank-3' : 
+                                'rank-other'
+                            }">#${listing.rank}</span>
+                        ` : ''}
                         <span style="color: ${parseFloat(listing.price_numeric) <= parseFloat(listing.floor_price) ? '#48DA7E' : 'inherit'}">
                             ${format_eth(listing.price_numeric)}${ethIcon}
                             ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
@@ -468,7 +543,7 @@
                                         class="profile-pic" 
                                         src="${listing.supabaseInfo.profile_picture}" 
                                         alt="Profile"
-                                        onerror="this.style.display='none'"
+                                        onerror="this.src='../icons/ft_logo.webp'"
                                     >
                                     <span class="seller-info">
                                         ${listing.supabaseInfo.seller ? 
@@ -525,7 +600,7 @@
                         ${floorListings.length > 0 ? `
                             <tr>
                                 <td colspan="8" class="section-header">
-                                    My Floor Price LIstings (${floorListings.length})
+                                    My Floor Price Listings (${floorListings.length}) - Total: ${format_eth(calculateTotalPrice(floorListings))} ${ethIcon}
                                 </td>
                             </tr>
                             ${createTableRows(floorListings)}
@@ -533,7 +608,7 @@
                         ${otherListings.length > 0 ? `
                             <tr>
                                 <td colspan="8" class="section-header" style="margin-top: 20px;">
-                                    Other Listings (${otherListings.length})
+                                    Other Listings (${otherListings.length}) - Total: ${format_eth(calculateTotalPrice(otherListings))} ${ethIcon}
                                 </td>
                             </tr>
                             ${createTableRows(otherListings)}

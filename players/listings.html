@@ -262,7 +262,9 @@
                         score_24hr,
                         score_7d,
                         score_main,
-                        trade_timeline
+                        trade_timeline,
+                        bid_pct,
+                        market_pct
                     `);
 
                 if (error) {
@@ -605,6 +607,75 @@
             `;
         }
 
+        // Add this function to create the donut chart
+        function createDonutChart(bid_pct, market_pct) {
+            // Ensure values are numbers and default to 0 if undefined/null
+            bid_pct = Number(bid_pct) || 0;
+            market_pct = Number(market_pct) || 0;
+            
+            // Check if we have any data to show
+            if (bid_pct === 0 && market_pct === 0) return '';
+            
+            const size = 40;
+            const strokeWidth = 4;
+            const radius = (size - strokeWidth) / 2;
+            const center = size / 2;
+            
+            // Calculate percentages and angles
+            const total = bid_pct + market_pct;
+            if (total === 0) return '';
+            
+            // Calculate angles
+            const bidAngle = (bid_pct / total) * 360;
+            const marketAngle = (market_pct / total) * 360;
+            
+            // Calculate stroke-dasharray values
+            const circumference = 2 * Math.PI * radius;
+            const bidDash = (bidAngle / 360) * circumference;
+            const marketDash = (marketAngle / 360) * circumference;
+
+            // Determine highest percentage and its color
+            const highestPct = Math.max(bid_pct, market_pct);
+            const highestColor = bid_pct >= market_pct ? "#48DA7E" : "#7B61FF";
+
+            return `
+                <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="margin-left: 8px;">
+                    ${bid_pct > 0 ? `
+                        <circle 
+                            cx="${center}" 
+                            cy="${center}" 
+                            r="${radius}"
+                            fill="none"
+                            stroke="#48DA7E"
+                            stroke-width="${strokeWidth}"
+                            stroke-dasharray="${bidDash} ${circumference}"
+                            transform="rotate(-90, ${center}, ${center})"
+                        />
+                    ` : ''}
+                    ${market_pct > 0 ? `
+                        <circle 
+                            cx="${center}" 
+                            cy="${center}" 
+                            r="${radius}"
+                            fill="none"
+                            stroke="#7B61FF"
+                            stroke-width="${strokeWidth}"
+                            stroke-dasharray="${marketDash} ${circumference}"
+                            transform="rotate(${bidAngle - 90}, ${center}, ${center})"
+                        />
+                    ` : ''}
+                    <text 
+                        x="${center}" 
+                        y="${center}" 
+                        text-anchor="middle" 
+                        dominant-baseline="middle" 
+                        fill="${highestColor}"
+                        style="font-size: 12px; font-weight: bold;"
+                    >${Math.round(highestPct)}</text>
+                </svg>
+            `;
+        }
+
         function displayListings(listings) {
             const ethIcon = `<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
                 <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
@@ -731,6 +802,10 @@
                     </td>
                     <td class="section-divider">
                         ${listing.supabaseInfo.trade_timeline ? createPriceChart(listing.supabaseInfo.trade_timeline) : ''}
+                        ${createDonutChart(
+                            listing.supabaseInfo.bid_pct || 0, 
+                            listing.supabaseInfo.market_pct || 0
+                        )}
                     </td>
                 </tr>
             `).join('');

@@ -153,6 +153,24 @@
         .legend-marker.floor { background: #48DA7E; }
         .legend-marker.bid { background: #4A9EFF; }
         .legend-marker.last { background: #7B61FF; }
+
+        .score-cell {
+            text-align: left;  /* Changed from center to left */
+            white-space: nowrap;
+            padding: 8px;
+        }
+
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-start;  /* Changed from center to flex-start */
+        }
+
+        .score-value {
+            display: block;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -182,7 +200,9 @@
                         last_sale,
                         last_sale_time,
                         lowest_sale,
-                        highest_sale
+                        highest_sale,
+                        score_24hr,
+                        score_7d
                     `);
 
                 if (error) {
@@ -301,6 +321,65 @@
             return Math.min(Math.max(position, 0), 100); // Clamp between 0 and 100
         }
 
+        function formatPricePercentage(percentage) {
+            if (percentage >= 100) {
+                return `${Math.round(percentage)}%`;  // ###%
+            } else if (percentage >= 10) {
+                return `${Math.round(percentage)}%`;  // ##%
+            } else {
+                return `${percentage.toFixed(2)}%`;   // #.##%
+            }
+        }
+
+        function getPriceDiffColor(percentage) {
+            if (percentage > 50) {
+                return '#FF5733'; // Red for high difference
+            } else if (percentage > 20) {
+                return '#FFC300'; // Yellow for moderate difference
+            } else {
+                return '#48DA7E'; // Green for low difference
+            }
+        }
+
+        // Add this function to your script section
+        function getScoreColor(score) {
+            // Handle invalid scores
+            if (!score || score < 0) return '#777777';
+            
+            // Normalize score to 0-1 range
+            const normalizedScore = Math.min(Math.max(score / 1000, 0), 1);
+            
+            // Define color stops for RYG (Red -> Yellow -> Green) gradient
+            const colors = [
+                { point: 0, color: [255, 50, 50] },    // Red
+                { point: 0.5, color: [255, 255, 50] }, // Yellow
+                { point: 1, color: [50, 255, 50] }     // Green
+            ];
+            
+            // Find the two colors to interpolate between
+            let lower = colors[0];
+            let upper = colors[colors.length - 1];
+            
+            for (let i = 0; i < colors.length - 1; i++) {
+                if (normalizedScore >= colors[i].point && normalizedScore <= colors[i + 1].point) {
+                    lower = colors[i];
+                    upper = colors[i + 1];
+                    break;
+                }
+            }
+            
+            // Calculate interpolation factor
+            const range = upper.point - lower.point;
+            const factor = range === 0 ? 0 : (normalizedScore - lower.point) / range;
+            
+            // Interpolate RGB values
+            const r = Math.round(lower.color[0] * (1 - factor) + upper.color[0] * factor);
+            const g = Math.round(lower.color[1] * (1 - factor) + upper.color[1] * factor);
+            const b = Math.round(lower.color[2] * (1 - factor) + upper.color[2] * factor);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
         function displayListings(listings) {
             const ethIcon = `<svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
                 <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
@@ -352,23 +431,36 @@
                         <a href="https://x.com/${listing.heroes.handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
                             <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                         </a>
-                    </td>                   
+                    </td>
+                    <td class="score-cell">
+                        <div class="score-container">
+                            <span class="score-value score-24h" title="24 hour score">
+                                <span style="color: ${getScoreColor(listing.supabaseInfo.score_24hr)}">
+                                    24h: ${listing.supabaseInfo.score_24hr ? Math.round(listing.supabaseInfo.score_24hr) : '-'}
+                                </span>
+                            </span>
+                            <span class="score-value score-7d" title="7 day score">
+                                <span style="color: ${getScoreColor(listing.supabaseInfo.score_7d)}">
+                                    7d: ${listing.supabaseInfo.score_7d ? Math.round(listing.supabaseInfo.score_7d) : '-'}
+                                </span>
+                            </span>
+                        </div>
+                    </td>
                     <td>${formatTimeUntilExpiration(listing.expiration_time)}</td>
                     <td>
                         <span style="color: ${parseFloat(listing.price_numeric) <= parseFloat(listing.floor_price) ? '#48DA7E' : 'inherit'}">
-                            ${format_eth(listing.price_numeric)}
+                            ${format_eth(listing.price_numeric)}${ethIcon}
+                            ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
+                                <div class="price-diff" title="% diff between listing price and floor" style="color: ${getPriceDiffColor(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}">
+                                    +${formatPricePercentage(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}
+                                </div>
+                            ` : ''}
                         </span> 
-                        ${ethIcon}
                     </td>
                     <td class="section-divider">
                         <div class="floor-container">
                             <div class="floor-value">
                                 ${format_eth(listing.floor_price)} ${ethIcon}
-                                ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
-                                    <div class="price-diff">
-                                        +${((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100).toFixed(2)}%
-                                    </div>
-                                ` : ''}
                             </div>
                             <div class="profile-container">
                                 ${listing.supabaseInfo.profile_picture ? `
@@ -422,6 +514,7 @@
                         <tr>
                             <th>Card</th>
                             <th class="hero-cell">Hero</th>
+                            <th class="score-cell" title="Performance Score 24h/7d">Score</th>
                             <th>Time Left</th>
                             <th>Price</th>
                             <th class="section-divider">Floor</th>
@@ -457,4 +550,3 @@
     </script>
 </body>
 </html>
-```html

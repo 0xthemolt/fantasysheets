@@ -71,6 +71,12 @@
             gap: 2px;
         }
 
+        .last-sale-value {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .last-sale-time {
             font-size: 0.8em;
             color: #777;
@@ -248,8 +254,6 @@
                         hero_handle,
                         rarity,
                         hero_rarity_index,
-                        seller,
-                        profile_picture,
                         listed_count,
                         last_sale,
                         last_sale_time,
@@ -278,8 +282,6 @@
         // Add this function after the other fetch functions
         async function fetchPlayerData(addresses) {
             try {
-                console.log('Fetching player data for addresses:', addresses);
-
                 const { data, error } = await supabaseClient
                     .from('players')
                     .select('player_address,player_pfp_url,player_name')
@@ -290,14 +292,11 @@
                     return null;
                 }
 
-                console.log('Raw player data from Supabase:', data);
-
                 // Create a map for easy lookup
                 const playerMap = new Map(
                     data.map(player => [player.player_address.toLowerCase(), player])
                 );
 
-                console.log('Processed player map:', Object.fromEntries(playerMap));
                 return playerMap;
             } catch (error) {
                 console.error('Error in fetchPlayerData:', error);
@@ -314,25 +313,10 @@
                     }
                 });
                 const data = await response.json();
-                console.log('Rank API response for hero_rarity_index', hero_rarity_index, ':', data);
-                
-                if (!data.orders || !Array.isArray(data.orders)) {
-                    console.warn('No orders found for hero_rarity_index:', hero_rarity_index);
-                    return [];
-                }
-                
-                // Sort orders by sequence if available
-                const sortedOrders = data.orders.sort((a, b) => {
-                    const seqA = a.sequence || Number.MAX_SAFE_INTEGER;
-                    const seqB = b.sequence || Number.MAX_SAFE_INTEGER;
-                    return seqA - seqB;
-                });
-
-                console.log('Sorted orders:', sortedOrders);
-                return sortedOrders;
+                return data.orders;
             } catch (error) {
-                console.error('Error fetching listing rank for hero_rarity_index:', hero_rarity_index, error);
-                return [];
+                console.error('Error fetching listing rank:', error);
+                return null;
             }
         }
 
@@ -364,47 +348,37 @@
                 const topTraders = new Set(
                     rankResults
                         .flatMap(orders => {
-                            if (!orders || !Array.isArray(orders)) {
-                                console.warn('Invalid orders data:', orders);
-                                return [];
-                            }
-                            
-                            // Find the first valid order (lowest sequence)
-                            const topOrder = orders.find(order => 
-                                order && 
-                                typeof order === 'object' && 
-                                order.sequence && 
-                                order.trader
-                            );
-                            
-                            if (topOrder) {
-                                console.log('Found top order:', topOrder);
-                                return [topOrder];
-                            }
-                            return [];
-                        })
-                        .map(order => {
-                            console.log('Processing top trader order:', order);
-                            return order.trader?.toLowerCase();
+                            console.log('Processing orders:', orders);
+                            // Get the first order from each array (lowest price)
+                            const firstOrder = orders?.[0];
+                            console.log('First order:', firstOrder);
+                            return firstOrder?.trader || [];
                         })
                         .filter(trader => trader)
+                        .map(trader => trader.toLowerCase())
                 );
-
-                console.log('Unique top traders:', Array.from(topTraders));
+                
+                console.log('Top traders addresses:', Array.from(topTraders));
 
                 // Fetch player data for top traders
                 const playerData = await fetchPlayerData(Array.from(topTraders));
-                console.log('Returned player data:', playerData);
+                console.log('Player data from Supabase:', Object.fromEntries(playerData || new Map()));
 
-                // Combine all data
+                // Log enriched listings for debugging
                 const enrichedListings = apiResponse.map((listing, index) => {
                     const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
                     const rankOrders = rankResults[index];
                     
-                    // Get top trader info if available
-                    const topOrder = rankOrders?.find(order => order.sequence === 1);
+                    // Get top trader info if available (get first order directly)
+                    const topOrder = rankOrders?.[0];  // Changed this line
                     const topTraderAddress = topOrder?.trader?.toLowerCase();
                     const topTraderInfo = topTraderAddress ? playerData?.get(topTraderAddress) : null;
+                    
+                    console.log('Top trader info for listing:', {
+                        address: topTraderAddress,
+                        info: topTraderInfo,
+                        orderDetails: topOrder // Add this to see full order details
+                    });
 
                     return {
                         ...listing,
@@ -479,6 +453,24 @@
             } else {
                 const days = Math.floor(diffMinutes / 1440); // 1440 minutes per day
                 return `${days}d`;
+            }
+        }
+
+        function formatLastSaleTime(lastSaleTime) {
+            if (!lastSaleTime) return '';
+            
+            const now = new Date();
+            const saleTime = new Date(lastSaleTime);
+            const diffMinutes = Math.floor((now - saleTime) / (1000 * 60));
+            
+            if (diffMinutes <= 120) {
+                return `${diffMinutes}m ago`;
+            } else if (diffMinutes <= 1440) {
+                const hours = Math.floor(diffMinutes / 60);
+                return `${hours}h ago`;
+            } else {
+                const days = Math.floor(diffMinutes / 1440);
+                return `${days}d ago`;
             }
         }
 
@@ -663,6 +655,18 @@
                             </div>
                         </div>
                     </td>
+                    <td class="section-divider">
+                        <div class="last-sale-container">
+                            ${listing.supabaseInfo.last_sale ? `
+                                <div class="last-sale-value">
+                                    ${format_eth(listing.supabaseInfo.last_sale)} ${ethIcon}
+                                </div>
+                                <div class="last-sale-time" title="${new Date(listing.supabaseInfo.last_sale_time).toUTCString()}">
+                                    ${formatLastSaleTime(listing.supabaseInfo.last_sale_time)}
+                                </div>
+                            ` : '-'}
+                        </div>
+                    </td>
                     <td colspan="3">
                         <div class="price-range">
                             <div class="price-range-fill"></div>
@@ -700,6 +704,7 @@
                             <th>Time Left</th>
                             <th>Price</th>
                             <th class="section-divider">Floor</th>
+                            <th class="section-divider">Last Sale</th>  <!-- Add this line -->
                             <th colspan="3">Price Range L14D / L30D</th>
                         </tr>
                     </thead>

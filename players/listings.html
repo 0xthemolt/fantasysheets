@@ -200,6 +200,31 @@
             background-color: #2d2d2d;
             color: #fff;
         }
+
+        .rank-placeholder {
+            visibility: hidden;
+            width: 30px;  /* Adjust this value to match your rank container width */
+            display: inline-block;
+        }
+
+        .listing-cell {
+            text-align: right;  /* Changed from left to right */
+            white-space: nowrap;
+        }
+
+        .listing-price {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .price-diff {
+            display: block;
+            text-align: right;  /* Ensure price diff is also right-aligned */
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -250,6 +275,36 @@
             }
         }
 
+        // Add this function after the other fetch functions
+        async function fetchPlayerData(addresses) {
+            try {
+                console.log('Fetching player data for addresses:', addresses);
+
+                const { data, error } = await supabaseClient
+                    .from('players')
+                    .select('player_address,player_pfp_url,player_name')
+                    .in('player_address', addresses);
+
+                if (error) {
+                    console.error('Error fetching player data:', error);
+                    return null;
+                }
+
+                console.log('Raw player data from Supabase:', data);
+
+                // Create a map for easy lookup
+                const playerMap = new Map(
+                    data.map(player => [player.player_address.toLowerCase(), player])
+                );
+
+                console.log('Processed player map:', Object.fromEntries(playerMap));
+                return playerMap;
+            } catch (error) {
+                console.error('Error in fetchPlayerData:', error);
+                return null;
+            }
+        }
+
         async function fetchListingRank(hero_rarity_index) {
             try {
                 const response = await fetch(`https://api-v2.fantasy.top/marketplace/sell-orders/${hero_rarity_index}?type=short`, {
@@ -259,10 +314,25 @@
                     }
                 });
                 const data = await response.json();
-                return data.orders;
+                console.log('Rank API response for hero_rarity_index', hero_rarity_index, ':', data);
+                
+                if (!data.orders || !Array.isArray(data.orders)) {
+                    console.warn('No orders found for hero_rarity_index:', hero_rarity_index);
+                    return [];
+                }
+                
+                // Sort orders by sequence if available
+                const sortedOrders = data.orders.sort((a, b) => {
+                    const seqA = a.sequence || Number.MAX_SAFE_INTEGER;
+                    const seqB = b.sequence || Number.MAX_SAFE_INTEGER;
+                    return seqA - seqB;
+                });
+
+                console.log('Sorted orders:', sortedOrders);
+                return sortedOrders;
             } catch (error) {
-                console.error('Error fetching listing rank:', error);
-                return null;
+                console.error('Error fetching listing rank for hero_rarity_index:', hero_rarity_index, error);
+                return [];
             }
         }
 
@@ -290,23 +360,62 @@
                 );
                 const rankResults = await Promise.all(rankPromises);
 
+                // Get unique top traders from rank results
+                const topTraders = new Set(
+                    rankResults
+                        .flatMap(orders => {
+                            if (!orders || !Array.isArray(orders)) {
+                                console.warn('Invalid orders data:', orders);
+                                return [];
+                            }
+                            
+                            // Find the first valid order (lowest sequence)
+                            const topOrder = orders.find(order => 
+                                order && 
+                                typeof order === 'object' && 
+                                order.sequence && 
+                                order.trader
+                            );
+                            
+                            if (topOrder) {
+                                console.log('Found top order:', topOrder);
+                                return [topOrder];
+                            }
+                            return [];
+                        })
+                        .map(order => {
+                            console.log('Processing top trader order:', order);
+                            return order.trader?.toLowerCase();
+                        })
+                        .filter(trader => trader)
+                );
+
+                console.log('Unique top traders:', Array.from(topTraders));
+
+                // Fetch player data for top traders
+                const playerData = await fetchPlayerData(Array.from(topTraders));
+                console.log('Returned player data:', playerData);
+
                 // Combine all data
                 const enrichedListings = apiResponse.map((listing, index) => {
                     const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
                     const rankOrders = rankResults[index];
                     
-                    // Find rank position
-                    let rank = null;
-                    if (rankOrders) {
-                        rank = rankOrders.findIndex(order => 
-                            order.token_id === listing.token_id
-                        ) + 1;
-                    }
+                    // Get top trader info if available
+                    const topOrder = rankOrders?.find(order => order.sequence === 1);
+                    const topTraderAddress = topOrder?.trader?.toLowerCase();
+                    const topTraderInfo = topTraderAddress ? playerData?.get(topTraderAddress) : null;
 
                     return {
                         ...listing,
                         supabaseInfo: supabaseInfo || {},
-                        rank
+                        rank: rankOrders ? rankOrders.findIndex(order => 
+                            order.token_id === listing.token_id
+                        ) + 1 : null,
+                        topTrader: topTraderInfo ? {
+                            name: topTraderInfo.player_name,
+                            pfpUrl: topTraderInfo.player_pfp_url
+                        } : null
                     };
                 });
 
@@ -514,23 +623,21 @@
                         </div>
                     </td>
                     <td>${formatTimeUntilExpiration(listing.expiration_time)}</td>
-                    <td>
-                        ${listing.rank ? `
-                            <span class="rank-container ${
-                                listing.rank === 1 ? 'rank-1' : 
-                                listing.rank === 2 ? 'rank-2' : 
-                                listing.rank === 3 ? 'rank-3' : 
-                                'rank-other'
-                            }">#${listing.rank}</span>
-                        ` : ''}
-                        <span style="color: ${parseFloat(listing.price_numeric) <= parseFloat(listing.floor_price) ? '#48DA7E' : 'inherit'}">
+                    <td class="listing-cell">
+                        <span class="rank-container ${listing.rank ? (
+                            listing.rank === 1 ? 'rank-1' : 
+                            listing.rank === 2 ? 'rank-2' : 
+                            listing.rank === 3 ? 'rank-3' : 
+                            'rank-other'
+                        ) : 'rank-placeholder'}">${listing.rank ? `#${listing.rank}` : ''}</span>
+                        <span class="listing-price">
                             ${format_eth(listing.price_numeric)}${ethIcon}
-                            ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
-                                <div class="price-diff" title="% diff between listing price and floor" style="color: ${getPriceDiffColor(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}">
-                                    +${formatPricePercentage(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}
-                                </div>
-                            ` : ''}
-                        </span> 
+                        </span>
+                        ${parseFloat(listing.price_numeric) > parseFloat(listing.floor_price) ? `
+                            <div class="price-diff" title="% diff between listing price and floor">
+                                +${formatPricePercentage(((parseFloat(listing.price_numeric) - parseFloat(listing.floor_price)) / parseFloat(listing.floor_price) * 100))}
+                            </div>
+                        ` : ''}
                     </td>
                     <td class="section-divider">
                         <div class="floor-container">
@@ -538,18 +645,18 @@
                                 ${format_eth(listing.floor_price)} ${ethIcon}
                             </div>
                             <div class="profile-container">
-                                ${listing.supabaseInfo.profile_picture ? `
+                                ${listing.topTrader ? `
                                     <img 
                                         class="profile-pic" 
-                                        src="${listing.supabaseInfo.profile_picture}" 
+                                        src="${listing.topTrader.pfpUrl}" 
                                         alt="Profile"
                                         onerror="this.src='../icons/ft_logo.webp'"
                                     >
                                     <span class="seller-info">
-                                        ${listing.supabaseInfo.seller ? 
-                                            (listing.supabaseInfo.seller.length > 15 ? 
-                                                listing.supabaseInfo.seller.substring(0, 15) + '...' : 
-                                                listing.supabaseInfo.seller) 
+                                        ${listing.topTrader.name ? 
+                                            (listing.topTrader.name.length > 15 ? 
+                                            listing.topTrader.name.substring(0, 15) + '...' : 
+                                            listing.topTrader.name) 
                                             : ''}
                                     </span>
                                 ` : ''}

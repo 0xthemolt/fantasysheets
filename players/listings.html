@@ -21,19 +21,28 @@
         table td {
             padding: 8px;
         }
+        .profile-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 80px; /* Add a minimum width */
+            width: 100%; /* Take up full width of parent */
+        }
         .profile-pic {
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            vertical-align: middle;
-            margin-right: 4px;
+            margin: 0 auto; /* Center horizontally */
+            display: block; /* Make image a block element */
         }
         .seller-info {
             display: block;
             font-size: 0.8em;
             color: #777;
             margin-top: 2px;
-            text-align: left;
+            text-align: center;
+            width: 100%; /* Take up full width of parent */
         }
         .section-divider {
             border-left: 1px solid #ddd;
@@ -41,16 +50,10 @@
         }
         .floor-container {
             display: flex;
-            justify-content: flex-start;  /* Changed from space-between to flex-start */
+            justify-content: flex-start;
             align-items: center;
             width: 100%;
-            gap: 12px;  /* Added fixed gap instead of space-between */
-        }
-        
-        .profile-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            gap: 12px;
         }
         
         .floor-value {
@@ -790,8 +793,8 @@
                                     >
                                     <span class="seller-info">
                                         ${listing.topTrader.name ? 
-                                            (listing.topTrader.name.length > 15 ? 
-                                            listing.topTrader.name.substring(0, 15) + '...' : 
+                                            (listing.topTrader.name.length > 12 ? 
+                                            listing.topTrader.name.substring(0, 12) + '...' : 
                                             listing.topTrader.name) 
                                             : ''}
                                     </span>

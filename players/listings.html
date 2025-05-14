@@ -574,7 +574,6 @@
             const width = 200;
             const height = 40;
             const padding = 4;
-            const dotRadius = 2; // Size of the dots
             
             // Handle both string and object inputs
             const sortedData = (typeof tradeData === 'string' ? JSON.parse(tradeData) : tradeData)
@@ -589,8 +588,8 @@
             };
             
             const priceRange = {
-                min: Math.min(...sortedData.map(d => d.min_price)),
-                max: Math.max(...sortedData.map(d => d.max_price))
+                min: Math.min(...sortedData.map(d => d.avg_price)),
+                max: Math.max(...sortedData.map(d => d.avg_price))
             };
             
             // Scale functions
@@ -604,26 +603,19 @@
                 return height - padding - percent * (height - 2 * padding);
             };
             
-            // Create dots for each method
-            const marketData = sortedData.filter(d => d.method === 'market');
-            const bidData = sortedData.filter(d => d.method === 'bid');
-            
-            const createDots = (data, color) => {
-                if (!data.length) return '';
-                return data.map(d => 
-                    `<circle 
-                        cx="${scaleX(d.date_hour)}" 
-                        cy="${scaleY(d.max_price)}" 
-                        r="${dotRadius}" 
-                        fill="${color}"
-                    />`
-                ).join('');
-            };
+            // Create path for the line
+            const points = sortedData.map(d => 
+                `${scaleX(d.date_hour)},${scaleY(d.avg_price)}`
+            ).join(' ');
             
             return `
                 <svg width="${width}" height="${height}" style="background: #2a2a2a; border-radius: 2px;">
-                    ${createDots(marketData, '#7B61FF')}
-                    ${createDots(bidData, '#48DA7E')}
+                    <polyline 
+                        points="${points}"
+                        fill="none"
+                        stroke="#7B61FF"
+                        stroke-width="1.5"
+                    />
                 </svg>
             `;
         }

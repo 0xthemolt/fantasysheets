@@ -772,7 +772,7 @@
                             'rank-other'
                         ) : 'rank-placeholder'}">${listing.rank ? `#${listing.rank}` : ''}</span>
                         <span class="listing-price">
-                            ${format_eth(listing.price_numeric)}${ethIcon}
+                            <span style="color: ${parseFloat(listing.price_numeric) === parseFloat(listing.floor_price) ? '#4ADE80' : 'inherit'}">${format_eth(listing.price_numeric)}</span>${ethIcon}
                         </span>
                     </td>
                     <td class="section-divider">

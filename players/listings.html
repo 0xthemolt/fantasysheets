@@ -581,18 +581,18 @@
             
             if (!sortedData.length) return '';
             
-            // Get min/max values for scaling
+            const now = new Date();
             const timeRange = {
-                min: new Date(sortedData[0].date_hour),
-                max: new Date(sortedData[sortedData.length - 1].date_hour)
+                max: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours())),
+                min: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 14, now.getUTCHours()))
             };
             
             const priceRange = {
                 min: Math.min(...sortedData.map(d => d.avg_price)),
                 max: Math.max(...sortedData.map(d => d.avg_price))
             };
-            
-            // Scale functions
+
+            // Scale functions remain the same
             const scaleX = (date) => {
                 const percent = (new Date(date) - timeRange.min) / (timeRange.max - timeRange.min);
                 return padding + percent * (width - 2 * padding);
@@ -602,20 +602,78 @@
                 const percent = (price - priceRange.min) / (priceRange.max - priceRange.min);
                 return height - padding - percent * (height - 2 * padding);
             };
+
+            // Create points with trend information
+            const points = [];
+            const windowSize = 5; // Increased from 3 to 5 points
+            const minChangeThreshold = 0.005; // 0.5% minimum change to show trend
             
-            // Create path for the line
-            const points = sortedData.map(d => 
-                `${scaleX(d.date_hour)},${scaleY(d.avg_price)}`
-            ).join(' ');
-            
-            return `
-                <svg width="${width}" height="${height}" style="background: #2a2a2a; border-radius: 2px;">
-                    <polyline 
-                        points="${points}"
-                        fill="none"
-                        stroke="#7B61FF"
+            sortedData.forEach((d, i) => {
+                const point = {
+                    x: scaleX(d.date_hour),
+                    y: scaleY(d.avg_price),
+                    price: d.avg_price,
+                    date: new Date(d.date_hour).toLocaleDateString(),
+                    time: new Date(d.date_hour).toLocaleTimeString(),
+                    priceFormatted: format_eth(d.avg_price)
+                };
+
+                // Calculate trend with minimum threshold
+                if (i >= windowSize - 1) {
+                    const window = sortedData.slice(i - windowSize + 1, i + 1);
+                    const firstPrice = window[0].avg_price;
+                    const lastPrice = window[window.length - 1].avg_price;
+                    const priceChange = (lastPrice - firstPrice) / firstPrice;
+                    
+                    if (Math.abs(priceChange) >= minChangeThreshold) {
+                        point.trend = priceChange > 0 ? 'up' : 'down';
+                    } else {
+                        point.trend = 'neutral';
+                    }
+                } else {
+                    point.trend = 'neutral';
+                }
+
+                points.push(point);
+            });
+
+            // Create SVG path segments with different colors
+            const segments = points.map((point, i) => {
+                if (i === 0) return '';
+                
+                const prevPoint = points[i - 1];
+                const color = point.trend === 'up' ? '#4ADE80' : 
+                             point.trend === 'down' ? '#EF4444' : 
+                             '#404040'; // Changed neutral color to a darker grey
+
+                return `
+                    <line 
+                        x1="${prevPoint.x}" 
+                        y1="${prevPoint.y}" 
+                        x2="${point.x}" 
+                        y2="${point.y}"
+                        stroke="${color}"
                         stroke-width="1.5"
                     />
+                `;
+            });
+
+            return `
+                <svg width="${width}" height="${height}" style="background: #2a2a2a; border-radius: 2px;">
+                    ${segments.join('')}
+                    ${points.map(p => `
+                        <circle 
+                            cx="${p.x}" 
+                            cy="${p.y}" 
+                            r="3" 
+                            fill="transparent"
+                            stroke="transparent"
+                            style="cursor: pointer;"
+                        >
+                            <title>${p.date} ${p.time}
+Price: ${p.priceFormatted} ETH</title>
+                        </circle>
+                    `).join('')}
                 </svg>
             `;
         }

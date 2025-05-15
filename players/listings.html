@@ -462,6 +462,24 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Add these styles to your existing <style> section */
+        body {
+            margin: 0;
+            padding: 15px;
+            min-width: fit-content;  /* Ensure body is at least as wide as content */
+            overflow-x: auto;        /* Allow horizontal scrolling */
+        }
+
+        table {
+            width: max-content;      /* Let table take its natural width */
+            min-width: 100%;        /* But at least as wide as viewport */
+        }
+
+        #tableContainer {
+            overflow-x: auto;       /* Enable horizontal scrolling */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
+        }
     </style>
 </head>
 <body>
@@ -824,20 +842,20 @@
 
         // Add this function to your script section
         function getScoreColor(score) {
-            // Handle invalid scores
-            if (!score || score < 0) return '#777777';
+            // Only treat undefined and null as invalid scores
+            if (score === undefined || score === null) return '#777777';
             
-            // Normalize score to 0-1 range
+            // Normalize score to 0-1 range (0 will now be red, 1000 will be green)
             const normalizedScore = Math.min(Math.max(score / 1000, 0), 1);
             
             // Define color stops for RYG (Red -> Yellow -> Green) gradient
             const colors = [
-                { point: 0, color: [255, 50, 50] },    // Red
-                { point: 0.5, color: [255, 255, 50] }, // Yellow
-                { point: 1, color: [50, 255, 50] }     // Green
+                { point: 0, color: [255, 50, 50] },    // Red (for score 0)
+                { point: 0.5, color: [255, 255, 50] }, // Yellow (for score 500)
+                { point: 1, color: [50, 255, 50] }     // Green (for score 1000)
             ];
             
-            // Find the two colors to interpolate between
+            // Rest of the function remains the same
             let lower = colors[0];
             let upper = colors[colors.length - 1];
             
@@ -849,11 +867,9 @@
                 }
             }
             
-            // Calculate interpolation factor
             const range = upper.point - lower.point;
             const factor = range === 0 ? 0 : (normalizedScore - lower.point) / range;
             
-            // Interpolate RGB values
             const r = Math.round(lower.color[0] * (1 - factor) + upper.color[0] * factor);
             const g = Math.round(lower.color[1] * (1 - factor) + upper.color[1] * factor);
             const b = Math.round(lower.color[2] * (1 - factor) + upper.color[2] * factor);

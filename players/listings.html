@@ -250,8 +250,9 @@
         }
         
         .search-box {
-            flex: 0 0 250px; /* Change from flex: 1 to prevent expansion */
-            width: 250px; /* Reduced width (was approximately 300px) */
+            flex: 0 0; /* Change from flex: 1 to prevent expansion */
+            width: 275px; /* Reduced width (was approximately 300px) */
+            min-width: 275px; /* Added to prevent shrinking */
             position: relative;
             background: #2a2a2a;
             padding: 12px;
@@ -270,11 +271,13 @@
         .search-input-container {
             position: relative;
             width: 100%;
+            min-width: 0; /* Added to prevent overflow */
             display: block;
         }
         
         #playerHandleSearch {
             width: 100%;
+            min-width: 0; /* Added to prevent overflow */
             box-sizing: border-box;
             padding: 8px 10px; /* Slightly smaller padding */
             padding-right: 35px;
@@ -413,6 +416,52 @@
         .selected-player-tag {
             display: none;
         }
+
+        .refresh-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .refresh-btn.spinning i {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Add this to your existing style section */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: #777;
+            font-size: 14px;
+            gap: 10px;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -426,6 +475,9 @@
                 </div>
                 <div id="autocompleteResults" class="autocomplete-results"></div>
             </div>
+            <button id="refreshButton" class="refresh-btn" title="Refresh player data">
+                <i class="fas fa-sync-alt"></i>
+            </button>
         </div>
     <div id="tableContainer"></div>
 
@@ -572,8 +624,20 @@
             }
         }
 
+        // Add this helper function
+        function showLoading() {
+            document.getElementById('tableContainer').innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <span>Loading listings...</span>
+                </div>
+            `;
+        }
+
         async function fetchListings(player_id) {
             try {
+                showLoading(); // Add loading indicator before fetching
+                
                 const [apiResponse, supabaseData] = await Promise.all([
                     fetch(`https://api-v2.fantasy.top/player/listings/${player_id}`, { // Fixed template literal
                         headers: {
@@ -649,6 +713,11 @@
                 displayListings(enrichedListings);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="loading-container" style="color: #ff4444;">
+                        Error loading listings. Please try again.
+                    </div>
+                `;
             }
         }
 
@@ -1036,6 +1105,13 @@ Price: ${p.priceFormatted} ETH</title>
             players.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'autocomplete-item';
+                div.style.justifyContent = 'space-between'; // Add this line
+                
+                // Create left container for image and name
+                const leftContainer = document.createElement('div');
+                leftContainer.style.display = 'flex';
+                leftContainer.style.alignItems = 'center';
+                leftContainer.style.gap = '8px';
                 
                 const img = document.createElement('img');
                 img.src = item.pfp || '../icons/ft_logo.webp';
@@ -1050,15 +1126,20 @@ Price: ${p.priceFormatted} ETH</title>
                     `${item.name.substring(0, 12)}...` : 
                     item.name;
                 
-                const statsSpan = document.createElement('span');
-                statsSpan.style.color = '#777';
-                statsSpan.style.marginLeft = 'auto';
-                statsSpan.style.fontSize = '0.9em';
-                statsSpan.textContent = `Listed: ${item.sellOrders} Value: ${format_eth(item.totalValue)} ETH`;
+                leftContainer.appendChild(img);
+                leftContainer.appendChild(nameSpan);
                 
-                div.appendChild(img);
-                div.appendChild(nameSpan);
-                div.appendChild(statsSpan);
+                // Add stats span if there are sell orders
+                if (item.sellOrders && item.sellOrders > 0) {
+                    const statsSpan = document.createElement('span');
+                    statsSpan.style.color = '#777';
+                    statsSpan.style.fontSize = '0.9em';
+                    statsSpan.textContent = `${format_eth(item.totalValue)} ETH (${item.sellOrders})`;
+                    div.appendChild(leftContainer);
+                    div.appendChild(statsSpan);
+                } else {
+                    div.appendChild(leftContainer);
+                }
                 
                 div.addEventListener('click', () => {
                     selectPlayerHandle(item.handle, item.id);
@@ -1072,6 +1153,9 @@ Price: ${p.priceFormatted} ETH</title>
 
         // Fix selectPlayerHandle function - fix template literal
         function selectPlayerHandle(playerHandle, playerId) {
+            // Store the handle
+            localStorage.setItem('selectedPlayerHandle', playerHandle);
+
             const searchInput = document.getElementById('playerHandleSearch');
             const searchContainer = searchInput.parentNode;
             
@@ -1105,6 +1189,9 @@ Price: ${p.priceFormatted} ETH</title>
         }
 
         function removePlayerHandle() {
+            // Remove the stored handle
+            localStorage.removeItem('selectedPlayerHandle');
+
             const searchInput = document.getElementById('playerHandleSearch');
             const searchContainer = searchInput.parentNode;
             const playerTag = searchContainer.querySelector('.selected-player-tag');
@@ -1194,17 +1281,17 @@ Price: ${p.priceFormatted} ETH</title>
                         <div class="score-container">
                             <span class="score-value score-24h" title="24 hour score">
                                 <span style="color: ${getScoreColor(listing.supabaseInfo.score_24hr)}">
-                                    24h: ${listing.supabaseInfo.score_24hr ? Math.round(listing.supabaseInfo.score_24hr) : '-'}
+                                    24h: ${listing.supabaseInfo.score_24hr !== null && listing.supabaseInfo.score_24hr !== undefined ? Math.round(listing.supabaseInfo.score_24hr) : '-'}
                                 </span>
                             </span>
                             <span class="score-value score-7d" title="7 day score">
                                 <span style="color: ${getScoreColor(listing.supabaseInfo.score_7d)}">
-                                    7d: ${listing.supabaseInfo.score_7d ? Math.round(listing.supabaseInfo.score_7d) : '-'}
+                                    7d: ${listing.supabaseInfo.score_7d !== null && listing.supabaseInfo.score_7d !== undefined ? Math.round(listing.supabaseInfo.score_7d) : '-'}
                                 </span>
                             </span>
                             <span class="score-value score-main" title="Main score">
                                 <span style="color: ${getScoreColor(listing.supabaseInfo.score_main)}">
-                                    Main: ${listing.supabaseInfo.score_main ? Math.round(listing.supabaseInfo.score_main) : '-'}
+                                    Main: ${listing.supabaseInfo.score_main !== null && listing.supabaseInfo.score_main !== undefined ? Math.round(listing.supabaseInfo.score_main) : '-'}
                                 </span>
                             </span>                      
                         </div>
@@ -1314,11 +1401,12 @@ Price: ${p.priceFormatted} ETH</title>
             document.getElementById('tableContainer').innerHTML = table;
         }
 
-        // Add event listeners for search input
-        document.addEventListener('DOMContentLoaded', () => {
+        // Update the DOMContentLoaded event listener:
+        document.addEventListener('DOMContentLoaded', async () => {
             const searchInput = document.getElementById('playerHandleSearch');
             const clearButton = document.querySelector('.clear-search');
 
+            // Set up input event listeners
             searchInput.addEventListener('input', (e) => {
                 const value = e.target.value;
                 showAutocompleteResults(value);
@@ -1331,8 +1419,47 @@ Price: ${p.priceFormatted} ETH</title>
                 showAutocompleteResults('');
             });
 
-            // Only fetch players on page load, not listings
-            fetchPlayers();
+            // First fetch all players
+            await fetchPlayers();
+
+            // Check for stored player handle
+            const storedHandle = localStorage.getItem('selectedPlayerHandle');
+            if (storedHandle && allPlayers.length > 0) {
+                // Find the player in our allPlayers array
+                const player = allPlayers.find(p => p.handle === storedHandle);
+                if (player) {
+                    // Use the existing selectPlayerHandle function to set up the UI
+                    selectPlayerHandle(player.handle, player.id);
+                } else {
+                    // If stored player not found, show default top 10
+                    showAutocompleteResults('');
+                }
+            } else {
+                // No stored handle, show default top 10
+                showAutocompleteResults('');
+            }
+
+            // Add refresh button click handler
+            const refreshButton = document.getElementById('refreshButton');
+            refreshButton.addEventListener('click', async () => {
+                // Add spinning class to button
+                refreshButton.classList.add('spinning');
+
+                // Get current selected player's ID from stored handle
+                const storedHandle = localStorage.getItem('selectedPlayerHandle');
+                if (storedHandle && allPlayers.length > 0) {
+                    const player = allPlayers.find(p => p.handle === storedHandle);
+                    if (player) {
+                        // Refresh listings for current player
+                        await fetchListings(player.id);
+                    }
+                }
+
+                // Remove spinning class after refresh
+                setTimeout(() => {
+                    refreshButton.classList.remove('spinning');
+                }, 1000);
+            });
         });
     </script>
 </body>

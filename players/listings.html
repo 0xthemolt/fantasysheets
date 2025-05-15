@@ -234,13 +234,236 @@
             color: #777;
             margin-top: 2px;
         }
+
+        /* Filter container styles */
+        .filter-container {
+            width: 68%;
+            margin: 0 auto 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-box {
+            flex: 0 0 auto; /* Change from flex: 1 to prevent expansion */
+            width: 180px; /* Reduced width (was approximately 300px) */
+            position: relative;
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        
+        .search-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-input-container {
+            position: relative;
+            width: 100%;
+            display: block;
+        }
+        
+        #heroHandleSearch {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 10px; /* Slightly smaller padding */
+            padding-right: 35px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 11px; /* Reduced from default (~14px) */
+            background: #1a1a1a;
+            color: #fff;
+            transition: border-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        #heroHandleSearch:focus {
+            outline: none;
+            border-color: #444;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 3px; /* Reduced from 4px */
+            display: none;
+            font-size: 14px; /* Reduce to fit narrower box */
+            transition: color 0.2s;
+        }
+        
+        .clear-search:hover {
+            color: #fff;
+        }
+        
+        .clear-search.visible {
+            display: block;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%; /* Use 100% of the container, which matches search box */
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-sizing: border-box;
+        }
+        
+        .autocomplete-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .player-preview-pic {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        /* Add styles for the selected hero handle tag */
+        .selected-player-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin: 4px 0;
+            font-size: 11px;
+            position: relative;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .selected-player-tag .remove-player {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #444;
+            color: #fff;
+            border: none;
+            margin-left: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: background-color 0.2s;
+            min-width: 16px;
+            flex-shrink: 0;
+        }
+
+        .selected-player-tag .remove-player:hover {
+            background: #555;
+        }
+
+        /* Hide the input when a player is selected */
+        .search-input-container.has-selected-player #playerHandleSearch {
+            display: none;
+        }
+
+        /* Show the selected player tag when a player is selected */
+        .search-input-container.has-selected-player .selected-player-tag {
+            display: inline-flex;
+        }
+
+        /* Hide the selected player tag when no player is selected */
+        .selected-player-tag {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>Player Listings</h1>
+        <div class="filter-container">
+            <div class="search-box">
+                <label for="playerSearch">Search by Player:</label>
+                <div class="search-input-container">
+                    <input type="text" id="playerHandleSearch" placeholder="Enter player..." autocomplete="off">
+                    <button class="clear-search"></button>
+                </div>
+                <div id="autocompleteResults" class="autocomplete-results"></div>
+            </div>
+        </div>
     <div id="tableContainer"></div>
 
     <script>
+
+        // Function to fetch all unique player handles with profile pictures
+        async function fetchPlayers() {
+            try {
+                console.log('Executing query: Fetching unique players with profile pictures');
+                const { data, error } = await supabaseClient
+                    .from('vwplayer_listing_totals')
+                    .select('player_name, player_handle, profile_picture, sell_orders, total_value')
+                    .order('sell_orders', { ascending: false });  // Sort by sell_orders descending
+
+                if (error) {
+                    console.error('Error fetching players:', error);
+                    return;
+                }
+                
+                // Map and store the data in allPlayers 
+                allPlayers = data
+                    .map(item => ({
+                        handle: item.player_handle,
+                        pfp: item.profile_picture
+                    }));
+                
+                console.log('Total unique players loaded:', allPlayers.length);
+                console.log('First 10 players:', allPlayers.slice(0, 10));
+                
+                // If we have players, show the first 10 by default
+                if (allPlayers.length > 0) {
+                    showAutocompleteResults('');
+                }
+                
+            } catch (error) {
+                console.error('Unexpected error fetching players:', error);
+            }
+        }
 
         // Add Supabase client initialization at the top of your file
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
@@ -757,6 +980,132 @@ Price: ${p.priceFormatted} ETH</title>
             `;
         }
 
+        // Function to display autocomplete results
+        function showAutocompleteResults(inputValue) {
+            const resultsContainer = document.getElementById('autocompleteResults');
+            resultsContainer.innerHTML = '';
+            
+            // Check if we have players loaded
+            if (!allPlayers || allPlayers.length === 0) {
+                console.warn('No players available for autocomplete');
+                return;
+            }
+            
+            let matchingPlayers;
+            if (!inputValue || inputValue.trim() === '') {
+                // Show all players if no input
+                matchingPlayers = allPlayers.slice(0, 10); // Only show first 10 by default
+                console.log('Showing first 10 players:', matchingPlayers);
+            } else {
+                // Filter players based on input
+                matchingPlayers = allPlayers.filter(item => 
+                    item.handle.toLowerCase().includes(inputValue.toLowerCase())
+                );
+            }
+            
+            // Display matching players
+            resultsContainer.innerHTML = matchingPlayers.map(player => `
+                <div class="autocomplete-item">
+                    <img class="player-pfp" src="${player.pfp || '../icons/ft_logo.webp'}" alt="Profile">
+                    <span>${player.handle}</span>
+                </div>
+            `).join('');
+            
+            resultsContainer.style.display = matchingPlayers.length ? 'block' : 'none';
+
+            displayPlayerHandle(matchingPlayers);
+        }
+
+        function displayPlayerHandle(players) {
+            const resultsContainer = document.getElementById('autocompleteResults');
+            
+            if (players.length === 0) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            // Clear previous results
+            resultsContainer.innerHTML = '';
+            
+            players.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'autocomplete-item';
+                
+                const img = document.createElement('img');
+                img.src = item.pfp || '/icons/ft_logo.webp';
+                img.alt = item.handle;
+                img.className = 'player-preview-pic';
+                img.onerror = function() {
+                    this.src = '/icons/ft_logo.webp';
+                };
+                
+                const span = document.createElement('span');
+                span.textContent = item.handle;
+                
+                div.appendChild(img);
+                div.appendChild(span);
+                
+                div.addEventListener('click', () => {
+                    selectPlayerHandle(item.handle);
+                });
+                
+                resultsContainer.appendChild(div);
+            });
+            
+            resultsContainer.style.display = 'block';
+            console.log('Displayed players count:', players.length);
+        }
+
+        function selectPlayerHandle(playerHandle) {
+            const searchInput = document.getElementById('playerHandleSearch');
+            const searchContainer = searchInput.parentNode;
+            
+            // Create or update the selected hero tag
+            let playerTag = searchContainer.querySelector('.selected-player-tag');
+            if (!playerTag) {
+                playerTag = document.createElement('div');
+                playerTag.className = 'selected-player-tag';
+                searchContainer.insertBefore(playerTag, searchInput);
+            }
+            
+            playerTag.innerHTML = `
+                ${handle}
+                <button class="remove-player" title="Remove player">×</button>
+            `;
+            
+            // Add click handler to remove button
+            playerTag.querySelector('.remove-player').addEventListener('click', () => {
+                removeplayerandle();
+            });
+            
+            // Update container state
+            searchContainer.classList.add('has-selected-player');
+            
+            // Hide autocomplete results
+            document.getElementById('autocompleteResults').style.display = 'none';
+            
+            // Update current filter and fetch data
+            currentFilter = handle;
+            fetchAndDisplayCardHolders(handle);
+        }
+
+        function removePlayerHandle() {
+            const searchInput = document.getElementById('playerHandleSearch');
+            const searchContainer = searchInput.parentNode;
+            const playerTag = searchContainer.querySelector('.selected-player-tag');
+            
+            if (playerTag) {
+                playerTag.remove();
+                searchContainer.classList.remove('has-selected-player');
+                currentFilter = null;
+                // Clear the table without making a query
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = '';
+                currentData = [];
+            }
+        }
+
+
         function calculateTradesPerDay(tradeData) {
             if (!tradeData) return 0;
             
@@ -947,7 +1296,10 @@ Price: ${p.priceFormatted} ETH</title>
         }
 
         // Fetch data when page loads
-        fetchListings();
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchListings();
+            fetchPlayers();
+        });
     </script>
 </body>
 </html>

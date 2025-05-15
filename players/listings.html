@@ -237,7 +237,7 @@
 
         /* Filter container styles */
         .filter-container {
-            width: 68%;
+            width: 60%;
             margin: 0 auto 20px auto;
             padding: 20px;
             background: #1a1a1a;
@@ -250,8 +250,8 @@
         }
         
         .search-box {
-            flex: 0 0 auto; /* Change from flex: 1 to prevent expansion */
-            width: 180px; /* Reduced width (was approximately 300px) */
+            flex: 0 0 250px; /* Change from flex: 1 to prevent expansion */
+            width: 250px; /* Reduced width (was approximately 300px) */
             position: relative;
             background: #2a2a2a;
             padding: 12px;
@@ -273,7 +273,7 @@
             display: block;
         }
         
-        #heroHandleSearch {
+        #playerHandleSearch {
             width: 100%;
             box-sizing: border-box;
             padding: 8px 10px; /* Slightly smaller padding */
@@ -289,7 +289,7 @@
             text-overflow: ellipsis;
         }
         
-        #heroHandleSearch:focus {
+        #playerHandleSearch:focus {
             outline: none;
             border-color: #444;
         }
@@ -431,31 +431,38 @@
 
     <script>
 
+        // Add missing global variable
+        let allPlayers = [];
+        let currentFilter = null;
+
         // Function to fetch all unique player handles with profile pictures
         async function fetchPlayers() {
             try {
                 console.log('Executing query: Fetching unique players with profile pictures');
                 const { data, error } = await supabaseClient
                     .from('vwplayer_listing_totals')
-                    .select('player_name, player_handle, profile_picture, sell_orders, total_value')
-                    .order('sell_orders', { ascending: false });  // Sort by sell_orders descending
+                    .select('*')  // Select all fields to make sure we get everything we need
+                    .order('sell_orders', { ascending: false });
 
                 if (error) {
                     console.error('Error fetching players:', error);
                     return;
                 }
                 
-                // Map and store the data in allPlayers 
-                allPlayers = data
-                    .map(item => ({
-                        handle: item.player_handle,
-                        pfp: item.profile_picture
-                    }));
+                // Include player_id in the mapped data
+                allPlayers = data.map(item => ({
+                    id: item.player_id,
+                    handle: item.player_handle,
+                    pfp: item.profile_picture,
+                    name: item.player_name,
+                    sellOrders: item.sell_orders,
+                    totalValue: item.total_value
+                }));
                 
                 console.log('Total unique players loaded:', allPlayers.length);
-                console.log('First 10 players:', allPlayers.slice(0, 10));
+                console.log('First player data:', allPlayers[0]); // Add this for debugging
                 
-                // If we have players, show the first 10 by default
+                // Show initial results
                 if (allPlayers.length > 0) {
                     showAutocompleteResults('');
                 }
@@ -565,11 +572,10 @@
             }
         }
 
-        async function fetchListings() {
+        async function fetchListings(player_id) {
             try {
-                // Fetch initial data
                 const [apiResponse, supabaseData] = await Promise.all([
-                    fetch('https://api-v2.fantasy.top/player/listings/0x162F95a9364c891028d255467F616902A479681a', {
+                    fetch(`https://api-v2.fantasy.top/player/listings/${player_id}`, { // Fixed template literal
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
@@ -1016,6 +1022,7 @@ Price: ${p.priceFormatted} ETH</title>
             displayPlayerHandle(matchingPlayers);
         }
 
+        // Fix displayPlayerHandle function - remove duplicate function
         function displayPlayerHandle(players) {
             const resultsContainer = document.getElementById('autocompleteResults');
             
@@ -1024,7 +1031,6 @@ Price: ${p.priceFormatted} ETH</title>
                 return;
             }
             
-            // Clear previous results
             resultsContainer.innerHTML = '';
             
             players.forEach(item => {
@@ -1032,35 +1038,44 @@ Price: ${p.priceFormatted} ETH</title>
                 div.className = 'autocomplete-item';
                 
                 const img = document.createElement('img');
-                img.src = item.pfp || '/icons/ft_logo.webp';
-                img.alt = item.handle;
+                img.src = item.pfp || '../icons/ft_logo.webp';
+                img.alt = item.name;
                 img.className = 'player-preview-pic';
                 img.onerror = function() {
-                    this.src = '/icons/ft_logo.webp';
+                    this.src = '../icons/ft_logo.webp';
                 };
                 
-                const span = document.createElement('span');
-                span.textContent = item.handle;
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = item.name.length >= 12 ? 
+                    `${item.name.substring(0, 12)}...` : 
+                    item.name;
+                
+                const statsSpan = document.createElement('span');
+                statsSpan.style.color = '#777';
+                statsSpan.style.marginLeft = 'auto';
+                statsSpan.style.fontSize = '0.9em';
+                statsSpan.textContent = `Listed: ${item.sellOrders} Value: ${format_eth(item.totalValue)} ETH`;
                 
                 div.appendChild(img);
-                div.appendChild(span);
+                div.appendChild(nameSpan);
+                div.appendChild(statsSpan);
                 
                 div.addEventListener('click', () => {
-                    selectPlayerHandle(item.handle);
+                    selectPlayerHandle(item.handle, item.id);
                 });
                 
                 resultsContainer.appendChild(div);
             });
             
             resultsContainer.style.display = 'block';
-            console.log('Displayed players count:', players.length);
         }
 
-        function selectPlayerHandle(playerHandle) {
+        // Fix selectPlayerHandle function - fix template literal
+        function selectPlayerHandle(playerHandle, playerId) {
             const searchInput = document.getElementById('playerHandleSearch');
             const searchContainer = searchInput.parentNode;
             
-            // Create or update the selected hero tag
+            // Create or update the selected player tag
             let playerTag = searchContainer.querySelector('.selected-player-tag');
             if (!playerTag) {
                 playerTag = document.createElement('div');
@@ -1069,13 +1084,13 @@ Price: ${p.priceFormatted} ETH</title>
             }
             
             playerTag.innerHTML = `
-                ${handle}
+                ${playerHandle}
                 <button class="remove-player" title="Remove player">×</button>
             `;
             
             // Add click handler to remove button
             playerTag.querySelector('.remove-player').addEventListener('click', () => {
-                removeplayerandle();
+                removePlayerHandle();
             });
             
             // Update container state
@@ -1084,9 +1099,9 @@ Price: ${p.priceFormatted} ETH</title>
             // Hide autocomplete results
             document.getElementById('autocompleteResults').style.display = 'none';
             
-            // Update current filter and fetch data
-            currentFilter = handle;
-            fetchAndDisplayCardHolders(handle);
+            // Update current filter and fetch data with player ID
+            currentFilter = playerHandle;
+            fetchListings(playerId); // Use the player ID for the API call
         }
 
         function removePlayerHandle() {
@@ -1098,13 +1113,17 @@ Price: ${p.priceFormatted} ETH</title>
                 playerTag.remove();
                 searchContainer.classList.remove('has-selected-player');
                 currentFilter = null;
-                // Clear the table without making a query
-                const tableBody = document.getElementById('tableBody');
-                tableBody.innerHTML = '';
-                currentData = [];
+                
+                // Clear the table
+                document.getElementById('tableContainer').innerHTML = '';
+                
+                // Reset search input
+                searchInput.value = '';
+                
+                // Show initial top 10 players again
+                showAutocompleteResults('');
             }
         }
-
 
         function calculateTradesPerDay(tradeData) {
             if (!tradeData) return 0;
@@ -1295,9 +1314,24 @@ Price: ${p.priceFormatted} ETH</title>
             document.getElementById('tableContainer').innerHTML = table;
         }
 
-        // Fetch data when page loads
+        // Add event listeners for search input
         document.addEventListener('DOMContentLoaded', () => {
-            fetchListings();
+            const searchInput = document.getElementById('playerHandleSearch');
+            const clearButton = document.querySelector('.clear-search');
+
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                showAutocompleteResults(value);
+                clearButton.style.display = value ? 'block' : 'none';
+            });
+
+            clearButton.addEventListener('click', () => {
+                searchInput.value = '';
+                clearButton.style.display = 'none';
+                showAutocompleteResults('');
+            });
+
+            // Only fetch players on page load, not listings
             fetchPlayers();
         });
     </script>

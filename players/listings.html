@@ -504,7 +504,7 @@
     </div>
     <div class="data-freshness">
         <span>Listings: Live</span></span>
-        <span>Scores & Trade History: <span id="sellOrdersTimeAgo"></span></span>
+        <span>| Scores & Trade History: <span id="freshnessTimeAgo"></span></span>
     </div>
     <div class="filter-container">
         <div class="search-box">
@@ -552,7 +552,6 @@
                 }));
                 
                 console.log('Total unique players loaded:', allPlayers.length);
-                console.log('First player data:', allPlayers[0]); // Add this for debugging
                 
                 // Show initial results
                 if (allPlayers.length > 0) {
@@ -597,8 +596,28 @@
                     return null;
                 }
 
-                // Store the data in localStorage for later use
-                localStorage.setItem('listingData', JSON.stringify(data));
+                // Debug logging for timestamps
+                if (data && data.length > 0) {
+                    console.log('First row timestamp:', data[0].timestamp);
+                    
+                    // Find the minimum timestamp
+                    const minTimestamp = data.reduce((min, item) => {
+                        const itemTime = new Date(item.timestamp);
+                        return itemTime < min ? itemTime : min;
+                    }, new Date(data[0].timestamp));
+                    
+                    // Calculate time difference in minutes
+                    const now = new Date();
+                    const diffMinutes = Math.floor((now - minTimestamp) / (1000 * 60));
+                    
+                    // Format the time ago text
+                    const timeAgoText = diffMinutes < 60 
+                        ? `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`
+                        : `${Math.floor(diffMinutes / 60)} hour${Math.floor(diffMinutes / 60) !== 1 ? 's' : ''} ago`;
+                    
+                    
+                    document.getElementById('freshnessTimeAgo').textContent = timeAgoText;
+                }
 
                 return data;
             } catch (error) {
@@ -607,7 +626,6 @@
             }
         }
 
-        // Add this function after the other fetch functions
         async function fetchPlayerData(addresses) {
             try {
                 const { data, error } = await supabaseClient
@@ -1109,7 +1127,6 @@ Price: ${p.priceFormatted} ETH</title>
             if (!inputValue || inputValue.trim() === '') {
                 // Show all players if no input
                 matchingPlayers = allPlayers.slice(0, 10); // Only show first 10 by default
-                console.log('Showing first 10 players:', matchingPlayers);
             } else {
                 // Filter players based on input
                 matchingPlayers = allPlayers.filter(item => 
@@ -1386,12 +1403,12 @@ Price: ${p.priceFormatted} ETH</title>
                     <td class="section-divider">
                         ${listing.supabaseInfo.trade_timeline ? createPriceChart(listing.supabaseInfo.trade_timeline) : ''}
                         <div style="display: inline-block; margin: 0 8px; font-size: 11px; color: #777;">
-                            <span style="font-weight: bold; color: #aaa; display: block;">${
+                            <span style="font-weight: bold; color: #aaa; display: block;cursor: help;" title="Total Trades">${
                                 typeof listing.supabaseInfo.trade_timeline === 'string' 
                                     ? JSON.parse(listing.supabaseInfo.trade_timeline).reduce((sum, d) => sum + d.txn, 0)
                                     : listing.supabaseInfo.trade_timeline?.reduce((sum, d) => sum + d.txn, 0) || 0
                             }</span>
-                            <span style="font-weight: bold; color: #aaa;">${calculateTradesPerDay(listing.supabaseInfo.trade_timeline)}</span>/d
+                            <span style="font-weight: bold; color: #aaa;cursor: help;" title="Trades Per Day">${calculateTradesPerDay(listing.supabaseInfo.trade_timeline)}</span>/d
                         </div>
                         ${createDonutChart(
                             listing.supabaseInfo.bid_pct || 0, 

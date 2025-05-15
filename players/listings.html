@@ -480,23 +480,45 @@
             overflow-x: auto;       /* Enable horizontal scrolling */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
         }
+
+        .data-freshness {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            margin-left: 28px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Player Listings</h1>
-        <div class="filter-container">
-            <div class="search-box">
-                <label for="playerSearch">Search by Player:</label>
-                <div class="search-input-container">
-                    <input type="text" id="playerHandleSearch" placeholder="Enter player..." autocomplete="off">
-                    <button class="clear-search"></button>
-                </div>
-                <div id="autocompleteResults" class="autocomplete-results"></div>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Player Listings
+        </h1>
+    </div>
+    <div class="data-freshness">
+        <span>Listings: Live</span></span>
+        <span>Scores & Trade History: <span id="sellOrdersTimeAgo"></span></span>
+    </div>
+    <div class="filter-container">
+        <div class="search-box">
+            <label for="playerSearch">Search by Player:</label>
+            <div class="search-input-container">
+                <input type="text" id="playerHandleSearch" placeholder="Enter player..." autocomplete="off">
+                <button class="clear-search"></button>
             </div>
-            <button id="refreshButton" class="refresh-btn" title="Refresh player data">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+            <div id="autocompleteResults" class="autocomplete-results"></div>
         </div>
+        <button id="refreshButton" class="refresh-btn" title="Refresh player data">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
     <div id="tableContainer"></div>
 
     <script>

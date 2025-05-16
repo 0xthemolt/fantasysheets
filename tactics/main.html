@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Listings</title>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .hero-cell {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+        }
+
+        .score-container {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .score-low {
+            background-color: rgba(215, 48, 39, 0.2);  /* matplotlib RdYlGn red */
+        }
+
+        .score-medium {
+            background-color: rgba(255, 255, 191, 0.2);  /* matplotlib RdYlGn yellow */
+        }
+
+        .score-high {
+            background-color: rgba(26, 152, 80, 0.2);  /* matplotlib RdYlGn green */
+        }
+
+        .score-per-salary::before {
+            display: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            cursor: pointer;
+        }
+
+        .tactic-summary {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tactic-summary h3 {
+            margin: 0 0 8px 0;
+        }
+
+        .tactic-details {
+            display: flex;
+            gap: 24px;
+        }
+
+        .tactic-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tactic-detail i {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="tactic-summary">
+        <h3 id="tacticName"></h3>
+        <div class="tactic-details">
+            <div class="tactic-detail">
+                <i class="fas fa-clock"></i>
+                <span id="tacticDuration"></span>
+            </div>
+            <div class="tactic-detail">
+                <i class="fas fa-calendar"></i>
+                <span id="tacticDates"></span>
+            </div>
+        </div>
+    </div>
+    <div id="tableContainer">
+        <h2>Hero Scores</h2>
+        <table id="heroScores">
+            <thead>
+                <tr>
+                    <th data-sort="name">Hero</th>
+                    <th data-sort="score">Score</th>
+                    <th data-sort="salary">Salary Cap</th>
+                    <th data-sort="value">Value</th>
+                </tr>
+            </thead>
+            <tbody id="heroTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentSort = { column: 'score', ascending: false };
+
+        function sortData(heroes, column, ascending) {
+            return [...heroes].sort((a, b) => {
+                let aValue, bValue;
+                
+                switch(column) {
+                    case 'name':
+                        aValue = a.heroes.name.toLowerCase();
+                        bValue = b.heroes.name.toLowerCase();
+                        break;
+                    case 'score':
+                        aValue = parseFloat(a.fantasy_score);
+                        bValue = parseFloat(b.fantasy_score);
+                        break;
+                    case 'salary':
+                        aValue = parseFloat(a.salary_cap);
+                        bValue = parseFloat(b.salary_cap);
+                        break;
+                    case 'value':
+                        aValue = parseFloat(a.fantasy_score) / parseFloat(a.salary_cap);
+                        bValue = parseFloat(b.fantasy_score) / parseFloat(b.salary_cap);
+                        break;
+                }
+                
+                if (ascending) {
+                    return aValue > bValue ? 1 : -1;
+                }
+                return aValue < bValue ? 1 : -1;
+            });
+        }
+
+        async function fetchHeroData() {
+            try {
+                const response = await fetch(`https://api-v2.fantasy.top/tactics/hero-scores/c169c857-0b4d-4a6c-aff1-14629f4adb2f?orderBy.fantasy_score=desc&pagination.page=1&pagination.limit=500`, {
+                    headers: {
+                        'accept': 'application/json',
+                        'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                    }
+                });
+
+                const data = await response.json();
+                window.heroesData = data.data; // Store data globally
+                displayHeroData(window.heroesData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        async function fetchTacticData() {
+            try {
+                const response = await fetch(`https://api-v2.fantasy.top/tactics/byId/c169c857-0b4d-4a6c-aff1-14629f4adb2f?options.include.config.include.payout_structure=true&count_entry=true&count_personal_entries=true&include_gains=true`, {
+                    headers: {
+                        'accept': 'application/json',
+                        'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                    }
+                });
+
+                const tactic = await response.json();
+                displayTacticSummary(tactic);
+            } catch (error) {
+                console.error('Error fetching tactic data:', error);
+            }
+        }
+
+        function displayTacticSummary(tactic) {
+            const startDate = new Date(tactic.start_date);
+            const endDate = new Date(tactic.end_date);
+            
+            // Just display the name without emoji
+            document.getElementById('tacticName').textContent = tactic.config.name;
+            document.getElementById('tacticDuration').textContent = `${tactic.config.duration} hours`;
+            document.getElementById('tacticDates').textContent = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        }
+
+        function displayHeroData(heroes) {
+            const tableBody = document.getElementById('heroTableBody');
+            const sortedHeroes = sortData(heroes, currentSort.column, currentSort.ascending);
+            tableBody.innerHTML = '';
+
+            // Find min and max score per salary for scaling using raw values
+            const scorePerSalaryValues = sortedHeroes.map(hero => 
+                parseFloat(hero.fantasy_score) / parseFloat(hero.salary_cap)
+            );
+            const minScore = Math.min(...scorePerSalaryValues);
+            const maxScore = Math.max(...scorePerSalaryValues);
+            const range = maxScore - minScore;
+
+            sortedHeroes.forEach(hero => {
+                const salaryCapRounded = parseFloat(hero.salary_cap).toFixed(1);
+                const rawScorePerSalary = parseFloat(hero.fantasy_score) / parseFloat(hero.salary_cap);
+                const displayScorePerSalary = (rawScorePerSalary / 100).toFixed(1);
+                
+                // Determine score category using raw value
+                let scoreClass;
+                const normalizedScore = (rawScorePerSalary - minScore) / range;
+                if (normalizedScore < 0.33) {
+                    scoreClass = 'score-low';
+                } else if (normalizedScore < 0.66) {
+                    scoreClass = 'score-medium';
+                } else {
+                    scoreClass = 'score-high';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="hero-cell">
+                        <img src="${hero.heroes.profile_image_url_https}" alt="${hero.heroes.name}" class="hero-image">
+                        ${hero.heroes.name}
+                        <a href="https://x.com/${hero.heroes.handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
+                            <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                        </a>
+                    </td>
+                    <td>${parseFloat(hero.fantasy_score).toFixed(2)}</td>
+                    <td>${salaryCapRounded}</td>
+                    <td>
+                        <span class="score-container ${scoreClass}">
+                            ${displayScorePerSalary}X
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchTacticData();
+            fetchHeroData();
+        });
+
+        document.querySelectorAll('#heroScores th').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.dataset.sort;
+                if (currentSort.column === column) {
+                    currentSort.ascending = !currentSort.ascending;
+                } else {
+                    currentSort.column = column;
+                    currentSort.ascending = false;
+                }
+                displayHeroData(window.heroesData);
+            });
+        });
+    </script>
+</body>
+</html>

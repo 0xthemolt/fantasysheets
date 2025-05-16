@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Listings</title>
+    <title>Tactic Scores</title>
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -76,6 +76,47 @@
         .tactic-detail i {
             color: #666;
         }
+
+        .number-cell {
+            text-align: right;
+        }
+
+        .center-cell {
+            text-align: center !important;
+        }
+
+        .salary-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        
+        .salary-value {
+            font-weight: 500;
+            width: 24px;  /* Set fixed width */
+            height: 24px; /* Set fixed height */
+            border-radius: 50%; /* Make it circular */
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+        }
+
+        /* Update the salary background colors to be more vibrant */
+        .salary-low { 
+            background-color: #f5f5f5; 
+            border: 1px solid #e0e0e0;
+        }
+        .salary-medium { 
+            background-color: #FFD700;  /* Solid gold color */
+            border: 1px solid #FFB700;
+        }
+        .salary-high { 
+            background-color: #FFA500;  /* Solid orange color */
+            border: 1px solid #FF8C00;
+        }
     </style>
 </head>
 <body>
@@ -97,10 +138,13 @@
         <table id="heroScores">
             <thead>
                 <tr>
+                    <th data-sort="rank">Rank</th>
                     <th data-sort="name">Hero</th>
-                    <th data-sort="score">Score</th>
-                    <th data-sort="salary">Salary Cap</th>
+                    <th data-sort="score" class="number-cell">Score</th>
+                    <th data-sort="salary" class="center-cell">Salary Cap</th>
                     <th data-sort="value">Value</th>
+                    <th data-sort="views" class="number-cell">Views</th>
+                    <th data-sort="tweets" class="number-cell">Tweets</th>
                 </tr>
             </thead>
             <tbody id="heroTableBody"></tbody>
@@ -131,6 +175,18 @@
                         aValue = parseFloat(a.fantasy_score) / parseFloat(a.salary_cap);
                         bValue = parseFloat(b.fantasy_score) / parseFloat(b.salary_cap);
                         break;
+                    case 'rank':
+                        aValue = parseInt(a.current_rank);
+                        bValue = parseInt(b.current_rank);
+                        break;
+                    case 'views':
+                        aValue = parseInt(a.views);
+                        bValue = parseInt(b.views);
+                        break;
+                    case 'tweets':
+                        aValue = parseInt(a.tweet_count);
+                        bValue = parseInt(b.tweet_count);
+                        break;
                 }
                 
                 if (ascending) {
@@ -157,30 +213,104 @@
             }
         }
 
+        
+        // Add Supabase client initialization at the top of your file
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
         async function fetchTacticData() {
             try {
-                const response = await fetch(`https://api-v2.fantasy.top/tactics/byId/c169c857-0b4d-4a6c-aff1-14629f4adb2f?options.include.config.include.payout_structure=true&count_entry=true&count_personal_entries=true&include_gains=true`, {
-                    headers: {
-                        'accept': 'application/json',
-                        'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
-                    }
-                });
+                const { data, error } = await supabaseClient
+                    .from('vwtactics')
+                    .select('config_name,config_duration,config_salary_cap,payout_structure_price_pool,payout_structure_max_tickets,start_date,end_date,total_players')
+                    .single();
 
-                const tactic = await response.json();
-                displayTacticSummary(tactic);
+                if (error) throw error;
+
+                // Format dates
+                const startDate = new Date(data.start_date);
+                const endDate = new Date(data.end_date);
+                const dateFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+                const formattedDateRange = `${startDate.toLocaleDateString('en-US', dateFormatOptions)} - ${endDate.toLocaleDateString('en-US', dateFormatOptions)}`;
+
+                // Update all summary items
+                document.getElementById('tacticName').textContent = data.config_name;
+                document.getElementById('tacticDuration').textContent = `${data.config_duration} hours`;
+                document.getElementById('tacticDates').textContent = formattedDateRange;
+
+                // Add the new details to the tactic-details div
+                document.querySelector('.tactic-details').innerHTML += `
+                    <div class="tactic-detail">
+                        <i class="fas fa-trophy"></i>
+                        <span>$${data.payout_structure_price_pool}</span>
+                    </div>
+                    <div class="tactic-detail">
+                        <span>${data.total_players}</span>
+                        <i class="fas fa-users"></i>
+                        <span>/</span>
+                        <span>${data.payout_structure_max_tickets}</span>
+                        <i class="fas fa-ticket"></i>
+                    </div>
+                    <div class="tactic-detail">
+                        <i class="fas fa-coins"></i>
+                        <span>${data.config_salary_cap} Cap</span>
+                    </div>
+                `;
+
             } catch (error) {
                 console.error('Error fetching tactic data:', error);
             }
         }
 
-        function displayTacticSummary(tactic) {
-            const startDate = new Date(tactic.start_date);
-            const endDate = new Date(tactic.end_date);
-            
-            // Just display the name without emoji
-            document.getElementById('tacticName').textContent = tactic.config.name;
-            document.getElementById('tacticDuration').textContent = `${tactic.config.duration} hours`;
-            document.getElementById('tacticDates').textContent = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+        function formatViews(views) {
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + 'M';
+            } else if (views >= 1000) {
+                return Math.round(views / 1000) + 'K';
+            }
+            return views;
+        }
+
+        // Add this function before getColorForRank
+        function lerp(start, end, amt) {
+            return start * (1 - amt) + end * amt;
+        }
+
+        // Cache color calculations
+        const colorCache = new Map();
+
+        function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+            const cacheKey = `${value}_${maxValue}_${higherIsBetter}`;
+            if (colorCache.has(cacheKey)) {
+                return colorCache.get(cacheKey);
+            }
+
+            let ratio;
+            if (higherIsBetter) {
+                ratio = Math.min(value / maxValue, 1);
+            } else {
+                // For ranks - lower is better
+                ratio = 1 - (Math.min(value / maxValue, 1));
+            }
+
+            if (ratio < 0.5) {
+                // Red to Orange/Gold transition
+                const r = Math.round(lerp(215, 230, ratio * 2));
+                const g = Math.round(lerp(48, 140, ratio * 2));  // Reduced from 224 to 140
+                const b = Math.round(lerp(39, 0, ratio * 2));    // Changed to 0 for more saturation
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            } else {
+                // Orange/Gold to Green transition
+                const r = Math.round(lerp(230, 44, (ratio - 0.5) * 2));
+                const g = Math.round(lerp(140, 162, (ratio - 0.5) * 2));
+                const b = Math.round(lerp(0, 95, (ratio - 0.5) * 2));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            }
         }
 
         function displayHeroData(heroes) {
@@ -214,20 +344,46 @@
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td style="text-align: center; font-weight: 500;">
+                        ${hero.current_rank}
+                    </td>
                     <td class="hero-cell">
                         <img src="${hero.heroes.profile_image_url_https}" alt="${hero.heroes.name}" class="hero-image">
                         ${hero.heroes.name}
                         <a href="https://x.com/${hero.heroes.handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
                             <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                         </a>
+                        <div style="display: flex; align-items: center; gap: 2px; background: transparent;border-radius: 10px; padding: 1px 5px;">
+                            <i class="fas fa-users" style="font-size: 8px; color: #1DA1F2;"></i>
+                            <span style="font-size: 10px; font-weight: bold; color: #1DA1F2;">${formatViews(hero.heroes.followers_count)}</span>
+                        </div>
                     </td>
-                    <td>${parseFloat(hero.fantasy_score).toFixed(2)}</td>
-                    <td>${salaryCapRounded}</td>
+                    <td class="number-cell">
+                        <span style="background-color: ${getColorForRank(parseFloat(hero.fantasy_score), Math.max(...heroes.map(h => parseFloat(h.fantasy_score))), true)}; 
+                                     border-radius: 4px; 
+                                     padding: 4px 8px; 
+                                     color: white; 
+                                     font-weight: 500;">
+                            ${parseFloat(hero.fantasy_score).toFixed(1)}
+                        </span>
+                    </td>
+                    <td class="center-cell">
+                        <div class="salary-display">
+                            <span class="salary-value ${
+                                parseFloat(hero.salary_cap) <= 3 ? 'salary-low' : 
+                                parseFloat(hero.salary_cap) <= 6 ? 'salary-medium' : 
+                                'salary-high'
+                            }">${salaryCapRounded}</span>
+                        </div>
+                    </td>
                     <td>
-                        <span class="score-container ${scoreClass}">
+                        <span class="score-container ${scoreClass}" 
+                              title="${parseFloat(hero.fantasy_score).toFixed(2)} / ${hero.salary_cap} = ${rawScorePerSalary.toFixed(2)}">
                             ${displayScorePerSalary}X
                         </span>
                     </td>
+                    <td class="number-cell">${hero.views.toLocaleString()}</td>
+                    <td class="number-cell">${hero.tweet_count}</td>
                 `;
                 tableBody.appendChild(row);
             });

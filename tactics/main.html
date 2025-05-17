@@ -85,37 +85,22 @@
             text-align: center !important;
         }
 
-        .salary-display {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-        }
-        
-        .salary-value {
-            font-weight: 500;
-            width: 24px;  /* Set fixed width */
-            height: 24px; /* Set fixed height */
-            border-radius: 50%; /* Make it circular */
-            color: #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2px;
+        /* Add these styles to your existing <style> section */
+        body {
+            margin: 0;
+            padding: 15px;
+            min-width: fit-content;  /* Ensure body is at least as wide as content */
+            overflow-x: auto;        /* Allow horizontal scrolling */
         }
 
-        /* Update the salary background colors to be more vibrant */
-        .salary-low { 
-            background-color: #f5f5f5; 
-            border: 1px solid #e0e0e0;
+        table {
+            width: max-content;      /* Let table take its natural width */
+            min-width: 100%;        /* But at least as wide as viewport */
         }
-        .salary-medium { 
-            background-color: #FFD700;  /* Solid gold color */
-            border: 1px solid #FFB700;
-        }
-        .salary-high { 
-            background-color: #FFA500;  /* Solid orange color */
-            border: 1px solid #FF8C00;
+
+        #tableContainer {
+            overflow-x: auto;       /* Enable horizontal scrolling */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
         }
     </style>
 </head>
@@ -354,38 +339,39 @@
             }
         }
 
-        function getOwnershipColor(percentage) {
-            // Define the color stops from the gradient (left to right)
+        function getOwnershipColor(percentage, heroes) {
+            // Define colors from lowest to highest
             const colorStops = [
-                '#9e0142', // Deep red
-                '#d53e4f', // Red
-                '#f46d43', // Orange-red
-                '#fdae61', // Light orange
-                '#fee08b', // Light yellow
-                '#ffffbf', // Pale yellow
-                '#e6f598', // Light green
-                '#abdda4', // Green
-                '#66c2a5', // Teal
-                '#3288bd', // Blue
-                '#5e4fa2'  // Purple
-            ].reverse(); // Reverse so purple is highest
+                '#9e0142',  // Deep red (lowest)
+                '#d53e4f',  // Red
+                '#f46d43',  // Orange-red
+                '#fdae61',  // Light orange
+                '#fee08b',  // Light yellow
+                '#ffffbf',  // Pale yellow
+                '#e6f598',  // Light green
+                '#abdda4',  // Green
+                '#66c2a5',  // Teal
+                '#3288bd',  // Blue
+                '#5e4fa2'   // Purple (highest)
+            ];
 
-            // Normalize the percentage to 0-1 range
-            const ratio = Math.min(percentage / 100, 1);
+            // Find min and max values
+            const maxUsage = Math.max(...heroes.map(h => parseFloat(h.usage)));
+            const minUsage = Math.min(...heroes.map(h => parseFloat(h.usage)));
+            const range = maxUsage - minUsage;
+
+            // Normalize the percentage to 0-1 range based on actual min/max values
+            const ratio = range === 0 ? 0 : (percentage - minUsage) / range;
             
-            // Find the appropriate color range based on ratio
             const colorIndex = Math.min(Math.floor(ratio * (colorStops.length - 1)), colorStops.length - 2);
             const colorRatio = (ratio * (colorStops.length - 1)) - colorIndex;
 
-            // Get the two colors to interpolate between
             const color1 = colorStops[colorIndex];
             const color2 = colorStops[colorIndex + 1];
 
-            // Convert hex to RGB for interpolation
             const rgb1 = hexToRgb(color1);
             const rgb2 = hexToRgb(color2);
 
-            // Interpolate between the colors
             const r = Math.round(lerp(rgb1.r, rgb2.r, colorRatio));
             const g = Math.round(lerp(rgb1.g, rgb2.g, colorRatio));
             const b = Math.round(lerp(rgb1.b, rgb2.b, colorRatio));
@@ -462,13 +448,7 @@
                         </span>
                     </td>
                     <td class="center-cell">
-                        <div class="salary-display">
-                            <span class="salary-value ${
-                                parseFloat(hero.salary_cap) <= 3 ? 'salary-low' : 
-                                parseFloat(hero.salary_cap) <= 6 ? 'salary-medium' : 
-                                'salary-high'
-                            }">${salaryCapRounded}</span>
-                        </div>
+                        <span style="color: white; font-weight: 500;">${salaryCapRounded}</span>
                     </td>
                     <td>
                         <span class="score-container ${scoreClass}" 
@@ -477,12 +457,9 @@
                         </span>
                     </td>
                     <td class="number-cell">
-                        <span style="background-color: ${getOwnershipColor(parseFloat(hero.usage))}; 
-                                    border-radius: 4px; 
-                                    padding: 4px 8px; 
-                                    color: white; 
-                                    font-weight: 500;">
-                            ${hero.usage.toFixed(0)}%
+                        <span style="color: ${getOwnershipColor(parseFloat(hero.usage), heroes)}; 
+                                    font-weight: 600;">
+                            ${hero.usage.toFixed(1)}%
                         </span>
                     </td>
                     <td class="number-cell">${hero.views.toLocaleString()}</td>

@@ -102,6 +102,14 @@
             overflow-x: auto;       /* Enable horizontal scrolling */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
         }
+
+        .info-hover {
+            cursor: help;
+        }
+        
+        .clickable-hover {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -206,12 +214,11 @@
                 
                 // Merge hero data with usage data using hero_id
                 window.heroesData = heroData.data.map(hero => {
-                    const usage = usageMap.get(hero.hero_id);  // Changed from hero.heroes.id to hero.hero_id
-                    if (!usage) {
-                    }
+                    const usage = usageMap.get(hero.hero_id);
                     return {
                         ...hero,
-                        usage: usage?.hero_usage_pct || 0
+                        usage: usage?.hero_usage_pct || 0,
+                        usage_count: usage?.hero_usage_count || 0
                     };
                 });
                 
@@ -451,14 +458,16 @@
                         <span style="color: white; font-weight: 500;">${salaryCapRounded}</span>
                     </td>
                     <td>
-                        <span class="score-container ${scoreClass}" 
-                              title="${parseFloat(hero.fantasy_score).toFixed(2)} / ${hero.salary_cap} = ${hero.valueScore.toFixed(2)}">
+                        <span class="score-container ${scoreClass} info-hover" 
+                              title="Score ${parseFloat(hero.fantasy_score).toFixed(2)} / Salary ${hero.salary_cap} = ${hero.valueScore.toFixed(2)}">
                             ${displayScorePerSalary}X
                         </span>
                     </td>
                     <td class="number-cell">
                         <span style="color: ${getOwnershipColor(parseFloat(hero.usage), heroes)}; 
-                                    font-weight: 600;">
+                                    font-weight: 600;"
+                              class="clickable-hover"
+                              title="${hero.usage_count.toLocaleString()} owners">
                             ${hero.usage.toFixed(1)}%
                         </span>
                     </td>

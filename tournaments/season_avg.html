@@ -26,6 +26,7 @@
         }
 
         .cut-line td {
+            position: relative;
             border-top: 2px dashed #ff4444;
         }
         
@@ -48,7 +49,27 @@
         }
 
         .exempt-line td {
+            position: relative;
             border-top: 2px dashed #3498db;
+        }
+
+        .line-label {
+            position: absolute;
+            top: -14px;
+            width: 100%;  /* Use full width of the table */
+            left: 0;      /* Align to left edge */
+            text-align: center;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .cut-line-label {
+            color: #ff4444;
+        }
+
+        .exempt-line-label {
+            color: #3498db;
         }
 
         .rank-cell {
@@ -122,8 +143,14 @@
         }
 
         #tableContainer {
-            overflow-x: auto;       /* Enable horizontal scrolling */
-            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;  /* Add this */
+        }
+
+        .tournament-table {
+            position: relative;  /* Add this */
+            width: 100%;
         }
 
     </style>
@@ -147,7 +174,7 @@
                placeholder="Search heroes...">
         <label class="toggle-switch">
             <input type="checkbox" id="showOutgoingToggle">
-            Show Outgoing Heroes
+            Show Bottom 15 Heroes (at risk)
         </label>
     </div>
     <div id="tableContainer">
@@ -283,11 +310,11 @@
                     bValue = b.avgScore;
                 } else if (column === 'handle') {
                     aValue = a.handle.toLowerCase();
-                    bValue = b.handle.toLowerCase();
+                    bValue = a.handle.toLowerCase();
                     return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
                 } else {
                     aValue = a.tournaments[column]?.fantasy_score || 0;
-                    bValue = b.tournaments[column]?.fantasy_score || 0;
+                    bValue = a.tournaments[column]?.fantasy_score || 0;
                 }
                 
                 return ascending ? aValue - bValue : bValue - aValue;
@@ -418,14 +445,11 @@
                                        !isPossiblyExempt && 
                                        !isExempt;
 
-                // Add exempt line before first exempt hero
-                if ((isPossiblyExempt || isExempt) && 
-                    !sortedData.slice(0, index).some(h => 
-                        EXEMPT_HEROES.includes(h.handle) || 
-                        TEAM_HEROES.includes(h.handle)
-                    )) {
-                    row.classList.add('exempt-line');
-                }
+                // Add rank cell first
+                const rankCell = document.createElement('td');
+                rankCell.className = 'rank-cell';
+                rankCell.textContent = ranksByAverage[hero.handle];
+                row.appendChild(rankCell);
 
                 // Add cut line before first bottom 15 non-exempt hero
                 if (isBottomFifteen && 
@@ -433,13 +457,24 @@
                         nonExemptHeroes.indexOf(h) >= bottom15Index
                     )) {
                     row.classList.add('cut-line');
+                    const label = document.createElement('span');
+                    label.className = 'line-label cut-line-label';
+                    label.textContent = 'Bottom 15 Cut Line';
+                    rankCell.appendChild(label);
                 }
 
-                // Add rank cell
-                const rankCell = document.createElement('td');
-                rankCell.className = 'rank-cell';
-                rankCell.textContent = ranksByAverage[hero.handle];
-                row.appendChild(rankCell);
+                // Add exempt line before first exempt hero
+                if ((isPossiblyExempt || isExempt) && 
+                    !sortedData.slice(0, index).some(h => 
+                        EXEMPT_HEROES.includes(h.handle) || 
+                        TEAM_HEROES.includes(h.handle)
+                    )) {
+                    row.classList.add('exempt-line');
+                    const label = document.createElement('span');
+                    label.className = 'line-label exempt-line-label';
+                    label.textContent = 'Protected / Exempt';
+                    rankCell.appendChild(label);
+                }
 
                 // Hero cell with image and name
                 const heroCell = document.createElement('td');

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactic Scores</title>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .tournament-table th {
+            cursor: pointer;
+            user-select: none;
+            padding: 8px;
+        }
+
+        .average-column {
+            border-left: 2px solid #444;
+            padding-left: 16px !important;
+        }
+
+        .average-header {
+            font-weight: 600;
+            color: #888;
+        }
+
+        .cut-line td {
+            border-top: 2px dashed #ff4444;
+        }
+        
+        .cut-indicator {
+            color: #ff4444;
+            font-size: 0.8em;
+            margin-left: 4px;
+        }
+
+        .removed-indicator {
+            color: #ff4444;
+            margin-left: 4px;
+            font-size: 0.8em;
+        }
+
+        .exempt-indicator {
+            color: #3498db;
+            font-size: 0.8em;
+            margin-left: 4px;
+        }
+
+        .exempt-line td {
+            border-top: 2px dashed #3498db;
+        }
+
+        .rank-cell {
+            width: 40px;
+            text-align: center;
+            color: #666;
+        }
+
+        .toggle-container {
+            margin-bottom: 16px;
+        }
+        
+        .toggle-switch {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .toggle-switch input {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-container">
+        <label class="toggle-switch">
+            <input type="checkbox" id="showOutgoingToggle">
+            Show Outgoing Heroes
+        </label>
+    </div>
+    <div id="tableContainer">
+        <table class="tournament-table">
+            <thead>
+                <tr>
+                    <th class="rank-cell">#</th>  <!-- Add this line -->
+                    <th>Hero</th>
+                    <!-- Tournament columns will be added dynamically -->
+                    <th class="number-cell average-header">Average</th>
+                </tr>
+            </thead>
+            <tbody id="heroTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Define tournament numbers
+        const tournamentNumbers = [51, 50, 49, 48];
+
+        const EXEMPT_HEROES = ['frankdegods'];
+        const TEAM_HEROES = ['0xMikado', 'travisbickle0x', '0xKipit'];
+
+        async function fetchTournamentData() {
+            try {
+                const tournamentPromises = tournamentNumbers.map(tournamentNumber => 
+                    fetch(`https://api-v2.fantasy.top/hero/stats?pagination.page=1&pagination.limit=200&order_by.fantasy_score=desc&tournament_number=${tournamentNumber}&search=%25%25&tactic_only=false`, {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                        }
+                    }).then(response => response.json())
+                );
+
+                const tournamentResults = await Promise.all(tournamentPromises);
+
+                let combinedData = {};
+
+                tournamentResults.forEach((tournament, index) => {
+                    const tournamentNumber = tournamentNumbers[index];
+                    tournament.data.forEach(hero => {
+                        const heroKey = hero.handle; // Use handle as unique identifier
+                        if (!combinedData[heroKey]) {
+                            combinedData[heroKey] = {
+                                handle: hero.handle,
+                                name: hero.name,
+                                profile_image: hero.profile_image_url_https,
+                                tournaments: {},
+                                avgScore: 0,
+                                totalTournaments: 0
+                            };
+                        }
+                        combinedData[heroKey].tournaments[tournamentNumber] = {
+                            fantasy_score: parseFloat(hero.fantasy_score),
+                            rank: hero.current_rank
+                        };
+                        combinedData[heroKey].totalTournaments++;
+                    });
+                });
+
+                // Calculate averages
+                Object.values(combinedData).forEach(hero => {
+                    const scores = Object.values(hero.tournaments).map(t => t.fantasy_score);
+                    hero.avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+                });
+
+                window.seasonData = combinedData;
+                console.log('Season data loaded:', Object.keys(combinedData).length, 'heroes');
+                return combinedData;
+
+            } catch (error) {
+                console.error('Error fetching tournament data:', error);
+                return null;
+            }
+        }
+
+        // Add color cache for performance
+        const colorCache = new Map();
+
+        // Add lerp function
+        function lerp(start, end, amt) {
+            return start * (1 - amt) + end * amt;
+        }
+
+        function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+            const cacheKey = `${value}_${maxValue}_${higherIsBetter}`;
+            if (colorCache.has(cacheKey)) {
+                return colorCache.get(cacheKey);
+            }
+
+            let ratio;
+            if (higherIsBetter) {
+                ratio = Math.min(value / maxValue, 1);
+            } else {
+                // For ranks - lower is better
+                ratio = 1 - (Math.min(value / maxValue, 1));
+            }
+
+            if (ratio < 0.5) {
+                // Red to Orange/Gold transition
+                const r = Math.round(lerp(215, 230, ratio * 2));
+                const g = Math.round(lerp(48, 140, ratio * 2));  // Reduced from 224 to 140
+                const b = Math.round(lerp(39, 0, ratio * 2));    // Changed to 0 for more saturation
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            } else {
+                // Orange/Gold to Green transition
+                const r = Math.round(lerp(230, 44, (ratio - 0.5) * 2));
+                const g = Math.round(lerp(140, 162, (ratio - 0.5) * 2));
+                const b = Math.round(lerp(0, 95, (ratio - 0.5) * 2));
+                const color = `rgb(${r}, ${g}, ${b})`;
+                colorCache.set(cacheKey, color);
+                return color;
+            }
+        }
+
+        function sortData(data, column, ascending = false) {
+            return Object.values(data).sort((a, b) => {
+                // First check if either hero is exempt
+                const aIsExempt = EXEMPT_HEROES.includes(a.handle) || TEAM_HEROES.includes(a.handle);
+                const bIsExempt = EXEMPT_HEROES.includes(b.handle) || TEAM_HEROES.includes(b.handle);
+
+                // If exempt status differs, exempt heroes go to bottom
+                if (aIsExempt !== bIsExempt) {
+                    return aIsExempt ? 1 : -1;
+                }
+
+                // If both are exempt or both are not, sort normally
+                let aValue, bValue;
+                
+                if (column === 'average') {
+                    aValue = a.avgScore;
+                    bValue = b.avgScore;
+                } else if (column === 'handle') {
+                    aValue = a.handle.toLowerCase();
+                    bValue = b.handle.toLowerCase();
+                    return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                } else {
+                    aValue = a.tournaments[column]?.fantasy_score || 0;
+                    bValue = b.tournaments[column]?.fantasy_score || 0;
+                }
+                
+                return ascending ? aValue - bValue : bValue - aValue;
+            });
+        }
+
+        function displayTournamentData(data, sortColumn = 'average', ascending = false) {
+            const tableHead = document.querySelector('.tournament-table thead tr');
+            const tableBody = document.getElementById('heroTableBody');
+            
+            // Clear existing headers except first and last
+            while (tableHead.children.length > 2) {
+                tableHead.removeChild(tableHead.children[1]);
+            }
+            
+            // Sort tournament numbers in ascending order
+            const sortedTournaments = tournamentNumbers.sort((a, b) => a - b);
+            
+            // Add tournament number columns
+            sortedTournaments.forEach(num => {
+                const th = document.createElement('th');
+                th.textContent = `T${num}`;
+                th.className = 'number-cell';
+                th.dataset.sort = num.toString();
+                th.addEventListener('click', () => handleSort(num.toString()));
+                tableHead.insertBefore(th, tableHead.lastElementChild);
+            });
+
+            // Update average column header
+            const averageHeader = tableHead.lastElementChild;
+            averageHeader.className = 'number-cell average-column average-header';
+            averageHeader.dataset.sort = 'average';
+            averageHeader.addEventListener('click', () => handleSort('average'));
+
+            // Add click handler to hero column
+            tableHead.firstElementChild.addEventListener('click', () => handleSort('handle'));
+
+            // Get all fantasy scores for color scaling
+            const allScores = Object.values(data).flatMap(hero => 
+                Object.values(hero.tournaments).map(t => t.fantasy_score)
+            );
+            const maxScore = Math.max(...allScores);
+
+            // Sort and create rows
+            const sortedData = sortData(data, sortColumn, ascending);
+            tableBody.innerHTML = '';
+
+            // Filter out exempt and team heroes for bottom 15 calculation
+            const nonExemptHeroes = sortedData.filter(hero => 
+                !EXEMPT_HEROES.includes(hero.handle) && 
+                !TEAM_HEROES.includes(hero.handle)
+            );
+
+            // Calculate bottom 15 index based on non-exempt heroes
+            const bottom15Index = nonExemptHeroes.length - 15;
+
+            // Filter heroes based on toggle state
+            const showOnlyOutgoing = document.getElementById('showOutgoingToggle').checked;
+            const heroesToDisplay = showOnlyOutgoing 
+                ? sortedData.filter(hero => {
+                    const nonExemptIndex = nonExemptHeroes.findIndex(h => h.handle === hero.handle);
+                    return nonExemptIndex >= bottom15Index && 
+                           !EXEMPT_HEROES.includes(hero.handle) && 
+                           !TEAM_HEROES.includes(hero.handle);
+                })
+                : sortedData;
+
+            heroesToDisplay.forEach((hero, index) => {
+                const row = document.createElement('tr');
+                
+                const isPossiblyExempt = EXEMPT_HEROES.includes(hero.handle);
+                const isExempt = TEAM_HEROES.includes(hero.handle);
+                
+                // Calculate real position in non-exempt list
+                const nonExemptIndex = nonExemptHeroes.findIndex(h => h.handle === hero.handle);
+                
+                const isBottomFifteen = currentSort.column === 'average' && 
+                                       !currentSort.ascending && 
+                                       nonExemptIndex >= bottom15Index &&
+                                       !isPossiblyExempt && 
+                                       !isExempt;
+
+                // Add exempt line before first exempt hero
+                if ((isPossiblyExempt || isExempt) && 
+                    !sortedData.slice(0, index).some(h => 
+                        EXEMPT_HEROES.includes(h.handle) || 
+                        TEAM_HEROES.includes(h.handle)
+                    )) {
+                    row.classList.add('exempt-line');
+                }
+
+                // Add cut line before first bottom 15 non-exempt hero
+                if (isBottomFifteen && 
+                    !nonExemptHeroes.slice(0, nonExemptIndex).some(h => 
+                        nonExemptHeroes.indexOf(h) >= bottom15Index
+                    )) {
+                    row.classList.add('cut-line');
+                }
+
+                // Hero cell with image and name
+                const heroCell = document.createElement('td');
+                heroCell.innerHTML = `
+                    <div class="hero-cell">
+                        <img src="${hero.profile_image}" alt="${hero.name}" class="hero-image">
+                        <span>${hero.name}</span>
+                        ${isBottomFifteen ? 
+                            '<i class="fas fa-times-circle removed-indicator" title="Likely to be removed"></i>' : ''}
+                        ${isPossiblyExempt ? 
+                            '<i class="fas fa-question-circle exempt-indicator" title="Exempt?"></i>' : ''}
+                        ${isExempt ? 
+                            `<img src="../icons/ft_logo.webp" class="exempt-indicator" title="Exempt" style="width: 12px; height: 12px;">` : ''}
+                    </div>
+                `;
+                row.appendChild(heroCell);
+
+                // Tournament scores
+                sortedTournaments.forEach(tournamentNum => {
+                    const td = document.createElement('td');
+                    td.className = 'number-cell';
+                    const tournamentData = hero.tournaments[tournamentNum];
+                    if (tournamentData) {
+                        td.innerHTML = `
+                            <span style="background-color: ${getColorForRank(tournamentData.fantasy_score, maxScore, true)}; 
+                                        border-radius: 4px; 
+                                        padding: 4px 8px; 
+                                        color: white; 
+                                        font-weight: 500;">
+                                ${Math.round(tournamentData.fantasy_score)}
+                            </span>
+                        `;
+                    } else {
+                        td.textContent = '-';
+                    }
+                    row.appendChild(td);
+                });
+
+                // Average score
+                const avgCell = document.createElement('td');
+                avgCell.className = 'number-cell average-column';
+                avgCell.innerHTML = `
+                    <span style="background-color: ${getColorForRank(hero.avgScore, maxScore, true)}; 
+                                border-radius: 4px; 
+                                padding: 4px 8px; 
+                                color: white; 
+                                font-weight: 500;">
+                        ${Math.round(hero.avgScore)}
+                    </span>
+                `;
+                row.appendChild(avgCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Add sort handling
+        let currentSort = { column: 'average', ascending: false };
+
+        function handleSort(column) {
+            if (currentSort.column === column) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.column = column;
+                currentSort.ascending = column === 'handle';  // Default ascending for name sorting
+            }
+            displayTournamentData(window.seasonData, currentSort.column, currentSort.ascending);
+        }
+
+        // Update the DOMContentLoaded event handler
+        document.addEventListener('DOMContentLoaded', async () => {
+            const data = await fetchTournamentData();
+            if (data) {
+                // Add toggle event listener
+                document.getElementById('showOutgoingToggle').addEventListener('change', () => {
+                    displayTournamentData(window.seasonData, currentSort.column, currentSort.ascending);
+                });
+                
+                displayTournamentData(data, 'average', false);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tactic Scores</title>
+    <title>Season Last 4 Avg Scores</title>
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -77,16 +77,23 @@
 
         .toggle-container {
             margin-bottom: 16px;
-        }
-        
-        .toggle-switch {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            cursor: pointer;
+            gap: 16px;
         }
-        
-        .toggle-switch input {
-            margin-right: 8px;
+
+        .search-box {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+            background-color: #fff;
+            color: #333;
+        }
+
+        .search-box::placeholder {
+            color: #999;
         }
 
         .data-freshness {
@@ -134,6 +141,10 @@
         <span>Scores: Live</span></span>
     </div>
     <div class="toggle-container">
+        <input type="text" 
+               id="heroSearch" 
+               class="search-box" 
+               placeholder="Search heroes...">
         <label class="toggle-switch">
             <input type="checkbox" id="showOutgoingToggle">
             Show Outgoing Heroes
@@ -283,6 +294,24 @@
             });
         }
 
+        // Add fuzzy search function
+        function fuzzyMatch(str, pattern) {
+            pattern = pattern.toLowerCase();
+            str = str.toLowerCase();
+            
+            let patternIdx = 0;
+            let strIdx = 0;
+            
+            while (strIdx < str.length && patternIdx < pattern.length) {
+                if (str[strIdx] === pattern[patternIdx]) {
+                    patternIdx++;
+                }
+                strIdx++;
+            }
+            
+            return patternIdx === pattern.length;
+        }
+
         function displayTournamentData(data, sortColumn = 'average', ascending = false) {
             const tableHead = document.querySelector('.tournament-table thead tr');
             const tableBody = document.getElementById('heroTableBody');
@@ -343,16 +372,28 @@
             // Calculate bottom 15 index based on non-exempt heroes
             const bottom15Index = nonExemptHeroes.length - 15;
 
-            // Filter heroes based on toggle state
+            const searchTerm = document.getElementById('heroSearch').value;
             const showOnlyOutgoing = document.getElementById('showOutgoingToggle').checked;
-            const heroesToDisplay = showOnlyOutgoing 
-                ? sortedData.filter(hero => {
+
+            const heroesToDisplay = sortedData.filter(hero => {
+                // First apply search filter if there's a search term
+                if (searchTerm) {
+                    const matchesSearch = 
+                        fuzzyMatch(hero.name, searchTerm) || 
+                        fuzzyMatch(hero.handle, searchTerm);
+                    if (!matchesSearch) return false;
+                }
+
+                // Then apply the outgoing filter if enabled
+                if (showOnlyOutgoing) {
                     const nonExemptIndex = nonExemptHeroes.findIndex(h => h.handle === hero.handle);
                     return nonExemptIndex >= bottom15Index && 
                            !EXEMPT_HEROES.includes(hero.handle) && 
                            !TEAM_HEROES.includes(hero.handle);
-                })
-                : sortedData;
+                }
+                
+                return true;
+            });
 
             // Calculate ranks based on average score (before any sorting)
             const ranksByAverage = Object.values(data)
@@ -474,6 +515,11 @@
             if (data) {
                 // Add toggle event listener
                 document.getElementById('showOutgoingToggle').addEventListener('change', () => {
+                    displayTournamentData(window.seasonData, currentSort.column, currentSort.ascending);
+                });
+
+                // Add search event listener
+                document.getElementById('heroSearch').addEventListener('input', () => {
                     displayTournamentData(window.seasonData, currentSort.column, currentSort.ascending);
                 });
                 

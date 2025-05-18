@@ -52,9 +52,27 @@
         }
 
         .rank-cell {
-            width: 40px;
+            width: 30px;  /* Reduce from 40px */
             text-align: center;
             color: #666;
+            padding-right: 4px !important;  /* Add tight padding */
+        }
+
+        .hero-cell {
+            display: flex;
+            align-items: center;
+            padding-left: 4px;  /* Add left padding to maintain small gap */
+        }
+
+        .hero-image {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .tournament-table td {
+            padding: 8px 4px;  /* Reduce default cell padding */
         }
 
         .toggle-container {
@@ -70,9 +88,51 @@
         .toggle-switch input {
             margin-right: 8px;
         }
+
+        .data-freshness {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            margin-left: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        
+        /* Add these styles to your existing <style> section */
+        body {
+            margin: 0;
+            padding: 15px;
+            min-width: fit-content;  /* Ensure body is at least as wide as content */
+            overflow-x: auto;        /* Allow horizontal scrolling */
+        }
+
+        table {
+            width: max-content;      /* Let table take its natural width */
+            min-width: 100%;        /* But at least as wide as viewport */
+        }
+
+        #tableContainer {
+            overflow-x: auto;       /* Enable horizontal scrolling */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
+        }
+
     </style>
 </head>
 <body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Season / Last 4 Avg Score
+        </h1>
+    </div>
+    <div class="data-freshness">
+        <span>Scores: Live</span></span>
+    </div>
     <div class="toggle-container">
         <label class="toggle-switch">
             <input type="checkbox" id="showOutgoingToggle">
@@ -83,7 +143,6 @@
         <table class="tournament-table">
             <thead>
                 <tr>
-                    <th class="rank-cell">#</th>  <!-- Add this line -->
                     <th>Hero</th>
                     <!-- Tournament columns will be added dynamically -->
                     <th class="number-cell average-header">Average</th>
@@ -228,10 +287,21 @@
             const tableHead = document.querySelector('.tournament-table thead tr');
             const tableBody = document.getElementById('heroTableBody');
             
-            // Clear existing headers except first and last
-            while (tableHead.children.length > 2) {
-                tableHead.removeChild(tableHead.children[1]);
-            }
+            // Clear entire header first
+            tableHead.innerHTML = '';
+            
+            // Add rank header
+            const rankHeader = document.createElement('th');
+            rankHeader.textContent = '#';
+            rankHeader.className = 'rank-cell';
+            tableHead.appendChild(rankHeader);
+            
+            // Add hero header
+            const heroHeader = document.createElement('th');
+            heroHeader.textContent = 'Hero';
+            heroHeader.dataset.sort = 'handle';
+            heroHeader.addEventListener('click', () => handleSort('handle'));
+            tableHead.appendChild(heroHeader);
             
             // Sort tournament numbers in ascending order
             const sortedTournaments = tournamentNumbers.sort((a, b) => a - b);
@@ -243,17 +313,16 @@
                 th.className = 'number-cell';
                 th.dataset.sort = num.toString();
                 th.addEventListener('click', () => handleSort(num.toString()));
-                tableHead.insertBefore(th, tableHead.lastElementChild);
+                tableHead.appendChild(th);
             });
 
-            // Update average column header
-            const averageHeader = tableHead.lastElementChild;
+            // Add average column header
+            const averageHeader = document.createElement('th');
+            averageHeader.textContent = 'Average';
             averageHeader.className = 'number-cell average-column average-header';
             averageHeader.dataset.sort = 'average';
             averageHeader.addEventListener('click', () => handleSort('average'));
-
-            // Add click handler to hero column
-            tableHead.firstElementChild.addEventListener('click', () => handleSort('handle'));
+            tableHead.appendChild(averageHeader);
 
             // Get all fantasy scores for color scaling
             const allScores = Object.values(data).flatMap(hero => 
@@ -284,6 +353,14 @@
                            !TEAM_HEROES.includes(hero.handle);
                 })
                 : sortedData;
+
+            // Calculate ranks based on average score (before any sorting)
+            const ranksByAverage = Object.values(data)
+                .sort((a, b) => b.avgScore - a.avgScore)
+                .reduce((acc, hero, index) => {
+                    acc[hero.handle] = index + 1;
+                    return acc;
+                }, {});
 
             heroesToDisplay.forEach((hero, index) => {
                 const row = document.createElement('tr');
@@ -316,6 +393,12 @@
                     )) {
                     row.classList.add('cut-line');
                 }
+
+                // Add rank cell
+                const rankCell = document.createElement('td');
+                rankCell.className = 'rank-cell';
+                rankCell.textContent = ranksByAverage[hero.handle];
+                row.appendChild(rankCell);
 
                 // Hero cell with image and name
                 const heroCell = document.createElement('td');

@@ -23,6 +23,11 @@
         .average-header {
             font-weight: 600;
             color: #888;
+            min-width: 200px;
+            max-width: 200px;
+            padding: 8px 4px 8px 16px !important;
+            box-sizing: border-box;
+            border-left: 2px solid #444;
         }
 
         .cut-line td {
@@ -73,16 +78,46 @@
         }
 
         .rank-cell {
-            width: 30px;  /* Reduce from 40px */
+            width: 50px;
+            color: white;  /* Changed from #666 to white */
             text-align: center;
-            color: #666;
-            padding-right: 4px !important;  /* Add tight padding */
+            white-space: nowrap;
+        }
+
+        .rank-number {
+            display: inline-block;
+            margin-right: 6px;
+            color: white;  /* Add explicit white color */
+        }
+
+        /* Update the rank header style */
+        th.rank-cell {
+            color: white !important;  /* Force white color for header */
+            font-weight: 600;
+        }
+
+        .rank-change {
+            display: inline-block;
+            font-size: 10px;
+            margin-left: 2px;  /* Added margin */
+        }
+
+        .rank-change.rank-up {
+            color: #44b700;  /* Green for improvements */
+        }
+
+        .rank-change.rank-down {
+            color: #ff4444;  /* Red for drops */
+        }
+
+        .rank-change i {
+            margin-right: 2px;  /* Added gap between arrow and number */
         }
 
         .hero-cell {
             display: flex;
             align-items: center;
-            padding-left: 4px;  /* Add left padding to maintain small gap */
+            padding-left: 2px;  /* Add left padding to maintain small gap */
         }
 
         .hero-image {
@@ -93,7 +128,15 @@
         }
 
         .tournament-table td {
-            padding: 8px 4px;  /* Reduce default cell padding */
+            padding: 8px 4px;
+            vertical-align: middle;
+            border-bottom: 1px solid #333;  /* Add consistent bottom border */
+        }
+
+        .number-cell {
+            text-align: center;
+            padding: 8px 4px;
+            vertical-align: middle;
         }
 
         .toggle-container {
@@ -153,6 +196,41 @@
             width: 100%;
         }
 
+        .averages-container {
+            border-left: 2px solid #444;
+            padding: 8px 4px 8px 16px !important; /* Match padding with other cells */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 200px;
+            max-width: 200px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .score-rank-pair {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rank-indicator {
+            color: #888;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        .arrow-indicator {
+            color: #888;
+            font-size: 12px;
+            flex-shrink: 0; /* Prevent arrow from shrinking */
+        }
+
+        .current-period {
+            color: #44b700 !important;  /* Green to match the positive changes */
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -192,7 +270,7 @@
 
     <script>
         // Define tournament numbers
-        const tournamentNumbers = [51, 50, 49, 48];
+        const tournamentNumbers = [51, 50, 49, 48, 47];
 
         const EXEMPT_HEROES = ['frankdegods'];
         const TEAM_HEROES = ['0xMikado', 'travisbickle0x', '0xKipit'];
@@ -305,9 +383,12 @@
                 // If both are exempt or both are not, sort normally
                 let aValue, bValue;
                 
-                if (column === 'average') {
-                    aValue = a.avgScore;
-                    bValue = b.avgScore;
+                if (column === 'currentAvg') {
+                    aValue = a.currentAvg;
+                    bValue = b.currentAvg;
+                } else if (column === 'priorAvg') {
+                    aValue = a.priorAvg;
+                    bValue = a.priorAvg;
                 } else if (column === 'handle') {
                     aValue = a.handle.toLowerCase();
                     bValue = a.handle.toLowerCase();
@@ -339,7 +420,7 @@
             return patternIdx === pattern.length;
         }
 
-        function displayTournamentData(data, sortColumn = 'average', ascending = false) {
+        function displayTournamentData(data, sortColumn = 'currentAvg', ascending = false) {
             const tableHead = document.querySelector('.tournament-table thead tr');
             const tableBody = document.getElementById('heroTableBody');
             
@@ -359,26 +440,48 @@
             heroHeader.addEventListener('click', () => handleSort('handle'));
             tableHead.appendChild(heroHeader);
             
-            // Sort tournament numbers in ascending order
-            const sortedTournaments = tournamentNumbers.sort((a, b) => a - b);
+            // Sort tournament numbers in ascending order for display
+            const sortedTournaments = [...tournamentNumbers].sort((a, b) => a - b);
             
-            // Add tournament number columns
+            // Get latest tournament number (still highest number)
+            const latestTournament = Math.max(...tournamentNumbers);
+            
+            // Split tournaments for averages calculation (still in descending order for proper periods)
+            const currentTournaments = tournamentNumbers.sort((a, b) => b - a).slice(0, 4); // Latest 4
+            const priorTournaments = tournamentNumbers.sort((a, b) => b - a).slice(1, 5);   // Previous 4 (skip latest)
+
+            // Calculate both averages for each hero
+            Object.values(data).forEach(hero => {
+                // Calculate current average (latest 4)
+                const currentScores = currentTournaments
+                    .map(num => hero.tournaments[num]?.fantasy_score || 0);
+                hero.currentAvg = currentScores.reduce((a, b) => a + b, 0) / currentTournaments.length;
+
+                // Calculate prior average (previous 4)
+                const priorScores = priorTournaments
+                    .map(num => hero.tournaments[num]?.fantasy_score || 0);
+                hero.priorAvg = priorScores.reduce((a, b) => a + b, 0) / priorTournaments.length;
+            });
+
+            // Add tournament number columns (in ascending order)
             sortedTournaments.forEach(num => {
                 const th = document.createElement('th');
-                th.textContent = `T${num}`;
-                th.className = 'number-cell';
+                const isCurrentPeriod = currentTournaments.includes(num);
+                th.textContent = `MT${num}`;
+                th.className = `number-cell ${isCurrentPeriod ? 'current-period' : ''}`;
                 th.dataset.sort = num.toString();
                 th.addEventListener('click', () => handleSort(num.toString()));
                 tableHead.appendChild(th);
             });
 
-            // Add average column header
-            const averageHeader = document.createElement('th');
-            averageHeader.textContent = 'Average';
-            averageHeader.className = 'number-cell average-column average-header';
-            averageHeader.dataset.sort = 'average';
-            averageHeader.addEventListener('click', () => handleSort('average'));
-            tableHead.appendChild(averageHeader);
+            // Replace the two average headers with a single one
+            const avgHeader = document.createElement('th');
+            avgHeader.innerHTML = 'AVG: Prior -> <span class="current-period">Current</span>';
+            avgHeader.className = 'number-cell average-header';
+            avgHeader.colSpan = 2;
+            avgHeader.dataset.sort = 'currentAvg';
+            avgHeader.addEventListener('click', () => handleSort('currentAvg'));
+            tableHead.appendChild(avgHeader);
 
             // Get all fantasy scores for color scaling
             const allScores = Object.values(data).flatMap(hero => 
@@ -422,9 +525,17 @@
                 return true;
             });
 
-            // Calculate ranks based on average score (before any sorting)
-            const ranksByAverage = Object.values(data)
-                .sort((a, b) => b.avgScore - a.avgScore)
+            // Calculate ranks based on current average
+            const ranksByCurrentAvg = Object.values(data)
+                .sort((a, b) => b.currentAvg - a.currentAvg)
+                .reduce((acc, hero, index) => {
+                    acc[hero.handle] = index + 1;
+                    return acc;
+                }, {});
+
+            // Calculate ranks for both averages
+            const ranksByPriorAvg = Object.values(data)
+                .sort((a, b) => b.priorAvg - a.priorAvg)
                 .reduce((acc, hero, index) => {
                     acc[hero.handle] = index + 1;
                     return acc;
@@ -439,17 +550,28 @@
                 // Calculate real position in non-exempt list
                 const nonExemptIndex = nonExemptHeroes.findIndex(h => h.handle === hero.handle);
                 
-                const isBottomFifteen = currentSort.column === 'average' && 
+                const isBottomFifteen = currentSort.column === 'currentAvg' && 
                                        !currentSort.ascending && 
                                        nonExemptIndex >= bottom15Index &&
                                        !isPossiblyExempt && 
                                        !isExempt;
 
-                // Add rank cell first
+                // Add rank cell with change indicator
                 const rankCell = document.createElement('td');
                 rankCell.className = 'rank-cell';
-                rankCell.textContent = ranksByAverage[hero.handle];
-                row.appendChild(rankCell);
+
+                const currentRank = ranksByCurrentAvg[hero.handle];
+                const priorRank = ranksByPriorAvg[hero.handle];
+                const rankChange = priorRank - currentRank;
+
+                // Create rank cell content
+                let rankContent = `<span class="rank-number">${currentRank}</span>`;
+                if (rankChange !== 0) {
+                    rankContent += `<span class="rank-change ${rankChange > 0 ? 'rank-up' : 'rank-down'}">
+                        <i class="fas fa-arrow-${rankChange > 0 ? 'up' : 'down'}"></i>${Math.abs(rankChange)}
+                    </span>`;
+                }
+                rankCell.innerHTML = rankContent;
 
                 // Add cut line before first bottom 15 non-exempt hero
                 if (isBottomFifteen && 
@@ -475,6 +597,8 @@
                     label.textContent = 'Protected / Exempt';
                     rankCell.appendChild(label);
                 }
+
+                row.appendChild(rankCell);
 
                 // Hero cell with image and name
                 const heroCell = document.createElement('td');
@@ -513,26 +637,49 @@
                     row.appendChild(td);
                 });
 
-                // Average score
-                const avgCell = document.createElement('td');
-                avgCell.className = 'number-cell average-column';
-                avgCell.innerHTML = `
-                    <span style="background-color: ${getColorForRank(hero.avgScore, maxScore, true)}; 
-                                border-radius: 4px; 
-                                padding: 4px 8px; 
-                                color: white; 
-                                font-weight: 500;">
-                        ${Math.round(hero.avgScore)}
-                    </span>
+                // Create a container for both averages
+                const averagesContainer = document.createElement('td');
+                averagesContainer.className = 'averages-container';
+                averagesContainer.colSpan = 2;
+
+                const avgContent = document.createElement('div');
+                avgContent.style.display = 'flex';
+                avgContent.style.alignItems = 'center';
+                avgContent.style.gap = '8px';
+                avgContent.style.justifyContent = 'center';
+                avgContent.innerHTML = `
+                    <div class="score-rank-pair">
+                        <span style="background-color: ${getColorForRank(hero.priorAvg, maxScore, true)}; 
+                                    border-radius: 4px; 
+                                    padding: 4px 8px; 
+                                    color: white; 
+                                    font-weight: 500;">
+                            ${Math.round(hero.priorAvg)}
+                        </span>
+                        <span class="rank-indicator">#${ranksByPriorAvg[hero.handle]}</span>
+                    </div>
+                    <i class="fas fa-arrow-right arrow-indicator"></i>
+                    <div class="score-rank-pair">
+                        <span style="background-color: ${getColorForRank(hero.currentAvg, maxScore, true)}; 
+                                    border-radius: 4px; 
+                                    padding: 4px 8px; 
+                                    color: white; 
+                                    font-weight: 500;">
+                            ${Math.round(hero.currentAvg)}
+                        </span>
+                        <span class="rank-indicator">#${ranksByCurrentAvg[hero.handle]}</span>
+                    </div>
                 `;
-                row.appendChild(avgCell);
+
+                averagesContainer.appendChild(avgContent);
+                row.appendChild(averagesContainer);
 
                 tableBody.appendChild(row);
             });
         }
 
         // Add sort handling
-        let currentSort = { column: 'average', ascending: false };
+        let currentSort = { column: 'currentAvg', ascending: false };
 
         function handleSort(column) {
             if (currentSort.column === column) {
@@ -558,7 +705,7 @@
                     displayTournamentData(window.seasonData, currentSort.column, currentSort.ascending);
                 });
                 
-                displayTournamentData(data, 'average', false);
+                displayTournamentData(data, 'currentAvg', false);
             }
         });
     </script>

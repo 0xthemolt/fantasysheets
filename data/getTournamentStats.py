@@ -24,7 +24,12 @@ with override as (
   SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,3133 as registered_decks,946 AS player_count union all
    SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,5261 as registered_decks,1850 AS player_count union all
     SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,9217 as registered_decks,2877 AS player_count union all
-     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count
+     SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count union all
+      SELECT 'Main 52'  AS tournament_unique_key, 'Elite' as league,1593 as registered_decks,600 AS player_count union all
+  SELECT 'Main 52'  AS tournament_unique_key, 'Gold' as league,2913 as registered_decks,878 AS player_count union all
+   SELECT 'Main 52'  AS tournament_unique_key, 'Silver' as league,5192 as registered_decks,1639 AS player_count union all
+    SELECT 'Main 52'  AS tournament_unique_key, 'Bronze' as league,10820 as registered_decks,2886 AS player_count union all
+     SELECT 'Main 52'  AS tournament_unique_key, 'Reverse' as league,5126 as registered_decks,1349 AS player_count
 )
 select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
@@ -58,7 +63,8 @@ cursor.close()
 
 total_players_query = """
 WITH override AS (
-  SELECT 'Main 50'  AS tournament_unique_key, 4215 AS total_player_count
+  SELECT 'Main 50'  AS tournament_unique_key, 4215 AS total_player_count union all 
+  SELECT 'Main 52'  AS tournament_unique_key, 3952 AS total_player_count
 )
 SELECT 
     CONCAT(TO_CHAR(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key) AS tournament,
@@ -85,7 +91,8 @@ total_players_df = pd.read_sql_query(total_players_query, conn)
 cursor.close()
 
 
-card_stars_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+card_stars_query = f"""
+select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,
  gt.tournament_unique_key,
     coalesce(t.hero_stars,1) hero_stars,
@@ -100,15 +107,29 @@ card_stars_df = pd.read_sql_query(card_stars_query, conn)
 cursor.close()
 
 
-rarity_query = f"""select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+rarity_query = f"""
+WITH override AS (
+  SELECT 'Main 52'  AS tournament_unique_key, 'legendary' as rarity,358 AS card_count union all
+  SELECT 'Main 52'  AS tournament_unique_key, 'epic' as rarity,3174 AS card_count union all
+  SELECT 'Main 52'  AS tournament_unique_key, 'rare' as rarity,20600 AS card_count union all
+  SELECT 'Main 52'  AS tournament_unique_key, 'common' as rarity,104088 AS card_count
+)
+select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,
  gt.tournament_unique_key,
     t.hero_rarity,
-    count(*) card_count
+     CASE WHEN MAX(override.card_count) IS NOT NULL THEN
+        MAX(override.card_count)
+    ELSE 
+        count(*) 
+    END as card_count
 from agg.tournamentownership t 
 join   flatten.get_tournaments gt
     on t.tournament_id  = gt.tournament_id 
-    where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
+left join override 
+    on t.tournament_unique_key = override.tournament_unique_key
+    and t.hero_rarity = override.rarity
+where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
     and gt.tournament_number not in (45)
 group by 1,2,3,4
 order by gt.start_timestamp asc"""

@@ -90,16 +90,6 @@
         "tournament_number": "45",
         "leagues": [
             {
-                "league": "Bronze",
-                "deck_count": 7673,
-                "player_count": 2711
-            },
-            {
-                "league": "Reverse",
-                "deck_count": 6329,
-                "player_count": 1731
-            },
-            {
                 "league": "Elite",
                 "deck_count": 1452,
                 "player_count": 629
@@ -110,9 +100,19 @@
                 "player_count": 1873
             },
             {
+                "league": "Bronze",
+                "deck_count": 7673,
+                "player_count": 2711
+            },
+            {
                 "league": "Gold",
                 "deck_count": 2626,
                 "player_count": 884
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 6329,
+                "player_count": 1731
             }
         ],
         "stars": [
@@ -158,9 +158,9 @@
         "tournament_number": "46",
         "leagues": [
             {
-                "league": "Elite",
-                "deck_count": 1076,
-                "player_count": 504
+                "league": "Silver",
+                "deck_count": 4681,
+                "player_count": 1750
             },
             {
                 "league": "Gold",
@@ -168,19 +168,19 @@
                 "player_count": 869
             },
             {
-                "league": "Bronze",
-                "deck_count": 8187,
-                "player_count": 2942
-            },
-            {
                 "league": "Reverse",
                 "deck_count": 5586,
                 "player_count": 1482
             },
             {
-                "league": "Silver",
-                "deck_count": 4681,
-                "player_count": 1750
+                "league": "Elite",
+                "deck_count": 1076,
+                "player_count": 504
+            },
+            {
+                "league": "Bronze",
+                "deck_count": 8187,
+                "player_count": 2942
             }
         ],
         "stars": [
@@ -328,19 +328,9 @@
         "tournament_number": "48",
         "leagues": [
             {
-                "league": "Gold",
-                "deck_count": 2886,
-                "player_count": 890
-            },
-            {
                 "league": "Elite",
                 "deck_count": 1655,
                 "player_count": 634
-            },
-            {
-                "league": "Bronze",
-                "deck_count": 7721,
-                "player_count": 2968
             },
             {
                 "league": "Reverse",
@@ -351,6 +341,16 @@
                 "league": "Silver",
                 "deck_count": 4427,
                 "player_count": 1652
+            },
+            {
+                "league": "Bronze",
+                "deck_count": 7721,
+                "player_count": 2968
+            },
+            {
+                "league": "Gold",
+                "deck_count": 2886,
+                "player_count": 890
             }
         ],
         "stars": [
@@ -413,11 +413,6 @@
         "tournament_number": "49",
         "leagues": [
             {
-                "league": "Elite",
-                "deck_count": 1873,
-                "player_count": 732
-            },
-            {
                 "league": "Bronze",
                 "deck_count": 8187,
                 "player_count": 2849
@@ -426,6 +421,11 @@
                 "league": "Reverse",
                 "deck_count": 5332,
                 "player_count": 1361
+            },
+            {
+                "league": "Elite",
+                "deck_count": 1873,
+                "player_count": 732
             },
             {
                 "league": "Silver",
@@ -503,24 +503,24 @@
                 "player_count": 652
             },
             {
-                "league": "Gold",
-                "deck_count": 3133,
-                "player_count": 946
-            },
-            {
-                "league": "Bronze",
-                "deck_count": 9217,
-                "player_count": 2877
-            },
-            {
                 "league": "Reverse",
                 "deck_count": 5644,
                 "player_count": 1514
             },
             {
+                "league": "Gold",
+                "deck_count": 3133,
+                "player_count": 946
+            },
+            {
                 "league": "Silver",
                 "deck_count": 5261,
                 "player_count": 1850
+            },
+            {
+                "league": "Bronze",
+                "deck_count": 9217,
+                "player_count": 2877
             }
         ],
         "stars": [
@@ -593,14 +593,14 @@
                 "player_count": 1789
             },
             {
-                "league": "Reverse",
-                "deck_count": 5448,
-                "player_count": 1526
-            },
-            {
                 "league": "Bronze",
                 "deck_count": 9449,
                 "player_count": 2840
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 5448,
+                "player_count": 1526
             },
             {
                 "league": "Elite",
@@ -664,36 +664,87 @@
     },
     "05-19 | Main 52": {
         "tournament_unique_key": "Main 52",
-        "tournament_status": "not started",
+        "tournament_status": "live",
         "tournament_number": "52",
         "leagues": [
             {
-                "league": "Elite",
-                "deck_count": 401,
-                "player_count": null
-            },
-            {
                 "league": "Silver",
-                "deck_count": 1353,
-                "player_count": null
+                "deck_count": 5192,
+                "player_count": 1639
             },
             {
                 "league": "Gold",
-                "deck_count": 601,
-                "player_count": null
+                "deck_count": 2913,
+                "player_count": 878
             },
             {
                 "league": "Bronze",
-                "deck_count": 2409,
-                "player_count": null
+                "deck_count": 10820,
+                "player_count": 2886
             },
             {
                 "league": "Reverse",
-                "deck_count": 975,
-                "player_count": null
+                "deck_count": 5126,
+                "player_count": 1349
+            },
+            {
+                "league": "Elite",
+                "deck_count": 1593,
+                "player_count": 600
             }
         ],
-        "stars": [],
-        "rarity": []
+        "stars": [
+            {
+                "hero_stars": 1,
+                "card_count": 12055
+            },
+            {
+                "hero_stars": 2,
+                "card_count": 14961
+            },
+            {
+                "hero_stars": 3,
+                "card_count": 22254
+            },
+            {
+                "hero_stars": 4,
+                "card_count": 27779
+            },
+            {
+                "hero_stars": 5,
+                "card_count": 23373
+            },
+            {
+                "hero_stars": 6,
+                "card_count": 13350
+            },
+            {
+                "hero_stars": 7,
+                "card_count": 6494
+            },
+            {
+                "hero_stars": 8,
+                "card_count": 5209
+            }
+        ],
+        "rarity": [
+            {
+                "hero_rarity": "common",
+                "card_count": 104088
+            },
+            {
+                "hero_rarity": "epic",
+                "card_count": 3174
+            },
+            {
+                "hero_rarity": "legendary",
+                "card_count": 358
+            },
+            {
+                "hero_rarity": "rare",
+                "card_count": 20600
+            }
+        ],
+        "total_player_count": 3952
     }
 }

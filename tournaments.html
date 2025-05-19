@@ -85,10 +85,12 @@
                     fetch('./data/tournaments/tournaments_stats.json')
                         .then(response => response.json())
                         .then(data => {
-                            const tournaments = Object.values(data);
-                            const lastTournament = tournaments[tournaments.length - 1];
+                            // Sort tournaments by tournament number and get the latest one
+                            const latestTournament = Object.values(data)
+                                .sort((a, b) => parseInt(b.tournament_number) - parseInt(a.tournament_number))[0];
+
                             document.getElementById('tournamentStatus').innerHTML = 
-                                `${lastTournament.tournament_unique_key} | Status: ${lastTournament.tournament_status} (Deck Counts: Live)`;
+                                `${latestTournament.tournament_unique_key} | Deck Counts: Live`;
                         })
                         .catch(error => {
                             console.error('Error:', error);

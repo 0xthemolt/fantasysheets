@@ -21,13 +21,9 @@
         }
 
         .average-header {
-            font-weight: 600;
-            color: #888;
-            min-width: 200px;
-            max-width: 200px;
-            padding: 8px 4px 8px 16px !important;
-            box-sizing: border-box;
             border-left: 2px solid #444;
+            padding: 8px 4px;
+            min-width: 200px;
         }
 
         .cut-line td {
@@ -128,14 +124,14 @@
         }
 
         .tournament-table td {
-            padding: 8px 4px;
+            padding: 8px 4px;  /* Make sure all cells have same padding */
             vertical-align: middle;
             border-bottom: 1px solid #333;  /* Add consistent bottom border */
         }
 
         .number-cell {
             text-align: center;
-            padding: 8px 4px;
+            padding: 8px 4px;  /* Match other cells */
             vertical-align: middle;
         }
 
@@ -198,14 +194,12 @@
 
         .averages-container {
             border-left: 2px solid #444;
-            padding: 8px 4px 8px 16px !important; /* Match padding with other cells */
+            padding: 8px 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
             min-width: 200px;
-            max-width: 200px;
-            height: 100%;
             box-sizing: border-box;
         }
 
@@ -388,14 +382,15 @@
                     bValue = b.currentAvg;
                 } else if (column === 'priorAvg') {
                     aValue = a.priorAvg;
-                    bValue = a.priorAvg;
+                    bValue = b.priorAvg;
                 } else if (column === 'handle') {
                     aValue = a.handle.toLowerCase();
-                    bValue = a.handle.toLowerCase();
+                    bValue = b.handle.toLowerCase();
                     return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
                 } else {
+                    // Fix for tournament column sorting
                     aValue = a.tournaments[column]?.fantasy_score || 0;
-                    bValue = a.tournaments[column]?.fantasy_score || 0;
+                    bValue = b.tournaments[column]?.fantasy_score || 0;  // Changed from a.tournaments to b.tournaments
                 }
                 
                 return ascending ? aValue - bValue : bValue - aValue;
@@ -474,11 +469,10 @@
                 tableHead.appendChild(th);
             });
 
-            // Replace the two average headers with a single one
+            // Update the header creation
             const avgHeader = document.createElement('th');
             avgHeader.innerHTML = 'AVG: Prior -> <span class="current-period">Current</span>';
             avgHeader.className = 'number-cell average-header';
-            avgHeader.colSpan = 2;
             avgHeader.dataset.sort = 'currentAvg';
             avgHeader.addEventListener('click', () => handleSort('currentAvg'));
             tableHead.appendChild(avgHeader);
@@ -637,10 +631,9 @@
                     row.appendChild(td);
                 });
 
-                // Create a container for both averages
+                // Update the averages container creation
                 const averagesContainer = document.createElement('td');
                 averagesContainer.className = 'averages-container';
-                averagesContainer.colSpan = 2;
 
                 const avgContent = document.createElement('div');
                 avgContent.style.display = 'flex';

@@ -197,23 +197,34 @@
 
         async function fetchHeroData() {
             try {
-                const [heroResponse, usageData] = await Promise.all([
-                    fetch(`https://api-v2.fantasy.top/tactics/hero-scores/c169c857-0b4d-4a6c-aff1-14629f4adb2f?orderBy.fantasy_score=desc&pagination.page=1&pagination.limit=500`, {
+                let allHeroData = [];
+                let page = 1;
+                let hasNextPage = true;
+                const usageData = await fetchTacticHeroUsage();
+
+                // Fetch all pages until next is null
+                while (hasNextPage) {
+                    const heroResponse = await fetch(
+                        `https://api-v2.fantasy.top/tactics/hero-scores/c169c857-0b4d-4a6c-aff1-14629f4adb2f?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=50`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
                         }
-                    }),
-                    fetchTacticHeroUsage()
-                ]);
+                    });
 
-                const heroData = await heroResponse.json();        
+                    const heroData = await heroResponse.json();
+                    allHeroData = [...allHeroData, ...heroData.data];
+                    
+                    // Check if there's a next page
+                    hasNextPage = heroData.meta.next !== null;
+                    page++;
+                }
                 
                 // Create a map of hero usage data for quick lookup
                 const usageMap = new Map(usageData.map(item => [item.hero_id, item]));
                 
                 // Merge hero data with usage data using hero_id
-                window.heroesData = heroData.data.map(hero => {
+                window.heroesData = allHeroData.map(hero => {
                     const usage = usageMap.get(hero.hero_id);
                     return {
                         ...hero,

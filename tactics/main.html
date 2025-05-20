@@ -112,30 +112,32 @@
             cursor: pointer;
         }
 
-        /* Replace the toggle switch styles with these new styles */
+        /* Update these styles in your existing CSS */
         .segmented-control {
             position: relative;
             width: fit-content;
             background: #151616;
-            border-radius: 8px;
-            padding: 4px;
+            border-radius: 6px;
+            padding: 3px;
             margin-bottom: 20px;
         }
 
         .segment-labels {
             position: relative;
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .segment-label {
             position: relative;
-            padding: 8px 16px;
+            padding: 6px 12px;
             font-weight: 500;
             color: #525353;
             cursor: pointer;
             transition: color 0.3s ease;
             z-index: 1;
+            text-align: center;
+            min-width: 80px; /* Ensure consistent width */
         }
 
         .segment-label.active {
@@ -144,24 +146,19 @@
 
         .segment-slider {
             position: absolute;
-            top: 4px;
-            left: 4px;
+            top: 3px;
+            left: 3px;
             background: #2A2A2A;
-            height: calc(100% - 8px);
-            width: calc((100% - 8px) / 2);  /* Half width minus padding */
-            border-radius: 6px;
-            transition: transform 0.3s ease;
+            height: calc(100% - 6px);
+            width: calc((100% - 6px) / 2); /* Half width minus padding */
+            border-radius: 4px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Initial state - Heroes selected */
-        .segment-slider {
-            transform: translateX(0);
-        }
-
-        /* ROI selected state */
+        /* ROI selected state - more precise calculation */
         .segmented-control[data-active="roi"] .segment-slider {
-            transform: translateX(calc(100% + 8px));  /* Full width plus gap */
+            transform: translateX(calc(100% + 6px)); /* Exactly one segment width plus gap */
         }
 
         .table-container {
@@ -186,10 +183,98 @@
 
         /* Player ROI table columns */
         #playerROI th:nth-child(1) { width: 200px; } /* Player */
-        #playerROI th:nth-child(2) { width: 120px; } /* Investment */
-        #playerROI th:nth-child(3) { width: 120px; } /* Earnings */
-        #playerROI th:nth-child(4) { width: 100px; } /* ROI % */
+        #playerROI th:nth-child(2) { width: 200px; } /* Won/Entry/ROI group */
+        #playerROI th:nth-child(3) { width: 100px; } /* Decks */
+        #playerROI th:nth-child(4) { width: 100px; } /* ITM % */
         
+        /* Add these styles to your existing CSS section */
+        .player-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Update the bar-related styles */
+        .decks-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%; /* Full width of container */
+        }
+
+        .bar-container {
+            width: 80px; /* Fixed width for consistency */
+            height: 6px;
+            background: #2a2a2a;
+            border-radius: 3px;
+            overflow: hidden;
+            flex-shrink: 0; /* Prevent bar from shrinking */
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* Add new style for the value display */
+        .bar-value {
+            min-width: 40px; /* Fixed width for percentage */
+            text-align: right;
+            flex-shrink: 0; /* Prevent text from shrinking */
+        }
+
+        /* Add these new styles */
+        .money-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .money-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .money-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .deck-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .deck-icon {
+            color: #3b82f6;
+            font-size: 1.2em;
+        }
+
+        .deck-size {
+            font-size: 0.9em;
+            opacity: 0.4;
+            margin-right: 2px;
+        }
+
+        .top-winner {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trophy-icon {
+            margin-right: 2px;
+        }
     </style>
 </head>
 <body>
@@ -235,9 +320,11 @@
             <thead>
                 <tr>
                     <th data-sort="player">Player</th>
-                    <th data-sort="investment" class="number-cell">Investment</th>
-                    <th data-sort="earnings" class="number-cell">Earnings</th>
+                    <th data-sort="won" class="number-cell">Won ($)</th>
+                    <th data-sort="entry" class="number-cell">Entry ($)</th>
                     <th data-sort="roi" class="number-cell">ROI %</th>
+                    <th data-sort="decks" class="number-cell">Decks</th>
+                    <th data-sort="itm" class="number-cell">ITM %</th>
                 </tr>
             </thead>
             <tbody id="playerROIBody"></tbody>
@@ -615,32 +702,123 @@
             });
         });
 
-        // Add function to display dummy ROI data
-        function displayPlayerROIData() {
-            const dummyData = [
-                { player: "Player1", investment: 1000, earnings: 1500, roi: 50 },
-                { player: "Player2", investment: 2000, earnings: 2400, roi: 20 },
-                { player: "Player3", investment: 500, earnings: 800, roi: 60 },
-                { player: "Player4", investment: 1500, earnings: 1350, roi: -10 }
-            ];
+        // Replace the dummy displayPlayerROIData function with this:
+        async function displayPlayerROIData() {
+            try {
+                const { data: roiData, error } = await supabaseClient
+                    .from('vwtactic_roi')
+                    .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, roi_pct, itm_pct');
 
-            const tableBody = document.getElementById('playerROIBody');
-            tableBody.innerHTML = '';
+                if (error) throw error;
 
-            dummyData.forEach(player => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${player.player}</td>
-                    <td class="number-cell">$${player.investment.toLocaleString()}</td>
-                    <td class="number-cell">$${player.earnings.toLocaleString()}</td>
-                    <td class="number-cell">
-                        <span style="color: ${player.roi >= 0 ? '#22c55e' : '#ef4444'}">
-                            ${player.roi > 0 ? '+' : ''}${player.roi}%
-                        </span>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
+                const tableBody = document.getElementById('playerROIBody');
+                tableBody.innerHTML = '';
+
+                const maxDecks = Math.max(...roiData.map(player => player.decks));
+
+                // Update the getITMDetails function
+                function getITMDetails(itmPct) {
+                    if (itmPct >= 70) {
+                        return {
+                            color: '#22c55e', // Green
+                            label: 'Advanced'
+                        };
+                    } else if (itmPct >= 60) {
+                        return {
+                            color: '#3b82f6', // Blue
+                            label: 'Intermediate'
+                        };
+                    } else if (itmPct >= 50) {
+                        return {
+                            color: '#8b5cf6', // Purple
+                            label: 'Acceptable'
+                        };
+                    } else if (itmPct >= 40) {
+                        return {
+                            color: '#f97316', // Orange
+                            label: 'Below Average'
+                        };
+                    } else {
+                        return {
+                            color: '#6b7280', // Grey
+                            label: 'Poor'
+                        };
+                    }
+                }
+
+                // Update the displayPlayerROIData function's row template
+                roiData.forEach((player, index) => {
+                    const itmDetails = getITMDetails(player.itm_pct);
+                    
+                    // Get trophy icon for top 3
+                    const getTrophyIcon = (index) => {
+                        if (index === 0) return '<i class="fas fa-trophy trophy-icon" style="color: #FFD700;"></i>';
+                        if (index === 1) return '<i class="fas fa-trophy trophy-icon" style="color: #C0C0C0;"></i>';
+                        if (index === 2) return '<i class="fas fa-trophy trophy-icon" style="color: #CD7F32;"></i>';
+                        return '';
+                    };
+
+                    // Calculate deck size relative to max
+                    const deckRatio = player.decks / maxDecks;
+                    const getDeckIcons = (ratio) => {
+                        if (ratio > 0.8) return '<i class="fas fa-square deck-icon"></i>'.repeat(3);
+                        if (ratio > 0.5) return '<i class="fas fa-square deck-icon"></i>'.repeat(2);
+                        return '<i class="fas fa-square deck-icon"></i>';
+                    };
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="player-cell">
+                            <img src="${player.profile_picture}" 
+                                 alt="${player.player_name}" 
+                                 class="player-image"
+                                 onerror="this.src='../icons/ft_logo.webp'"
+                                 loading="lazy">
+                            <span>${player.player_name}</span>
+                        </td>
+                        <td class="money-group">
+                            <div class="money-row">
+                                <span class="money-label">Won:</span>
+                                <span class="top-winner">
+                                    ${getTrophyIcon(index)}
+                                    <span style="color: #22c55e">$${player.total_won.toLocaleString()}</span>
+                                </span>
+                            </div>
+                            <div class="money-row">
+                                <span class="money-label">Entry:</span>
+                                <span>$${player.total_entry.toLocaleString()}</span>
+                            </div>
+                            <div class="money-row">
+                                <span class="money-label">ROI:</span>
+                                <span style="color: ${player.roi_pct >= 0 ? '#22c55e' : '#ef4444'}">
+                                    ${player.roi_pct > 0 ? '+' : ''}${player.roi_pct.toFixed(1)}%
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="deck-indicator" title="${player.decks} decks">
+                                ${getDeckIcons(deckRatio)}
+                                <span class="deck-size">${player.decks}</span>
+                            </div>
+                        </td>
+                        <td class="number-cell">
+                            <div class="decks-bar">
+                                <div class="bar-container">
+                                    <div class="bar-fill" 
+                                         style="width: ${player.itm_pct}%; background: ${getITMDetails(player.itm_pct).color};"
+                                         title="${getITMDetails(player.itm_pct).label} ITM Rate"></div>
+                                </div>
+                                <span class="bar-value" style="color: ${getITMDetails(player.itm_pct).color}">
+                                    ${Math.round(player.itm_pct)}%
+                                </span>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching ROI data:', error);
+            }
         }
 
         // Load data when page loads

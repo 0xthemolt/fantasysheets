@@ -152,7 +152,7 @@ where 1=1
 --hero_handle = 'CryptoKaleo'
 --and ghwst.tournament_unique_key  = 'Main 33'
 and gt.tournament_status <> 'not started'
-and gt.tournament_seq_nbr <= 6
+and gt.tournament_seq_nbr <= 8
 group by 1,2,3,4
 )
 select tournament_unique_key
@@ -160,7 +160,7 @@ select tournament_unique_key
 ,max(views) views
 ,max(score_0_count) score_0_count
 from base
-where hours_since_Start <= (24*3)
+where hours_since_Start <= (24*1)
 group by 1,2
 order by 1,2"""
 tournament_views_df = pd.read_sql_query(tournament_views_query, conn_two)

@@ -163,7 +163,7 @@
 
         .table-container {
             display: none;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -182,16 +182,18 @@
         #heroScores th:nth-child(8) { width: 80px; }  /* Tweets */
 
         /* Player ROI table columns */
-        #playerROI th:nth-child(1) { width: 200px; } /* Player */
-        #playerROI th:nth-child(2) { width: 200px; } /* Won/Entry/ROI group */
-        #playerROI th:nth-child(3) { width: 100px; } /* Decks */
-        #playerROI th:nth-child(4) { width: 100px; } /* ITM % */
+        #playerROI th:nth-child(1) { width: 50px; max-width: 150px;} /* Player */
+        #playerROI th:nth-child(2) { width: 50px; max-width: 100px; } /*won*/
+        #playerROI th:nth-child(3) { width: 50px; max-width: 100px;} /*etry*/
+        #playerROI th:nth-child(4) { width: 50px; max-width: 100px;} /*roi*/
+        #playerROI th:nth-child(5) { width: 50px; max-width: 150px;} /* ITM % */
         
         /* Add these styles to your existing CSS section */
         .player-cell {
             display: flex;
             align-items: center;
             gap: 8px;
+            min-height: 40px; /* Prevent layout shift */
         }
 
         .player-image {
@@ -199,6 +201,7 @@
             height: 32px;
             border-radius: 50%;
             object-fit: cover;
+            background: url('../icons/ft_logo.webp') center/cover; /* Default background */
         }
 
         /* Update the bar-related styles */
@@ -206,16 +209,16 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            width: 100%; /* Full width of container */
+            justify-content: flex-end;
         }
 
         .bar-container {
-            width: 80px; /* Fixed width for consistency */
+            width: 100px;
             height: 6px;
             background: #2a2a2a;
             border-radius: 3px;
             overflow: hidden;
-            flex-shrink: 0; /* Prevent bar from shrinking */
+            flex-shrink: 0;
         }
 
         .bar-fill {
@@ -225,9 +228,11 @@
 
         /* Add new style for the value display */
         .bar-value {
-            min-width: 40px; /* Fixed width for percentage */
+            font-size: 0.9em;
+            font-weight: 500;
+            min-width: 36px;
             text-align: right;
-            flex-shrink: 0; /* Prevent text from shrinking */
+            white-space: nowrap;
         }
 
         /* Add these new styles */
@@ -274,6 +279,31 @@
 
         .trophy-icon {
             margin-right: 2px;
+        }
+
+        /* Add these styles to your CSS section */
+        .won-cell {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .trophy-container {
+            width: 20px; /* Fixed width for trophy */
+            display: flex;
+            justify-content: center;
+        }
+
+        .won-amount {
+            min-width: 50px; /* Fixed width for amount, adjust based on max expected width */
+            text-align: right;
+        }
+
+        /* Update the decks-bar and related styles */
+        .itm-cell {
+            text-align: center !important;
+            padding-right: 8px !important;
         }
     </style>
 </head>
@@ -323,7 +353,6 @@
                     <th data-sort="won" class="number-cell">Won ($)</th>
                     <th data-sort="entry" class="number-cell">Entry ($)</th>
                     <th data-sort="roi" class="number-cell">ROI %</th>
-                    <th data-sort="decks" class="number-cell">Decks</th>
                     <th data-sort="itm" class="number-cell">ITM %</th>
                 </tr>
             </thead>
@@ -675,6 +704,47 @@
             });
         }
 
+        // Update the getITMDetails function
+        function getITMDetails(itmPct) {
+            if (itmPct >= 70) {
+                return {
+                    color: '#22c55e', // Green
+                    label: 'Advanced'
+                };
+            } else if (itmPct >= 60) {
+                return {
+                    color: '#3b82f6', // Blue
+                    label: 'Intermediate'
+                };
+            } else if (itmPct >= 50) {
+                return {
+                    color: '#a855f7', // Purple
+                    label: 'Acceptable'
+                };
+            } else if (itmPct >= 40) {
+                return {
+                    color: '#f97316', // Orange
+                    label: 'Below Average'
+                };
+            } else {
+                return {
+                    color: '#6b7280', // Grey
+                    label: 'Poor'
+                };
+            }
+        }
+
+        // Add this function to determine top winners
+        function getTopWinners(data) {
+            // Sort by total_won descending and get top 3
+            return new Set(
+                [...data]
+                    .sort((a, b) => b.total_won - a.total_won)
+                    .slice(0, 3)
+                    .map(player => player.player_name)
+            );
+        }
+
         // Update the click handler
         document.querySelectorAll('.segment-label').forEach(label => {
             label.addEventListener('click', function() {
@@ -702,70 +772,81 @@
             });
         });
 
-        // Replace the dummy displayPlayerROIData function with this:
+        // Add ROI table sorting functionality
+        let roiSort = { column: 'won', ascending: false }; // Default sort by winnings
+
+        // Add this function for ROI table sorting
+        function sortROIData(data, column, ascending) {
+            return [...data].sort((a, b) => {
+                let aValue, bValue;
+                
+                switch(column) {
+                    case 'player':
+                        aValue = a.player_name.toLowerCase();
+                        bValue = b.player_name.toLowerCase();
+                        break;
+                    case 'won':
+                        aValue = a.total_won;
+                        bValue = b.total_won;
+                        break;
+                    case 'entry':
+                        aValue = a.total_entry;
+                        bValue = b.total_entry;
+                        break;
+                    case 'roi':
+                        aValue = a.roi_pct;
+                        bValue = b.roi_pct;
+                        break;
+                    case 'decks':
+                        aValue = a.decks;
+                        bValue = b.decks;
+                        break;
+                    case 'itm':
+                        aValue = a.itm_pct;
+                        bValue = b.itm_pct;
+                        break;
+                }
+                
+                return ascending ? aValue - bValue : bValue - aValue;
+            });
+        }
+
+        // Add cached data variable
+        let cachedROIData = null;
+
+        // Update the displayPlayerROIData function
         async function displayPlayerROIData() {
             try {
-                const { data: roiData, error } = await supabaseClient
-                    .from('vwtactic_roi')
-                    .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, roi_pct, itm_pct');
+                // Only fetch if we don't have cached data
+                if (!cachedROIData) {
+                    const { data, error } = await supabaseClient
+                        .from('vwtactic_roi')
+                        .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, roi_pct, itm_pct');
 
-                if (error) throw error;
+                    if (error) throw error;
+                    cachedROIData = data;
+                }
 
                 const tableBody = document.getElementById('playerROIBody');
                 tableBody.innerHTML = '';
 
-                const maxDecks = Math.max(...roiData.map(player => player.decks));
+                // Get top winners once
+                const topWinners = getTopWinners(cachedROIData);
+                
+                // Sort the cached data
+                const sortedData = sortROIData(cachedROIData, roiSort.column, roiSort.ascending);
 
-                // Update the getITMDetails function
-                function getITMDetails(itmPct) {
-                    if (itmPct >= 70) {
-                        return {
-                            color: '#22c55e', // Green
-                            label: 'Advanced'
-                        };
-                    } else if (itmPct >= 60) {
-                        return {
-                            color: '#3b82f6', // Blue
-                            label: 'Intermediate'
-                        };
-                    } else if (itmPct >= 50) {
-                        return {
-                            color: '#8b5cf6', // Purple
-                            label: 'Acceptable'
-                        };
-                    } else if (itmPct >= 40) {
-                        return {
-                            color: '#f97316', // Orange
-                            label: 'Below Average'
-                        };
-                    } else {
-                        return {
-                            color: '#6b7280', // Grey
-                            label: 'Poor'
-                        };
-                    }
-                }
+                // Get trophy icon based on total winnings rank, not display order
+                const getTrophyIcon = (playerName) => {
+                    const winnerRank = [...topWinners].indexOf(playerName);
+                    if (winnerRank === 0) return '<i class="fas fa-trophy" style="color: #FFD700; margin-right: 4px;"></i>';
+                    if (winnerRank === 1) return '<i class="fas fa-trophy" style="color: #C0C0C0; margin-right: 4px;"></i>';
+                    if (winnerRank === 2) return '<i class="fas fa-trophy" style="color: #CD7F32; margin-right: 4px;"></i>';
+                    return '';
+                };
 
-                // Update the displayPlayerROIData function's row template
-                roiData.forEach((player, index) => {
+                sortedData.forEach(player => {
                     const itmDetails = getITMDetails(player.itm_pct);
-                    
-                    // Get trophy icon for top 3
-                    const getTrophyIcon = (index) => {
-                        if (index === 0) return '<i class="fas fa-trophy trophy-icon" style="color: #FFD700;"></i>';
-                        if (index === 1) return '<i class="fas fa-trophy trophy-icon" style="color: #C0C0C0;"></i>';
-                        if (index === 2) return '<i class="fas fa-trophy trophy-icon" style="color: #CD7F32;"></i>';
-                        return '';
-                    };
-
-                    // Calculate deck size relative to max
-                    const deckRatio = player.decks / maxDecks;
-                    const getDeckIcons = (ratio) => {
-                        if (ratio > 0.8) return '<i class="fas fa-square deck-icon"></i>'.repeat(3);
-                        if (ratio > 0.5) return '<i class="fas fa-square deck-icon"></i>'.repeat(2);
-                        return '<i class="fas fa-square deck-icon"></i>';
-                    };
-
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td class="player-cell">
@@ -776,39 +857,33 @@
                                  loading="lazy">
                             <span>${player.player_name}</span>
                         </td>
-                        <td class="money-group">
-                            <div class="money-row">
-                                <span class="money-label">Won:</span>
-                                <span class="top-winner">
-                                    ${getTrophyIcon(index)}
-                                    <span style="color: #22c55e">$${player.total_won.toLocaleString()}</span>
+                        <td class="number-cell">
+                            <div class="won-cell">
+                                <div class="trophy-container">
+                                    ${getTrophyIcon(player.player_name)}
+                                </div>
+                                <span class="won-amount" style="color: ${player.total_won > 0 ? '#22c55e' : '#6b7280'}">
+                                    $${player.total_won.toLocaleString()}
                                 </span>
-                            </div>
-                            <div class="money-row">
-                                <span class="money-label">Entry:</span>
-                                <span>$${player.total_entry.toLocaleString()}</span>
-                            </div>
-                            <div class="money-row">
-                                <span class="money-label">ROI:</span>
-                                <span style="color: ${player.roi_pct >= 0 ? '#22c55e' : '#ef4444'}">
-                                    ${player.roi_pct > 0 ? '+' : ''}${player.roi_pct.toFixed(1)}%
-                                </span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="deck-indicator" title="${player.decks} decks">
-                                ${getDeckIcons(deckRatio)}
-                                <span class="deck-size">${player.decks}</span>
                             </div>
                         </td>
                         <td class="number-cell">
+                            $${player.total_entry.toLocaleString()}
+                            <span style="color: #6b7280; font-size: 0.9em;">(${player.decks})</span>
+                        </td>
+                        <td class="number-cell">
+                            <span style="color: ${player.roi_pct >= 0 ? '#22c55e' : '#ef4444'}">
+                                ${player.roi_pct > 0 ? '+' : ''}${Math.round(player.roi_pct)}%
+                            </span>
+                        </td>
+                        <td class="itm-cell">
                             <div class="decks-bar">
                                 <div class="bar-container">
                                     <div class="bar-fill" 
-                                         style="width: ${player.itm_pct}%; background: ${getITMDetails(player.itm_pct).color};"
-                                         title="${getITMDetails(player.itm_pct).label} ITM Rate"></div>
+                                         style="width: ${player.itm_pct}%; background: ${itmDetails.color};"
+                                         title="${itmDetails.label} ITM Rate"></div>
                                 </div>
-                                <span class="bar-value" style="color: ${getITMDetails(player.itm_pct).color}">
+                                <span class="bar-value" style="color: ${itmDetails.color}">
                                     ${Math.round(player.itm_pct)}%
                                 </span>
                             </div>
@@ -817,9 +892,23 @@
                     tableBody.appendChild(row);
                 });
             } catch (error) {
-                console.error('Error fetching ROI data:', error);
+                console.error('Error handling ROI data:', error);
             }
         }
+
+        // Add click handlers for ROI table sorting
+        document.querySelectorAll('#playerROI th').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.dataset.sort;
+                if (roiSort.column === column) {
+                    roiSort.ascending = !roiSort.ascending; // Toggle direction if same column
+                } else {
+                    roiSort.column = column;
+                    roiSort.ascending = false; // Start with descending for new column
+                }
+                displayPlayerROIData();
+            });
+        });
 
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', () => {

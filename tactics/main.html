@@ -41,6 +41,7 @@
         table {
             border-collapse: collapse;
             width: 100%;
+            table-layout: fixed; /* This helps control column widths */
         }
 
         td, th {
@@ -98,7 +99,7 @@
             min-width: 100%;        /* But at least as wide as viewport */
         }
 
-        #tableContainer {
+        #heroScoresContainer {
             overflow-x: auto;       /* Enable horizontal scrolling */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
         }
@@ -110,6 +111,91 @@
         .clickable-hover {
             cursor: pointer;
         }
+
+        /* Toggle Switch Styles */
+        .toggle-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .table-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .table-container.active {
+            display: block;
+        }
+
+        /* Add column width specifications */
+        #heroScores th:nth-child(1) { width: 60px; }  /* Rank */
+        #heroScores th:nth-child(2) { width: 250px; } /* Hero */
+        #heroScores th:nth-child(3) { width: 80px; }  /* Score */
+        #heroScores th:nth-child(4) { width: 100px; } /* Salary Cap */
+        #heroScores th:nth-child(5) { width: 80px; }  /* Value */
+        #heroScores th:nth-child(6) { width: 80px; }  /* Own % */
+        #heroScores th:nth-child(7) { width: 80px; }  /* Views */
+        #heroScores th:nth-child(8) { width: 80px; }  /* Tweets */
+
+        /* Player ROI table columns */
+        #playerROI th:nth-child(1) { width: 200px; } /* Player */
+        #playerROI th:nth-child(2) { width: 120px; } /* Investment */
+        #playerROI th:nth-child(3) { width: 120px; } /* Earnings */
+        #playerROI th:nth-child(4) { width: 100px; } /* ROI % */
+        
     </style>
 </head>
 <body>
@@ -126,8 +212,15 @@
             </div>
         </div>
     </div>
-    <div id="tableContainer">
-        <h2>Hero Scores</h2>
+    <div class="toggle-switch-container">
+        <span class="toggle-label">Heroes</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="tableToggle">
+            <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Player ROI</span>
+    </div>
+    <div id="heroScoresContainer" class="table-container active">
         <table id="heroScores">
             <thead>
                 <tr>
@@ -142,6 +235,19 @@
                 </tr>
             </thead>
             <tbody id="heroTableBody"></tbody>
+        </table>
+    </div>
+    <div id="playerROIContainer" class="table-container">
+        <table id="playerROI">
+            <thead>
+                <tr>
+                    <th data-sort="player">Player</th>
+                    <th data-sort="investment" class="number-cell">Investment</th>
+                    <th data-sort="earnings" class="number-cell">Earnings</th>
+                    <th data-sort="roi" class="number-cell">ROI %</th>
+                </tr>
+            </thead>
+            <tbody id="playerROIBody"></tbody>
         </table>
     </div>
 
@@ -484,6 +590,49 @@
                     </td>
                     <td class="number-cell">${hero.views.toLocaleString()}</td>
                     <td class="number-cell">${hero.tweet_count}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Add the toggle handler
+        document.getElementById('tableToggle').addEventListener('change', function(e) {
+            const heroTable = document.getElementById('heroScoresContainer');
+            const roiTable = document.getElementById('playerROIContainer');
+            
+            if (this.checked) {
+                heroTable.classList.remove('active');
+                roiTable.classList.add('active');
+                displayPlayerROIData(); // Load ROI data when switching to that view
+            } else {
+                roiTable.classList.remove('active');
+                heroTable.classList.add('active');
+            }
+        });
+
+        // Add function to display dummy ROI data
+        function displayPlayerROIData() {
+            const dummyData = [
+                { player: "Player1", investment: 1000, earnings: 1500, roi: 50 },
+                { player: "Player2", investment: 2000, earnings: 2400, roi: 20 },
+                { player: "Player3", investment: 500, earnings: 800, roi: 60 },
+                { player: "Player4", investment: 1500, earnings: 1350, roi: -10 }
+            ];
+
+            const tableBody = document.getElementById('playerROIBody');
+            tableBody.innerHTML = '';
+
+            dummyData.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${player.player}</td>
+                    <td class="number-cell">$${player.investment.toLocaleString()}</td>
+                    <td class="number-cell">$${player.earnings.toLocaleString()}</td>
+                    <td class="number-cell">
+                        <span style="color: ${player.roi >= 0 ? '#22c55e' : '#ef4444'}">
+                            ${player.roi > 0 ? '+' : ''}${player.roi}%
+                        </span>
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });

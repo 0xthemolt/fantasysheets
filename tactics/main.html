@@ -112,62 +112,56 @@
             cursor: pointer;
         }
 
-        /* Toggle Switch Styles */
-        .toggle-switch-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        /* Replace the toggle switch styles with these new styles */
+        .segmented-control {
+            position: relative;
+            width: fit-content;
+            background: #151616;
+            border-radius: 8px;
+            padding: 4px;
             margin-bottom: 20px;
         }
 
-        .toggle-switch {
+        .segment-labels {
             position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
+            display: flex;
+            gap: 8px;
         }
 
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .toggle-label {
+        .segment-label {
+            position: relative;
+            padding: 8px 16px;
             font-weight: 500;
-            color: #666;
+            color: #525353;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 1;
+        }
+
+        .segment-label.active {
+            color: white;
+        }
+
+        .segment-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: #2A2A2A;
+            height: calc(100% - 8px);
+            width: calc((100% - 8px) / 2);  /* Half width minus padding */
+            border-radius: 6px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Initial state - Heroes selected */
+        .segment-slider {
+            transform: translateX(0);
+        }
+
+        /* ROI selected state */
+        .segmented-control[data-active="roi"] .segment-slider {
+            transform: translateX(calc(100% + 8px));  /* Full width plus gap */
         }
 
         .table-container {
@@ -212,13 +206,12 @@
             </div>
         </div>
     </div>
-    <div class="toggle-switch-container">
-        <span class="toggle-label">Heroes</span>
-        <label class="toggle-switch">
-            <input type="checkbox" id="tableToggle">
-            <span class="slider"></span>
-        </label>
-        <span class="toggle-label">Player ROI</span>
+    <div class="segmented-control">
+        <div class="segment-labels">
+            <span class="segment-label active" data-segment="heroes">Heroes</span>
+            <span class="segment-label" data-segment="roi">Player ROI</span>
+        </div>
+        <div class="segment-slider"></div>
     </div>
     <div id="heroScoresContainer" class="table-container active">
         <table id="heroScores">
@@ -595,19 +588,31 @@
             });
         }
 
-        // Add the toggle handler
-        document.getElementById('tableToggle').addEventListener('change', function(e) {
-            const heroTable = document.getElementById('heroScoresContainer');
-            const roiTable = document.getElementById('playerROIContainer');
-            
-            if (this.checked) {
-                heroTable.classList.remove('active');
-                roiTable.classList.add('active');
-                displayPlayerROIData(); // Load ROI data when switching to that view
-            } else {
-                roiTable.classList.remove('active');
-                heroTable.classList.add('active');
-            }
+        // Update the click handler
+        document.querySelectorAll('.segment-label').forEach(label => {
+            label.addEventListener('click', function() {
+                const segment = this.dataset.segment;
+                const control = this.closest('.segmented-control');
+                const heroTable = document.getElementById('heroScoresContainer');
+                const roiTable = document.getElementById('playerROIContainer');
+
+                // Update active states
+                document.querySelectorAll('.segment-label').forEach(lbl => lbl.classList.remove('active'));
+                this.classList.add('active');
+
+                // Update slider position by setting data-active
+                control.dataset.active = segment;
+
+                // Show/hide appropriate table
+                if (segment === 'roi') {
+                    heroTable.classList.remove('active');
+                    roiTable.classList.add('active');
+                    displayPlayerROIData();
+                } else {
+                    roiTable.classList.remove('active');
+                    heroTable.classList.add('active');
+                }
+            });
         });
 
         // Add function to display dummy ROI data

@@ -12,7 +12,6 @@
         .hero-cell {
             display: flex;
             align-items: center;
-            padding: 8px;
         }
 
         .score-container {
@@ -172,14 +171,14 @@
         }
 
         /* Add column width specifications */
-        #heroScores th:nth-child(1) { width: 60px; }  /* Rank */
-        #heroScores th:nth-child(2) { width: 250px; } /* Hero */
-        #heroScores th:nth-child(3) { width: 80px; }  /* Score */
-        #heroScores th:nth-child(4) { width: 100px; } /* Salary Cap */
-        #heroScores th:nth-child(5) { width: 80px; }  /* Value */
-        #heroScores th:nth-child(6) { width: 80px; }  /* Own % */
-        #heroScores th:nth-child(7) { width: 80px; }  /* Views */
-        #heroScores th:nth-child(8) { width: 80px; }  /* Tweets */
+        #heroScores th:nth-child(1) { width: 60px; max-width: 60px; }      /* Rank */
+        #heroScores th:nth-child(2) { width: 300px; max-width: 300px; }    /* Hero */
+        #heroScores th:nth-child(3) { width: 100px; max-width: 100px; }    /* Score */
+        #heroScores th:nth-child(4) { width: 100px; max-width: 100px; }    /* Salary Cap */
+        #heroScores th:nth-child(5) { width: 80px; max-width: 60px; }      /* Value */
+        #heroScores th:nth-child(6) { width: 80px; max-width: 60px; }      /* Own % */
+        #heroScores th:nth-child(7) { width: 80px; max-width: 60px; }      /* Views */
+        #heroScores th:nth-child(8) { width: 80px; max-width: 60px; } 
 
         /* Player ROI table columns */
         #playerROI th:nth-child(1) { width: 50px; max-width: 150px;} /* Player */

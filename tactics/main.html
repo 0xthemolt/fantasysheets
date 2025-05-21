@@ -420,7 +420,7 @@
                 // Fetch all pages until next is null
                 while (hasNextPage) {
                     const heroResponse = await fetch(
-                        `https://api-v2.fantasy.top/tactics/hero-scores/7644dde5-f0d8-45f9-bb78-fec1e8766e70?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=50`, {
+                        `https://api-v2.fantasy.top/tactics/hero-scores/7644dde5-f0d8-45f9-bb78-fec1e8766e70?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=250`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'

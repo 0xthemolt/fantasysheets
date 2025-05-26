@@ -681,7 +681,7 @@
             if (heroId && rarity && stars) {
                 const heroCardImage = document.getElementById('hero-card-image');
                 // Try with absolute path from root
-                const imageUrl = `/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                const imageUrl = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                 console.log('Hero Card Image URL:', {
                     heroId,
                     rarity,
@@ -695,7 +695,7 @@
                 heroCardImage.onerror = function() {
                     console.log('Image failed to load:', imageUrl);
                     // Try fallback path if first attempt fails
-                    this.src = `../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                    this.src = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                     
                     // Add second error handler for fallback path
                     this.onerror = function() {
@@ -1896,10 +1896,10 @@
                         <div class="seller-modal-content">
                             <div class="bid-content" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
                                 <img id="hero-card-image-${heroId}" 
-                                     src="/cards/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                     src="https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png"
                                      alt="Hero Card"
                                      style="width: 80px; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
-                                     onerror="this.onerror=null; this.src='../cards/${rarity.toLowerCase()}/${heroId}_${stars}.png'">
+                                     onerror="this.onerror=null; this.src='../icons/fan.webp'">
                                 <div>
                                     <div style="font-size: 0.8em; color: #aaa;">
                                         *Experimental/Data may be inaccurate. Active Bids as of <span style="color: white; font-weight: bold;">${calculateMinutesAgo(bids[0].db_updated_utc)} min ago</span>

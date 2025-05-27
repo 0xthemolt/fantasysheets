@@ -12,14 +12,6 @@ LEAGUE_IMAGES = config['league_images']
 LEAGUE_COLORS = config['league_colors']
 REWARD_IMAGES = config['reward_images']
 
-def get_db_connection():
-    return psycopg2.connect(
-        dbname="0xthemolt",
-        user="postgres",
-        password="admin",
-        host="localhost",
-        port="5432"
-    )
 
 def supabase_db_connection():
     return psycopg2.connect(
@@ -76,11 +68,8 @@ group by 1,2,3
     select 
         gt.tournament_name as league_name, -- column 0
         gtpp.tournament_league_unique_key, -- column 1
-        gt.tournament_duration_hours::integer as tournament_duration_hours, -- column 2
-        case 
-            when gt.tournament_status = 'live' then ROUND(EXTRACT(EPOCH FROM (NOW() at time zone 'UTC' - gt.start_timestamp)) / 3600)::integer 
-            else ROUND(gt.tournament_duration_hours)::integer 
-        end AS tournament_progress_hours, -- column 3
+        null as tournament_duration_hours, -- column 2
+        null AS tournament_progress_hours, -- column 3
         player_handle, -- column 4
         player_pic, -- column 5
         player_score, -- column 6

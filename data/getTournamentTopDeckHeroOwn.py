@@ -10,10 +10,10 @@ with open('C:/fantasy_top_analysis/pages/config.json', 'r') as config_file:
 
 def get_db_connection():
     return psycopg2.connect(
-        dbname="0xthemolt",
-        user="postgres",
-        password="admin",
-        host="localhost",
+        dbname="postgres",
+        user="postgres.hhcuqhvmzwmehdsaamhn",
+        password="$&roct8&rgp4NE",
+        host="aws-0-us-west-1.pooler.supabase.com",
         port="5432"
     )
 
@@ -22,44 +22,52 @@ TOURNAMENT_NUMBER = config['tournament_number']
 
 query = f"""
 with base_records as (
-    select 
+select 
     	t.tournament_id,
         t.tournament_unique_key,
         t2.league,
         t.hero_handle,
         t.hero_id,
-        ghwst.fantasy_score,
+        ghwst.score as fantasy_score,
         t.tournament_player_deck_id,
-        t.unique_player_rank as player_rank,
+        t.player_rank,
         card_stars.hero_stars,
         coalesce(
         	(case 
         	      when t2.league = 'Reverse'  then
-        	      	case when t.player_score = 0 then gtbi.reward / 5
+        	      	case when t.player_score = 0 then eth_reward.reward / 5
         	 	    else  
         	 	    (1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) / 
-         				SUM(1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * gtbi.reward
+         				SUM(1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * eth_reward.reward
         	 	    end
         	 	  when t2.league <>  'Reverse'  then
         	 	  	case when t.hero_score  = 0 then 0 
-					else (t.hero_score::float / t.player_score) * gtbi.reward
+					else (
+                          coalesce((t.hero_score::float / t.player_score) * eth_reward.reward,0)
+                        + coalesce((t.hero_score::float / t.player_score) * ((frag_rewards.reward / 100) * .0045),0)
+                        )
 					end
 			end) ,0) as reward_value_added,
-        t.db_updated_cst + INTERVAL '5 hours' as db_updated_utc
+        t.db_updated_cst as db_updated_utc
     from agg.tournamentownership t 
     join flatten.get_tournaments t2 
     	on t.tournament_id = t2.tournament_id
-    left join flatten.get_heros_with_stats_tournament ghwst 
+    left join flatten.HERO_STATS_TOURNAMENT_CURRENT ghwst 
     	on t.hero_id = ghwst.hero_id
     	and t.tournament_unique_key = ghwst.tournament_unique_key
     left join flatten.get_cards_flags_stars card_stars
 	    ON t.hero_id = card_stars.hero_id
 	    and t2.start_timestamp between card_stars.start_datetime and card_stars.end_datetime
-	left join flatten.get_tournament_by_id gtbi 
-		on t.tournament_id = gtbi.tournament_id
-		and t.player_rank between gtbi.range_start  and gtbi.range_end
-		and gtbi.reward_type = 'ETH'
-    where t.tournament_unique_key = 'Main 52'
+	left join flatten.TOURNAMENT_REWARDS eth_reward 
+		on t.tournament_id = eth_reward.tournament_id
+		and t.player_rank between eth_reward.range_start  and eth_reward.range_end
+		and eth_reward.reward_type = 'ETH'
+    left join flatten.TOURNAMENT_REWARDS frag_rewards 
+		on t.tournament_id = frag_rewards.tournament_id
+		and t.player_rank between frag_rewards.range_start  and frag_rewards.range_end
+		and frag_rewards.reward_type = 'FRAGMENT'
+    where t.tournament_unique_key = 'Main 53'
+    order by player_score desc
 )
 ,reward_value_added as (
 select tournament_id,tournament_unique_key,league,hero_handle,hero_id,fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
@@ -75,7 +83,7 @@ top50_records as (
 itm_records as (
     select br.*
     from base_records br
-    join flatten.GET_TOURNAMENT_BY_ID rewards
+    join flatten.TOURNAMENT_REWARDS rewards
 	   on br.tournament_id = rewards.tournament_id 
 	    and br.player_rank between rewards.range_start and rewards.range_end 
 	    and rewards.reward_type = 'ETH'
@@ -128,11 +136,11 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,league,hero_handle,concat('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
+select tournament_unique_key,league,hero_handle,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
 from base
 where rnk <= 10
 union all
-select tournament_unique_key,league,hero_handle,concat('https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
+select tournament_unique_key,league,hero_handle,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
 from reward_value_added
 where rnk <= 10
 order by tournament_unique_key,category,rnk asc

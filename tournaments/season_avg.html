@@ -246,7 +246,7 @@
                placeholder="Search heroes...">
         <label class="toggle-switch">
             <input type="checkbox" id="showOutgoingToggle">
-            Show Bottom 15 Heroes (at risk)
+            Show Bottom 5 Heroes (at risk)
         </label>
     </div>
     <div id="tableContainer">
@@ -264,7 +264,7 @@
 
     <script>
         // Define tournament numbers
-        const tournamentNumbers = [52, 51, 50, 49, 48];
+        const tournamentNumbers = [53, 52, 51, 50, 49];
 
         const EXEMPT_HEROES = ['frankdegods'];
         const TEAM_HEROES = ['0xMikado', 'travisbickle0x', '0xKipit'];
@@ -494,7 +494,7 @@
             );
 
             // Calculate bottom 15 index based on non-exempt heroes
-            const bottom15Index = nonExemptHeroes.length - 15;
+            const bottom15Index = nonExemptHeroes.length - 5;
 
             const searchTerm = document.getElementById('heroSearch').value;
             const showOnlyOutgoing = document.getElementById('showOutgoingToggle').checked;

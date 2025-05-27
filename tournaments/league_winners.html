@@ -71,12 +71,14 @@
                         .sort((a, b) => (b.rva || 0) - (a.rva || 0))  // Sort by RVA descending
                         .map(hero => `
                         <tr>
-                            <td style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-size: 1.1em">${hero.hero}</span>
-                                    <span style="font-size: 0.9em; color: #BBFF00;">${Math.round(hero.fantasy_score).toLocaleString()} pts</span>
-                                    <span style="font-size: 0.8em">${'⭐'.repeat(hero.hero_stars)}</span>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="${hero.image_url}" alt="${hero.hero}" class="card-image">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span style="font-size: 1.1em">${hero.hero}</span>
+                                        <span style="font-size: 0.9em; color: #BBFF00;">${Math.round(hero.fantasy_score).toLocaleString()} pts</span>
+                                        <span style="font-size: 0.8em">${'⭐'.repeat(hero.hero_stars)}</span>
+                                    </div>
                                 </div>
                             </td>
                             <td>
@@ -131,7 +133,7 @@
                 <i class="fas fa-home"></i>
             </a>
             Tournament Hero League Winners
-            <span class="tournament-badge">Main 52</span>
+            <span class="tournament-badge">Main 53</span>
         </h1>
     </div>
     <div class="small-text">
@@ -371,4 +373,3 @@
     }
 </style>
 
-    

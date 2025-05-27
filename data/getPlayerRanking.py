@@ -32,20 +32,32 @@ select  player_id
 from flatten.TOURNAMENT_PLAYERS gtpp 
 join finished_tournaments t
 	on gtpp.tournament_id = t.tournament_id
---where player_id = '0x162F95a9364c891028d255467F616902A479681a'
 group by 1
 )
---select * from player_deck_counts;
+,rewards_won_criteria as (
+select ph.player_id
+from flatten.tournament_player_history  ph
+join finished_tournaments t
+   on ph.tournament_id::text = t.tournament_id::text
+where t.finished_tournament_seq_nbr <= 3   /*must have won .03 eth in the last 3 combined*/
+group by 1
+having suM(reward_eth) >= .03
+UNION 
+select ph.player_id
+from flatten.tournament_player_history  ph
+join finished_tournaments t
+   on ph.tournament_id::text = t.tournament_id::text
+group by 1
+having suM(reward_fan) >= 5000000  /*lifetime 5m + fan*/
+)
 ,eth_frags_won as (
-select player_id
---,tournament_unique_key
+select ph.player_id
 ,suM(reward_eth) reward_eth
 ,sum(reward_fragment) + sum(reward_pack * 100) reward_frag 
-from flatten.tournament_player_history 
---where player_id = '0x162F95a9364c891028d255467F616902A479681a'
---and tournament_unique_key = 'Main 31'
-group by 1--,2
-having suM(reward_eth) >= .03
+from flatten.tournament_player_history  ph
+join rewards_won_criteria t
+   on ph.player_id = t.player_id
+group by 1
 )
 ,touranment_rankings as (
 select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp,t.finished_tournament_seq_nbr
@@ -66,8 +78,6 @@ left join flatten.get_player_basic_data gpbd
 join eth_frags_won 
     on tplayers.player_id = eth_frags_won.player_id
 where 1=1
---and tplayers.player_id = '0x162F95a9364c891028d255467F616902A479681a'
---and t.tournament_unique_key  = 'Main 31'
 )  
 ,league_ranking as (
 select league,player_id

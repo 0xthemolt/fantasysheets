@@ -174,7 +174,7 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,max(coalesce(tvbp.buy_volume,0)) as buy_vol
 ,max(coalesce(tvbp.pack_volume,0)) as pack_vol
 ,max(coalesce(tvbp.sell_volume,0)) as sell_vol
-,max(coalesce(tvbp.buy_volume,0) + coalesce(tvbp.pack_volume,0) - coalesce(tvbp.sell_volume,0)) as net_vol
+,max(coalesce(tvbp.sell_volume,0) - coalesce(tvbp.buy_volume,0) - coalesce(tvbp.pack_volume,0)) as net_vol
 ,max(coalesce(tvbp.trade_count,0)) as trade_count
 ,max(coalesce(tvbp.max_buy,0)) as max_buy
 ,max(coalesce(tvbp.max_sell,0)) as max_sell
@@ -242,10 +242,6 @@ rank_columns = ['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze
 for col in rank_columns:
     player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 
-# Handle NaN values in norm rank columns
-elo_columns = ['elo_score', 'elo_rank']
-for col in elo_columns:
-    player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 
 # Get the maximum freshness timestamp
 max_freshness = player_ranking_df['freshness_timestamp'].max()

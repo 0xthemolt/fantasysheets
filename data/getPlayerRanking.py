@@ -140,7 +140,7 @@ having count(*) >= 2 --at least 2 tournaments
         max(timestamp) as last_txn
     FROM flatten.player_mint_pack_details    
     where player_address <> '0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841'
-    -- and pack_price <> 0
+    -- and pack_price <> 0 --keep all because this gives activity txn
     GROUP BY 1
 )
 ,trade_volume_by_player as (

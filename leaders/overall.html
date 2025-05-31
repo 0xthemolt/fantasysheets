@@ -373,7 +373,7 @@
                             Sells
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable section-end" data-sort="netVol" title="Buy vol minus Sell Vol">
+                        <th class="sortable section-end" data-sort="netVol" title="Sells - Buys - Pack Bought">
                             Net
                             <div class="sort-arrow"></div>
                         </th>
@@ -502,7 +502,7 @@
                     <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
                     <td class="section-end">${formatInt(player.cards)}</td>
                     <td>${formatNumberMK(player.fanPoints)}</td>
-                    <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td class="section-end">${formatNumberMK(parseFloat(player.rewardFrag))}</td>
  
                     <td>${formatInt(player.decks)}</td>
@@ -586,10 +586,10 @@
                           player.reverse_l5 <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse_l5)}</span>` :
                           formatInt(player.reverse_l5)}
                     </td>
-                    <td>${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
-                    <td>${formatDecimalOne(player.packVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
-                    <td>${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
-                    <td class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td title="ETH">${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                    <td title="ETH">${formatDecimalOne(player.packVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                    <td title="ETH">${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                    <td title="Sells - Buys - Pack Bought" class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td><input type="checkbox" class="compare-checkbox"></td>
                 </tr>
             `).join('');

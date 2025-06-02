@@ -100,7 +100,7 @@
             </div>
         </div>
     </div>
-    <div id="tableContainer" style="margin-top: 20px;"></div>></div>
+    <div id="tableContainer" style="margin-top: 20px;"></div></div>
 
     <script>
         let charts = {}; // Add this at the top of your script to store chart instances
@@ -529,35 +529,6 @@
                     html += `<td>${total.toLocaleString()}</td>`;
                 });
                 html += '<td></td></tr>';
-
-                // Add spacing between sections
-                html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;
-
-
-                // Stars rows
-                html += '<tr><th colspan="' + (Object.keys(data).length + 2) + '">Card Counts By Hero Stars</th></tr>';
-
-                // Get all unique star values and sort them in descending order
-                const stars = [...new Set(Object.values(data).flatMap(t => t.stars ? t.stars.map(s => s.hero_stars) : []))];
-                const sortedStars = stars.length > 0 ? stars.sort((a, b) => b - a) : []; // Sort in descending order or set to empty array
-                
-                sortedStars.forEach(star => {
-                    html += `<tr><td>${star} ⭐</td>`;
-                    Object.values(data).forEach(tournamentData => {
-                        const starData = tournamentData.stars.find(s => s.hero_stars === star);
-                        html += `<td>${starData ? starData.card_count.toLocaleString() : '-'}</td>`;
-                    });
-                    html += '<td></td></tr>';
-                });
-                
-                // Add Stars Total row
-                html += '<tr class="total-row"><td>Total Cards</td>';
-                Object.values(data).forEach(tournamentData => {
-                    const total = tournamentData.stars.reduce((sum, star) => sum + star.card_count, 0);
-                    html += `<td>${total.toLocaleString()}</td>`;
-                });
-                html += '<td></td></tr>';
-                
                 html += '</table>';
                 
                 document.getElementById('tableContainer').innerHTML = html;

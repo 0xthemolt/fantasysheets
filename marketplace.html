@@ -346,7 +346,7 @@
         }
         
         .seller-modal {
-            background: rgba(30, 30, 30, 0.95);
+            background: rgba(30, 30, 30);
             border-radius: 12px;
             padding: 10px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -1771,310 +1771,6 @@
         }
 
         // Add this to your existing JavaScript, after the table is created
-        function initializeCommonEquivalentToggle() {
-            const toggle = document.getElementById('common-equivalent-toggle');
-            if (!toggle) {
-                console.warn('Common equivalent toggle not found');
-                return;
-            }
-            
-            const toggleLabel = document.getElementById('common-equivalent-label');
-            if (!toggleLabel) {
-                console.warn('Toggle label element not found');
-                return;
-            }
-            
-            toggle.addEventListener('change', function() {
-                toggleLabel.textContent = this.checked ? 'On' : 'Off';
-                updateCommonEquivalentPrices(this.checked);
-            });
-        }
-
-        function updateCommonEquivalentPrices(isEnabled) {
-            const rows = document.querySelectorAll('.marketplace-table tbody tr');
-            
-            rows.forEach(row => {
-                // Get all floor price cells for each rarity
-                const legendaryFloorCell = row.querySelector('td:nth-child(6)');
-                const epicFloorCell = row.querySelector('td:nth-child(9)');
-                const rareFloorCell = row.querySelector('td:nth-child(12)');
-                const commonFloorCell = row.querySelector('td:nth-child(15)');
-                
-                // Skip if any cell is null
-                if (!legendaryFloorCell || !epicFloorCell || !rareFloorCell || !commonFloorCell) {
-                    return;
-                }
-                
-                // Store original values if not already stored
-                if (!legendaryFloorCell.hasAttribute('data-original-value')) {
-                    legendaryFloorCell.setAttribute('data-original-value', legendaryFloorCell.textContent);
-                    epicFloorCell.setAttribute('data-original-value', epicFloorCell.textContent);
-                    rareFloorCell.setAttribute('data-original-value', rareFloorCell.textContent);
-                    commonFloorCell.setAttribute('data-original-value', commonFloorCell.textContent);
-                }
-                
-                // Remove any existing highlights
-                legendaryFloorCell.classList.remove('lowest-price-highlight');
-                epicFloorCell.classList.remove('lowest-price-highlight');
-                rareFloorCell.classList.remove('lowest-price-highlight');
-                commonFloorCell.classList.remove('lowest-price-highlight');
-                
-                if (isEnabled) {
-                    // Calculate common equivalents
-                    const legendaryValue = parseFloat(legendaryFloorCell.getAttribute('data-original-value'));
-                    const epicValue = parseFloat(epicFloorCell.getAttribute('data-original-value'));
-                    const rareValue = parseFloat(rareFloorCell.getAttribute('data-original-value'));
-                    const commonValue = parseFloat(commonFloorCell.getAttribute('data-original-value'));
-                    
-                    // Convert to common equivalents
-                    const legendaryEquiv = !isNaN(legendaryValue) ? legendaryValue / 125 : Infinity;
-                    const epicEquiv = !isNaN(epicValue) ? epicValue / 25 : Infinity;
-                    const rareEquiv = !isNaN(rareValue) ? rareValue / 5 : Infinity;
-                    
-                    // Display the equivalent values
-                    if (!isNaN(legendaryValue)) {
-                        legendaryFloorCell.innerHTML = `${formatValue(legendaryEquiv)} <small>(÷125)</small>`;
-                    }
-                    if (!isNaN(epicValue)) {
-                        epicFloorCell.innerHTML = `${formatValue(epicEquiv)} <small>(÷25)</small>`;
-                    }
-                    if (!isNaN(rareValue)) {
-                        rareFloorCell.innerHTML = `${formatValue(rareEquiv)} <small>(÷5)</small>`;
-                    }
-                    
-                    // Find the lowest equivalent price
-                    const prices = [
-                        { cell: legendaryFloorCell, value: legendaryEquiv },
-                        { cell: epicFloorCell, value: epicEquiv },
-                        { cell: rareFloorCell, value: rareEquiv },
-                        { cell: commonFloorCell, value: commonValue }
-                    ].filter(item => !isNaN(item.value) && item.value !== Infinity);
-                    
-                    if (prices.length > 0) {
-                        // Sort by value to find the lowest
-                        prices.sort((a, b) => a.value - b.value);
-                        // Highlight the lowest price
-                        prices[0].cell.classList.add('lowest-price-highlight');
-                    }
-                } else {
-                    // Restore original values
-                    legendaryFloorCell.textContent = legendaryFloorCell.getAttribute('data-original-value');
-                    epicFloorCell.textContent = epicFloorCell.getAttribute('data-original-value');
-                    rareFloorCell.textContent = rareFloorCell.getAttribute('data-original-value');
-                    commonFloorCell.textContent = commonFloorCell.getAttribute('data-original-value');
-                }
-            });
-        }
-
-        // Add this new function to handle bid modal display
-        function showBidModal(encodedBids, heroId, rarity, stars, encodedTrades) {
-            try {
-                const bids = JSON.parse(decodeURIComponent(encodedBids));
-                
-                // Create or get existing modal overlay
-                let modalOverlay = document.getElementById('bid-modal-overlay');
-                if (!modalOverlay) {
-                    modalOverlay = document.createElement('div');
-                    modalOverlay.id = 'bid-modal-overlay';
-                    modalOverlay.className = 'seller-modal-overlay';
-                    document.body.appendChild(modalOverlay);
-                    
-                    // Close modal when clicking outside
-                    modalOverlay.addEventListener('click', function(e) {
-                        if (e.target === modalOverlay) {
-                            closeBidModal();
-                        }
-                    });
-                }
-                
-                // Update the entire modal content each time
-                modalOverlay.innerHTML = `
-                    <div class="seller-modal" style="width: 500px;">
-                        <div class="seller-modal-close" onclick="closeBidModal()">
-                            <i class="fas fa-times"></i>
-                        </div>
-                        <div class="seller-modal-content">
-                            <div class="bid-content" style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                                <img id="hero-card-image-${heroId}" 
-                                     src="https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png"
-                                     alt="Hero Card"
-                                     style="width: 80px; height: auto; border-radius: 4px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);"
-                                     onerror="this.onerror=null; this.src='../icons/fan.webp'">
-                                <div>
-                                    <div style="font-size: 0.8em; color: #aaa;">
-                                        *Experimental/Data may be inaccurate. Active Bids as of <span style="color: white; font-weight: bold;">${calculateMinutesAgo(bids[0].db_updated_utc)} min ago</span>
-                                    </div>
-                                    <div class="bid-list" style="width: 100%;">
-                                        ${formatBidsList(bids)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Trade history in its own container -->
-                        <div class="trade_history" style="margin-top: 15px; width: 100%; padding: 0 10px;">
-                            <div style="font-size: 0.8em; color: #aaa; margin-bottom: 8px;">Trade History</div>
-                            <div class="price-range-container" style="position: relative; height: 24px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 8px;">
-                                <!-- Range bar and markers will be added dynamically -->
-                            </div>
-                            <div class="price-labels" style="display: flex; justify-content: space-between; font-size: 0.8em; color: #aaa;">
-                                <!-- Price labels will be added dynamically -->
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Show modal
-                modalOverlay.style.display = 'flex';
-                
-                // Handle trade data
-                if (encodedTrades && encodedTrades !== '[]') {
-                    try {
-                        const trades = JSON.parse(decodeURIComponent(encodedTrades));
-                        if (trades && trades.length > 0) {
-                            const trade = trades[0];
-                            const priceRange = modalOverlay.querySelector('.price-range-container');
-                            const priceLabels = modalOverlay.querySelector('.price-labels');
-                            
-                            const range = trade.max_price - trade.min_price;
-                            const floorPosition = ((trade.floor_price - trade.min_price) / range) * 100;
-                            const lastTradePosition = ((trade.last_trade - trade.min_price) / range) * 100;
-                            
-                            priceRange.innerHTML = `
-                                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(250, 204, 21, 0.3); transform: translateY(-50%);"></div>
-                                <div style="position: absolute; top: 4px; left: ${floorPosition}%; width: 2px; height: 16px; background: #00FFDF;" title="Floor: ${trade.floor_price.toFixed(4)}"></div>
-                                <div style="position: absolute; top: 4px; left: ${lastTradePosition}%; width: 2px; height: 16px; background: #F1A3FD;" title="Last Trade: ${trade.last_trade.toFixed(4)}"></div>
-                            `;
-                            
-                            priceLabels.innerHTML = `
-                                <span>${trade.min_price.toFixed(4)}</span>
-                                <div style="display: flex; gap: 12px; color: #aaa;">
-                                    <span style="color: #00FFDF;">Floor: ${trade.floor_price.toFixed(4)}</span>
-                                    <span style="color: #F1A3FD;">Last: ${trade.last_trade.toFixed(4)}</span>
-                                </div>
-                                <span>${trade.max_price.toFixed(4)}</span>
-                            `;
-                            
-                            modalOverlay.querySelector('.trade_history').style.display = 'block';
-                        } else {
-                            modalOverlay.querySelector('.trade_history').style.display = 'none';
-                        }
-                    } catch (error) {
-                        console.error('Error parsing trade data:', error);
-                        modalOverlay.querySelector('.trade_history').style.display = 'none';
-                    }
-                } else {
-                    modalOverlay.querySelector('.trade_history').style.display = 'none';
-                }
-                
-                // Prevent scrolling on body
-                document.body.style.overflow = 'hidden';
-                
-            } catch (error) {
-                console.error('Error showing bid modal:', error);
-            }
-        }
-
-        // Helper function to format the bids list
-        function formatBidsList(bidsJson) {
-            try {
-                const bids = Array.isArray(bidsJson) ? bidsJson : JSON.parse(bidsJson);
-                return `
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="padding: 8px; text-align: left;">Rank</th>
-                                <th style="padding: 8px; text-align: left;">Bid</th>
-                                <th style="padding: 8px; text-align: left; width: 180px;">Player</th>  <!-- Increased width -->
-                                <th style="padding: 8px; text-align: left;">Expires</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${bids.map(bid => {
-                                // Convert UTC timestamp string to Date object and adjust for local timezone
-                                const expirationUTC = new Date(bid.expiration_timestamp + 'Z'); // Add 'Z' to ensure UTC parsing
-                                const now = new Date();
-                                
-                                // Calculate time difference in milliseconds
-                                const diffMs = expirationUTC - now;
-                                const diffHours = diffMs / (1000 * 60 * 60);
-                                
-                                let expirationText;
-                                if (diffHours >= 24) {
-                                    const days = Math.floor(diffHours / 24);
-                                    expirationText = `in ${days} days`;
-                                } else if (diffHours >= 2) {
-                                    expirationText = `in ${Math.floor(diffHours)} hours`;
-                                } else {
-                                    const minutes = Math.max(0, Math.floor(diffHours * 60));
-                                    expirationText = `in ${minutes} minutes`;
-                                }
-                                
-                                return `
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 8px;">${bid.rank}</td>
-                                        <td style="padding: 8px; text-align: right;">
-                                            ${Number(bid.bid).toFixed(4)} 
-                                            <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
-                                                <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
-                                                <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
-                                                <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
-                                                <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
-                                                <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
-                                                <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
-                                            </svg>
-                                        </td>
-                                        <td style="padding: 8px;">
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <img src="${bid.profile_picture}" 
-                                                     alt="Profile" 
-                                                     style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
-                                                     onerror="this.src='../icons/fan.webp'">
-                                                <span>${bid.player_name}</span>
-                                                <a href="https://x.com/${bid.player_handle}" target="_blank" style="margin-left: 4px; text-decoration: none;">
-                                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                                                </a>
-                                                <i class="fas fa-copy" 
-                                                   onclick="copyToClipboard('${bid.player_handle}', event)" 
-                                                   style="cursor: pointer; color: #aaa; font-size: 0.8em; margin-left: 4px;"></i>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 8px;">${expirationText}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-            } catch (error) {
-                console.error('Error formatting bids:', error);
-                return '<div style="color: red;">Error formatting bids data</div>';
-            }
-        }
-
-        // Add close function for bid modal
-        function closeBidModal() {
-            const modalOverlay = document.getElementById('bid-modal-overlay');
-            if (modalOverlay) {
-                modalOverlay.style.display = 'none';
-            }
-            
-            // Re-enable scrolling
-            document.body.style.overflow = '';
-        }
-
-        // Make closeBidModal globally accessible
-        window.closeBidModal = closeBidModal;
-
-        function calculateMinutesAgo(dbUpdatedUtc) {
-            const dbTime = new Date(dbUpdatedUtc);
-            const now = new Date();
-            const nowUtc = new Date(now.getTime() + now.getTimezoneOffset() * 60000); // Convert local time to UTC
-            const diffMinutes = Math.floor((nowUtc - dbTime) / (1000 * 60));
-            return Math.max(0, diffMinutes); // Ensure we don't show negative minutes
-        }
-
-        // Add this function to your existing JavaScript code
         async function showPlayerHighestBidsModal() {
             try {
                 const { data: bids, error } = await supabaseClient
@@ -2116,6 +1812,9 @@
                                 </thead>
                                 <tbody>
                                     ${bids.map(bid => `
+                                       
+
+
                                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                             <td style="padding: 8px;">
                                                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -2188,6 +1887,183 @@
         // Make functions globally accessible
         window.showPlayerHighestBidsModal = showPlayerHighestBidsModal;
         window.closePlayerBidsModal = closePlayerBidsModal;
+
+        // Add this helper function to convert rarity string to number
+        function getRarityNumber(rarity) {
+            switch(rarity.toLowerCase()) {
+                case 'legendary': return 1;
+                case 'epic': return 2;
+                case 'rare': return 3;
+                case 'common': return 4;
+                default: return 0;
+            }
+        }
+
+        function formatBidsListFromAPI(bidData) {
+            try {
+                const bids = bidData.highest_five_bids || [];
+                
+                // Sort bids by price descending, then expiration ascending
+                bids.sort((a, b) => {
+                    const priceA = BigInt(a.price);
+                    const priceB = BigInt(b.price);
+                    
+                    if (priceB !== priceA) {
+                        return priceB > priceA ? 1 : -1;
+                    }
+                    return parseInt(a.expiration_time) - parseInt(b.expiration_time);
+                });
+
+                return `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 8px; text-align: right;">Price</th>
+                                <th style="padding: 8px; text-align: left;">Player</th>
+                                <th style="padding: 8px; text-align: right;">Expires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bids.map((bid, index) => {
+                                const ethPrice = Number(BigInt(bid.price)) / 1e18;
+                                const expirationDate = new Date(parseInt(bid.expiration_time) * 1000);
+                                const now = new Date();
+                                const diffMs = expirationDate - now;
+                                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                
+                                let expirationText;
+                                if (diffDays > 0) {
+                                    expirationText = `${diffDays}d ${diffHours}h`;
+                                } else if (diffHours > 0) {
+                                    expirationText = `${diffHours}h`;
+                                } else {
+                                    const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+                                    expirationText = `${diffMinutes}m`;
+                                }
+
+                                const playerDisplay = bid.bidder_handle || shortenAddress(bid.trader);
+
+                                return `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 8px; text-align: right;">
+                                            ${ethPrice.toFixed(4)}
+                                        </td>
+                                        <td style="padding: 8px; text-align: left;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span>${playerDisplay}</span>
+                                                <a href="https://x.com/${bid.bidder_handle}" target="_blank" style="text-decoration: none;">
+                                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                                </a>
+                                                <i class="fas fa-copy" onclick="copyToClipboard('${bid.bidder_handle}', event)" 
+                                                   style="font-size: 0.8em; color: #777; cursor: pointer;"></i>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 8px; text-align: right;">${expirationText}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error formatting bids:', error);
+                return '<div style="color: red;">Error formatting bids data</div>';
+            }
+        }
+
+        // Helper function to shorten addresses
+        function shortenAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+        // Initialize common equivalent toggle
+        function initializeCommonEquivalentToggle() {
+            const toggle = document.getElementById('common-equivalent-toggle');
+            const label = document.getElementById('common-equivalent-label');
+            
+            if (!toggle || !label) {
+                console.warn('Common equivalent toggle elements not found');
+                return;
+            }
+            
+            toggle.addEventListener('change', function() {
+                label.textContent = this.checked ? 'On' : 'Off';
+                // Add your common equivalent logic here
+            });
+        }
+
+        // Show bid modal function
+        async function showBidModal(encodedBids, heroId, rarity, stars) {
+            try {
+                // Track API call time
+                const apiCallTime = Date.now();
+                
+                // Get rarity number for API call
+                const rarityNum = getRarityNumber(rarity);
+                
+                // Construct API URL
+                const apiUrl = `https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarityNum}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`;
+                
+                // API request headers
+                const headers = {
+                    'accept': 'application/json',
+                    'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, X-Api-Key'
+                };
+
+                // Fetch bid data from API
+                const response = await fetch(apiUrl, { headers });
+                if (!response.ok) throw new Error('Failed to fetch bid data');
+                const bidData = await response.json();
+
+                // Calculate seconds elapsed
+                const secondsAgo = Math.floor((Date.now() - apiCallTime) / 1000);
+
+                // Create or update modal overlay
+                let modalOverlay = document.getElementById('bid-modal-overlay');
+                if (!modalOverlay) {
+                    modalOverlay = document.createElement('div');
+                    modalOverlay.id = 'bid-modal-overlay';
+                    modalOverlay.className = 'seller-modal-overlay';
+                    document.body.appendChild(modalOverlay);
+                }
+
+                // Update modal content
+                modalOverlay.innerHTML = `
+                    <div class="seller-modal" style="width: 500px;">
+                        <div class="seller-modal-close" onclick="this.parentElement.parentElement.style.display='none'">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div class="bid-modal-container">
+                                <div class="bid-card-container">
+                                    <img class="bid-card-image" 
+                                         src="https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                         alt="Hero Card"
+                                         onerror="this.onerror=null; this.src='../icons/fan.webp'">
+                                </div>
+                                <div class="bid-content-container">
+                                    <div class="bid-header">Active Bids (${secondsAgo}s ago)</div>
+                                    <div class="bid-list-container">
+                                        ${formatBidsListFromAPI(bidData)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Show modal
+                modalOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+            } catch (error) {
+                console.error('Error showing bid modal:', error);
+            }
+        }
     </script>
 </body>
 </html>

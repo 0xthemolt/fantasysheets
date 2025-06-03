@@ -225,6 +225,14 @@
             color: #44b700 !important;  /* Green to match the positive changes */
             font-weight: 600;
         }
+
+        .season-divider {
+            border-right: 2px solid #444;
+        }
+
+        .average-divider {
+            border-left: 2px solid #fff !important;  /* Override any existing border */
+        }
     </style>
 </head>
 <body>
@@ -233,7 +241,7 @@
             <a href="../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Season / Last 4 Avg Score
+            Last 4 Avg Score by Season
         </h1>
     </div>
     <div class="data-freshness">
@@ -263,10 +271,26 @@
     </div>
 
     <script>
-        // Define tournament numbers
-        const tournamentNumbers = [53, 52, 51, 50, 49];
+        // Replace the existing seasons definition with:
+        const seasons = {
+            2: [
+                { seasonTournament: 1, mainTournament: 54 }  // Season 2 tournaments
+            ],
+            1: [
+                { seasonTournament: 5, mainTournament: 53 },
+                { seasonTournament: 4, mainTournament: 52 },
+                { seasonTournament: 3, mainTournament: 51 },
+                { seasonTournament: 2, mainTournament: 50 },
+            ]
+        };
 
-        const EXEMPT_HEROES = ['frankdegods'];
+        // Flatten the seasons object into main tournament numbers array for API calls
+        const tournamentNumbers = [
+            ...seasons[2].map(t => t.mainTournament),  // Season 2 tournaments
+            ...seasons[1].map(t => t.mainTournament)   // Season 1 tournaments
+        ];
+
+        const EXEMPT_HEROES = ['a'];
         const TEAM_HEROES = ['0xMikado', 'travisbickle0x', '0xKipit'];
 
         async function fetchTournamentData() {
@@ -459,20 +483,40 @@
             });
 
             // Add tournament number columns (in ascending order)
-            sortedTournaments.forEach(num => {
+            sortedTournaments.forEach((num, index) => {
                 const th = document.createElement('th');
                 const isCurrentPeriod = currentTournaments.includes(num);
-                th.textContent = `MT${num}`;
+                
+                // Find the season and tournament info
+                const seasonEntry = Object.entries(seasons).find(([season, tournaments]) => 
+                    tournaments.some(t => t.mainTournament === num)
+                );
+                const seasonNumber = seasonEntry[0];
+                const tournamentInfo = seasonEntry[1].find(t => t.mainTournament === num);
+                
+                th.textContent = `S${seasonNumber}T${tournamentInfo.seasonTournament}`;
+                
+                // Add season divider if this is the first tournament of a season
+                if (index > 0) {
+                    const prevNum = sortedTournaments[index - 1];
+                    const prevSeasonNum = Object.entries(seasons).find(([season, tournaments]) => 
+                        tournaments.some(t => t.mainTournament === prevNum)
+                    )[0];
+                    if (prevSeasonNum !== seasonNumber) {
+                        th.classList.add('season-divider');
+                    }
+                }
+                
                 th.className = `number-cell ${isCurrentPeriod ? 'current-period' : ''}`;
                 th.dataset.sort = num.toString();
                 th.addEventListener('click', () => handleSort(num.toString()));
                 tableHead.appendChild(th);
             });
 
-            // Update the header creation
+            // Update the averages header to use white border
             const avgHeader = document.createElement('th');
             avgHeader.innerHTML = 'AVG: Prior -> <span class="current-period">Current</span>';
-            avgHeader.className = 'number-cell average-header';
+            avgHeader.className = 'number-cell average-header average-divider';
             avgHeader.dataset.sort = 'currentAvg';
             avgHeader.addEventListener('click', () => handleSort('currentAvg'));
             tableHead.appendChild(avgHeader);

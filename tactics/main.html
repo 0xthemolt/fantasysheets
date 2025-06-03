@@ -838,9 +838,9 @@
                 
                 switch(column) {
                     case 'player':
-                        aValue = a.player_name.toLowerCase();
-                        bValue = b.player_name.toLowerCase();
-                        break;
+                        return ascending ? 
+                            a.player_name.localeCompare(b.player_name) : 
+                            b.player_name.localeCompare(a.player_name);
                     case 'won':
                         aValue = a.total_won;
                         bValue = b.total_won;
@@ -850,18 +850,19 @@
                         bValue = b.total_entry;
                         break;
                     case 'roi':
+                        // Use the pre-calculated roi_pct from SQL directly
                         aValue = a.roi_pct;
                         bValue = b.roi_pct;
-                        break;
-                    case 'decks':
-                        aValue = a.decks;
-                        bValue = b.decks;
                         break;
                     case 'itm':
                         aValue = a.itm_pct;
                         bValue = b.itm_pct;
                         break;
                 }
+                
+                // Handle null/undefined values
+                if (aValue === null || aValue === undefined) aValue = -Infinity;
+                if (bValue === null || bValue === undefined) bValue = -Infinity;
                 
                 return ascending ? aValue - bValue : bValue - aValue;
             });
@@ -877,7 +878,7 @@
                 if (!cachedROIData) {
                     const { data, error } = await supabaseClient
                         .from('vwtactic_roi')
-                        .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, itm_pct');
+                        .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, itm_pct, roi_pct');  // Added roi_pct here
 
                     if (error) throw error;
                     cachedROIData = data;
@@ -929,7 +930,7 @@
                         </td>
                         <td class="number-cell">
                             <span style="color: ${player.roi_pct >= 0 ? '#22c55e' : '#ef4444'}">
-                                ${player.roi_pct > 0 ? '+' : ''}${Math.round(player.roi_pct)}%
+                                ${player.roi_pct > 0 ? '+' : ''}${player.roi_pct}%
                             </span>
                         </td>
                         <td class="itm-cell">
@@ -986,6 +987,12 @@
                 displayHeroData(window.heroesData);
             });
         });
+
+        function formatROIPercent(roi) {
+            if (typeof roi !== 'number') return '0%';
+            const roundedROI = Math.round(roi);
+            return `${roundedROI > 0 ? '+' : ''}${roundedROI}%`;
+        }
     </script>
 </body>
 </html>

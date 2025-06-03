@@ -1813,8 +1813,6 @@
                                 <tbody>
                                     ${bids.map(bid => `
                                        
-
-
                                         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                             <td style="padding: 8px;">
                                                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -1902,7 +1900,6 @@
         function formatBidsListFromAPI(bidData) {
             try {
                 const bids = bidData.highest_five_bids || [];
-                
                 // Sort bids by price descending, then expiration ascending
                 bids.sort((a, b) => {
                     const priceA = BigInt(a.price);
@@ -1929,14 +1926,29 @@
                                 const expirationDate = new Date(parseInt(bid.expiration_time) * 1000);
                                 const now = new Date();
                                 const diffMs = expirationDate - now;
-                                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const diffHours = diffMs / (1000 * 60 * 60);
+                                const diffDays = diffHours / 24;
                                 
+                                // Determine color based on thresholds
+                                let expirationColor;
+                                if (diffHours <= 6) {
+                                    expirationColor = '#ff4444'; // Red for <= 6 hours
+                                } else if (diffHours < 24) {
+                                    expirationColor = '#ffa500'; // Orange for < 24 hours
+                                } else if (diffDays >= 5) {
+                                    expirationColor = '#44ff44'; // Green for > 5 days
+                                } else if (diffDays >= 3) {
+                                    expirationColor = '#4444ff'; // Blue for >= 3 days
+                                } else {
+                                    expirationColor = '#ffffff'; // Default white
+                                }
+                                
+                                // Format the expiration text
                                 let expirationText;
-                                if (diffDays > 0) {
-                                    expirationText = `${diffDays}d ${diffHours}h`;
-                                } else if (diffHours > 0) {
-                                    expirationText = `${diffHours}h`;
+                                if (diffDays >= 1) {
+                                    expirationText = `${Math.floor(diffDays)}d ${Math.floor(diffHours % 24)}h`;
+                                } else if (diffHours >= 1) {
+                                    expirationText = `${Math.floor(diffHours)}h`;
                                 } else {
                                     const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
                                     expirationText = `${diffMinutes}m`;
@@ -1959,7 +1971,7 @@
                                                    style="font-size: 0.8em; color: #777; cursor: pointer;"></i>
                                             </div>
                                         </td>
-                                        <td style="padding: 8px; text-align: right;">${expirationText}</td>
+                                        <td style="padding: 8px; text-align: right; color: ${expirationColor};">${expirationText}</td>
                                     </tr>
                                 `;
                             }).join('')}
@@ -1996,13 +2008,8 @@
         // Show bid modal function
         async function showBidModal(encodedBids, heroId, rarity, stars) {
             try {
-                // Track API call time
                 const apiCallTime = Date.now();
-                
-                // Get rarity number for API call
                 const rarityNum = getRarityNumber(rarity);
-                
-                // Construct API URL
                 const apiUrl = `https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarityNum}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`;
                 
                 // API request headers
@@ -2029,11 +2036,19 @@
                     modalOverlay.id = 'bid-modal-overlay';
                     modalOverlay.className = 'seller-modal-overlay';
                     document.body.appendChild(modalOverlay);
+
+                    // Add click event listener to close on outside click
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            modalOverlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }
+                    });
                 }
 
                 // Update modal content
                 modalOverlay.innerHTML = `
-                    <div class="seller-modal" style="width: 500px;">
+                    <div class="seller-modal" style="width: 500px;" onclick="event.stopPropagation()">
                         <div class="seller-modal-close" onclick="this.parentElement.parentElement.style.display='none'">
                             <i class="fas fa-times"></i>
                         </div>

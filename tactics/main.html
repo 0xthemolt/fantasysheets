@@ -12,6 +12,12 @@
         .hero-cell {
             display: flex;
             align-items: center;
+            height: 100%;
+            padding: 8px 4px;
+            box-sizing: border-box;
+            min-height: 40px;
+            gap: 8px;
+            margin: 0; /* Remove margin */
         }
 
         .score-container {
@@ -78,7 +84,8 @@
         }
 
         .number-cell {
-            text-align: right;
+            padding: 8px 4px;
+            text-align: center;
         }
 
         .center-cell {
@@ -304,6 +311,42 @@
             text-align: center !important;
             padding-right: 8px !important;
         }
+
+        /* Add to your existing <style> section */
+        @keyframes blink {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            animation: blink 2s infinite;
+        }
+
+        .status-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: #22c55e;
+        }
+
+        /* Add consistent styling for all table cells */
+        .tournament-table td {
+            padding: 0;
+            vertical-align: middle;
+            border-bottom: 1px solid #333;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -419,7 +462,7 @@
                 // Fetch all pages until next is null
                 while (hasNextPage) {
                     const heroResponse = await fetch(
-                        `https://api-v2.fantasy.top/tactics/hero-scores/7644dde5-f0d8-45f9-bb78-fec1e8766e70?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=250`, {
+                        `https://api-v2.fantasy.top/tactics/hero-scores/a386a345-b238-409e-bd00-8d700d1e90dd?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=200`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
@@ -477,6 +520,7 @@
             }
         }
 
+        // Update the fetchTacticData function
         async function fetchTacticData() {
             try {
                 const { data, error } = await supabaseClient
@@ -489,11 +533,24 @@
                 // Format dates
                 const startDate = new Date(data.start_date);
                 const endDate = new Date(data.end_date);
+                const now = new Date();
+                const isLive = now >= startDate && now <= endDate;
+
                 const dateFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
                 const formattedDateRange = `${startDate.toLocaleDateString('en-US', dateFormatOptions)} - ${endDate.toLocaleDateString('en-US', dateFormatOptions)}`;
 
+                // Update tactic name with live indicator if active
+                document.getElementById('tacticName').innerHTML = `
+                    ${data.config_name}
+                    ${isLive ? `
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <span class="status-text">Live</span>
+                        </div>
+                    ` : ''}
+                `;
+
                 // Update all summary items
-                document.getElementById('tacticName').textContent = data.config_name;
                 document.getElementById('tacticDuration').textContent = `${data.config_duration} hours`;
                 document.getElementById('tacticDates').textContent = formattedDateRange;
 
@@ -820,7 +877,7 @@
                 if (!cachedROIData) {
                     const { data, error } = await supabaseClient
                         .from('vwtactic_roi')
-                        .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, roi_pct, itm_pct');
+                        .select('tactic_id, player_name, profile_picture, total_won, total_entry, decks, itm_pct');
 
                     if (error) throw error;
                     cachedROIData = data;

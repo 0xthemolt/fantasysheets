@@ -12,12 +12,10 @@
         .hero-cell {
             display: flex;
             align-items: center;
-            height: 100%;
-            padding: 8px 4px;
-            box-sizing: border-box;
-            min-height: 40px;
             gap: 8px;
-            margin: 0; /* Remove margin */
+            /* Remove height and box-sizing */
+            padding: 8px;
+            margin: 0;
         }
 
         .score-container {
@@ -49,9 +47,11 @@
             table-layout: fixed; /* This helps control column widths */
         }
 
-        td, th {
-            padding: 8px;
+        td {
+            padding: 0; /* Remove padding from td */
             text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid #333;
         }
 
         th {
@@ -84,7 +84,7 @@
         }
 
         .number-cell {
-            padding: 8px 4px;
+            padding: 8px;
             text-align: center;
         }
 
@@ -723,8 +723,8 @@
                             <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                         </a>
                         <div style="display: flex; align-items: center; gap: 2px; background: transparent;border-radius: 10px; padding: 1px 5px;">
-                            <i class="fas fa-users" style="font-size: 8px; color: #1DA1F2;"></i>
-                            <span style="font-size: 10px; font-weight: bold; color: #1DA1F2;">${formatViews(hero.heroes.followers_count)}</span>
+                            <i class="fas fa-users" style="font-size: 8px; color: #666666;"></i>
+                            <span style="font-size: 10px; font-weight: bold; color: #666666;">${formatViews(hero.heroes.followers_count)}</span>
                         </div>
                     </td>
                     <td class="number-cell">

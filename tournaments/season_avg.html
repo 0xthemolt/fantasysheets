@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .tournament-table th {
             cursor: pointer;
@@ -494,7 +493,7 @@
                 const seasonNumber = seasonEntry[0];
                 const tournamentInfo = seasonEntry[1].find(t => t.mainTournament === num);
                 
-                th.textContent = `S${seasonNumber}T${tournamentInfo.seasonTournament}`;
+                th.textContent = `S${seasonNumber}M${tournamentInfo.seasonTournament}`;
                 
                 // Add season divider if this is the first tournament of a season
                 if (index > 0) {
@@ -515,7 +514,7 @@
 
             // Update the averages header to use white border
             const avgHeader = document.createElement('th');
-            avgHeader.innerHTML = 'AVG: Prior -> <span class="current-period">Current</span>';
+            avgHeader.innerHTML = 'AVG: Prior 4 -> <span class="current-period">Last 4</span>';
             avgHeader.className = 'number-cell average-header average-divider';
             avgHeader.dataset.sort = 'currentAvg';
             avgHeader.addEventListener('click', () => handleSort('currentAvg'));

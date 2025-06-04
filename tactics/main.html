@@ -326,6 +326,12 @@
             margin-left: 8px;
         }
 
+        .status-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Live status styles */
         .status-dot {
             width: 8px;
             height: 8px;
@@ -334,10 +340,20 @@
             animation: blink 2s infinite;
         }
 
-        .status-text {
-            font-size: 12px;
-            font-weight: 500;
+        .status-live {
             color: #22c55e;
+        }
+
+        /* Complete status styles */
+        .status-complete {
+            color: #3b82f6;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-complete i {
+            font-size: 12px;
         }
 
         /* Add consistent styling for all table cells */
@@ -462,7 +478,7 @@
                 // Fetch all pages until next is null
                 while (hasNextPage) {
                     const heroResponse = await fetch(
-                        `https://api-v2.fantasy.top/tactics/hero-scores/a386a345-b238-409e-bd00-8d700d1e90dd?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=200`, {
+                        `https://api-v2.fantasy.top/tactics/hero-scores/fb102529-119b-4134-9723-6774c0fc031c?orderBy.fantasy_score=desc&pagination.page=${page}&pagination.limit=200`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'

@@ -48,7 +48,7 @@ select
                         )
 					end
 			end) ,0) as reward_value_added,
-        t.db_updated_cst as db_updated_utc
+        t.db_updated_cst + interval '5 hours' as db_updated_utc
     from agg.tournamentownership t 
     join flatten.get_tournaments t2 
     	on t.tournament_id = t2.tournament_id

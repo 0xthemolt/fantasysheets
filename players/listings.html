@@ -1361,13 +1361,13 @@ Price: ${p.priceFormatted} ETH</title>
                             'rank-other'
                         ) : 'rank-placeholder'}">${listing.rank ? `#${listing.rank}` : ''}</span>
                         <span class="listing-price">
-                            <span style="color: ${parseFloat(listing.price_numeric) === parseFloat(listing.floor_price) ? '#4ADE80' : 'inherit'}">${format_eth(listing.price_numeric)}</span>${ethIcon}
+                            <span style="color: ${parseFloat(listing.price_numeric) === parseFloat(listing.floor_price) ? '#4ADE80' : 'inherit'}">${format_eth(listing.price_numeric)}</span>
                         </span>
                     </td>
                     <td class="section-divider">
                         <div class="floor-container">
                             <div class="floor-value">
-                                ${format_eth(listing.floor_price)} ${ethIcon}
+                                ${format_eth(listing.floor_price)}
                             </div>
                             <div class="profile-container">
                                 ${listing.topTrader ? `
@@ -1392,7 +1392,7 @@ Price: ${p.priceFormatted} ETH</title>
                         <div class="last-sale-container">
                             ${listing.supabaseInfo.last_sale ? `
                                 <div class="last-sale-value">
-                                    ${format_eth(listing.supabaseInfo.last_sale)} ${ethIcon}
+                                    ${format_eth(listing.supabaseInfo.last_sale)}
                                 </div>
                                 <div class="last-sale-time" title="${new Date(listing.supabaseInfo.last_sale_time).toUTCString()}">
                                     ${formatLastSaleTime(listing.supabaseInfo.last_sale_time)}
@@ -1437,7 +1437,7 @@ Price: ${p.priceFormatted} ETH</title>
                         ${floorListings.length > 0 ? `
                             <tr>
                                 <td colspan="8" class="section-header">
-                                    My Floor Price Listings (${floorListings.length}) - Total: ${format_eth(calculateTotalPrice(floorListings))} ${ethIcon}
+                                    My Floor Price Listings (${floorListings.length}) - Total: ${format_eth(calculateTotalPrice(floorListings))}
                                 </td>
                             </tr>
                             ${createTableRows(floorListings)}
@@ -1445,7 +1445,7 @@ Price: ${p.priceFormatted} ETH</title>
                         ${otherListings.length > 0 ? `
                             <tr>
                                 <td colspan="8" class="section-header" style="margin-top: 20px;">
-                                    Other Listings (${otherListings.length}) - Total: ${format_eth(calculateTotalPrice(otherListings))} ${ethIcon}
+                                    Other Listings (${otherListings.length}) - Total: ${format_eth(calculateTotalPrice(otherListings))}
                                 </td>
                             </tr>
                             ${createTableRows(otherListings)}

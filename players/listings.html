@@ -706,7 +706,7 @@
                         }
                     }).then(res => res.json()),
                     fetchSupabaseListingData(),
-                    fetchOriginalTokenCost()
+                    fetchOriginalTokenCost(player_id)  // Pass player_id here
                 ]);
 
                 // Create map for Supabase data
@@ -724,21 +724,16 @@
                 const topTraders = new Set(
                     rankResults
                         .flatMap(orders => {
-                            console.log('Processing orders:', orders);
                             // Get the first order from each array (lowest price)
                             const firstOrder = orders?.[0];
-                            console.log('First order:', firstOrder);
                             return firstOrder?.trader || [];
                         })
                         .filter(trader => trader)
                         .map(trader => trader.toLowerCase())
                 );
                 
-                console.log('Top traders addresses:', Array.from(topTraders));
-
                 // Fetch player data for top traders
                 const playerData = await fetchPlayerData(Array.from(topTraders));
-                console.log('Player data from Supabase:', Object.fromEntries(playerData || new Map()));
 
                 // Merge all enrichment logic into a single mapping to avoid redeclaration
                 const enrichedListings = apiResponse.map((listing, index) => {
@@ -754,7 +749,19 @@
                     const topTraderAddress = topOrder?.trader?.toLowerCase();
                     const topTraderInfo = topTraderAddress ? playerData?.get(topTraderAddress) : null;
 
-                    const originalCost = originalCostData?.get(listing.token_id.toString());
+                    // Find original cost data by matching token_id and checking trader
+                    const costData = originalCostData?.get(listing.token_id);
+                    const originalCost = costData?.player_address?.toLowerCase() === listing.trader?.toLowerCase() 
+                        ? costData.price 
+                        : null;
+
+                    // Debug logging for first few listings
+                    if (index < 5) {
+                        console.log('Listing token_id:', listing.token_id);
+                        console.log('Listing trader:', listing.trader);
+                        console.log('Found cost data:', costData);
+                        console.log('Original cost match:', originalCost);
+                    }
 
                     return {
                         ...listing,
@@ -764,8 +771,7 @@
                             name: topTraderInfo.player_name,
                             pfpUrl: topTraderInfo.player_pfp_url
                         } : null,
-                        originalCost: originalCost?.price || null,
-                        originalOwner: originalCost?.player_address || null
+                        originalCost: originalCost
                     };
                 });
 
@@ -780,24 +786,41 @@
             }
         }
 
-        // Add this function after your other fetch functions
-        async function fetchOriginalTokenCost() {
+        // Add this function to fetch original token cost
+        async function fetchOriginalTokenCost(player_id) {
             try {
                 const { data, error } = await supabaseClient
-                    .from('get_original_token_cost')
-                    .select('token_id,player_address,price');
+                    .from('vwget_original_token_cost')
+                    .select('token_id,player_address,price')
+                    .eq('player_address', player_id);
 
                 if (error) {
                     console.error('Error fetching original token cost:', error);
                     return null;
                 }
 
-                // Create a map for easy lookup by token_id
-                const tokenCostMap = new Map(
-                    data.map(item => [item.token_id.toString(), item])
-                );
+                // Create a map using token_id as the key since we'll join with trader
+                const tokenCostMap = new Map();
+                data.forEach(item => {
+                    // Convert token_id to string to ensure consistent matching
+                    const tokenId = item.token_id.toString();
+                    tokenCostMap.set(tokenId, {
+                        price: item.price,
+                        player_address: item.player_address
+                    });
+                });
 
-                console.log('Loaded original cost data for', data.length, 'tokens');
+                // Debug logging
+                console.log('First 5 token_ids from API listings:', 
+                    apiResponse?.slice(0, 5).map(l => l.token_id));
+                console.log('First 5 token_ids from cost data:', 
+                    Array.from(tokenCostMap.keys()).slice(0, 5));
+                console.log('Sample token_id types - API:', 
+                    typeof apiResponse?.[0]?.token_id,
+                    'Cost data:', typeof Array.from(tokenCostMap.keys())[0]);
+                console.log('Total cost records loaded:', data.length);
+                console.log('Sample full cost record:', data[0]);
+
                 return tokenCostMap;
             } catch (error) {
                 console.error('Unexpected error fetching original token cost:', error);
@@ -1467,7 +1490,7 @@ Price: ${p.priceFormatted} ETH</title>
                     <tbody>
                         ${floorListings.length > 0 ? `
                             <tr>
-                                <td colspan="8" class="section-header">
+                                <td colspan="9" class="section-header">
                                     My Floor Price Listings (${floorListings.length}) - Total: ${format_eth(calculateTotalPrice(floorListings))}
                                 </td>
                             </tr>
@@ -1475,7 +1498,7 @@ Price: ${p.priceFormatted} ETH</title>
                         ` : ''}
                         ${otherListings.length > 0 ? `
                             <tr>
-                                <td colspan="8" class="section-header" style="margin-top: 20px;">
+                                <td colspan="9" class="section-header" style="margin-top: 20px;">
                                     Other Listings (${otherListings.length}) - Total: ${format_eth(calculateTotalPrice(otherListings))}
                                 </td>
                             </tr>

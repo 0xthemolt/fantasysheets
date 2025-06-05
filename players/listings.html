@@ -695,16 +695,18 @@
 
         async function fetchListings(player_id) {
             try {
-                showLoading(); // Add loading indicator before fetching
+                showLoading();
                 
-                const [apiResponse, supabaseData] = await Promise.all([
-                    fetch(`https://api-v2.fantasy.top/player/listings/${player_id}`, { // Fixed template literal
+                // Fetch both API data and original cost data in parallel
+                const [apiResponse, supabaseData, originalCostData] = await Promise.all([
+                    fetch(`https://api-v2.fantasy.top/player/listings/${player_id}`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
                         }
                     }).then(res => res.json()),
-                    fetchSupabaseListingData()
+                    fetchSupabaseListingData(),
+                    fetchOriginalTokenCost()
                 ]);
 
                 // Create map for Supabase data
@@ -738,7 +740,7 @@
                 const playerData = await fetchPlayerData(Array.from(topTraders));
                 console.log('Player data from Supabase:', Object.fromEntries(playerData || new Map()));
 
-                // Log enriched listings for debugging
+                // Merge all enrichment logic into a single mapping to avoid redeclaration
                 const enrichedListings = apiResponse.map((listing, index) => {
                     const supabaseInfo = supabaseMap.get(listing.hero_rarity_index.toString());
                     const rankOrders = rankResults[index];
@@ -748,15 +750,11 @@
                     const rank = matchingOrder?.dense_rank || null;
 
                     // Get top trader info if available (get first order directly)
-                    const topOrder = rankOrders?.[0];  // Changed this line
+                    const topOrder = rankOrders?.[0];
                     const topTraderAddress = topOrder?.trader?.toLowerCase();
                     const topTraderInfo = topTraderAddress ? playerData?.get(topTraderAddress) : null;
-                    
-                    console.log('Top trader info for listing:', {
-                        address: topTraderAddress,
-                        info: topTraderInfo,
-                        orderDetails: topOrder // Add this to see full order details
-                    });
+
+                    const originalCost = originalCostData?.get(listing.token_id.toString());
 
                     return {
                         ...listing,
@@ -765,7 +763,9 @@
                         topTrader: topTraderInfo ? {
                             name: topTraderInfo.player_name,
                             pfpUrl: topTraderInfo.player_pfp_url
-                        } : null
+                        } : null,
+                        originalCost: originalCost?.price || null,
+                        originalOwner: originalCost?.player_address || null
                     };
                 });
 
@@ -777,6 +777,31 @@
                         Error loading listings. Please try again.
                     </div>
                 `;
+            }
+        }
+
+        // Add this function after your other fetch functions
+        async function fetchOriginalTokenCost() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('get_original_token_cost')
+                    .select('token_id,player_address,price');
+
+                if (error) {
+                    console.error('Error fetching original token cost:', error);
+                    return null;
+                }
+
+                // Create a map for easy lookup by token_id
+                const tokenCostMap = new Map(
+                    data.map(item => [item.token_id.toString(), item])
+                );
+
+                console.log('Loaded original cost data for', data.length, 'tokens');
+                return tokenCostMap;
+            } catch (error) {
+                console.error('Unexpected error fetching original token cost:', error);
+                return null;
             }
         }
 
@@ -1364,6 +1389,11 @@ Price: ${p.priceFormatted} ETH</title>
                             <span style="color: ${parseFloat(listing.price_numeric) === parseFloat(listing.floor_price) ? '#4ADE80' : 'inherit'}">${format_eth(listing.price_numeric)}</span>
                         </span>
                     </td>
+                    <td class="listing-cell">
+                        <span class="listing-price">
+                            ${listing.originalCost ? format_eth(listing.originalCost) : '-'}
+                        </span>
+                    </td>
                     <td class="section-divider">
                         <div class="floor-container">
                             <div class="floor-value">
@@ -1427,7 +1457,8 @@ Price: ${p.priceFormatted} ETH</title>
                             <th class="hero-cell"></th>
                             <th class="score-cell" title="Performance Score 24h/7d">Score</th>
                             <th>Time Left</th>
-                            <th>Price</th>
+                            <th>List Price</th>
+                            <th>Cost</th>
                             <th class="section-divider">Floor</th>
                             <th class="section-divider">Last Sale</th>  <!-- Add this line -->
                             <th class="section-divider">Price Range L14D</th>

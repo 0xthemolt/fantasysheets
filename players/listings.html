@@ -810,14 +810,6 @@
                     });
                 });
 
-                // Debug logging
-                console.log('First 5 token_ids from API listings:', 
-                    apiResponse?.slice(0, 5).map(l => l.token_id));
-                console.log('First 5 token_ids from cost data:', 
-                    Array.from(tokenCostMap.keys()).slice(0, 5));
-                console.log('Sample token_id types - API:', 
-                    typeof apiResponse?.[0]?.token_id,
-                    'Cost data:', typeof Array.from(tokenCostMap.keys())[0]);
                 console.log('Total cost records loaded:', data.length);
                 console.log('Sample full cost record:', data[0]);
 
@@ -1417,6 +1409,33 @@ Price: ${p.priceFormatted} ETH</title>
                             ${listing.originalCost ? format_eth(listing.originalCost) : '-'}
                         </span>
                     </td>
+                    <td class="listing-cell">
+                        ${(() => {
+        const listPrice = parseFloat(listing.price_numeric);
+        const cost = listing.originalCost ? parseFloat(listing.originalCost) : null;
+        const fee = listPrice * 0.04;
+        const pnl = cost !== null ? (listPrice - fee - cost) : null;
+        
+        // Format PnL with parentheses for negative values
+        const formatPnlValue = (value) => {
+            if (value === null) return '-';
+            const formatted = format_eth(Math.abs(value));
+            return value < 0 ? `(${formatted})` : formatted;
+        };
+        
+        return `
+            <span class="listing-price" title="Cost:     ${cost ? format_eth(cost).padStart(10) : '-'.padStart(10)}
+List:     ${format_eth(listPrice).padStart(10)}
+Fee:     (${format_eth(fee).padStart(10)})
+________________________
+PnL:     ${pnl ? formatPnlValue(pnl).padStart(10) : '-'.padStart(10)}" style="text-align: right;">
+        <span style="color: ${pnl ? (pnl < 0 ? '#EF4444' : '#4ADE80') : 'inherit'}">
+            ${pnl ? formatPnlValue(pnl) : '-'}
+        </span>
+    </span>
+        `;
+    })()}
+                    </td>
                     <td class="section-divider">
                         <div class="floor-container">
                             <div class="floor-value">
@@ -1482,6 +1501,7 @@ Price: ${p.priceFormatted} ETH</title>
                             <th>Time Left</th>
                             <th>List Price</th>
                             <th>Cost</th>
+                            <th>Est PnL</th>
                             <th class="section-divider">Floor</th>
                             <th class="section-divider">Last Sale</th>  <!-- Add this line -->
                             <th class="section-divider">Price Range L14D</th>
@@ -1490,7 +1510,7 @@ Price: ${p.priceFormatted} ETH</title>
                     <tbody>
                         ${floorListings.length > 0 ? `
                             <tr>
-                                <td colspan="9" class="section-header">
+                                <td colspan="10" class="section-header">
                                     My Floor Price Listings (${floorListings.length}) - Total: ${format_eth(calculateTotalPrice(floorListings))}
                                 </td>
                             </tr>
@@ -1498,7 +1518,7 @@ Price: ${p.priceFormatted} ETH</title>
                         ` : ''}
                         ${otherListings.length > 0 ? `
                             <tr>
-                                <td colspan="9" class="section-header" style="margin-top: 20px;">
+                                <td colspan="10" class="section-header" style="margin-top: 20px;">
                                     Other Listings (${otherListings.length}) - Total: ${format_eth(calculateTotalPrice(otherListings))}
                                 </td>
                             </tr>

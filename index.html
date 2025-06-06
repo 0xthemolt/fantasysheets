@@ -227,11 +227,103 @@
             box-sizing: border-box;
             text-align: center;
         }
+
+        /* Add this CSS for summary section */
+        .summary-container {
+            grid-column: 1 / -1;  /* Span all columns */
+            background: #292828;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-text {
+            color: #fff;
+            font-size: 0.9em;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .sheet-link {
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .sheet-link:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+
+        .modal-content {
+            background-color: #292828;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .getting-started-text {
+            color: #4ADE80;
+            cursor: pointer;
+            text-decoration: none;
+            margin-left: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .getting-started-text:hover {
+            color: #22c55e;
+        }
     </style>
 </head>
 <body>
     <h1>FantasySheets</h1>
     <div class="nav-container">
+        <div class="summary-container">
+            <div class="summary-text">
+                Welcome to FantasySheets, your center for stats on fantasy.top heroes and players.
+                <a class="getting-started-text" onclick="openModal()">Getting Started</a>
+            </div>
+            <a href="https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0" 
+                class="sheet-link" 
+                target="_blank">
+                📊 FantasySheets Google Sheet
+            </a>
+        </div>
         <div class="grid-layout">
             <!-- <div class="column-container pro-container">
                 <h2 class="column-title">Pro (in development) </h2>
@@ -264,6 +356,58 @@
             </div>
         </div>
         <p style="font-size: 0.5em; color: grey; text-align: center;">Best viewed on wide screen desktop, but works on mobile.</p>
+    </div>
+
+    <!-- Add this modal HTML after your grid-layout div -->
+    <div id="startModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div style="text-align: left; line-height: 1.6;">
+                <p style="font-size: 1.1em; margin-bottom: 1.5em; color: #fff;">
+                    New to fantasy.top? Check out the 
+                    <a href="https://fantasy-top.gitbook.io/fantasy-top-guide" 
+                       target="_blank" 
+                       style="color: #4ADE80; text-decoration: none;">
+                        official documentation
+                    </a>
+                </p>
+                <p style="font-size: 1.1em; margin-bottom: 1em; color: #fff;">Looking to buy your first cards or find the best heroes for the next tournament?</p>
+                <ol style="font-size: 1.1em; margin-left: 1.5em; margin-bottom: 1.5em; color: #9ca3af;">
+                    <li>Go to the Google sheet linked on the main page. Download to Excel or make a copy.</li>
+                    <li>Research and find the best heroes.</li>
+                    <li>Make up your own models and calculations for finding the best</li>
+                    <li>My suggestion: look at fantasy points per ETH for best value and fantasy points per stars for best hero in star capped tournaments.</li>
+                    <li>I suggest weighting tournament scores more than current 7d stats.</li>
+                    <li>What scores are needed for ETH or Fragments? See <a href="league_rewards_itm_v2.html"  target="_blank" 
+   style="color: #4ADE80; text-decoration: none;">Rewards ITM Tool</a></li>
+                </ol>
+                <p style="font-size: .8em; color: #fff;">
+                    <a href="https://x.com/0xthemolt" 
+                          target="_blank" 
+                          style="color: #4ADE80; text-decoration: none;">0xthemolt</a> on X if you have any questions
+                </p>
+                <p style="font-size: 1.1em; margin-top: 2rem; margin-bottom: 0.5em; color: #fff;">
+                    Additional Resources:
+                </p>
+                <ul style="font-size: 0.9em; margin-left: 1.5em; color: #9ca3af; list-style-type: none; padding: 0;">
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="https://dev.fun/p/6de88c6da1b743a84cbc" target="_blank" style="color: #4ADE80; text-decoration: none;">Fantasy Hub</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="https://ftoptimizor.xyz/" target="_blank" style="color: #4ADE80; text-decoration: none;">FT Deck Optimizer</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="https://fthuds.com" target="_blank" style="color: #4ADE80; text-decoration: none;">HUDS - Chrome Extension for Hero Stats</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="https://fanfanpro.com/tourneys" target="_blank" style="color: #4ADE80; text-decoration: none;">FanFanPro - Stats and Tools</a>
+                    </li>
+                    <li style="margin-bottom: 0.5rem;">
+                        <a href="https://fanscan.live/" target="_blank" style="color: #4ADE80; text-decoration: none;">FanScan - FT NFT Mint Scanner</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -311,7 +455,6 @@
             //{ filename: 'tier_maker.html', title: 'Tier Maker'},
             { filename: '/players/listings.html', title: 'Player Listings', isNew: true},
             { filename: '/players/cards.html', title: 'Player Cards'},
-            { filename: 'https://docs.google.com/spreadsheets/d/10GdAFNpvbCQD5stPiyPDatiWhRW6MAizYwRazLyuSy0/edit?gid=0#gid=0', title: 'FantasySheets Google Sheet' },
             { filename: 'settings.html', title: 'Settings', icon: 'fas fa-cog' },
         ],
     };
@@ -492,6 +635,22 @@
 
 
     document.addEventListener('DOMContentLoaded', loadPages);
+
+    function openModal() {
+        document.getElementById('startModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('startModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('startModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
 </script>
 </body>
 </html>

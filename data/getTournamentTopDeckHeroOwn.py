@@ -66,7 +66,7 @@ select
 		on t.tournament_id = frag_rewards.tournament_id
 		and t.player_rank between frag_rewards.range_start  and frag_rewards.range_end
 		and frag_rewards.reward_type = 'FRAGMENT'
-    where t.tournament_unique_key = 'Main 55'
+    where t.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 )
 ,reward_value_added as (
@@ -145,6 +145,7 @@ from reward_value_added
 where rnk <= 10
 order by tournament_unique_key,category,rnk asc
 """
+
 
 conn = get_db_connection()
 cursor = conn.cursor()

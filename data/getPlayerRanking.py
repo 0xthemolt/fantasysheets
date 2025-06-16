@@ -41,7 +41,7 @@ join finished_tournaments t
    on ph.tournament_id::text = t.tournament_id::text
 where t.finished_tournament_seq_nbr <= 3   /*must have won .03 eth in the last 3 combined*/
 group by 1
-having suM(reward_eth) >= .03
+having suM(reward_eth) >= .025
 UNION 
 select tp.player_id
 from flatten.tournament_players tp
@@ -50,7 +50,7 @@ join flatten.tournament_rewards tr
     and tp.unique_player_rank between tr.range_start and tr.range_end
     and tr.reward_type = 'FAN'
 group by 1
-having suM(tr.reward) >= 5000000  /*lifetime 5m + fan*/
+having suM(tr.reward) >= 4000000  /*lifetime 5m + fan*/
 )
 ,eth_frags_won as (
 select ph.player_id

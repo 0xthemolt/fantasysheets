@@ -43,14 +43,9 @@ where t.finished_tournament_seq_nbr <= 3   /*must have won .03 eth in the last 3
 group by 1
 having suM(reward_eth) >= .025
 UNION 
-select tp.player_id
-from flatten.tournament_players tp
-join flatten.tournament_rewards tr
-    on tp.tournament_id = tr.tournament_id
-    and tp.unique_player_rank between tr.range_start and tr.range_end
-    and tr.reward_type = 'FAN'
-group by 1
-having suM(tr.reward) >= 4000000  /*lifetime 5m + fan*/
+select player_id
+from flatten.get_player_basic_data tp
+where fan_pts_plus_referrals >= 5000000  /*lifetime 5m + fan*/
 )
 ,eth_frags_won as (
 select ph.player_id

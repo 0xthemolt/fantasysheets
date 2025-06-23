@@ -25,7 +25,7 @@ cursor = conn.cursor()
 query = f"""
 set statement_timeout = '2min';
 with base as (
-        select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle,gtpp2.player_rank,gt2.tournament_name
+        select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle,gtpp2.unique_player_rank,gt2.tournament_name
         ,(gtpp2.db_updated_cst)::timestamp as timestamp
     from flatten.tournament_players gtpp2 
         join flatten.get_tournaments gt2 
@@ -76,11 +76,11 @@ group by 1,2
   		gtpp2.player_id,
   		COUNT(*) as decks,
   		SUM(case when (coalesce(reward_pack.reward,0) + (coalesce(reward_frag.reward,0)/100)) >=1 then 1 else 0 END) as itm_decks,
-		MIN(case when league = 'Elite' then player_rank  end) as best_elite,
-		MIN(case when league = 'Gold' then player_rank  end) as best_gold,
-		MIN(case when league = 'Silver' then player_rank  end) as best_silver,
-		MIN(case when league = 'Bronze' then player_rank  end) as best_bronze,
-		MIN(case when league = 'Reverse' then player_rank  end) as best_reverse,
+		MIN(case when league = 'Elite' then unique_player_rank  end) as best_elite,
+		MIN(case when league = 'Gold' then unique_player_rank  end) as best_gold,
+		MIN(case when league = 'Silver' then unique_player_rank  end) as best_silver,
+		MIN(case when league = 'Bronze' then unique_player_rank  end) as best_bronze,
+		MIN(case when league = 'Reverse' then unique_player_rank  end) as best_reverse,
         sum(coalesce(reward_eth.reward,0)) as reward_eth,
         sum(coalesce(reward_pack.reward,0)) as reward_pack,
         sum(coalesce(reward_fan.reward,0)) as reward_fan,
@@ -89,24 +89,24 @@ group by 1,2
   from base gtpp2
     LEFT JOIN flatten.tournament_rewards reward_eth
         ON gtpp2.rewards_tournament_id  = reward_eth.tournament_id 
-        AND gtpp2.player_rank BETWEEN reward_eth.range_start AND reward_eth.range_end
+        AND gtpp2.unique_player_rank BETWEEN reward_eth.range_start AND reward_eth.range_end
         AND reward_eth.reward_type = 'ETH'
     LEFT JOIN flatten.tournament_rewards reward_pack
         ON gtpp2.rewards_tournament_id = reward_pack.tournament_id 
-        AND gtpp2.player_rank BETWEEN reward_pack.range_start AND reward_pack.range_end
+        AND gtpp2.unique_player_rank BETWEEN reward_pack.range_start AND reward_pack.range_end
         AND reward_pack.reward_type = 'PACK'
     LEFT JOIN flatten.tournament_rewards reward_fan
         ON gtpp2.rewards_tournament_id = reward_fan.tournament_id 
-        AND gtpp2.player_rank BETWEEN reward_fan.range_start AND reward_fan.range_end
+        AND gtpp2.unique_player_rank BETWEEN reward_fan.range_start AND reward_fan.range_end
         AND reward_fan.reward_type = 'FAN'
     LEFT JOIN flatten.tournament_rewards reward_frag
         ON gtpp2.rewards_tournament_id = reward_frag.tournament_id 
-        AND gtpp2.player_rank BETWEEN reward_frag.range_start AND reward_frag.range_end
+        AND gtpp2.unique_player_rank BETWEEN reward_frag.range_start AND reward_frag.range_end
         AND reward_frag.reward_type = 'FRAGMENT'
         and gtpp2.start_timestamp::date >= '2024-11-09'
   	LEFT JOIN flatten.tournament_rewards reward_gold
         ON gtpp2.rewards_tournament_id = reward_gold.tournament_id 
-        AND gtpp2.player_rank BETWEEN reward_gold.range_start AND reward_gold.range_end
+        AND gtpp2.unique_player_rank BETWEEN reward_gold.range_start AND reward_gold.range_end
         AND reward_gold.reward_type = 'GOLD'
    --where gtpp2.tournament_unique_key = 'Main 25'
    --where league <> 'Reverse'

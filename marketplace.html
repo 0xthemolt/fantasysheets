@@ -576,7 +576,7 @@
             width: 100%;
         }
 
-        /* Add this CSS to the existing <style> section */
+        /* Add this to your existing <style> section */
         .fa-copy {
             cursor: pointer;
             color: #aaa;
@@ -586,6 +586,23 @@
         .fa-copy:active {
             transform: scale(0.95); /* Slight shrink when clicked */
         }
+
+        /* Add this to your existing <style> section */
+        .visavi-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: middle;
+            position: relative;
+            top: 0px; /* or remove this line if still not centered */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .visavi-icon:hover {
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
 <body>
@@ -620,6 +637,21 @@
             
             // Show modal with seller info
             showSellerModal(sellerId, sellerName, sellerHandle, sellerPfpUrl, sellerPortValue);
+        }
+
+        function createBidsCell(bids, isVisavi, heroId, rarityLabel, stars, trades) {
+            if (!bids || bids.length === 0) return '';
+            const tradesEncoded = encodeURIComponent(JSON.stringify(trades || []));
+            const bidsEncoded = encodeURIComponent(JSON.stringify(bids));
+            if (isVisavi) {
+                return `<img src="../icons/visavi.jpeg" class="visavi-icon"
+                    onclick="showBidModal('${bidsEncoded}', '${heroId}', '${rarityLabel}', '${stars}', '${tradesEncoded}')"
+                    alt="Visavi Bidder" />`;
+            } else {
+                return `<i class="fas fa-user seller-icon"
+                    onclick="showBidModal('${bidsEncoded}', '${heroId}', '${rarityLabel}', '${stars}', '${tradesEncoded}')"
+                ></i>`;
+            }
         }
 
         // Function to show seller modal
@@ -803,7 +835,7 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('marketplace')
-                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, can_be_packed, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, can_be_packed, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades,is_visavi')
                     .order('score', { ascending: false });
 
                 if (error) throw error;
@@ -837,10 +869,10 @@
                             score: item.score,
                             score_24hr: item.score_24hr,
                             stars: item.stars,
-                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
-                            epic: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
-                            rare: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] },
-                            common: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [] }
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            epic:      { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            rare:      { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            common:    { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false }
                         };
                     }
                     
@@ -859,7 +891,8 @@
                             seller_port_value: item.seller_port_value
                         } : null,
                         bids: Array.isArray(item.bids) ? item.bids : [], // Check if it's already an array
-                        trades: Array.isArray(item.trades) ? item.trades : [] // Add trades to the rarity object
+                        trades: Array.isArray(item.trades) ? item.trades : [], // Add trades to the rarity object
+                        is_visavi: !!item.is_visavi // <-- set here for each rarity
                     };
                     
                     return acc;
@@ -1131,87 +1164,147 @@
                                     <td>${item.stars}</td>
                                     <td>${item.inflation_degree}${item.can_be_packed === false ? ' <i class="fa-solid fa-circle-pause" style="color: rgba(255, 0, 0, 0.7);"></i>' : ''}</td>
                                     <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
-                                    <td class="rarity-section-legendary">${formatValue(item.legendary.highest_bid)}${item.legendary.bids && item.legendary.bids.length > 0 ? 
-                                        `<i class="fas fa-user seller-icon" 
-                                            onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}', '${encodeURIComponent(JSON.stringify(item.legendary.trades || []))}')"
-                                            ></i>` 
-                                        : ''}</td>
                                     <td class="rarity-section-legendary">
-                                        <div class="listed-count">
+                                        ${formatValue(item.legendary.highest_bid)}
+                                        ${
+                                            item.legendary.bids && item.legendary.bids.length > 0
+                                            ? (
+                                                item.legendary.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-legendary">
+                                      <div class="listed-count">
                                             ${item.legendary.listed_count}
-                                            ${item.legendary.seller_info ? `
-                                                <i class="fas fa-user seller-icon" 
-                                                   onclick="toggleTooltip(this)"
-                                                   data-seller-id="${item.legendary.seller_info.seller_id}"
-                                                   data-seller-name="${item.legendary.seller_info.name}"
-                                                   data-seller-handle="${item.legendary.seller_info.handle}"
-                                                   data-seller-pfp-url="${item.legendary.seller_info.pfp_url}"
-                                                   data-seller-port-value="${item.legendary.seller_info.seller_port_value}"
-                                                   data-hero-id="${item.hero_id}"
-                                                   data-rarity="Legendary"
-                                                   data-stars="${item.stars}"
-                                                   data-floor-price="${item.legendary.floor}"></i>
-                                            ` : ''}
+                                            ${item.legendary.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.legendary.seller_info.seller_id}"
+                                                    data-seller-name="${item.legendary.seller_info.seller_name}"
+                                                    data-seller-handle="${item.legendary.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.legendary.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.legendary.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="legendary"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.legendary.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
                                         </div>
                                     </td>
                                     <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
-                                    <td class="rarity-section-epic">${formatValue(item.epic.highest_bid)}${item.epic.bids && item.epic.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-epic">
-                                        <div class="listed-count">
+                                        ${formatValue(item.epic.highest_bid)}
+                                        ${
+                                            item.epic.bids && item.epic.bids.length > 0
+                                            ? (
+                                                item.epic.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-epic">
+                                     <div class="listed-count">
                                             ${item.epic.listed_count}
-                                            ${item.epic.seller_info ? `
-                                                <i class="fas fa-user seller-icon" 
-                                                   onclick="toggleTooltip(this)"
-                                                   data-seller-id="${item.epic.seller_info.seller_id}"
-                                                   data-seller-name="${item.epic.seller_info.name}"
-                                                   data-seller-handle="${item.epic.seller_info.handle}"
-                                                   data-seller-pfp-url="${item.epic.seller_info.pfp_url}"
-                                                   data-seller-port-value="${item.epic.seller_info.seller_port_value}"
-                                                   data-hero-id="${item.hero_id}"
-                                                   data-rarity="Epic"
-                                                   data-stars="${item.stars}"
-                                                   data-floor-price="${item.epic.floor}"></i>
-                                            ` : ''}
+                                            ${item.epic.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.epic.seller_info.seller_id}"
+                                                    data-seller-name="${item.epic.seller_info.seller_name}"
+                                                    data-seller-handle="${item.epic.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.epic.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.epic.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="epic"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.epic.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
                                         </div>
                                     </td>
                                     <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
-                                    <td class="rarity-section-rare">${formatValue(item.rare.highest_bid)}${item.rare.bids && item.rare.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>` : ''}</td>
                                     <td class="rarity-section-rare">
-                                        <div class="listed-count">
+                                        ${formatValue(item.rare.highest_bid)}
+                                        ${
+                                            item.rare.bids && item.rare.bids.length > 0
+                                            ? (
+                                                item.rare.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-rare">
+                                     <div class="listed-count">
                                             ${item.rare.listed_count}
-                                            ${item.rare.seller_info ? `
-                                                <i class="fas fa-user seller-icon" 
-                                                   onclick="toggleTooltip(this)"
-                                                   data-seller-id="${item.rare.seller_info.seller_id}"
-                                                   data-seller-name="${item.rare.seller_info.name}"
-                                                   data-seller-handle="${item.rare.seller_info.handle}"
-                                                   data-seller-pfp-url="${item.rare.seller_info.pfp_url}"
-                                                   data-seller-port-value="${item.rare.seller_info.seller_port_value}"
-                                                   data-hero-id="${item.hero_id}"
-                                                   data-rarity="Rare"
-                                                   data-stars="${item.stars}"
-                                                   data-floor-price="${item.rare.floor}"></i>
-                                            ` : ''}
+                                            ${item.rare.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.rare.seller_info.seller_id}"
+                                                    data-seller-name="${item.rare.seller_info.seller_name}"
+                                                    data-seller-handle="${item.rare.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.rare.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.rare.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="rare"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.rare.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
                                         </div>
                                     </td>
                                     <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
-                                    <td class="rarity-section-common">${formatValue(item.common.highest_bid)}${item.common.bids && item.common.bids.length > 0 ? `<i class="fas fa-user seller-icon" onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>` : ''}</td>                     
+                                    <td class="rarity-section-common">
+                                        ${formatValue(item.common.highest_bid)}
+                                        ${
+                                            item.common.bids && item.common.bids.length > 0
+                                            ? (
+                                                item.common.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
                                     <td class="rarity-section-common">
                                         <div class="listed-count">
                                             ${item.common.listed_count}
-                                            ${item.common.seller_info ? `
-                                                <i class="fas fa-user seller-icon" 
-                                                   onclick="toggleTooltip(this)"
-                                                   data-seller-id="${item.common.seller_info.seller_id}"
-                                                   data-seller-name="${item.common.seller_info.name}"
-                                                   data-seller-handle="${item.common.seller_info.handle}"
-                                                   data-seller-pfp-url="${item.common.seller_info.pfp_url}"
-                                                   data-seller-port-value="${item.common.seller_info.seller_port_value}"
-                                                   data-hero-id="${item.hero_id}"
-                                                   data-rarity="Common"
-                                                   data-stars="${item.stars}"
-                                                   data-floor-price="${item.common.floor}"></i>
-                                            ` : ''}
+                                            ${item.common.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.common.seller_info.seller_id}"
+                                                    data-seller-name="${item.common.seller_info.seller_name}"
+                                                    data-seller-handle="${item.common.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.common.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.common.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="common"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.common.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -1244,7 +1337,8 @@
                             item.legendary.floor,
                             item.legendary.highest_bid || '',
                             item.legendary.listed_count || '',
-                            item.legendary.seller_info ? item.legendary.seller_info.seller_id : ''
+                            item.legendary.seller_info ? item.legendary.seller_info.seller_id : '',
+                            item.legendary.is_visavi
                         ].map(value => `"${value}"`);
                         csvRows.push(row.join(','));
 
@@ -1259,7 +1353,8 @@
                             item.epic.floor,
                             item.epic.highest_bid || '',
                             item.epic.listed_count || '',
-                            item.epic.seller_info ? item.epic.seller_info.seller_id : ''
+                            item.epic.seller_info ? item.epic.seller_info.seller_id : '',
+                            item.epic.is_visavi
                         ].map(value => `"${value}"`);
                         csvRows.push(epicRow.join(','));
 
@@ -1274,7 +1369,8 @@
                             item.rare.floor,
                             item.rare.highest_bid || '',
                             item.rare.listed_count || '',
-                            item.rare.seller_info ? item.rare.seller_info.seller_id : ''
+                            item.rare.seller_info ? item.rare.seller_info.seller_id : '',
+                            item.rare.is_visavi
                         ].map(value => `"${value}"`);
                         csvRows.push(rareRow.join(','));
 
@@ -1289,7 +1385,8 @@
                             item.common.floor,
                             item.common.highest_bid || '',
                             item.common.listed_count || '',
-                            item.common.seller_info ? item.common.seller_info.seller_id : ''
+                            item.common.seller_info ? item.common.seller_info.seller_id : '',
+                            item.common.is_visavi
                         ].map(value => `"${value}"`);
                         csvRows.push(commonRow.join(','));
                     });
@@ -1732,6 +1829,7 @@
                 updateRangeTrack();
             });
             
+                                   
             // Initialize the slider
             updateRangeTrack();
         }

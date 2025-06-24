@@ -13,6 +13,7 @@
     <title>Player Bids</title>
     <link rel="stylesheet" href="../styles.css?v=8e4c2f">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .grid-container {
             display: grid;
@@ -193,6 +194,7 @@
                     const orderbook = await fetchOrderbook(item.hero_id, item.rarity);
                     return {
                         bidder_handle: item.bidder_handle,
+                        bidder_address: item.trader,
                         price: item.price,
                         expiration_time: item.expiration_time,
                         hero_id: item.hero_id,
@@ -325,7 +327,7 @@ function renderCards(sortType) {
             
             if (prevBid) {
                 priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                if (priceDiff > 1) {
+                if (priceDiff > 10) {
                     priceGapClass = 'price-gap';
                 }
             }
@@ -352,11 +354,16 @@ function renderCards(sortType) {
             }
             
             const expiration = formatTimeUntilExpiration(bid.expiration_time);
-            const gapStyle = priceGapClass ? 'style="border-top: 1px solid #FF69B4 !important;"' : '';
-            
+            const gapStyle = priceGapClass ? 'style="border-top: 1.5px solid #FF69B4 !important;"' : '';
+                        
             bidRows += `
             <tr class="${priceGapClass}" ${gapStyle}>
-                <td ${cellStyle}>${bid.bidder_handle || 'Anonymous'}</td>
+                <td ${cellStyle}>
+                    ${bid.bidder_handle || 'Anonymous'}
+                    ${isBot(bid.trader) 
+                        ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                        : ''}
+                </td>
                 <td ${cellStyle} class="price-col">${formatPrice(bid.price)}</td>
                 <td style="color: ${expiration.color} !important;">${expiration.text}</td>
             </tr>
@@ -392,7 +399,33 @@ function renderCards(sortType) {
 
     document.getElementById('results').innerHTML = grid;
 }
-        // Fetch data when page loads
+        // Add this array to store known bot bidders
+
+const KNOWN_BOTS = [
+  { handle: 'NoahCohen697864', address: '0x6CBAC11436149e49CE0fFF01c087946032aB0AFC' },
+  { handle: 'visavi_eth', address: '0x71355856191061B1723F24DFc1007dAC29F3aCa5' },
+  { handle: 'Chiro458', address: '0x307E0aBe028ca468bF97126610e0Ad7C2b2C12Fb' },
+  { handle: 'Bartomiej1805', address: '0xeb77499E304792ad15a9C2501E5F9dfdFE6eBa45' },
+  { handle: 'nghia19993', address: '0x0bE267CDe2E2E892346363A6e6E27b189f5B17B0' },
+  { handle: '_0xE83C0E', address: '0xE8381dB94c161154e2d7FdFF9e8502403565FC0E' },
+  { handle: 'Saxeus03', address: '0xa881e9042d377f217D806F90B80aF6b02A6eB92E' },
+  { handle: 'xsaint237656', address: '0x311166e0F6745ED6EBa3B76756C518F0ece2B988' },
+  { handle: 'Alex09755157', address: '0x5e77ea483238316EfD9F295f9e6FC3575Fe082bf' },
+{ handle: 'moneyfest_2020', address: '0xefbA9AB00b5cC953BeC5Ce1e87F6FfA9b8aACA46' },
+];
+
+// Helper function to check if a bidder is a bot - with error handling
+function isBot(trader) {
+  if (!trader) return false;
+  
+  const traderAddress = String(trader).toLowerCase();
+  
+  return KNOWN_BOTS.some(bot => {  // Changed botAddress to bot
+    return String(bot.address).toLowerCase() === traderAddress;  // Added .address to access the property
+  });
+}
+
+// Fetch data when page loads
         fetchBids();
     </script>
 </body>

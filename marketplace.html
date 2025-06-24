@@ -2110,11 +2110,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         <td style="padding: 8px; text-align: left;">
                                             <div style="display: flex; align-items: center; gap: 8px;">
                                                 <span>${playerDisplay}</span>
+                                                ${isBot(bid.trader) 
+                                                ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                                                : ''}
                                                 <a href="https://x.com/${bid.bidder_handle}" target="_blank" style="text-decoration: none;">
                                                     <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                                                 </a>
-                                                <i class="fas fa-copy" onclick="copyToClipboard('${bid.bidder_handle}', event)" 
-                                                   style="font-size: 0.8em; color: #777; cursor: pointer;"></i>
                                             </div>
                                         </td>
                                         <td style="padding: 8px; text-align: right; color: ${expirationColor};">${expirationText}</td>
@@ -2149,6 +2150,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 label.textContent = this.checked ? 'On' : 'Off';
                 // Add your common equivalent logic here
             });
+        }
+
+        const KNOWN_BOTS = [
+        { handle: 'NoahCohen697864', address: '0x6CBAC11436149e49CE0fFF01c087946032aB0AFC' },
+        { handle: 'visavi_eth', address: '0x71355856191061B1723F24DFc1007dAC29F3aCa5' },
+        { handle: 'Chiro458', address: '0x307E0aBe028ca468bF97126610e0Ad7C2b2C12Fb' },
+        { handle: 'Bartomiej1805', address: '0xeb77499E304792ad15a9C2501E5F9dfdFE6eBa45' },
+        { handle: 'nghia19993', address: '0x0bE267CDe2E2E892346363A6e6E27b189f5B17B0' },
+        { handle: '_0xE83C0E', address: '0xE8381dB94c161154e2d7FdFF9e8502403565FC0E' },
+        { handle: 'Saxeus03', address: '0xa881e9042d377f217D806F90B80aF6b02A6eB92E' },
+        { handle: 'xsaint237656', address: '0x311166e0F6745ED6EBa3B76756C518F0ece2B988' },
+        { handle: 'Alex09755157', address: '0x5e77ea483238316EfD9F295f9e6FC3575Fe082bf' },
+        { handle: 'moneyfest_2020', address: '0xefbA9AB00b5cC953BeC5Ce1e87F6FfA9b8aACA46' },
+        ];
+
+        // Helper function to check if a bidder is a bot - with error handling
+        function isBot(trader) {
+        if (!trader) return false;
+        
+        const traderAddress = String(trader).toLowerCase();
+        
+        return KNOWN_BOTS.some(bot => {  // Changed botAddress to bot
+            return String(bot.address).toLowerCase() === traderAddress;  // Added .address to access the property
+        });
         }
 
         // Show bid modal function

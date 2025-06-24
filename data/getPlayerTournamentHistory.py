@@ -34,40 +34,51 @@ with base as (
        --and gtpp2.tournament_unique_key = 'Main 24'
     order by 1 desc
   )
+  ,best_rank as (
+  select player_id,tournament_unique_key,
+  	MIN(case when league = 'Elite' then unique_player_rank  end) as best_elite,
+	MIN(case when league = 'Gold' then unique_player_rank  end) as best_gold,
+	MIN(case when league = 'Silver' then unique_player_rank  end) as best_silver,
+	MIN(case when league = 'Bronze' then unique_player_rank  end) as best_bronze,
+	MIN(case when league = 'Reverse' then unique_player_rank  end) as best_reverse
+    from base
+    group by 1,2
+  )
   ,heroes as (select distinct hero_handle, is_deleted from  flatten.heroes_current hc)
   ,nbc_wallets as (select distinct player_id from master.nbc_wallets)
   ,historical_rewards as (
-  select player_id,tournament_id,tournament_unique_key,league,
+  select player_id,gt.tournament_id,gt.tournament_unique_key,league,
 	null as decks,/*can't be done with this data*/
 	null as itm_decks, /*can't be done with this data*/
-	rank as best_rank,
 	reward_eth,
 	reward_pack,
 	reward_fan,
-	reward_frag,
+	reward_fragment as reward_frag,
 	reward_gold,
     is_rewards_final
-  from flatten.GET_TOURNAMENT_HISTORIES_BY_PLAYER_ID
+  from flatten.tournament_player_history tph join flatten.get_tournaments gt on tph.tournament_id::text = gt.tournament_id::text
   --where player_id = '0x162F95a9364c891028d255467F616902A479681a'
 --  and tournament_unique_key = 'Main 25'
 )
 ,historical_rewards_agg as (
-select  player_id,tournament_unique_key,
+select  historical_rewards.player_id,historical_rewards.tournament_unique_key,
 	null as decks,
 	COUNT(distinct case when coalesce(reward_pack,0) > 0 then tournament_id end) as itm_decks, /*for each league w/ + 1 card assume at least 1 ITM deck, need this because some rewards history look up are bugged*/
-	MIN(case when league = 'Elite' then best_rank  end) as best_elite,
-	MIN(case when league = 'Gold' then best_rank  end) as best_gold,
-	MIN(case when league = 'Silver' then best_rank  end) as best_silver,
-	MIN(case when league = 'Bronze' then best_rank  end) as best_bronze,
-	MIN(case when league = 'Reverse' then best_rank  end) as best_reverse,
-	MIN(case when league not IN ('Elite','Gold','Silver','Bronze','Reverse') then best_rank  end) as best_other,
+	MIN(best_elite) best_elite,
+	MIN(best_gold) best_gold,
+	MIN(best_elite) best_silver,
+	MIN(best_bronze) best_bronze,
+	MIN(best_reverse) best_reverse,
+	MIN(null::int) as best_other,
 	suM(reward_eth) as reward_eth,
 	suM(reward_pack) as reward_pack,
 	suM(reward_fan) as reward_fan,
 	suM(reward_frag) as reward_frag,
 	suM(reward_gold) as reward_gold,
     MIN(is_rewards_final) as is_rewards_final
-from historical_rewards
+from historical_rewards 
+join best_rank on historical_rewards.player_id = best_rank.player_id
+    and historical_rewards.tournament_unique_key = best_rank.tournament_unique_key
 group by 1,2
 )
 ,rewards_final as (select tournament_unique_key, MIN(is_rewards_final) as is_rewards_final from historical_rewards_agg group by 1)

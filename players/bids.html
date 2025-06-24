@@ -100,10 +100,65 @@
         .price-gap {
             background-color: #ffcccc; /* Light red background for price gap */
         }
+
+        /* Add to your <style> section */
+
+.control-container {
+    background-color: #333;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sort-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sort-options label {
+    color: #fff;
+    font-weight: 500;
+}
+
+.sort-options select {
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.sort-options select:focus {
+    outline: none;
+    border-color: #00AAFF;
+}
+
+.hero-card.player-winning {
+    border: 2px solid #4ADE80;
+}
+
+.hero-card.player-not-winning {
+    border: 2px solid #FF8C00;
+}
     </style>
 </head>
 <body>
-    <div id="results" class="grid-container"></div>
+    <!-- Add this above your results div -->
+<div class="control-container">
+    <div class="sort-options">
+        <label for="sort-select">Sort By:</label>
+        <select id="sort-select" onchange="sortCards(this.value)">
+            <option value="not-winning" selected>Not Winning</option>
+            <option value="winning">Winning</option>
+        </select>
+    </div>
+</div>
+
+<div id="results" class="grid-container"></div>
 
     <script>        async function fetchOrderbook(heroId, rarity) {
             const response = await fetch(`https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarity}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`, {
@@ -200,101 +255,143 @@
             }
 
             return { text, color };
-        }        function displayResults(data) {
-            const grid = data.bids.map(item => {
-                const topFiveBids = item.orderbook.highest_five_bids || [];
-                
-                // Create bid rows with price gap highlighting
-                let bidRows = '';
-                
-                // Check if player has any bids and if they have the highest bid
-                const playerHasHighestBid = topFiveBids.length > 0 && 
-                                           topFiveBids[0].trader && 
-                                           topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                
-                for (let i = 0; i < topFiveBids.length; i++) {
-                    const bid = topFiveBids[i];
-                    const prevBid = i > 0 ? topFiveBids[i-1] : null;
-                    
-                    // Calculate price gap percentage if not the first bid
-                    let priceGapClass = '';
-                    let priceDiff = 0;
-                    
-                    if (prevBid) {
-                        priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                        if (priceDiff > 10) {
-                            priceGapClass = 'price-gap';
-                        }
-                    }
-                    
-                    const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                    
-                    // Set color based on conditions:
-                    // 1. Green if player has highest bid or all higher bids are also player's
-                    // 2. Orange if player bid but another player has a higher bid
-                    // 3. Default if not player's bid
-                    let cellStyle = '';
-                    if (isPlayerBid) {
-                        // Check if any higher bids are from other players
-                        let otherPlayerHasHigherBid = false;
-                        for (let j = 0; j < i; j++) {
-                            if (topFiveBids[j].trader && 
-                                topFiveBids[j].trader.toLowerCase() !== PLAYER_ADDRESS.toLowerCase()) {
-                                otherPlayerHasHigherBid = true;
-                                break;
-                            }
-                        }
-                        
-                        if (otherPlayerHasHigherBid) {
-                            cellStyle = 'style="color: #FF8C00 !important;"'; // Orange if other player has higher bid
-                        } else {
-                            cellStyle = 'style="color: #4ADE80 !important;"'; // Green if all higher bids are player's
-                        }
-                    }
-                    
-                    const expiration = formatTimeUntilExpiration(bid.expiration_time);
-                    const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
-                    
-                    bidRows += `
-                    <tr class="${priceGapClass}" ${gapStyle}>
-                        <td ${cellStyle}>${bid.bidder_handle || 'Anonymous'}</td>
-                        <td ${cellStyle} class="price-col">${formatPrice(bid.price)}</td>
-                        <td style="color: ${expiration.color} !important;">${expiration.text}</td>
-                    </tr>
-                    `;
+        }        // Global to store the data
+let bidData = [];
+
+function displayResults(data) {
+    // Store data globally for sorting
+    bidData = data.bids;
+    renderCards('not-winning'); // Default sort
+}
+
+function sortCards(sortType) {
+    renderCards(sortType);
+}
+
+function renderCards(sortType) {
+    if (!bidData || !bidData.length) return;
+    
+    let sortedBids = [...bidData];
+    
+    if (sortType === 'not-winning') {
+        // Sort to show cards where player is not winning at the top
+        sortedBids.sort((a, b) => {
+            const aTopBid = a.orderbook.highest_five_bids?.[0];
+            const bTopBid = b.orderbook.highest_five_bids?.[0];
+            
+            const aIsWinning = aTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+            const bIsWinning = bTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+            
+            if (aIsWinning && !bIsWinning) return 1;
+            if (!aIsWinning && bIsWinning) return -1;
+            return 0;
+        });
+    } else if (sortType === 'winning') {
+        // Sort to show cards where player is winning at the top
+        sortedBids.sort((a, b) => {
+            const aTopBid = a.orderbook.highest_five_bids?.[0];
+            const bTopBid = b.orderbook.highest_five_bids?.[0];
+            
+            const aIsWinning = aTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+            const bIsWinning = bTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+            
+            if (aIsWinning && !bIsWinning) return -1;
+            if (!aIsWinning && bIsWinning) return 1;
+            return 0;
+        });
+    }
+    
+    const grid = sortedBids.map(item => {
+        const topFiveBids = item.orderbook.highest_five_bids || [];
+        
+        // Determine if player is winning this card
+        const playerIsWinning = topFiveBids.length > 0 && 
+                               topFiveBids[0].trader && 
+                               topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+        
+        // Set card class based on winning status
+        const cardClass = playerIsWinning ? 'hero-card player-winning' : 'hero-card player-not-winning';
+        
+        // Create bid rows with price gap highlighting
+        let bidRows = '';
+        
+        for (let i = 0; i < topFiveBids.length; i++) {
+            const bid = topFiveBids[i];
+            const prevBid = i > 0 ? topFiveBids[i-1] : null;
+            
+            // Calculate price gap percentage if not the first bid
+            let priceGapClass = '';
+            let priceDiff = 0;
+            
+            if (prevBid) {
+                priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
+                if (priceDiff > 1) {
+                    priceGapClass = 'price-gap';
                 }
-
-                return `
-                <div class="hero-card">
-                    <img 
-                        class="card-image" 
-                        src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
-                        alt="Hero Card"
-                        onerror="this.src='../icons/ft_logo.webp'"
-                    >
-                    <h3>${item.name}</h3>
-                    <a href="https://x.com/${item.bidder_handle}/" class="hero-handle" target="_blank">@${item.bidder_handle}</a>
-                    <div class="hero-price">${formatPrice(item.price)}</div>
-                    
-                    <table class="bids-table">
-                        <thead>
-                            <tr>
-                                <th>Bidder</th>
-                                <th>Price</th>
-                                <th>Expires In</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${bidRows}
-                        </tbody>
-                    </table>
-                </div>
-                `;
-            }).join('');
-
-            document.getElementById('results').innerHTML = grid;
+            }
+            
+            const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+            
+            // Check if any higher bids are from other players
+            let otherPlayerHasHigherBid = false;
+            for (let j = 0; j < i; j++) {
+                if (topFiveBids[j].trader && 
+                    topFiveBids[j].trader.toLowerCase() !== PLAYER_ADDRESS.toLowerCase()) {
+                    otherPlayerHasHigherBid = true;
+                    break;
+                }
+            }
+            
+            let cellStyle = '';
+            if (isPlayerBid) {
+                if (otherPlayerHasHigherBid) {
+                    cellStyle = 'style="color: #FF8C00 !important;"'; // Orange if other player has higher bid
+                } else {
+                    cellStyle = 'style="color: #4ADE80 !important;"'; // Green if all higher bids are player's
+                }
+            }
+            
+            const expiration = formatTimeUntilExpiration(bid.expiration_time);
+            const gapStyle = priceGapClass ? 'style="border-top: 1px solid #FF69B4 !important;"' : '';
+            
+            bidRows += `
+            <tr class="${priceGapClass}" ${gapStyle}>
+                <td ${cellStyle}>${bid.bidder_handle || 'Anonymous'}</td>
+                <td ${cellStyle} class="price-col">${formatPrice(bid.price)}</td>
+                <td style="color: ${expiration.color} !important;">${expiration.text}</td>
+            </tr>
+            `;
         }
 
+        return `
+        <div class="${cardClass}">
+            <img 
+                class="card-image" 
+                src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
+                alt="Hero Card"
+                onerror="this.src='../icons/ft_logo.webp'"
+            >
+            <h3>${item.name}</h3>
+            <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
+            
+            <table class="bids-table">
+                <thead>
+                    <tr>
+                        <th>Bidder</th>
+                        <th>Price</th>
+                        <th>Expires In</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${bidRows}
+                </tbody>
+            </table>
+        </div>
+        `;
+    }).join('');
+
+    document.getElementById('results').innerHTML = grid;
+}
         // Fetch data when page loads
         fetchBids();
     </script>

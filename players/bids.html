@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Listings</title>
-    <link rel="stylesheet" href="../styles.css">
+    <title>Player Bids</title>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <style>
         .grid-container {
             display: grid;
@@ -30,8 +38,10 @@
         }
 
         .hero-card h3 {
-            margin: 0 0 0.5rem 0;
-            color: #333;
+            color: white;
+            font-size: .9rem;
+            margin-bottom: 4px;
+            margin-top: 8px;
         }
 
         .hero-card .hero-image {
@@ -39,7 +49,7 @@
         }
 
         .hero-card .hero-name {
-          font-size: 14px; /* Smaller font */
+          font-size: 8px; /* Smaller font */
         }
 
         .hero-info {
@@ -76,7 +86,7 @@
 
         .hero-handle {
             color: #777;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             margin-bottom: 0.5rem;
             text-decoration: none;
             transition: color 0.2s ease;
@@ -194,8 +204,13 @@
             const grid = data.bids.map(item => {
                 const topFiveBids = item.orderbook.highest_five_bids || [];
                 
-                // Create bid rows with price gap highlighting and debug
+                // Create bid rows with price gap highlighting
                 let bidRows = '';
+                
+                // Check if player has any bids and if they have the highest bid
+                const playerHasHighestBid = topFiveBids.length > 0 && 
+                                           topFiveBids[0].trader && 
+                                           topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
                 
                 for (let i = 0; i < topFiveBids.length; i++) {
                     const bid = topFiveBids[i];
@@ -207,19 +222,37 @@
                     
                     if (prevBid) {
                         priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                        console.log(`Bid ${i}: ${bid.price}, Prev: ${prevBid.price}, Diff: ${priceDiff.toFixed(2)}%`);
-                        
-                        if (priceDiff > 10) { // Lowered to 1%
+                        if (priceDiff > 10) {
                             priceGapClass = 'price-gap';
-                            console.log(`Adding price-gap class, diff: ${priceDiff.toFixed(2)}%`);
                         }
                     }
                     
                     const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                    const cellStyle = isPlayerBid ? 'style="color: #4ADE80 !important;"' : '';
-                    const expiration = formatTimeUntilExpiration(bid.expiration_time);
                     
-                    // Add explicit style instead of just class
+                    // Set color based on conditions:
+                    // 1. Green if player has highest bid or all higher bids are also player's
+                    // 2. Orange if player bid but another player has a higher bid
+                    // 3. Default if not player's bid
+                    let cellStyle = '';
+                    if (isPlayerBid) {
+                        // Check if any higher bids are from other players
+                        let otherPlayerHasHigherBid = false;
+                        for (let j = 0; j < i; j++) {
+                            if (topFiveBids[j].trader && 
+                                topFiveBids[j].trader.toLowerCase() !== PLAYER_ADDRESS.toLowerCase()) {
+                                otherPlayerHasHigherBid = true;
+                                break;
+                            }
+                        }
+                        
+                        if (otherPlayerHasHigherBid) {
+                            cellStyle = 'style="color: #FF8C00 !important;"'; // Orange if other player has higher bid
+                        } else {
+                            cellStyle = 'style="color: #4ADE80 !important;"'; // Green if all higher bids are player's
+                        }
+                    }
+                    
+                    const expiration = formatTimeUntilExpiration(bid.expiration_time);
                     const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
                     
                     bidRows += `

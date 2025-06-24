@@ -327,7 +327,7 @@ function renderCards(sortType) {
             
             if (prevBid) {
                 priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                if (priceDiff > 10) {
+                if (priceDiff > 5) {
                     priceGapClass = 'price-gap';
                 }
             }

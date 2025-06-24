@@ -8,27 +8,38 @@
     <style>
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
             padding: 1rem;
         }
 
         @media (min-width: 992px) {
             .grid-container {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
         .hero-card {
             border: 1px solid #ddd;
             border-radius: 8px;
-            padding: 1rem;
+            padding: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto;
         }
 
         .hero-card h3 {
             margin: 0 0 0.5rem 0;
             color: #333;
+        }
+
+        .hero-card .hero-image {
+          width: 80px; /* Reduce from larger size */
+        }
+
+        .hero-card .hero-name {
+          font-size: 14px; /* Smaller font */
         }
 
         .hero-info {
@@ -61,6 +72,23 @@
         .player-bid {
             color: #4ADE80 !important;
             font-weight: bold;
+        }
+
+        .hero-handle {
+            color: #777;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .hero-handle:hover {
+            color: #1DA1F2;
+            text-decoration: underline;
+        }
+
+        .price-gap {
+            background-color: #ffcccc; /* Light red background for price gap */
         }
     </style>
 </head>
@@ -106,6 +134,7 @@
                         rarity: item.rarity,
                         stars: item.hero.stars,
                         name: item.hero.name,
+                        handle: item.hero.handle,
                         orderbook: orderbook
                     };
                 }))
@@ -125,7 +154,7 @@
         }
 
         function formatPrice(price) {
-            return (parseInt(price) / 1000000000000000000).toFixed(4);
+            return (parseInt(price) / 1000000000000000000).toFixed(5);
         }        function formatTimeUntilExpiration(expirationTime) {
             const expirationDate = new Date(parseInt(expirationTime) * 1000);
             const now = new Date();
@@ -161,25 +190,46 @@
             }
 
             return { text, color };
-        }function displayResults(data) {            const grid = data.bids.map(item => {
-                const topFiveBids = item.orderbook.highest_five_bids || [];                const bidRows = topFiveBids.map(bid => {
-                    console.log('Comparing addresses:', {
-                        trader: bid.trader,
-                        player: PLAYER_ADDRESS,
-                        traderLower: bid.trader?.toLowerCase(),
-                        playerLower: PLAYER_ADDRESS.toLowerCase()
-                    });
+        }        function displayResults(data) {
+            const grid = data.bids.map(item => {
+                const topFiveBids = item.orderbook.highest_five_bids || [];
+                
+                // Create bid rows with price gap highlighting and debug
+                let bidRows = '';
+                
+                for (let i = 0; i < topFiveBids.length; i++) {
+                    const bid = topFiveBids[i];
+                    const prevBid = i > 0 ? topFiveBids[i-1] : null;
+                    
+                    // Calculate price gap percentage if not the first bid
+                    let priceGapClass = '';
+                    let priceDiff = 0;
+                    
+                    if (prevBid) {
+                        priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
+                        console.log(`Bid ${i}: ${bid.price}, Prev: ${prevBid.price}, Diff: ${priceDiff.toFixed(2)}%`);
+                        
+                        if (priceDiff > 10) { // Lowered to 1%
+                            priceGapClass = 'price-gap';
+                            console.log(`Adding price-gap class, diff: ${priceDiff.toFixed(2)}%`);
+                        }
+                    }
+                    
                     const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                    console.log('Is match?', isPlayerBid);                    const cellStyle = isPlayerBid ? 'style="color: #4ADE80 !important;"' : '';
+                    const cellStyle = isPlayerBid ? 'style="color: #4ADE80 !important;"' : '';
                     const expiration = formatTimeUntilExpiration(bid.expiration_time);
-                    return `
-                    <tr>
+                    
+                    // Add explicit style instead of just class
+                    const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
+                    
+                    bidRows += `
+                    <tr class="${priceGapClass}" ${gapStyle}>
                         <td ${cellStyle}>${bid.bidder_handle || 'Anonymous'}</td>
-                        <td ${cellStyle} class="price-col">${formatPrice(bid.price)} ETH</td>
+                        <td ${cellStyle} class="price-col">${formatPrice(bid.price)}</td>
                         <td style="color: ${expiration.color} !important;">${expiration.text}</td>
                     </tr>
                     `;
-                }).join('');
+                }
 
                 return `
                 <div class="hero-card">
@@ -190,9 +240,8 @@
                         onerror="this.src='../icons/ft_logo.webp'"
                     >
                     <h3>${item.name}</h3>
-                    <div class="hero-info">ID: ${item.hero_id}</div>
-                    <div class="hero-info">Rarity: ${item.rarity}</div>
-                    <div class="hero-price">${formatPrice(item.price)} ETH</div>
+                    <a href="https://x.com/${item.bidder_handle}/" class="hero-handle" target="_blank">@${item.bidder_handle}</a>
+                    <div class="hero-price">${formatPrice(item.price)}</div>
                     
                     <table class="bids-table">
                         <thead>

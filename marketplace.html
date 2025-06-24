@@ -1611,33 +1611,81 @@
             }
         }
 
-        // Add this function to the script section
-        function copyToClipboard(text, event) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Show feedback
-                const feedback = document.createElement('div');
-                feedback.className = 'copy-feedback';
-                feedback.textContent = 'Copied!';
-                
-                // Position near the click
-                feedback.style.left = `${event.clientX}px`;
-                feedback.style.top = `${event.clientY - 30}px`;
-                
-                document.body.appendChild(feedback);
-                
-                // Show the feedback
-                setTimeout(() => feedback.classList.add('show'), 10);
-                
-                // Remove after animation
-                setTimeout(() => {
-                    feedback.classList.remove('show');
-                    setTimeout(() => document.body.removeChild(feedback), 300);
-                }, 1500);
-            });
-            
-            // Stop event propagation to prevent tooltip from closing
-            event.stopPropagation();
+        // Add this function to your JavaScript code
+
+async function fetchSellOrders() {
+    const API_URL = 'https://api-v2.fantasy.top/marketplace/sell-orders?filters.minPrice=&filters.maxPrice=&filters.rarities=4&filters.rarities=3&filters.rarities=2&filters.rarities=1&filters.onlyFavorites=false&filters.stars=0&filters.stars=8&search=&rankCriteria=4&pagination.page=1&pagination.limit=6000';
+    
+    try {
+        // Get the API key from localStorage or another source
+        const apiKey = localStorage.getItem('fantasyTopApiKey');
+        
+        if (!apiKey) {
+            console.error('API key not found. Please set your API key first.');
+            return null;
         }
+        
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Sell orders fetched:', data.sell_orders.length);
+        
+        // Store in localStorage for later use
+        localStorage.setItem('sellOrdersData', JSON.stringify(data));
+        
+        // Also store as a global variable for immediate use
+        window.sellOrdersData = data;
+        
+        return data;
+    } catch (error) {
+        console.error('Error fetching sell orders:', error);
+        return null;
+    }
+}
+
+// Function to retrieve the stored data
+function getSellOrdersData() {
+    // Try from memory first
+    if (window.sellOrdersData) {
+        return window.sellOrdersData;
+    }
+    
+    // Try from localStorage next
+    const storedData = localStorage.getItem('sellOrdersData');
+    if (storedData) {
+        const data = JSON.parse(storedData);
+        window.sellOrdersData = data; // Cache in memory
+        return data;
+    }
+    
+    // If not available, fetch it
+    return fetchSellOrders();
+}
+
+// Example usage
+document.addEventListener('DOMContentLoaded', async () => {
+    // You can fetch sell orders when the page loads
+    // or wait until a specific user action
+    await fetchSellOrders();
+    
+    // Now you can use the data whenever needed
+    // Example:
+    // const sellOrders = getSellOrdersData();
+    // if (sellOrders) {
+    //     doSomethingWithSellOrders(sellOrders);
+    // }
+});
+
 
         // Add this helper function to shorten IDs
         function shortenId(id) {

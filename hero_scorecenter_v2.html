@@ -18,122 +18,60 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .tournament-dropdown {
-    position: relative;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    /* Remove the custom padding/border-radius - let tournament-badge handle it */
-    transition: all 0.2s ease;
-    user-select: none;
-}
+    .tournament-dropdown {
+        position: relative;
+        display: inline-block;
+    }
 
-.tournament-dropdown:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+    .tournament-dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 4px;
+        right: 0;
+        font-size: 0.7em; /* 40% smaller font */
+    }
 
-.tournament-chevron {
-    font-size: 12px;
-    transition: transform 0.3s ease;
-    margin-left: 4px;
-}
+    .tournament-dropdown-content.show {
+        display: block;
+    }
 
-.tournament-dropdown.active .tournament-chevron {
-    transform: rotate(180deg);
-}
+    .tournament-option {
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
 
-.tournament-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 8px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 1000;
-    max-height: 300px;
-    overflow: hidden;
-    margin-top: 4px;
-}
+    .tournament-option:hover {
+        background-color: #f1f1f1;
+    }
 
-.tournament-dropdown.active .tournament-dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
+    .tournament-status {
+        font-size: 0.8em;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
 
-.tournament-dropdown-content {
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 8px 0;
-}
+    .tournament-status.live {
+        background-color: #4caf50;
+        color: white;
+    }
 
-/* Modern scrollbar */
-.tournament-dropdown-content::-webkit-scrollbar {
-    width: 6px;
-}
+    .tournament-status.archived {
+        background-color: #9e9e9e;
+        color: white;
+    }
 
-.tournament-dropdown-content::-webkit-scrollbar-track {
-    background: #2a2a2a;
-    border-radius: 3px;
-}
-
-.tournament-dropdown-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #4a4a4a 0%, #666 100%);
-    border-radius: 3px;
-    transition: background 0.2s ease;
-}
-
-.tournament-dropdown-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #666 0%, #888 100%);
-}
-
-.tournament-option {
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.tournament-option:last-child {
-    border-bottom: none;
-}
-
-.tournament-option:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.tournament-option.current {
-    background: rgba(74, 144, 226, 0.15);
-    color: #4a90e2;
-}
-
-.tournament-option.current:hover {
-    background: rgba(74, 144, 226, 0.25);
-}
-
-.tournament-status {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-}
-
-.tournament-status.archived {
-    background: rgba(158, 158, 158, 0.2);
-    color: #9e9e9e;
-}
-    </style>
+    .tournament-badge {
+        cursor: pointer;
+        user-select: none;
+    }
+</style>
 </head>
 <body>
     <div class="title-container">
@@ -142,13 +80,10 @@
                 <i class="fas fa-home"></i>
             </a>
             Hero Score Center
-            <span class="tournament-badge tournament-dropdown" id="tournament-selector">
-                <span class="tournament-text">Main 58</span>
-                <i class="fas fa-chevron-down tournament-chevron"></i>
-                <div class="tournament-dropdown-menu" id="tournament-dropdown">
-                    <!-- Will be populated dynamically -->
-                </div>
-            </span>
+            <span class="tournament-badge" id="tournament-selector">
+    Main 58 <i class="fas fa-chevron-down" id="dropdown-icon" style="color: black;"></i>
+    <div class="tournament-dropdown-content" id="tournament-dropdown"></div>
+</span>
         </h1>
     </div>
     <div id="search-container" style="display: flex; align-items: center;">
@@ -160,9 +95,7 @@
         <span class="clear-search"></span>
     </div>
     <div class="small-text">
-        <span id="timestamp">2025-06-30 20:24 UTC</span>
-        <span id="timeAgo"></span>
-        <span class="info-text"> | Heroes: 10</span>
+        <span class="info-text"> Heroes: 10 | Status: Live</span>
     </div>
 <div class="sections">
         <div class="star-columns">
@@ -499,33 +432,16 @@
             try {
                 console.log('Initializing page with API data...');
                 
-                // Show loading state
-                const titleElement = document.querySelector('.title-header .tournament-badge');
-                if (titleElement) {
-                    titleElement.textContent = 'Loading...';
-                }
-
                 // Fetch data from API
                 const apiData = await fetchHeroData();
                 const processedData = processHeroData(apiData);
                 
                 console.log('Processed data:', processedData);
 
-                // Update tournament badge
-                if (titleElement) {
-                    titleElement.textContent = `Main ${API_CONFIG.TOURNAMENT_NUMBER}`;
-                }
-
-                // Update hero count
+                // Update hero count with actual count from API
                 const heroCountElement = document.querySelector('.info-text');
                 if (heroCountElement && apiData.meta) {
-                    heroCountElement.textContent = ` | Heroes: ${apiData.meta.total}`;
-                }
-
-                // Update timestamp
-                const timestampElement = document.getElementById('timestamp');
-                if (timestampElement) {
-                    timestampElement.textContent = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+                    heroCountElement.textContent = ` Heroes: ${apiData.meta.total} | Status: Live`;
                 }
 
                 // Populate the hero tables with dynamic data
@@ -538,12 +454,6 @@
                 
             } catch (error) {
                 console.error('Failed to initialize page with API data:', error);
-                
-                // Show error state
-                const titleElement = document.querySelector('.title-header .tournament-badge');
-                if (titleElement) {
-                    titleElement.textContent = 'Error Loading';
-                }
             }
         }
 
@@ -722,7 +632,7 @@
                     options.push({
                         number: currentTournament - i,
                         isCurrent: false,
-                        status: 'Archived'
+                        status: 'Ended'
                     });
                 }
                 
@@ -839,9 +749,6 @@
             // Initialize the page with API data first
             initializePage();
             
-            // Initialize tournament dropdown
-            initializeTournamentDropdown();
-            
             // Initialize search functionality
             searchHeroes();
             
@@ -914,10 +821,80 @@
                     tooltip.setAttribute('aria-expanded', 'false');
                 });
             }
+
+            // Tournament selector functionality
+            const tournamentSelector = document.getElementById('tournament-selector');
+            const dropdownIcon = document.getElementById('dropdown-icon');
+            const dropdownContent = document.getElementById('tournament-dropdown');
+            
+            function createDropdownOptions() {
+                const currentTournament = API_CONFIG.TOURNAMENT_NUMBER;
+                let content = '';
+                
+                // Current tournament
+                content += `
+                    <div class="tournament-option" data-tournament="${currentTournament}">
+                        <span>Main ${currentTournament}</span>
+                        <span class="tournament-status live">Live</span>
+                    </div>
+                `;
+                
+                // Previous 10 tournaments
+                for (let i = 1; i <= 10; i++) {
+                    const tournamentNum = currentTournament - i;
+                    content += `
+                        <div class="tournament-option" data-tournament="${tournamentNum}">
+                            <span>Main ${tournamentNum}</span>
+                            <span class="tournament-status archived">Ended</span>
+                        </div>
+                    `;
+                }
+                
+                dropdownContent.innerHTML = content;
+            }
+
+            function toggleDropdown() {
+                dropdownContent.classList.toggle('show');
+                dropdownIcon.classList.toggle('fa-chevron-down');
+                dropdownIcon.classList.toggle('fa-chevron-up');
+            }
+
+            // Handle clicks on tournament selector
+            tournamentSelector.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown();
+                
+                if (!dropdownContent.innerHTML) {
+                    createDropdownOptions();
+                }
+            });
+
+            // Handle tournament selection
+            dropdownContent.addEventListener('click', function(e) {
+                const option = e.target.closest('.tournament-option');
+                if (option) {
+                    const tournamentNum = option.dataset.tournament;
+                    document.querySelector('.tournament-badge').firstChild.textContent = `Main ${tournamentNum} `;
+                    toggleDropdown();
+                    
+                    // Call your existing tournament loading function here
+                    // Assuming you have a function to load tournament data
+                    fetchHeroData(tournamentNum).then(data => {
+                        const processedData = processHeroData(data);
+                        populateHeroTables(processedData);
+                    });
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdownContent.classList.remove('show');
+                dropdownIcon.classList.remove('fa-chevron-up');
+                dropdownIcon.classList.add('fa-chevron-down');
+            });
         });
     </script>
     <script src="/js/config.js?v=1.0.0" defer></script>
-    <script src="/js/timeUtils.js?v=1.0.0" defer></script>
     <script src="/js/toolTip.js?v=1.0.0" defer></script>
     <script src="/js/chartComponent.js?v=1.0.1" defer></script>
 </body>

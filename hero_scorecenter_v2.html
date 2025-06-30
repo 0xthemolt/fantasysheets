@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Score Center</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Hero Score Center
+            <span class="tournament-badge">Main 58</span>
+        </h1>
+    </div>
+    <div id="search-container" style="display: flex; align-items: center;">
+        <button class="button-group button-group--yellow" id="my-favorites-group">
+            <span class="button-label">My Favorites</span>
+            <i class="fa-regular fa-star"></i>
+        </button>
+        <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+        <span class="clear-search"></span>
+    </div>
+    <div class="small-text">
+        <span id="timestamp">2025-06-30 17:24 UTC</span>
+        <span id="timeAgo"></span>
+        <span class="info-text"> | Heroes: 177</span>
+    </div>
+<div class="sections">
+        <div class="star-columns">
+            <!-- 8 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 7 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 6 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            <!-- Continue star columns in the same parent -->
+            <!-- 5 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 3 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 1 Star Heroes -->
+            <div class="star-column">
+                <h2>⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                Stats
+                                <div class="top-text top" role="tooltip">
+                                    👀 Views 🐦 Posts 📣 Reach
+                                </div>
+                            </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated dynamically by populateHeroTables() -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Score Trend Modal -->
+        <div id="scoreTrendModal" class="modal">
+            <div class="modal-content" style="width: 80%; max-width: 1200px; height: 80vh; max-height: 800px;">
+                <span class="close-modal" onclick="closeScoreTrendModal()">&times;</span>
+                <h2 id="modalTitle"></h2>
+                <div id="modalContent" style="height: calc(100% - 60px);"></div>
+            </div>
+        </div>
+    </div>
+    
+<script>
+
+        // Add your new functions
+        function showScoreTrend(heroHandle) {
+            console.log('showScoreTrend called with hero:', heroHandle);
+
+            const modal = document.getElementById('scoreTrendModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            // First, clear the modal content and show loading state
+            modalContent.innerHTML = '<p>Loading...</p>';
+
+            // Add console.log to debug the JSON response
+            fetch('/hero_score_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched data:', data); // Debug log
+                    console.log('Looking for hero:', heroHandle); // Debug log
+                    
+                    // Check if the hero exists in the data
+                    if (!data.heroes || !data.heroes[heroHandle]) {
+                        throw new Error(`Hero ${heroHandle} not found in data`);
+                    }
+
+                    const heroData = data.heroes[heroHandle];
+                    console.log('Hero data:', heroData); // Debug log
+
+                    // Use hero_pfp_url instead of pfp_url if that's what's in your JSON
+                    const heroImageUrl = heroData.hero_pfp_url || heroData.pfp_url;
+                    
+                    if (!heroImageUrl) {
+                        throw new Error('No profile image URL found for hero');
+                    }
+
+                    modalTitle.innerHTML = `
+                        <div style="text-align: center; margin-bottom: 0; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
+                            <img src="${heroImageUrl}" alt="${heroHandle}" style="width: 30px; height: 30px; border-radius: 50%; margin-bottom: -8px;">
+                            <span>${heroHandle}</span>
+                        </div>
+                    `;
+                    modal.style.display = "block";
+
+                    // Clear previous content
+                    modalContent.innerHTML = '';
+
+                    // Add chart container with a unique ID that includes the hero handle
+                    const chartId = `heroChart_${heroHandle}`;
+                    modalContent.innerHTML += `
+                        <div class="chart-container" style="background-color: black; width: 100%; height: 100%; min-height: 400px;">
+                            <canvas id="${chartId}"></canvas>
+                        </div>
+                    `;
+
+                    // Safely destroy existing chart if it exists
+                    if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                        window.currentHeroChart.destroy();
+                    }
+
+                    // Create new chart and store the instance
+                    createHeroChart(chartId, '/hero_score_data.json', heroHandle).then(chart => {
+                        window.currentHeroChart = chart;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching hero data:', error);
+                    modalTitle.textContent = `Score Trend ${heroHandle}`;
+                    modal.style.display = "block";
+                    modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
+                });
+        }
+
+        function closeScoreTrendModal() {
+            const modal = document.getElementById('scoreTrendModal');
+            modal.style.display = "none";
+            
+            // Safely destroy chart when modal is closed
+            if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                window.currentHeroChart.destroy();
+                window.currentHeroChart = null;
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('scoreTrendModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Add this new event listener for the star
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttonGroup = document.querySelector('#my-favorites-group');
+            const icon = buttonGroup.querySelector('i');
+            
+            buttonGroup.addEventListener('click', function() {
+                if (icon.classList.contains('fa-regular')) {
+                    // Switching to filled star - show only favorites
+                    icon.className = 'fa-solid fa-star';
+                    buttonGroup.classList.add('selected');
+                    filterFavorites(true);
+                } else {
+                    // Switching to outline star - show all
+                    icon.className = 'fa-regular fa-star';
+                    buttonGroup.classList.remove('selected');
+                    filterFavorites(false);
+                }
+            });
+        });
+
+        function filterFavorites(showOnlyFavorites) {
+            // Get favorites from localStorage
+            const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+            const rows = document.querySelectorAll('.star-column table tr');
+
+            rows.forEach(function(row) {
+                if (!row.querySelector('.card')) return; // Skip header rows
+                
+                const heroHandle = row.querySelector('.card p').textContent;
+                
+                if (showOnlyFavorites) {
+                    // Show row only if hero is in favorites
+                    row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                } else {
+                    // Show all rows
+                    row.style.display = '';
+                }
+            });
+        }
+
+    function searchHeroes() {
+        document.getElementById('hero-search-box').addEventListener('input', function() {
+            var searchTerm = this.value.toLowerCase();
+            var rows = document.querySelectorAll('.star-column table tbody tr');
+            
+            rows.forEach(function(row) {
+                var heroName = row.querySelector('.card p a').textContent.toLowerCase();
+                
+                if (heroName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Add this function to replace the static HTML with dynamic data
+function populateHeroTables() {
+    const tournamentData = getTournamentData(58);
+    if (!tournamentData || !tournamentData.heroes) {
+        console.error('No tournament data available');
+        return;
+    }
+
+    const heroes = tournamentData.heroes;
+    
+    // Group heroes by star rating
+    const heroesByStars = {};
+    for (let i = 1; i <= 8; i++) {
+        heroesByStars[i] = heroes.filter(hero => hero.stars === i);
+    }
+
+    // Update each star column
+    for (let stars = 8; stars >= 1; stars--) {
+        // Find column by the header text containing the exact number of stars
+        const starColumns = Array.from(document.querySelectorAll('.star-column'));
+        const starColumn = starColumns.find(column => {
+            const headerStars = column.querySelector('h2').innerText.match(/⭐/g);
+            return headerStars && headerStars.length === stars;
+        });
+        
+        if (!starColumn) {
+            console.error(`Could not find column for ${stars} stars`);
+            continue;
+        }
+
+        const tbody = starColumn.querySelector('tbody');
+        if (!tbody) continue;
+
+        // Clear existing content
+        tbody.innerHTML = '';
+
+        // Add heroes for this star level
+        heroesByStars[stars].forEach(hero => {
+            const row = createHeroRow(hero);
+            tbody.appendChild(row);
+        });
+    }
+}
+
+function createHeroRow(hero) {
+    const row = document.createElement('tr');
+    
+    // Format numbers for display
+    const formatNumber = (num) => {
+        if (!num || num === 0) return '0';
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    };
+
+    // Get background color based on fantasy score (you can adjust this logic)
+    const getScoreColor = (score) => {
+        if (score >= 900) return '#006837';
+        if (score >= 800) return '#1a8a42';
+        if (score >= 700) return '#339f54';
+        if (score >= 600) return '#5ab760';
+        if (score >= 500) return '#7cc665';
+        if (score >= 400) return '#a1d569';
+        if (score >= 300) return '#c7e87c';
+        if (score >= 200) return '#e6f49d';
+        if (score >= 100) return '#fef0a1';
+        if (score > 0) return '#fdb86a';
+        return '#a50026';
+    };
+
+    // Round fantasy_score and reach to integers
+    const roundedFantasyScore = Math.round(hero.fantasy_score);
+    const roundedReach = Math.round(hero.reach);
+
+    // Truncate handle if longer than 10 characters
+    const displayHandle = hero.handle.length > 10 ? hero.handle.substring(0, 10) + '...' : hero.handle;
+
+    row.innerHTML = `
+        <td style="width: 30px; min-width: 30px; max-width: 60px;">
+            <div class="card">
+                <img src="${hero.profile_image_url_https}" class="hero-image" alt="${hero.handle}">
+                <p><a href="https://x.com/${hero.handle}" target="_blank" style="text-decoration: none; color: inherit;">${hero.name} (@${displayHandle})</a></p>
+            </div>
+        </td>
+        <td class="black-text" style="background-color: ${getScoreColor(roundedFantasyScore)};">
+            ${roundedFantasyScore}
+        </td>
+        <td class="multi-line smaller-stats">
+            <div style="padding-top: 4px;">👀 ${formatNumber(hero.views)}</div>
+            <div style="padding-top: 4px;">🐦 ${formatNumber(hero.tweet_count)}</div>
+            <div style="padding-top: 4px;">📣 ${formatNumber(roundedReach)}</div>
+            <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('${hero.handle}')"></i>
+        </td>
+    `;
+
+    return row;
+}
+
+// Update your DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch and store the data
+    await fetchAndStoreTournamentData();
+    
+    // Populate the hero tables with API data
+    populateHeroTables();
+    
+    // Update hero count in the info text
+    const tournamentData = getTournamentData(58);
+    if (tournamentData) {
+        const heroCount = tournamentData.heroes.length;
+        const infoText = document.querySelector('.info-text');
+        if (infoText) {
+            infoText.textContent = ` | Heroes: ${heroCount}`;
+        }
+    }
+    
+    // Initialize search functionality
+    searchHeroes();
+    
+    // Initialize tooltip functionality
+    const tooltips = document.querySelectorAll('.tooltip-trigger');
+    
+    tooltips.forEach(tooltip => {
+        // Handle both click and keyboard events
+        ['click', 'keydown'].forEach(eventType => {
+            tooltip.addEventListener(eventType, function(e) {
+                // For keyboard, only process Enter or Space
+                if (eventType === 'keydown' && !(e.key === 'Enter' || e.key === ' ')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close all other tooltips
+                tooltips.forEach(t => {
+                    if (t !== tooltip) {
+                        t.classList.remove('active');
+                        t.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                
+                // Toggle current tooltip
+                const isActive = this.classList.toggle('active');
+                this.setAttribute('aria-expanded', isActive);
+            });
+        });
+    });
+
+    // Close tooltip when clicking/focusing outside
+    document.addEventListener('click', closeAllTooltips);
+    document.addEventListener('focusin', function(e) {
+        if (!e.target.closest('.tooltip-trigger')) {
+            closeAllTooltips();
+        }
+    });
+    
+    // Close tooltips with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAllTooltips();
+
+        }
+    });
+    
+    function closeAllTooltips() {
+        tooltips.forEach(tooltip => {
+            tooltip.classList.remove('active');
+            tooltip.setAttribute('aria-expanded', 'false');
+        });
+    }
+});
+</script>
+<script src="/js/config.js?v=1.0.0" defer></script>
+<script src="/js/timeUtils.js?v=1.0.0" defer></script>
+<script src="/js/toolTip.js?v=1.0.0" defer></script>
+<script src="/js/chartComponent.js?v=1.0.1" defer></script>
+<script>
+    // Global variable to store the tournament data
+let tournamentDataset = null;
+
+// Function to fetch and store tournament data
+async function fetchAndStoreTournamentData() {
+    try {
+        const tournamentNumbers = [58]; // Add more tournament numbers as needed
+        
+        console.log('Fetching tournaments for numbers:', tournamentNumbers);
+        
+        const tournamentPromises = tournamentNumbers.map(tournamentNumber => 
+            fetch(`https://api-v2.fantasy.top/hero/stats?pagination.page=1&pagination.limit=200&order_by.fantasy_score=desc&tournament_number=${tournamentNumber}&search=%25%25&tactic_only=false`, {
+                headers: {
+                    'accept': 'application/json',
+                    'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                }
+            }).then(response => {
+                console.log(`Response for tournament ${tournamentNumber}:`, response.status, response.statusText);
+                return response.json();
+            })
+        );
+
+        const tournamentResults = await Promise.all(tournamentPromises);
+
+        // Create a structured dataset
+        const dataset = {};
+        
+        tournamentResults.forEach((tournamentData, index) => {
+            const tournamentNumber = tournamentNumbers[index];
+            
+            console.log(`Tournament ${tournamentNumber} results:`, {
+                tournamentNumber: tournamentNumber,
+                dataCount: tournamentData.data ? tournamentData.data.length : 0,
+                hasData: !!tournamentData.data,
+                sampleHero: tournamentData.data && tournamentData.data[0] ? {
+                    name: tournamentData.data[0].name,
+                    handle: tournamentData.data[0].handle,
+                    fantasy_score: tournamentData.data[0].fantasy_score,
+                    stars: tournamentData.data[0].stars,
+                    floor_price: tournamentData.data[0].floor_price
+                } : null,
+                meta: tournamentData.meta
+            });
+            
+            // Store the tournament data with proper structure
+            dataset[tournamentNumber] = {
+                tournamentNumber: tournamentNumber,
+                heroes: tournamentData.data || [],
+                meta: tournamentData.meta || {},
+                totalCount: tournamentData.data ? tournamentData.data.length : 0,
+                fetchedAt: new Date().toISOString()
+            };
+        });
+        
+        // Store in global variable
+        tournamentDataset = dataset;
+        
+        console.log('Tournament dataset created:', tournamentDataset);
+        return dataset;
+        
+    } catch (error) {
+        console.error('Error fetching tournament data:', error);
+        return null;
+    }
+}
+
+// Helper functions to access the data
+function getTournamentData(tournamentNumber) {
+    if (!tournamentDataset) {
+        console.warn('Tournament dataset not loaded yet. Call fetchAndStoreTournamentData() first.');
+        return null;
+    }
+    return tournamentDataset[tournamentNumber];
+}
+
+function getAllTournamentData() {
+    return tournamentDataset;
+}
+
+function getHeroData(tournamentNumber, heroHandle) {
+    const tournament = getTournamentData(tournamentNumber);
+    if (!tournament || !tournament.heroes) return null;
+    
+    return tournament.heroes.find(hero => hero.handle === heroHandle);
+}
+
+function getHeroesByStars(tournamentNumber, stars) {
+    const tournament = getTournamentData(tournamentNumber);
+    if (!tournament || !tournament.heroes) return [];
+    
+    return tournament.heroes.filter(hero => hero.stars === stars);
+}
+
+function getTopHeroes(tournamentNumber, limit = 10) {
+    const tournament = getTournamentData(tournamentNumber);
+    if (!tournament || !tournament.heroes) return [];
+    
+    return tournament.heroes
+        .sort((a, b) => b.fantasy_score - a.fantasy_score)
+        .slice(0, limit);
+}
+
+// Call this when your page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch and store the data
+    await fetchAndStoreTournamentData();
+    
+    // Now you can use the data anywhere in your application
+    // Example usage:
+    console.log('Tournament 58 data:', getTournamentData(58));
+    console.log('8-star heroes:', getHeroesByStars(58, 8));
+    console.log('Top 10 heroes:', getTopHeroes(58, 10));
+    
+    // Example: Get a specific hero's data
+    const heroData = getHeroData(58, 'tier10k');
+    if (heroData) {
+        console.log('Hero data for tier10k:', {
+            name: heroData.name,
+            handle: heroData.handle,
+            fantasy_score: heroData.fantasy_score,
+            stars: heroData.stars,
+            floor_price: heroData.floor_price,
+            current_rank: heroData.current_rank,
+            views: heroData.views,
+            tweet_count: heroData.tweet_count,
+            reach: heroData.reach,
+            followers_count: heroData.followers_count,
+            profile_image: heroData.profile_image_url_https
+        });
+    }
+});
+</script>
+</body>
+</html>

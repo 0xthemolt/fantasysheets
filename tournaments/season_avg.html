@@ -240,7 +240,7 @@
             <a href="../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Last 4 Avg Score by Season
+            Season 3 (Last 6 Avg Score)
         </h1>
     </div>
     <div class="data-freshness">
@@ -272,6 +272,9 @@
     <script>
         // Replace the existing seasons definition with:
         const seasons = {
+            3: [
+                { seasonTournament: 1, mainTournament: 58 },
+            ],
             2: [
                 { seasonTournament: 4, mainTournament: 57 },  // Season 2 tournaments
                 { seasonTournament: 3, mainTournament: 56 },  // Season 2 tournaments
@@ -279,12 +282,14 @@
                 { seasonTournament: 1, mainTournament: 54 }  // Season 2 tournaments
             ],
             1: [
-                { seasonTournament: 1, mainTournament: 53 }
-            ]
+                { seasonTournament: 4, mainTournament: 53 },
+                { seasonTournament: 3, mainTournament: 52 }
+            ],
         };
 
         // Flatten the seasons object into main tournament numbers array for API calls
         const tournamentNumbers = [
+            ...seasons[3].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[2].map(t => t.mainTournament),  // Season 2 tournaments
             ...seasons[1].map(t => t.mainTournament)   // Season 1 tournaments
         ];
@@ -294,39 +299,65 @@
 
         async function fetchTournamentData() {
             try {
+                console.log('Fetching tournaments for numbers:', tournamentNumbers);
+                
                 const tournamentPromises = tournamentNumbers.map(tournamentNumber => 
                     fetch(`https://api-v2.fantasy.top/hero/stats?pagination.page=1&pagination.limit=200&order_by.fantasy_score=desc&tournament_number=${tournamentNumber}&search=%25%25&tactic_only=false`, {
                         headers: {
                             'accept': 'application/json',
                             'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
                         }
-                    }).then(response => response.json())
+                    }).then(response => {
+                        console.log(`Response for tournament ${tournamentNumber}:`, response.status, response.statusText);
+                        return response.json();
+                    })
                 );
 
                 const tournamentResults = await Promise.all(tournamentPromises);
+
+                // Add detailed logging for each tournament result
+                tournamentResults.forEach((tournament, index) => {
+                    const tournamentNumber = tournamentNumbers[index];
+                    console.log(`Tournament ${tournamentNumber} results:`, {
+                        tournamentNumber: tournamentNumber,
+                        dataCount: tournament.data ? tournament.data.length : 0,
+                        hasData: !!tournament.data,
+                        sampleHero: tournament.data && tournament.data[0] ? {
+                            name: tournament.data[0].name,
+                            handle: tournament.data[0].handle,
+                            fantasy_score: tournament.data[0].fantasy_score
+                        } : null,
+                        fullResponse: tournament
+                    });
+                });
 
                 let combinedData = {};
 
                 tournamentResults.forEach((tournament, index) => {
                     const tournamentNumber = tournamentNumbers[index];
-                    tournament.data.forEach(hero => {
-                        const heroKey = hero.handle; // Use handle as unique identifier
-                        if (!combinedData[heroKey]) {
-                            combinedData[heroKey] = {
-                                handle: hero.handle,
-                                name: hero.name,
-                                profile_image: hero.profile_image_url_https,
-                                tournaments: {},
-                                avgScore: 0,
-                                totalTournaments: 0
+                    if (tournament.data && tournament.data.length > 0) {
+                        console.log(`Processing ${tournament.data.length} heroes for tournament ${tournamentNumber}`);
+                        tournament.data.forEach(hero => {
+                            const heroKey = hero.handle;
+                            if (!combinedData[heroKey]) {
+                                combinedData[heroKey] = {
+                                    handle: hero.handle,
+                                    name: hero.name,
+                                    profile_image: hero.profile_image_url_https,
+                                    tournaments: {},
+                                    avgScore: 0,
+                                    totalTournaments: 0
+                                };
+                            }
+                            combinedData[heroKey].tournaments[tournamentNumber] = {
+                                fantasy_score: parseFloat(hero.fantasy_score),
+                                rank: hero.current_rank
                             };
-                        }
-                        combinedData[heroKey].tournaments[tournamentNumber] = {
-                            fantasy_score: parseFloat(hero.fantasy_score),
-                            rank: hero.current_rank
-                        };
-                        combinedData[heroKey].totalTournaments++;
-                    });
+                            combinedData[heroKey].totalTournaments++;
+                        });
+                    } else {
+                        console.warn(`No data found for tournament ${tournamentNumber}:`, tournament);
+                    }
                 });
 
                 // Calculate averages
@@ -337,6 +368,7 @@
 
                 window.seasonData = combinedData;
                 console.log('Season data loaded:', Object.keys(combinedData).length, 'heroes');
+                console.log('Sample hero data:', Object.values(combinedData)[0]);
                 return combinedData;
 
             } catch (error) {
@@ -465,8 +497,8 @@
             const latestTournament = Math.max(...tournamentNumbers);
             
             // Split tournaments for averages calculation (still in descending order for proper periods)
-            const currentTournaments = tournamentNumbers.sort((a, b) => b - a).slice(0, 4); // Latest 4
-            const priorTournaments = tournamentNumbers.sort((a, b) => b - a).slice(1, 5);   // Previous 4 (skip latest)
+            const currentTournaments = tournamentNumbers.sort((a, b) => b - a).slice(0, 6); // Latest 4
+            const priorTournaments = tournamentNumbers.sort((a, b) => b - a).slice(1, 7);   // Previous 4 (skip latest)
 
             // Calculate both averages for each hero
             Object.values(data).forEach(hero => {
@@ -514,7 +546,7 @@
 
             // Update the averages header to use white border
             const avgHeader = document.createElement('th');
-            avgHeader.innerHTML = 'AVG: Prior 4 -> <span class="current-period">Last 4</span>';
+            avgHeader.innerHTML = 'AVG: Prior 6 -> <span class="current-period">Last 6</span>';
             avgHeader.className = 'number-cell average-header average-divider';
             avgHeader.dataset.sort = 'currentAvg';
             avgHeader.addEventListener('click', () => handleSort('currentAvg'));

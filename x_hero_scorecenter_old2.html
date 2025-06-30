@@ -1,0 +1,667 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-LXJ5Q7LKKE');
+        </script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hero Score Center</title>
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+        <link rel="stylesheet" href="./styles.css">
+        <link rel="icon" type="image/png" href="icons/favicon.webp">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </head>
+    <body>
+        <div class="title-container">
+            <h1 class="title-header">
+                <a href="index.html" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                Hero Score Center
+                <span class="tournament-badge">Main 58</span>
+            </h1>
+        </div>
+        <div id="search-container" style="display: flex; align-items: center;">
+            <button class="button-group button-group--yellow" id="my-favorites-group">
+                <span class="button-label">My Favorites</span>
+                <i class="fa-regular fa-star"></i>
+            </button>
+            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+            <span class="clear-search"></span>
+        </div>
+        <div class="small-text">
+            <span id="timestamp">2025-06-30 20:24 UTC</span>
+            <span id="timeAgo"></span>
+            <span class="info-text"> | Heroes: 10</span>
+        </div>
+    <div class="sections">
+            <div class="star-columns">
+    
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1812298915661623296/P0Yj0Xgq_normal.jpg" class="hero-image" alt="inversebrah">
+                            <p><a href="https://x.com/inversebrah" target="_blank" style="text-decoration: none; color: inherit;">inversebrah</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #a50026;">
+                        0
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 0</div>
+                        <div style="padding-top: 4px;">🐦 0</div>
+                        <div style="padding-top: 4px;">📣 0</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('inversebrah')"></i>
+                    </td>
+                </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1897349963702554624/cKgEHo7L_normal.jpg" class="hero-image" alt="AltcoinSherpa">
+                            <p><a href="https://x.com/AltcoinSherpa" target="_blank" style="text-decoration: none; color: inherit;">AltcoinSherpa</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #bbe277;">
+                        598
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 53.4K</div>
+                        <div style="padding-top: 4px;">🐦 6</div>
+                        <div style="padding-top: 4px;">📣 10</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('AltcoinSherpa')"></i>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1739893695942639616/9W39mSnm_normal.jpg" class="hero-image" alt="lokithebird">
+                            <p><a href="https://x.com/lokithebird" target="_blank" style="text-decoration: none; color: inherit;">lokithebird</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #bde278;">
+                        596
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 17.1K</div>
+                        <div style="padding-top: 4px;">🐦 4</div>
+                        <div style="padding-top: 4px;">📣 14</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('lokithebird')"></i>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1930685777152778240/YxGXJric_normal.jpg" class="hero-image" alt="ciniz">
+                            <p><a href="https://x.com/ciniz" target="_blank" style="text-decoration: none; color: inherit;">ciniz</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #a50026;">
+                        0
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 0</div>
+                        <div style="padding-top: 4px;">🐦 0</div>
+                        <div style="padding-top: 4px;">📣 0</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ciniz')"></i>
+                    </td>
+                </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1687521808331702272/Ky0QmeqD_normal.jpg" class="hero-image" alt="ayyyeandy">
+                            <p><a href="https://x.com/ayyyeandy" target="_blank" style="text-decoration: none; color: inherit;">ayyyeandy</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #006837;">
+                        909
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 107.7K</div>
+                        <div style="padding-top: 4px;">🐦 5</div>
+                        <div style="padding-top: 4px;">📣 55</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ayyyeandy')"></i>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1469588644088451073/VEu0DKDG_normal.jpg" class="hero-image" alt="Route2FI">
+                            <p><a href="https://x.com/Route2FI" target="_blank" style="text-decoration: none; color: inherit;">Route2FI</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #a9da6b;">
+                        632
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 43.0K</div>
+                        <div style="padding-top: 4px;">🐦 2</div>
+                        <div style="padding-top: 4px;">📣 22</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('Route2FI')"></i>
+                    </td>
+                </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1865978664535334912/H8YWnmXS_normal.jpg" class="hero-image" alt="TaikiMaeda2">
+                            <p><a href="https://x.com/TaikiMaeda2" target="_blank" style="text-decoration: none; color: inherit;">TaikiMaeda2</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #feefa5;">
+                        409
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 10.4K</div>
+                        <div style="padding-top: 4px;">🐦 1</div>
+                        <div style="padding-top: 4px;">📣 21</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('TaikiMaeda2')"></i>
+                    </td>
+                </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1891813024870047744/NaMWQupt_normal.jpg" class="hero-image" alt="ChartFuMonkey">
+                            <p><a href="https://x.com/ChartFuMonkey" target="_blank" style="text-decoration: none; color: inherit;">ChartFuMonkey</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #fee899;">
+                        390
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 16.3K</div>
+                        <div style="padding-top: 4px;">🐦 6</div>
+                        <div style="padding-top: 4px;">📣 5</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ChartFuMonkey')"></i>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1584989392132866086/36z_WjdM_normal.jpg" class="hero-image" alt="CoinGurruu">
+                            <p><a href="https://x.com/CoinGurruu" target="_blank" style="text-decoration: none; color: inherit;">CoinGurruu</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #a50026;">
+                        0
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 0</div>
+                        <div style="padding-top: 4px;">🐦 0</div>
+                        <div style="padding-top: 4px;">📣 0</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('CoinGurruu')"></i>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="https://pbs.twimg.com/profile_images/1868745836777312256/XsNk1YlU_normal.jpg" class="hero-image" alt="CL207">
+                            <p><a href="https://x.com/CL207" target="_blank" style="text-decoration: none; color: inherit;">CL207</a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: #a50026;">
+                        0
+                    </td>
+
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">👀 0</div>
+                        <div style="padding-top: 4px;">🐦 0</div>
+                        <div style="padding-top: 4px;">📣 0</div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('CL207')"></i>
+                    </td>
+                </tr>
+            
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="star-column">
+                <h2>⭐</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Score</th>
+                            <th>
+                                <span class="tooltip" 
+                                      role="button" 
+                                      tabindex="0" 
+                                      aria-label="Stats Information">
+                                    Stats
+                                    <div class="top-text top" role="tooltip">
+                                        👀 Views 🐦 Posts 📣 Reach
+                                    </div>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        
+                    </tbody>
+                </table>
+            </div>
+        
+            </div>
+        </div>
+        <div id="scoreTrendModal" class="modal">
+            <div class="modal-content" style="width: 80%; max-width: 1200px; height: 80vh; max-height: 800px;">
+                <span class="close-modal" onclick="closeScoreTrendModal()">&times;</span>
+                <h2 id="modalTitle"></h2>
+                <div id="modalContent" style="height: calc(100% - 60px);"></div>
+            </div>
+        </div>
+        <script>
+
+                // Add your new functions
+                function showScoreTrend(heroHandle) {
+                    console.log('showScoreTrend called with hero:', heroHandle);
+
+                    const modal = document.getElementById('scoreTrendModal');
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalContent = document.getElementById('modalContent');
+                    
+                    // First, clear the modal content and show loading state
+                    modalContent.innerHTML = '<p>Loading...</p>';
+
+                    // Add console.log to debug the JSON response
+                    fetch('/hero_score_data.json')
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Fetched data:', data); // Debug log
+                            console.log('Looking for hero:', heroHandle); // Debug log
+                            
+                            // Check if the hero exists in the data
+                            if (!data.heroes || !data.heroes[heroHandle]) {
+                                throw new Error(`Hero ${heroHandle} not found in data`);
+                            }
+
+                            const heroData = data.heroes[heroHandle];
+                            console.log('Hero data:', heroData); // Debug log
+
+                            // Use hero_pfp_url instead of pfp_url if that's what's in your JSON
+                            const heroImageUrl = heroData.hero_pfp_url || heroData.pfp_url;
+                            
+                            if (!heroImageUrl) {
+                                throw new Error('No profile image URL found for hero');
+                            }
+
+                            modalTitle.innerHTML = `
+                                <div style="text-align: center; margin-bottom: 0; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
+                                    <img src="${heroImageUrl}" alt="${heroHandle}" style="width: 30px; height: 30px; border-radius: 50%; margin-bottom: -8px;">
+                                    <span>${heroHandle}</span>
+                                </div>
+                            `;
+                            modal.style.display = "block";
+
+                            // Clear previous content
+                            modalContent.innerHTML = '';
+
+                            // Add chart container with a unique ID that includes the hero handle
+                            const chartId = `heroChart_${heroHandle}`;
+                            modalContent.innerHTML += `
+                                <div class="chart-container" style="background-color: black; width: 100%; height: 100%; min-height: 400px;">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                            `;
+
+                            // Safely destroy existing chart if it exists
+                            if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                                window.currentHeroChart.destroy();
+                            }
+
+                            // Create new chart and store the instance
+                            createHeroChart(chartId, '/hero_score_data.json', heroHandle).then(chart => {
+                                window.currentHeroChart = chart;
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching hero data:', error);
+                            modalTitle.textContent = `Score Trend ${heroHandle}`;
+                            modal.style.display = "block";
+                            modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
+                        });
+                }
+
+                function closeScoreTrendModal() {
+                    const modal = document.getElementById('scoreTrendModal');
+                    modal.style.display = "none";
+                    
+                    // Safely destroy chart when modal is closed
+                    if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                        window.currentHeroChart.destroy();
+                        window.currentHeroChart = null;
+                    }
+                }
+
+                // Close modal when clicking outside of it
+                window.onclick = function(event) {
+                    const modal = document.getElementById('scoreTrendModal');
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                // Add this new event listener for the star
+                document.addEventListener('DOMContentLoaded', function() {
+                    const buttonGroup = document.querySelector('#my-favorites-group');
+                    const icon = buttonGroup.querySelector('i');
+                    
+                    buttonGroup.addEventListener('click', function() {
+                        if (icon.classList.contains('fa-regular')) {
+                            // Switching to filled star - show only favorites
+                            icon.className = 'fa-solid fa-star';
+                            buttonGroup.classList.add('selected');
+                            filterFavorites(true);
+                        } else {
+                            // Switching to outline star - show all
+                            icon.className = 'fa-regular fa-star';
+                            buttonGroup.classList.remove('selected');
+                            filterFavorites(false);
+                        }
+                    });
+                });
+
+                function filterFavorites(showOnlyFavorites) {
+                    // Get favorites from localStorage
+                    const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+                    const rows = document.querySelectorAll('.star-column table tr');
+
+                    rows.forEach(function(row) {
+                        if (!row.querySelector('.card')) return; // Skip header rows
+                        
+                        const heroHandle = row.querySelector('.card p').textContent;
+                        
+                        if (showOnlyFavorites) {
+                            // Show row only if hero is in favorites
+                            row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                        } else {
+                            // Show all rows
+                            row.style.display = '';
+                        }
+                    });
+                }
+
+            function searchHeroes() {
+                document.getElementById('hero-search-box').addEventListener('input', function() {
+                    var searchTerm = this.value.toLowerCase();
+                    var cards = document.querySelectorAll('.card');
+                    
+                    cards.forEach(function(card) {
+                        var heroName = card.querySelector('p').textContent.toLowerCase();
+                        var row = card.closest('tr');
+                        
+                        if (heroName.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize search functionality
+                searchHeroes();
+                
+                // Initialize tooltip functionality
+                const tooltips = document.querySelectorAll('.tooltip-trigger');
+                
+                tooltips.forEach(tooltip => {
+                    // Handle both click and keyboard events
+                    ['click', 'keydown'].forEach(eventType => {
+                        tooltip.addEventListener(eventType, function(e) {
+                            // For keyboard, only process Enter or Space
+                            if (eventType === 'keydown' && !(e.key === 'Enter' || e.key === ' ')) {
+                                return;
+                            }
+                            
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            // Close all other tooltips
+                            tooltips.forEach(t => {
+                                if (t !== tooltip) {
+                                    t.classList.remove('active');
+                                    t.setAttribute('aria-expanded', 'false');
+                                }
+                            });
+                            
+                            // Toggle current tooltip
+                            const isActive = this.classList.toggle('active');
+                            this.setAttribute('aria-expanded', isActive);
+                        });
+                    });
+                });
+
+                // Close tooltip when clicking/focusing outside
+                document.addEventListener('click', closeAllTooltips);
+                document.addEventListener('focusin', function(e) {
+                    if (!e.target.closest('.tooltip-trigger')) {
+                        closeAllTooltips();
+                    }
+                });
+                
+                // Close tooltips with Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeAllTooltips();
+                    }
+                });
+                
+                function closeAllTooltips() {
+                    tooltips.forEach(tooltip => {
+                        tooltip.classList.remove('active');
+                        tooltip.setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
+        </script>
+        <script src="/js/config.js?v=1.0.0" defer></script>
+        <script src="/js/timeUtils.js?v=1.0.0" defer></script>
+        <script src="/js/toolTip.js?v=1.0.0" defer></script>
+        <script src="/js/chartComponent.js?v=1.0.1" defer></script>
+    </body>
+    </html>
+    

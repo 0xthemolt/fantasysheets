@@ -1,667 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Score Center</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+    .tournament-dropdown {
+        position: relative;
+        display: inline-block;
+    }
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-LXJ5Q7LKKE');
-        </script>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hero Score Center</title>
-        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
-        <link rel="stylesheet" href="./styles.css">
-        <link rel="icon" type="image/png" href="icons/favicon.webp">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    </head>
-    <body>
-        <div class="title-container">
-            <h1 class="title-header">
-                <a href="index.html" class="home-link">
-                    <i class="fas fa-home"></i>
-                </a>
-                Hero Score Center
-                <span class="tournament-badge">Main 58</span>
-            </h1>
+    .tournament-dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        border-radius: 4px;
+        right: 0;
+        font-size: 0.7em; /* 40% smaller font */
+    }
+
+    .tournament-dropdown-content.show {
+        display: block;
+    }
+
+    .tournament-option {
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .tournament-option:hover {
+        background-color: #f1f1f1;
+    }
+
+    .tournament-status {
+        font-size: 0.8em;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+
+    .tournament-status.live {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    .tournament-status.archived {
+        background-color: #9e9e9e;
+        color: white;
+    }
+
+    .tournament-badge {
+        cursor: pointer;
+        user-select: none;
+    }
+</style>
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Hero Score Center
+            <span class="tournament-badge" id="tournament-selector">
+    Main 58 <i class="fas fa-chevron-down" id="dropdown-icon" style="color: black;"></i>
+    <div class="tournament-dropdown-content" id="tournament-dropdown"></div>
+</span>
+        </h1>
+    </div>
+    <div id="search-container" style="display: flex; align-items: center;">
+        <button class="button-group button-group--yellow" id="my-favorites-group">
+            <span class="button-label">My Favorites</span>
+            <i class="fa-regular fa-star"></i>
+        </button>
+        <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+        <span class="clear-search"></span>
+    </div>
+    <div class="small-text">
+        <span class="info-text"> Heroes: 10 | Status: Live</span>
+    </div>
+<div class="sections">
+        <div class="star-columns">
+
+        <div class="star-column">
+            <h2>⭐⭐⭐⭐⭐⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
-        <div id="search-container" style="display: flex; align-items: center;">
-            <button class="button-group button-group--yellow" id="my-favorites-group">
-                <span class="button-label">My Favorites</span>
-                <i class="fa-regular fa-star"></i>
-            </button>
-            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
-            <span class="clear-search"></span>
+
+        <div class="star-column">
+            <h2>⭐⭐⭐⭐⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
-        <div class="small-text">
-            <span id="timestamp">2025-06-30 20:24 UTC</span>
-            <span id="timeAgo"></span>
-            <span class="info-text"> | Heroes: 10</span>
+
+        <div class="star-column">
+            <h2>⭐⭐⭐⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
-    <div class="sections">
-            <div class="star-columns">
-    
-            <div class="star-column">
-                <h2>⭐⭐⭐⭐⭐⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐⭐⭐⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐⭐⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1812298915661623296/P0Yj0Xgq_normal.jpg" class="hero-image" alt="inversebrah">
-                            <p><a href="https://x.com/inversebrah" target="_blank" style="text-decoration: none; color: inherit;">inversebrah</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #a50026;">
-                        0
-                    </td>
 
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 0</div>
-                        <div style="padding-top: 4px;">🐦 0</div>
-                        <div style="padding-top: 4px;">📣 0</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('inversebrah')"></i>
-                    </td>
-                </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1897349963702554624/cKgEHo7L_normal.jpg" class="hero-image" alt="AltcoinSherpa">
-                            <p><a href="https://x.com/AltcoinSherpa" target="_blank" style="text-decoration: none; color: inherit;">AltcoinSherpa</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #bbe277;">
-                        598
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 53.4K</div>
-                        <div style="padding-top: 4px;">🐦 6</div>
-                        <div style="padding-top: 4px;">📣 10</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('AltcoinSherpa')"></i>
-                    </td>
-                </tr>
-            
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1739893695942639616/9W39mSnm_normal.jpg" class="hero-image" alt="lokithebird">
-                            <p><a href="https://x.com/lokithebird" target="_blank" style="text-decoration: none; color: inherit;">lokithebird</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #bde278;">
-                        596
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 17.1K</div>
-                        <div style="padding-top: 4px;">🐦 4</div>
-                        <div style="padding-top: 4px;">📣 14</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('lokithebird')"></i>
-                    </td>
-                </tr>
-            
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1930685777152778240/YxGXJric_normal.jpg" class="hero-image" alt="ciniz">
-                            <p><a href="https://x.com/ciniz" target="_blank" style="text-decoration: none; color: inherit;">ciniz</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #a50026;">
-                        0
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 0</div>
-                        <div style="padding-top: 4px;">🐦 0</div>
-                        <div style="padding-top: 4px;">📣 0</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ciniz')"></i>
-                    </td>
-                </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1687521808331702272/Ky0QmeqD_normal.jpg" class="hero-image" alt="ayyyeandy">
-                            <p><a href="https://x.com/ayyyeandy" target="_blank" style="text-decoration: none; color: inherit;">ayyyeandy</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #006837;">
-                        909
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 107.7K</div>
-                        <div style="padding-top: 4px;">🐦 5</div>
-                        <div style="padding-top: 4px;">📣 55</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ayyyeandy')"></i>
-                    </td>
-                </tr>
-            
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1469588644088451073/VEu0DKDG_normal.jpg" class="hero-image" alt="Route2FI">
-                            <p><a href="https://x.com/Route2FI" target="_blank" style="text-decoration: none; color: inherit;">Route2FI</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #a9da6b;">
-                        632
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 43.0K</div>
-                        <div style="padding-top: 4px;">🐦 2</div>
-                        <div style="padding-top: 4px;">📣 22</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('Route2FI')"></i>
-                    </td>
-                </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1865978664535334912/H8YWnmXS_normal.jpg" class="hero-image" alt="TaikiMaeda2">
-                            <p><a href="https://x.com/TaikiMaeda2" target="_blank" style="text-decoration: none; color: inherit;">TaikiMaeda2</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #feefa5;">
-                        409
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 10.4K</div>
-                        <div style="padding-top: 4px;">🐦 1</div>
-                        <div style="padding-top: 4px;">📣 21</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('TaikiMaeda2')"></i>
-                    </td>
-                </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1891813024870047744/NaMWQupt_normal.jpg" class="hero-image" alt="ChartFuMonkey">
-                            <p><a href="https://x.com/ChartFuMonkey" target="_blank" style="text-decoration: none; color: inherit;">ChartFuMonkey</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #fee899;">
-                        390
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 16.3K</div>
-                        <div style="padding-top: 4px;">🐦 6</div>
-                        <div style="padding-top: 4px;">📣 5</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('ChartFuMonkey')"></i>
-                    </td>
-                </tr>
-            
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1584989392132866086/36z_WjdM_normal.jpg" class="hero-image" alt="CoinGurruu">
-                            <p><a href="https://x.com/CoinGurruu" target="_blank" style="text-decoration: none; color: inherit;">CoinGurruu</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #a50026;">
-                        0
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 0</div>
-                        <div style="padding-top: 4px;">🐦 0</div>
-                        <div style="padding-top: 4px;">📣 0</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('CoinGurruu')"></i>
-                    </td>
-                </tr>
-            
-                <tr>
-                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
-                        <div class="card">
-                            <img src="https://pbs.twimg.com/profile_images/1868745836777312256/XsNk1YlU_normal.jpg" class="hero-image" alt="CL207">
-                            <p><a href="https://x.com/CL207" target="_blank" style="text-decoration: none; color: inherit;">CL207</a></p>
-                        </div>
-                    </td>
-                    <td class="black-text" style="background-color: #a50026;">
-                        0
-                    </td>
-
-                    <td class="multi-line smaller-stats">
-                        <div style="padding-top: 4px;">👀 0</div>
-                        <div style="padding-top: 4px;">🐦 0</div>
-                        <div style="padding-top: 4px;">📣 0</div>
-                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('CL207')"></i>
-                    </td>
-                </tr>
-            
-                    </tbody>
-                </table>
-            </div>
-        
-            <div class="star-column">
-                <h2>⭐</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Score</th>
-                            <th>
-                                <span class="tooltip" 
-                                      role="button" 
-                                      tabindex="0" 
-                                      aria-label="Stats Information">
-                                    Stats
-                                    <div class="top-text top" role="tooltip">
-                                        👀 Views 🐦 Posts 📣 Reach
-                                    </div>
-                                </span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        
-                    </tbody>
-                </table>
-            </div>
-        
-            </div>
+        <div class="star-column">
+            <h2>⭐⭐⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
-        <div id="scoreTrendModal" class="modal">
-            <div class="modal-content" style="width: 80%; max-width: 1200px; height: 80vh; max-height: 800px;">
-                <span class="close-modal" onclick="closeScoreTrendModal()">&times;</span>
-                <h2 id="modalTitle"></h2>
-                <div id="modalContent" style="height: calc(100% - 60px);"></div>
-            </div>
+
+        <div class="star-column">
+            <h2>⭐⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
         </div>
-        <script>
 
-                // Add your new functions
-                function showScoreTrend(heroHandle) {
-                    console.log('showScoreTrend called with hero:', heroHandle);
+        <div class="star-column">
+            <h2>⭐⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
 
-                    const modal = document.getElementById('scoreTrendModal');
-                    const modalTitle = document.getElementById('modalTitle');
-                    const modalContent = document.getElementById('modalContent');
-                    
-                    // First, clear the modal content and show loading state
-                    modalContent.innerHTML = '<p>Loading...</p>';
+        <div class="star-column">
+            <h2>⭐⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
 
-                    // Add console.log to debug the JSON response
-                    fetch('/hero_score_data.json')
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Fetched data:', data); // Debug log
-                            console.log('Looking for hero:', heroHandle); // Debug log
-                            
-                            // Check if the hero exists in the data
-                            if (!data.heroes || !data.heroes[heroHandle]) {
-                                throw new Error(`Hero ${heroHandle} not found in data`);
-                            }
+        <div class="star-column">
+            <h2>⭐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hero</th>
+                        <th>Score</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
 
-                            const heroData = data.heroes[heroHandle];
-                            console.log('Hero data:', heroData); // Debug log
+        </div>
+    </div>
+    <div id="scoreTrendModal" class="modal">
+        <div class="modal-content" style="width: 80%; max-width: 1200px; height: 80vh; max-height: 800px;">
+            <span class="close-modal" onclick="closeScoreTrendModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <div id="modalContent" style="height: calc(100% - 60px);"></div>
+        </div>
+    </div>
+    <script>
+        // API configuration
+        const API_CONFIG = {
+            BASE_URL: 'https://api-v2.fantasy.top',
+            API_KEY: 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+            TOURNAMENT_NUMBER: 58
+        };
 
-                            // Use hero_pfp_url instead of pfp_url if that's what's in your JSON
-                            const heroImageUrl = heroData.hero_pfp_url || heroData.pfp_url;
-                            
-                            if (!heroImageUrl) {
-                                throw new Error('No profile image URL found for hero');
-                            }
-
-                            modalTitle.innerHTML = `
-                                <div style="text-align: center; margin-bottom: 0; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
-                                    <img src="${heroImageUrl}" alt="${heroHandle}" style="width: 30px; height: 30px; border-radius: 50%; margin-bottom: -8px;">
-                                    <span>${heroHandle}</span>
-                                </div>
-                            `;
-                            modal.style.display = "block";
-
-                            // Clear previous content
-                            modalContent.innerHTML = '';
-
-                            // Add chart container with a unique ID that includes the hero handle
-                            const chartId = `heroChart_${heroHandle}`;
-                            modalContent.innerHTML += `
-                                <div class="chart-container" style="background-color: black; width: 100%; height: 100%; min-height: 400px;">
-                                    <canvas id="${chartId}"></canvas>
-                                </div>
-                            `;
-
-                            // Safely destroy existing chart if it exists
-                            if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
-                                window.currentHeroChart.destroy();
-                            }
-
-                            // Create new chart and store the instance
-                            createHeroChart(chartId, '/hero_score_data.json', heroHandle).then(chart => {
-                                window.currentHeroChart = chart;
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error fetching hero data:', error);
-                            modalTitle.textContent = `Score Trend ${heroHandle}`;
-                            modal.style.display = "block";
-                            modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
-                        });
-                }
-
-                function closeScoreTrendModal() {
-                    const modal = document.getElementById('scoreTrendModal');
-                    modal.style.display = "none";
-                    
-                    // Safely destroy chart when modal is closed
-                    if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
-                        window.currentHeroChart.destroy();
-                        window.currentHeroChart = null;
+        // Function to fetch hero data from API
+        async function fetchHeroData(tournamentNumber = API_CONFIG.TOURNAMENT_NUMBER) {
+            try {
+                const response = await fetch(
+                    `${API_CONFIG.BASE_URL}/hero/stats?pagination.page=1&pagination.limit=200&order_by.fantasy_score=desc&tournament_number=${tournamentNumber}&search=%25%25&tactic_only=false`,
+                    {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': API_CONFIG.API_KEY
+                        }
                     }
+                );
+
+                console.log(`Response for tournament ${tournamentNumber}:`, response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                // Close modal when clicking outside of it
-                window.onclick = function(event) {
-                    const modal = document.getElementById('scoreTrendModal');
-                    if (event.target == modal) {
-                        modal.style.display = "none";
-                    }
-                }
-
-                // Add this new event listener for the star
-                document.addEventListener('DOMContentLoaded', function() {
-                    const buttonGroup = document.querySelector('#my-favorites-group');
-                    const icon = buttonGroup.querySelector('i');
-                    
-                    buttonGroup.addEventListener('click', function() {
-                        if (icon.classList.contains('fa-regular')) {
-                            // Switching to filled star - show only favorites
-                            icon.className = 'fa-solid fa-star';
-                            buttonGroup.classList.add('selected');
-                            filterFavorites(true);
-                        } else {
-                            // Switching to outline star - show all
-                            icon.className = 'fa-regular fa-star';
-                            buttonGroup.classList.remove('selected');
-                            filterFavorites(false);
-                        }
-                    });
-                });
-
-                function filterFavorites(showOnlyFavorites) {
-                    // Get favorites from localStorage
-                    const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
-                    const rows = document.querySelectorAll('.star-column table tr');
-
-                    rows.forEach(function(row) {
-                        if (!row.querySelector('.card')) return; // Skip header rows
-                        
-                        const heroHandle = row.querySelector('.card p').textContent;
-                        
-                        if (showOnlyFavorites) {
-                            // Show row only if hero is in favorites
-                            row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
-                        } else {
-                            // Show all rows
-                            row.style.display = '';
-                        }
-                    });
-                }
-
-            function searchHeroes() {
-                document.getElementById('hero-search-box').addEventListener('input', function() {
-                    var searchTerm = this.value.toLowerCase();
-                    var cards = document.querySelectorAll('.card');
-                    
-                    cards.forEach(function(card) {
-                        var heroName = card.querySelector('p').textContent.toLowerCase();
-                        var row = card.closest('tr');
-                        
-                        if (heroName.includes(searchTerm)) {
-                            row.style.display = '';
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-                });
+                const data = await response.json();
+                console.log('Fetched hero data:', data);
+                
+                return data;
+            } catch (error) {
+                console.error('Error fetching hero data:', error);
+                throw error;
             }
-            
-            document.addEventListener('DOMContentLoaded', function() {
-                // Initialize search functionality
-                searchHeroes();
-                
-                // Initialize tooltip functionality
-                const tooltips = document.querySelectorAll('.tooltip-trigger');
-                
-                tooltips.forEach(tooltip => {
-                    // Handle both click and keyboard events
-                    ['click', 'keydown'].forEach(eventType => {
-                        tooltip.addEventListener(eventType, function(e) {
-                            // For keyboard, only process Enter or Space
-                            if (eventType === 'keydown' && !(e.key === 'Enter' || e.key === ' ')) {
-                                return;
-                            }
-                            
-                            e.preventDefault();
-                            e.stopPropagation();
-                            
-                            // Close all other tooltips
-                            tooltips.forEach(t => {
-                                if (t !== tooltip) {
-                                    t.classList.remove('active');
-                                    t.setAttribute('aria-expanded', 'false');
-                                }
-                            });
-                            
-                            // Toggle current tooltip
-                            const isActive = this.classList.toggle('active');
-                            this.setAttribute('aria-expanded', isActive);
-                        });
-                    });
-                });
+        }
 
-                // Close tooltip when clicking/focusing outside
-                document.addEventListener('click', closeAllTooltips);
-                document.addEventListener('focusin', function(e) {
-                    if (!e.target.closest('.tooltip-trigger')) {
-                        closeAllTooltips();
-                    }
-                });
+        // Function to process and structure the API data
+        function processHeroData(apiData) {
+            if (!apiData || !apiData.data) {
+                console.error('Invalid API data structure');
+                return {};
+            }
+
+            const processedData = {
+                heroes: {},
+                meta: apiData.meta,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Group heroes by star rating
+            const heroesByStars = {
+                8: [],
+                7: [],
+                6: [],
+                5: [],
+                4: [],
+                3: [],
+                2: [],
+                1: []
+            };
+
+            // Process each hero
+            apiData.data.forEach(hero => {
+                const heroData = {
+                    handle: hero.handle,
+                    name: hero.name,
+                    fantasy_score: Math.round(hero.fantasy_score),
+                    views: hero.views,
+                    tweet_count: hero.tweet_count,
+                    reach: Math.round(hero.reach),
+                    stars: hero.stars,
+                    profile_image_url: hero.profile_image_url_https,
+                    current_rank: hero.current_rank,
+                    previous_rank: hero.previous_rank,
+                    followers_count: hero.followers_count,
+                    floor_price: hero.floor_price,
+                    avg_views: hero.avg_views
+                };
+
+                // Add to heroes object
+                processedData.heroes[hero.handle] = heroData;
+
+                // Add to star grouping
+                if (heroesByStars[hero.stars]) {
+                    heroesByStars[hero.stars].push(heroData);
+                }
+            });
+
+            // Sort each star group by fantasy_score (descending)
+            Object.keys(heroesByStars).forEach(stars => {
+                heroesByStars[stars].sort((a, b) => b.fantasy_score - a.fantasy_score);
+            });
+
+            processedData.heroesByStars = heroesByStars;
+            
+            return processedData;
+        }
+
+        // Function to format numbers for display
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Function to get background color based on score
+        function getScoreBackgroundColor(score) {
+            if (score >= 900) return '#006837';
+            if (score >= 800) return '#18954e';
+            if (score >= 700) return '#42ab5a';
+            if (score >= 600) return '#70c164';
+            if (score >= 500) return '#a2d769';
+            if (score >= 400) return '#d1eb85';
+            if (score >= 300) return '#edf7a7';
+            if (score >= 200) return '#fef9b5';
+            if (score >= 100) return '#fdd884';
+            if (score >= 50) return '#f7864e';
+            return '#a50026';
+        }
+
+        // Function to format handle with truncation and styling
+        function formatHandle(handle) {
+            if (handle.length > 10) {
+                return handle.substring(0, 10) + '...';
+            }
+            return handle;
+        }
+
+        // Function to generate hero row HTML
+        function generateHeroRowHTML(hero) {
+            const backgroundColor = getScoreBackgroundColor(hero.fantasy_score);
+            const formattedHandle = formatHandle(hero.handle);
+            
+            return `
+                <tr>
+                    <td style="width: 30px; min-width: 30px; max-width: 60px;">
+                        <div class="card">
+                            <img src="${hero.profile_image_url}" class="hero-image" alt="${hero.handle}">
+                            <p><a href="https://x.com/${hero.handle}" target="_blank" style="text-decoration: none; color: inherit;">
+                                ${hero.name}<br>
+                                <span style="color: #808080; font-size: 0.85em;">(@${formattedHandle})</span>
+                            </a></p>
+                        </div>
+                    </td>
+                    <td class="black-text" style="background-color: ${backgroundColor};">
+                        ${hero.fantasy_score}
+                    </td>
+                    <td class="multi-line smaller-stats">
+                        <div style="padding-top: 4px;">
+                            <i class="fas fa-eye" style="color: #2196F3;"></i> 
+                            <span style="color: #2196F3;">${formatNumber(hero.views)}</span>
+                        </div>
+                        <div style="padding-top: 4px;">
+                            <i class="fas fa-message" style="color: #a259e6;"></i> 
+                            <span style="color: #a259e6;">${hero.tweet_count}</span>
+                        </div>
+                        <div style="padding-top: 4px;">
+                            <i class="fas fa-signal" style="color: #4caf50;"></i> 
+                            <span style="color: #4caf50;">${formatNumber(hero.reach)}</span>
+                        </div>
+                        <i class="fas fa-chart-line" style="font-size: 9px; margin-left: 4px; cursor: pointer; text-decoration: none; border: none; padding-top: 4px;" onclick="showScoreTrend('${hero.handle}')"></i>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Function to populate hero tables with dynamic data
+        function populateHeroTables(processedData) {
+            const starColumns = document.querySelectorAll('.star-column');
+            
+            starColumns.forEach((column, index) => {
+                const starLevel = 8 - index; // 8 stars down to 1 star
+                const tbody = column.querySelector('tbody');
                 
-                // Close tooltips with Escape key
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        closeAllTooltips();
-                    }
-                });
-                
-                function closeAllTooltips() {
-                    tooltips.forEach(tooltip => {
-                        tooltip.classList.remove('active');
-                        tooltip.setAttribute('aria-expanded', 'false');
+                if (tbody && processedData.heroesByStars[starLevel]) {
+                    // Clear existing content
+                    tbody.innerHTML = '';
+                    
+                    // Add heroes for this star level
+                    processedData.heroesByStars[starLevel].forEach(hero => {
+                        tbody.innerHTML += generateHeroRowHTML(hero);
                     });
                 }
             });
-        </script>
-        <script src="/js/config.js?v=1.0.0" defer></script>
-        <script src="/js/timeUtils.js?v=1.0.0" defer></script>
-        <script src="/js/toolTip.js?v=1.0.0" defer></script>
-        <script src="/js/chartComponent.js?v=1.0.1" defer></script>
-    </body>
-    </html>
-    
+        }
+
+        // Initialize the page with API data
+        async function initializePage() {
+            try {
+                console.log('Initializing page with API data...');
+                
+                // Fetch data from API
+                const apiData = await fetchHeroData();
+                const processedData = processHeroData(apiData);
+                
+                console.log('Processed data:', processedData);
+
+                // Update hero count with actual count from API
+                const heroCountElement = document.querySelector('.info-text');
+                if (heroCountElement && apiData.meta) {
+                    heroCountElement.textContent = ` Heroes: ${apiData.meta.total} | Status: Live`;
+                }
+
+                // Populate the hero tables with dynamic data
+                populateHeroTables(processedData);
+
+                // Store the processed data globally for use by other functions
+                window.heroData = processedData;
+                
+                console.log('Page initialized successfully with API data');
+                
+            } catch (error) {
+                console.error('Failed to initialize page with API data:', error);
+            }
+        }
+
+        // Modified showScoreTrend function to use dynamic data
+        function showScoreTrend(heroHandle) {
+            console.log('showScoreTrend called with hero:', heroHandle);
+
+            const modal = document.getElementById('scoreTrendModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            // First, clear the modal content and show loading state
+            modalContent.innerHTML = '<p>Loading...</p>';
+
+            // Check if we have hero data loaded
+            if (window.heroData && window.heroData.heroes && window.heroData.heroes[heroHandle]) {
+                const heroData = window.heroData.heroes[heroHandle];
+                
+                modalTitle.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 0; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
+                        <img src="${heroData.profile_image_url}" alt="${heroHandle}" style="width: 30px; height: 30px; border-radius: 50%; margin-bottom: -8px;">
+                        <span>${heroHandle}</span>
+                    </div>
+                `;
+                modal.style.display = "block";
+
+                // Clear previous content
+                modalContent.innerHTML = '';
+
+                // Add chart container with a unique ID that includes the hero handle
+                const chartId = `heroChart_${heroHandle}`;
+                modalContent.innerHTML += `
+                    <div class="chart-container" style="background-color: black; width: 100%; height: 100%; min-height: 400px;">
+                        <canvas id="${chartId}"></canvas>
+                    </div>
+                `;
+
+                // Safely destroy existing chart if it exists
+                if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                    window.currentHeroChart.destroy();
+                }
+
+                // Create new chart and store the instance
+                createHeroChart(chartId, '/hero_score_data.json', heroHandle).then(chart => {
+                    window.currentHeroChart = chart;
+                });
+            } else {
+                // Fallback to original method if dynamic data not available
+                fetch('/hero_score_data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Fetched data:', data);
+                        console.log('Looking for hero:', heroHandle);
+                        
+                        if (!data.heroes || !data.heroes[heroHandle]) {
+                            throw new Error(`Hero ${heroHandle} not found in data`);
+                        }
+
+                        const heroData = data.heroes[heroHandle];
+                        const heroImageUrl = heroData.hero_pfp_url || heroData.pfp_url;
+                        
+                        if (!heroImageUrl) {
+                            throw new Error('No profile image URL found for hero');
+                        }
+
+                        modalTitle.innerHTML = `
+                            <div style="text-align: center; margin-bottom: 0; display: flex; align-items: flex-end; justify-content: center; gap: 5px;">
+                                <img src="${heroImageUrl}" alt="${heroHandle}" style="width: 30px; height: 30px; border-radius: 50%; margin-bottom: -8px;">
+                                <span>${heroHandle}</span>
+                            </div>
+                        `;
+                        modal.style.display = "block";
+
+                        modalContent.innerHTML = '';
+                        const chartId = `heroChart_${heroHandle}`;
+                        modalContent.innerHTML += `
+                            <div class="chart-container" style="background-color: black; width: 100%; height: 100%; min-height: 400px;">
+                                <canvas id="${chartId}"></canvas>
+                            </div>
+                        `;
+
+                        if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                            window.currentHeroChart.destroy();
+                        }
+
+                        createHeroChart(chartId, '/hero_score_data.json', heroHandle).then(chart => {
+                            window.currentHeroChart = chart;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching hero data:', error);
+                        modalTitle.textContent = `Score Trend ${heroHandle}`;
+                        modal.style.display = "block";
+                        modalContent.innerHTML = `<p>Error loading hero data: ${error.message}</p>`;
+                    });
+            }
+        }
+
+        function closeScoreTrendModal() {
+            const modal = document.getElementById('scoreTrendModal');
+            modal.style.display = "none";
+            
+            // Safely destroy chart when modal is closed
+            if (window.currentHeroChart && typeof window.currentHeroChart.destroy === 'function') {
+                window.currentHeroChart.destroy();
+                window.currentHeroChart = null;
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('scoreTrendModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function filterFavorites(showOnlyFavorites) {
+            // Get favorites from localStorage
+            const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+            const rows = document.querySelectorAll('.star-column table tr');
+
+            rows.forEach(function(row) {
+                if (!row.querySelector('.card')) return; // Skip header rows
+                
+                const heroHandle = row.querySelector('.card p').textContent;
+                
+                if (showOnlyFavorites) {
+                    // Show row only if hero is in favorites
+                    row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                } else {
+                    // Show all rows
+                    row.style.display = '';
+                }
+            });
+        }
+
+        function searchHeroes() {
+            document.getElementById('hero-search-box').addEventListener('input', function() {
+                var searchTerm = this.value.toLowerCase();
+                var cards = document.querySelectorAll('.card');
+                
+                cards.forEach(function(card) {
+                    var heroName = card.querySelector('p').textContent.toLowerCase();
+                    var row = card.closest('tr');
+                    
+                    if (heroName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Tournament dropdown functionality
+        function initializeTournamentDropdown() {
+            const dropdown = document.getElementById('tournament-selector');
+            const dropdownMenu = document.getElementById('tournament-dropdown');
+            const tournamentText = dropdown.querySelector('.tournament-text');
+            
+            // Generate tournament options (current + 10 previous)
+            function generateTournamentOptions() {
+                const currentTournament = API_CONFIG.TOURNAMENT_NUMBER;
+                const options = [];
+                
+                // Add current tournament
+                options.push({
+                    number: currentTournament,
+                    isCurrent: true,
+                    status: 'Live'
+                });
+                
+                // Add previous 10 tournaments
+                for (let i = 1; i <= 10; i++) {
+                    options.push({
+                        number: currentTournament - i,
+                        isCurrent: false,
+                        status: 'Ended'
+                    });
+                }
+                
+                return options;
+            }
+            
+            // Populate dropdown menu
+            function populateDropdown() {
+                const options = generateTournamentOptions();
+                const content = document.createElement('div');
+                content.className = 'tournament-dropdown-content';
+                
+                options.forEach(option => {
+                    const optionEl = document.createElement('div');
+                    optionEl.className = `tournament-option ${option.isCurrent ? 'current' : ''}`;
+                    optionEl.dataset.tournament = option.number;
+                    
+                    optionEl.innerHTML = `
+                        <span>Main ${option.number}</span>
+                        <span class="tournament-status ${option.status.toLowerCase()}">${option.status}</span>
+                    `;
+                    
+                    optionEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectTournament(option.number);
+                        closeDropdown();
+                    });
+                    
+                    content.appendChild(optionEl);
+                });
+                
+                dropdownMenu.innerHTML = '';
+                dropdownMenu.appendChild(content);
+            }
+            
+            // Toggle dropdown
+            function toggleDropdown() {
+                dropdown.classList.toggle('active');
+                if (dropdown.classList.contains('active')) {
+                    populateDropdown();
+                }
+            }
+            
+            // Close dropdown
+            function closeDropdown() {
+                dropdown.classList.remove('active');
+            }
+            
+            // Select tournament
+            async function selectTournament(tournamentNumber) {
+                try {
+                    // Update display
+                    tournamentText.textContent = `Main ${tournamentNumber}`;
+                    
+                    // Update API config
+                    API_CONFIG.TOURNAMENT_NUMBER = tournamentNumber;
+                    
+                    // Show loading state
+                    tournamentText.textContent = 'Loading...';
+                    
+                    // Fetch new data
+                    const apiData = await fetchHeroData(tournamentNumber);
+                    const processedData = processHeroData(apiData);
+                    
+                    // Update display
+                    tournamentText.textContent = `Main ${tournamentNumber}`;
+                    
+                    // Update hero count
+                    const heroCountElement = document.querySelector('.info-text');
+                    if (heroCountElement && apiData.meta) {
+                        heroCountElement.textContent = ` | Heroes: ${apiData.meta.total}`;
+                    }
+                    
+                    // Update timestamp
+                    const timestampElement = document.getElementById('timestamp');
+                    if (timestampElement) {
+                        timestampElement.textContent = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+                    }
+                    
+                    // Populate tables with new data
+                    populateHeroTables(processedData);
+                    
+                    // Store the processed data globally
+                    window.heroData = processedData;
+                    
+                    console.log(`Switched to tournament ${tournamentNumber}`);
+                    
+                } catch (error) {
+                    console.error(`Failed to load tournament ${tournamentNumber}:`, error);
+                    tournamentText.textContent = `Main ${tournamentNumber} (Error)`;
+                }
+            }
+            
+            // Event listeners
+            dropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                closeDropdown();
+            });
+            
+            // Close dropdown on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeDropdown();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the page with API data first
+            initializePage();
+            
+            // Initialize search functionality
+            searchHeroes();
+            
+            // Initialize favorites functionality
+            const buttonGroup = document.querySelector('#my-favorites-group');
+            const icon = buttonGroup.querySelector('i');
+            
+            buttonGroup.addEventListener('click', function() {
+                if (icon.classList.contains('fa-regular')) {
+                    // Switching to filled star - show only favorites
+                    icon.className = 'fa-solid fa-star';
+                    buttonGroup.classList.add('selected');
+                    filterFavorites(true);
+                } else {
+                    // Switching to outline star - show all
+                    icon.className = 'fa-regular fa-star';
+                    buttonGroup.classList.remove('selected');
+                    filterFavorites(false);
+                }
+            });
+            
+            // Initialize tooltip functionality
+            const tooltips = document.querySelectorAll('.tooltip-trigger');
+            
+            tooltips.forEach(tooltip => {
+                // Handle both click and keyboard events
+                ['click', 'keydown'].forEach(eventType => {
+                    tooltip.addEventListener(eventType, function(e) {
+                        // For keyboard, only process Enter or Space
+                        if (eventType === 'keydown' && !(e.key === 'Enter' || e.key === ' ')) {
+                            return;
+                        }
+                        
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Close all other tooltips
+                        tooltips.forEach(t => {
+                            if (t !== tooltip) {
+                                t.classList.remove('active');
+                                t.setAttribute('aria-expanded', 'false');
+                            }
+                        });
+                        
+                        // Toggle current tooltip
+                        const isActive = this.classList.toggle('active');
+                        this.setAttribute('aria-expanded', isActive);
+                    });
+                });
+            });
+
+            // Close tooltip when clicking/focusing outside
+            document.addEventListener('click', closeAllTooltips);
+            document.addEventListener('focusin', function(e) {
+                if (!e.target.closest('.tooltip-trigger')) {
+                    closeAllTooltips();
+                }
+            });
+            
+            // Close tooltips with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAllTooltips();
+                }
+            });
+            
+            function closeAllTooltips() {
+                tooltips.forEach(tooltip => {
+                    tooltip.classList.remove('active');
+                    tooltip.setAttribute('aria-expanded', 'false');
+                });
+            }
+
+            // Tournament selector functionality
+            const tournamentSelector = document.getElementById('tournament-selector');
+            const dropdownIcon = document.getElementById('dropdown-icon');
+            const dropdownContent = document.getElementById('tournament-dropdown');
+            
+            function createDropdownOptions() {
+                const currentTournament = API_CONFIG.TOURNAMENT_NUMBER;
+                let content = '';
+                
+                // Current tournament
+                content += `
+                    <div class="tournament-option" data-tournament="${currentTournament}">
+                        <span>Main ${currentTournament}</span>
+                        <span class="tournament-status live">Live</span>
+                    </div>
+                `;
+                
+                // Previous 10 tournaments
+                for (let i = 1; i <= 10; i++) {
+                    const tournamentNum = currentTournament - i;
+                    content += `
+                        <div class="tournament-option" data-tournament="${tournamentNum}">
+                            <span>Main ${tournamentNum}</span>
+                            <span class="tournament-status archived">Ended</span>
+                        </div>
+                    `;
+                }
+                
+                dropdownContent.innerHTML = content;
+            }
+
+            function toggleDropdown() {
+                dropdownContent.classList.toggle('show');
+                dropdownIcon.classList.toggle('fa-chevron-down');
+                dropdownIcon.classList.toggle('fa-chevron-up');
+            }
+
+            // Handle clicks on tournament selector
+            tournamentSelector.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown();
+                
+                if (!dropdownContent.innerHTML) {
+                    createDropdownOptions();
+                }
+            });
+
+            // Handle tournament selection
+            dropdownContent.addEventListener('click', function(e) {
+                const option = e.target.closest('.tournament-option');
+                if (option) {
+                    const tournamentNum = option.dataset.tournament;
+                    document.querySelector('.tournament-badge').firstChild.textContent = `Main ${tournamentNum} `;
+                    toggleDropdown();
+                    
+                    // Call your existing tournament loading function here
+                    // Assuming you have a function to load tournament data
+                    fetchHeroData(tournamentNum).then(data => {
+                        const processedData = processHeroData(data);
+                        populateHeroTables(processedData);
+                    });
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdownContent.classList.remove('show');
+                dropdownIcon.classList.remove('fa-chevron-up');
+                dropdownIcon.classList.add('fa-chevron-down');
+            });
+        });
+    </script>
+    <script src="/js/config.js?v=1.0.0" defer></script>
+    <script src="/js/toolTip.js?v=1.0.0" defer></script>
+    <script src="/js/chartComponent.js?v=1.0.1" defer></script>
+</body>
+</html>

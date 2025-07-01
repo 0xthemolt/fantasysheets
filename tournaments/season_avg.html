@@ -502,15 +502,31 @@
 
             // Calculate both averages for each hero
             Object.values(data).forEach(hero => {
-                // Calculate current average (latest 4)
+                // Calculate current average (latest 6)
                 const currentScores = currentTournaments
-                    .map(num => hero.tournaments[num]?.fantasy_score || 0);
-                hero.currentAvg = currentScores.reduce((a, b) => a + b, 0) / currentTournaments.length;
+                    .map(num => {
+                        const score = hero.tournaments[num]?.fantasy_score;
+                        // Include if score is 0 or any other number, exclude if undefined/null
+                        return score !== undefined && score !== null ? score : null;
+                    })
+                    .filter(score => score !== null); // Only filter out null/undefined values
+    
+                hero.currentAvg = currentScores.length > 0 ? 
+                    currentScores.reduce((a, b) => a + b, 0) / currentScores.length : 
+                    0;
 
-                // Calculate prior average (previous 4)
+                // Calculate prior average (previous 6)
                 const priorScores = priorTournaments
-                    .map(num => hero.tournaments[num]?.fantasy_score || 0);
-                hero.priorAvg = priorScores.reduce((a, b) => a + b, 0) / priorTournaments.length;
+                    .map(num => {
+                        const score = hero.tournaments[num]?.fantasy_score;
+                        // Include if score is 0 or any other number, exclude if undefined/null
+                        return score !== undefined && score !== null ? score : null;
+                    })
+                    .filter(score => score !== null); // Only filter out null/undefined values
+    
+                hero.priorAvg = priorScores.length > 0 ? 
+                    priorScores.reduce((a, b) => a + b, 0) / priorScores.length : 
+                    0;
             });
 
             // Add tournament number columns (in ascending order)

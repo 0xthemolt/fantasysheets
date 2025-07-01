@@ -173,6 +173,10 @@
 .refresh-btn.spinning i {
     animation: spin 1s linear infinite;
 }
+
+.hero-card.player-winning-with-gap {
+    border: 2px solid #FF69B4 !important; /* Same pink color as price gap */
+}
     </style>
 </head>
 <body>
@@ -342,8 +346,14 @@ function renderCards(sortType) {
                                topFiveBids[0].trader && 
                                topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
         
-        // Set card class based on winning status
-        const cardClass = playerIsWinning ? 'hero-card player-winning' : 'hero-card player-not-winning';
+        // Check for price gap below player's winning bid
+        const hasGapBelowWinningBid = playerIsWinning && topFiveBids.length > 1 && 
+                                     ((topFiveBids[0].price - topFiveBids[1].price) / topFiveBids[0].price) * 100 > 5;
+        
+        // Set card class based on winning status and gap
+        const cardClass = playerIsWinning 
+            ? (hasGapBelowWinningBid ? 'hero-card player-winning-with-gap' : 'hero-card player-winning')
+            : 'hero-card player-not-winning';
         
         // Create bid rows with price gap highlighting
         let bidRows = '';

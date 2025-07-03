@@ -1844,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Initialize the range track
             function updateRangeTrack() {
-                              
+                                                                                                                        
                                const minVal = parseInt(minStars.value);
                 const maxVal = parseInt(maxStars.value);
                 const minPercent = ((minVal - 1) / 7) * 100;
@@ -2204,8 +2204,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 }
                                 
                                 .mini-pfp {
-                                    width: 20px;
-                                    height: 20px;
+                                    width: 25px;
+                                    height: 25px;
                                     border-radius: 50%;
                                     object-fit: cover;
                                     flex-shrink: 0;
@@ -2294,7 +2294,129 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Add this function after your other initialization functions
+        // Add this function after your other modal functions
+
+        function closePlayerBidsModal() {
+            const modalOverlay = document.getElementById('player-bids-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+        }
+        // Add this function after your other modal functions
+
+        async function showBidModal(bidsEncoded, heroId, rarityLabel, stars, tradesEncoded = '') {
+            try {
+                const bids = JSON.parse(decodeURIComponent(bidsEncoded));
+                const trades = tradesEncoded ? JSON.parse(decodeURIComponent(tradesEncoded)) : [];
+                
+                // Create modal if it doesn't exist
+                let modalOverlay = document.getElementById('bid-modal-overlay');
+                if (!modalOverlay) {
+                    modalOverlay = document.createElement('div');
+                    modalOverlay.id = 'bid-modal-overlay';
+                    modalOverlay.className = 'seller-modal-overlay';
+                    document.body.appendChild(modalOverlay);
+                    
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            closeBidModal();
+                        }
+                    });
+                }
+
+                // Generate bid list HTML
+                const bidListHTML = bids.map(bid => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="${bid.profile_picture}" 
+                                alt="Profile" 
+                                style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;"
+                                onerror="this.src='../icons/fan.webp'">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="color: white; font-size: 1em; line-height: 1.2;">${bid.player_name}</span>
+                                <a href="https://x.com/${bid.player_handle}" 
+                                target="_blank" 
+                                style="text-decoration: none; color: #777; font-size: 0.85em; line-height: 1.2; margin-top: 3px;"
+                                onmouseover="this.style.color='#1DA1F2'" 
+                                onmouseout="this.style.color='#777'">
+                                    @${bid.player_handle}
+                                </a>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: white; font-weight: bold;">${Number(bid.bid).toFixed(4)} ETH</div>
+                            <div style="color: #777; font-size: 0.8em;">${formatDate(bid.expiration_timestamp)}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Generate trades list HTML if available
+                const tradesListHTML = trades.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                        <div style="font-size: 1em; color: #ccc; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 5px;">
+                            Recent Trades (${trades.length})
+                        </div>
+                        ${trades.map(trade => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                <div style="color: #ccc; font-size: 0.9em;">
+                                    ${formatDate(trade.timestamp)}
+                                </div>
+                                <div style="color: white; font-weight: bold;">
+                                    ${Number(trade.price).toFixed(4)} ETH
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                modalOverlay.innerHTML = `
+                    <div class="seller-modal" style="width: 400px; max-height: 80vh; overflow-y: auto;">
+                        <div class="seller-modal-close" onclick="closeBidModal()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div class="bid-modal-container">
+                                <div class="bid-card-container">
+                                    <img src="https://r2.fantasy.top/v2/${rarityLabel.toLowerCase()}/${heroId}_${stars}.png" 
+                                        alt="Hero Card"
+                                        class="bid-card-image"
+                                        onerror="this.src='../icons/fan.webp'">
+                                </div>
+                                <div class="bid-content-container">
+                                    <div class="bid-header">
+                                        ${rarityLabel} ${stars}★ Bids (${bids.length})
+                                    </div>
+                                    <div class="bid-list-container">
+                                        ${bidListHTML}
+                                    </div>
+                                </div>
+                            </div>
+                            ${tradesListHTML}
+                        </div>
+                    </div>
+                `;
+
+                modalOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+            } catch (error) {
+                console.error('Error showing bid modal:', error);
+            }
+        }
+
+        // Add the close function for bid modal
+        function closeBidModal() {
+            const modalOverlay = document.getElementById('bid-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+        }
+
+        // Make functions globally accessible
+        window.showBidModal = showBidModal;
+        window.closeBidModal = closeBidModal;
 
         function initializeCommonEquivalentToggle() {
             const toggle = document.getElementById('common-equivalent-toggle');
@@ -2318,17 +2440,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Add the missing close function for the player bids modal
-        function closePlayerBidsModal() {
-            const modalOverlay = document.getElementById('player-bids-modal-overlay');
-            if (modalOverlay) {
-                modalOverlay.style.display = 'none';
-            }
-            document.body.style.overflow = '';
-        }
-
-        // Make the function globally accessible
+        // Make functions globally accessible
         window.closePlayerBidsModal = closePlayerBidsModal;
+        window.showPlayerHighestBidsModal = showPlayerHighestBidsModal;
+        window.initializeCommonEquivalentToggle = initializeCommonEquivalentToggle;
     </script>
 </body>
 </html>

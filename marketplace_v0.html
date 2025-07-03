@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Keep critical scripts -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    
+    <!-- Defer non-critical scripts -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Marketplace</title>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sortable i {
+            margin-left: 5px;
+            opacity: 0.3;
+        }
+        .sortable.desc i {
+            opacity: 1;
+            transform: rotate(180deg);
+        }
+        .sortable.asc i {
+            opacity: 1;
+        }
+        
+        /* Fix column width */
+        .marketplace-table th, .marketplace-table td {
+            width: auto;
+            white-space: nowrap;
+        }
+        
+        /* Search box styles */
+        .search-container {
+            margin-bottom: 15px;
+            position: relative;
+            max-width: 250px; /* Set a predefined width */
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 7.5px 15px; /* Reduced by 25% from 10px */
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(30, 30, 30, 0.6);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            height: 36px; /* Explicitly set height (reduced from typical ~48px) */
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+        }
+        
+        /* Global floors styling */
+        .global-floors {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .floor-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .floor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        .floor-legendary {
+            background: linear-gradient(135deg, rgba(251, 231, 255, 0.15), rgba(251, 231, 255, 0.05));
+            border: 1px solid rgba(251, 231, 255, 0.3);
+        }
+        .floor-epic {
+            background: linear-gradient(135deg, rgba(241, 163, 253, 0.15), rgba(241, 163, 253, 0.05));
+            border: 1px solid rgba(241, 163, 253, 0.3);
+        }
+        .floor-rare {
+            background: linear-gradient(135deg, rgba(0, 255, 223, 0.15), rgba(0, 255, 223, 0.05));
+            border: 1px solid rgba(0, 255, 223, 0.3);
+        }
+        .floor-common {
+            background: linear-gradient(135deg, rgba(147, 255, 1, 0.15), rgba(147, 255, 1, 0.05));
+            border: 1px solid rgba(147, 255, 1, 0.3);
+        }
+        .floor-title {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .floor-legendary .floor-title { color: #FBE7FF; }
+        .floor-epic .floor-title { color: #F1A3FD; }
+        .floor-rare .floor-title { color: #00FFDF; }
+        .floor-common .floor-title { color: #93FF01; }
+        .floor-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .floor-value::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url('../icons/eth.webp');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .export-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .export-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: left;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9em;
+            line-height: 24px;  /* Match height of toggle switch */
+            margin: 0;
+            padding: 0;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-option {
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 30, 30, 0.6);
+        }
+
+        .filter-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-option.active {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Style for rare and common options */
+        .filter-option-rare {
+            color: #00FFDF; /* Rare color */
+        }
+
+        .filter-option-common {
+            color: #93FF01; /* Common color */
+        }
+
+        .filter-option-clear {
+            color: #aaa;
+            font-size: 0.8em;
+            padding: 6px 8px;
+        }
+
+        .star-filter-container {
+            margin: 5px 0;
+        }
+
+        /* Double Range Slider Styles */
+        .double_range_slider_box {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 36px; /* Match the search input height */
+            background: rgba(30, 30, 30, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 6px; /* Match search input border-radius */
+            padding: 0 50px; /* Adjusted padding to maintain space for labels */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 40px; /* Add margin to make room for labels */
+            box-sizing: border-box; /* Ensure padding is included in height */
+        }
+
+        .double_range_slider {
+            position: relative;
+            width: 90%;
+            height: 4px; /* Slightly reduced for better proportions */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .range_track {
+            position: absolute;
+            height: 100%;
+            background: #FACC15;
+            border-radius: 5px;
+            top: 0;
+        }
+
+        .double_range_slider input[type="range"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            position: absolute;
+            background: transparent;
+            pointer-events: none;
+            top: 0;
+            height: 5px;
+            margin: 0;
+        }
+
+        .double_range_slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FACC15;
+            cursor: pointer;
+            pointer-events: auto;
+            margin-top: -2px;
+            border: 2px solid #FACC15;
+        }
+
+        .double_range_slider input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FACC15;
+            cursor: pointer;
+            pointer-events: auto;
+            border: 2px solid #FACC15;
+            margin-top: -2px;
+        }
+
+        .minvalue, .maxvalue {
+            position: absolute;
+            font-size: 12px;
+            color: #fff;
+            background: rgba(30, 30, 30, 0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5; /* Ensure they appear above other elements */
+        }
+        
+        .minvalue {
+            left: -40px; /* Move further left */
+            transform: translateY(-50%);
+        }
+        
+        .maxvalue {
+            right: -40px; /* Move further right */
+            transform: translateY(-50%);
+        }
+
+        .filter-label {
+            color: #fff;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* Modal styles */
+        .seller-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .seller-modal {
+            background: rgba(30, 30, 30);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            width: 160px;
+            max-width: 90vw;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .seller-modal-close {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .seller-modal-close:hover {
+            color: white;
+        }
+        
+        .seller-modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .seller-modal-pfp {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hero-card-image {
+            width: 100%;
+            max-width: 100px;
+            height: auto;
+            border-radius: 4px;
+            margin-top: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-floor-info {
+            margin-top: 5px;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .seller-modal-name {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .seller-modal-twitter {
+            color: #1DA1F2;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 6px;
+            background: rgba(29, 161, 242, 0.1);
+            border-radius: 10px;
+            transition: background 0.2s;
+            font-size: 0.8em;
+        }
+        
+        .seller-modal-twitter:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+        
+
+        /* Update seller icon styles with hover color effect */
+        .seller-icon {
+            font-size: 0.75em; /* Make icon 25% smaller */
+            margin-left: 8px; /* Add more space between icon and number */
+            opacity: 0.8; /* Slightly reduce opacity for better visual balance */
+            cursor: pointer;
+            transition: color 0.2s, opacity 0.2s; /* Smooth transition for hover effects */
+        }
+        
+        .seller-icon:hover {
+            opacity: 1;
+            color: #FACC15; /* Change to yellow color on hover */
+        }
+        
+        /* Center align the listed-count container */
+        .listed-count {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center horizontally */
+            width: 100%; /* Take full width of the cell */
+        }
+
+        /* Add this new section for score slider */
+        .score-filter-container {
+            margin: 5px 0;
+        }
+        
+        /* Add label for score slider */
+        .slider-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9em;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin: 0;
+            vertical-align: middle;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #FACC15;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9em;
+            color: #fff;
+            line-height: 24px;  /* Match height of toggle switch */
+            margin: 0;
+            padding: 0;
+        }
+
+        .lowest-price-highlight {
+            position: relative;
+            background: rgba(250, 204, 21, 0.15);
+            border-radius: 0;
+            border: none;
+            font-weight: bold;
+            color: #FACC15;
+        }
+
+        /* Remove any previous animation or box-shadow styles */
+        @keyframes pulse {
+            0% { box-shadow: none; }
+            100% { box-shadow: none; }
+        }
+
+        .bid-modal-container {
+            display: flex;
+            align-items: stretch;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .bid-card-container {
+            display: flex;
+            align-items: center;  /* This will center the card vertically */
+            width: 80px;         /* Fixed width to match the image */
+        }
+
+        .bid-card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .bid-content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bid-header {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .bid-list-container {
+            width: 100%;
+        }
+
+        /* Add this to your existing <style> section */
+        .fa-copy {
+            cursor: pointer;
+            color: #aaa;
+            transition: color 0.2s ease;
+        }
+
+        .fa-copy:active {
+            transform: scale(0.95); /* Slight shrink when clicked */
+        }
+
+        /* Add this to your existing <style> section */
+        .visavi-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: middle;
+            position: relative;
+            top: 0px; /* or remove this line if still not centered */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .visavi-icon:hover {
+            transform: scale(1.1);
+        }
+
+        #seller-modal-handle:hover {
+            color: #1DA1F2 !important;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="marketplace-container"></div>
+
+    <script>
+        // Add at the top of your script section, with other utility functions
+        function formatDate(date) {
+            if (!date) return 'N/A';
+            const utcDate = new Date(date);
+            const year = utcDate.getUTCFullYear();
+            const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(utcDate.getUTCDate()).padStart(2, '0');
+            const hours = String(utcDate.getUTCHours()).padStart(2, '0');
+            const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        // Initialize Supabase client
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Function to toggle tooltip (show seller modal)
+        function toggleTooltip(icon) {
+            // Get seller info from data attributes
+            const sellerId = icon.getAttribute('data-seller-id');
+            const sellerName = icon.getAttribute('data-seller-name');
+            const sellerHandle = icon.getAttribute('data-seller-handle');
+            const sellerPfpUrl = icon.getAttribute('data-seller-pfp-url');
+            const sellerPortValue = icon.getAttribute('data-seller-port-value');
+            
+            // Show modal with seller info
+            showSellerModal(sellerId, sellerName, sellerHandle, sellerPfpUrl, sellerPortValue);
+        }
+
+        function createBidsCell(bids, isVisavi, heroId, rarityLabel, stars, trades) {
+            if (!bids || bids.length === 0) return '';
+            const tradesEncoded = encodeURIComponent(JSON.stringify(trades || []));
+            const bidsEncoded = encodeURIComponent(JSON.stringify(bids));
+            if (isVisavi) {
+                return `<img src="../icons/visavi.jpeg" class="visavi-icon"
+                    onclick="showBidModal('${bidsEncoded}', '${heroId}', '${rarityLabel}', '${stars}', '${tradesEncoded}')"
+                    alt="Visavi Bidder" />`;
+            } else {
+                return `<i class="fas fa-user seller-icon"
+                    onclick="showBidModal('${bidsEncoded}', '${heroId}', '${rarityLabel}', '${stars}', '${tradesEncoded}')"
+                ></i>`;
+            }
+        }
+
+        // Function to show seller modal
+        function showSellerModal(sellerId, sellerName, sellerHandle, sellerPfpUrl, sellerPortValue) {
+            // Create modal if it doesn't exist
+            let modalOverlay = document.getElementById('seller-modal-overlay');
+            if (!modalOverlay) {
+                modalOverlay = document.createElement('div');
+                modalOverlay.id = 'seller-modal-overlay';
+                modalOverlay.className = 'seller-modal-overlay';
+                
+                const modalHTML = `
+                    <div class="seller-modal">
+                        <div class="seller-modal-close" onclick="closeSellerModal()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div style="font-size: 0.8em; color: #aaa; margin-bottom: 5px;">Seller</div>
+                            <img id="seller-modal-pfp" class="seller-modal-pfp" src="" alt="Seller" onerror="this.onerror=null; this.src='../icons/fan.webp';">
+                            <div class="seller-modal-name" id="seller-modal-name"></div>
+                            <div>
+                                <a id="seller-modal-handle" href="#" target="_blank" style="text-decoration: none; color: #888; font-size: 0.8em; transition: color 0.2s ease;">
+                                    @<span id="seller-handle-text"></span>
+                                </a>
+                            </div>
+                            <img id="hero-card-image" class="hero-card-image" src="" alt="Hero Card" style="display: none;">
+                            <div id="card-floor-info" class="card-floor-info" style="display: none;">
+                                Ask: <span id="card-floor-value"></span>
+                                <img src="../icons/eth.webp" alt="ETH Icon" style="width: 16px; height: 16px; vertical-align: middle;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modalOverlay.innerHTML = modalHTML;
+                document.body.appendChild(modalOverlay);
+                
+                // Close modal when clicking outside
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) {
+                        closeSellerModal();
+                    }
+                });
+            }
+            
+            // Update modal content
+            // Replace the existing content setting section with:
+            // Update modal content
+            document.getElementById('seller-modal-pfp').src = sellerPfpUrl || '../icons/fan.webp';
+            document.getElementById('seller-modal-name').textContent = sellerName;
+            document.getElementById('seller-modal-handle').href = `https://x.com/${sellerHandle}`;
+            document.getElementById('seller-handle-text').textContent = sellerHandle;
+
+            // Get hero card data from the clicked element
+            const heroId = event.currentTarget.getAttribute('data-hero-id');
+            const rarity = event.currentTarget.getAttribute('data-rarity');
+            const stars = event.currentTarget.getAttribute('data-stars');
+            const floorPrice = event.currentTarget.getAttribute('data-floor-price');
+            
+            // If we have hero card data, show the image
+            if (heroId && rarity && stars) {
+                const heroCardImage = document.getElementById('hero-card-image');
+                // Try with absolute path from root
+                const imageUrl = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                console.log('Hero Card Image URL:', {
+                    heroId,
+                    rarity,
+                    stars,
+                    fullUrl: imageUrl
+                });
+                heroCardImage.src = imageUrl;
+                heroCardImage.style.display = 'block';
+                
+                // Add error handling for the image
+                heroCardImage.onerror = function() {
+                    console.log('Image failed to load:', imageUrl);
+                    // Try fallback path if first attempt fails
+                    this.src = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                    
+                    // Add second error handler for fallback path
+                    this.onerror = function() {
+                        console.log('Fallback image also failed to load');
+                        this.style.display = 'none';
+                    };
+                };
+                
+                // Show floor price if available
+                if (floorPrice) {
+                    document.getElementById('card-floor-value').textContent = format_eth(floorPrice);
+                    document.getElementById('card-floor-info').style.display = 'flex';
+                } else {
+                    document.getElementById('card-floor-info').style.display = 'none';
+                }
+            } else {
+                document.getElementById('hero-card-image').style.display = 'none';
+                document.getElementById('card-floor-info').style.display = 'none';
+            }
+            
+            // Show modal
+            modalOverlay.style.display = 'flex';
+            
+            // Prevent scrolling on body
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Function to close seller modal
+        function closeSellerModal() {
+            const modalOverlay = document.getElementById('seller-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            
+            // Re-enable scrolling
+            document.body.style.overflow = '';
+        }
+        
+        // Make closeSellerModal globally accessible
+        window.closeSellerModal = closeSellerModal;
+        
+        // Load data when page loads
+        window.onload = loadMarketplaceData;
+
+        // Helper function to format values
+        function formatValue(value) {
+            if (value === '-' || value === '' || value === null || value === undefined) return '-';
+            const num = parseFloat(value);
+            if (isNaN(num)) return '-';
+            return num >= 0.1 ? num.toFixed(2) : num.toFixed(3);
+        }
+
+        // Calculate and display global floors
+        function updateGlobalFloors(heroesArray) {
+            // Initialize with high values
+            let lowestLegendary = Infinity;
+            let lowestEpic = Infinity;
+            let lowestRare = Infinity;
+            let lowestCommon = Infinity;
+            
+            // Find the lowest floor for each rarity
+            heroesArray.forEach(hero => {
+                // Check legendary floor
+                if (hero.legendary.floor !== '-') {
+                    const legendaryFloor = parseFloat(hero.legendary.floor);
+                    if (!isNaN(legendaryFloor) && legendaryFloor < lowestLegendary) {
+                        lowestLegendary = legendaryFloor;
+                    }
+                }
+                
+                // Check epic floor
+                if (hero.epic.floor !== '-') {
+                    const epicFloor = parseFloat(hero.epic.floor);
+                    if (!isNaN(epicFloor) && epicFloor < lowestEpic) {
+                        lowestEpic = epicFloor;
+                    }
+                }
+                
+                // Check rare floor
+                if (hero.rare.floor !== '-') {
+                    const rareFloor = parseFloat(hero.rare.floor);
+                    if (!isNaN(rareFloor) && rareFloor < lowestRare) {
+                        lowestRare = rareFloor;
+                    }
+                }
+                
+                // Check common floor
+                if (hero.common.floor !== '-') {
+                    const commonFloor = parseFloat(hero.common.floor);
+                    if (!isNaN(commonFloor) && commonFloor < lowestCommon) {
+                        lowestCommon = commonFloor;
+                    }
+                }
+            });
+            
+            // Update the UI with the lowest floors
+            document.getElementById('legendary-floor').textContent = lowestLegendary === Infinity ? '-' : formatValue(lowestLegendary);
+            document.getElementById('epic-floor').textContent = lowestEpic === Infinity ? '-' : formatValue(lowestEpic);
+            document.getElementById('rare-floor').textContent = lowestRare === Infinity ? '-' : formatValue(lowestRare);
+            document.getElementById('common-floor').textContent = lowestCommon === Infinity ? '-' : formatValue(lowestCommon);
+        }
+
+        // Fetch and display marketplace data
+        async function loadMarketplaceData() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('marketplace')
+                    .select('hero_handle, hero_id,hero_name, hero_pfp_url, inflation_degree, can_be_packed, stars, score, rarity, floor, highest_bid, floor_bid_spread,listed_count, db_updated,score_24hr,seller_id,seller_name,seller_handle,seller_pfp_url,seller_port_value,sweep_5_cards_price,sweep_5_avg_price,epic_discount_price,rare_discount_price,bids,trades,is_visavi')
+                    .order('score', { ascending: false });
+
+                if (error) throw error;
+
+                // Update the UI with the max db_updated value
+                const minDbUpdated = data.reduce((min, item) => {
+                    return item.db_updated < min ? item.db_updated : min;
+                }, data[0]?.db_updated || 'N/A');
+
+                // Calculate time ago
+                const timeAgo = minDbUpdated !== 'N/A' ? Math.floor((new Date() - new Date(minDbUpdated)) / 60000) : 'N/A';
+
+                // Check if the element exists before updating
+                const dbUpdatedElement = document.getElementById('db-updated');
+                if (dbUpdatedElement) {
+                    dbUpdatedElement.innerText = formatDate(minDbUpdated);
+                } else {
+                    console.warn('Element with ID "db-updated" not found.');
+                }
+
+                // Create a pivot table structure by hero
+                const pivotedData = data.reduce((acc, item) => {
+                    if (!acc[item.hero_handle]) {
+                        acc[item.hero_handle] = {
+                            hero_handle: item.hero_handle,
+                            hero_id: item.hero_id,
+                            hero_name: item.hero_name,
+                            hero_pfp_url: item.hero_pfp_url,
+                            inflation_degree: item.inflation_degree,
+                            can_be_packed: item.can_be_packed,
+                            score: item.score,
+                            score_24hr: item.score_24hr,
+                            stars: item.stars,
+                            legendary: { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            epic:      { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            rare:      { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false },
+                            common:    { floor: '-', highest_bid: '-', listed_count: '-', floor_bid_spread: '-999', seller_info: null, bids: [], trades: [], is_visavi: false }
+                        };
+                    }
+                    
+                    // Update the rarity data based on the item's rarity
+                    const rarityKey = item.rarity.toLowerCase();
+                    acc[item.hero_handle][rarityKey] = {
+                        floor: Number(item.floor).toFixed(4),
+                        highest_bid: item.highest_bid || '-',
+                        listed_count: item.listed_count || '-',
+                        floor_bid_spread: item.floor_bid_spread || '-999',
+                        seller_info: item.listed_count && item.listed_count > 0 ? {
+                            seller_name: item.seller_name,
+                            seller_handle: item.seller_handle,
+                            seller_pfp_url: item.seller_pfp_url,
+                            seller_id: item.seller_id,
+                            seller_port_value: item.seller_port_value
+                        } : null,
+                        bids: Array.isArray(item.bids) ? item.bids : [], // Check if it's already an array
+                        trades: Array.isArray(item.trades) ? item.trades : [], // Add trades to the rarity object
+                        is_visavi: !!item.is_visavi // <-- set here for each rarity
+                    };
+                    
+                    return acc;
+                }, {});
+
+                // Convert the pivoted data back to an array for rendering
+                const heroesArray = Object.values(pivotedData);
+
+                // No need to sort here since data is already sorted from the query
+                const container = document.getElementById('marketplace-container');
+                container.innerHTML = `
+                    <style>
+                        .marketplace-container {
+                            position: relative;
+                            padding-top: 40px;  /* Space for export button */
+                            max-width: 90%;
+                            margin: 0 auto;  /* Center the container */
+                            width: 100%;
+                        }
+                        .export-button {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            padding: 8px 16px;
+                            background: transparent;
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                            border-radius: 4px;
+                            color: #fff;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        .export-button:hover {
+                            background: rgba(255, 255, 255, 0.1);
+                        }
+                        .marketplace-table {
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            width: 100%;
+                            border: none;
+                            position: relative;
+                            min-width: min-content;  /* Ensures table doesn't shrink below content width */
+                        }
+                        .marketplace-table tbody {
+                            display: block;
+                            max-height: calc(80vh - 80px); /* Adjust for header height */
+                            overflow-y: auto;
+                            scrollbar-width: thin;
+                            scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+                        }
+                        .marketplace-table thead {
+                            display: table;
+                            width: calc(100% - 6px);
+                            table-layout: fixed;
+                        }
+                        .marketplace-table tbody tr {
+                            display: table;
+                            width: 100%;
+                            table-layout: fixed;
+                        }
+                        /* Make hero column twice as wide */
+                        .marketplace-table th:first-child,
+                        .marketplace-table td:first-child {
+                            width: 150px;  /* Adjust this value based on your needs */
+                        }
+                        .marketplace-table tbody tr:hover {
+                            background-color: rgba(255, 255, 255, 0.05) !important;  /* Use !important to override rarity section backgrounds */
+                        }
+                        .marketplace-table tbody::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        .marketplace-table tbody::-webkit-scrollbar-track {
+                            background: transparent;
+                        }
+                        .marketplace-table tbody::-webkit-scrollbar-thumb {
+                            background-color: rgba(155, 155, 155, 0.5);
+                            border-radius: 3px;
+                        }
+                        .marketplace-table thead {
+                            position: sticky;
+                            top: 0;
+                            z-index: 1;
+                            background-color: rgb(13, 17, 23);
+                        }
+                        .marketplace-table thead::after {
+                            content: '';
+                            position: absolute;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            height: 1px;
+                            background: rgba(255, 255, 255, 0.1);
+                        }
+                        .marketplace-table thead tr:nth-child(2) {
+                            position: sticky;
+                            top: 37px;
+                            background-color: rgb(13, 17, 23);
+                        }
+                        .hero-cell {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .hero-cell img {
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            object-fit: cover;
+                        }
+                        .rarity-section-legendary { background-color: rgba(251, 231, 255, 0.1); }
+                        .rarity-section-epic { background-color: rgba(241, 163, 253, 0.1); }
+                        .rarity-section-rare { background-color: rgba(0, 255, 223, 0.1); }
+                        .rarity-section-common { background-color: rgba(147, 255, 1, 0.1); }
+                        
+                        .rarity-header-legendary { color: #FBE7FF; }
+                        .rarity-header-epic { color: #F1A3FD; }
+                        .rarity-header-rare { color: #00FFDF; }
+                        .rarity-header-common { color: #93FF01; }
+                        
+                        .marketplace-table td, .marketplace-table th {
+                            border: none;
+                            padding: 8px;
+                        }
+                    </style>
+                    <div class="marketplace-container">
+                        <div class="export-container" style="text-align: right;">
+                            <button class="export-button" onclick="exportToCSV()">
+                                <i class="fas fa-file-export"></i>
+                                Export CSV
+                            </button>
+                            <span id="db-updated" style="display: block; font-size: 0.8em; color: grey; margin-top: 5px; text-align: right;">${minDbUpdated !== 'N/A' ? formatDate(minDbUpdated) : 'N/A'} UTC (${timeAgo} min ago)</span>
+                        </div>
+                        
+                        <div class="global-floors">
+                            <div class="floor-card floor-legendary">
+                                <div class="floor-title">Legendary</div>
+                                <div class="floor-value" id="legendary-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-epic">
+                                <div class="floor-title">Epic</div>
+                                <div class="floor-value" id="epic-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-rare">
+                                <div class="floor-title">Rare</div>
+                                <div class="floor-value" id="rare-floor">-</div>
+                            </div>
+                            <div class="floor-card floor-common">
+                                <div class="floor-title">Common</div>
+                                <div class="floor-value" id="common-floor">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="range-filter-container" style="display: flex; align-items: left; gap: 5px; margin-bottom: 15px;">
+                            <div class="search-container" style="margin: 0; flex: 1;">
+                                <input type="text" class="search-input" id="hero-search" placeholder="Search hero...">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            
+                            <div class="star-filter-container" style="margin: 0; flex: 1;">
+                                <div class="double_range_slider_box">
+                                    <div class="double_range_slider">
+                                        <span class="range_track" id="range_track"></span>
+                                        <input type="range" class="min" id="min-stars" min="1" max="8" value="1" step="1">
+                                        <input type="range" class="max" id="max-stars" min="1" max="8" value="8" step="1">
+                                        <div class="minvalue">1★</div>
+                                        <div class="maxvalue">8★</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="score-filter-container" style="margin: 0; flex: 1;">
+                                <div class="double_range_slider_box">
+                                    <div class="double_range_slider">
+                                        <span class="range_track" id="score_range_track"></span>
+                                        <input type="range" class="min" id="min-score" min="0" max="1000" value="0" step="10">
+                                        <input type="range" class="max" id="max-score" min="0" max="1000" value="1000" step="10">
+                                        <div class="minvalue" id="score-minvalue">0</div>
+                                        <div class="maxvalue" id="score-maxvalue">1000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-container" style="display: flex; align-items: center; gap: 20px;">
+                            <!-- Bid Floor Spread Filter -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="filter-label">Bid Floor Spread:</div>
+                                <div class="filter-options">
+                                    <div class="filter-option filter-option-rare" id="rare-spread-filter" data-rarity="rare">Rare</div>
+                                    <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
+                                    <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
+                                </div>
+                            </div>
+
+                            <!-- Common Equivalent Toggle -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1);">
+                                <div class="filter-label" style="display: flex; align-items: center;">Common Equivalent:</div>
+                                <div class="filter-options" style="display: flex; align-items: center; gap: 8px;">
+                                    <label class="toggle-switch" style="margin: 0; display: flex; align-items: center;">
+                                        <input type="checkbox" id="common-equivalent-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label" id="common-equivalent-label" style="display: flex; align-items: center;">Off</span>
+                                </div>
+                            </div>
+
+                            <!-- Top Player Bids Button -->
+                            <button onclick="showPlayerHighestBidsModal()" 
+                                    style="padding: 8px 16px; 
+                                           background: transparent;
+                                           border: 1px solid rgba(255, 255, 255, 0.1);
+                                           border-radius: 4px;
+                                           color: #fff;
+                                           cursor: pointer;">
+                                <i class="fas fa-gavel"></i>
+                                Top Player Bids
+                            </button>
+                        </div>
+                        
+                        <table class="marketplace-table">
+                            <thead>
+                                <tr>
+                                    <th>Hero</th>
+                                    <th class="sortable" data-sort="score">7d <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="score_24hr">24hr <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="stars">Stars <i class="fas fa-sort-up"></i></th>
+                                    <th class="sortable" data-sort="inflation">Inflation <i class="fas fa-sort-up"></i></th>
+                                    <th colspan="3" class="rarity-header-legendary">Legendary</th>
+                                    <th colspan="3" class="rarity-header-epic">Epic</th>
+                                    <th colspan="3" class="rarity-header-rare">Rare</th>
+                                    <th colspan="3" class="rarity-header-common">Common</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="5"></th>
+                                    <th>Floor</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
+                                    <th>Floor</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
+                                    <th>Floor</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
+                                    <th>Floor</th>
+                                    <th>Bid</th>
+                                    <th>Listed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${heroesArray.map(item => `
+                                <tr 
+                                    data-legendary-spread="${item.legendary.floor_bid_spread || '-999'}"
+                                    data-epic-spread="${item.epic.floor_bid_spread || '-999'}"
+                                    data-rare-spread="${item.rare.floor_bid_spread || '-999'}"
+                                    data-common-spread="${item.common.floor_bid_spread || '-999'}"
+                                >
+                                    <td>
+                                        <div class="hero-cell">
+                                            <img src="${item.hero_pfp_url}" alt="Hero Profile">
+                                            <span data-hero-name="${item.hero_name}">${item.hero_handle}</span>
+                                                        <a href="https://x.com/${item.hero_handle}" target="_blank" rel="noopener noreferrer" style="margin-left: 5px; color: inherit; text-decoration: none;">
+                                                        <i class="fab fa-x-twitter" style="font-size: 0.8em;"></i>
+                                                        </a>
+                                        </div>
+                                    </td>
+                                    <td>${Math.round(item.score)}</td>
+                                    <td>${Math.round(item.score_24hr)}</td>
+                                    <td>${item.stars}</td>
+                                    <td>${item.inflation_degree}${item.can_be_packed === false ? ' <i class="fa-solid fa-circle-pause" style="color: rgba(255, 0, 0, 0.7);"></i>' : ''}</td>
+                                    <td class="rarity-section-legendary">${formatValue(item.legendary.floor)}</td>
+                                    <td class="rarity-section-legendary">
+                                        ${formatValue(item.legendary.highest_bid)}
+                                        ${
+                                            item.legendary.bids && item.legendary.bids.length > 0
+                                            ? (
+                                                item.legendary.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-legendary">
+                                      <div class="listed-count">
+                                            ${item.legendary.listed_count}
+                                            ${item.legendary.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.legendary.seller_info.seller_id}"
+                                                    data-seller-name="${item.legendary.seller_info.seller_name}"
+                                                    data-seller-handle="${item.legendary.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.legendary.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.legendary.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="legendary"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.legendary.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="rarity-section-epic">${formatValue(item.epic.floor)}</td>
+                                    <td class="rarity-section-epic">
+                                        ${formatValue(item.epic.highest_bid)}
+                                        ${
+                                            item.epic.bids && item.epic.bids.length > 0
+                                            ? (
+                                                item.epic.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-epic">
+                                     <div class="listed-count">
+                                            ${item.epic.listed_count}
+                                            ${item.epic.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.epic.seller_info.seller_id}"
+                                                    data-seller-name="${item.epic.seller_info.seller_name}"
+                                                    data-seller-handle="${item.epic.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.epic.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.epic.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="epic"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.epic.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="rarity-section-rare">${formatValue(item.rare.floor)}</td>
+                                    <td class="rarity-section-rare">
+                                        ${formatValue(item.rare.highest_bid)}
+                                        ${
+                                            item.rare.bids && item.rare.bids.length > 0
+                                            ? (
+                                                item.rare.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-rare">
+                                     <div class="listed-count">
+                                            ${item.rare.listed_count}
+                                            ${item.rare.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.rare.seller_info.seller_id}"
+                                                    data-seller-name="${item.rare.seller_info.seller_name}"
+                                                    data-seller-handle="${item.rare.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.rare.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.rare.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="rare"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.rare.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="rarity-section-common">${formatValue(item.common.floor)}</td>
+                                    <td class="rarity-section-common">
+                                        ${formatValue(item.common.highest_bid)}
+                                        ${
+                                            item.common.bids && item.common.bids.length > 0
+                                            ? (
+                                                item.common.is_visavi
+                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"
+                                                    alt="Visavi Bidder" />`
+                                                : `<i class="fas fa-user seller-icon"
+                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>`
+                                            )
+                                            : ''
+                                        }
+                                    </td>
+                                    <td class="rarity-section-common">
+                                        <div class="listed-count">
+                                            ${item.common.listed_count}
+                                            ${item.common.seller_info
+                                            ? `<i class="fas fa-user seller-icon"
+                                                    data-seller-id="${item.common.seller_info.seller_id}"
+                                                    data-seller-name="${item.common.seller_info.seller_name}"
+                                                    data-seller-handle="${item.common.seller_info.seller_handle}"
+                                                    data-seller-pfp-url="${item.common.seller_info.seller_pfp_url}"
+                                                    data-seller-port-value="${item.common.seller_info.seller_port_value}"
+                                                    data-hero-id="${item.hero_id}"
+                                                    data-rarity="common"
+                                                    data-stars="${item.stars}"
+                                                    data-floor-price="${item.common.floor}"
+                                                    onclick="toggleTooltip(this)"
+                                                ></i>`
+                                            : ''
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div id="no-results" class="no-results" style="display: none;">No heroes found matching your search.</div>
+                    </div>
+                `;
+
+                // Move this call here, after the HTML is generated
+                updateGlobalFloors(heroesArray);
+
+                // Add the export function
+                window.exportToCSV = function() {
+                    // Convert the raw data to CSV format
+                    const csvRows = [];
+                    const headers = ['Hero Handle', 'Hero Name', 'Score', 'Score 24hr', 'Stars', 'Inflation Degree', 'Rarity', 'Floor', 'Highest Bid', 'Listed Count', 'Seller ID'];
+                    csvRows.push(headers.join(','));
+
+                    heroesArray.forEach(item => {
+                        const row = [
+                            item.hero_handle,
+                            item.hero_name,
+                            item.score,
+                            item.score_24hr,
+                            item.stars,
+                            item.inflation_degree,
+                            'Legendary',
+                            item.legendary.floor,
+                            item.legendary.highest_bid || '',
+                            item.legendary.listed_count || '',
+                            item.legendary.seller_info ? item.legendary.seller_info.seller_id : '',
+                            item.legendary.is_visavi
+                        ].map(value => `"${value}"`);
+                        csvRows.push(row.join(','));
+
+                        const epicRow = [
+                            item.hero_handle,
+                            item.hero_name,
+                            item.score,
+                            item.score_24hr,
+                            item.stars,
+                            item.inflation_degree,
+                            'Epic',
+                            item.epic.floor,
+                            item.epic.highest_bid || '',
+                            item.epic.listed_count || '',
+                            item.epic.seller_info ? item.epic.seller_info.seller_id : '',
+                            item.epic.is_visavi
+                        ].map(value => `"${value}"`);
+                        csvRows.push(epicRow.join(','));
+
+                        const rareRow = [
+                            item.hero_handle,
+                            item.hero_name,
+                            item.score,
+                            item.score_24hr,
+                            item.stars,
+                            item.inflation_degree,
+                            'Rare',
+                            item.rare.floor,
+                            item.rare.highest_bid || '',
+                            item.rare.listed_count || '',
+                            item.rare.seller_info ? item.rare.seller_info.seller_id : '',
+                            item.rare.is_visavi
+                        ].map(value => `"${value}"`);
+                        csvRows.push(rareRow.join(','));
+
+                        const commonRow = [
+                            item.hero_handle,
+                            item.hero_name,
+                            item.score,
+                            item.score_24hr,
+                            item.stars,
+                            item.inflation_degree,
+                            'Common',
+                            item.common.floor,
+                            item.common.highest_bid || '',
+                            item.common.listed_count || '',
+                            item.common.seller_info ? item.common.seller_info.seller_id : '',
+                            item.common.is_visavi
+                        ].map(value => `"${value}"`);
+                        csvRows.push(commonRow.join(','));
+                    });
+
+                    // Create and trigger download
+                    const csvString = csvRows.join('\n');
+                    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    if (navigator.msSaveBlob) { // IE 10+
+                        navigator.msSaveBlob(blob, 'marketplace_data.csv');
+                    } else {
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'marketplace_data.csv';
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                };
+
+                // New function to format the date
+                function formatDate(date) {
+                    if (!date) return 'N/A'; // Return 'N/A' if date is undefined
+                    const utcDate = new Date(date); // Create a Date object from the timestamp
+                    const year = utcDate.getUTCFullYear();
+                    const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
+                    const day = String(utcDate.getUTCDate()).padStart(2, '0');
+                    const hours = String(utcDate.getUTCHours()).padStart(2, '0');
+                    const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+                    return `${year}-${month}-${day} ${hours}:${minutes}`;
+                }
+
+                // Sorting functionality
+                function initializeSorting() {
+                    const headers = document.querySelectorAll('.sortable');
+                    headers.forEach(header => {
+                        header.addEventListener('click', () => {
+                            const sortKey = header.dataset.sort;
+                            const tbody = document.querySelector('.marketplace-table tbody');
+                            const rows = Array.from(tbody.querySelectorAll('tr'));
+                            
+                            // Remove sorting classes from all headers
+                            headers.forEach(h => {
+                                if (h !== header) h.classList.remove('asc', 'desc');
+                            });
+                            
+                            // Determine sorting direction
+                            const isAsc = header.classList.contains('asc');
+                            const isDesc = header.classList.contains('desc');
+                            
+                            // Clear both classes first
+                            header.classList.remove('asc', 'desc');
+                            
+                            // If it wasn't sorted before or was ascending, make it descending (high to low)
+                            // If it was descending, make it ascending (low to high)
+                            if (!isDesc) {
+                                header.classList.add('desc');
+                            } else {
+                                header.classList.add('asc');
+                            }
+                            
+                            // Get the new state after toggling
+                            const isDescending = header.classList.contains('desc');
+                            
+                            // Sort the rows
+                            rows.sort((a, b) => {
+                                let aVal, bVal;
+                                
+                                switch(sortKey) {
+                                    case 'score':
+                                        aVal = parseFloat(a.children[1].textContent);
+                                        bVal = parseFloat(b.children[1].textContent);
+                                        break;
+                                    case 'score_24hr':
+                                        aVal = parseFloat(a.children[2].textContent);
+                                        bVal = parseFloat(b.children[2].textContent);
+                                        break;
+                                    case 'stars':
+                                        aVal = parseFloat(a.children[3].textContent);
+                                        bVal = parseFloat(b.children[3].textContent);
+                                        break;
+                                    case 'inflation':
+                                        aVal = parseFloat(a.children[4].textContent);
+                                        bVal = parseFloat(b.children[4].textContent);
+                                        break;
+                                }
+                                
+                                if (isNaN(aVal)) aVal = isDescending ? -Infinity : Infinity;
+                                if (isNaN(bVal)) bVal = isDescending ? -Infinity : Infinity;
+                                
+                                // For descending order (high to low), we want b - a
+                                // For ascending order (low to high), we want a - b
+                                return isDescending ? bVal - aVal : aVal - bVal;
+                            });
+                            
+                            // Reorder the rows
+                            rows.forEach(row => tbody.appendChild(row));
+                        });
+                    });
+                }
+
+                // Add search functionality
+                function initializeSearch() {
+                    const searchInput = document.getElementById('hero-search');
+                    const tableRows = document.querySelectorAll('.marketplace-table tbody tr');
+                    const noResultsMessage = document.getElementById('no-results');
+                    
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase().trim();
+                        let visibleCount = 0;
+                        
+                        tableRows.forEach(row => {
+                            const heroCell = row.querySelector('.hero-cell');
+                            const heroHandle = heroCell.querySelector('span').textContent.toLowerCase();
+                            const heroName = heroCell.querySelector('span').getAttribute('data-hero-name').toLowerCase();
+                            
+                            if (heroHandle.includes(searchTerm) || heroName.includes(searchTerm)) {
+                                row.style.display = '';
+                                visibleCount++;
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                        
+                        // Show/hide no results message
+                        noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                    });
+                }
+
+                // Call initializeSearch after the table is created
+                initializeSearch();
+                
+                // Call initializeSorting after the table is created
+                initializeSorting();
+
+                // Add bid floor spread sorting functionality
+                function initializeBidFloorSpreadSorting() {
+                    const rareSpreadFilter = document.getElementById('rare-spread-filter');
+                    const commonSpreadFilter = document.getElementById('common-spread-filter');
+                    const clearSpreadFilter = document.getElementById('clear-spread-filter');
+                    const tbody = document.querySelector('.marketplace-table tbody');
+                    
+                    // Function to calculate spread and sort
+                    function sortBySpread(rarity) {
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+                        
+                        // Sort rows by the pre-calculated floor_bid_spread (descending)
+                        rows.sort((a, b) => {
+                            // Get the spread value from the data attribute we'll add to each row
+                            const aSpread = parseFloat(a.getAttribute(`data-${rarity}-spread`) || '-999');
+                            const bSpread = parseFloat(b.getAttribute(`data-${rarity}-spread`) || '-999');
+                            
+                            return bSpread - aSpread; // Descending order
+                        });
+                        
+                        // Reorder the rows
+                        rows.forEach(row => tbody.appendChild(row));
+                    }
+                    
+                    // Function to clear all filters
+                    function clearFilters() {
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // Reset to default sort (by score)
+                        const scoreHeader = document.querySelector('.sortable[data-sort="score"]');
+                        if (scoreHeader) {
+                            scoreHeader.classList.add('desc');
+                            scoreHeader.classList.remove('asc');
+                            
+                            const rows = Array.from(tbody.querySelectorAll('tr'));
+                            rows.sort((a, b) => {
+                                const aScore = parseFloat(a.children[1].textContent);
+                                const bScore = parseFloat(b.children[1].textContent);
+                                return bScore - aScore; // Descending order by score
+                            });
+                            
+                            rows.forEach(row => tbody.appendChild(row));
+                        }
+                    }
+                    
+                    // Add event listeners for the filter buttons
+                    document.getElementById('rare-spread-filter').addEventListener('click', function() {
+                        // Toggle active state
+                        rareSpreadFilter.classList.toggle('active');
+                        commonSpreadFilter.classList.remove('active');
+                        
+                        // Call the function to sort by rare spread
+                        sortBySpread('rare');
+                    });
+
+                    document.getElementById('common-spread-filter').addEventListener('click', function() {
+                        // Toggle active state
+                        commonSpreadFilter.classList.toggle('active');
+                        rareSpreadFilter.classList.remove('active');
+                        
+                        // Call the function to sort by common spread
+                        sortBySpread('common');
+                    });
+
+                    document.getElementById('clear-spread-filter').addEventListener('click', function() {
+                        clearFilters();
+                        // Remove active state from all filter buttons
+                        rareSpreadFilter.classList.remove('active');
+                        commonSpreadFilter.classList.remove('active');
+                    });
+                }
+
+                // Call the function after the table is created
+                initializeBidFloorSpreadSorting();
+
+                // After the table HTML is generated and inserted into the DOM
+                // Initialize the star range slider
+                setTimeout(() => {
+                    initializeStarRangeSlider();
+                    initializeScoreRangeSlider();
+                    initializeCommonEquivalentToggle();
+                }, 100);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('marketplace-container').innerHTML = 'Error loading marketplace data';
+            }
+        }
+
+        // Add this function to your JavaScript code
+
+async function fetchSellOrders() {
+    const API_URL = 'https://api-v2.fantasy.top/marketplace/sell-orders?filters.minPrice=&filters.maxPrice=&filters.rarities=4&filters.rarities=3&filters.rarities=2&filters.rarities=1&filters.onlyFavorites=false&filters.stars=0&filters.stars=8&search=&rankCriteria=4&pagination.page=1&pagination.limit=6000';
+    
+    try {
+        // Get the API key from localStorage or another source
+        const apiKey = localStorage.getItem('fantasyTopApiKey');
+        
+        if (!apiKey) {
+            console.error('API key not found. Please set your API key first.');
+            return null;
+        }
+        
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Sell orders fetched:', data.sell_orders.length);
+        
+        // Store in localStorage for later use
+        localStorage.setItem('sellOrdersData', JSON.stringify(data));
+        
+        // Also store as a global variable for immediate use
+        window.sellOrdersData = data;
+        
+        return data;
+    } catch (error) {
+        console.error('Error fetching sell orders:', error);
+        return null;
+    }
+}
+
+// Function to retrieve the stored data
+function getSellOrdersData() {
+    // Try from memory first
+    if (window.sellOrdersData) {
+        return window.sellOrdersData;
+    }
+    
+    // Try from localStorage next
+    const storedData = localStorage.getItem('sellOrdersData');
+    if (storedData) {
+        const data = JSON.parse(storedData);
+        window.sellOrdersData = data; // Cache in memory
+        return data;
+    }
+    
+    // If not available, fetch it
+    return fetchSellOrders();
+}
+
+// Example usage
+document.addEventListener('DOMContentLoaded', async () => {
+    // You can fetch sell orders when the page loads
+    // or wait until a specific user action
+    await fetchSellOrders();
+    
+    // Now you can use the data whenever needed
+    // Example:
+    // const sellOrders = getSellOrdersData();
+    // if (sellOrders) {
+    //     doSomethingWithSellOrders(sellOrders);
+    // }
+});
+
+
+        // Add this helper function to shorten IDs
+        function shortenId(id) {
+            if (!id) return '';
+            if (id.length <= 8) return id;
+            return `${id.substring(0, 5)}...${id.substring(id.length - 3)}`;
+        }
+
+        function format_eth(value) {
+            if (value === null || value === undefined || isNaN(value)) return '-'; // Handle invalid values
+
+            const num = parseFloat(value);
+            if (num > 10) {
+                return num.toFixed(0); // Format as ## for values greater than 10
+            } else if (num > 1) {
+                return num.toFixed(1); // Format as #.# for values greater than 1
+            } else {
+                return num.toFixed(3); // Format as #.## for values less than or equal to 1
+            }
+        }
+
+        // Function to initialize the star range slider
+        function initializeStarRangeSlider() {
+            const minStars = document.getElementById('min-stars');
+            const maxStars = document.getElementById('max-stars');
+            const rangeTrack = document.getElementById('range_track');
+            const minValue = document.querySelector('.minvalue');
+            const maxValue = document.querySelector('.maxvalue');
+            
+            if (!minStars || !maxStars || !rangeTrack || !minValue || !maxValue) {
+                console.warn('Star range slider elements not found');
+                return;
+            }
+            
+            // Initialize the range track
+            function updateRangeTrack() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                const minPercent = ((minVal - 1) / 7) * 100;
+                const maxPercent = ((maxVal - 1) / 7) * 100;
+                
+                rangeTrack.style.left = minPercent + '%';
+                rangeTrack.style.width = (maxPercent - minPercent) + '%';
+                
+                minValue.textContent = minVal + '★';
+                maxValue.textContent = maxVal + '★';
+                
+                // Filter the marketplace table
+                filterMarketplaceByStars(minVal, maxVal);
+            }
+            
+            // Filter marketplace table based on star values
+            function filterMarketplaceByStars(min, max) {
+                const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+                let visibleCount = 0;
+                
+                marketplaceRows.forEach(row => {
+                    const starsCell = row.querySelector('td:nth-child(4)'); // Stars column
+                    if (!starsCell) return;
+                    
+                    const heroStars = parseInt(starsCell.textContent.trim());
+                    
+                    if (heroStars >= min && heroStars <= max) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                const noResultsMessage = document.getElementById('no-results');
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
+            }
+            
+            // Prevent min from exceeding max
+            minStars.addEventListener('input', function() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                
+                if (minVal > maxVal) {
+                    minStars.value = maxVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Prevent max from being less than min
+            maxStars.addEventListener('input', function() {
+                const minVal = parseInt(minStars.value);
+                const maxVal = parseInt(maxStars.value);
+                
+                if (maxVal < minVal) {
+                    maxStars.value = minVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Initialize the slider
+            updateRangeTrack();
+        }
+
+        // Add this new function for the score range slider
+        function initializeScoreRangeSlider() {
+            const minScore = document.getElementById('min-score');
+            const maxScore = document.getElementById('max-score');
+            const rangeTrack = document.getElementById('score_range_track');
+            const minValue = document.getElementById('score-minvalue');
+            const maxValue = document.getElementById('score-maxvalue');
+            
+            if (!minScore || !maxScore || !rangeTrack || !minValue || !maxValue) {
+                console.warn('Score range slider elements not found');
+                return;
+            }
+            
+            // Initialize the range track
+            function updateRangeTrack() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                const minPercent = (minVal / 1000) * 100;
+                const maxPercent = (maxVal / 1000) * 100;
+                
+                rangeTrack.style.left = minPercent + '%';
+                rangeTrack.style.width = (maxPercent - minPercent) + '%';
+                
+                minValue.textContent = minVal;
+                maxValue.textContent = maxVal;
+                
+                // Filter the marketplace table
+                filterMarketplaceByScore(minVal, maxVal);
+            }
+            
+            // Filter marketplace table based on score values
+            function filterMarketplaceByScore(min, max) {
+                const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+                let visibleCount = 0;
+                
+                marketplaceRows.forEach(row => {
+                    const scoreCell = row.querySelector('td:nth-child(2)'); // Score column
+                    if (!scoreCell) return;
+                    
+                    const heroScore = parseInt(scoreCell.textContent.trim());
+                    
+                    // Check if the row is already hidden by star filter
+                    const isHiddenByStar = row.style.display === 'none';
+                    
+                    if (heroScore >= min && heroScore <= max) {
+                        // Only show if not hidden by star filter
+                        if (!isHiddenByStar) {
+                            row.style.display = '';
+                            visibleCount++;
+                        }
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                const noResultsMessage = document.getElementById('no-results');
+                if (noResultsMessage) {
+                    noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+                }
+            }
+            
+            // Prevent min from exceeding max
+            minScore.addEventListener('input', function() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                
+                if (minVal > maxVal) {
+                    minScore.value = maxVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+            // Prevent max from being less than min
+            maxScore.addEventListener('input', function() {
+                const minVal = parseInt(minScore.value);
+                const maxVal = parseInt(maxScore.value);
+                
+                if (maxVal < minVal) {
+                    maxScore.value = minVal;
+                }
+                
+                updateRangeTrack();
+            });
+            
+                                   
+            // Initialize the slider
+            updateRangeTrack();
+        }
+        
+        // Modify the existing filterMarketplaceByStars function to work with score filter
+        function filterMarketplaceByStars(min, max) {
+            const marketplaceRows = document.querySelectorAll('.marketplace-table tbody tr');
+            let visibleCount = 0;
+            
+            // Get current score filter values
+            const minScore = parseInt(document.getElementById('min-score').value);
+            const maxScore = parseInt(document.getElementById('max-score').value);
+            
+            marketplaceRows.forEach(row => {
+                const starsCell = row.querySelector('td:nth-child(4)'); // Stars column
+                const scoreCell = row.querySelector('td:nth-child(2)'); // Score column
+                if (!starsCell || !scoreCell) return;
+                
+                const heroStars = parseInt(starsCell.textContent.trim());
+                const heroScore = parseInt(scoreCell.textContent.trim());
+                
+                // Check if both filters pass
+                if (heroStars >= min && heroStars <= max && 
+                    heroScore >= minScore && heroScore <= maxScore) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Show/hide no results message
+            const noResultsMessage = document.getElementById('no-results');
+            if (noResultsMessage) {
+                noResultsMessage.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+
+        // Add this to your existing JavaScript, after the table is created
+        async function showPlayerHighestBidsModal() {
+            try {
+                const { data: bids, error } = await supabaseClient
+                    .from('vwplayer_highest_bids')
+                    .select('player_name, player_handle, profile_picture, card_rarity, hero_id, stars, hero_handle, bid, expiration_timestamp, db_updated_utc, rank')
+                    .limit(20);
+
+                if (error) throw error;
+
+                let modalOverlay = document.getElementById('player-bids-modal-overlay');
+                if (!modalOverlay) {
+                    modalOverlay = document.createElement('div');
+                    modalOverlay.id = 'player-bids-modal-overlay';
+                    modalOverlay.className = 'seller-modal-overlay';
+                    document.body.appendChild(modalOverlay);
+                    
+                    // Add click event listener to close on outside click
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            closePlayerBidsModal();
+                        }
+                    });
+                }
+
+                modalOverlay.innerHTML = `
+                    <div class="seller-modal" style="width: 800px; max-height: 80vh; overflow-y: auto;">
+                        <div class="seller-modal-close" onclick="closePlayerBidsModal()">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div style="font-size: 1.2em; margin-bottom: 15px;">Top Player Bids</div>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th style="padding: 8px; text-align: left; width: 200px;">Player</th>
+                                        <th style="padding: 8px; text-align: left;">Hero</th>
+                                        <th style="padding: 8px; text-align: right;">Bid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${bids.map(bid => `
+                                       
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <td style="padding: 8px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <img src="${bid.profile_picture}" 
+                                                        alt="Profile" 
+                                                        style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
+                                                        onerror="this.src='../icons/fan.webp'">
+                                                    <span>${bid.player_name}</span>
+                                                    <a href="https://x.com/${bid.player_handle}" target="_blank" style="text-decoration: none;">
+                                                        <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td style="padding: 8px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <img src="../cards/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
+                                                        alt="Hero Card"
+                                                        style="width: 30px; height: auto; border-radius: 4px;"
+                                                        onerror="this.src='../icons/fan.webp'">
+                                                    <span>${bid.hero_handle}</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                ${Number(bid.bid).toFixed(4)} 
+                                                <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
+                                                    <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
+                                                    <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
+                                                    <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
+                                                    <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
+                                                    <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
+                                                    <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
+                                                </svg>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            <div style="font-size: 0.8em; color: #aaa; margin-top: 10px; text-align: right;">
+                                Last updated: ${formatDate(bids[0]?.db_updated_utc)} UTC
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                modalOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+                // Add click event listener to the modal overlay
+                modalOverlay.addEventListener('click', function(e) {
+                    // Check if the click is on the overlay itself (not its children)
+                    if (e.target === modalOverlay) {
+                        closePlayerBidsModal();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading player highest bids:', error);
+            }
+        }
+
+        // Add close function for the modal
+        function closePlayerBidsModal() {
+            const modalOverlay = document.getElementById('player-bids-modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+        }
+
+        // Make functions globally accessible
+        window.showPlayerHighestBidsModal = showPlayerHighestBidsModal;
+        window.closePlayerBidsModal = closePlayerBidsModal;
+
+        // Add this helper function to convert rarity string to number
+        function getRarityNumber(rarity) {
+            switch(rarity.toLowerCase()) {
+                case 'legendary': return 1;
+                case 'epic': return 2;
+                case 'rare': return 3;
+                case 'common': return 4;
+                default: return 0;
+            }
+        }
+
+        function formatBidsListFromAPI(bidData) {
+            try {
+                const bids = bidData.highest_five_bids || [];
+                // Sort bids by price descending, then expiration ascending
+                bids.sort((a, b) => {
+                    const priceA = BigInt(a.price);
+                    const priceB = BigInt(b.price);
+                    
+                    if (priceB !== priceA) {
+                        return priceB > priceA ? 1 : -1;
+                    }
+                    return parseInt(a.expiration_time) - parseInt(b.expiration_time);
+                });
+
+                return `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <th style="padding: 8px; text-align: right;">Price</th>
+                                <th style="padding: 8px; text-align: left;">Player</th>
+                                <th style="padding: 8px; text-align: right;">Expires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bids.map((bid, index) => {
+                                const ethPrice = Number(BigInt(bid.price)) / 1e18;
+                                const expirationDate = new Date(parseInt(bid.expiration_time) * 1000);
+                                const now = new Date();
+                                const diffMs = expirationDate - now;
+                                const diffHours = diffMs / (1000 * 60 * 60);
+                                const diffDays = diffHours / 24;
+                                
+                                // Determine color based on thresholds
+                                let expirationColor;
+                                if (diffHours <= 6) {
+                                    expirationColor = '#ff4444'; // Red for <= 6 hours
+                                } else if (diffHours < 24) {
+                                    expirationColor = '#ffa500'; // Orange for < 24 hours
+                                } else if (diffDays >= 5) {
+                                    expirationColor = '#44ff44'; // Green for > 5 days
+                                } else if (diffDays >= 3) {
+                                    expirationColor = '#4444ff'; // Blue for >= 3 days
+                                } else {
+                                    expirationColor = '#ffffff'; // Default white
+                                }
+                                
+                                // Format the expiration text
+                                let expirationText;
+                                if (diffDays >= 1) {
+                                    expirationText = `${Math.floor(diffDays)}d ${Math.floor(diffHours % 24)}h`;
+                                } else if (diffHours >= 1) {
+                                    expirationText = `${Math.floor(diffHours)}h`;
+                                } else {
+                                    const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+                                    expirationText = `${diffMinutes}m`;
+                                }
+
+                                const playerDisplay = bid.bidder_handle || shortenAddress(bid.trader);
+
+                                return `
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 8px; text-align: right;">
+                                            ${ethPrice.toFixed(4)}
+                                        </td>
+                                        <td style="padding: 8px; text-align: left;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span>${playerDisplay}</span>
+                                                ${isBot(bid.trader) 
+                                                ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                                                : ''}
+                                                <a href="https://x.com/${bid.bidder_handle}" target="_blank" style="text-decoration: none;">
+                                                    <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 8px; text-align: right; color: ${expirationColor};">${expirationText}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error formatting bids:', error);
+                return '<div style="color: red;">Error formatting bids data</div>';
+            }
+        }
+
+        // Helper function to shorten addresses
+        function shortenAddress(address) {
+            return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        }
+
+        // Initialize common equivalent toggle
+        function initializeCommonEquivalentToggle() {
+            const toggle = document.getElementById('common-equivalent-toggle');
+            const label = document.getElementById('common-equivalent-label');
+            
+            if (!toggle || !label) {
+                console.warn('Common equivalent toggle elements not found');
+                return;
+            }
+            
+            toggle.addEventListener('change', function() {
+                label.textContent = this.checked ? 'On' : 'Off';
+                // Add your common equivalent logic here
+            });
+        }
+
+        const KNOWN_BOTS = [
+        { handle: 'NoahCohen697864', address: '0x6CBAC11436149e49CE0fFF01c087946032aB0AFC' },
+        { handle: 'visavi_eth', address: '0x71355856191061B1723F24DFc1007dAC29F3aCa5' },
+        { handle: 'Chiro458', address: '0x307E0aBe028ca468bF97126610e0Ad7C2b2C12Fb' },
+        { handle: 'Bartomiej1805', address: '0xeb77499E304792ad15a9C2501E5F9dfdFE6eBa45' },
+        { handle: 'nghia19993', address: '0x0bE267CDe2E2E892346363A6e6E27b189f5B17B0' },
+        { handle: '_0xE83C0E', address: '0xE8381dB94c161154e2d7FdFF9e8502403565FC0E' },
+        { handle: 'Saxeus03', address: '0xa881e9042d377f217D806F90B80aF6b02A6eB92E' },
+        { handle: 'xsaint237656', address: '0x311166e0F6745ED6EBa3B76756C518F0ece2B988' },
+        { handle: 'Alex09755157', address: '0x5e77ea483238316EfD9F295f9e6FC3575Fe082bf' },
+            { handle: 'moneyfest_2020', address: '0xefbA9AB00b5cC953BeC5Ce1e87F6FfA9b8aACA46' },
+//  { handle: 'ToniBoiBoi', address: '0x63eB338e6D81F05Ef9Cb79B36584cb950F5a1291' },
+  { handle: 'PuperSuper228', address: '0x165E60D31dAc6E711C6e8935dc5c7B1C01fDE8D4' },
+   { handle: 'Veslav27323979', address: '0x4A9FfBD7274a1E1cBEBA2192d3Cd53c1a3bca2fF' },
+  { handle: 'schettaroX', address: '0xC4a94A00fb486cB131009E7BDBB1772dAc860560' },
+        ];
+
+        // Helper function to check if a bidder is a bot - with error handling
+        function isBot(trader) {
+        if (!trader) return false;
+        
+        const traderAddress = String(trader).toLowerCase();
+        
+        return KNOWN_BOTS.some(bot => {  // Changed botAddress to bot
+            return String(bot.address).toLowerCase() === traderAddress;  // Added .address to access the property
+        });
+        }
+
+        // Show bid modal function
+        async function showBidModal(encodedBids, heroId, rarity, stars) {
+            try {
+                const apiCallTime = Date.now();
+                const rarityNum = getRarityNumber(rarity);
+                const apiUrl = `https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarityNum}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`;
+                
+                // API request headers
+                const headers = {
+                    'accept': 'application/json',
+                    'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, X-Api-Key'
+                };
+
+                // Fetch bid data from API
+                const response = await fetch(apiUrl, { headers });
+                if (!response.ok) throw new Error('Failed to fetch bid data');
+                const bidData = await response.json();
+
+                // Calculate seconds elapsed
+                const secondsAgo = Math.floor((Date.now() - apiCallTime) / 1000);
+
+                // Create or update modal overlay
+                let modalOverlay = document.getElementById('bid-modal-overlay');
+                if (!modalOverlay) {
+                    modalOverlay = document.createElement('div');
+                    modalOverlay.id = 'bid-modal-overlay';
+                    modalOverlay.className = 'seller-modal-overlay';
+                    document.body.appendChild(modalOverlay);
+
+                    // Add click event listener to close on outside click
+                    modalOverlay.addEventListener('click', function(e) {
+                        if (e.target === modalOverlay) {
+                            modalOverlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }
+                    });
+                }
+
+                // Update modal content
+                modalOverlay.innerHTML = `
+                    <div class="seller-modal" style="width: 500px;" onclick="event.stopPropagation()">
+                        <div class="seller-modal-close" onclick="this.parentElement.parentElement.style.display='none'">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="seller-modal-content">
+                            <div class="bid-modal-container">
+                                <div class="bid-card-container">
+                                    <img class="bid-card-image" 
+                                         src="https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                         alt="Hero Card"
+                                         onerror="this.onerror=null; this.src='../icons/fan.webp'">
+                                </div>
+                                <div class="bid-content-container">
+                                    <div class="bid-header">Active Bids (${secondsAgo}s ago)</div>
+                                    <div class="bid-list-container">
+                                        ${formatBidsListFromAPI(bidData)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Show modal
+                modalOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+            } catch (error) {
+                console.error('Error showing bid modal:', error);
+            }
+        }
+    </script>
+</body>
+</html>

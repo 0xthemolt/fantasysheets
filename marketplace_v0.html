@@ -9,9 +9,8 @@
         gtag('js', new Date());
         gtag('config', 'G-LXJ5Q7LKKE');
     </script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Defer non-critical scripts -->
-    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     
@@ -724,19 +723,19 @@
             if (heroId && rarity && stars) {
                 const heroCardImage = document.getElementById('hero-card-image');
                 // Try with absolute path from root
-                const imageUrl = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                const heroImageUrl = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                 console.log('Hero Card Image URL:', {
                     heroId,
                     rarity,
                     stars,
-                    fullUrl: imageUrl
+                    fullUrl: heroImageUrl
                 });
-                heroCardImage.src = imageUrl;
+                heroCardImage.src = heroImageUrl;
                 heroCardImage.style.display = 'block';
                 
                 // Add error handling for the image
                 heroCardImage.onerror = function() {
-                    console.log('Image failed to load:', imageUrl);
+                    console.log('Image failed to load:', heroImageUrl);
                     // Try fallback path if first attempt fails
                     this.src = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                     
@@ -784,12 +783,11 @@
         window.onload = loadMarketplaceData;
 
         // Helper function to format values
-        function formatValue(value) {
-            if (value === '-' || value === '' || value === null || value === undefined) return '-';
+        const formatValue = (value) => {
+            if (value === '-' || value === '' || value == null) return '-';
             const num = parseFloat(value);
-            if (isNaN(num)) return '-';
-            return num >= 0.1 ? num.toFixed(2) : num.toFixed(3);
-        }
+            return isNaN(num) ? '-' : (num >= 0.1 ? num.toFixed(2) : num.toFixed(3));
+        };
 
         // Calculate and display global floors
         function updateGlobalFloors(heroesArray) {
@@ -1096,18 +1094,6 @@
                                     <div class="filter-option filter-option-rare" id="rare-spread-filter" data-rarity="rare">Rare</div>
                                     <div class="filter-option filter-option-common" id="common-spread-filter" data-rarity="common">Common</div>
                                     <div class="filter-option filter-option-clear" id="clear-spread-filter">Clear</div>
-                                </div>
-                            </div>
-
-                            <!-- Common Equivalent Toggle -->
-                            <div style="display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1);">
-                                <div class="filter-label" style="display: flex; align-items: center;">Common Equivalent:</div>
-                                <div class="filter-options" style="display: flex; align-items: center; gap: 8px;">
-                                    <label class="toggle-switch" style="margin: 0; display: flex; align-items: center;">
-                                        <input type="checkbox" id="common-equivalent-toggle">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                    <span class="toggle-label" id="common-equivalent-label" style="display: flex; align-items: center;">Off</span>
                                 </div>
                             </div>
 
@@ -1614,7 +1600,6 @@
                 setTimeout(() => {
                     initializeStarRangeSlider();
                     initializeScoreRangeSlider();
-                    initializeCommonEquivalentToggle();
                 }, 100);
             } catch (error) {
                 console.error('Error:', error);
@@ -1933,9 +1918,86 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const { data: bids, error } = await supabaseClient
                     .from('vwplayer_highest_bids')
                     .select('player_name, player_handle, profile_picture, card_rarity, hero_id, stars, hero_handle, bid, expiration_timestamp, db_updated_utc, rank')
-                    .limit(20);
+                    .limit(500);
 
                 if (error) throw error;
+
+                // Group bids by rarity
+                const bidsByRarity = {
+                    'Legendary': bids.filter(bid => bid.card_rarity === 'legendary').slice(0, 15),
+                    'Epic': bids.filter(bid => bid.card_rarity === 'epic').slice(0, 15),
+                    'Rare': bids.filter(bid => bid.card_rarity === 'rare').slice(0, 15),
+                    'Common': bids.filter(bid => bid.card_rarity === 'common').slice(0, 15)
+                };
+
+                // Function to create table for each rarity
+                function createRarityTable(rarity, rarityBids, colorClass) {
+                    if (rarityBids.length === 0) {
+                        return `
+                            <div class="rarity-column">
+                                <div class="rarity-header ${colorClass}">${rarity}</div>
+                                <div style="text-align: center; color: #777; padding: 20px; font-size: 0.8em;">No bids</div>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <div class="rarity-column">
+                            <div class="rarity-header ${colorClass}">${rarity}</div>
+                            <div class="rarity-table-container">
+                                <table class="rarity-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: left; padding: 8px; font-size: 0.8em; color: #ccc;">Player</th>
+                                            <th style="text-align: center; padding: 8px; font-size: 0.8em; color: #ccc;">Hero</th>
+                                            <th style="text-align: right; padding: 8px; font-size: 0.8em; color: #ccc;">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${rarityBids.map(bid => `
+                                            <tr class="bid-row">
+                                                <td style="padding: 8px; vertical-align: middle;">
+                                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                                        <img src="${bid.profile_picture}" 
+                                                            alt="Profile" 
+                                                            class="mini-pfp"
+                                                            onerror="this.src='../icons/fan.webp'">
+                                                        <div style="min-width: 0; flex: 1;">
+                                                            <div class="player-name" style="margin-bottom: 2px;">${bid.player_name}</div>
+                                                            <a href="https://x.com/${bid.player_handle}" 
+                                                               target="_blank" 
+                                                               class="player-handle">
+                                                                @${bid.player_handle}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style="padding: 8px; text-align: center; vertical-align: middle;">
+                                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                                        <img src="https://r2.fantasy.top/v2/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
+                                                            alt="Hero Card"
+                                                            class="mini-hero-card"
+                                                            onerror="this.src='../icons/fan.webp'">                                                      
+                                                        <span class="hero-name"><a href="https://x.com/${bid.hero_handle}" 
+                                                            target="_blank" 
+                                                            class="player-handle">
+                                                            @${bid.hero_handle}
+                                                        </a> </span>
+                                                    </div>
+                                                </td>
+                                                <td style="padding: 8px; text-align: right; vertical-align: middle;">
+                                                    <div class="bid-amount">
+                                                        ${Number(bid.bid).toFixed(4)}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 let modalOverlay = document.getElementById('player-bids-modal-overlay');
                 if (!modalOverlay) {
@@ -1953,63 +2015,172 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 modalOverlay.innerHTML = `
-                    <div class="seller-modal" style="width: 800px; max-height: 80vh; overflow-y: auto;">
+                    <div class="seller-modal" style="width: 1200px; max-height: 90vh; overflow-y: auto;">
                         <div class="seller-modal-close" onclick="closePlayerBidsModal()">
                             <i class="fas fa-times"></i>
                         </div>
                         <div class="seller-modal-content">
-                            <div style="font-size: 1.2em; margin-bottom: 15px;">Top Player Bids</div>
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                        <th style="padding: 8px; text-align: left; width: 200px;">Player</th>
-                                        <th style="padding: 8px; text-align: left;">Hero</th>
-                                        <th style="padding: 8px; text-align: right;">Bid</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${bids.map(bid => `
-                                       
-                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            <td style="padding: 8px;">
-                                                <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <img src="${bid.profile_picture}" 
-                                                        alt="Profile" 
-                                                        style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
-                                                        onerror="this.src='../icons/fan.webp'">
-                                                    <span>${bid.player_name}</span>
-                                                    <a href="https://x.com/${bid.player_handle}" target="_blank" style="text-decoration: none;">
-                                                        <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                                                    </a>
-                                                </div>
-                                            </td>
-                                            <td style="padding: 8px;">
-                                                <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <img src="../cards/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
-                                                        alt="Hero Card"
-                                                        style="width: 30px; height: auto; border-radius: 4px;"
-                                                        onerror="this.src='../icons/fan.webp'">
-                                                    <span>${bid.hero_handle}</span>
-                                                </div>
-                                            </td>
-                                            <td style="padding: 8px; text-align: right;">
-                                                ${Number(bid.bid).toFixed(4)} 
-                                                <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
-                                                    <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
-                                                    <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
-                                                    <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
-                                                    <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
-                                                    <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
-                                                    <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
-                                                </svg>
-                                            </td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                            <div style="font-size: 0.8em; color: #aaa; margin-top: 10px; text-align: right;">
-                                Last updated: ${formatDate(bids[0]?.db_updated_utc)} UTC
+                            <div style="font-size: 1.2em; margin-bottom: 5px; text-align: center;">Top Player Bids by Rarity</div>
+
+                        <div style="font-size: 0.8em; color: #aaa; margin-bottom: 15px; text-align: center;">
+                            Last updated: ${(() => {
+                                const minTimestamp = bids.reduce((min, bid) => {
+                                    return !min || bid.db_updated_utc < min ? bid.db_updated_utc : min;
+                                }, null);
+                                
+                                if (!minTimestamp) return 'N/A';
+                                
+                                // Simple string formatting - handle both formats and remove T
+                                const timestampStr = String(minTimestamp);
+                                
+                                // Check for ISO format with T (2025-07-03T17:20:31.265)
+                                const isoMatch = timestampStr.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+                                if (isoMatch) {
+                                    return `${isoMatch[1]} ${isoMatch[2]}`;
+                                }
+                                
+                                // Check for regular format with space (2025-07-03 17:20:31.265)
+                                const spaceMatch = timestampStr.match(/(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2})/);
+                                if (spaceMatch) {
+                                    return `${spaceMatch[1]} ${spaceMatch[2]}`;
+                                }
+                                
+                                // Fallback if regex doesn't match
+                                return timestampStr.replace('T', ' ').substring(0, 16); // Replace T with space and get first 16 chars
+                            })()} UTC
+                        </div>
+                            
+                            <style>
+                                .rarity-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(4, 1fr);
+                                    gap: 15px;
+                                    width: 100%;
+                                }
+                                
+                                .rarity-column {
+                                    background: rgba(255, 255, 255, 0.02);
+                                    border-radius: 8px;
+                                    overflow: hidden;
+                                    border: 1px solid rgba(255, 255, 255, 0.1);
+                                }
+                                
+                                .rarity-header {
+                                    padding: 10px;
+                                    text-align: center;
+                                    font-weight: bold;
+                                    font-size: 1em;
+                                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                                }
+                                
+                                .rarity-header.legendary { color: #FBE7FF; background: rgba(251, 231, 255, 0.1); }
+                                .rarity-header.epic { color: #F1A3FD; background: rgba(241, 163, 253, 0.1); }
+                                .rarity-header.rare { color: #00FFDF; background: rgba(0, 255, 223, 0.1); }
+                                .rarity-header.common { color: #93FF01; background: rgba(147, 255, 1, 0.1); }
+                                
+                                .rarity-table-container {
+                                    max-height: 400px;
+                                    overflow-y: auto;
+                                }
+                                
+                                .rarity-table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                }
+                                
+                                .rarity-table th {
+                                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                                    background: rgba(255, 255, 255, 0.02);
+                                    position: sticky;
+                                    top: 0;
+                                    z-index: 1;
+                                }
+                                
+                                .bid-row {
+                                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                                    font-size: 0.8em;
+                                }
+                                
+                                .bid-row:hover {
+                                    background: rgba(255, 255, 255, 0.05);
+                                }
+                                
+                                .mini-pfp {
+                                    width: 25px;
+                                    height: 25px;
+                                    border-radius: 50%;
+                                    object-fit: cover;
+                                    flex-shrink: 0;
+                                }
+                                
+                                .player-name {
+                                    color: white;
+                                    font-size: 1.2em;
+                                    line-height: 1.1;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    max-width: 80px;
+                                }
+                                
+                                .player-handle {
+                                    color: #777;
+                                    text-decoration: none;
+                                    font-size: 0.85em;
+                                    line-height: 1.1;
+                                    display: block;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    max-width: 80px;
+                                }
+                                
+                                .player-handle:hover {
+                                    color: #1DA1F2;
+                                }
+                                
+                                .mini-hero-card {
+                                    width: 24px;
+                                    height: auto;
+                                    border-radius: 2px;
+                                }
+                                
+                                .hero-name {
+                                    color: #ccc;
+                                    font-size: 0.85em;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    max-width: 60px;
+                                }
+                                
+                                .bid-amount {
+                                    color: white;
+                                    font-weight: bold;
+                                    font-size: 1.2em;
+                                }
+                                
+                                .rarity-table-container::-webkit-scrollbar {
+                                    width: 4px;
+                                }
+                                
+                                .rarity-table-container::-webkit-scrollbar-track {
+                                    background: transparent;
+                                }
+                                
+                                .rarity-table-container::-webkit-scrollbar-thumb {
+                                    background-color: rgba(155, 155, 155, 0.3);
+                                    border-radius: 2px;
+                                }
+                            </style>
+                            
+                            <div class="rarity-grid">
+                                ${createRarityTable('Legendary', bidsByRarity.Legendary, 'legendary')}
+                                ${createRarityTable('Epic', bidsByRarity.Epic, 'epic')}
+                                ${createRarityTable('Rare', bidsByRarity.Rare, 'rare')}
+                                ${createRarityTable('Common', bidsByRarity.Common, 'common')}
                             </div>
+                            
                         </div>
                     </div>
                 `;
@@ -2017,20 +2188,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modalOverlay.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
 
-                // Add click event listener to the modal overlay
-                modalOverlay.addEventListener('click', function(e) {
-                    // Check if the click is on the overlay itself (not its children)
-                    if (e.target === modalOverlay) {
-                        closePlayerBidsModal();
-                    }
-                });
-
             } catch (error) {
                 console.error('Error loading player highest bids:', error);
             }
         }
 
-        // Add close function for the modal
+        // Add this function after your other modal functions
+
         function closePlayerBidsModal() {
             const modalOverlay = document.getElementById('player-bids-modal-overlay');
             if (modalOverlay) {
@@ -2147,38 +2311,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
         }
 
-        // Initialize common equivalent toggle
-        function initializeCommonEquivalentToggle() {
-            const toggle = document.getElementById('common-equivalent-toggle');
-            const label = document.getElementById('common-equivalent-label');
-            
-            if (!toggle || !label) {
-                console.warn('Common equivalent toggle elements not found');
-                return;
-            }
-            
-            toggle.addEventListener('change', function() {
-                label.textContent = this.checked ? 'On' : 'Off';
-                // Add your common equivalent logic here
-            });
+        function getKnownBots() {
+            return [
+                { handle: 'NoahCohen697864', address: '0x6CBAC11436149e49CE0fFF01c087946032aB0AFC' },
+                { handle: 'visavi_eth', address: '0x71355856191061B1723F24DFc1007dAC29F3aCa5' },
+                { handle: 'Chiro458', address: '0x307E0aBe028ca468bF97126610e0Ad7C2b2C12Fb' },
+                { handle: 'Bartomiej1805', address: '0xeb77499E304792ad15a9C2501E5F9dfdFE6eBa45' },
+                { handle: 'nghia19993', address: '0x0bE267CDe2E2E892346363A6e6E27b189f5B17B0' },
+                { handle: '_0xE83C0E', address: '0xE8381dB94c161154e2d7FdFF9e8502403565FC0E' },
+                { handle: 'Saxeus03', address: '0xa881e9042d377f217D806F90B80aF6b02A6eB92E' },
+                { handle: 'xsaint237656', address: '0x311166e0F6745ED6EBa3B76756C518F0ece2B988' },
+                { handle: 'Alex09755157', address: '0x5e77ea483238316EfD9F295f9e6FC3575Fe082bf' },
+                { handle: 'moneyfest_2020', address: '0xefbA9AB00b5cC953BeC5Ce1e87F6FfA9b8aACA46' },
+                { handle: 'ToniBoiBoi', address: '0x63eB338e6D81F05Ef9Cb79B36584cb950F5a1291' },
+                { handle: 'PuperSuper228', address: '0x165E60D31dAc6E711C6e8935dc5c7B1C01fDE8D4' },
+                { handle: 'Veslav27323979', address: '0x4A9FfBD7274a1E1cBEBA2192d3Cd53c1a3bca2fF' },
+                { handle: 'schettaroX', address: '0xC4a94A00fb486cB131009E7BDBB1772dAc860560' },
+            ];
         }
-
-        const KNOWN_BOTS = [
-        { handle: 'NoahCohen697864', address: '0x6CBAC11436149e49CE0fFF01c087946032aB0AFC' },
-        { handle: 'visavi_eth', address: '0x71355856191061B1723F24DFc1007dAC29F3aCa5' },
-        { handle: 'Chiro458', address: '0x307E0aBe028ca468bF97126610e0Ad7C2b2C12Fb' },
-        { handle: 'Bartomiej1805', address: '0xeb77499E304792ad15a9C2501E5F9dfdFE6eBa45' },
-        { handle: 'nghia19993', address: '0x0bE267CDe2E2E892346363A6e6E27b189f5B17B0' },
-        { handle: '_0xE83C0E', address: '0xE8381dB94c161154e2d7FdFF9e8502403565FC0E' },
-        { handle: 'Saxeus03', address: '0xa881e9042d377f217D806F90B80aF6b02A6eB92E' },
-        { handle: 'xsaint237656', address: '0x311166e0F6745ED6EBa3B76756C518F0ece2B988' },
-        { handle: 'Alex09755157', address: '0x5e77ea483238316EfD9F295f9e6FC3575Fe082bf' },
-            { handle: 'moneyfest_2020', address: '0xefbA9AB00b5cC953BeC5Ce1e87F6FfA9b8aACA46' },
-//  { handle: 'ToniBoiBoi', address: '0x63eB338e6D81F05Ef9Cb79B36584cb950F5a1291' },
-  { handle: 'PuperSuper228', address: '0x165E60D31dAc6E711C6e8935dc5c7B1C01fDE8D4' },
-   { handle: 'Veslav27323979', address: '0x4A9FfBD7274a1E1cBEBA2192d3Cd53c1a3bca2fF' },
-  { handle: 'schettaroX', address: '0xC4a94A00fb486cB131009E7BDBB1772dAc860560' },
-        ];
 
         // Helper function to check if a bidder is a bot - with error handling
         function isBot(trader) {
@@ -2186,8 +2336,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const traderAddress = String(trader).toLowerCase();
         
-        return KNOWN_BOTS.some(bot => {  // Changed botAddress to bot
-            return String(bot.address).toLowerCase() === traderAddress;  // Added .address to access the property
+        return getKnownBots().some(bot => {
+            return String(bot.address).toLowerCase() === traderAddress;
         });
         }
 

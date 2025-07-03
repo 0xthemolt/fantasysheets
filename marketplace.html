@@ -1966,15 +1966,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                                                         alt="Profile" 
                                                         style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
                                                         onerror="this.src='../icons/fan.webp'">
-                                                    <span>${bid.player_name}</span>
-                                                    <a href="https://x.com/${bid.player_handle}" target="_blank" style="text-decoration: none;">
-                                                        <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
-                                                    </a>
+                                                    <div style="display: flex; flex-direction: column;">
+                                                        <span style="color: white; font-size: 1em; line-height: 1.2;">${bid.player_name}</span>
+                                                        <a href="https://x.com/${bid.player_handle}" 
+                                                           target="_blank" 
+                                                           style="text-decoration: none; color: #777; font-size: 0.85em; line-height: 1.2;"
+                                                           onmouseover="this.style.color='#1DA1F2'" 
+                                                           onmouseout="this.style.color='#777'">
+                                                            @${bid.player_handle}
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td style="padding: 8px;">
                                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <img src="../cards/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
+                                                    <img src="https://r2.fantasy.top/v2/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
                                                         alt="Hero Card"
                                                         style="width: 30px; height: auto; border-radius: 4px;"
                                                         onerror="this.src='../icons/fan.webp'">
@@ -1983,14 +1989,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             </td>
                                             <td style="padding: 8px; text-align: right;">
                                                 ${Number(bid.bid).toFixed(4)} 
-                                                <svg width="16" height="16" viewBox="0 0 256 417" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" style="vertical-align: middle;">
-                                                    <path fill="#8A92B2" d="M127.961 0l-2.795 9.5v275.668l2.795 2.79 127.962-75.638z"></path>
-                                                    <path fill="#62688F" d="M127.962 0L0 212.32l127.962 75.639V154.158z"></path>
-                                                    <path fill="#454A75" d="M127.961 312.187l-1.575 1.92v98.199l1.575 4.6L256 236.587z"></path>
-                                                    <path fill="#62688F" d="M127.962 416.905v-104.72L0 236.585z"></path>
-                                                    <path fill="#8A92B2" d="M127.961 287.958l127.96-75.637-127.96-58.162z"></path>
-                                                    <path fill="#62688F" d="M0 212.32l127.96 75.638v-133.8z"></path>
-                                                </svg>
                                             </td>
                                         </tr>
                                     `).join('')}

@@ -1918,7 +1918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const { data: bids, error } = await supabaseClient
                     .from('vwplayer_highest_bids')
                     .select('player_name, player_handle, profile_picture, card_rarity, hero_id, stars, hero_handle, bid, expiration_timestamp, db_updated_utc, rank')
-                    .limit(500);
+                    .limit(750);
 
                 if (error) throw error;
 

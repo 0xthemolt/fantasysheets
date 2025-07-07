@@ -25,6 +25,11 @@ with override as (
    SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,5261 as registered_decks,1850 AS player_count union all
     SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,9217 as registered_decks,2877 AS player_count union all
      SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count union all
+      SELECT 'Main 51'  AS tournament_unique_key, 'Elite' as league,1674 as registered_decks,676 AS player_count union all
+  SELECT 'Main 51'  AS tournament_unique_key, 'Gold' as league,3321 as registered_decks,945 AS player_count union all
+   SELECT 'Main 51'  AS tournament_unique_key, 'Silver' as league,5164 as registered_decks,1789 AS player_count union all
+    SELECT 'Main 51'  AS tournament_unique_key, 'Bronze' as league,9449 as registered_decks,2840 AS player_count union all
+     SELECT 'Main 51'  AS tournament_unique_key, 'Reverse' as league,5449 as registered_decks,1526 AS player_count union all
       SELECT 'Main 52'  AS tournament_unique_key, 'Elite' as league,1593 as registered_decks,600 AS player_count union all
   SELECT 'Main 52'  AS tournament_unique_key, 'Gold' as league,2913 as registered_decks,878 AS player_count union all
    SELECT 'Main 52'  AS tournament_unique_key, 'Silver' as league,5192 as registered_decks,1639 AS player_count union all
@@ -59,7 +64,12 @@ SELECT 'Main 53'  AS tournament_unique_key, 'Elite' as league,1576 as registered
   SELECT 'Main 58'  AS tournament_unique_key, 'Gold' as league,2656 as registered_decks,752 AS player_count union all
    SELECT 'Main 58'  AS tournament_unique_key, 'Silver' as league,4866 as registered_decks,1431 AS player_count union all
     SELECT 'Main 58'  AS tournament_unique_key, 'Bronze' as league,12033 as registered_decks,2680 AS player_count union all
-     SELECT 'Main 58'  AS tournament_unique_key, 'Reverse' as league,4560 as registered_decks,1025 AS player_count
+     SELECT 'Main 58'  AS tournament_unique_key, 'Reverse' as league,4560 as registered_decks,1025 AS player_count union all 
+                              SELECT 'Main 59'  AS tournament_unique_key, 'Elite' as league,1470 as registered_decks,505 AS player_count union all
+  SELECT 'Main 59'  AS tournament_unique_key, 'Gold' as league,2738 as registered_decks,777 AS player_count union all
+   SELECT 'Main 59'  AS tournament_unique_key, 'Silver' as league,4787 as registered_decks,1349 AS player_count union all
+    SELECT 'Main 59'  AS tournament_unique_key, 'Bronze' as league,12132 as registered_decks,2696 AS player_count union all
+     SELECT 'Main 59'  AS tournament_unique_key, 'Reverse' as league,4757 as registered_decks,946 AS player_count
 )
 select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
@@ -94,13 +104,15 @@ cursor.close()
 total_players_query = """
 WITH override AS (
   SELECT 'Main 50'  AS tournament_unique_key, 4215 AS total_player_count union all 
+   SELECT 'Main 51'  AS tournament_unique_key, 4195 AS total_player_count union all 
   SELECT 'Main 52'  AS tournament_unique_key, 3952 AS total_player_count union all
   SELECT 'Main 53'  AS tournament_unique_key, 3919 AS total_player_count union all
   SELECT 'Main 54'  AS tournament_unique_key, 3937 AS total_player_count union all
   SELECT 'Main 55'  AS tournament_unique_key, 3729 AS total_player_count  union all
    SELECT 'Main 56'  AS tournament_unique_key, 3638 AS total_player_count union all
      SELECT 'Main 57'  AS tournament_unique_key, 3442 AS total_player_count union all 
-          SELECT 'Main 58'  AS tournament_unique_key, 3425 AS total_player_count 
+          SELECT 'Main 58'  AS tournament_unique_key, 3425 AS total_player_count union all 
+             SELECT 'Main 59'  AS tournament_unique_key, 3369 AS total_player_count 
 )
 SELECT 
     CONCAT(TO_CHAR(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key) AS tournament,
@@ -149,6 +161,10 @@ WITH override AS (
   SELECT 'Main 52'  AS tournament_unique_key, 'epic' as rarity,3174 AS card_count union all
   SELECT 'Main 52'  AS tournament_unique_key, 'rare' as rarity,20600 AS card_count union all
   SELECT 'Main 52'  AS tournament_unique_key, 'common' as rarity,104088 AS card_count UNION ALL
+    SELECT 'Main 51'  AS tournament_unique_key, 'legendary' as rarity,357 AS card_count union all
+  SELECT 'Main 51'  AS tournament_unique_key, 'epic' as rarity,3155 AS card_count union all
+  SELECT 'Main 51'  AS tournament_unique_key, 'rare' as rarity,20511 AS card_count union all
+  SELECT 'Main 52'  AS tournament_unique_key, 'common' as rarity,101262 AS card_count UNION ALL
   SELECT 'Main 53'  AS tournament_unique_key, 'legendary' as rarity,337 AS card_count union all
   SELECT 'Main 53'  AS tournament_unique_key, 'epic' as rarity,3170 AS card_count union all
   SELECT 'Main 53'  AS tournament_unique_key, 'rare' as rarity,20600 AS card_count union all
@@ -172,7 +188,11 @@ WITH override AS (
        SELECT 'Main 58'  AS tournament_unique_key, 'legendary' as rarity,337 AS card_count union all
   SELECT 'Main 58'  AS tournament_unique_key, 'epic' as rarity,3241 AS card_count union all
   SELECT 'Main 58'  AS tournament_unique_key, 'rare' as rarity,20980 AS card_count union all
-  SELECT 'Main 58'  AS tournament_unique_key, 'common' as rarity,103442 AS card_count
+  SELECT 'Main 58'  AS tournament_unique_key, 'common' as rarity,103442 AS card_count union all 
+        SELECT 'Main 59'  AS tournament_unique_key, 'legendary' as rarity,345 AS card_count union all
+  SELECT 'Main 59'  AS tournament_unique_key, 'epic' as rarity,3275 AS card_count union all
+  SELECT 'Main 59'  AS tournament_unique_key, 'rare' as rarity,21152 AS card_count union all
+  SELECT 'Main 59'  AS tournament_unique_key, 'common' as rarity,104648 AS card_count
 )
 select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,

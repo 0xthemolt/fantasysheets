@@ -491,8 +491,7 @@
                         <th class="metric-group" data-sort="posts">
                             <div class="metric-header">
                                 <span class="metric-type">
-                                    <i class="fas fa-pencil"></i> Post Count & Timeline
-                                    <i class="fas fa-info-circle" title="Timeline only includes tweets, not quotes (limitation of post history)"></i>
+                                    <i class="fas fa-pencil"></i> Post Count
                                 </span>
                                 <div class="sort-arrow"></div>
                             </div>
@@ -783,12 +782,6 @@
                                 text-align: center;
                                 text-shadow: 0 0 8px ${getColorForRank(hero.posts, Math.max(...statsData.map(h => h.posts)), true)}40;
                             ">${hero.posts}</span>
-                            <div class="post-timeline">
-                                ${generateTimeline(hero.hero_handle, timelineData)}
-                            </div>
-                            <span class="metric-value" title="${timelineData.filter(post => post.hero_handle === hero.hero_handle).length === 0 ? 'No tweets' : 'Time since last post'}">
-                                <i class="fas fa-clock" style="color: #808080; margin-right: 4px; font-size: 75%;"></i>${getLastPostTime(hero.hero_handle, timelineData)}
-                            </span>
                         </div>
                     </td>
                 `;
@@ -962,98 +955,13 @@
             });
 
             updateScrollButtons();
-        }
-
-        function generateTimeline(heroHandle, timelineData) {
-            const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
-
-            // Get the latest now_hours_from_start
-            const nowHours = Math.max(...heroPosts.map(post => post.now_hours_from_start));
-            const progressWidth = Math.min((nowHours / 72) * 100, 100);
-            
-            const baseContainer = `
-                <div class="progress-bar" 
-                     style="position: absolute;
-                            left: 0;
-                            bottom: 0;
-                            height: 100%;
-                            width: ${progressWidth}%;
-                            background-color: #2a2a2a;
-                            border-radius: 4px;">
-                </div>`;
-
-            if (heroPosts.length === 1) {
-                const post = heroPosts[0];
-                const position = (post.post_hours_from_start / 72) * 100;
-                
-                return `${baseContainer}
-                        <div class="post-bar" 
-                             style="left: ${position}%; 
-                                    height: 24px; 
-                                    background-color: #4CAF50;
-                                    z-index: 1;">
-                        </div>`;
-            }
-
-            // Calculate statistics for all posts
-            const heroMaxViews = Math.max(...heroPosts.map(post => post.post_views));
-            const heroMinViews = Math.min(...heroPosts.map(post => post.post_views));
-            
-            // Generate bars for each post
-            const bars = heroPosts.map(post => {
-                const position = (post.post_hours_from_start / 72) * 100;
-                const viewsRatio = (post.post_views - heroMinViews) / (heroMaxViews - heroMinViews || 1);
-                const height = 4 + (viewsRatio * 20);
-                const color = getHeroBarColor(viewsRatio);
-                
-                return `<div class="post-bar" 
-                             style="left: ${position}%; 
-                                    height: ${height}px; 
-                                    background-color: ${color};
-                                    cursor: pointer;
-                                    z-index: 1;">
-                        </div>
-                        <div class="modal">
-                            <div class="modal-content">
-                                Views: ${formatViews(post.post_views)}<br>
-                                Hour: ${Math.round(post.post_hours_from_start)}
-                            </div>
-                        </div>`;
-            }).join('');
-            
-            return baseContainer + bars;
-        }
+        }   
 
         function getHeroBarColor(ratio) {
             // More granular color gradient based on the hero's own range
             if (ratio < 0.33) return '#ff4d4d';      // Bottom third - Red
             if (ratio < 0.66) return '#ffa64d';      // Middle third - Orange
             return '#4CAF50';                        // Top third - Green
-        }
-
-        function getLastPostTime(heroHandle, timelineData) {
-            const heroPosts = timelineData.filter(post => post.hero_handle === heroHandle);
-            if (!heroPosts.length) return '-';
-
-            // Find the most recent post timestamp
-            const lastPost = heroPosts.reduce((latest, current) => {
-                if (!latest.last_post_timestamp) return current;
-                if (!current.last_post_timestamp) return latest;
-                return new Date(current.last_post_timestamp + 'Z') > new Date(latest.last_post_timestamp + 'Z') 
-                    ? current 
-                    : latest;
-            }, heroPosts[0]);
-
-            if (!lastPost.last_post_timestamp) return '-';
-
-            const lastPostTimestamp = new Date(lastPost.last_post_timestamp + 'Z');
-            const now = new Date();
-
-            const diffHours = Math.max(0, Math.floor((now.getTime() - lastPostTimestamp.getTime()) / (1000 * 60 * 60)));
-
-            return diffHours >= 24 
-                ? `${Math.floor(diffHours / 24)}d`
-                : `${diffHours}h`;
         }
 
         function generateScoreHistory(history) {

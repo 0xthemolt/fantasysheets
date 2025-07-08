@@ -97,11 +97,6 @@
             color: #1DA1F2;
             text-decoration: underline;
         }
-
-        .price-gap {
-            background-color: #ffcccc; /* Light red background for price gap */
-        }
-
         /* Add to your <style> section */
 
 .control-container {
@@ -348,7 +343,7 @@ function renderCards(sortType) {
         
         // Check for price gap below player's winning bid
         const hasGapBelowWinningBid = playerIsWinning && topFiveBids.length > 1 && 
-                                     ((topFiveBids[0].price - topFiveBids[1].price) / topFiveBids[0].price) * 100 > 5;
+                                     ((topFiveBids[0].price - topFiveBids[1].price) / topFiveBids[0].price) * 100 > 6;
         
         // Set card class based on winning status and gap
         const cardClass = playerIsWinning 
@@ -365,10 +360,14 @@ function renderCards(sortType) {
             // Calculate price gap percentage if not the first bid
             let priceGapClass = '';
             let priceDiff = 0;
-            
+
             if (prevBid) {
                 priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                if (priceDiff > 5) {
+                // Only highlight if this is the gap below a player's winning bid
+                const prevBidIsPlayer = prevBid.trader && prevBid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+                const isFirstBid = i === 1; // Second row (index 1) would be the gap below first bid
+                
+                if (priceDiff > 6 && prevBidIsPlayer && isFirstBid) {
                     priceGapClass = 'price-gap';
                 }
             }
@@ -395,20 +394,20 @@ function renderCards(sortType) {
             }
             
             const expiration = formatTimeUntilExpiration(bid.expiration_time);
-            const gapStyle = priceGapClass ? 'style="border-top: 1.5px solid #FF69B4 !important;"' : '';
-                        
-            bidRows += `
-            <tr class="${priceGapClass}" ${gapStyle}>
-                <td ${cellStyle}>
-                    ${bid.bidder_handle || 'Anonymous'}
-                    ${isBot(bid.trader) 
-                        ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
-                        : ''}
-                </td>
-                <td ${cellStyle} class="price-col">${formatPrice(bid.price)}</td>
-                <td style="color: ${expiration.color} !important;">${expiration.text}</td>
-            </tr>
-            `;
+            const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
+                    
+bidRows += `
+<tr class="${priceGapClass}">
+    <td ${cellStyle} ${gapStyle}>
+        ${bid.bidder_handle || 'Anonymous'}
+        ${isBot(bid.trader) 
+            ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+            : ''}
+    </td>
+    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
+    <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
+</tr>
+`;
         }
 
         return `

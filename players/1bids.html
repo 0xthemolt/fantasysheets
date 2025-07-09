@@ -28,6 +28,21 @@
             }
         }
 
+        /* Add this new class for the low floor cards section */
+        .low-floor-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 992px) {
+            .low-floor-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         .hero-card {
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -172,6 +187,43 @@
 .hero-card.player-winning-with-gap {
     border: 2px solid #FF69B4 !important; /* Same pink color as price gap */
 }
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.low-floor-section {
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+@media (min-width: 992px) {
+    .main-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.low-floor-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+@media (min-width: 992px) {
+    .low-floor-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
     </style>
 </head>
 <body>
@@ -208,7 +260,7 @@
                     'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
                 }
             });
-              const data = await response.json();
+            const data = await response.json();
             
             // Deduplicate bids based on hero_id and rarity
             const uniqueHeroes = Array.from(new Map(
@@ -232,6 +284,7 @@
                         stars: item.hero.stars,
                         name: item.hero.name,
                         handle: item.hero.handle,
+                        floorPrice: item.floorPrice, // Add this line
                         orderbook: orderbook
                     };
                 }))
@@ -447,18 +500,19 @@ function renderCards(sortType) {
     const mainGrid = sortedMainCards.map(generateCardHTML).join('');
     const lowFloorGrid = lowFloorCards.map(generateCardHTML).join('');
     
-    // Create the combined HTML
-    let combinedHTML = `<div class="grid-container">${mainGrid}</div>`;
-    
-    if (lowFloorCards.length > 0) {
-        combinedHTML += `
-            <div style="margin-top: 2rem;">
-                <h2 style="color: #888; text-align: center; margin-bottom: 1rem;">Low Floor Price Cards (&lt; 0.005)</h2>
-                <div class="grid-container">${lowFloorGrid}</div>
-            </div>
-        `;
-    }
-    
+    // Create the combined HTML with a wrapper container
+    let combinedHTML = `
+        <div class="page-container">
+            <div class="main-container">${mainGrid}</div>
+            ${lowFloorCards.length > 0 ? `
+                <div class="low-floor-section">
+                    <h2 style="color: #888; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">Low Floor Price Cards (&lt; 0.005)</h2>
+                    <div class="low-floor-container">${lowFloorGrid}</div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+
     document.getElementById('results').innerHTML = combinedHTML;
 }
         // Add this array to store known bot bidders

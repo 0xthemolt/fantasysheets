@@ -305,9 +305,14 @@ function renderCards(sortType) {
     
     let sortedBids = [...bidData];
     
+    // Separate cards based on floorPrice
+    const mainCards = sortedBids.filter(item => parseFloat(item.floorPrice) >= 0.005);
+    const lowFloorCards = sortedBids.filter(item => parseFloat(item.floorPrice) < 0.005);
+    
+    // Sort main cards
+    let sortedMainCards = [...mainCards];
     if (sortType === 'not-winning') {
-        // Sort to show cards where player is not winning at the top
-        sortedBids.sort((a, b) => {
+        sortedMainCards.sort((a, b) => {
             const aTopBid = a.orderbook.highest_five_bids?.[0];
             const bTopBid = b.orderbook.highest_five_bids?.[0];
             
@@ -319,8 +324,7 @@ function renderCards(sortType) {
             return 0;
         });
     } else if (sortType === 'winning') {
-        // Sort to show cards where player is winning at the top
-        sortedBids.sort((a, b) => {
+        sortedMainCards.sort((a, b) => {
             const aTopBid = a.orderbook.highest_five_bids?.[0];
             const bTopBid = b.orderbook.highest_five_bids?.[0];
             
@@ -333,7 +337,8 @@ function renderCards(sortType) {
         });
     }
     
-    const grid = sortedBids.map(item => {
+    // Function to generate card HTML
+    const generateCardHTML = (item) => {
         const topFiveBids = item.orderbook.highest_five_bids || [];
         
         // Determine if player is winning this card
@@ -396,18 +401,18 @@ function renderCards(sortType) {
             const expiration = formatTimeUntilExpiration(bid.expiration_time);
             const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
                     
-bidRows += `
-<tr class="${priceGapClass}">
-    <td ${cellStyle} ${gapStyle}>
-        ${bid.bidder_handle || 'Anonymous'}
-        ${isBot(bid.trader) 
-            ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
-            : ''}
-    </td>
-    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
-    <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
-</tr>
-`;
+            bidRows += `
+            <tr class="${priceGapClass}">
+                <td ${cellStyle} ${gapStyle}>
+                    ${bid.bidder_handle || 'Anonymous'}
+                    ${isBot(bid.trader) 
+                        ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                        : ''}
+                </td>
+                <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
+                <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
+            </tr>
+            `;
         }
 
         return `
@@ -420,6 +425,7 @@ bidRows += `
             >
             <h3>${item.name}</h3>
             <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
+            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice}</p>
             
             <table class="bids-table">
                 <thead>
@@ -435,9 +441,25 @@ bidRows += `
             </table>
         </div>
         `;
-    }).join('');
-
-    document.getElementById('results').innerHTML = grid;
+    };
+    
+    // Generate HTML for both sections
+    const mainGrid = sortedMainCards.map(generateCardHTML).join('');
+    const lowFloorGrid = lowFloorCards.map(generateCardHTML).join('');
+    
+    // Create the combined HTML
+    let combinedHTML = `<div class="grid-container">${mainGrid}</div>`;
+    
+    if (lowFloorCards.length > 0) {
+        combinedHTML += `
+            <div style="margin-top: 2rem;">
+                <h2 style="color: #888; text-align: center; margin-bottom: 1rem;">Low Floor Price Cards (&lt; 0.005)</h2>
+                <div class="grid-container">${lowFloorGrid}</div>
+            </div>
+        `;
+    }
+    
+    document.getElementById('results').innerHTML = combinedHTML;
 }
         // Add this array to store known bot bidders
 

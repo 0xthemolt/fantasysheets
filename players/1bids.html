@@ -306,41 +306,52 @@
         function formatPrice(price) {
             return (parseInt(price) / 1000000000000000000).toFixed(5);
         }        function formatTimeUntilExpiration(expirationTime) {
-            const expirationDate = new Date(parseInt(expirationTime) * 1000);
-            const now = new Date();
-            const diffMs = expirationDate - now;
-            const diffHours = diffMs / (1000 * 60 * 60);
-            const diffDays = diffHours / 24;
+    // Add debugging to see what we're working with
+    console.log('Raw expiration_time:', expirationTime);
+    
+    // Convert to milliseconds - Unix timestamps are usually in seconds
+    const expirationDate = new Date(parseInt(expirationTime) * 1000);
+    console.log('Expiration date:', expirationDate.toISOString());
+    
+    // Use UTC time for consistency
+    const now = new Date();
+    console.log('Current UTC time:', now.toISOString());
+    
+    const diffMs = expirationDate - now;
+    console.log('Difference in ms:', diffMs);
+    
+    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffDays = diffHours / 24;
 
-            if (diffMs <= 0) return { text: 'Expired', color: '#ff4444' };
-            
-            // Determine color based on thresholds
-            let color;
-            if (diffHours <= 6) {
-                color = '#ff4444'; // Red for <= 6 hours
-            } else if (diffHours < 24) {
-                color = '#ffa500'; // Orange for < 24 hours
-            } else if (diffDays >= 5) {
-                color = '#44ff44'; // Green for > 5 days
-            } else if (diffDays >= 3) {
-                color = '#4444ff'; // Blue for >= 3 days
-            } else {
-                color = '#ffffff'; // Default white
-            }
-            
-            // Format the expiration text
-            let text;
-            if (diffDays >= 1) {
-                text = `${Math.floor(diffDays)}d ${Math.floor(diffHours % 24)}h`;
-            } else if (diffHours >= 1) {
-                text = `${Math.floor(diffHours)}h`;
-            } else {
-                const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
-                text = `${diffMinutes}m`;
-            }
+    if (diffMs <= 0) return { text: 'Expired', color: '#ff4444' };
+    
+    // Determine color based on thresholds
+    let color;
+    if (diffHours <= 6) {
+        color = '#ff4444'; // Red for <= 6 hours
+    } else if (diffHours < 24) {
+        color = '#ffa500'; // Orange for < 24 hours
+    } else if (diffDays >= 5) {
+        color = '#44ff44'; // Green for > 5 days
+    } else if (diffDays >= 3) {
+        color = '#4444ff'; // Blue for >= 3 days
+    } else {
+        color = '#ffffff'; // Default white
+    }
+    
+    // Format the expiration text
+    let text;
+    if (diffDays >= 1) {
+        text = `${Math.floor(diffDays)}d ${Math.floor(diffHours % 24)}h`;
+    } else if (diffHours >= 1) {
+        text = `${Math.floor(diffHours)}h`;
+    } else {
+        const diffMinutes = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+        text = `${diffMinutes}m`;
+    }
 
-            return { text, color };
-        }        // Global to store the data
+    return { text, color };
+}        // Global to store the data
 let bidData = [];
 
 function displayResults(data) {

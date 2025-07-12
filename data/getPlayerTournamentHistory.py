@@ -13,7 +13,7 @@ TOURNAMENT_NUMBER = config['tournament_number']
 conn = psycopg2.connect(
     dbname="postgres",
     user="postgres.hhcuqhvmzwmehdsaamhn",
-    password="$&roct8&rgp4NE",
+    password="Wafj2DCrI6Yjbe4I",
     host="aws-0-us-west-1.pooler.supabase.com",
     port="5432"
 )

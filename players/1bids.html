@@ -370,8 +370,8 @@ function renderCards(sortType) {
     let sortedBids = [...bidData];
     
     // Separate cards based on floorPrice
-    const mainCards = sortedBids.filter(item => parseFloat(item.floorPrice) >= 0.005);
-    const lowFloorCards = sortedBids.filter(item => parseFloat(item.floorPrice) < 0.005);
+    const mainCards = sortedBids.filter(item => parseFloat(item.floorPrice) >= 0.009);
+    const lowFloorCards = sortedBids.filter(item => parseFloat(item.floorPrice) < 0.009);
     
     // Sort main cards
     let sortedMainCards = [...mainCards];
@@ -517,7 +517,7 @@ function renderCards(sortType) {
             <div class="main-container">${mainGrid}</div>
             ${lowFloorCards.length > 0 ? `
                 <div class="low-floor-section">
-                    <h2 style="color: #888; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">Low Floor Price Cards (&lt; 0.005)</h2>
+                    <h2 style="color: #888; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">Low Floor Price Cards (&lt; 0.0065)</h2>
                     <div class="low-floor-container">${lowFloorGrid}</div>
                 </div>
             ` : ''}

@@ -69,7 +69,12 @@ SELECT 'Main 53'  AS tournament_unique_key, 'Elite' as league,1576 as registered
   SELECT 'Main 59'  AS tournament_unique_key, 'Gold' as league,2738 as registered_decks,777 AS player_count union all
    SELECT 'Main 59'  AS tournament_unique_key, 'Silver' as league,4787 as registered_decks,1349 AS player_count union all
     SELECT 'Main 59'  AS tournament_unique_key, 'Bronze' as league,12132 as registered_decks,2696 AS player_count union all
-     SELECT 'Main 59'  AS tournament_unique_key, 'Reverse' as league,4757 as registered_decks,946 AS player_count
+     SELECT 'Main 59'  AS tournament_unique_key, 'Reverse' as league,4757 as registered_decks,946 AS player_count union all 
+               SELECT 'Main 60'  AS tournament_unique_key, 'Elite' as league,1404 as registered_decks,493 AS player_count union all
+  SELECT 'Main 60'  AS tournament_unique_key, 'Gold' as league,2668 as registered_decks,757 AS player_count union all
+   SELECT 'Main 60'  AS tournament_unique_key, 'Silver' as league,4727 as registered_decks,1415 AS player_count union all
+    SELECT 'Main 60'  AS tournament_unique_key, 'Bronze' as league,12159 as registered_decks,2687 AS player_count union all
+     SELECT 'Main 60'  AS tournament_unique_key, 'Reverse' as league,4160 as registered_decks,1034 AS player_count
 )
 select 
     concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
@@ -112,7 +117,8 @@ WITH override AS (
    SELECT 'Main 56'  AS tournament_unique_key, 3638 AS total_player_count union all
      SELECT 'Main 57'  AS tournament_unique_key, 3442 AS total_player_count union all 
           SELECT 'Main 58'  AS tournament_unique_key, 3425 AS total_player_count union all 
-             SELECT 'Main 59'  AS tournament_unique_key, 3369 AS total_player_count 
+             SELECT 'Main 59'  AS tournament_unique_key, 3369 AS total_player_count union all 
+              SELECT 'Main 60'  AS tournament_unique_key, 3404 AS total_player_count 
 )
 SELECT 
     CONCAT(TO_CHAR(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key) AS tournament,
@@ -192,7 +198,11 @@ WITH override AS (
         SELECT 'Main 59'  AS tournament_unique_key, 'legendary' as rarity,345 AS card_count union all
   SELECT 'Main 59'  AS tournament_unique_key, 'epic' as rarity,3275 AS card_count union all
   SELECT 'Main 59'  AS tournament_unique_key, 'rare' as rarity,21152 AS card_count union all
-  SELECT 'Main 59'  AS tournament_unique_key, 'common' as rarity,104648 AS card_count
+  SELECT 'Main 59'  AS tournament_unique_key, 'common' as rarity,104648 AS card_count union all
+      SELECT 'Main 60'  AS tournament_unique_key, 'legendary' as rarity,347 AS card_count union all
+  SELECT 'Main 60'  AS tournament_unique_key, 'epic' as rarity,3274 AS card_count union all
+  SELECT 'Main 60'  AS tournament_unique_key, 'rare' as rarity,21292 AS card_count union all
+  SELECT 'Main 60'  AS tournament_unique_key, 'common' as rarity,100677 AS card_count 
 )
 select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,

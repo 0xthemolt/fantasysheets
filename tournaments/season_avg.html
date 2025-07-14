@@ -282,17 +282,13 @@
                 { seasonTournament: 3, mainTournament: 56 },  // Season 2 tournaments
                 { seasonTournament: 2, mainTournament: 55 },  // Season 2 tournaments
                 { seasonTournament: 1, mainTournament: 54 }  // Season 2 tournaments
-            ],
-            1: [
-                { seasonTournament: 4, mainTournament: 53 }
-            ],
+            ]
         };
 
         // Flatten the seasons object into main tournament numbers array for API calls
         const tournamentNumbers = [
             ...seasons[3].map(t => t.mainTournament),  // Season 3 tournaments
-            ...seasons[2].map(t => t.mainTournament),  // Season 2 tournaments
-            ...seasons[1].map(t => t.mainTournament)   // Season 1 tournaments
+            ...seasons[2].map(t => t.mainTournament)  // Season 2 tournaments
         ];
 
         const EXEMPT_HEROES = ['a'];

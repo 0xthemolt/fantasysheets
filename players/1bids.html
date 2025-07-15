@@ -255,7 +255,7 @@
     <script>
     // 1. Constants and Configuration
     const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     const PLAYER_ADDRESS = '0x162F95a9364c891028d255467F616902A479681a';
     
@@ -318,16 +318,18 @@
                 }
             });
             const data = await response.json();
+            console.log('Sample item rarity:', data[0]?.rarity);
+            console.log('Sample item hero_id:', data[0]?.hero_id);
+            console.log('Sample item stars:', data[0]?.hero?.stars);
             
             // Fetch bid bot data
             const bidBotData = await fetchBidBotData();
             
-            // Create bid bot lookup map
+            // Create bid bot lookup map using hero_rarity_id
             const bidBotMap = new Map();
             if (bidBotData) {
                 bidBotData.forEach(bot => {
-                    const key = `${bot.hero_id}-${bot.rarity_id}`;
-                    bidBotMap.set(key, bot);
+                    bidBotMap.set(bot.hero_rarity_id, bot);
                 });
             }
             
@@ -343,6 +345,11 @@
             const processedData = {
                 bids: await Promise.all(uniqueHeroes.map(async item => {
                     const orderbook = await fetchOrderbook(item.hero_id, item.rarity);
+                    
+                    // Create the key for joining with bid bot data
+                    const heroRarityKey = `${item.hero_id}_${item.rarity}`;
+                    const bidBotInfo = bidBotMap.get(heroRarityKey);
+                    
                     return {
                         bidder_handle: item.bidder_handle,
                         bidder_address: item.trader,
@@ -353,43 +360,192 @@
                         stars: item.hero.stars,
                         name: item.hero.name,
                         handle: item.hero.handle,
-                        floorPrice: item.floorPrice, // Add this line
-                        orderbook: orderbook
+                        floorPrice: item.floorPrice,
+                        orderbook: orderbook,
+                        // Add bid bot data
+                        bidBot: bidBotInfo || null
                     };
                 }))
             };
-
-            // You can now use both datasets together
-            if (bidBotData) {
-                console.log('Bid bot data loaded:', bidBotData);
-                // Process bid bot data as needed
-            }
             
-            displayResults(processedData);
+            // 4. Data Processing
+            bidData = processedData.bids.map(item => {
+                const topFiveBids = item.orderbook.highest_five_bids || [];
+                
+                // Determine if player is winning this card
+                const playerIsWinning = topFiveBids.length > 0 && 
+                                       topFiveBids[0].trader && 
+                                       topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+                
+                // Check for price gap below player's winning bid
+                const hasGapBelowWinningBid = playerIsWinning && topFiveBids.length > 1 && 
+                                             ((topFiveBids[0].price - topFiveBids[1].price) / topFiveBids[0].price) * 100 > 6;
+                
+                // Set card class based on winning status and gap
+                const cardClass = playerIsWinning 
+                    ? (hasGapBelowWinningBid ? 'hero-card player-winning-with-gap' : 'hero-card player-winning')
+                    : 'hero-card player-not-winning';
+                
+                // Get bid bot info
+                const bidBotInfo = item.bidBot;
+                const bidCeiling = bidBotInfo && bidBotInfo.max_price_eth && bidBotInfo.max_price_eth > 0 
+                    ? bidBotInfo.max_price_eth.toFixed(5) 
+                    : 'N/A';
+                const botEnabled = bidBotInfo ? bidBotInfo.enabled : false;
+                const botIconColor = botEnabled ? '#4ADE80' : '#888';
+                
+                // Create bid rows with price gap highlighting
+                let bidRows = '';
+                
+                for (let i = 0; i < topFiveBids.length; i++) {
+                    const bid = topFiveBids[i];
+                    const prevBid = i > 0 ? topFiveBids[i-1] : null;
+                    
+                    // Calculate price gap percentage if not the first bid
+                    let priceGapClass = '';
+                    let priceDiff = 0;
+
+                    if (prevBid) {
+                        priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
+                        // Only highlight if this is the gap below a player's winning bid
+                        const prevBidIsPlayer = prevBid.trader && prevBid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+                        const isFirstBid = i === 1; // Second row (index 1) would be the gap below first bid
+                        
+                        if (priceDiff > 6 && prevBidIsPlayer && isFirstBid) {
+                            priceGapClass = 'price-gap';
+                        }
+                    }
+                    
+                    const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+                    
+                    // Check if any higher bids are from other players
+                    let otherPlayerHasHigherBid = false;
+                    for (let j = 0; j < i; j++) {
+                        if (topFiveBids[j].trader && 
+                            topFiveBids[j].trader.toLowerCase() !== PLAYER_ADDRESS.toLowerCase()) {
+                            otherPlayerHasHigherBid = true;
+                            break;
+                        }
+                    }
+                    
+                    let cellStyle = '';
+                    if (isPlayerBid) {
+                        if (otherPlayerHasHigherBid) {
+                            cellStyle = 'style="color: #FF8C00 !important;"'; // Orange if other player has higher bid
+                        } else {
+                            cellStyle = 'style="color: #4ADE80 !important;"'; // Green if all higher bids are player's
+                        }
+                    }
+                    
+                    const expiration = formatTimeUntilExpiration(bid.expiration_time);
+                    const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
+                    
+                    bidRows += `
+                    <tr class="${priceGapClass}">
+                        <td ${cellStyle} ${gapStyle}>
+                            ${bid.bidder_handle || 'Anonymous'}
+                            ${isBot(bid.trader) 
+                                ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                                : ''}
+                        </td>
+                        <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
+                        <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
+                    </tr>
+                    `;
+                }
+
+                return {
+                    ...item,
+                    cardClass,
+                    bidRows,
+                    bidCeiling,
+                    botIconColor
+                };
+            });
+            
+            // 5. Render
+            renderBids();
         } catch (error) {
             console.error('Error fetching bids:', error);
+            document.getElementById('error-message').innerText = 'Error fetching bids. Please try again later.';
             document.getElementById('error-message').style.display = 'block';
-            document.getElementById('error-message').textContent = 'Failed to load data. Please try again.';
+        } finally {
+            document.getElementById('loading-indicator').style.display = 'none';
         }
     }
     
-    // 4. Utility Functions
-    function getRarityName(rarityNumber) {
-        switch(rarityNumber) {
-            case 1: return 'legendary';
-            case 2: return 'epic';
-            case 3: return 'rare';
-            case 4: return 'common';
-            default: return 'unknown';
-        }
+    function renderBids() {
+        const container = document.getElementById('results-container');
+        container.innerHTML = '';
+        
+        bidData.forEach(item => {
+            const cardHTML = `
+            <div class="${item.cardClass}">
+                <img 
+                    class="card-image" 
+                    src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
+                    alt="Hero Card"
+                    onerror="this.src='../icons/ft_logo.webp'"
+                >
+                <h3>${item.name}</h3>
+                <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
+                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice}</p>
+                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
+                    Bid Ceiling: ${item.bidCeiling}
+                    <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
+                </p>
+                
+                <table class="bids-table">
+                    <thead>
+                        <tr>
+                            <th>Bidder</th>
+                            <th>Price</th>
+                            <th>Expires In</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${item.bidRows}
+                    </tbody>
+                </table>
+            </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', cardHTML);
+        });
     }
     
-    function formatPrice(price) {
-        return (parseInt(price) / 1000000000000000000).toFixed(5);
+    function sortCards(sortBy) {
+        if (sortBy === 'winning') {
+            bidData.sort((a, b) => {
+                const aIsWinning = a.cardClass.includes('player-winning');
+                const bIsWinning = b.cardClass.includes('player-winning');
+                
+                if (aIsWinning && !bIsWinning) return -1;
+                if (!aIsWinning && bIsWinning) return 1;
+                return 0;
+            });
+        } else {
+            bidData.sort((a, b) => {
+                const aIsWinning = a.cardClass.includes('player-winning');
+                const bIsWinning = b.cardClass.includes('player-winning');
+                
+                if (aIsWinning && !bIsWinning) return 1;
+                if (!aIsWinning && bIsWinning) return -1;
+                return 0;
+            });
+        }
+        
+        renderBids();
     }
+    
+    document.getElementById('refresh-button').addEventListener('click', () => {
+        document.getElementById('loading-indicator').style.display = 'block';
+        document.getElementById('error-message').style.display = 'none';
+        fetchBids();
+    });
     
     function formatTimeUntilExpiration(expirationTime) {
-        // Remove console.log statements for production
+        // Convert Unix timestamp (seconds) to JavaScript Date (milliseconds)
         const expirationDate = new Date(parseInt(expirationTime) * 1000);
         const now = new Date();
         const diffMs = expirationDate - now;
@@ -423,210 +579,31 @@
 
         return { text, color };
     }
-    
-    function isBot(trader) {
-        if (!trader) return false;
-        const traderAddress = String(trader).toLowerCase();
-        return KNOWN_BOTS.some(bot => String(bot.address).toLowerCase() === traderAddress);
+
+    function formatPrice(price) {
+        return (parseInt(price) / 1000000000000000000).toFixed(5);
     }
-    
-    // 5. Display Functions
-    function displayResults(data) {
-        bidData = data.bids;
-        renderCards('not-winning');
-    }
-    
-    function sortCards(sortType) {
-        renderCards(sortType);
-    }
-    
-    function renderCards(sortType) {
-        if (!bidData || !bidData.length) return;
-        
-        let sortedBids = [...bidData];
-        
-        // Separate cards based on floorPrice
-        const mainCards = sortedBids.filter(item => parseFloat(item.floorPrice) >= 0.009);
-        const lowFloorCards = sortedBids.filter(item => parseFloat(item.floorPrice) < 0.009);
-        
-        // Sort main cards
-        let sortedMainCards = [...mainCards];
-        if (sortType === 'not-winning') {
-            sortedMainCards.sort((a, b) => {
-                const aTopBid = a.orderbook.highest_five_bids?.[0];
-                const bTopBid = b.orderbook.highest_five_bids?.[0];
-                
-                const aIsWinning = aTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                const bIsWinning = bTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                
-                if (aIsWinning && !bIsWinning) return 1;
-                if (!aIsWinning && bIsWinning) return -1;
-                return 0;
-            });
-        } else if (sortType === 'winning') {
-            sortedMainCards.sort((a, b) => {
-                const aTopBid = a.orderbook.highest_five_bids?.[0];
-                const bTopBid = b.orderbook.highest_five_bids?.[0];
-                
-                const aIsWinning = aTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                const bIsWinning = bTopBid?.trader?.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                
-                if (aIsWinning && !bIsWinning) return -1;
-                if (!aIsWinning && bIsWinning) return 1;
-                return 0;
-            });
+
+    function getRarityName(rarityNumber) {
+        switch(rarityNumber) {
+            case 1: return 'legendary';
+            case 2: return 'epic';
+            case 3: return 'rare';
+            case 4: return 'common';
+            default: return 'unknown';
         }
-        
-        // Function to generate card HTML
-        const generateCardHTML = (item) => {
-            const topFiveBids = item.orderbook.highest_five_bids || [];
-            
-            // Determine if player is winning this card
-            const playerIsWinning = topFiveBids.length > 0 && 
-                                   topFiveBids[0].trader && 
-                                   topFiveBids[0].trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-            
-            // Check for price gap below player's winning bid
-            const hasGapBelowWinningBid = playerIsWinning && topFiveBids.length > 1 && 
-                                         ((topFiveBids[0].price - topFiveBids[1].price) / topFiveBids[0].price) * 100 > 6;
-            
-            // Set card class based on winning status and gap
-            const cardClass = playerIsWinning 
-                ? (hasGapBelowWinningBid ? 'hero-card player-winning-with-gap' : 'hero-card player-winning')
-                : 'hero-card player-not-winning';
-            
-            // Create bid rows with price gap highlighting
-            let bidRows = '';
-            
-            for (let i = 0; i < topFiveBids.length; i++) {
-                const bid = topFiveBids[i];
-                const prevBid = i > 0 ? topFiveBids[i-1] : null;
-                
-                // Calculate price gap percentage if not the first bid
-                let priceGapClass = '';
-                let priceDiff = 0;
-
-                if (prevBid) {
-                    priceDiff = ((prevBid.price - bid.price) / prevBid.price) * 100;
-                    // Only highlight if this is the gap below a player's winning bid
-                    const prevBidIsPlayer = prevBid.trader && prevBid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                    const isFirstBid = i === 1; // Second row (index 1) would be the gap below first bid
-                    
-                    if (priceDiff > 6 && prevBidIsPlayer && isFirstBid) {
-                        priceGapClass = 'price-gap';
-                    }
-                }
-                
-                const isPlayerBid = bid.trader && bid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
-                
-                // Check if any higher bids are from other players
-                let otherPlayerHasHigherBid = false;
-                for (let j = 0; j < i; j++) {
-                    if (topFiveBids[j].trader && 
-                        topFiveBids[j].trader.toLowerCase() !== PLAYER_ADDRESS.toLowerCase()) {
-                        otherPlayerHasHigherBid = true;
-                        break;
-                    }
-                }
-                
-                let cellStyle = '';
-                if (isPlayerBid) {
-                    if (otherPlayerHasHigherBid) {
-                        cellStyle = 'style="color: #FF8C00 !important;"'; // Orange if other player has higher bid
-                    } else {
-                        cellStyle = 'style="color: #4ADE80 !important;"'; // Green if all higher bids are player's
-                    }
-                }
-                
-                const expiration = formatTimeUntilExpiration(bid.expiration_time);
-                const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
-                        
-                bidRows += `
-                <tr class="${priceGapClass}">
-                    <td ${cellStyle} ${gapStyle}>
-                        ${bid.bidder_handle || 'Anonymous'}
-                        ${isBot(bid.trader) 
-                            ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
-                            : ''}
-                    </td>
-                    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
-                    <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
-                </tr>
-                `;
-            }
-
-            return `
-            <div class="${cardClass}">
-                <img 
-                    class="card-image" 
-                    src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
-                    alt="Hero Card"
-                    onerror="this.src='../icons/ft_logo.webp'"
-                >
-                <h3>${item.name}</h3>
-                <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
-                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice}</p>
-                
-                <table class="bids-table">
-                    <thead>
-                        <tr>
-                            <th>Bidder</th>
-                            <th>Price</th>
-                            <th>Expires In</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${bidRows}
-                    </tbody>
-                </table>
-            </div>
-            `;
-        };
-        
-        // Generate HTML for both sections
-        const mainGrid = sortedMainCards.map(generateCardHTML).join('');
-        const lowFloorGrid = lowFloorCards.map(generateCardHTML).join('');
-        
-        // Create the combined HTML with a wrapper container
-        let combinedHTML = `
-            <div class="page-container">
-                <div class="main-container">${mainGrid}</div>
-                ${lowFloorCards.length > 0 ? `
-                    <div class="low-floor-section">
-                        <h2 style="color: #888; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">Low Floor Price Cards (&lt; 0.009)</h2>
-                        <div class="low-floor-container">${lowFloorGrid}</div>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-
-        // Fixed: Use correct ID
-        document.getElementById('results-container').innerHTML = combinedHTML;
     }
-    
-    // 6. Event Handlers
-    document.addEventListener('DOMContentLoaded', function() {
-        const refreshButton = document.getElementById('refresh-button'); // Fixed ID
-        
-        if (refreshButton) { // Add null check
-            refreshButton.addEventListener('click', async function() {
-                this.classList.add('spinning');
-                
-                try {
-                    await fetchBids();
-                } catch (error) {
-                    console.error('Error refreshing data:', error);
-                } finally {
-                    setTimeout(() => {
-                        this.classList.remove('spinning');
-                    }, 1000);
-                }
-            });
-        }
-        
-        // Initialize data on page load
-        fetchBids();
-    });
+
+    function isBot(traderAddress) {
+        if (!traderAddress) return false;
+        return KNOWN_BOTS.some(bot => 
+            bot.address.toLowerCase() === traderAddress.toLowerCase()
+        );
+    }
+
+    // Initial fetch
+    fetchBids();
     </script>
 </body>
 </html>
+

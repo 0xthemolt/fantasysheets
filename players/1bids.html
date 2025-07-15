@@ -283,7 +283,9 @@
                 'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
             }
         });
-        return await response.json();
+        const data = await response.json();
+        console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
+        return data;
     }
     
     async function fetchBidBotData() {
@@ -300,6 +302,7 @@
                 console.error('Error fetching bid bot data:', error);
                 return null;
             }
+            console.log(`Bid bot data: ${data?.length || 0} configurations loaded`);
             return data;
         } catch (error) {
             console.error('Error connecting to Supabase:', error);
@@ -316,9 +319,13 @@
                 }
             });
             const data = await response.json();
-            console.log('Sample item rarity:', data[0]?.rarity);
-            console.log('Sample item hero_id:', data[0]?.hero_id);
-            console.log('Sample item stars:', data[0]?.hero?.stars);
+            console.log(`Player bids: ${data?.length || 0} total bids fetched`);
+            
+            // After deduplication
+            const uniqueHeroes = Array.from(new Map(
+                data.map(item => [`${item.hero_id}-${item.rarity}`, item])
+            ).values());
+            console.log(`Unique heroes after deduplication: ${uniqueHeroes.length}`);
             
             // Fetch bid bot data
             const bidBotData = await fetchBidBotData();
@@ -330,14 +337,6 @@
                     bidBotMap.set(bot.hero_rarity_id, bot);
                 });
             }
-            
-            // Deduplicate bids based on hero_id and rarity
-            const uniqueHeroes = Array.from(new Map(
-                data.map(item => [
-                    `${item.hero_id}-${item.rarity}`,
-                    item
-                ])
-            ).values());
             
             // Process each unique hero and fetch orderbook
             const processedData = {
@@ -474,45 +473,85 @@
     }
     
     function renderBids() {
-        const container = document.getElementById('results-container');
-        
-        // Separate cards based on floorPrice
-        const mainCards = bidData.filter(item => parseFloat(item.floorPrice) >= 0.009);
-        const lowFloorCards = bidData.filter(item => parseFloat(item.floorPrice) < 0.009);
-        
-        // Function to generate card HTML
-        const generateCardHTML = (item) => `
-            <div class="${item.cardClass}">
-                <img 
-                    class="card-image" 
-                    src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
-                    alt="Hero Card"
-                    onerror="this.src='../icons/ft_logo.webp'"
-                >
-                <h3>${item.name}</h3>
-                <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
-                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice}</p>
-                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    Bid Ceiling: ${item.bidCeiling}
-                    <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
-                </p>
+        try {
+            const container = document.getElementById('results-container');
+            
+            // Debug logging
+            console.log('Rendering bids. Total bid data:', bidData.length);
+            
+            // Helper function to safely parse floor price
+            const getFloorPrice = (item) => {
+                if (!item.floorPrice) return 0;
+                const parsed = parseFloat(item.floorPrice);
+                return isNaN(parsed) ? 0 : parsed;
+            };
+            
+            // Separate cards based on floorPrice with additional logging
+            const mainCards = bidData.filter(item => {
+                const floorPrice = getFloorPrice(item);
+                console.log(`Processing item ${item.hero_id}: Floor price = ${floorPrice}`);
+                return floorPrice >= 0.009;
+            });
+            
+            const lowFloorCards = bidData.filter(item => {
+                const floorPrice = getFloorPrice(item);
+                return floorPrice < 0.009 && floorPrice > 0;
+            });
+            
+            // Add cards with missing floor prices to main cards
+            const noFloorCards = bidData.filter(item => !item.floorPrice);
+            mainCards.push(...noFloorCards);
+            
+            console.log('Main cards:', mainCards.length);
+            console.log('Low floor cards:', lowFloorCards.length);
+            console.log('Cards with no floor price:', noFloorCards.length);
+
+            // Function to generate card HTML
+            const generateCardHTML = (item) => {
+                if (!item) {
+                    console.error('Null item passed to generateCardHTML');
+                    return '';
+                }
                 
-                <table class="bids-table">
-                    <thead>
-                        <tr>
-                            <th>Bidder</th>
-                            <th>Price</th>
-                            <th>Expires In</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${item.bidRows}
-                    </tbody>
-                </table>
-            </div>
-        `;
+                try {
+                    return `
+                        <div class="${item.cardClass}">
+                            <img 
+                                class="card-image" 
+                                src="https://r2.fantasy.top/v2/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
+                                alt="Hero Card"
+                                onerror="this.src='../icons/ft_logo.webp'"
+                            >
+                            <h3>${item.name}</h3>
+                            <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
+                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice || 'N/A'}</p>
+                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
+                                Bid Ceiling: ${item.bidCeiling}
+                                <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
+                            </p>
+                            
+                            <table class="bids-table">
+                                <thead>
+                                    <tr>
+                                        <th>Bidder</th>
+                                        <th>Price</th>
+                                        <th>Expires In</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${item.bidRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } catch (err) {
+                    console.error('Error generating card HTML for item:', item, err);
+                    return '';
+                }
+            };
 
         // Generate HTML for both sections
+        console.log('Generating HTML for cards...');
         const mainGrid = mainCards.map(item => generateCardHTML(item)).join('');
         const lowFloorGrid = lowFloorCards.map(item => generateCardHTML(item)).join('');
 
@@ -529,8 +568,15 @@
             </div>
         `;
 
+        console.log('Setting innerHTML...');
         container.innerHTML = combinedHTML;
+        console.log('Render complete');
+    } catch (err) {
+        console.error('Error in renderBids:', err);
+        document.getElementById('error-message').innerText = 'Error rendering bids. Please try refreshing the page.';
+        document.getElementById('error-message').style.display = 'block';
     }
+}
     
     function sortCards(sortBy) {
         if (!bidData || bidData.length === 0) {

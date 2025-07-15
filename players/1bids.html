@@ -19,15 +19,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
+        #results-container {
             padding: 1rem;
         }
 
         @media (min-width: 992px) {
-            .grid-container {
+            #results-container {
                 grid-template-columns: repeat(4, 1fr);
             }
         }
@@ -203,19 +200,6 @@
     margin-top: 2rem;
 }
 
-.main-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-}
-
-@media (min-width: 992px) {
-    .main-container {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
 .low-floor-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -228,6 +212,20 @@
         grid-template-columns: repeat(4, 1fr);
     }
 }
+
+        /* Update the main-container class to match low-floor-container */
+        .main-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        @media (min-width: 992px) {
+            .main-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -465,6 +463,7 @@
             
             // 5. Render
             renderBids();
+            sortCards('not-winning');
         } catch (error) {
             console.error('Error fetching bids:', error);
             document.getElementById('error-message').innerText = 'Error fetching bids. Please try again later.';
@@ -476,10 +475,13 @@
     
     function renderBids() {
         const container = document.getElementById('results-container');
-        container.innerHTML = '';
         
-        bidData.forEach(item => {
-            const cardHTML = `
+        // Separate cards based on floorPrice
+        const mainCards = bidData.filter(item => parseFloat(item.floorPrice) >= 0.009);
+        const lowFloorCards = bidData.filter(item => parseFloat(item.floorPrice) < 0.009);
+        
+        // Function to generate card HTML
+        const generateCardHTML = (item) => `
             <div class="${item.cardClass}">
                 <img 
                     class="card-image" 
@@ -508,14 +510,36 @@
                     </tbody>
                 </table>
             </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', cardHTML);
-        });
+        `;
+
+        // Generate HTML for both sections
+        const mainGrid = mainCards.map(item => generateCardHTML(item)).join('');
+        const lowFloorGrid = lowFloorCards.map(item => generateCardHTML(item)).join('');
+
+        // Create the combined HTML with a wrapper container
+        const combinedHTML = `
+            <div class="page-container">
+                <div class="main-container">${mainGrid}</div>
+                ${lowFloorCards.length > 0 ? `
+                    <div class="low-floor-section">
+                        <h2 style="color: #888; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">Low Floor Price Cards (&lt; 0.009)</h2>
+                        <div class="low-floor-container">${lowFloorGrid}</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        container.innerHTML = combinedHTML;
     }
     
     function sortCards(sortBy) {
+        if (!bidData || bidData.length === 0) {
+            console.log('No bid data to sort');
+            return;
+        }
+        
         if (sortBy === 'winning') {
+            // Keep original winning sort logic
             bidData.sort((a, b) => {
                 const aIsWinning = a.cardClass.includes('player-winning');
                 const bIsWinning = b.cardClass.includes('player-winning');
@@ -525,12 +549,44 @@
                 return 0;
             });
         } else {
+            // Enhanced not-winning sort logic
             bidData.sort((a, b) => {
-                const aIsWinning = a.cardClass.includes('player-winning');
-                const bIsWinning = b.cardClass.includes('player-winning');
+                const getTopTwoBids = (item) => {
+                    const orderbook = item.orderbook?.highest_five_bids || [];
+                    return orderbook.length >= 2 ? [orderbook[0], orderbook[1]] : [orderbook[0]];
+                };
+
+                const calculatePriceGap = (topBids) => {
+                    if (topBids.length < 2) return 0;
+                    return ((topBids[0].price - topBids[1].price) / topBids[0].price) * 100;
+                };
+
+                const isPlayerWinning = (topBid) => {
+                    return topBid && topBid.trader && 
+                           topBid.trader.toLowerCase() === PLAYER_ADDRESS.toLowerCase();
+                };
+
+                const aTopBids = getTopTwoBids(a);
+                const bTopBids = getTopTwoBids(b);
+                const aIsWinning = aTopBids.length > 0 && isPlayerWinning(aTopBids[0]);
+                const bIsWinning = bTopBids.length > 0 && isPlayerWinning(bTopBids[0]);
+                const aGap = aIsWinning ? calculatePriceGap(aTopBids) : 0;
+                const bGap = bIsWinning ? calculatePriceGap(bTopBids) : 0;
                 
-                if (aIsWinning && !bIsWinning) return 1;
-                if (!aIsWinning && bIsWinning) return -1;
+                // Consider a gap > 6% as "too much"
+                const TOO_MUCH_GAP = 6;
+                const aIsTooMuch = aGap > TOO_MUCH_GAP;
+                const bIsTooMuch = bGap > TOO_MUCH_GAP;
+
+                // First priority: Not winning or winning with too much gap
+                if ((!aIsWinning || aIsTooMuch) && (bIsWinning && !bIsTooMuch)) return -1;
+                if ((aIsWinning && !aIsTooMuch) && (!bIsWinning || bIsTooMuch)) return 1;
+
+                // Second priority: Sort by floor price for cards that need attention
+                if (!aIsWinning || aIsTooMuch || !bIsWinning || bIsTooMuch) {
+                    return (b.floorPrice || 0) - (a.floorPrice || 0);
+                }
+
                 return 0;
             });
         }

@@ -284,7 +284,7 @@
             }
         });
         const data = await response.json();
-        console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
+        // console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
         return data;
     }
     
@@ -311,6 +311,9 @@
     }
     
     async function fetchBids() {
+        document.getElementById('loading-indicator').style.display = 'block';
+        document.getElementById('error-message').style.display = 'none';
+        
         try {
             const response = await fetch(`https://api-v2.fantasy.top/player/bids/${PLAYER_ADDRESS}`, {
                 headers: {
@@ -318,7 +321,18 @@
                     'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
                 }
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
+            console.log('Raw bid data:', data); // Add this debug log
+
+            if (!Array.isArray(data)) {
+                throw new Error('Received invalid data format');
+            }
+
             console.log(`Player bids: ${data?.length || 0} total bids fetched`);
             
             // After deduplication
@@ -640,11 +654,29 @@
         renderBids();
     }
     
-    document.getElementById('refresh-button').addEventListener('click', () => {
-        document.getElementById('loading-indicator').style.display = 'block';
-        document.getElementById('error-message').style.display = 'none';
-        fetchBids();
-    });
+    // Add this function to manage the refresh button state
+function toggleRefreshAnimation(show) {
+    const refreshButton = document.getElementById('refresh-button');
+    if (show) {
+        refreshButton.classList.add('spinning');
+    } else {
+        refreshButton.classList.remove('spinning');
+    }
+}
+
+// Update the refresh button click handler
+document.getElementById('refresh-button').addEventListener('click', async () => {
+    const refreshButton = document.getElementById('refresh-button');
+    refreshButton.classList.add('spinning');
+    
+    try {
+        await fetchBids();
+    } catch (error) {
+        console.error('Error during refresh:', error);
+    } finally {
+        refreshButton.classList.remove('spinning');
+    }
+});
     
     function formatTimeUntilExpiration(expirationTime) {
         // Convert Unix timestamp (seconds) to JavaScript Date (milliseconds)

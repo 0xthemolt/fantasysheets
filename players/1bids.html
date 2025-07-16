@@ -276,55 +276,68 @@
     let bidData = [];
     
     // 3. API Functions
-    // Update the fetchOrderbook function to return empty data on error instead of throwing
-async function fetchOrderbook(heroId, rarity) {
-    try {
-        const response = await fetch(`https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarity}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`, {
-            headers: {
-                'accept': 'application/json',
-                'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
-            }
-        });
-        
-        console.log(`Orderbook API status for Hero ${heroId} (Rarity ${rarity}): ${response.status} ${response.statusText}`);
-        
-        if (!response.ok) {
-            console.error(`Failed to fetch orderbook for Hero ${heroId} (Rarity ${rarity}): ${response.status}`);
-            return { highest_five_bids: [] }; // Return empty data instead of throwing
-        }
-        
-        const data = await response.json();
-        console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
-        return data;
-    } catch (error) {
-        console.error(`Error fetching orderbook for Hero ${heroId} (Rarity ${rarity}):`, error);
-        return { highest_five_bids: [] }; // Return empty data on error
-    }
+    // Add timeout utility function
+function fetchWithTimeout(url, options = {}, timeout = 5000) {
+    return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+        )
+    ]);
 }
 
-    async function fetchBidBotData() {
+// Update the fetchOrderbook function with timeout and retry logic
+async function fetchOrderbook(heroId, rarity, maxRetries = 3) {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            const { data, error } = await supabaseClient
-                .from('vwbid_bot')
-                .select(`
-                    hero_id, rarity_id, floor_price, bid_price, last_sale,
-                    max_price_eth, price_increment_eth, max_card_own_qty,
-                    enabled, updated_datetime, updated_by, hero_rarity_id
-                `);
+            console.log(`Fetching orderbook for Hero ${heroId} (Rarity ${rarity}) - Attempt ${attempt}`);
             
-            if (error) {
-                console.error('Error fetching bid bot data:', error);
-                return null;
+            const response = await fetchWithTimeout(
+                `https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarity}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`,
+                {
+                    headers: {
+                        'accept': 'application/json',
+                        'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                    }
+                },
+                5000 // 5 second timeout
+            );
+            
+            console.log(`Orderbook API status for Hero ${heroId} (Rarity ${rarity}): ${response.status} ${response.statusText}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            console.log(`Bid bot data: ${data?.length || 0} configurations loaded`);
-            return data;
+            
+            const data = await response.json();
+            console.log(`✓ Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
+            return { ...data, _failed: false };
+            
         } catch (error) {
-            console.error('Error connecting to Supabase:', error);
-            return null;
+            lastError = error;
+            console.warn(`⚠️ Attempt ${attempt} failed for Hero ${heroId} (Rarity ${rarity}): ${error.message}`);
+            
+            // Don't retry on final attempt
+            if (attempt === maxRetries) {
+                console.error(`✗ All ${maxRetries} attempts failed for Hero ${heroId} (Rarity ${rarity})`);
+                break;
+            }
+            
+            // Wait before retry (exponential backoff)
+            const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+            console.log(`Waiting ${waitTime}ms before retry...`);
+            await sleep(waitTime);
         }
     }
     
-    // Update the fetchBids function to use Promise.allSettled instead of Promise.all
+    // All attempts failed
+    console.error(`Error fetching orderbook for Hero ${heroId} (Rarity ${rarity}):`, lastError);
+    return { highest_five_bids: [], _failed: true };
+}
+
+// Update the fetchBids function to properly count failures
 async function fetchBids() {
     document.getElementById('loading-indicator').style.display = 'block';
     document.getElementById('error-message').style.display = 'none';
@@ -375,73 +388,57 @@ async function fetchBids() {
             // Add delay between requests
             await sleep(300);
             
-            try {
-                const orderbook = await fetchOrderbook(item.hero_id, item.rarity);
+            const orderbook = await fetchOrderbook(item.hero_id, item.rarity);
+            
+            // Check if the orderbook fetch actually failed
+            if (orderbook._failed) {
+                failedRequests++;
+                console.error(`✗ Failed to fetch orderbook for Hero ${item.hero_id} (Rarity ${item.rarity})`);
+            } else {
                 completedRequests++;
                 console.log(`✓ Fetched orderbook ${completedRequests}/${totalHeroes} (${Math.round(completedRequests/totalHeroes*100)}%)`);
-                
-                // Create the key for joining with bid bot data
-                const heroRarityKey = `${item.hero_id}_${item.rarity}`;
-                const bidBotInfo = bidBotMap.get(heroRarityKey);
-                
-                return {
-                    bidder_handle: item.bidder_handle,
-                    bidder_address: item.trader,
-                    price: item.price,
-                    expiration_time: item.expiration_time,
-                    hero_id: item.hero_id,
-                    rarity: item.rarity,
-                    stars: item.hero.stars,
-                    name: item.hero.name,        // Change from item.name to item.hero.name
-                    handle: item.hero.handle,    // Change from item.handle to item.hero.handle
-                    floorPrice: item.floorPrice,
-                    orderbook: orderbook,
-                    bidBot: bidBotInfo || null
-                };
-            } catch (error) {
-                failedRequests++;
-                console.error(`✗ Failed to fetch orderbook for Hero ${item.hero_id} (Rarity ${item.rarity}):`, error);
-                
-                // Return item with empty orderbook
-                const heroRarityKey = `${item.hero_id}_${item.rarity}`;
-                const bidBotInfo = bidBotMap.get(heroRarityKey);
-                
-                return {
-                    bidder_handle: item.bidder_handle,
-                    bidder_address: item.trader,
-                    price: item.price,
-                    expiration_time: item.expiration_time,
-                    hero_id: item.hero_id,
-                    rarity: item.rarity,
-                    stars: item.hero.stars,
-                    name: item.hero.name,        // Change from item.name to item.hero.name
-                    handle: item.hero.handle,    // Change from item.handle to item.hero.handle
-                    floorPrice: item.floorPrice,
-                    orderbook: { highest_five_bids: [] },
-                    bidBot: bidBotInfo || null
-                };
             }
+            
+            // Create the key for joining with bid bot data
+            const heroRarityKey = `${item.hero_id}_${item.rarity}`;
+            const bidBotInfo = bidBotMap.get(heroRarityKey);
+            
+            return {
+                bidder_handle: item.bidder_handle,
+                bidder_address: item.trader,
+                price: item.price,
+                expiration_time: item.expiration_time,
+                hero_id: item.hero_id,
+                rarity: item.rarity,
+                stars: item.hero.stars,
+                name: item.hero.name,
+                handle: item.hero.handle,
+                floorPrice: item.floorPrice,
+                orderbook: orderbook,
+                bidBot: bidBotInfo || null,
+                _orderbook_failed: orderbook._failed // Track which ones failed
+            };
         }));
 
-        // Extract successful results and failed results
-        const successfulBids = results
-            .filter(result => result.status === 'fulfilled')
-            .map(result => result.value);
-        
-        const failedBids = results
-            .filter(result => result.status === 'rejected')
-            .length;
+        // Extract results - all should be fulfilled since we're not throwing errors
+        const allResults = results.map(result => result.value);
+        const successfulBids = allResults.filter(item => !item._orderbook_failed);
+        const failedBids = allResults.filter(item => item._orderbook_failed);
 
         console.log(`✓ Successfully processed: ${successfulBids.length}`);
-        console.log(`✗ Failed requests: ${failedRequests}`);
-        console.log(`⚠️ Rejected promises: ${failedBids}`);
+        console.log(`✗ Failed orderbook requests: ${failedBids.length}`);
+        console.log(`⚠️ Total processed: ${allResults.length}`);
         
-        // Process the successful data
-        const processedData = { bids: successfulBids };
+        // Process all data (including failed ones with empty orderbooks)
+        const processedData = { bids: allResults };
         
-        // Continue with data processing...
+        // Continue with existing processing logic...
         bidData = processedData.bids.map(item => {
-            const topFiveBids = item.orderbook.highest_five_bids || [];
+            // Remove the _failed flag from orderbook before processing
+            const cleanOrderbook = { ...item.orderbook };
+            delete cleanOrderbook._failed;
+            
+            const topFiveBids = cleanOrderbook.highest_five_bids || [];
             
             // Determine if player is winning this card
             const playerIsWinning = topFiveBids.length > 0 && 
@@ -536,9 +533,10 @@ async function fetchBids() {
         
         // Show summary in UI if there were failures
         if (failedRequests > 0) {
-            const warningMessage = `Warning: ${failedRequests} orderbook requests failed. Showing ${successfulBids.length} successful results.`;
+            const warningMessage = `Warning: ${failedRequests} orderbook requests failed due to CORS/network issues. Showing ${successfulBids.length} cards with orderbook data and ${failedBids.length} without.`;
             console.warn(warningMessage);
-            // Optionally show this in the UI
+            
+            // Show warning in UI
             const warningDiv = document.createElement('div');
             warningDiv.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px; margin: 10px 0; border-radius: 4px; text-align: center;';
             warningDiv.textContent = warningMessage;

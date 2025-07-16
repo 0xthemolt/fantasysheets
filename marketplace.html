@@ -723,7 +723,7 @@
             if (heroId && rarity && stars) {
                 const heroCardImage = document.getElementById('hero-card-image');
                 // Try with absolute path from root
-                const heroImageUrl = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                const heroImageUrl = `https://r2.fantasy.top/v3/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                 console.log('Hero Card Image URL:', {
                     heroId,
                     rarity,
@@ -737,7 +737,7 @@
                 heroCardImage.onerror = function() {
                     console.log('Image failed to load:', heroImageUrl);
                     // Try fallback path if first attempt fails
-                    this.src = `https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
+                    this.src = `https://r2.fantasy.top/v3/${rarity.toLowerCase()}/${heroId}_${stars}.png`;
                     
                     // Add second error handler for fallback path
                     this.onerror = function() {
@@ -1974,7 +1974,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                                 </td>
                                                 <td style="padding: 8px; text-align: center; vertical-align: middle;">
                                                     <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                                        <img src="https://r2.fantasy.top/v2/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
+                                                        <img src="https://r2.fantasy.top/v3/${bid.card_rarity.toLowerCase()}/${bid.hero_id}_${bid.stars}.png" 
                                                             alt="Hero Card"
                                                             class="mini-hero-card"
                                                             onerror="this.src='../icons/fan.webp'">                                                      
@@ -2391,7 +2391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="bid-modal-container">
                                 <div class="bid-card-container">
                                     <img class="bid-card-image" 
-                                         src="https://r2.fantasy.top/v2/${rarity.toLowerCase()}/${heroId}_${stars}.png"
+                                         src="https://r2.fantasy.top/v3/${rarity.toLowerCase()}/${heroId}_${stars}.png"
                                          alt="Hero Card"
                                          onerror="this.onerror=null; this.src='../icons/fan.webp'">
                                 </div>

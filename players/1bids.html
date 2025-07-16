@@ -810,6 +810,26 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Update the fetchBidBotData function to use the correct view name
+async function fetchBidBotData() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('vwbid_bot')  // Changed from 'bid_bots' to 'vwbid_bot'
+            .select('*');
+        
+        if (error) {
+            console.error('Error fetching bid bot data:', error);
+            return null;
+        }
+        
+        console.log(`Bid bot data: ${data?.length || 0} configurations loaded`);
+        return data;
+    } catch (error) {
+        console.error('Error fetching bid bot data:', error);
+        return null;
+    }
+}
+
 // Initial fetch
 fetchBids();
     </script>

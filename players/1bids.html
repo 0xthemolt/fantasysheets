@@ -274,18 +274,45 @@
     
     // 2. Data Storage
     let bidData = [];
+    let uniqueHeroes = [];
+    let loadedHeroes = new Set();
+    let isLoading = false;
+    const HEROES_PER_BATCH = 20;
     
     // 3. API Functions
     async function fetchOrderbook(heroId, rarity) {
-        const response = await fetch(`https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarity}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`, {
-            headers: {
-                'accept': 'application/json',
-                'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+        try {
+            const response = await fetch(`https://api-v2.fantasy.top/marketplace/bid-orders?heroId=${heroId}&rarity=${rarity}&includeOrderbook=true&includePersonalBids=true&includeHighestFiveBids=true`, {
+                headers: {
+                    'accept': 'application/json',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'access-control-allow-headers': 'Origin, X-Requested-With, Content-Type, Accept, X-Api-Key',
+                    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'access-control-allow-origin': '*',
+                    'origin': 'https://fantasy-top.github.io',
+                    'referer': 'https://fantasy-top.github.io/',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'cross-site',
+                    'sec-fetch-storage-access': 'active',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+                    'x-api-key': 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+                }
+            });
+            
+            console.log(`Orderbook API status for Hero ${heroId} (Rarity ${rarity}): ${response.status} ${response.statusText}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
-        const data = await response.json();
-        console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
-        return data;
+            
+            const data = await response.json();
+            console.log(`Orderbook for Hero ${heroId} (Rarity ${rarity}): ${data.highest_five_bids?.length || 0} bids`);
+            return data;
+        } catch (error) {
+            console.error(`Error fetching orderbook for Hero ${heroId} (Rarity ${rarity}):`, error);
+            return { highest_five_bids: [] }; // Return empty data instead of throwing
+        }
     }
     
     async function fetchBidBotData() {
@@ -335,12 +362,15 @@
 
             console.log(`Player bids: ${data?.length || 0} total bids fetched`);
             
-            // After deduplication
-            const uniqueHeroes = Array.from(new Map(
+            // After deduplication, add total count logging
+            uniqueHeroes = Array.from(new Map(
                 data.map(item => [`${item.hero_id}-${item.rarity}`, item])
             ).values());
-            console.log(`Unique heroes after deduplication: ${uniqueHeroes.length}`);
+            const totalHeroes = uniqueHeroes.length;
+            console.log(`Starting to fetch orderbooks for ${totalHeroes} heroes...`);
             
+            let completedRequests = 0;
+
             // Fetch bid bot data
             const bidBotData = await fetchBidBotData();
             
@@ -354,8 +384,13 @@
             
             // Process each unique hero and fetch orderbook
             const processedData = {
-                bids: await Promise.all(uniqueHeroes.map(async item => {
+                bids: await Promise.all(uniqueHeroes.map(async (item, index) => {
+                    // Add delay between requests
+                    await sleep(350); // 100ms delay between each request
+                    
                     const orderbook = await fetchOrderbook(item.hero_id, item.rarity);
+                    completedRequests++;
+                    console.log(`Fetched orderbook ${completedRequests}/${totalHeroes} (${Math.round(completedRequests/totalHeroes*100)}%)`);
                     
                     // Create the key for joining with bid bot data
                     const heroRarityKey = `${item.hero_id}_${item.rarity}`;
@@ -668,6 +703,8 @@ function toggleRefreshAnimation(show) {
 document.getElementById('refresh-button').addEventListener('click', async () => {
     const refreshButton = document.getElementById('refresh-button');
     refreshButton.classList.add('spinning');
+    bidData = [];
+    loadedHeroes.clear();
     
     try {
         await fetchBids();
@@ -735,8 +772,13 @@ document.getElementById('refresh-button').addEventListener('click', async () => 
         );
     }
 
-    // Initial fetch
-    fetchBids();
+    // Add this helper function for delay
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Initial fetch
+fetchBids();
     </script>
 </body>
 </html>

@@ -66,7 +66,7 @@ select  historical_rewards.player_id,historical_rewards.tournament_unique_key,
 	COUNT(distinct case when coalesce(reward_pack,0) > 0 then tournament_id end) as itm_decks, /*for each league w/ + 1 card assume at least 1 ITM deck, need this because some rewards history look up are bugged*/
 	MIN(best_elite) best_elite,
 	MIN(best_gold) best_gold,
-	MIN(best_elite) best_silver,
+	MIN(best_silver) best_silver,
 	MIN(best_bronze) best_bronze,
 	MIN(best_reverse) best_reverse,
 	MIN(null::int) as best_other,

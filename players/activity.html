@@ -1008,7 +1008,8 @@
                 const heroStars = card.hero_stars || '';
                 const version = card.hero_is_deleted ? 'v1' : 'v2';
                 
-                return `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${rarity}/${heroId}_${heroStars}.png`;
+                return `https://r2.fantasy.top/v3/${rarity}/${heroId}_${heroStars}.png`;
+                // return `https://fantasy-top-cards.s3.eu-north-1.amazonaws.com/${version}/${rarity}/${heroId}_${heroStars}.png`;
             };
 
             // Special rendering for level up and burn cards

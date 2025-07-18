@@ -868,6 +868,7 @@
             <thead>
                 <tr>
                     <th>Type</th>
+                    <th>Player</th> <!-- NEW COLUMN -->
                     <th>Time</th>
                     <th>Price</th>
                     <th>Cards</th>
@@ -922,9 +923,10 @@
         try {
             const { data, error } = await supabaseClient
                 .from('player_mints')
-                .select('type, player_address, player_name, player_handle, player_pfp_url, tx_hash, timestamp, price, cards, hero_details')
-                .eq('player_handle', playerHandle);
-                
+                .select('type, player_address, player_name, player_handle, player_pfp_url, other_player_name, other_player_pfp_url, tx_hash, timestamp, price, cards, hero_details')
+                .eq('player_handle', playerHandle)
+                .order('timestamp', { ascending: false }); // <-- Add this line
+        
             if (error) {
                 console.error('Error fetching player mints:', error);
                 return [];
@@ -1152,7 +1154,7 @@
                 { 
                     data: 'type',
                     className: 'type-column',
-                    width: '100px',         
+                    width: '100px',
                     render: function(data, type, row) {
                         // First check the 'type' field from database
                         if (data === 'level up') {
@@ -1187,6 +1189,47 @@
                             return data === 'level up';
                         }
                         return true; // 'all' or any other value
+                    }
+                },
+                { // NEW PLAYER COLUMN
+                    data: null,
+                    className: 'player-column',
+                    width: '180px',
+                    orderable: false,
+                    render: function(data, type, row) {
+                        // Only show for BUY and SELL
+                        if (row.type === 'buy' || row.type === 'sell') {
+                            // Determine order based on type
+                            const first = row.type === 'buy'
+                                ? { name: row.other_player_name, pfp: row.other_player_pfp_url }
+                                : { name: row.player_name, pfp: row.player_pfp_url };
+                            const second = row.type === 'buy'
+                                ? { name: row.player_name, pfp: row.player_pfp_url }
+                                : { name: row.other_player_name, pfp: row.other_player_pfp_url };
+                            // Arrow direction
+                            const arrow = row.type === 'buy'
+                                ? '<span style="font-size:18px; margin:0 8px;">→</span>'
+                                : '<span style="font-size:18px; margin:0 8px;">→</span>';
+                            // Helper for avatar + name
+                            function playerBlock(player) {
+                                return `
+                                    <div style="display:flex;flex-direction:column;align-items:center;min-width:60px;">
+                                        <img src="${player.pfp || '/icons/ft_logo.webp'}" alt="${player.name || ''}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #333;background:#222;">
+                                        <div style="font-size:11px;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;">${player.name || ''}</div>
+                                    </div>
+                                `;
+                            }
+                            return `
+                                <div style="display:flex;align-items:center;justify-content:center;gap:2px;">
+                                    ${row.type === 'buy'
+                                        ? playerBlock(first) + arrow + playerBlock(second)
+                                        : playerBlock(first) + arrow + playerBlock(second)
+                                    }
+                                </div>
+                            `;
+                        }
+                        // For other types, return empty
+                        return '';
                     }
                 },
                 { 
@@ -1238,7 +1281,7 @@
                 }
             ],
             autoWidth: false,
-            order: [[1, 'desc']], // Sort by timestamp descending
+            order: [[3, 'desc']], // Sort by timestamp descending (timestamp is now the 3rd column, index 2)
             pageLength: 10,      // Show 100 records per page
             lengthMenu: [10, 25, 50],
             responsive: true,
@@ -1568,7 +1611,7 @@
             }
             
             // Log the data for debugging
-            console.debug('Searching in hero cards:', heroCards);
+            console.debug('Searching through hero cards:', heroCards);
             
             // Search through hero handles - more thorough search
             for (const card of heroCards) {

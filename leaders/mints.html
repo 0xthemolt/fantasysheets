@@ -270,9 +270,6 @@ async function fetchAndDisplayRankings() {
                             style="cursor: default; vertical-align: middle;">
                     <span style="margin-left: 8px;">
                         ${player.player_name}
-                        ${player.elo_image ? 
-                            `<img src="../icons/${player.elo_image}.webp" alt="Elo" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 4px;" title="${player.elo_image}">` 
-                            : ''}
                         <a href="https://x.com/${player.player_handle}" target="_blank" style="margin-left: 4px;">
                             <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
                         </a>

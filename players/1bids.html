@@ -17,6 +17,7 @@
     
     <!-- Add this line to include Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     
     <style>
         #results-container {
@@ -45,6 +46,9 @@
         }
 
         .hero-card {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 8px;
@@ -52,6 +56,7 @@
             width: 100%;
             max-width: 250px;
             margin: 0 auto;
+            margin-bottom: 16px;
         }
 
         .hero-card h3 {
@@ -89,11 +94,10 @@
         .themolt-bid {
             background-color: #e6f7ff;
         }        .card-image {
-            width: 20%;
+            width: 80px;
             height: auto;
             border-radius: 8px;
             display: block;
-            margin: 0 auto;
         }
 
         .player-bid {
@@ -613,50 +617,62 @@ async function fetchBids() {
                 
                 try {
                     return `
-                        <div class="${item.cardClass}">
-                            <img 
-                                class="card-image" 
-                                src="https://r2.fantasy.top/v3/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
-                                alt="Hero Card"
-                                onerror="this.src='../icons/ft_logo.webp'"
-                            >
-                            <h3>${item.name}</h3>
-                            <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
-                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                              Floor: ${item.floorPrice || 'N/A'}
-                            </p>
-                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                                Bid Ceiling: ${item.bidCeiling}
-                                <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
-                                ${
-                                  (() => {
-                                    // Compare bidCeiling to floorPrice, show negative % (closer to 0 is worse)
-                                    const ceiling = parseFloat(item.bidCeiling);
-                                    const floor = parseFloat(item.floorPrice);
-                                    if (!ceiling || !floor) return '';
-                                    const gap = ((ceiling - floor) / ceiling) * 100;
-                                    let color = '#fff';
-                                    if (gap < 0 && gap >= -10) color = '#ff4444';
-                                    else if (gap < -10 && gap >= -20) color = '#ffa500';
-                                    const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
-                                    return ` <span style="color:${color};">(${percentText}%)</span>`;
-                                  })()
-                                }
-                            </p>
-                            
-                            <table class="bids-table">
-                                <thead>
-                                    <tr>
-                                        <th>Bidder</th>
-                                        <th>Price</th>
-                                        <th>Expires In</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${item.bidRows}
-                                </tbody>
-                            </table>
-                        </div>
+<div class="${item.cardClass}" style="display: flex; flex-direction: column; align-items: center;">
+    <div class="hero-main-row" style="display: flex; flex-direction: row; align-items: flex-start; width: 100%;">
+        <div class="card-image-container" style="flex: 0 0 80px; display: flex; align-items: flex-start;">
+            <img 
+                class="card-image" 
+                src="https://r2.fantasy.top/v3/${getRarityName(item.rarity)}/${item.hero_id}_${item.stars}.png" 
+                alt="Hero Card"
+                onerror="this.src='../icons/ft_logo.webp'"
+                style="width: 80px; height: auto; border-radius: 8px;"
+            >
+        </div>
+        <div class="card-info-container" style="flex: 1; margin-left: 12px; display: flex; flex-direction: column; align-items: flex-start;">
+            <div class="hero-info-block" style="width: 100%;">
+                <h3>${item.name}</h3>
+                <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
+                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
+                    Floor: ${item.floorPrice || 'N/A'}
+                </p>
+                <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
+                    Bid Ceiling: ${item.bidCeiling}
+                    <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
+                    ${
+                      (() => {
+                        const ceiling = parseFloat(item.bidCeiling);
+                        const floor = parseFloat(item.floorPrice);
+                        if (!ceiling || !floor) return '';
+                        const gap = ((ceiling - floor) / ceiling) * 100;
+                        let color = '#fff';
+                        if (gap < 0 && gap >= -10) color = '#ff4444';
+                        else if (gap < -10 && gap >= -20) color = '#ffa500';
+                        const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
+                        return ` <span style="color:${color};">(${percentText}%)</span>`;
+                      })()
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="bids-table-container" style="width: 100%; display: flex; justify-content: center;">
+        <table class="bids-table" style="margin: 0 auto;">
+            <thead>
+                <tr>
+                    <th>Bidder</th>
+                    <th>Price</th>
+                    <th>Expires In</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${item.bidRows}
+            </tbody>
+        </table>
+    </div>
+    <div class="price-chart-container" style="width: 100%; background: #222; border-radius: 8px; margin-top: 12px; padding: 4px 0;">
+        <div id="price_chart_${item.hero_id}_${item.rarity}" style="width:220px;height:120px;margin:0 auto;"></div>
+    </div>
+</div>
                     `;
                 } catch (err) {
                     console.error('Error generating card HTML for item:', item, err);
@@ -685,6 +701,138 @@ async function fetchBids() {
         console.log('Setting innerHTML...');
         container.innerHTML = combinedHTML;
         console.log('Render complete');
+
+        const staticChartData = {
+    "floor_price": 0.021,
+    "last_sale": 0.019,
+    "bid_price": 0.0185,
+    "max_price_eth": 0.0171,
+    "recent_trades": [
+        {"price": 0.0221, "count": 3},
+        {"price": 0.0208, "count": 10},
+        {"price": 0.0198, "count": 9},
+        {"price": 0.0189, "count": 7},
+        {"price": 0.0181, "count": 2},
+        {"price": 0.0168, "count": 9},
+        {"price": 0.0157, "count": 6},
+        {"price": 0.0148, "count": 6},
+        {"price": 0.0138, "count": 6},
+        {"price": 0.0126, "count": 13}
+    ]
+};
+
+const prices = staticChartData.recent_trades.map(t => t.price);
+const counts = staticChartData.recent_trades.map(t => t.count);
+
+const trace = {
+    x: prices,
+    y: counts,
+    type: 'scatter',
+    mode: 'lines+markers',
+    fill: 'tozeroy',
+    line: {shape: 'spline', color: '#fff'},
+    marker: {color: '#fff'}
+};
+
+const layout = {
+    paper_bgcolor: '#222',
+    plot_bgcolor: '#222',
+    xaxis: {
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false,
+        title: '',
+        color: '#ccc'
+    },
+    yaxis: {
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false,
+        title: '',
+        color: '#ccc'
+    },
+    showlegend: false,
+    margin: {l: 10, r: 10, t: 10, b: 10},
+    shapes: [
+        {
+            type: 'line',
+            x0: staticChartData.floor_price,
+            x1: staticChartData.floor_price,
+            y0: 0,
+            y1: Math.max(...counts),
+            line: {color: 'red', width: 2, dash: 'dot'}
+        },
+        {
+            type: 'line',
+            x0: staticChartData.last_sale,
+            x1: staticChartData.last_sale,
+            y0: 0,
+            y1: Math.max(...counts),
+            line: {color: 'blue', width: 2, dash: 'dot'}
+        },
+        {
+            type: 'line',
+            x0: staticChartData.bid_price,
+            x1: staticChartData.bid_price,
+            y0: 0,
+            y1: Math.max(...counts),
+            line: {color: 'green', width: 2, dash: 'dot'}
+        },
+        {
+            type: 'line',
+            x0: staticChartData.max_price_eth,
+            x1: staticChartData.max_price_eth,
+            y0: 0,
+            y1: Math.max(...counts),
+            line: {color: 'orange', width: 2, dash: 'dot'}
+        }
+    ],
+    annotations: [
+        {
+            x: staticChartData.floor_price,
+            y: Math.max(...counts),
+            text: `FP<br>${staticChartData.floor_price}`,
+            showarrow: false,
+            font: {color: 'red', size: 10},
+            xanchor: 'left',
+            yanchor: 'bottom'
+        },
+        {
+            x: staticChartData.last_sale,
+            y: Math.max(...counts),
+            text: `LS<br>${staticChartData.last_sale}`,
+            showarrow: false,
+            font: {color: 'blue', size: 10},
+            xanchor: 'left',
+            yanchor: 'bottom'
+        },
+        {
+            x: staticChartData.bid_price,
+            y: Math.max(...counts),
+            text: `BID<br>${staticChartData.bid_price}`,
+            showarrow: false,
+            font: {color: 'green', size: 10},
+            xanchor: 'left',
+            yanchor: 'bottom'
+        },
+        {
+            x: staticChartData.max_price_eth,
+            y: Math.max(...counts),
+            text: `MAX<br>${staticChartData.max_price_eth}`,
+            showarrow: false,
+            font: {color: 'orange', size: 10},
+            xanchor: 'left',
+            yanchor: 'bottom'
+        }
+    ],
+    width: 220,
+    height: 120
+};
+
+// Render chart for each card
+document.querySelectorAll('[id^="price_chart_"]').forEach(el => {
+    Plotly.newPlot(el.id, [trace], layout, {displayModeBar: false});
+});
     } catch (err) {
         console.error('Error in renderBids:', err);
         document.getElementById('error-message').innerText = 'Error rendering bids. Please try refreshing the page.';
@@ -844,7 +992,7 @@ function sleep(ms) {
 async function fetchBidBotData() {
     try {
         const { data, error } = await supabaseClient
-            .from('vwbid_bot')  // Changed from 'bid_bots' to 'vwbid_bot'
+            .from('vwbid_bot')
             .select('*');
         
         if (error) {
@@ -852,6 +1000,17 @@ async function fetchBidBotData() {
             return null;
         }
         
+        // Parse chart_data for each bot
+        data.forEach(bot => {
+            if (typeof bot.chart_data === 'string') {
+                try {
+                    bot.chart_data = JSON.parse(bot.chart_data);
+                } catch (e) {
+                    bot.chart_data = [];
+                }
+            }
+        });
+
         console.log(`Bid bot data: ${data?.length || 0} configurations loaded`);
         return data;
     } catch (error) {

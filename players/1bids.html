@@ -802,7 +802,7 @@ async function fetchBids() {
                 text: `FP<br>${Number(chartData.floor_price).toFixed(4)}`,
                 showarrow: false,
                 font: {color: 'red', size: 10},
-                xanchor: 'left',
+                xanchor: 'center', // Center label horizontally
                 yanchor: 'bottom'
             },
             {
@@ -811,7 +811,7 @@ async function fetchBids() {
                 text: `LS<br>${Number(chartData.last_sale).toFixed(4)}`,
                 showarrow: false,
                 font: {color: 'aqua', size: 10},
-                xanchor: 'left',
+                xanchor: 'center', // Center label horizontally
                 yanchor: 'bottom'
             },
             {
@@ -820,7 +820,7 @@ async function fetchBids() {
                 text: `BID<br>${Number(chartData.bid_price).toFixed(4)}`,
                 showarrow: false,
                 font: {color: bidPriceColor, size: 10},
-                xanchor: 'left',
+                xanchor: 'center', // Center label horizontally
                 yanchor: 'top'
             },
             {
@@ -829,7 +829,7 @@ async function fetchBids() {
                 text: `MAX<br>${Number(chartData.max_price_eth).toFixed(4)}`,
                 showarrow: false,
                 font: {color: 'pink', size: 10},
-                xanchor: 'left',
+                xanchor: 'center', // Center label horizontally
                 yanchor: 'bottom'
             }
         ],

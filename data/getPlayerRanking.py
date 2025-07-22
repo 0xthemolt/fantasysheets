@@ -45,7 +45,7 @@ having suM(reward_eth) >= .025
 UNION 
 select player_id
 from flatten.get_player_basic_data tp
-where fan_pts_plus_referrals >= 5000000  /*lifetime 5m + fan*/
+where fan_pts_plus_referrals >= 2500000  /*lifetime 5m + fan*/
 )
 ,eth_frags_won as (
 select ph.player_id

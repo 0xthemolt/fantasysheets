@@ -211,6 +211,12 @@
     padding: 1rem;
 }
 
+.bids-table,
+.bids-table th,
+.bids-table td {
+    font-size: 0.75rem; /* or use 13px, 12px, etc. for even smaller */
+}
+
 @media (min-width: 992px) {
     .low-floor-container {
         grid-template-columns: repeat(4, 1fr);
@@ -539,7 +545,7 @@ async function fetchBids() {
                     <td ${cellStyle} ${gapStyle}>
                         ${bid.bidder_handle || 'Anonymous'}
                         ${isBot(bid.trader) 
-                            ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
+                            ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC; font-size:80%;" title="Known bot"></i>' 
                             : ''}
                     </td>
                     <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}${percentGapToFloor}</td>
@@ -645,7 +651,7 @@ async function fetchBids() {
                 </p>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
                     My Bid Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
-                    <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
+                    <i class="fas fa-robot" style="margin-left: 4px; font-size:80%; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
                     ${
                       (() => {
                         const ceiling = parseFloat(item.bidCeiling);
@@ -667,9 +673,6 @@ async function fetchBids() {
         <table class="bids-table" style="margin: 0 auto;">
             <thead>
                 <tr>
-                    <th>Bidder</th>
-                    <th>Price</th>
-                    <th>Expires In</th>
                 </tr>
             </thead>
             <tbody>
@@ -773,7 +776,7 @@ async function fetchBids() {
                 x1: chartData.last_sale,
                 y0: 0,
                 y1: Math.max(...counts),
-                line: {color: 'blue', width: 2, dash: 'dot'}
+                line: {color: 'aqua', width: 2, dash: 'dot'}
             },
             {
                 type: 'line',
@@ -807,7 +810,7 @@ async function fetchBids() {
                 y: Math.max(...counts),
                 text: `LS<br>${Number(chartData.last_sale).toFixed(4)}`,
                 showarrow: false,
-                font: {color: 'blue', size: 10},
+                font: {color: 'aqua', size: 10},
                 xanchor: 'left',
                 yanchor: 'bottom'
             },
@@ -953,7 +956,9 @@ document.getElementById('refresh-button').addEventListener('click', async () => 
         }
         
         let text;
-        if (diffDays >= 1) {
+        if (diffDays >= 3) {
+            text = `${Math.floor(diffDays)}d`;
+        } else if (diffDays >= 1) {
             text = `${Math.floor(diffDays)}d ${Math.floor(diffHours % 24)}h`;
         } else if (diffHours >= 1) {
             text = `${Math.floor(diffHours)}h`;

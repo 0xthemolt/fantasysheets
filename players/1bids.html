@@ -605,7 +605,7 @@ async function fetchBids() {
                             ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC; font-size:80%;" title="Known bot"></i>' 
                             : ''}
                     </td>
-                    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}${percentGapToFloor}</td>
+                    <td ${cellStyle} class="price-col" ${gapStyle}>${percentGapToFloor}${formatPrice(bid.price)}</td>
                     <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
                 </tr>
                 `;

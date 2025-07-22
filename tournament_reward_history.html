@@ -270,7 +270,7 @@
                         // Round to 1 decimal place if it's a decimal number
                         const formattedValue = Number.isInteger(currentValue) ? currentValue : 
                             String(currentValue).split('.')[1].length >= 2 ? 
-                                Number(currentValue).toFixed(2) : 
+                                Number(currentValue).toFixed(3) : 
                                 Number(currentValue).toFixed(1);
                         cellContent = String(formattedValue);
                         

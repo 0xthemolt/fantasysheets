@@ -230,6 +230,14 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
+
+        .price-chart-container .plot-container.plotly {
+    width: 100% !important;
+    max-width: 260px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    user-select: none;
+}
     </style>
 </head>
 <body>
@@ -633,10 +641,10 @@ async function fetchBids() {
                 <h3>${item.name}</h3>
                 <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    Floor: ${item.floorPrice || 'N/A'}
+                    Floor: ${item.floorPrice ? Number(item.floorPrice).toFixed(5) : 'N/A'}
                 </p>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    Bid Ceiling: ${item.bidCeiling}
+                    My Bid Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
                     <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
                     ${
                       (() => {
@@ -669,8 +677,8 @@ async function fetchBids() {
             </tbody>
         </table>
     </div>
-    <div class="price-chart-container" style="width: 100%; background: #222; border-radius: 8px; margin-top: 12px; padding: 4px 0;">
-        <div id="price_chart_${item.hero_id}_${item.rarity}" style="width:220px;height:120px;margin:0 auto;"></div>
+    <div class="price-chart-container" style="width: 260px; background: #222; border-radius: 8px; margin-top: 12px; padding: 4px 0;">
+        <div id="price_chart_${item.hero_id}_${item.rarity}" style="width:260px;height:100px;margin:0 auto;"></div>
     </div>
 </div>
                     `;
@@ -702,135 +710,130 @@ async function fetchBids() {
         container.innerHTML = combinedHTML;
         console.log('Render complete');
 
-        const staticChartData = {
-    "floor_price": 0.021,
-    "last_sale": 0.019,
-    "bid_price": 0.0185,
-    "max_price_eth": 0.0171,
-    "recent_trades": [
-        {"price": 0.0221, "count": 3},
-        {"price": 0.0208, "count": 10},
-        {"price": 0.0198, "count": 9},
-        {"price": 0.0189, "count": 7},
-        {"price": 0.0181, "count": 2},
-        {"price": 0.0168, "count": 9},
-        {"price": 0.0157, "count": 6},
-        {"price": 0.0148, "count": 6},
-        {"price": 0.0138, "count": 6},
-        {"price": 0.0126, "count": 13}
-    ]
-};
+        document.querySelectorAll('[id^="price_chart_"]').forEach(el => {
+    const [_, heroId, rarity] = el.id.match(/^price_chart_(\d+)_(\d+)$/) || [];
+    const card = bidData.find(item => String(item.hero_id) === heroId && String(item.rarity) === rarity);
 
-const prices = staticChartData.recent_trades.map(t => t.price);
-const counts = staticChartData.recent_trades.map(t => t.count);
+    // Only use dynamic chart_data, skip if not present or invalid
+    if (!card?.bidBot?.chart_data || !card.bidBot.chart_data.recent_trades) return;
 
-const trace = {
-    x: prices,
-    y: counts,
-    type: 'scatter',
-    mode: 'lines+markers',
-    fill: 'tozeroy',
-    line: {shape: 'spline', color: '#fff'},
-    marker: {color: '#fff'}
-};
+    const chartData = card.bidBot.chart_data;
+    const prices = chartData.recent_trades.map(t => t.price);
+    const counts = chartData.recent_trades.map(t => t.count);
 
-const layout = {
-    paper_bgcolor: '#222',
-    plot_bgcolor: '#222',
-    xaxis: {
-        showgrid: false,
-        zeroline: false,
-        showticklabels: false,
-        title: '',
-        color: '#ccc'
-    },
-    yaxis: {
-        showgrid: false,
-        zeroline: false,
-        showticklabels: false,
-        title: '',
-        color: '#ccc'
-    },
-    showlegend: false,
-    margin: {l: 10, r: 10, t: 10, b: 10},
-    shapes: [
-        {
-            type: 'line',
-            x0: staticChartData.floor_price,
-            x1: staticChartData.floor_price,
-            y0: 0,
-            y1: Math.max(...counts),
-            line: {color: 'red', width: 2, dash: 'dot'}
-        },
-        {
-            type: 'line',
-            x0: staticChartData.last_sale,
-            x1: staticChartData.last_sale,
-            y0: 0,
-            y1: Math.max(...counts),
-            line: {color: 'blue', width: 2, dash: 'dot'}
-        },
-        {
-            type: 'line',
-            x0: staticChartData.bid_price,
-            x1: staticChartData.bid_price,
-            y0: 0,
-            y1: Math.max(...counts),
-            line: {color: 'green', width: 2, dash: 'dot'}
-        },
-        {
-            type: 'line',
-            x0: staticChartData.max_price_eth,
-            x1: staticChartData.max_price_eth,
-            y0: 0,
-            y1: Math.max(...counts),
-            line: {color: 'orange', width: 2, dash: 'dot'}
-        }
-    ],
-    annotations: [
-        {
-            x: staticChartData.floor_price,
-            y: Math.max(...counts),
-            text: `FP<br>${staticChartData.floor_price}`,
-            showarrow: false,
-            font: {color: 'red', size: 10},
-            xanchor: 'left',
-            yanchor: 'bottom'
-        },
-        {
-            x: staticChartData.last_sale,
-            y: Math.max(...counts),
-            text: `LS<br>${staticChartData.last_sale}`,
-            showarrow: false,
-            font: {color: 'blue', size: 10},
-            xanchor: 'left',
-            yanchor: 'bottom'
-        },
-        {
-            x: staticChartData.bid_price,
-            y: Math.max(...counts),
-            text: `BID<br>${staticChartData.bid_price}`,
-            showarrow: false,
-            font: {color: 'green', size: 10},
-            xanchor: 'left',
-            yanchor: 'bottom'
-        },
-        {
-            x: staticChartData.max_price_eth,
-            y: Math.max(...counts),
-            text: `MAX<br>${staticChartData.max_price_eth}`,
-            showarrow: false,
-            font: {color: 'orange', size: 10},
-            xanchor: 'left',
-            yanchor: 'bottom'
-        }
-    ],
-    width: 220,
-    height: 120
-};
+    // Set bid price line and label color based on winning status
+    let bidPriceColor = '#4ADE80'; // winning (green)
+    if (card.cardClass.includes('player-not-winning')) {
+        bidPriceColor = '#FF8C00'; // not winning (orange)
+    }
 
-// Render chart for each card
-document.querySelectorAll('[id^="price_chart_"]').forEach(el => {
+    const trace = {
+        x: prices,
+        y: counts,
+        type: 'scatter',
+        mode: 'lines', // No dots
+        fill: 'tozeroy',
+        line: {shape: 'spline', color: '#fff'},
+        hoverinfo: 'text',
+        text: prices.map((price, i) => `${counts[i]}, ${price.toFixed(4)}`) // Tooltip: qty:price
+    };
+
+    const layout = {
+        paper_bgcolor: '#222',
+        plot_bgcolor: '#222',
+        xaxis: {
+            showgrid: false,
+            zeroline: false,
+            showticklabels: false,
+            title: '',
+            color: '#ccc'
+        },
+        yaxis: {
+            showgrid: false,
+            zeroline: false,
+            showticklabels: false,
+            title: '',
+            color: '#ccc'
+        },
+        showlegend: false,
+        margin: {l: 10, r: 10, t: 6, b: 6},
+        hovermode: 'closest',
+        shapes: [
+            {
+                type: 'line',
+                x0: chartData.floor_price,
+                x1: chartData.floor_price,
+                y0: 0,
+                y1: Math.max(...counts),
+                line: {color: 'red', width: 2, dash: 'dot'}
+            },
+            {
+                type: 'line',
+                x0: chartData.last_sale,
+                x1: chartData.last_sale,
+                y0: 0,
+                y1: Math.max(...counts),
+                line: {color: 'blue', width: 2, dash: 'dot'}
+            },
+            {
+                type: 'line',
+                x0: chartData.bid_price,
+                x1: chartData.bid_price,
+                y0: 0,
+                y1: Math.max(...counts),
+                line: {color: bidPriceColor, width: 2, dash: 'dot'}
+            },
+            {
+                type: 'line',
+                x0: chartData.max_price_eth,
+                x1: chartData.max_price_eth,
+                y0: 0,
+                y1: Math.max(...counts),
+                line: {color: 'pink', width: 2, dash: 'dot'}
+            }
+        ],
+        annotations: [
+            {
+                x: chartData.floor_price,
+                y: Math.max(...counts),
+                text: `FP<br>${Number(chartData.floor_price).toFixed(4)}`,
+                showarrow: false,
+                font: {color: 'red', size: 10},
+                xanchor: 'left',
+                yanchor: 'bottom'
+            },
+            {
+                x: chartData.last_sale,
+                y: Math.max(...counts),
+                text: `LS<br>${Number(chartData.last_sale).toFixed(4)}`,
+                showarrow: false,
+                font: {color: 'blue', size: 10},
+                xanchor: 'left',
+                yanchor: 'bottom'
+            },
+            {
+                x: chartData.bid_price,
+                y: 0,
+                text: `BID<br>${Number(chartData.bid_price).toFixed(4)}`,
+                showarrow: false,
+                font: {color: bidPriceColor, size: 10},
+                xanchor: 'left',
+                yanchor: 'top'
+            },
+            {
+                x: chartData.max_price_eth,
+                y: Math.max(...counts),
+                text: `MAX<br>${Number(chartData.max_price_eth).toFixed(4)}`,
+                showarrow: false,
+                font: {color: 'pink', size: 10},
+                xanchor: 'left',
+                yanchor: 'bottom'
+            }
+        ],
+        width: 260,
+        height: 100
+    };
+
     Plotly.newPlot(el.id, [trace], layout, {displayModeBar: false});
 });
     } catch (err) {

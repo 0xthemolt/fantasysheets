@@ -508,6 +508,20 @@ async function fetchBids() {
                 const expiration = formatTimeUntilExpiration(bid.expiration_time);
                 const gapStyle = priceGapClass ? 'style="border-top: 2px solid #FF69B4 !important;"' : '';
                 
+                let percentGapToFloor = '';
+                if (i === 0 && item.floorPrice) {
+                    const floor = parseFloat(item.floorPrice);
+                    const topBidPrice = parseFloat(bid.price) / 1e18;
+                    if (floor && topBidPrice) {
+                        const gap = ((floor - topBidPrice) / floor) * 100;
+                        let color = '#fff';
+                        if (gap < 10) color = '#ff4444';
+                        else if (gap < 20) color = '#ffa500';
+                        const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
+                        percentGapToFloor = ` <span style="color:${color};">(${percentText}%)</span>`;
+                    }
+                }
+                
                 bidRows += `
                 <tr class="${priceGapClass}">
                     <td ${cellStyle} ${gapStyle}>
@@ -516,7 +530,7 @@ async function fetchBids() {
                             ? '<i class="fas fa-robot" style="margin-left: 4px; color: #4DC2FC;" title="Known bot"></i>' 
                             : ''}
                     </td>
-                    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}</td>
+                    <td ${cellStyle} class="price-col" ${gapStyle}>${formatPrice(bid.price)}${percentGapToFloor}</td>
                     <td ${gapStyle} style="color: ${expiration.color} !important;">${expiration.text}</td>
                 </tr>
                 `;
@@ -608,10 +622,26 @@ async function fetchBids() {
                             >
                             <h3>${item.name}</h3>
                             <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
-                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">Floor: ${item.floorPrice || 'N/A'}</p>
+                            <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
+                              Floor: ${item.floorPrice || 'N/A'}
+                            </p>
                             <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
                                 Bid Ceiling: ${item.bidCeiling}
                                 <i class="fas fa-robot" style="margin-left: 4px; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
+                                ${
+                                  (() => {
+                                    // Compare bidCeiling to floorPrice, show negative % (closer to 0 is worse)
+                                    const ceiling = parseFloat(item.bidCeiling);
+                                    const floor = parseFloat(item.floorPrice);
+                                    if (!ceiling || !floor) return '';
+                                    const gap = ((ceiling - floor) / ceiling) * 100;
+                                    let color = '#fff';
+                                    if (gap < 0 && gap >= -10) color = '#ff4444';
+                                    else if (gap < -10 && gap >= -20) color = '#ffa500';
+                                    const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
+                                    return ` <span style="color:${color};">(${percentText}%)</span>`;
+                                  })()
+                                }
                             </p>
                             
                             <table class="bids-table">

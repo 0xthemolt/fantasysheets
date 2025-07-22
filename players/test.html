@@ -1,146 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Recent Trades Line Chart</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 40px;
-    }
-    .chart-container {
-      max-width: 340px;
-      margin: auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      padding: 18px 20px;
-      position: relative;
-    }
-    .bar-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 2px;
-      position: relative;
-    }
-    .bar {
-      height: 12px;
-      border-radius: 0;
-      background: #222;
-      margin-right: 8px;
-      transition: width 0.3s;
-      position: relative;
-    }
-    .bar-label {
-      width: 60px;
-      font-size: 0.93em;
-      color: #222;
-      text-align: right;
-      margin-right: 8px;
-    }
-    .bar-count {
-      font-size: 0.93em;
-      color: #555;
-      min-width: 18px;
-      text-align: left;
-    }
-    .marker {
-      position: absolute;
-      top: -8px;
-      width: 0;
-      height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 8px solid;
-    }
-    .marker-label {
-      position: absolute;
-      top: -18px;
-      left: -10px;
-      font-size: 0.75em;
-      color: #222;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Ridgeline Chart Example</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-  <div class="chart-container" style="height:60px; position:relative;">
-    <h4 style="text-align:center; margin-bottom:8px; color:#222;">Recent Trades</h4>
-    <canvas id="tradeLine" width="300" height="18" style="display:block; margin:auto; background:#eee; border-radius:6px;"></canvas>
-    <div id="markerLayer" style="position:absolute; left:0; top:28px; width=300px; height:18px; pointer-events:none;"></div>
-  </div>
-  <script>
-  const data = {"hero_rarity_index" : "1073132650309726208_4", "floor_price" : 0.0095, "last_sale" : 0.0069, "bid_price" : 0.00585, "max_price_eth" : 0.0061, "recent_trades" : [{"price" : 0.0079, "count" : 2}, {"price" : 0.0068, "count" : 7}, {"price" : 0.0066, "count" : 9}, {"price" : 0.0059, "count" : 7}, {"price" : 0.0052, "count" : 8}, {"price" : 0.0045, "count" : 13}, {"price" : 0.0040, "count" : 29}, {"price" : 0.0034, "count" : 8}]};
+    <div id="ridgeline" style="width:700px;height:400px;"></div>
+    <script>
+        const data = {
+            "hero_rarity_index": "1138993163706753029_4",
+            "floor_price": 0.021,
+            "last_sale": 0.019,
+            "bid_price": 0.0185,
+            "max_price_eth": 0.0171,
+            "recent_trades": [
+                {"price": 0.0221, "count": 3},
+                {"price": 0.0208, "count": 10},
+                {"price": 0.0198, "count": 9},
+                {"price": 0.0189, "count": 7},
+                {"price": 0.0181, "count": 2},
+                {"price": 0.0168, "count": 9},
+                {"price": 0.0157, "count": 6},
+                {"price": 0.0148, "count": 6},
+                {"price": 0.0138, "count": 6},
+                {"price": 0.0126, "count": 13}
+            ]
+        };
 
-  const trades = data.recent_trades.sort((a, b) => a.price - b.price);
-  const minPrice = Math.min(...trades.map(t => t.price));
-  const maxPrice = Math.max(...trades.map(t => t.price));
-  const maxCount = Math.max(...trades.map(t => t.count));
+        // Prepare data for ridgeline-like chart
+        const prices = data.recent_trades.map(t => t.price);
+        const counts = data.recent_trades.map(t => t.count);
 
-  const canvas = document.getElementById('tradeLine');
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
+        // Simulate ridgeline by stacking curves (here, just one curve for simplicity)
+        const trace = {
+            x: prices,
+            y: counts,
+            type: 'scatter',
+            mode: 'lines+markers',
+            fill: 'tozeroy',
+            name: 'Recent Trades',
+            line: {shape: 'spline'}
+        };
 
-  // Draw gradient line
-  for (let x = 0; x < w; x++) {
-    // Map x to price
-    const price = minPrice + (x / w) * (maxPrice - minPrice);
-    // Find closest trade
-    let closest = trades[0];
-    let minDiff = Math.abs(trades[0].price - price);
-    for (let t of trades) {
-      let diff = Math.abs(t.price - price);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = t;
-      }
-    }
-    // Opacity/brightness based on count
-    const alpha = 0.2 + 0.8 * (closest.count / maxCount); // 0.2 to 1
-    ctx.fillStyle = `rgba(34,34,34,${alpha})`;
-    ctx.fillRect(x, 0, 1, h);
-  }
-
-  // Marker data
-  const markers = [
-    { label: 'Floor', value: data.floor_price, color: '#e74c3c' },
-    { label: 'Last', value: data.last_sale, color: '#27ae60' },
-    { label: 'Bid', value: data.bid_price, color: '#2980b9' },
-    { label: 'Max', value: data.max_price_eth, color: '#f1c40f' }
-  ];
-
-  // Overlay markers
-  const markerLayer = document.getElementById('markerLayer');
-  markers.forEach(marker => {
-    const percent = (marker.value - minPrice) / (maxPrice - minPrice);
-    const leftPx = percent * w;
-
-    // Marker triangle
-    const markerDiv = document.createElement('div');
-    markerDiv.style.position = 'absolute';
-    markerDiv.style.left = `${leftPx - 6}px`; // Center triangle
-    markerDiv.style.top = '0px';
-    markerDiv.style.width = '0';
-    markerDiv.style.height = '0';
-    markerDiv.style.borderLeft = '6px solid transparent';
-    markerDiv.style.borderRight = '6px solid transparent';
-    markerDiv.style.borderBottom = `12px solid ${marker.color}`;
-    markerDiv.title = `${marker.label}: ${marker.value.toFixed(4)}`;
-
-    // Optional label
-    const labelDiv = document.createElement('div');
-    labelDiv.style.position = 'absolute';
-    labelDiv.style.left = '18px';
-    labelDiv.style.top = `${topPx - 8}px`;
-    labelDiv.style.fontSize = '0.8em';
-    labelDiv.style.color = marker.color;
-    labelDiv.textContent = marker.label;
-
-    markerLayer.appendChild(markerDiv);
-    markerLayer.appendChild(labelDiv);
-  });
-</script>
+        Plotly.newPlot('ridgeline', [trace], {
+            title: 'Recent Trades Ridgeline Chart',
+            xaxis: {title: 'Price (ETH)'},
+            yaxis: {title: 'Count'},
+            showlegend: false
+        });
+    </script>
 </body>
 </html>

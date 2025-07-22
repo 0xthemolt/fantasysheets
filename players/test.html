@@ -2,14 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ridgeline Chart Example</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <div id="ridgeline" style="width:700px;height:400px;"></div>
+    <div id="ridgeline" style="width:560px;height:320px;"></div>
     <script>
         const data = {
-            "hero_rarity_index": "1138993163706753029_4",
             "floor_price": 0.021,
             "last_sale": 0.019,
             "bid_price": 0.0185,
@@ -28,26 +26,106 @@
             ]
         };
 
-        // Prepare data for ridgeline-like chart
         const prices = data.recent_trades.map(t => t.price);
         const counts = data.recent_trades.map(t => t.count);
 
-        // Simulate ridgeline by stacking curves (here, just one curve for simplicity)
         const trace = {
             x: prices,
             y: counts,
             type: 'scatter',
             mode: 'lines+markers',
             fill: 'tozeroy',
-            name: 'Recent Trades',
             line: {shape: 'spline'}
         };
 
         Plotly.newPlot('ridgeline', [trace], {
-            title: 'Recent Trades Ridgeline Chart',
-            xaxis: {title: 'Price (ETH)'},
-            yaxis: {title: 'Count'},
-            showlegend: false
+            xaxis: {
+                showgrid: false,
+                zeroline: false,
+                showticklabels: false,
+                title: ''
+            },
+            yaxis: {
+                showgrid: false,
+                zeroline: false,
+                showticklabels: false,
+                title: ''
+            },
+            showlegend: false,
+            shapes: [
+                {
+                    type: 'line',
+                    x0: data.floor_price,
+                    x1: data.floor_price,
+                    y0: 0,
+                    y1: Math.max(...counts),
+                    line: {color: 'red', width: 2, dash: 'dot'}
+                },
+                {
+                    type: 'line',
+                    x0: data.last_sale,
+                    x1: data.last_sale,
+                    y0: 0,
+                    y1: Math.max(...counts),
+                    line: {color: 'blue', width: 2, dash: 'dot'}
+                },
+                {
+                    type: 'line',
+                    x0: data.bid_price,
+                    x1: data.bid_price,
+                    y0: 0,
+                    y1: Math.max(...counts),
+                    line: {color: 'green', width: 2, dash: 'dot'}
+                },
+                {
+                    type: 'line',
+                    x0: data.max_price_eth,
+                    x1: data.max_price_eth,
+                    y0: 0,
+                    y1: Math.max(...counts),
+                    line: {color: 'orange', width: 2, dash: 'dot'}
+                }
+            ],
+            annotations: [
+                {
+                    x: data.floor_price,
+                    y: Math.max(...counts),
+                    text: `FP<br>${data.floor_price}`,
+                    showarrow: false,
+                    font: {color: 'red', size: 12},
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                {
+                    x: data.last_sale,
+                    y: Math.max(...counts),
+                    text: `LS<br>${data.last_sale}`,
+                    showarrow: false,
+                    font: {color: 'blue', size: 12},
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                {
+                    x: data.bid_price,
+                    y: Math.max(...counts),
+                    text: `BID<br>${data.bid_price}`,
+                    showarrow: false,
+                    font: {color: 'green', size: 12},
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                },
+                {
+                    x: data.max_price_eth,
+                    y: Math.max(...counts),
+                    text: `MAX<br>${data.max_price_eth}`,
+                    showarrow: false,
+                    font: {color: 'orange', size: 12},
+                    xanchor: 'left',
+                    yanchor: 'bottom'
+                }
+            ],
+            width: 560,
+            height: 320
         });
     </script>
 </body>

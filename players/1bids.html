@@ -162,6 +162,55 @@
     border: 2px solid #FF8C00;
 }
 
+       .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Slightly reduced gap */
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 11px; /* Reduced from 14px */
+            cursor: pointer;
+            padding: 5px 8px; /* Slightly smaller padding */
+            border-radius: 4px;
+            user-select: none;
+            color: #fff;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-label:hover {
+            background: #3a3a3a;
+        }
+        
+        .checkbox-label input {
+            margin-right: 6px;
+            accent-color: transparent;
+            transform: scale(0.8); /* Reduce checkbox size by 20% */
+        }
+        
+        /* Rarity-specific colors for checked state */
+        
+        .checkbox-label.rare input:checked {
+            accent-color: #00FFE2;
+        }
+        
+        .checkbox-label.common input:checked {
+            accent-color: #94FF00;
+        }
+        
+        
+        .checkbox-label.rare {
+            border-left: 3px solid #00FFE2;
+        }
+        
+        .checkbox-label.common {
+            border-left: 3px solid #94FF00;
+        }
+        
 .refresh-btn {
     background-color: #3498db;
     color: white;
@@ -255,6 +304,14 @@
                     <option value="not-winning" selected>Not Winning</option>
                     <option value="winning">Winning</option>
                 </select>
+            <div class="checkbox-group">
+                    <label class="checkbox-label rare">
+                        <input type="checkbox" id="filterRare"> Rare
+                    </label>
+                    <label class="checkbox-label common">
+                        <input type="checkbox" id="filterCommon"> Common
+                    </label>
+            </div>
             </div>
             <button id="refresh-button" class="refresh-btn" title="Refresh player data">
                 <i class="fas fa-sync-alt"></i>
@@ -631,7 +688,7 @@ async function fetchBids() {
                 
                 try {
                     return `
-<div class="${item.cardClass}" style="display: flex; flex-direction: column; align-items: center;">
+<div class="${item.cardClass}" data-rarity="${item.rarity}" style="display: flex; flex-direction: column; align-items: center;">
     <div class="hero-main-row" style="display: flex; flex-direction: row; align-items: flex-start; width: 100%;">
         <div class="card-image-container" style="flex: 0 0 80px; display: flex; align-items: flex-start;">
             <img 
@@ -651,7 +708,6 @@ async function fetchBids() {
                 </p>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
                     My Bid Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
-                    <i class="fas fa-robot" style="margin-left: 4px; font-size:80%; color: ${item.botIconColor};" title="Bot ${item.bidBot && item.bidBot.enabled ? 'enabled' : 'disabled'}"></i>
                     ${
                       (() => {
                         const ceiling = parseFloat(item.bidCeiling);
@@ -673,6 +729,9 @@ async function fetchBids() {
         <table class="bids-table" style="margin: 0 auto;">
             <thead>
                 <tr>
+                  <th style="height: 12px;">&nbsp;</th>
+            <th style="height: 12px;">&nbsp;</th>
+            <th style="height: 12px;">&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
@@ -1030,6 +1089,46 @@ async function fetchBidBotData() {
 // Initial fetch
 fetchBids();
     </script>
+<script>
+// filepath: c:\fantasy_top_analysis\pages\players\1bids.html
+// ...existing code...
+
+// Rarity mapping
+const rarityMap = {
+    'Rare': 3,
+    'Common': 4
+};
+
+// Filtering logic
+function filterByRarity() {
+    // Get checked rarity IDs
+    const checkedRarities = [];
+    if (document.getElementById('filterRare').checked) checkedRarities.push(rarityMap['Rare']);
+    if (document.getElementById('filterCommon').checked) checkedRarities.push(rarityMap['Common']);
+
+    // Select all hero cards
+    document.querySelectorAll('.hero-card').forEach(card => {
+        const cardRarity = parseInt(card.getAttribute('data-rarity'));
+        // If no checkbox is checked, show all
+        if (checkedRarities.length === 0 || checkedRarities.includes(cardRarity)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Add event listeners to checkboxes
+document.getElementById('filterRare').addEventListener('change', filterByRarity);
+document.getElementById('filterCommon').addEventListener('change', filterByRarity);
+
+// Optionally, call filterByRarity after rendering cards
+const originalRenderBids = renderBids;
+renderBids = function() {
+    originalRenderBids();
+    filterByRarity();
+};
+</script>
 </body>
 </html>
 

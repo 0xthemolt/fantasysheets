@@ -707,18 +707,21 @@ async function fetchBids() {
                     Floor: ${item.floorPrice ? Number(item.floorPrice).toFixed(5) : 'N/A'}
                 </p>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    My Bid Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
+                    My Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
                     ${
                       (() => {
                         const ceiling = parseFloat(item.bidCeiling);
                         const floor = parseFloat(item.floorPrice);
                         if (!ceiling || !floor) return '';
-                        const gap = ((ceiling - floor) / ceiling) * 100;
+                        const gap = ((ceiling - floor) / floor) * 100;
+                        // Only show if gap is between 0% and -20%
+                        if (gap > 0 || gap <= -20) return '';
                         let color = '#fff';
-                        if (gap < 0 && gap >= -10) color = '#ff4444';
-                        else if (gap < -10 && gap >= -20) color = '#ffa500';
+                        if (gap <= 0 && gap > -10) color = '#ff4444';      // 0% to -10% (red)
+                        else if (gap <= -10 && gap > -20) color = '#ffa500'; // -10% to -20% (yellow)
+                        else return '';
                         const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
-                        return ` <span style="color:${color};">(${percentText}%)</span>`;
+                        return ` <span style="color:${color};">${percentText}%</span>`;
                       })()
                     }
                 </p>

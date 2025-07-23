@@ -589,11 +589,17 @@ async function fetchBids() {
                     const topBidPrice = parseFloat(bid.price) / 1e18;
                     if (floor && topBidPrice) {
                         const gap = ((floor - topBidPrice) / floor) * 100;
-                        let color = '#fff';
-                        if (gap < 10) color = '#ff4444';
-                        else if (gap < 20) color = '#ffa500';
-                        const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
-                        percentGapToFloor = ` <span style="color:${color};">(${percentText}%)</span>`;
+                        let color = '';
+                        // Only show if gap is between 0% and 20%
+                        if (gap > 0 && gap <= 10) color = '#ff4444';      // 0% to 10% (red)
+                        else if (gap > 10 && gap <= 20) color = '#ffa500'; // 10% to 20% (yellow)
+                        else color = '';
+                        if (color) {
+                            const percentText = Math.abs(gap) < 1 ? gap.toFixed(1) : Math.round(gap);
+                            percentGapToFloor = ` <span style="color:${color};">${percentText}%</span>`;
+                        } else {
+                            percentGapToFloor = '';
+                        }
                     }
                 }
                 

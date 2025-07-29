@@ -126,7 +126,7 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
         reward_frag.reward AS frag, -- column 48
         gtpp.db_updated_cst::timestamp  as timestamp, -- column 49
         gt.tournament_unique_key -- column 50
-    from flatten.tournament_players gtpp
+     from flatten.tournament_players gtpp
     join flatten.get_tournaments gt
         on gtpp.tournament_id = gt.tournament_id
     left join flatten.tournament_rewards reward_gold
@@ -150,23 +150,23 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
         AND gtpp.unique_player_rank between reward_frag.range_start and reward_frag.range_end
         AND reward_frag.reward_type = 'FRAGMENT'
     left join flatten.temp_trade_history_base  buyer_cost_card1
-    	on gtpp.card1_id = buyer_cost_card1.card_id
+    	on gtpp.card1_id = buyer_cost_card1.base_card_id
     	and gtpp.player_id = buyer_cost_card1.buyer_id
 		and buyer_cost_card1.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card2
-    	on gtpp.card2_id = buyer_cost_card2.card_id
+    	on gtpp.card2_id = buyer_cost_card2.base_card_id
     	and gtpp.player_id = buyer_cost_card2.buyer_id
 		and buyer_cost_card2.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card3
-    	on gtpp.card3_id = buyer_cost_card3.card_id
+    	on gtpp.card3_id = buyer_cost_card3.base_card_id
     	and gtpp.player_id = buyer_cost_card3.buyer_id
 		and buyer_cost_card3.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card4
-    	on gtpp.card4_id = buyer_cost_card4.card_id
+    	on gtpp.card4_id = buyer_cost_card4.base_card_id
     	and gtpp.player_id = buyer_cost_card4.buyer_id
 		and buyer_cost_card4.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card5
-    	on gtpp.card5_id = buyer_cost_card5.card_id
+    	on gtpp.card5_id = buyer_cost_card5.base_card_id
     	and gtpp.player_id = buyer_cost_card5.buyer_id
 		and buyer_cost_card5.buyer_last_buy_card_id = 1
 	left join flatten.vwhero_cards_est_value market_l5_cost_card1  

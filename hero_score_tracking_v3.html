@@ -42,8 +42,8 @@
     <div class="table-container" style="display: flex; flex-direction: column; flex: 1; justify-content: flex-start;">
         <table id="heroesTable">
     <tr>
-        <th class="rank-column" data-sort="rank">
-            <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+        <th class="rank-column" data-sort="rank" style="text-align:center;">
+            #<div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
         </th>
         <th class="hero-column" style="text-align: left; min-width: max-content;">Hero</th>
         <th class="rank-column" data-sort="views">
@@ -52,11 +52,11 @@
         <th class="rank-column" data-sort="posts">
             Posts <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
         </th>
-        <th data-sort="4htrend">
-            4h Trend <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
-        </th>
         <th data-sort="8htrend">
             8h Trend <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+        </th>
+        <th data-sort="24htrend">
+            24h Trend <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
         </th>
         <!-- Timestamp columns will be added dynamically -->
     </tr>
@@ -105,6 +105,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 let allHeroes = [];
 let allTimestamps = [];
+let currentSort = { column: null, descending: true };
 
 // Fetch API heroes
 async function fetchApiHeroes() {
@@ -201,6 +202,42 @@ function renderHeroMatrixTable(heroes, timestamps) {
     const minScore = allScores.length ? Math.min(...allScores) : 0;
     const maxScore = allScores.length ? Math.max(...allScores) : 1;
 
+    // Calculate percent changes for sorting
+    heroes.forEach(hero => {
+        // 8h Trend
+        let trend8hScores = [];
+        const now = new Date();
+        const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
+        for (const ts of timestamps.slice().reverse()) {
+            const tsDate = new Date(ts);
+            if (tsDate >= eightHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
+                trend8hScores.push(hero.scores[ts]);
+            }
+        }
+        if (typeof hero.fantasy_score === 'number') {
+            trend8hScores.push(hero.fantasy_score);
+        }
+        hero._trend8h = (trend8hScores.length > 1 && trend8hScores[0] !== 0)
+            ? ((trend8hScores[trend8hScores.length - 1] - trend8hScores[0]) / trend8hScores[0]) * 100
+            : 0;
+
+        // 24h Trend
+        let trend24hScores = [];
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        for (const ts of timestamps.slice().reverse()) {
+            const tsDate = new Date(ts);
+            if (tsDate >= twentyFourHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
+                trend24hScores.push(hero.scores[ts]);
+            }
+        }
+        if (typeof hero.fantasy_score === 'number') {
+            trend24hScores.push(hero.fantasy_score);
+        }
+        hero._trend24h = (trend24hScores.length > 1 && trend24hScores[0] !== 0)
+            ? ((trend24hScores[trend24hScores.length - 1] - trend24hScores[0]) / trend24hScores[0]) * 100
+            : 0;
+    });
+
     // Add a row for each hero
     for (const hero of heroes) {
         const row = table.insertRow();
@@ -225,7 +262,7 @@ function renderHeroMatrixTable(heroes, timestamps) {
             </a>
         `;
 
-        // Views cell with RdYlGn color
+        // Views
         const viewsCell = row.insertCell();
         viewsCell.className = "frozen-columns";
         let formattedViews = '';
@@ -247,9 +284,38 @@ function renderHeroMatrixTable(heroes, timestamps) {
         postsCell.className = "frozen-columns";
         postsCell.textContent = hero.tweet_count ?? '';
 
-        // Trend columns (optional, blank)
-        row.insertCell();
-        row.insertCell();
+        // 8h Trend
+        const trend8hCell = row.insertCell();
+        let trend8hScores = [];
+        const now = new Date();
+        const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
+        // Collect all scores from 8h ago to now, in order
+        for (const ts of timestamps.slice().reverse()) { // oldest to newest
+            const tsDate = new Date(ts);
+            if (tsDate >= eightHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
+                trend8hScores.push(hero.scores[ts]);
+            }
+        }
+        // Always add current live score at the end if available
+        if (typeof hero.fantasy_score === 'number') {
+            trend8hScores.push(hero.fantasy_score);
+        }
+        trend8hCell.innerHTML = renderSparkline(trend8hScores);
+
+        // 24h Trend
+        const trend24hCell = row.insertCell();
+        let trend24hScores = [];
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        for (const ts of timestamps.slice().reverse()) { // oldest to newest
+            const tsDate = new Date(ts);
+            if (tsDate >= twentyFourHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
+                trend24hScores.push(hero.scores[ts]);
+            }
+        }
+        if (typeof hero.fantasy_score === 'number') {
+            trend24hScores.push(hero.fantasy_score);
+        }
+        trend24hCell.innerHTML = renderSparkline(trend24hScores);
 
         // "Live" fantasy_score column
         const liveCell = row.insertCell();
@@ -487,6 +553,104 @@ function filterSupabaseSnapshots(supabaseScores) {
     filtered.forEach(row => { delete row._dt; });
 
     return filtered;
+}
+
+function renderSparkline(scores, width = 63, height = 40) {
+    if (!scores.length || scores.every(s => s === 0)) return '';
+    const min = Math.min(...scores);
+    const max = Math.max(...scores);
+    const range = max - min || 1;
+    const first = scores[0];
+    const last = scores[scores.length - 1];
+    const percentChange = first ? ((last - first) / first) * 100 : 0;
+    const isUp = percentChange >= 0;
+    const color = isUp ? "#27ae60" : "#e74c3c";
+    const percentText = first
+        ? `${isUp ? '+' : ''}${Math.round(percentChange)}%`
+        : '';
+
+    const points = scores.map((score, i) => {
+        const x = (i / (scores.length - 1)) * (width - 2) + 1;
+        const y = height - 2 - ((score - min) / range) * (height - 4);
+        return `${x},${y}`;
+    }).join(' ');
+    const areaPoints = scores.map((score, i) => {
+        const x = (i / (scores.length - 1)) * (width - 2) + 1;
+        const y = height - 2 - ((score - min) / range) * (height - 4);
+        return `${x},${y}`;
+    }).join(' ') + ` ${width - 1},${height - 1} 1,${height - 1}`;
+
+    // Tooltip text
+    const tooltip = (typeof first === 'number' && typeof last === 'number')
+        ? `First: ${Math.round(first)} | Last: ${Math.round(last)}`
+        : '';
+
+    // Text position
+    const textX = isUp ? width - 2 : 2;
+    const textAnchor = isUp ? 'end' : 'start';
+    const textY = height - 4;
+
+    // SVG with <title> for native tooltip
+    return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow:visible; margin-top:-10px; margin-bottom:-10px; vertical-align:middle;">
+            <title>${tooltip}</title>
+            <polyline points="${areaPoints}" fill="${color}22" stroke="none"/>
+            <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2"/>
+            <text x="${textX}" y="${textY}" font-size="9" fill="${color}" text-anchor="${textAnchor}" font-family="Arial, sans-serif">${percentText}</text>
+        </svg>
+    `;
+}
+
+// Sort event listeners
+document.querySelector('[data-sort="views"]').addEventListener('click', function() {
+    handleSort('views', (a, b) =>
+        currentSort.descending
+            ? (b.views ?? 0) - (a.views ?? 0)
+            : (a.views ?? 0) - (b.views ?? 0)
+    );
+});
+
+document.querySelector('[data-sort="posts"]').addEventListener('click', function() {
+    handleSort('posts', (a, b) =>
+        currentSort.descending
+            ? (b.tweet_count ?? 0) - (a.tweet_count ?? 0)
+            : (a.tweet_count ?? 0) - (b.tweet_count ?? 0)
+    );
+});
+
+document.querySelector('[data-sort="8htrend"]').addEventListener('click', function() {
+    handleSort('8htrend', (a, b) =>
+        currentSort.descending
+            ? (b._trend8h ?? 0) - (a._trend8h ?? 0)
+            : (a._trend8h ?? 0) - (b._trend8h ?? 0)
+    );
+});
+
+document.querySelector('[data-sort="24htrend"]').addEventListener('click', function() {
+    handleSort('24htrend', (a, b) =>
+        currentSort.descending
+            ? (b._trend24h ?? 0) - (a._trend24h ?? 0)
+            : (a._trend24h ?? 0) - (b._trend24h ?? 0)
+    );
+});
+
+document.querySelector('[data-sort="rank"]').addEventListener('click', function() {
+    handleSort('rank', (a, b) =>
+        currentSort.descending
+            ? (a.current_rank ?? 9999) - (b.current_rank ?? 9999)
+            : (b.current_rank ?? 9999) - (a.current_rank ?? 9999)
+    );
+});
+
+function handleSort(column, sortFn) {
+    if (currentSort.column === column) {
+        currentSort.descending = !currentSort.descending;
+    } else {
+        currentSort.column = column;
+        currentSort.descending = true; // Always descending on first click
+    }
+    const sorted = [...allHeroes].sort(sortFn);
+    renderHeroMatrixTable(sorted, allTimestamps);
 }
     </script>
 </body>

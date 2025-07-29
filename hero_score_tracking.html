@@ -90,12 +90,16 @@
             color: #3498db;
         }
         .table-container {
-    overflow-x: auto;
-    width: 100%;
-}
-#heroesTable {
-    min-width: 1200px; /* or larger, depending on your columns */
-}
+            overflow-x: auto;
+            width: 100%;
+            user-select: none; /* Prevent text selection during drag */
+        }
+        .table-container.active {
+            cursor: grabbing !important;
+        }
+        #heroesTable {
+            min-width: 1200px; /* or larger, depending on your columns */
+        }
     </style>
 
     </div>
@@ -527,6 +531,53 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Hide loading message and show table
     document.getElementById('loading-message').style.display = 'none';
     document.getElementById('heroesTable').style.display = '';
+});
+
+// Enable click and drag scrolling for desktop
+document.addEventListener('DOMContentLoaded', function() {
+    const tableContainer = document.querySelector('.table-container');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    tableContainer.addEventListener('mousedown', (e) => {
+        // Only enable drag if not clicking on interactive elements
+        if (e.target.tagName === 'TH' || e.target.closest('th') || 
+            e.target.tagName === 'A' || e.target.closest('a') ||
+            e.target.tagName === 'BUTTON' || e.target.closest('button') ||
+            e.target.tagName === 'INPUT' || e.target.closest('input')) {
+            return;
+        }
+        
+        isDown = true;
+        tableContainer.classList.add('active');
+        startX = e.pageX - tableContainer.offsetLeft;
+        scrollLeft = tableContainer.scrollLeft;
+        tableContainer.style.cursor = 'grabbing';
+    });
+
+    tableContainer.addEventListener('mouseleave', () => {
+        isDown = false;
+        tableContainer.classList.remove('active');
+        tableContainer.style.cursor = 'grab';
+    });
+
+    tableContainer.addEventListener('mouseup', () => {
+        isDown = false;
+        tableContainer.classList.remove('active');
+        tableContainer.style.cursor = 'grab';
+    });
+
+    tableContainer.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - tableContainer.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        tableContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    // Set initial cursor
+    tableContainer.style.cursor = 'grab';
 });
 
 document.getElementById('hero-search-box').addEventListener('input', function(e) {

@@ -37,9 +37,7 @@
         <span class="clear-search"></span>
     </div>
     <div class="small-text">
-        <span id="timestamp">2025-07-29 00:54 UTC</span>
-        | Status: live
-        <span class="info-text"> | Most recent score first</span>
+        <span class="info-text" id="scores-last-changed"></span>
     </div>
     <div class="table-container" style="display: flex; flex-direction: column; flex: 1; justify-content: flex-start;">
         <table id="heroesTable">
@@ -71,122 +69,8 @@
                 <th>Hashed Scores</th>
                 <th>Changed From Previous</th>
             </tr>
-
-        <tr>
-            <td>2025-07-28 14:54:24.203388+00:00</td>
-            <td>1809024182339520871</td>
-            <td class="initial">Initial</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 15:54:19.079781+00:00</td>
-            <td>6101928080721129388</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 16:54:10.604622+00:00</td>
-            <td>5135593327759256458</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 17:24:12.208107+00:00</td>
-            <td>7956317753880136455</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 17:54:20.769767+00:00</td>
-            <td>1612223159537579561</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 18:24:12.685424+00:00</td>
-            <td>8272211647056589146</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 18:54:13.574590+00:00</td>
-            <td>1506439668364926574</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 19:24:10.729377+00:00</td>
-            <td>2421013581356566860</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 19:54:10.110889+00:00</td>
-            <td>2421013581356566860</td>
-            <td class="no-change">No Change</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 20:24:18.165525+00:00</td>
-            <td>1838039086181615225</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 20:54:08.049349+00:00</td>
-            <td>7974664610637133326</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 21:24:12.552340+00:00</td>
-            <td>6101928080721129388</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 21:54:10.942192+00:00</td>
-            <td>225354678866350720</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 22:24:11.404001+00:00</td>
-            <td>6356268863914403075</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 22:54:11.774462+00:00</td>
-            <td>6517953619477702055</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 23:24:11.107215+00:00</td>
-            <td>9050886695914382167</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-28 23:54:12.767651+00:00</td>
-            <td>1302614914805512450</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-29 00:24:08.738359+00:00</td>
-            <td>2157147142352565066</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-        <tr>
-            <td>2025-07-29 00:54:12.387309+00:00</td>
-            <td>7248500506616156940</td>
-            <td class="changed">Changed</td>
-        </tr>
-    
-    </table>
+            <!-- Dynamic rows will be added here -->
+        </table>
     </div>
     <style>
         .hash-comparison {
@@ -218,6 +102,9 @@
 const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+let allHeroes = [];
+let allTimestamps = [];
 
 // Fetch API heroes
 async function fetchApiHeroes() {
@@ -293,14 +180,19 @@ function renderHeroMatrixTable(heroes, timestamps) {
     // Remove all rows except header
     while (table.rows.length > 1) table.deleteRow(1);
 
-    // Find min/max views for coloring
-    const viewsArray = heroes.map(h => typeof h.views === 'number' ? h.views : 0);
-    const vmin = Math.min(...viewsArray);
-    const vmax = Math.max(...viewsArray);
+    // Find min/max views for coloring - use ALL heroes to maintain consistent scale
+    const allViewsArray = allHeroes.map(h => typeof h.views === 'number' ? h.views : 0);
+    const vmin = Math.min(...allViewsArray);
+    const vmax = Math.max(...allViewsArray);
 
-    // Find min/max fan_score for all timestamps and all heroes
+    // Find min/max fan_score for all timestamps using ALL heroes (not just filtered)
     let allScores = [];
-    for (const hero of heroes) {
+    for (const hero of allHeroes) {
+        // Include live fantasy_score
+        if (typeof hero.fantasy_score === 'number') {
+            allScores.push(hero.fantasy_score);
+        }
+        // Include historical scores
         for (const ts of timestamps) {
             const score = hero.scores[ts];
             if (typeof score === 'number') allScores.push(score);
@@ -322,16 +214,16 @@ function renderHeroMatrixTable(heroes, timestamps) {
         const heroCell = row.insertCell();
         heroCell.className = "hero-column frozen-columns";
         const displayName = (hero.name && hero.name.length > 15)
-    ? hero.name.slice(0, 15) + '...'
-    : (hero.name || hero.handle);
+            ? hero.name.slice(0, 15) + '...'
+            : (hero.name || hero.handle);
 
-heroCell.innerHTML = `
-    <img src="${hero.profile_image_url_https || ''}" class="hero-image" alt="${hero.name || hero.handle}">
-    <span>${displayName}</span>
-    <a href="https://x.com/${hero.handle}" target="_blank" style="margin-left:6px; color:#888; font-size:0.9em; vertical-align:middle;">
-        <i class="fab fa-x-twitter"></i>
-    </a>
-`;
+        heroCell.innerHTML = `
+            <img src="${hero.profile_image_url_https || ''}" class="hero-image" alt="${hero.name || hero.handle}">
+            <span>${displayName}</span>
+            <a href="https://x.com/${hero.handle}" target="_blank" style="margin-left:6px; color:#888; font-size:0.9em; vertical-align:middle;">
+                <i class="fab fa-x-twitter"></i>
+            </a>
+        `;
 
         // Views cell with RdYlGn color
         const viewsCell = row.insertCell();
@@ -345,7 +237,10 @@ heroCell.innerHTML = `
             formattedViews = hero.views ?? '';
         }
         viewsCell.textContent = formattedViews;
-        viewsCell.style.color = getRdYlGnColor(hero.views ?? 0, vmin, vmax);
+        // Handle case where vmin === vmax to avoid division by zero
+        if (vmax > vmin) {
+            viewsCell.style.color = getRdYlGnColor(hero.views ?? 0, vmin, vmax);
+        }
 
         // Posts
         const postsCell = row.insertCell();
@@ -426,7 +321,103 @@ function getRdYlGnColor(value, vmin, vmax) {
     return `rgb(${color[0]},${color[1]},${color[2]})`;
 }
 
-// Orchestrate everything on DOMContentLoaded
+function generateScoreHash(scores) {
+    // Sort scores to ensure consistent hashing regardless of order
+    const sortedScores = scores.sort((a, b) => a - b);
+    const scoreString = sortedScores.join(',');
+    
+    // Simple hash function (djb2)
+    let hash = 5381;
+    for (let i = 0; i < scoreString.length; i++) {
+        hash = ((hash << 5) + hash) + scoreString.charCodeAt(i);
+    }
+    return Math.abs(hash);
+}
+
+let lastScoreChangeTimestamp = null; // Global variable to track last change
+
+function renderHashComparison(supabaseScores, timestamps) {
+    const hashTable = document.getElementById('hashTable');
+    if (!hashTable) return;
+
+    // Clear existing rows except header
+    while (hashTable.rows.length > 1) {
+        hashTable.deleteRow(1);
+    }
+
+    // Calculate hash for each timestamp
+    const hashData = [];
+    for (const ts of timestamps) {
+        const scoresForTimestamp = supabaseScores
+            .filter(row => row.start_datetime === ts)
+            .map(row => row.fan_score)
+            .filter(score => typeof score === 'number');
+
+        const hash = generateScoreHash(scoresForTimestamp);
+        hashData.push({ timestamp: ts, hash: hash });
+    }
+
+    lastScoreChangeTimestamp = null; // Reset before calculation
+
+    // Find most recent "Changed" status
+    let foundChange = false;
+    hashData.forEach((data, index) => {
+        const row = hashTable.insertRow();
+
+        // Timestamp cell
+        const dt = new Date(data.timestamp);
+        const formatted =
+            dt.getUTCFullYear() + '-' +
+            String(dt.getUTCMonth() + 1).padStart(2, '0') + '-' +
+            String(dt.getUTCDate()).padStart(2, '0') + ' ' +
+            String(dt.getUTCHours()).padStart(2, '0') + ':' +
+            String(dt.getUTCMinutes()).padStart(2, '0') + ':' +
+            String(dt.getUTCSeconds()).padStart(2, '0');
+        row.insertCell().textContent = formatted;
+
+        // Hash cell
+        row.insertCell().textContent = data.hash;
+
+        // Status cell
+        const statusCell = row.insertCell();
+        if (index === hashData.length - 1) { // Oldest timestamp
+            statusCell.textContent = 'Initial';
+            statusCell.className = 'initial';
+        } else {
+            const nextHash = hashData[index + 1].hash;
+            if (data.hash === nextHash) {
+                statusCell.textContent = 'No Change';
+                statusCell.className = 'no-change';
+            } else {
+                statusCell.textContent = 'Changed';
+                statusCell.className = 'changed';
+                if (!foundChange) {
+                    lastScoreChangeTimestamp = data.timestamp;
+                    foundChange = true;
+                }
+            }
+        }
+    });
+}
+
+function updateScoresLastChanged() {
+    if (!lastScoreChangeTimestamp) return;
+    const lastChangedDate = new Date(lastScoreChangeTimestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - lastChangedDate.getTime();
+    const diffMinutes = Math.floor(diffMs / (60 * 1000));
+    let text;
+    if (diffMinutes < 180) {
+        text = `Scores Last Changed: ${diffMinutes} minutes ago`;
+    } else {
+        const diffHours = Math.floor(diffMinutes / 60);
+        text = `Scores Last Changed: ${diffHours} hours ago`;
+    }
+    const infoSpan = document.getElementById('scores-last-changed');
+    if (infoSpan) infoSpan.textContent = text;
+}
+
+// Update the DOMContentLoaded event handler
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         const [apiHeroes, supabaseScores] = await Promise.all([
@@ -437,6 +428,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         allHeroes = mergedResult.merged;
         allTimestamps = mergedResult.allTimestamps;
         renderHeroMatrixTable(allHeroes, allTimestamps);
+        renderHashComparison(supabaseScores, allTimestamps);
+        updateScoresLastChanged(); // <-- Now uses lastScoreChangeTimestamp
     } catch (e) {
         console.error(e);
     }
@@ -452,7 +445,7 @@ document.getElementById('hero-search-box').addEventListener('input', function(e)
         (hero.handle && hero.handle.toLowerCase().includes(query)) ||
         (hero.name && hero.name.toLowerCase().includes(query))
     );
-    renderHeroMatrixTable(filtered, allTimestamps);
+    renderHeroMatrixTable(filtered, allTimestamps); // <-- always use allTimestamps
 });
 
 function filterSupabaseSnapshots(supabaseScores) {
@@ -496,6 +489,5 @@ function filterSupabaseSnapshots(supabaseScores) {
     return filtered;
 }
     </script>
-    <script src="/js/timeUtils.js" defer></script>
 </body>
 </html>

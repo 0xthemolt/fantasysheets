@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-LXJ5Q7LKKE');
+        </script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hero Score  Tracking</title>
+        <link rel="icon" type="image/png" href="icons/favicon.webp">
+        <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+        <link rel="stylesheet" href="./styles.css">
+        <script src="/js/config.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    </head>
+    <body>
+        <div class="title-container">
+            <h1 class="title-header">
+                <a href="index.html" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                Hero Score Tracking
+                <span class="tournament-badge">Main 62</span>
+            </h1>
+        </div>
+        <div id="search-container" style="display: flex; align-items: center;">
+            <button class="button-group button-group--yellow" id="my-favorites-group">
+                <span class="button-label">My Favorites</span>
+                <i class="fa-regular fa-star"></i>
+            </button>
+            <input type="text" id="hero-search-box" class="search-box" placeholder="Search Heroes">
+            <span class="clear-search"></span>
+        </div>
+        <div class="small-text">
+            <span id="timestamp">2025-07-29 00:54 UTC</span>
+            | Status: live
+            <span class="info-text"> | Most recent score first</span>
+        </div>
+        <div class="table-container" style="display: flex; flex-direction: column; flex: 1; justify-content: flex-start;">
+            <table id="heroesTable">
+            <tr>
+                <th class="rank-column" data-sort="rank">
+                    <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+                </th>
+                <th class="hero-column" style="text-align: left; min-width: max-content;">Hero</th>
+                <th class="rank-column" data-sort="views">
+                    Views <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+                </th>
+                <th class="rank-column" data-sort="posts">
+                    Posts <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+                </th>
+                <th data-sort="4htrend">
+                    4h Trend <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+                </th>
+                <th data-sort="8htrend">
+                    8h Trend <div class="sort-arrows"><span class="sort-arrow up"></span><span class="sort-arrow down"></span></div>
+                </th>
+        <th>07-29 00:54</th><th>07-29 00:24</th><th>07-28 23:54</th><th>07-28 23:24</th><th>07-28 22:54</th><th>07-28 22:24</th><th>07-28 21:54</th><th>07-28 21:24</th><th>07-28 20:54</th><th>07-28 20:24</th><th>07-28 19:54</th><th>07-28 19:24</th><th>07-28 18:54</th><th>07-28 18:24</th><th>07-28 17:54</th><th>07-28 17:24</th><th>07-28 16:54</th><th>07-28 15:54</th><th>07-28 14:54</th></tr>
+               <tr>
+                <td class="frozen-columns" data-value="16.0">16</td>
+                <td class="hero-column frozen-columns">
+                    <img src="https://pbs.twimg.com/profile_images/1748136011417161728/2AVT6Js__normal.jpg" class="hero-image" alt="wizardofsoho">
+                    <span>wizardofsoho</span>
+                </td>
+                <td class="frozen-columns" data-value="180734.0" style="color: #a50026">180K</td>
+                <td class="frozen-columns" data-value="15.0">15</td>
+        
+            <td class="frozen-columns" data-value="11.443433029908972">
+            <div class="trend-container" style="position: relative;">
+                <svg width="100" height="30" style="display: block;">
+                    <defs>
+                        <linearGradient id="gradient_-2133778528338691138" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="2,28 2.0,28.0 15.714285714285714,26.522727272727273 29.428571428571427,25.045454545454547 43.14285714285714,19.43181818181818 56.857142857142854,14.113636363636365 70.57142857142857,3.4772727272727266 84.28571428571428,2.2954545454545467 98.0,2.0 98,28" fill="url(#gradient_-2133778528338691138)" />
+                    <polyline 
+                        points="2.0,28.0 15.714285714285714,26.522727272727273 29.428571428571427,25.045454545454547 43.14285714285714,19.43181818181818 56.857142857142854,14.113636363636365 70.57142857142857,3.4772727272727266 84.28571428571428,2.2954545454545467 98.0,2.0"
+                        fill="none"
+                        stroke="#4CAF50"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    <text 
+                        x="98" 
+                        y="25" 
+                        fill="#4CAF50" 
+                        font-size="10px" 
+                        text-anchor="end"
+                        style="font-family: Arial, sans-serif;"
+                    >11.4%</text>
+                </svg>
+            </div>
+        </td>
+            <td class="frozen-columns" data-value="11.010362694300518" style="border-right: 2px solid #ddd;">
+            <div class="trend-container" style="position: relative;">
+                <svg width="100" height="30" style="display: block;">
+                    <defs>
+                        <linearGradient id="gradient_-268462425419007819" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:0.3" />
+                            <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:0.1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="2,28 2.0,22.849056603773583 8.4,20.88679245283019 14.8,26.28301886792453 21.200000000000003,23.339622641509436 27.6,21.37735849056604 34.0,21.37735849056604 40.400000000000006,28.0 46.800000000000004,25.30188679245283 53.2,23.58490566037736 59.6,22.358490566037737 66.0,21.132075471698112 72.4,16.471698113207545 78.80000000000001,12.056603773584907 85.2,3.2264150943396217 91.60000000000001,2.245283018867923 98.0,2.0 98,28" fill="url(#gradient_-268462425419007819)" />
+                    <polyline 
+                        points="2.0,22.849056603773583 8.4,20.88679245283019 14.8,26.28301886792453 21.200000000000003,23.339622641509436 27.6,21.37735849056604 34.0,21.37735849056604 40.400000000000006,28.0 46.800000000000004,25.30188679245283 53.2,23.58490566037736 59.6,22.358490566037737 66.0,21.132075471698112 72.4,16.471698113207545 78.80000000000001,12.056603773584907 85.2,3.2264150943396217 91.60000000000001,2.245283018867923 98.0,2.0"
+                        fill="none"
+                        stroke="#4CAF50"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                    <text 
+                        x="98" 
+                        y="25" 
+                        fill="#4CAF50" 
+                        font-size="10px" 
+                        text-anchor="end"
+                        style="font-family: Arial, sans-serif;"
+                    >11.0%</text>
+                </svg>
+            </div>
+        </td>
+        
+                    <td class="score-cell" style="background-color: rgb(0, 104, 55); color: black">
+                        857
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(2, 107, 56); color: black">
+                        856
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(12, 126, 66); color: black">
+                        852
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(211, 236, 135); color: black">
+                        816
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(254, 237, 161); color: black">
+                        798
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(249, 149, 85); color: white">
+                        779
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(245, 119, 71); color: white">
+                        774
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(234, 89, 58); color: white">
+                        769
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(215, 49, 39); color: white">
+                        762
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(165, 0, 38); color: white">
+                        751
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(248, 144, 83); color: white">
+                        778
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(248, 144, 83); color: white">
+                        778
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(237, 94, 60); color: white">
+                        770
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(196, 30, 38); color: white">
+                        758
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(250, 157, 89); color: white">
+                        780
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(242, 106, 65); color: white">
+                        772
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(246, 124, 74); color: white">
+                        775
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(234, 89, 58); color: white">
+                        769
+                    </td>
+                
+                    <td class="score-cell" style="background-color: rgb(236, 247, 165); color: black">
+                        809
+                    </td>
+                </tr></table>
+        <div class="hash-comparison" style="margin-top: 20px;">
+            <h3>Score Distribution Hashes</h3>
+            <table id="hashTable">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Hashed Scores</th>
+                    <th>Changed From Previous</th>
+                </tr>
+    
+            <tr>
+                <td>2025-07-28 14:54:24.203388+00:00</td>
+                <td>1809024182339520871</td>
+                <td class="initial">Initial</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 15:54:19.079781+00:00</td>
+                <td>6101928080721129388</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 16:54:10.604622+00:00</td>
+                <td>5135593327759256458</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 17:24:12.208107+00:00</td>
+                <td>7956317753880136455</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 17:54:20.769767+00:00</td>
+                <td>1612223159537579561</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 18:24:12.685424+00:00</td>
+                <td>8272211647056589146</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 18:54:13.574590+00:00</td>
+                <td>1506439668364926574</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 19:24:10.729377+00:00</td>
+                <td>2421013581356566860</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 19:54:10.110889+00:00</td>
+                <td>2421013581356566860</td>
+                <td class="no-change">No Change</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 20:24:18.165525+00:00</td>
+                <td>1838039086181615225</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 20:54:08.049349+00:00</td>
+                <td>7974664610637133326</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 21:24:12.552340+00:00</td>
+                <td>6101928080721129388</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 21:54:10.942192+00:00</td>
+                <td>225354678866350720</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 22:24:11.404001+00:00</td>
+                <td>6356268863914403075</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 22:54:11.774462+00:00</td>
+                <td>6517953619477702055</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 23:24:11.107215+00:00</td>
+                <td>9050886695914382167</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-28 23:54:12.767651+00:00</td>
+                <td>1302614914805512450</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-29 00:24:08.738359+00:00</td>
+                <td>2157147142352565066</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+            <tr>
+                <td>2025-07-29 00:54:12.387309+00:00</td>
+                <td>7248500506616156940</td>
+                <td class="changed">Changed</td>
+            </tr>
+        
+        </table>
+        </div>
+        <style>
+            .hash-comparison {
+                margin: 20px;
+                padding: 15px;
+                border-radius: 5px;
+            }
+            .changed {
+                color: #27ae60;
+                font-weight: bold;
+            }
+            .no-change {
+                color: #e74c3c;
+            }
+            .initial {
+                color: #3498db;
+            }
+        </style>
+    
+        </div>
+        <script>
+        
+            const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+            const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey,)
+
+    
+                // Add this new script section for drag scrolling
+                const tableContainer = document.querySelector('.table-container');
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                tableContainer.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    tableContainer.classList.add('active');
+                    startX = e.pageX - tableContainer.offsetLeft;
+                    scrollLeft = tableContainer.scrollLeft;
+                });
+
+                tableContainer.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    tableContainer.classList.remove('active');
+                });
+
+                tableContainer.addEventListener('mouseup', () => {
+                    isDown = false;
+                    tableContainer.classList.remove('active');
+                });
+
+                tableContainer.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - tableContainer.offsetLeft;
+                    const walk = (x - startX) * 2; // Scroll speed multiplier
+                    tableContainer.scrollLeft = scrollLeft - walk;
+                });       
+                
+                // Add this new event listener for the star
+                document.addEventListener('DOMContentLoaded', function() {
+                    const buttonGroup = document.querySelector('#my-favorites-group');
+                    const icon = buttonGroup.querySelector('i');
+                    
+                    buttonGroup.addEventListener('click', function() {
+                        if (icon.classList.contains('fa-regular')) {
+                            // Switching to filled star - show only favorites
+                            icon.className = 'fa-solid fa-star';
+                            buttonGroup.classList.add('selected');
+                            filterFavorites(true);
+                        } else {
+                            // Switching to outline star - show all
+                            icon.className = 'fa-regular fa-star';
+                            buttonGroup.classList.remove('selected');
+                            filterFavorites(false);
+                        }
+                    });
+                });
+
+                function filterFavorites(showOnlyFavorites) {
+                    // Get favorites from localStorage
+                    const favoriteHeroes = JSON.parse(localStorage.getItem('favoriteHeroes') || '[]');
+                    const rows = document.querySelectorAll('#heroesTable tr');
+
+                    rows.forEach(function(row, index) {
+                        if (index === 0) return; // Skip header row
+                        
+                        const heroHandle = row.querySelector('td:nth-child(2) span').textContent;
+                        
+                        if (showOnlyFavorites) {
+                            // Show row only if hero is in favorites
+                            row.style.display = favoriteHeroes.includes(heroHandle) ? '' : 'none';
+                        } else {
+                            // Show all rows
+                            row.style.display = '';
+                        }
+                    });
+                }
+
+                function sortTable(column, descending) {
+                var table = document.getElementById("heroesTable");
+                var rows = Array.from(table.rows).slice(1); // Convert to array and skip header
+                
+                // Find the column index based on the data-sort attribute
+                var headerCells = table.rows[0].cells;
+                var columnIndex = Array.from(headerCells).findIndex(cell => cell.getAttribute('data-sort') === column);
+                
+                if (columnIndex === -1) return; // Exit if column not found
+
+                // Remove the special case for hero_fantasy_score
+                const ascending = !descending;
+
+                rows.sort((a, b) => {
+                    let aCell = a.cells[columnIndex];
+                    let bCell = b.cells[columnIndex];
+                    
+                    // Use the raw values stored in data-value
+                    let aValue = parseFloat(aCell.getAttribute('data-value')) || 0;
+                    let bValue = parseFloat(bCell.getAttribute('data-value')) || 0;
+
+                    return ascending ? aValue - bValue : bValue - aValue;
+                });
+
+                // Reinsert rows in new order
+                rows.forEach(row => table.appendChild(row));
+                
+                updateRanks(); // Call to update ranks after sorting
+            }
+
+            // Ensure that the ranking is based on hero_fantasy_score
+            function updateRanks() {
+                var rows = document.querySelectorAll('#heroesTable tr');
+                let currentRank = 1; // Start ranking from 1
+                let lastValue = null; // To track the last value for skipping identical ranks
+                let lastRank = 1; // To track the last assigned rank
+
+                rows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    var rankCell = row.querySelector('td.rank');
+                    if (rankCell) {
+                        let currentValue = parseFloat(row.querySelector('td[data-value]').getAttribute('data-value')) || 0;
+
+                        // If the current value is the same as the last value, keep the same rank
+                        if (currentValue === lastValue) {
+                            rankCell.textContent = lastRank; // Same rank for identical values
+                        } else {
+                            rankCell.textContent = currentRank; // Assign new rank
+                            lastRank = currentRank; // Update lastRank to current
+                        }
+                        lastValue = currentValue; // Update lastValue to current
+                        currentRank++; // Increment rank for next unique value
+                    }
+                });
+            }
+
+            // Add click event listeners to the headers
+            document.addEventListener('DOMContentLoaded', function() {
+                const headers = document.querySelectorAll('th[data-sort]');
+                headers.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const column = this.getAttribute('data-sort');
+                        
+                        // Find current sort direction
+                        const currentArrow = this.querySelector('.sort-arrow.active');
+                        const isDescending = currentArrow && currentArrow.classList.contains('down');
+                        
+                        // Reset all arrows in all headers
+                        document.querySelectorAll('.sort-arrow').forEach(arrow => {
+                            arrow.classList.remove('active');
+                        });
+                        
+                        // Toggle between ascending and descending
+                        const newArrow = this.querySelector(isDescending ? '.sort-arrow.up' : '.sort-arrow.down');
+                        if (newArrow) {
+                            newArrow.classList.add('active');
+                        }
+                        
+                        // For hero_fantasy_score, we want to maintain descending as default
+                        const descending = (column === 'hero_fantasy_score') 
+                            ? (isDescending ? false : true)  // Toggle between true/false
+                            : (isDescending ? false : true); // Toggle between true/false
+
+                        sortTable(column, descending);
+                    });
+                });
+            });
+        
+            // Setup search
+            const searchBox = document.getElementById('hero-search-box');
+            const clearButton = document.querySelector('.clear-search');
+            
+            const heroHandles = Array.from(document.querySelectorAll('#heroesTable tr:not(:first-child) td:nth-child(2) span'))
+                .map(span => span.textContent);
+            
+            function filterTable(searchTerm) {
+                searchTerm = searchTerm.toLowerCase();
+                const rows = document.querySelectorAll('#heroesTable tr');
+                
+                rows.forEach(function(row, index) {
+                    if (index === 0) return; // Skip header row
+                    const heroHandle = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+                    row.style.display = heroHandle.includes(searchTerm) ? '' : 'none';
+                });
+            }
+
+            // Setup search functionality with clear button
+            searchBox.addEventListener('input', function(e) {
+                filterTable(e.target.value);
+                // Show/hide clear button based on search content
+                clearButton.style.display = e.target.value ? 'block' : 'none';
+            });
+
+            // Setup clear button functionality
+            clearButton.addEventListener('click', function() {
+                searchBox.value = '';
+                filterTable('');
+                this.style.display = 'none';
+                searchBox.focus();
+            });
+
+            // Query Supabase and store the results for later use
+            let heroScoreData = [];
+
+            // Function to render the heroesTable with dynamic data from API
+function renderHeroesTable() {
+    const table = document.getElementById('heroesTable');
+    if (!table) return;
+
+    // Keep the header row and remove all other rows
+    const headerRow = table.rows[0];
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+
+    // Insert a row for each hero in heroScoreData
+    heroScoreData.forEach(hero => {
+        const row = table.insertRow();
+
+        // Rank column (current_rank)
+        const rankCell = row.insertCell();
+        rankCell.className = "frozen-columns";
+        rankCell.setAttribute('data-value', hero.current_rank ?? '');
+        rankCell.textContent = hero.current_rank ?? '';
+
+        // Hero column (pfp + name + clickable X icon)
+        const heroCell = row.insertCell();
+        heroCell.className = "hero-column frozen-columns";
+        heroCell.innerHTML = `
+            <img src="${hero.profile_image_url_https || ''}" class="hero-image" alt="${hero.name || hero.handle}">
+            <span>${hero.name || hero.handle}</span>
+            <a href="https://x.com/${hero.handle}" target="_blank" style="margin-left:6px; color:#888; font-size:0.9em; vertical-align:middle;">
+                <i class="fab fa-x-twitter"></i>
+            </a>
+        `;
+
+        // Views column
+        const viewsCell = row.insertCell();
+        viewsCell.className = "frozen-columns";
+        viewsCell.setAttribute('data-value', hero.views ?? '');
+
+        // Format views as #K or #M
+        let formattedViews = '';
+        if (typeof hero.views === 'number') {
+            if (hero.views >= 1_000_000) {
+                formattedViews = (hero.views / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+            } else if (hero.views >= 1_000) {
+                formattedViews = (hero.views / 1_000).toFixed(0) + 'K';
+            } else {
+                formattedViews = hero.views.toString();
+            }
+        } else {
+            formattedViews = hero.views ?? '';
+        }
+        viewsCell.textContent = formattedViews;
+
+        // Posts column (tweet_count)
+        const postsCell = row.insertCell();
+        postsCell.className = "frozen-columns";
+        postsCell.setAttribute('data-value', hero.tweet_count ?? '');
+        postsCell.textContent = hero.tweet_count ?? '';
+
+        // Leave the rest of the columns (trend, timestamps, etc.) as is for now
+        for (let i = 4; i < headerRow.cells.length; i++) {
+            row.insertCell();
+        }
+    });
+}
+
+    const API_CONFIG = {
+        BASE_URL: 'https://api-v2.fantasy.top',
+        API_KEY: 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+        TOURNAMENT_NUMBER: 62
+    };
+    
+// Fetch data from the live API and render table when ready
+async function fetchHeroDataAndRender(tournamentNumber = API_CONFIG.TOURNAMENT_NUMBER) {
+    try {
+        const response = await fetch(
+            `${API_CONFIG.BASE_URL}/hero/stats?pagination.page=1&pagination.limit=200&order_by.fantasy_score=desc&tournament_number=${tournamentNumber}&search=%25%25&tactic_only=false`,
+            {
+                headers: {
+                    'accept': 'application/json',
+                    'x-api-key': API_CONFIG.API_KEY
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('API hero data:', result.data); // <-- Add this line
+        heroScoreData = result.data || [];
+        renderHeroesTable();
+    } catch (error) {
+        console.error('Error fetching hero data:', error);
+    }
+}
+
+// Call the new fetch function on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof API_CONFIG !== 'undefined') {
+        fetchHeroDataAndRender();
+    } else {
+        console.error('API_CONFIG is not defined!');
+    }
+});
+            </script>
+            <script src="/js/timeUtils.js" defer></script>
+        </body>
+        </html>

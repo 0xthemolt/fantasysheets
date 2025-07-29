@@ -1685,7 +1685,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                 handle: player[`card${i}_hero_handle`],
                                                 stars: player[`card${i}_hero_stars`],
                                                 score: player[`card${i}_score`],
-                                                url: `https://r2.fantasy.top/v2/${player[`card${i}_hero_rarity`]}/${player[`card${i}_hero_id`]}_${player[`card${i}_hero_stars`]}.png`,
+                                                url: `https://r2.fantasy.top/v3/${player[`card${i}_hero_rarity`]}/${player[`card${i}_hero_id`]}_${player[`card${i}_hero_stars`]}.png`,
                                                 rarity: player[`card${i}_hero_rarity`]
                                             }))
                                             .sort((a, b) => b.score - a.score)
@@ -1878,7 +1878,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                                 handle: group.best_deck[`card${i}_hero_handle`],
                                                 stars: group.best_deck[`card${i}_hero_stars`],
                                                 score: group.best_deck[`card${i}_score`],
-                                                url: `https://r2.fantasy.top/v2/${group.best_deck[`card${i}_hero_rarity`]}/${group.best_deck[`card${i}_hero_id`]}_${group.best_deck[`card${i}_hero_stars`]}.png`,
+                                                url: `https://r2.fantasy.top/v3/${group.best_deck[`card${i}_hero_rarity`]}/${group.best_deck[`card${i}_hero_id`]}_${group.best_deck[`card${i}_hero_stars`]}.png`,
                                                 rarity: group.best_deck[`card${i}_hero_rarity`]
                                             }))
                                             .sort((a, b) => b.score - a.score)
@@ -1950,11 +1950,11 @@ function updateTableWithData(data, preserveFiltered = false) {
         }
 
         const heroes = [
-            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: `https://r2.fantasy.top/v2/${player.card1_hero_rarity}/${player.card1_hero_id}_${player.card1_hero_stars}.png`, rarity: player.card1_hero_rarity }, 
-            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: `https://r2.fantasy.top/v2/${player.card2_hero_rarity}/${player.card2_hero_id}_${player.card2_hero_stars}.png`, rarity: player.card2_hero_rarity },
-            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: `https://r2.fantasy.top/v2/${player.card3_hero_rarity}/${player.card3_hero_id}_${player.card3_hero_stars}.png`, rarity: player.card3_hero_rarity },
-            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: `https://r2.fantasy.top/v2/${player.card4_hero_rarity}/${player.card4_hero_id}_${player.card4_hero_stars}.png`, rarity: player.card4_hero_rarity },
-            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: `https://r2.fantasy.top/v2/${player.card5_hero_rarity}/${player.card5_hero_id}_${player.card5_hero_stars}.png`, rarity: player.card5_hero_rarity }
+            { id: player.card1_id, handle: player.card1_hero_handle, stars: player.card1_hero_stars, score: player.card1_score, url: `https://r2.fantasy.top/v3/${player.card1_hero_rarity}/${player.card1_hero_id}_${player.card1_hero_stars}.png`, rarity: player.card1_hero_rarity }, 
+            { id: player.card2_id, handle: player.card2_hero_handle, stars: player.card2_hero_stars, score: player.card2_score, url: `https://r2.fantasy.top/v3/${player.card2_hero_rarity}/${player.card2_hero_id}_${player.card2_hero_stars}.png`, rarity: player.card2_hero_rarity },
+            { id: player.card3_id, handle: player.card3_hero_handle, stars: player.card3_hero_stars, score: player.card3_score, url: `https://r2.fantasy.top/v3/${player.card3_hero_rarity}/${player.card3_hero_id}_${player.card3_hero_stars}.png`, rarity: player.card3_hero_rarity },
+            { id: player.card4_id, handle: player.card4_hero_handle, stars: player.card4_hero_stars, score: player.card4_score, url: `https://r2.fantasy.top/v3/${player.card4_hero_rarity}/${player.card4_hero_id}_${player.card4_hero_stars}.png`, rarity: player.card4_hero_rarity },
+            { id: player.card5_id, handle: player.card5_hero_handle, stars: player.card5_hero_stars, score: player.card5_score, url: `https://r2.fantasy.top/v3/${player.card5_hero_rarity}/${player.card5_hero_id}_${player.card5_hero_stars}.png`, rarity: player.card5_hero_rarity }
         ];
 
         const row = document.createElement('tr');

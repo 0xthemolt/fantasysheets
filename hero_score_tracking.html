@@ -40,6 +40,7 @@
         <span class="info-text" id="scores-last-changed"></span>
     </div>
     <div class="table-container" style="display: flex; flex-direction: column; flex: 1; justify-content: flex-start;">
+        <div id="loading-message" style="text-align:center; font-size:1.2em; margin:20px 0;">Loading...</div>
         <table id="heroesTable">
     <tr>
         <th class="rank-column" data-sort="rank" style="text-align:center;">
@@ -88,6 +89,13 @@
         .initial {
             color: #3498db;
         }
+        .table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+#heroesTable {
+    min-width: 1200px; /* or larger, depending on your columns */
+}
     </style>
 
     </div>
@@ -209,9 +217,12 @@ function renderHeroMatrixTable(heroes, timestamps) {
         const now = new Date();
         const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
         for (const ts of timestamps.slice().reverse()) {
-            const tsDate = new Date(ts);
-            if (tsDate >= eightHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
-                trend8hScores.push(hero.scores[ts]);
+            const score = hero.scores[ts];
+            if (typeof score === 'number') {
+                const tsDate = new Date(ts);
+                if (tsDate >= eightHoursAgo && tsDate <= now) {
+                    trend8hScores.push(score);
+                }
             }
         }
         if (typeof hero.fantasy_score === 'number') {
@@ -225,9 +236,12 @@ function renderHeroMatrixTable(heroes, timestamps) {
         let trend24hScores = [];
         const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         for (const ts of timestamps.slice().reverse()) {
-            const tsDate = new Date(ts);
-            if (tsDate >= twentyFourHoursAgo && tsDate <= now && typeof hero.scores[ts] === 'number') {
-                trend24hScores.push(hero.scores[ts]);
+            const score = hero.scores[ts];
+            if (typeof score === 'number') {
+                const tsDate = new Date(ts);
+                if (tsDate >= twentyFourHoursAgo && tsDate <= now) {
+                    trend24hScores.push(score);
+                }
             }
         }
         if (typeof hero.fantasy_score === 'number') {
@@ -485,20 +499,34 @@ function updateScoresLastChanged() {
 
 // Update the DOMContentLoaded event handler
 document.addEventListener('DOMContentLoaded', async function() {
+    // Show loading message
+    document.getElementById('loading-message').style.display = 'block';
+    document.getElementById('heroesTable').style.display = 'none';
+
     try {
         const [apiHeroes, supabaseScores] = await Promise.all([
             fetchApiHeroes(),
             fetchSupabaseScores()
         ]);
-        const mergedResult = mergeHeroScores(apiHeroes, supabaseScores);
+        
+        // Filter the supabase scores before merging
+        const filteredSupabaseScores = filterSupabaseSnapshots(supabaseScores);
+        
+        const mergedResult = mergeHeroScores(apiHeroes, filteredSupabaseScores);
         allHeroes = mergedResult.merged;
         allTimestamps = mergedResult.allTimestamps;
         renderHeroMatrixTable(allHeroes, allTimestamps);
-        renderHashComparison(supabaseScores, allTimestamps);
-        updateScoresLastChanged(); // <-- Now uses lastScoreChangeTimestamp
+        
+        // Use filtered scores for hash comparison too
+        renderHashComparison(filteredSupabaseScores, allTimestamps);
+        updateScoresLastChanged();
     } catch (e) {
         console.error(e);
     }
+
+    // Hide loading message and show table
+    document.getElementById('loading-message').style.display = 'none';
+    document.getElementById('heroesTable').style.display = '';
 });
 
 document.getElementById('hero-search-box').addEventListener('input', function(e) {

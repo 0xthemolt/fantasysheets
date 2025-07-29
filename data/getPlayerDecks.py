@@ -41,16 +41,7 @@ SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_
 FROM flatten.hero_stats_tournament_current base 
 join flatten.get_tournaments gt 
 	on base.tournament_id = gt.tournament_id 
-where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
-)
-,trade_history_base as (
-select ptd.buyer_address as buyer_id,ftt.card_id ,ptd.timestamp as trade_timestamp,ptd.total_price as price,ptd.hero_rarity_index,ptd.hero_id,ptd.hero_rarity
-,row_number() over (partition by ptd.buyer_address,ftt.card_id order by ptd.timestamp desc) buyer_last_buy_card_id
-from flatten.player_trade_details   ptd
-join flatten.fantasy_token_txn ftt  
-	on ptd.tx_hash = ftt.tx_hash 
-	and ptd.token_id = ftt.token_id 
-where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841') --frag buy
+where gt.tournament_league_unique_key = 'Elite Main 61'
 )
 ,hero_count as (select COUNT(*) as hero_count from ordered_records)
     select 
@@ -67,6 +58,7 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         card1_score card1_score, -- column 10
         card1_hero_stars, -- column 11
         buyer_cost_card1.price as card1_actual_cost, -- column 12
+        null as card1_market_cost,
         market_l5_cost_card1.est_value as card1_est_cost, -- column 13
 --        case 
 --            when card1_hero_rarity = 'rare' then (common_market_l5_cost_card1.est_value * .85) * 5 
@@ -79,7 +71,8 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         card2_score card2_score, -- column 17
         card2_hero_stars, -- column 18
         buyer_cost_card2.price as card2_actual_cost, -- column 19
-        market_l5_cost_card2.est_value as card2_est_cost, -- column 20
+        null as card2_market_cost, -- column 20
+        market_l5_cost_card2.est_value as card2_est_cost, -- column 21
 --        case 
 --            when card2_hero_rarity = 'rare' then (common_market_l5_cost_card2.est_value * .85) * 5 
 --            when card2_hero_rarity = 'epic' then (common_market_l5_cost_card2.est_value * .80) * 25 
@@ -91,7 +84,8 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         card3_score card3_score, -- column 24
         card3_hero_stars, -- column 25
         buyer_cost_card3.price as card3_actual_cost, -- column 26
-        market_l5_cost_card3.est_value as card3_est_cost, -- column 27
+        null as card3_market_cost, --column 27
+        market_l5_cost_card3.est_value as card3_est_cost, -- column 28
 --        case 
 --            when card3_hero_rarity = 'rare' then (common_market_l5_cost_card3.est_value * .85) * 5 
 --            when card3_hero_rarity = 'epic' then (common_market_l5_cost_card3.est_value * .80) * 25 
@@ -103,7 +97,8 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         card4_score card4_score, -- column 31
         card4_hero_stars, -- column 32
         buyer_cost_card4.price as card4_actual_cost, -- column 33
-        market_l5_cost_card4.est_value as card4_est_cost, -- column 34
+        null as card4market_cost, -- column 34
+        market_l5_cost_card4.est_value as card4_est_cost, -- column 35
 --        case 
 --            when card4_hero_rarity = 'rare' then (common_market_l5_cost_card4.est_value * .85) * 5 
 --            when card4_hero_rarity = 'epic' then (common_market_l5_cost_card4.est_value * .80) * 25 
@@ -115,7 +110,8 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         card5_score card5_score, -- column 38
         card5_hero_stars, -- column 39
         buyer_cost_card5.price as card5_actual_cost, -- column 40
-        market_l5_cost_card5.est_value as card5_est_cost, -- column 41
+        null as card5_market_cost, --column 41
+        market_l5_cost_card5.est_value as card5_est_cost, -- column 42
 --        case 
 --            when card5_hero_rarity = 'rare' then (common_market_l5_cost_card5.est_value * .85) * 5 
 --            when card5_hero_rarity = 'epic' then (common_market_l5_cost_card5.est_value * .80) * 25 
@@ -153,23 +149,23 @@ where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0
         ON gtpp.tournament_id = reward_frag.tournament_id
         AND gtpp.unique_player_rank between reward_frag.range_start and reward_frag.range_end
         AND reward_frag.reward_type = 'FRAGMENT'
-    left join trade_history_base  buyer_cost_card1
+    left join flatten.temp_trade_history_base  buyer_cost_card1
     	on gtpp.card1_id = buyer_cost_card1.card_id
     	and gtpp.player_id = buyer_cost_card1.buyer_id
 		and buyer_cost_card1.buyer_last_buy_card_id = 1
-    left join trade_history_base  buyer_cost_card2
+    left join flatten.temp_trade_history_base  buyer_cost_card2
     	on gtpp.card2_id = buyer_cost_card2.card_id
     	and gtpp.player_id = buyer_cost_card2.buyer_id
 		and buyer_cost_card2.buyer_last_buy_card_id = 1
-    left join trade_history_base  buyer_cost_card3
+    left join flatten.temp_trade_history_base  buyer_cost_card3
     	on gtpp.card3_id = buyer_cost_card3.card_id
     	and gtpp.player_id = buyer_cost_card3.buyer_id
 		and buyer_cost_card3.buyer_last_buy_card_id = 1
-    left join trade_history_base  buyer_cost_card4
+    left join flatten.temp_trade_history_base  buyer_cost_card4
     	on gtpp.card4_id = buyer_cost_card4.card_id
     	and gtpp.player_id = buyer_cost_card4.buyer_id
 		and buyer_cost_card4.buyer_last_buy_card_id = 1
-    left join trade_history_base  buyer_cost_card5
+    left join flatten.temp_trade_history_base  buyer_cost_card5
     	on gtpp.card5_id = buyer_cost_card5.card_id
     	and gtpp.player_id = buyer_cost_card5.buyer_id
 		and buyer_cost_card5.buyer_last_buy_card_id = 1

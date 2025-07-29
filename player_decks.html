@@ -257,7 +257,7 @@
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};"></th>                 
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Player Cost</th>
-                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Market Cost</th>
+                        <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Est Cost</th>
                         <th style="background-color: ${LEAGUE_COLORS[leagueName.toLowerCase()]};">Rewards</th>   
                     </tr>`;
                     
@@ -329,19 +329,19 @@
                         
                         let playerCostHtml = '<div style="display: flex; flex-direction: column; gap: 5px;">';
                         deck.cards.forEach(card => {
-                            const cost = card.actual_card_cost || card.market_card_cost || card.est_card_cost;
-                            const costType = card.actual_card_cost ? 'a' : (card.market_card_cost ? 'm' : 'e');
+                            const cost = card.actual_card_cost || card.est_card_cost;
+                            const costType = card.actual_card_cost ? 'a' : 'e'; // 
                             playerCostHtml += `
                                 <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
                                     <span>${card.hero_handle}</span>
-                                    <span title="A = actual cost | M = recent market median | E = estimate based on recent common median * rarity multiplier">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                    <span title="A = actual cost | E = estimate cost">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
                                 </div>
                             `;
                         });
 
                         // Calculate total cost
                         const playerTotalCost = deck.cards.reduce((sum, card) => {
-                            const cost = card.actual_card_cost || card.market_card_cost || card.est_card_cost || 0;
+                            const cost = card.actual_card_cost || card.est_card_cost || 0;
                             return sum + cost;
                         }, 0);
 
@@ -354,30 +354,30 @@
                             </div>
                         </div>`;
 
-                        let marketCostHtml = '<div style="display: flex; flex-direction: column; gap: 5px;">';
+                        let estCostHtml = '<div style="display: flex; flex-direction: column; gap: 5px;">';
                         deck.cards.forEach(card => {
-                            const cost = card.market_card_cost || card.est_card_cost;
-                            const costType =(card.market_card_cost ? 'm' : 'e');
-                            marketCostHtml += `
+                            const cost = card.est_card_cost;
+                            const costType = 'e'; // Always market for this block
+                            estCostHtml += `
                                 <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
                                     <span>${card.hero_handle}</span>
-                                    <span title="A = actual cost | M = recent market median | E = estimate based on recent common median * rarity multiplier">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
+                                    <span title="A = actual cost | E = estimate cost">${cost ? `${Number(cost).toFixed(3).replace(/\.?0+$/, '')} (${costType})` : '-'}</span>
                                 </div>
                             `;
                         });
 
                         // Calculate total cost
-                        const marketTotalCost = deck.cards.reduce((sum, card) => {
-                            const cost = card.market_card_cost || card.est_card_cost || 0;
+                        const estTotalCost = deck.cards.reduce((sum, card) => {
+                            const cost = card.est_card_cost || 0;
                             return sum + cost;
                         }, 0);
 
                         // Add divider and total
-                        marketCostHtml += `
+                        estCostHtml += `
                             <div style="border-top: 1px solid #444; margin: 5px 0;"></div>
                             <div style="text-align: left; font-size: 0.9em; display: flex; justify-content: space-between;">
                                 <span>Total:</span>
-                                <span>${marketTotalCost ? marketTotalCost.toFixed(3).replace(/\.?0+$/, '') : '-'}</span>
+                                <span>${estTotalCost ? estTotalCost.toFixed(3).replace(/\.?0+$/, '') : '-'}</span>
                             </div>
                         </div>`;
                         
@@ -387,7 +387,7 @@
                             <td>${playerScore}</td>
                             <td>${cardsHtml}</td>                  
                             <td>${playerCostHtml}</td> 
-                            <td>${marketCostHtml}</td>   
+                            <td>${estCostHtml}</td>   
                             <td>${rewardsHtml}</td> 
                         </tr>`;
                     });

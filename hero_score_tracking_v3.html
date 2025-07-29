@@ -284,6 +284,22 @@ function renderHeroMatrixTable(heroes, timestamps) {
     // Remove all rows except header
     while (table.rows.length > 1) table.deleteRow(1);
 
+    // Find min/max views for coloring
+    const viewsArray = heroes.map(h => typeof h.views === 'number' ? h.views : 0);
+    const vmin = Math.min(...viewsArray);
+    const vmax = Math.max(...viewsArray);
+
+    // Find min/max fan_score for all timestamps and all heroes
+    let allScores = [];
+    for (const hero of heroes) {
+        for (const ts of timestamps) {
+            const score = hero.scores[ts];
+            if (typeof score === 'number') allScores.push(score);
+        }
+    }
+    const minScore = allScores.length ? Math.min(...allScores) : 0;
+    const maxScore = allScores.length ? Math.max(...allScores) : 1;
+
     // Add a row for each hero
     for (const hero of heroes) {
         const row = table.insertRow();
@@ -304,7 +320,7 @@ function renderHeroMatrixTable(heroes, timestamps) {
             </a>
         `;
 
-        // Views
+        // Views cell with RdYlGn color
         const viewsCell = row.insertCell();
         viewsCell.className = "frozen-columns";
         let formattedViews = '';
@@ -316,6 +332,7 @@ function renderHeroMatrixTable(heroes, timestamps) {
             formattedViews = hero.views ?? '';
         }
         viewsCell.textContent = formattedViews;
+        viewsCell.style.color = getRdYlGnColor(hero.views ?? 0, vmin, vmax);
 
         // Posts
         const postsCell = row.insertCell();
@@ -330,9 +347,51 @@ function renderHeroMatrixTable(heroes, timestamps) {
         for (const ts of timestamps) {
             const cell = row.insertCell();
             const score = hero.scores[ts];
-            cell.textContent = score !== undefined ? score : '';
+            if (typeof score === 'number') {
+                cell.textContent = Math.round(score);
+                cell.style.backgroundColor = getRdYlGnColor(score, minScore, maxScore);
+                cell.style.color = (score - minScore) / (maxScore - minScore) > 0.3 ? 'black' : 'white';
+            } else {
+                cell.textContent = '-';
+                cell.style.backgroundColor = '#eee';
+                cell.style.color = '#888';
+            }
         }
     }
+}
+
+// RdYlGn colormap: returns a hex color for a value between vmin and vmax
+function getRdYlGnColor(value, vmin, vmax) {
+    // Normalize value between 0 and 1
+    let norm = (value - vmin) / (vmax - vmin);
+    norm = Math.max(0, Math.min(1, norm)); // Clamp between 0 and 1
+
+    // RdYlGn stops: red -> yellow -> green
+    const stops = [
+        { stop: 0.0, color: [165, 0, 38] },    // Red
+        { stop: 0.5, color: [255, 255, 192] }, // Yellow
+        { stop: 1.0, color: [0, 104, 55] }     // Green
+    ];
+
+    let color;
+    if (norm <= 0.5) {
+        // Red to Yellow
+        let t = norm / 0.5;
+        color = [
+            Math.round(stops[0].color[0] + t * (stops[1].color[0] - stops[0].color[0])),
+            Math.round(stops[0].color[1] + t * (stops[1].color[1] - stops[0].color[1])),
+            Math.round(stops[0].color[2] + t * (stops[1].color[2] - stops[0].color[2]))
+        ];
+    } else {
+        // Yellow to Green
+        let t = (norm - 0.5) / 0.5;
+        color = [
+            Math.round(stops[1].color[0] + t * (stops[2].color[0] - stops[1].color[0])),
+            Math.round(stops[1].color[1] + t * (stops[2].color[1] - stops[1].color[1])),
+            Math.round(stops[1].color[2] + t * (stops[2].color[2] - stops[1].color[2]))
+        ];
+    }
+    return `rgb(${color[0]},${color[1]},${color[2]})`;
 }
 
 // Orchestrate everything on DOMContentLoaded
@@ -342,11 +401,26 @@ document.addEventListener('DOMContentLoaded', async function() {
             fetchApiHeroes(),
             fetchSupabaseScores()
         ]);
-        const { merged, allTimestamps } = mergeHeroScores(apiHeroes, supabaseScores);
-        renderHeroMatrixTable(merged, allTimestamps);
+        const mergedResult = mergeHeroScores(apiHeroes, supabaseScores);
+        allHeroes = mergedResult.merged;
+        allTimestamps = mergedResult.allTimestamps;
+        renderHeroMatrixTable(allHeroes, allTimestamps);
     } catch (e) {
         console.error(e);
     }
+});
+
+document.getElementById('hero-search-box').addEventListener('input', function(e) {
+    const query = e.target.value.trim().toLowerCase();
+    if (!query) {
+        renderHeroMatrixTable(allHeroes, allTimestamps);
+        return;
+    }
+    const filtered = allHeroes.filter(hero =>
+        (hero.handle && hero.handle.toLowerCase().includes(query)) ||
+        (hero.name && hero.name.toLowerCase().includes(query))
+    );
+    renderHeroMatrixTable(filtered, allTimestamps);
 });
     </script>
     <script src="/js/timeUtils.js" defer></script>

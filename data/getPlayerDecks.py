@@ -43,28 +43,16 @@ join flatten.get_tournaments gt
 	on base.tournament_id = gt.tournament_id 
 where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
 )
-,hero_count as (select COUNT(*) as hero_count from ordered_records)
 ,trade_history_base as (
-select buyer_id,card_id,trade_timestamp,price,hero_rarity_id,hero_id,card_rarity,hero_handle,row_number() over (partition by buyer_id,card_id order by trade_timestamp desc) buyer_last_buy_card_id
-from flatten.hero_trades ghlt 
-where buyer_id  not in ('0x000000000000000000000000000000000000000A','0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841') --frag buy
+select ptd.buyer_address as buyer_id,ftt.card_id ,ptd.timestamp as trade_timestamp,ptd.total_price as price,ptd.hero_rarity_index,ptd.hero_id,ptd.hero_rarity
+,row_number() over (partition by ptd.buyer_address,ftt.card_id order by ptd.timestamp desc) buyer_last_buy_card_id
+from flatten.player_trade_details   ptd
+join flatten.fantasy_token_txn ftt  
+	on ptd.tx_hash = ftt.tx_hash 
+	and ptd.token_id = ftt.token_id 
+where ptd.buyer_address  not in ('0x000000000000000000000000000000000000000A','0xCA6a9B8B9a2cb3aDa161bAD701Ada93e79a12841') --frag buy
 )
-,trade_history_prior_to_tournament as (
-select buyer_id,hero_rarity_id,hero_id,price,card_rarity,hero_handle
-,ROW_NUMBER() over (partition by hero_rarity_id order by trade_timestamp desc) hero_rarity_trade_history_rank
-,trade_timestamp
-from trade_history_base
-where 1=1  
-and trade_timestamp >= NOW() at time zone 'UTC' - interval '21 days'  --for performance
- and trade_timestamp < (select start_timestamp from  flatten.get_tournaments where tournament_league_unique_key  = 'Elite Main {TOURNAMENT_NUMBER}') --pre main start
--- and hero_handle = 'blockgraze' and rarity = 'rare'
-)
-,trade_l5_txn_median as (
-select hero_id,hero_rarity_id,card_rarity,PERCENTILE_CONT(0.5) within group(	order by price) as median_price	
-from trade_history_prior_to_tournament
-where hero_rarity_trade_history_rank <= 5
-group by 1,2,3
-)
+,hero_count as (select COUNT(*) as hero_count from ordered_records)
     select 
         gt.tournament_name as league_name, -- column 0
         gtpp.tournament_league_unique_key, -- column 1
@@ -79,61 +67,61 @@ group by 1,2,3
         card1_score card1_score, -- column 10
         card1_hero_stars, -- column 11
         buyer_cost_card1.price as card1_actual_cost, -- column 12
-        market_l5_cost_card1.median_price as card1_market_cost, -- column 13
-        case 
-            when card1_hero_rarity = 'rare' then (common_market_l5_cost_card1.median_price * .85) * 5 
-            when card1_hero_rarity = 'epic' then (common_market_l5_cost_card1.median_price * .80) * 25 
-            when card1_hero_rarity = 'legendary' then (common_market_l5_cost_card1.median_price * .75) * 125 
-            else common_market_l5_cost_card1.median_price 
-        end as card1_est_cost, -- column 14
+        market_l5_cost_card1.est_value as card1_est_cost, -- column 13
+--        case 
+--            when card1_hero_rarity = 'rare' then (common_market_l5_cost_card1.est_value * .85) * 5 
+--            when card1_hero_rarity = 'epic' then (common_market_l5_cost_card1.est_value * .80) * 25 
+--            when card1_hero_rarity = 'legendary' then (common_market_l5_cost_card1.est_value * .75) * 125 
+--            else common_market_l5_cost_card1.est_value 
+--        end as card1_est_cost, -- column 14
         card2_hero_handle, -- column 15
         card2_picture_url, -- column 16
         card2_score card2_score, -- column 17
         card2_hero_stars, -- column 18
         buyer_cost_card2.price as card2_actual_cost, -- column 19
-        market_l5_cost_card2.median_price as card2_market_cost, -- column 20
-        case 
-            when card2_hero_rarity = 'rare' then (common_market_l5_cost_card2.median_price * .85) * 5 
-            when card2_hero_rarity = 'epic' then (common_market_l5_cost_card2.median_price * .80) * 25 
-            when card2_hero_rarity = 'legendary' then (common_market_l5_cost_card2.median_price * .75) * 125 
-            else common_market_l5_cost_card2.median_price 
-        end as card2_est_cost, -- column 21
+        market_l5_cost_card2.est_value as card2_est_cost, -- column 20
+--        case 
+--            when card2_hero_rarity = 'rare' then (common_market_l5_cost_card2.est_value * .85) * 5 
+--            when card2_hero_rarity = 'epic' then (common_market_l5_cost_card2.est_value * .80) * 25 
+--            when card2_hero_rarity = 'legendary' then (common_market_l5_cost_card2.est_value * .75) * 125 
+--            else common_market_l5_cost_card2.est_value 
+--        end as card2_est_cost, -- column 21
         card3_hero_handle, -- column 22
         card3_picture_url, -- column 23
         card3_score card3_score, -- column 24
         card3_hero_stars, -- column 25
         buyer_cost_card3.price as card3_actual_cost, -- column 26
-        market_l5_cost_card3.median_price as card3_market_cost, -- column 27
-        case 
-            when card3_hero_rarity = 'rare' then (common_market_l5_cost_card3.median_price * .85) * 5 
-            when card3_hero_rarity = 'epic' then (common_market_l5_cost_card3.median_price * .80) * 25 
-            when card3_hero_rarity = 'legendary' then (common_market_l5_cost_card3.median_price * .75) * 125 
-            else common_market_l5_cost_card3.median_price 
-        end as card3_est_cost, -- column 28
+        market_l5_cost_card3.est_value as card3_est_cost, -- column 27
+--        case 
+--            when card3_hero_rarity = 'rare' then (common_market_l5_cost_card3.est_value * .85) * 5 
+--            when card3_hero_rarity = 'epic' then (common_market_l5_cost_card3.est_value * .80) * 25 
+--            when card3_hero_rarity = 'legendary' then (common_market_l5_cost_card3.est_value * .75) * 125 
+--            else common_market_l5_cost_card3.est_value 
+--        end as card3_est_cost, -- column 28
         card4_hero_handle, -- column 29
         card4_picture_url, -- column 30
         card4_score card4_score, -- column 31
         card4_hero_stars, -- column 32
         buyer_cost_card4.price as card4_actual_cost, -- column 33
-        market_l5_cost_card4.median_price as card4_market_cost, -- column 34
-        case 
-            when card4_hero_rarity = 'rare' then (common_market_l5_cost_card4.median_price * .85) * 5 
-            when card4_hero_rarity = 'epic' then (common_market_l5_cost_card4.median_price * .80) * 25 
-            when card4_hero_rarity = 'legendary' then (common_market_l5_cost_card4.median_price * .75) * 125 
-            else common_market_l5_cost_card4.median_price 
-        end as card4_est_cost, -- column 35
+        market_l5_cost_card4.est_value as card4_est_cost, -- column 34
+--        case 
+--            when card4_hero_rarity = 'rare' then (common_market_l5_cost_card4.est_value * .85) * 5 
+--            when card4_hero_rarity = 'epic' then (common_market_l5_cost_card4.est_value * .80) * 25 
+--            when card4_hero_rarity = 'legendary' then (common_market_l5_cost_card4.est_value * .75) * 125 
+--            else common_market_l5_cost_card4.est_value 
+--        end as card4_est_cost, -- column 35
         card5_hero_handle, -- column 36
         card5_picture_url, -- column 37
         card5_score card5_score, -- column 38
         card5_hero_stars, -- column 39
         buyer_cost_card5.price as card5_actual_cost, -- column 40
-        market_l5_cost_card5.median_price as card5_market_cost, -- column 41
-        case 
-            when card5_hero_rarity = 'rare' then (common_market_l5_cost_card5.median_price * .85) * 5 
-            when card5_hero_rarity = 'epic' then (common_market_l5_cost_card5.median_price * .80) * 25 
-            when card5_hero_rarity = 'legendary' then (common_market_l5_cost_card5.median_price * .75) * 125 
-            else common_market_l5_cost_card5.median_price 
-        end as card5_est_cost, -- column 42
+        market_l5_cost_card5.est_value as card5_est_cost, -- column 41
+--        case 
+--            when card5_hero_rarity = 'rare' then (common_market_l5_cost_card5.est_value * .85) * 5 
+--            when card5_hero_rarity = 'epic' then (common_market_l5_cost_card5.est_value * .80) * 25 
+--            when card5_hero_rarity = 'legendary' then (common_market_l5_cost_card5.est_value * .75) * 125 
+--            else common_market_l5_cost_card5.est_value 
+--        end as card5_est_cost, -- column 42
         tournament_player_deck_id, -- column 43
         reward_fan.reward as fan, -- column 44
         reward_gold.reward AS gold, -- column 45
@@ -185,31 +173,31 @@ group by 1,2,3
     	on gtpp.card5_id = buyer_cost_card5.card_id
     	and gtpp.player_id = buyer_cost_card5.buyer_id
 		and buyer_cost_card5.buyer_last_buy_card_id = 1
-	left join trade_l5_txn_median market_l5_cost_card1
+	left join flatten.vwhero_cards_est_value market_l5_cost_card1  
 		on gtpp.card1_hero_rarity_index = market_l5_cost_card1.hero_rarity_id
-	left join trade_l5_txn_median market_l5_cost_card2
+	left join flatten.vwhero_cards_est_value market_l5_cost_card2
 		on gtpp.card2_hero_rarity_index = market_l5_cost_card2.hero_rarity_id
-	left join trade_l5_txn_median market_l5_cost_card3
+	left join flatten.vwhero_cards_est_value market_l5_cost_card3
 		on gtpp.card3_hero_rarity_index = market_l5_cost_card3.hero_rarity_id
-	left join trade_l5_txn_median market_l5_cost_card4
+	left join flatten.vwhero_cards_est_value market_l5_cost_card4
 		on gtpp.card4_hero_rarity_index = market_l5_cost_card4.hero_rarity_id
-	left join trade_l5_txn_median market_l5_cost_card5
+	left join flatten.vwhero_cards_est_value market_l5_cost_card5
 		on gtpp.card5_hero_rarity_index = market_l5_cost_card5.hero_rarity_id
-	left join trade_l5_txn_median common_market_l5_cost_card1
+	/*left join flatten.vwhero_cards_est_value common_market_l5_cost_card1
 		on gtpp.card1_hero_id = common_market_l5_cost_card1.hero_id
-		and common_market_l5_cost_card1.card_rarity = 'common'
-	left join trade_l5_txn_median common_market_l5_cost_card2
+		and common_market_l5_cost_card1.rarity = 'common'
+	left join flatten.vwhero_cards_est_value common_market_l5_cost_card2
 		on gtpp.card2_hero_id = common_market_l5_cost_card2.hero_id
-		and common_market_l5_cost_card2.card_rarity = 'common'
-	left join trade_l5_txn_median common_market_l5_cost_card3
+		and common_market_l5_cost_card2.rarity = 'common'
+	left join flatten.vwhero_cards_est_value common_market_l5_cost_card3
 		on gtpp.card3_hero_id = common_market_l5_cost_card3.hero_id
-		and common_market_l5_cost_card3.card_rarity = 'common'
-	left join trade_l5_txn_median common_market_l5_cost_card4
+		and common_market_l5_cost_card3.rarity = 'common'
+	left join flatten.vwhero_cards_est_value common_market_l5_cost_card4
 		on gtpp.card4_hero_id = common_market_l5_cost_card4.hero_id
-		and common_market_l5_cost_card4.card_rarity = 'common'
-	left join trade_l5_txn_median common_market_l5_cost_card5
+		and common_market_l5_cost_card4.rarity = 'common'
+	left join flatten.vwhero_cards_est_value common_market_l5_cost_card5
 		on gtpp.card5_hero_id = common_market_l5_cost_card5.hero_id
-		and common_market_l5_cost_card5.card_rarity = 'common'
+		and common_market_l5_cost_card5.rarity = 'common'*/
     where gt.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 """

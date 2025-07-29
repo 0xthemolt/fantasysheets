@@ -275,6 +275,15 @@ function renderHeroMatrixTable(heroes, timestamps) {
     // Update header: keep first 6 columns, then add timestamps
     const headerRow = table.rows[0];
     while (headerRow.cells.length > 6) headerRow.deleteCell(6);
+
+    // Add "Live" column
+    const liveTh = document.createElement('th');
+    liveTh.textContent = 'Live';
+    liveTh.style.color = '#27ae60'; // Nice green
+    liveTh.style.fontWeight = 'bold';
+    headerRow.appendChild(liveTh);
+
+    // Add timestamp columns
     timestamps.forEach(ts => {
         const th = document.createElement('th');
         th.textContent = ts.replace('T', ' ').slice(5, 16);
@@ -312,13 +321,17 @@ function renderHeroMatrixTable(heroes, timestamps) {
         // Hero info
         const heroCell = row.insertCell();
         heroCell.className = "hero-column frozen-columns";
-        heroCell.innerHTML = `
-            <img src="${hero.profile_image_url_https || ''}" class="hero-image" alt="${hero.name || hero.handle}">
-            <span>${hero.name || hero.handle}</span>
-            <a href="https://x.com/${hero.handle}" target="_blank" style="margin-left:6px; color:#888; font-size:0.9em; vertical-align:middle;">
-                <i class="fab fa-x-twitter"></i>
-            </a>
-        `;
+        const displayName = (hero.name && hero.name.length > 15)
+    ? hero.name.slice(0, 15) + '...'
+    : (hero.name || hero.handle);
+
+heroCell.innerHTML = `
+    <img src="${hero.profile_image_url_https || ''}" class="hero-image" alt="${hero.name || hero.handle}">
+    <span>${displayName}</span>
+    <a href="https://x.com/${hero.handle}" target="_blank" style="margin-left:6px; color:#888; font-size:0.9em; vertical-align:middle;">
+        <i class="fab fa-x-twitter"></i>
+    </a>
+`;
 
         // Views cell with RdYlGn color
         const viewsCell = row.insertCell();
@@ -343,17 +356,35 @@ function renderHeroMatrixTable(heroes, timestamps) {
         row.insertCell();
         row.insertCell();
 
+        // "Live" fantasy_score column
+        const liveCell = row.insertCell();
+        if (typeof hero.fantasy_score === 'number') {
+            liveCell.textContent = Math.round(hero.fantasy_score);
+            if (hero.fantasy_score !== 0) {
+                liveCell.style.backgroundColor = getRdYlGnColor(hero.fantasy_score, minScore, maxScore);
+                liveCell.style.color = (hero.fantasy_score - minScore) / (maxScore - minScore) > 0.3 ? 'black' : 'white';
+            } else {
+                // Explicitly set to RdYlGn red for zero
+                liveCell.style.backgroundColor = 'rgb(165,0,38)';
+                liveCell.style.color = '#fff';
+            }
+        } else {
+            liveCell.textContent = '-';
+            liveCell.style.backgroundColor = '#141515';
+            liveCell.style.color = '#888';
+        }
+
         // Matrix: fan_score for each timestamp
         for (const ts of timestamps) {
             const cell = row.insertCell();
             const score = hero.scores[ts];
-            if (typeof score === 'number') {
+            if (typeof score === 'number' && score !== 0) {
                 cell.textContent = Math.round(score);
                 cell.style.backgroundColor = getRdYlGnColor(score, minScore, maxScore);
                 cell.style.color = (score - minScore) / (maxScore - minScore) > 0.3 ? 'black' : 'white';
             } else {
                 cell.textContent = '-';
-                cell.style.backgroundColor = '#eee';
+                cell.style.backgroundColor = '#141515';
                 cell.style.color = '#888';
             }
         }
@@ -366,31 +397,32 @@ function getRdYlGnColor(value, vmin, vmax) {
     let norm = (value - vmin) / (vmax - vmin);
     norm = Math.max(0, Math.min(1, norm)); // Clamp between 0 and 1
 
-    // RdYlGn stops: red -> yellow -> green
+    // Official RdYlGn 11-color stops from ColorBrewer
     const stops = [
-        { stop: 0.0, color: [165, 0, 38] },    // Red
-        { stop: 0.5, color: [255, 255, 192] }, // Yellow
-        { stop: 1.0, color: [0, 104, 55] }     // Green
+        [165, 0, 38],    // 0.0 - Red
+        [215, 48, 39],   // 0.1 - Red-Orange
+        [244, 109, 67],  // 0.2 - Orange
+        [253, 174, 97],  // 0.3 - Light Orange
+        [254, 224, 139], // 0.4 - Yellow
+        [255, 255, 191], // 0.5 - Light Yellow
+        [217, 239, 139], // 0.6 - Yellow-Green
+        [166, 217, 106], // 0.7 - Light Green
+        [102, 189, 99],  // 0.8 - Green
+        [26, 152, 80],   // 0.9 - Dark Green
+        [0, 104, 55]     // 1.0 - Deep Green
     ];
 
-    let color;
-    if (norm <= 0.5) {
-        // Red to Yellow
-        let t = norm / 0.5;
-        color = [
-            Math.round(stops[0].color[0] + t * (stops[1].color[0] - stops[0].color[0])),
-            Math.round(stops[0].color[1] + t * (stops[1].color[1] - stops[0].color[1])),
-            Math.round(stops[0].color[2] + t * (stops[1].color[2] - stops[0].color[2]))
-        ];
-    } else {
-        // Yellow to Green
-        let t = (norm - 0.5) / 0.5;
-        color = [
-            Math.round(stops[1].color[0] + t * (stops[2].color[0] - stops[1].color[0])),
-            Math.round(stops[1].color[1] + t * (stops[2].color[1] - stops[1].color[1])),
-            Math.round(stops[1].color[2] + t * (stops[2].color[2] - stops[1].color[2]))
-        ];
-    }
+    // Find which two stops norm falls between
+    const idx = norm * (stops.length - 1);
+    const lower = Math.floor(idx);
+    const upper = Math.ceil(idx);
+    const t = idx - lower;
+
+    // Interpolate between stops
+    const color = [0, 1, 2].map(i =>
+        Math.round(stops[lower][i] + t * (stops[upper][i] - stops[lower][i]))
+    );
+
     return `rgb(${color[0]},${color[1]},${color[2]})`;
 }
 
@@ -422,6 +454,47 @@ document.getElementById('hero-search-box').addEventListener('input', function(e)
     );
     renderHeroMatrixTable(filtered, allTimestamps);
 });
+
+function filterSupabaseSnapshots(supabaseScores) {
+    if (!supabaseScores.length) return [];
+
+    // Parse timestamps and sort descending (most recent first)
+    supabaseScores.forEach(row => {
+        row._dt = new Date(row.start_datetime);
+    });
+    supabaseScores.sort((a, b) => b._dt - a._dt);
+
+    // Find the most recent timestamp
+    const latest = supabaseScores[0]._dt;
+    const eightHoursAgo = new Date(latest.getTime() - 8 * 60 * 60 * 1000);
+
+    // Split into recent and older
+    const recent = supabaseScores.filter(row => row._dt >= eightHoursAgo);
+    const older = supabaseScores.filter(row => row._dt < eightHoursAgo);
+
+    // For older data, group by hero_handle, local date, and local hour, keep only max timestamp per group
+    const grouped = {};
+    for (const row of older) {
+        // Use UTC for grouping
+        const date = row._dt.getUTCFullYear() + '-' +
+                     String(row._dt.getUTCMonth() + 1).padStart(2, '0') + '-' +
+                     String(row._dt.getUTCDate()).padStart(2, '0');
+        const hour = row._dt.getUTCHours(); // UTC hour
+        const key = `${row.hero_handle}|${date}|${hour}`;
+        if (!grouped[key] || row._dt > grouped[key]._dt) {
+            grouped[key] = row;
+        }
+    }
+    const filteredOlder = Object.values(grouped);
+
+    // Combine recent and filtered older data
+    const filtered = [...recent, ...filteredOlder];
+
+    // Remove temp _dt property
+    filtered.forEach(row => { delete row._dt; });
+
+    return filtered;
+}
     </script>
     <script src="/js/timeUtils.js" defer></script>
 </body>

@@ -21,16 +21,16 @@ cursor = conn.cursor()
 player_ranking_query = f"""with base as (
 select t.tournament_unique_key ,t.league ,t.registered_decks,t.start_timestamp
 ,tplayers.player_id,gpbd.player_name,gpbd.profile_picture 
-,tplayers.player_rank
-,1 - (tplayers.player_rank - 1) / (t.registered_decks) normalized_rank  --x min = total registered / worse place, x max = best (rank 1)
+,tplayers.unique_player_rank as player_rank
+,1 - (tplayers.unique_player_rank - 1) / (t.registered_decks) normalized_rank  --x min = total registered / worse place, x max = best (rank 1)
 ,coalesce(reward,0) eth_reward
-,row_number() over (partition by t.tournament_league_unique_key,tplayers.player_id order by tplayers.player_rank asc) as best_deck_rank
+,row_number() over (partition by t.tournament_league_unique_key,tplayers.player_id order by tplayers.unique_player_rank asc) as best_deck_rank
  FROM flatten.tournament_players tplayers
  join flatten.GET_TOURNAMENTS t  
 	on tplayers.tournament_id  = t.tournament_id 
 left join  flatten.tournament_rewards rewards_eth
 	on tplayers.tournament_id = rewards_eth.tournament_id
-	and tplayers.player_rank between  rewards_eth.range_start and rewards_eth.range_end
+	and tplayers.unique_player_rank between  rewards_eth.range_start and rewards_eth.range_end
 	and rewards_eth.reward_type = 'ETH'
 left join flatten.get_player_basic_data gpbd 
 	on tplayers.player_id  = gpbd.player_id 

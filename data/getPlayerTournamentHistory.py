@@ -25,7 +25,8 @@ cursor = conn.cursor()
 query = f"""
 set statement_timeout = '2min';
 with base as (
-        select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle,gtpp2.unique_player_rank,gt2.tournament_name
+        select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle
+        ,gtpp2.unique_player_rank,gt2.tournament_name
         ,(gtpp2.db_updated_cst)::timestamp as timestamp
     from flatten.tournament_players gtpp2 
         join flatten.get_tournaments gt2 

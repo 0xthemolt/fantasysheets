@@ -253,7 +253,7 @@
                placeholder="Search heroes...">
         <label class="toggle-switch">
             <input type="checkbox" id="showOutgoingToggle">
-            Show Bottom 5 Heroes (at risk)
+            Show Bottom 10 Heroes (at risk)
         </label>
     </div>
     <div id="tableContainer">
@@ -273,6 +273,7 @@
         // Replace the existing seasons definition with:
         const seasons = {
             3: [
+                { seasonTournament: 6, mainTournament: 63 },
                 { seasonTournament: 5, mainTournament: 62 },
                 { seasonTournament: 4, mainTournament: 61 },
                 { seasonTournament: 3, mainTournament: 60 },
@@ -280,8 +281,7 @@
                 { seasonTournament: 1, mainTournament: 58 },
             ],
             2: [
-                { seasonTournament: 4, mainTournament: 57 },  // Season 2 tournaments
-                { seasonTournament: 3, mainTournament: 56 }
+                { seasonTournament: 4, mainTournament: 57 }
             ]
         };
 
@@ -582,7 +582,7 @@
             );
 
             // Calculate bottom 15 index based on non-exempt heroes
-            const bottom15Index = nonExemptHeroes.length - 5;
+            const bottom15Index = nonExemptHeroes.length - 10;
 
             const searchTerm = document.getElementById('heroSearch').value;
             const showOnlyOutgoing = document.getElementById('showOutgoingToggle').checked;

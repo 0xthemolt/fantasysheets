@@ -41,7 +41,7 @@ SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_
 FROM flatten.hero_stats_tournament_current base 
 join flatten.get_tournaments gt 
 	on base.tournament_id = gt.tournament_id 
-where gt.tournament_league_unique_key = 'Elite Main 61'
+where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
 )
 ,hero_count as (select COUNT(*) as hero_count from ordered_records)
     select 
@@ -58,14 +58,14 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
         card1_score card1_score, -- column 10
         card1_hero_stars, -- column 11
         buyer_cost_card1.price as card1_actual_cost, -- column 12
-        null as card1_market_cost,
-        market_l5_cost_card1.est_value as card1_est_cost, -- column 13
+        null as card1_market_cost,  -- column 13
+        market_l5_cost_card1.est_value as card1_est_cost, -- column 14
 --        case 
 --            when card1_hero_rarity = 'rare' then (common_market_l5_cost_card1.est_value * .85) * 5 
 --            when card1_hero_rarity = 'epic' then (common_market_l5_cost_card1.est_value * .80) * 25 
 --            when card1_hero_rarity = 'legendary' then (common_market_l5_cost_card1.est_value * .75) * 125 
 --            else common_market_l5_cost_card1.est_value 
---        end as card1_est_cost, -- column 14
+--        end as card1_est_cost, 
         card2_hero_handle, -- column 15
         card2_picture_url, -- column 16
         card2_score card2_score, -- column 17
@@ -78,7 +78,7 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
 --            when card2_hero_rarity = 'epic' then (common_market_l5_cost_card2.est_value * .80) * 25 
 --            when card2_hero_rarity = 'legendary' then (common_market_l5_cost_card2.est_value * .75) * 125 
 --            else common_market_l5_cost_card2.est_value 
---        end as card2_est_cost, -- column 21
+--        end as card2_est_cost, 
         card3_hero_handle, -- column 22
         card3_picture_url, -- column 23
         card3_score card3_score, -- column 24
@@ -91,7 +91,7 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
 --            when card3_hero_rarity = 'epic' then (common_market_l5_cost_card3.est_value * .80) * 25 
 --            when card3_hero_rarity = 'legendary' then (common_market_l5_cost_card3.est_value * .75) * 125 
 --            else common_market_l5_cost_card3.est_value 
---        end as card3_est_cost, -- column 28
+--        end as card3_est_cost, 
         card4_hero_handle, -- column 29
         card4_picture_url, -- column 30
         card4_score card4_score, -- column 31
@@ -104,7 +104,7 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
 --            when card4_hero_rarity = 'epic' then (common_market_l5_cost_card4.est_value * .80) * 25 
 --            when card4_hero_rarity = 'legendary' then (common_market_l5_cost_card4.est_value * .75) * 125 
 --            else common_market_l5_cost_card4.est_value 
---        end as card4_est_cost, -- column 35
+--        end as card4_est_cost, 
         card5_hero_handle, -- column 36
         card5_picture_url, -- column 37
         card5_score card5_score, -- column 38
@@ -117,13 +117,13 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
 --            when card5_hero_rarity = 'epic' then (common_market_l5_cost_card5.est_value * .80) * 25 
 --            when card5_hero_rarity = 'legendary' then (common_market_l5_cost_card5.est_value * .75) * 125 
 --            else common_market_l5_cost_card5.est_value 
---        end as card5_est_cost, -- column 42
-        tournament_player_deck_id, -- column 43
-        reward_fan.reward as fan, -- column 44
+--        end as card5_est_cost,
+        gtpp.tournament_player_deck_id, --coumn 43
+        gtpp.fan_won as fan, -- column 44
         reward_gold.reward AS gold, -- column 45
-        reward_eth.reward AS eth, -- column 46
+        gtpp.eth_won AS eth, -- column 46
         reward_pack.reward AS packs, -- column 47
-        reward_frag.reward AS frag, -- column 48
+        gtpp.frags_won AS frag, -- column 48
         gtpp.db_updated_cst::timestamp  as timestamp, -- column 49
         gt.tournament_unique_key -- column 50
      from flatten.tournament_players gtpp
@@ -133,22 +133,22 @@ where gt.tournament_league_unique_key = 'Elite Main 61'
        ON gtpp.tournament_id = reward_gold.tournament_id
         AND gtpp.unique_player_rank between reward_gold.range_start and reward_gold.range_end
         AND reward_gold.reward_type = 'GOLD'
-    LEFT JOIN flatten.tournament_rewards reward_eth
-       ON gtpp.tournament_id = reward_eth.tournament_id
-        AND gtpp.unique_player_rank between reward_eth.range_start and reward_eth.range_end
-        AND reward_eth.reward_type = 'ETH'
+--    LEFT JOIN flatten.tournament_rewards reward_eth
+--       ON gtpp.tournament_id = reward_eth.tournament_id
+--        AND gtpp.unique_player_rank between reward_eth.range_start and reward_eth.range_end
+--        AND reward_eth.reward_type = 'ETH'
     LEFT JOIN flatten.tournament_rewards reward_pack
        ON gtpp.tournament_id = reward_pack.tournament_id
         AND gtpp.unique_player_rank between reward_pack.range_start and reward_pack.range_end
         AND reward_pack.reward_type = 'PACK'
-   LEFT JOIN flatten.tournament_rewards reward_fan
-       ON gtpp.tournament_id = reward_fan.tournament_id
-        AND gtpp.unique_player_rank between reward_fan.range_start and reward_fan.range_end
-        AND reward_fan.reward_type = 'FAN'
-    LEFT JOIN flatten.tournament_rewards reward_frag
-        ON gtpp.tournament_id = reward_frag.tournament_id
-        AND gtpp.unique_player_rank between reward_frag.range_start and reward_frag.range_end
-        AND reward_frag.reward_type = 'FRAGMENT'
+--   LEFT JOIN flatten.tournament_rewards reward_fan
+--       ON gtpp.tournament_id = reward_fan.tournament_id
+--        AND gtpp.unique_player_rank between reward_fan.range_start and reward_fan.range_end
+--        AND reward_fan.reward_type = 'FAN'
+--    LEFT JOIN flatten.tournament_rewards reward_frag
+--        ON gtpp.tournament_id = reward_frag.tournament_id
+--        AND gtpp.unique_player_rank between reward_frag.range_start and reward_frag.range_end
+--        AND reward_frag.reward_type = 'FRAGMENT'
     left join flatten.temp_trade_history_base  buyer_cost_card1
     	on gtpp.card1_id = buyer_cost_card1.base_card_id
     	and gtpp.player_id = buyer_cost_card1.buyer_id

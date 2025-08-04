@@ -136,7 +136,19 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
-select tournament_unique_key,league,hero_handle,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,hero_count,category,usage_percentage,0 as reward_value_added,rnk,db_updated_utc
+select 
+tournament_unique_key
+,league
+,hero_handle
+,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url
+,fantasy_score 
+,hero_stars
+,hero_count
+,category
+,usage_percentage
+,0 as reward_value_added
+,rnk
+,db_updated_utc
 from base
 where rnk <= 10
 union all

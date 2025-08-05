@@ -232,6 +232,79 @@
         .average-divider {
             border-left: 2px solid #fff !important;  /* Override any existing border */
         }
+
+        .info-icon {
+            margin-left: 4px;
+            color: #888;
+            font-size: 10px;
+            cursor: help;
+            display: inline-block;
+            padding: 2px;
+        }
+
+        /* Modal styles */
+        .info-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content {
+            background-color: #333;
+            color: white;
+            margin: 20% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 300px;
+            text-align: center;
+            position: relative;
+            animation: slideIn 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 30% auto;
+                padding: 15px;
+                max-width: 280px;
+            }
+            
+            .info-icon {
+                font-size: 12px;
+                padding: 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -244,7 +317,10 @@
         </h1>
     </div>
     <div class="data-freshness">
-        <span>Scores: Live</span></span>
+        <span>Scores: Live | Last 6 Avg & Vote Out Info </span>
+        <span class="info-icon">
+            <i class="fas fa-info-circle"></i>
+        </span>
     </div>
     <div class="toggle-container">
         <input type="text" 
@@ -281,7 +357,8 @@
                 { seasonTournament: 1, mainTournament: 58 },
             ],
             2: [
-                { seasonTournament: 4, mainTournament: 57 }
+                { seasonTournament: 4, mainTournament: 57 },
+                { seasonTournament: 3, mainTournament: 56 }
             ]
         };
 
@@ -467,6 +544,7 @@
             return patternIdx === pattern.length;
         }
 
+        // Update the displayTournamentData function around line 420
         function displayTournamentData(data, sortColumn = 'currentAvg', ascending = false) {
             const tableHead = document.querySelector('.tournament-table thead tr');
             const tableBody = document.getElementById('heroTableBody');
@@ -490,16 +568,17 @@
             // Sort tournament numbers in ascending order for display
             const sortedTournaments = [...tournamentNumbers].sort((a, b) => a - b);
             
-            // Get latest tournament number (still highest number)
+            // Get latest tournament number (highest number) - this will be excluded
             const latestTournament = Math.max(...tournamentNumbers);
             
-            // Split tournaments for averages calculation (still in descending order for proper periods)
-            const currentTournaments = tournamentNumbers.sort((a, b) => b - a).slice(0, 6); // Latest 4
-            const priorTournaments = tournamentNumbers.sort((a, b) => b - a).slice(1, 7);   // Previous 4 (skip latest)
+            // Split tournaments for averages calculation (exclude the highest/latest tournament)
+            const tournamentsSortedDesc = tournamentNumbers.sort((a, b) => b - a);
+            const currentTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(0, 6); // Latest 6 excluding most recent
+            const priorTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(1, 7);   // Previous 6 (skip latest)
 
             // Calculate both averages for each hero
             Object.values(data).forEach(hero => {
-                // Calculate current average (latest 6)
+                // Calculate current average (latest 6, excluding most recent tournament)
                 const currentScores = currentTournaments
                     .map(num => {
                         const score = hero.tournaments[num]?.fantasy_score;
@@ -507,12 +586,12 @@
                         return score !== undefined && score !== null ? score : null;
                     })
                     .filter(score => score !== null); // Only filter out null/undefined values
-    
+
                 hero.currentAvg = currentScores.length > 0 ? 
                     currentScores.reduce((a, b) => a + b, 0) / currentScores.length : 
                     0;
 
-                // Calculate prior average (previous 6)
+                // Calculate prior average (previous 6, excluding most recent tournament)
                 const priorScores = priorTournaments
                     .map(num => {
                         const score = hero.tournaments[num]?.fantasy_score;
@@ -530,6 +609,7 @@
             sortedTournaments.forEach((num, index) => {
                 const th = document.createElement('th');
                 const isCurrentPeriod = currentTournaments.includes(num);
+                const isLatestTournament = num === latestTournament;
                 
                 // Find the season and tournament info
                 const seasonEntry = Object.entries(seasons).find(([season, tournaments]) => 
@@ -538,7 +618,10 @@
                 const seasonNumber = seasonEntry[0];
                 const tournamentInfo = seasonEntry[1].find(t => t.mainTournament === num);
                 
-                th.textContent = `S${seasonNumber}M${tournamentInfo.seasonTournament}`;
+                // Create the header text WITHOUT info icon
+                let headerContent = `S${seasonNumber}M${tournamentInfo.seasonTournament}`;
+                
+                th.innerHTML = headerContent;
                 
                 // Add season divider if this is the first tournament of a season
                 if (index > 0) {
@@ -551,13 +634,17 @@
                     }
                 }
                 
-                th.className = `number-cell ${isCurrentPeriod ? 'current-period' : ''}`;
+                // Only add current-period class if it's in the average calculation (not the latest tournament)
+                th.className = `number-cell ${isCurrentPeriod && !isLatestTournament ? 'current-period' : ''}`;
                 th.dataset.sort = num.toString();
+                
+                // Simple click handler for sorting (no need to check for info icon)
                 th.addEventListener('click', () => handleSort(num.toString()));
+                
                 tableHead.appendChild(th);
             });
 
-            // Update the averages header to use white border
+            // Update the averages header
             const avgHeader = document.createElement('th');
             avgHeader.innerHTML = 'AVG: Prior 6 -> <span class="current-period">Last 6</span>';
             avgHeader.className = 'number-cell average-header average-divider';
@@ -663,7 +750,7 @@
                     row.classList.add('cut-line');
                     const label = document.createElement('span');
                     label.className = 'line-label cut-line-label';
-                    label.textContent = 'Bottom 5 Cut Line';
+                    label.textContent = 'Bottom 10 Cut Line';
                     rankCell.appendChild(label);
                 }
 
@@ -774,6 +861,7 @@
 
         // Update the DOMContentLoaded event handler
         document.addEventListener('DOMContentLoaded', async () => {
+            // Fetch and display tournament data
             const data = await fetchTournamentData();
             if (data) {
                 // Add toggle event listener
@@ -788,7 +876,55 @@
                 
                 displayTournamentData(data, 'currentAvg', false);
             }
+
+            // Setup modal functionality after the page is loaded
+            const modal = document.getElementById('infoModal');
+            const closeBtn = document.querySelector('.modal-close');
+
+            if (modal && closeBtn) {
+                // Close modal when clicking close button
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+
+                // Close modal when clicking outside of it
+                window.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+
+                // Close modal on escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                    }
+                });
+
+                // Add click handlers to info icons (delegate to handle dynamic content)
+                document.addEventListener('click', function(event) {
+                    if (event.target.closest('.info-icon')) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        console.log('Info icon clicked, showing modal'); // Debug log
+                        modal.style.display = 'block';
+                    }
+                });
+            } else {
+                console.error('Modal elements not found:', { modal, closeBtn });
+            }
         });
     </script>
+
+    <!-- Add modal HTML before closing body tag -->
+    <div id="infoModal" class="info-modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Last 6 Average & Vote Out</h3>
+            <p>• Each season, 5 heroes are removed based on a vote using FAN. </p>
+            <p>• The vote includes the 10 worst heroes, based on a average of their last 6 tournament scores, excluding the current/live tournament. </p>
+            <p>• Only Green highlighted tournaments are included in the "Last 6" calculation</p>
+        </div>
+    </div>
 </body>
 </html>

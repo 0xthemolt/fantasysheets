@@ -490,15 +490,28 @@ function updateScoresLastChanged() {
     const now = new Date();
     const diffMs = now.getTime() - lastChangedDate.getTime();
     const diffMinutes = Math.floor(diffMs / (60 * 1000));
+    
     let text;
+    let isStale = false;
+    
     if (diffMinutes < 180) {
         text = `Scores Last Changed: ${diffMinutes} minutes ago`;
+        isStale = diffMinutes > 60;
     } else {
         const diffHours = Math.floor(diffMinutes / 60);
         text = `Scores Last Changed: ${diffHours} hours ago`;
+        isStale = true; // Always stale if hours
     }
+    
     const infoSpan = document.getElementById('scores-last-changed');
-    if (infoSpan) infoSpan.textContent = text;
+    if (infoSpan) {
+        if (isStale) {
+            infoSpan.innerHTML = `<span style="color: #e74c3c;">${text} <i class="fas fa-exclamation-triangle" style="color: #e74c3c; margin-left: 4px;"></i></span>`;
+        } else {
+            infoSpan.textContent = text;
+            infoSpan.style.color = ''; // Reset to default color
+        }
+    }
 }
 
 // Update the DOMContentLoaded event handler

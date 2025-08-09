@@ -25,6 +25,61 @@
         object-fit: contain !important;
         max-width: 120px !important;
     }
+
+    .star-section {
+        margin: 30px 0;
+        padding: 20px;
+        border: 2px solid #555;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .star-header {
+        margin: 0 0 20px 0;
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 1.5em;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: flex-start;
+    }
+
+    .card {
+        border: 1px solid #555;
+        padding: 12px;
+        width: 180px;
+        text-align: center;
+        border-radius: 8px;
+        background: #333333;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-info {
+        margin-top: 8px;
+        font-size: 0.9em;
+        line-height: 1.4;
+        color: white !important;
+    }
+
+    .card-info b {
+        color: white !important;
+    }
     </style>
 </head>
 <body>
@@ -37,6 +92,7 @@
     <div id="result"></div>
 
     <script>
+
         async function fetchAllCards(token) {
             let allCards = [];
             const offset = 0;
@@ -82,7 +138,11 @@
 
             let html = '';
             sortedStars.forEach(star => {
-                html += `<h3>${star} Star${star > 1 ? 's' : ''}</h3><div style="display:flex;flex-wrap:wrap;">`;
+                html += `
+                    <div class="star-section">
+                        <h3 class="star-header">${star} Star${star > 1 ? 's' : ''}</h3>
+                        <div class="cards-container">`;
+                
                 // Sort cards in this group by expected_score descending
                 groups[star].sort((a, b) => b.expected_score - a.expected_score).forEach(card => {
                     const rarityName = rarityMap[card.rarity] || card.rarity;
@@ -100,7 +160,7 @@
                         </div>
                     `;
                 });
-                html += '</div>';
+                html += '</div></div>';
             });
             document.getElementById('result').innerHTML = html;
         }

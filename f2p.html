@@ -15,6 +15,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Player Cards</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+    div.card img.card-image {
+        width: 50% !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        display: block !important;
+        margin: 0 auto !important;
+        object-fit: contain !important;
+        max-width: 120px !important;
+    }
+    </style>
 </head>
 <body>
     <h2>Fantasy Top Card Fetcher</h2>
@@ -78,7 +89,7 @@
                     const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
                     html += `
                         <div class="card">
-                            <img src="${imgUrl}" alt="Hero" class="card-img">
+                            <img src="${imgUrl}" alt="Hero" class="card-image">
                             <div class="card-info">
                                 <b>Hero ID:</b> ${card.hero_id}<br>
                                 <b>Rarity:</b> ${rarityName}<br>

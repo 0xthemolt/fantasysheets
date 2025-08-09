@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Cards</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h2>Fantasy Top Card Fetcher</h2>
+    <label for="token">Bearer Token:</label>
+    <input type="text" id="token" style="width:60%;" placeholder="Paste your Bearer token here (starts with 'ey')">
+    <br><br>
+    <button id="fetchBtn">Fetch Cards</button>
+    <div id="status"></div>
+    <div id="result"></div>
+
+    <script>
+        async function fetchAllCards(token) {
+            let allCards = [];
+            const offset = 0;
+            const limit = 500;
+            let total = null;
+
+            document.getElementById('status').textContent = `Fetching ${limit} cards at offset ${offset}...`;
+            const url = `https://api-v2.fantasy.top/free-to-play/get-player-inventory?limit=${limit}&offset=${offset}&sortBy=expected_score_desc`;
+            const resp = await fetch(url, {
+                headers: {
+                    "accept": "application/json, text/plain, */*",
+                    "authorization": "Bearer " + token
+                }
+            });
+            if (!resp.ok) {
+                throw new Error("API error: " + resp.status);
+            }
+            const json = await resp.json();
+            total = json.total;
+            allCards = json.data;
+            document.getElementById('status').textContent = `Fetched ${allCards.length} of ${total} cards.`;
+            return { total, cards: allCards };
+        }
+
+        function renderCardsByStars(cards) {
+            const rarityMap = {
+                1: "legendary",
+                2: "epic",
+                3: "rare",
+                4: "common"
+            };
+
+            // Group cards by stars
+            const groups = {};
+            cards.forEach(card => {
+                const stars = card.stars;
+                if (!groups[stars]) groups[stars] = [];
+                groups[stars].push(card);
+            });
+
+            // Sort stars descending
+            const sortedStars = Object.keys(groups).map(Number).sort((a, b) => b - a);
+
+            let html = '';
+            sortedStars.forEach(star => {
+                html += `<h3>${star} Star${star > 1 ? 's' : ''}</h3><div style="display:flex;flex-wrap:wrap;">`;
+                // Sort cards in this group by expected_score descending
+                groups[star].sort((a, b) => b.expected_score - a.expected_score).forEach(card => {
+                    const rarityName = rarityMap[card.rarity] || card.rarity;
+                    const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
+                    html += `
+                        <div class="card">
+                            <img src="${imgUrl}" alt="Hero" class="card-img">
+                            <div class="card-info">
+                                <b>Hero ID:</b> ${card.hero_id}<br>
+                                <b>Rarity:</b> ${rarityName}<br>
+                                <b>Edition:</b> ${card.edition}<br>
+                                <b>Expected Score:</b> ${card.expected_score.toFixed(2)}<br>
+                                <b>Count:</b> ${card.count}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            });
+            document.getElementById('result').innerHTML = html;
+        }
+
+        async function handleToken(token) {
+            if (!token.startsWith('ey')) {
+                alert("Please enter a valid Bearer token (starts with 'ey').");
+                return;
+            }
+            localStorage.setItem('privy:id_token', token); // Save to localStorage
+            document.getElementById('result').textContent = "";
+            document.getElementById('status').textContent = "Starting fetch...";
+            try {
+                const result = await fetchAllCards(token);
+                if (!result.cards || result.cards.length === 0) {
+                    document.getElementById('status').textContent = "Token expired or no cards found.";
+                    localStorage.removeItem('privy:id_token');
+                    return;
+                }
+                document.getElementById('status').textContent = `Total cards: ${result.total}`;
+                renderCardsByStars(result.cards);
+            } catch (e) {
+                document.getElementById('status').textContent = "Token expired or invalid.";
+                document.getElementById('result').textContent = "";
+                localStorage.removeItem('privy:id_token');
+            }
+        }
+
+        document.getElementById('fetchBtn').onclick = async function() {
+            const token = document.getElementById('token').value.trim();
+            await handleToken(token);
+        };
+
+        // Try to auto-populate the token field from localStorage
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log("DOMContentLoaded event fired");
+            try {
+                const privyToken = localStorage.getItem('privy:id_token');
+                console.log("privy:id_token from localStorage:", privyToken);
+                if (privyToken && privyToken.startsWith('ey')) {
+                    document.getElementById('token').value = privyToken;
+                    document.getElementById('result').textContent = "";
+                    document.getElementById('status').textContent = "Starting fetch...";
+                    try {
+                        console.log("Calling fetchAllCards...");
+                        const result = await fetchAllCards(privyToken);
+                        document.getElementById('status').textContent = `Total cards: ${result.total}`;
+                        renderCardsByStars(result.cards);
+                    } catch (e) {
+                        console.error("Error in fetchAllCards:", e);
+                        document.getElementById('status').textContent = "";
+                        document.getElementById('result').textContent = "Error: " + e.message;
+                    }
+                }
+            } catch (e) {
+                console.error("Error in DOMContentLoaded handler:", e);
+            }
+        });
+    </script>
+</body>
+</html>

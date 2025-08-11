@@ -28,10 +28,12 @@ select
         t2.league,
         t.hero_handle,
         t.hero_id,
-        ghwst.score as fantasy_score,
+        t.hero_rarity_index,
+        t.hero_rarity,
+        t.hero_stars,
+        t.hero_score,
         t.tournament_player_deck_id,
         t.player_rank,
-        card_stars.hero_stars,
         coalesce(
         	(case 
         	      when t2.league = 'Reverse'  then
@@ -44,7 +46,7 @@ select
         	 	  	case when t.hero_score  = 0 then 0 
 					else (
                           coalesce((t.hero_score::float / t.player_score) * eth_reward.reward,0)
-                        + coalesce((t.hero_score::float / t.player_score) * ((frag_rewards.reward / 100) * .0045),0)
+                        + coalesce((t.hero_score::float / t.player_score) * ((frag_rewards.reward / 100) * .004),0)
                         )
 					end
 			end) ,0) as reward_value_added,
@@ -52,12 +54,6 @@ select
     from agg.tournamentownership t 
     join flatten.get_tournaments t2 
     	on t.tournament_id = t2.tournament_id
-    left join flatten.HERO_STATS_TOURNAMENT_CURRENT ghwst 
-    	on t.hero_id = ghwst.hero_id
-    	and t.tournament_unique_key = ghwst.tournament_unique_key
-    left join flatten.get_cards_flags_stars card_stars
-	    ON t.hero_id = card_stars.hero_id
-	    and t2.start_timestamp between card_stars.start_datetime and card_stars.end_datetime
 	left join flatten.TOURNAMENT_REWARDS eth_reward 
 		on t.tournament_id = eth_reward.tournament_id
 		and t.player_rank between eth_reward.range_start  and eth_reward.range_end
@@ -69,13 +65,19 @@ select
     where t.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 )
+--select * from base_records limit 200 ;
 ,reward_value_added as (
-select tournament_id,tournament_unique_key,league,hero_handle,hero_id,fantasy_score,hero_stars,'rva' as category,db_updated_utc,suM(reward_value_added) reward_value_added,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
+select tournament_id,tournament_unique_key,league,hero_handle,hero_id,hero_rarity_index,hero_score,hero_stars,hero_rarity
+,'rva' as category
+,db_updated_utc,
+suM(reward_value_added) reward_value_added
+,row_number() over (partition by tournament_id order by suM(reward_value_added) desc) as rnk
 from base_records
-group by 1,2,3,4,5,6,7,8,9
+group by 1,2,3,4,5,6,7,8,9,10,11
 order by 3 desc
-),
-top50_records as (
+)
+--select * from reward_value_added where league = 'Silver' order by rnk asc;
+,top50_records as (
     select *
     from base_records
     where player_rank <= 50
@@ -83,49 +85,51 @@ top50_records as (
 itm_records as (
     select br.*
     from base_records br
-    join flatten.TOURNAMENT_REWARDS rewards
+    join flatten.TOURNAMENT_REWARDS rewards  --inner join to only get eth winning deck
 	   on br.tournament_id = rewards.tournament_id 
 	    and br.player_rank between rewards.range_start and rewards.range_end 
 	    and rewards.reward_type = 'ETH'
-),
+)
 --select * from itm_records where league = 'Silver' order by player_rank  asc;
-deck_counts as (
-    select tournament_id,'top50' as category, count(distinct tournament_player_deck_id) as total_decks
-    from top50_records
-    group by 1
-    union all
+,deck_counts as (
+--    select tournament_id,'top50' as category, count(distinct tournament_player_deck_id) as total_decks
+--    from top50_records
+--    group by 1
+--    union all
     select tournament_id,'itm' as category, count(distinct tournament_player_deck_id) as total_decks
     from itm_records
     group by 1
 ),
 hero_stats as (
+--    select 
+--    	t.tournament_id,
+--        t.tournament_unique_key,
+--        t.league,
+--        t.hero_handle,
+--        t.hero_id,
+--        t.hero_score,
+--        t.hero_stars,
+--        t.hero_rarity,
+--        t.db_updated_utc,
+--        count(*) as hero_count,
+--        'top50' as category
+--    from top50_records t
+--    group by 1,2,3,4,5,6,7,8,9
+--    union all
     select 
     	t.tournament_id,
         t.tournament_unique_key,
         t.league,
         t.hero_handle,
         t.hero_id,
-        t.fantasy_score,
+        t.hero_score,
         t.hero_stars,
-        t.db_updated_utc,
-        count(*) as hero_count,
-        'top50' as category
-    from top50_records t
-    group by 1,2,3,4,5,6,7,8
-    union all
-    select 
-    	t.tournament_id,
-        t.tournament_unique_key,
-        t.league,
-        t.hero_handle,
-        t.hero_id,
-        t.fantasy_score,
-        t.hero_stars,
+        t.hero_rarity,
         t.db_updated_utc,
         count(*) as hero_count,
         'itm' as category
     from itm_records t
-    group by 1,2,3,4,5,6,7,8
+    group by 1,2,3,4,5,6,7,8,9
 )
 ,base as (
 select 
@@ -140,8 +144,8 @@ select
 tournament_unique_key
 ,league
 ,hero_handle
-,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url
-,fantasy_score 
+,concat('https://r2.fantasy.top/v3/', hero_rarity,'/',hero_id,'_',hero_stars,'.png') as card_picture_url
+,hero_score 
 ,hero_stars
 ,hero_count
 ,category
@@ -152,7 +156,19 @@ tournament_unique_key
 from base
 where rnk <= 10
 union all
-select tournament_unique_key,league,hero_handle,concat('https://r2.fantasy.top/v2/argent/',hero_id,'_',hero_stars,'.png') as card_picture_url,fantasy_score ,hero_stars,0 as hero_count,category,0 as usage_percentage,reward_value_added,rnk,db_updated_utc
+select 
+tournament_unique_key  --0
+,league
+,hero_handle
+,concat('https://r2.fantasy.top/v3/', hero_rarity,'/',hero_id,'_',hero_stars,'.png') as card_picture_url
+,hero_score 
+,hero_stars
+,0 as hero_count
+,category
+,0 as usage_percentage
+,reward_value_added
+,rnk
+,db_updated_utc  --11
 from reward_value_added
 where rnk <= 10
 order by tournament_unique_key,category,rnk asc
@@ -182,7 +198,7 @@ for row in result:
     hero_info = {
         "hero": row[2],     # hero_handle
         "image_url": row[3], # card_picture_url
-        "fantasy_score": float(row[4]),  # fantasy_score
+        "hero_score": float(row[4]),  # fantasy_score
         "hero_stars": row[5], # hero_stars
         "hero_count": int(row[6]),       # hero_count
         "usage_percentage": float(row[8]), # usage_percentage

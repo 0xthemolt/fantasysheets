@@ -313,7 +313,7 @@
             <a href="../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Season 3 (Last 6 Avg Score)
+            Season 4 (Last 6 Avg Score)
         </h1>
     </div>
     <div class="data-freshness">
@@ -348,6 +348,9 @@
     <script>
         // Replace the existing seasons definition with:
         const seasons = {
+            4: [              
+                { seasonTournament: 1, mainTournament: 64 }
+            ],
             3: [
                 { seasonTournament: 6, mainTournament: 63 },
                 { seasonTournament: 5, mainTournament: 62 },
@@ -357,13 +360,13 @@
                 { seasonTournament: 1, mainTournament: 58 },
             ],
             2: [
-                { seasonTournament: 4, mainTournament: 57 },
-                { seasonTournament: 3, mainTournament: 56 }
+                { seasonTournament: 4, mainTournament: 57 }
             ]
         };
 
         // Flatten the seasons object into main tournament numbers array for API calls
         const tournamentNumbers = [
+            ...seasons[4].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[3].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[2].map(t => t.mainTournament)  // Season 2 tournaments
         ];

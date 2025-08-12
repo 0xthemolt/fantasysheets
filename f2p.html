@@ -63,11 +63,29 @@
         background: #333333;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative; /* Added for positioning the count badge */
     }
 
     .card:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-count {
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        color: black;
+        border: 1px solid black;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.65em;
+        font-weight: bold;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        white-space: nowrap;
     }
 
     .card-info {
@@ -79,6 +97,60 @@
 
     .card-info b {
         color: white !important;
+    }
+
+    .median-score {
+        margin-top: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .median-label {
+        font-size: 0.7em;
+        color: #ccc;
+        font-weight: bold;
+    }
+
+    .median-badge {
+        background: #444;
+        color: black;
+        padding: 3px 8px;
+        border-radius: 4px;
+        border: 2px solid #333;
+        font-size: 0.75em;
+        font-weight: bold;
+        min-width: 35px;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .last-5-days {
+        margin-top: 8px;
+        font-size: 0.7em;
+        color: #ccc;
+        font-weight: bold;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: center;
+        gap: 3px;
+        margin-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .score-badge {
+        background: #444;
+        color: white;
+        padding: 2px 4px;
+        border-radius: 8px;
+        border: 1px solid #666;
+        font-size: 0.8em;
+        font-weight: bold;
+        min-width: 25px;
+        text-align: center;
     }
     </style>
 </head>
@@ -92,133 +164,318 @@
     <div id="result"></div>
 
     <script>
+    const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey)
 
-        async function fetchAllCards(token) {
-            let allCards = [];
-            const offset = 0;
-            const limit = 500;
-            let total = null;
+    // Global variable to store the query results
+    let f2pScoresData = null;
 
-            document.getElementById('status').textContent = `Fetching ${limit} cards at offset ${offset}...`;
-            const url = `https://api-v2.fantasy.top/free-to-play/get-player-inventory?limit=${limit}&offset=${offset}&sortBy=expected_score_desc`;
-            const resp = await fetch(url, {
-                headers: {
-                    "accept": "application/json, text/plain, */*",
-                    "authorization": "Bearer " + token
-                }
-            });
-            if (!resp.ok) {
-                throw new Error("API error: " + resp.status);
-            }
-            const json = await resp.json();
-            total = json.total;
-            allCards = json.data;
-            document.getElementById('status').textContent = `Fetched ${allCards.length} of ${total} cards.`;
-            return { total, cards: allCards };
+    // Color cache and helper functions
+    const colorCache = new Map();
+
+    function lerp(start, end, factor) {
+        return start + (end - start) * factor;
+    }
+
+    function getColorForRank(value, maxValue = 1000, higherIsBetter = true) {
+        const cacheKey = `${value}_${maxValue}_${higherIsBetter}`;
+        if (colorCache.has(cacheKey)) {
+            return colorCache.get(cacheKey);
         }
 
-        function renderCardsByStars(cards) {
-            const rarityMap = {
-                1: "legendary",
-                2: "epic",
-                3: "rare",
-                4: "common"
-            };
-
-            // Group cards by stars
-            const groups = {};
-            cards.forEach(card => {
-                const stars = card.stars;
-                if (!groups[stars]) groups[stars] = [];
-                groups[stars].push(card);
-            });
-
-            // Sort stars descending
-            const sortedStars = Object.keys(groups).map(Number).sort((a, b) => b - a);
-
-            let html = '';
-            sortedStars.forEach(star => {
-                html += `
-                    <div class="star-section">
-                        <h3 class="star-header">${star} Star${star > 1 ? 's' : ''}</h3>
-                        <div class="cards-container">`;
-                
-                // Sort cards in this group by expected_score descending
-                groups[star].sort((a, b) => b.expected_score - a.expected_score).forEach(card => {
-                    const rarityName = rarityMap[card.rarity] || card.rarity;
-                    const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
-                    html += `
-                        <div class="card">
-                            <img src="${imgUrl}" alt="Hero" class="card-image">
-                            <div class="card-info">
-                                <b>Hero ID:</b> ${card.hero_id}<br>
-                                <b>Rarity:</b> ${rarityName}<br>
-                                <b>Edition:</b> ${card.edition}<br>
-                                <b>Expected Score:</b> ${card.expected_score.toFixed(2)}<br>
-                                <b>Count:</b> ${card.count}
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div></div>';
-            });
-            document.getElementById('result').innerHTML = html;
+        let ratio;
+        if (higherIsBetter) {
+            ratio = Math.min(value / maxValue, 1);
+        } else {
+            // For ranks - lower is better
+            ratio = 1 - (Math.min(value / maxValue, 1));
         }
 
-        async function handleToken(token) {
-            if (!token.startsWith('ey')) {
-                alert("Please enter a valid Bearer token (starts with 'ey').");
-                return;
-            }
-            localStorage.setItem('privy:id_token', token); // Save to localStorage
-            document.getElementById('result').textContent = "";
-            document.getElementById('status').textContent = "Starting fetch...";
-            try {
-                const result = await fetchAllCards(token);
-                if (!result.cards || result.cards.length === 0) {
-                    document.getElementById('status').textContent = "Token expired or no cards found.";
-                    localStorage.removeItem('privy:id_token');
-                    return;
-                }
-                document.getElementById('status').textContent = `Total cards: ${result.total}`;
-                renderCardsByStars(result.cards);
-            } catch (e) {
-                document.getElementById('status').textContent = "Token expired or invalid.";
-                document.getElementById('result').textContent = "";
-                localStorage.removeItem('privy:id_token');
-            }
+        if (ratio < 0.5) {
+            // Red to Yellow transition
+            const r = Math.round(lerp(215, 254, ratio * 2));
+            const g = Math.round(lerp(48, 224, ratio * 2));
+            const b = Math.round(lerp(39, 139, ratio * 2));
+            const color = `rgb(${r}, ${g}, ${b})`;
+            colorCache.set(cacheKey, color);
+            return color;
+        } else {
+            // Yellow to Green transition
+            const r = Math.round(lerp(254, 44, (ratio - 0.5) * 2));
+            const g = Math.round(lerp(224, 162, (ratio - 0.5) * 2));
+            const b = Math.round(lerp(139, 95, (ratio - 0.5) * 2));
+            const color = `rgb(${r}, ${g}, ${b})`;
+            colorCache.set(cacheKey, color);
+            return color;
         }
+    }
 
-        document.getElementById('fetchBtn').onclick = async function() {
-            const token = document.getElementById('token').value.trim();
-            await handleToken(token);
-        };
+    // Function to fetch and store the F2P scores data
+    async function fetchF2PScores() {
+        try {
+            console.log('Fetching F2P scores data...');
+            const { data, error } = await supabaseClient
+                .from('vwf2p_here_24hr_scores')
+                .select('hero_id,hero_name, posts_per_day,time_24h_from_now, prior_5_days, prior_5_weeks_dow_hh');
 
-        // Try to auto-populate the token field from localStorage
-        window.addEventListener('DOMContentLoaded', async () => {
-            console.log("DOMContentLoaded event fired");
-            try {
-                const privyToken = localStorage.getItem('privy:id_token');
-                console.log("privy:id_token from localStorage:", privyToken);
-                if (privyToken && privyToken.startsWith('ey')) {
-                    document.getElementById('token').value = privyToken;
-                    document.getElementById('result').textContent = "";
-                    document.getElementById('status').textContent = "Starting fetch...";
-                    try {
-                        console.log("Calling fetchAllCards...");
-                        const result = await fetchAllCards(privyToken);
-                        document.getElementById('status').textContent = `Total cards: ${result.total}`;
-                        renderCardsByStars(result.cards);
-                    } catch (e) {
-                        console.error("Error in fetchAllCards:", e);
-                        document.getElementById('status').textContent = "";
-                        document.getElementById('result').textContent = "Error: " + e.message;
-                    }
-                }
-            } catch (e) {
-                console.error("Error in DOMContentLoaded handler:", e);
+            if (error) {
+                console.error('Error fetching F2P scores:', error);
+                return null;
+            }
+
+            console.log('F2P scores data fetched successfully:', data.length, 'records');
+            f2pScoresData = data;
+            return data;
+        } catch (err) {
+            console.error('Exception while fetching F2P scores:', err);
+            return null;
+        }
+    }
+
+    // Function to get F2P score for a specific hero
+    function getF2PScore(heroHandle) {
+        if (!f2pScoresData) {
+            console.warn('F2P scores data not loaded yet');
+            return null;
+        }
+        
+        return f2pScoresData.find(score => score.hero_handle === heroHandle);
+    }
+
+    // Function to get all F2P scores (for when you need the full dataset)
+    function getAllF2PScores() {
+        return f2pScoresData;
+    }
+
+    async function fetchAllCards(token) {
+        let allCards = [];
+        const offset = 0;
+        const limit = 500;
+        let total = null;
+
+        document.getElementById('status').textContent = `Fetching ${limit} cards at offset ${offset}...`;
+        const url = `https://api-v2.fantasy.top/free-to-play/get-player-inventory?limit=${limit}&offset=${offset}&sortBy=expected_score_desc`;
+        const resp = await fetch(url, {
+            headers: {
+                "accept": "application/json, text/plain, */*",
+                "authorization": "Bearer " + token
             }
         });
+        if (!resp.ok) {
+            throw new Error("API error: " + resp.status);
+        }
+        const json = await resp.json();
+        total = json.total;
+        allCards = json.data;
+        document.getElementById('status').textContent = `Fetched ${allCards.length} of ${total} cards.`;
+        return { total, cards: allCards };
+    }
+
+    // Helper function to format date for tooltip
+    function formatDateForTooltip(dateString) {
+        const date = new Date(dateString);
+        const options = { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+        };
+        return date.toLocaleDateString('en-US', options);
+    }
+
+    // Helper function to calculate median of 4 highest scores
+    function calculateMedianScore(scores) {
+        if (!scores || scores.length === 0) return null;
+        
+        // Get all max_score values and sort them descending
+        const maxScores = scores.map(s => s.max_score).sort((a, b) => b - a);
+        
+        // Take the 4 highest scores (or all if less than 4)
+        const top4 = maxScores.slice(0, Math.min(4, maxScores.length));
+        
+        if (top4.length === 0) return null;
+        
+        // Calculate median
+        top4.sort((a, b) => a - b); // Sort ascending for median calculation
+        const mid = Math.floor(top4.length / 2);
+        
+        if (top4.length % 2 === 0) {
+            return (top4[mid - 1] + top4[mid]) / 2;
+        } else {
+            return top4[mid];
+        }
+    }
+
+    function renderCardsByStars(cards) {
+        const rarityMap = {
+            1: "legendary",
+            2: "epic",
+            3: "rare",
+            4: "common"
+        };
+
+        // Join cards with F2P scores data
+        const enrichedCards = cards.map(card => {
+            const f2pData = f2pScoresData ? f2pScoresData.find(score => score.hero_id === card.hero_id) : null;
+            return {
+                ...card,
+                hero_name: f2pData ? f2pData.hero_name : 'Unknown Hero',
+                f2p_scores: f2pData || null
+            };
+        });
+
+        // Group enriched cards by stars
+        const groups = {};
+        enrichedCards.forEach(card => {
+            const stars = card.stars;
+            if (!groups[stars]) groups[stars] = [];
+            groups[stars].push(card);
+        });
+
+        // Sort stars descending
+        const sortedStars = Object.keys(groups).map(Number).sort((a, b) => b - a);
+
+        let html = '';
+        sortedStars.forEach(star => {
+            html += `
+                <div class="star-section">
+                    <h3 class="star-header">${star} Star${star > 1 ? 's' : ''}</h3>
+                    <div class="cards-container">`;
+                
+            // Sort cards in this group by expected_score descending
+            groups[star].sort((a, b) => b.expected_score - a.expected_score).forEach(card => {
+                const rarityName = rarityMap[card.rarity] || card.rarity;
+                const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
+                
+                // Calculate median score and format daily scores
+                let medianHtml = '';
+                let scoresHtml = '';
+                
+                if (card.f2p_scores && card.f2p_scores.prior_5_days) {
+                    try {
+                        let scores;
+                        
+                        // Check if prior_5_days is already an array (parsed) or a string (needs parsing)
+                        if (Array.isArray(card.f2p_scores.prior_5_days)) {
+                            scores = card.f2p_scores.prior_5_days;
+                        } else if (typeof card.f2p_scores.prior_5_days === 'string') {
+                            scores = JSON.parse(card.f2p_scores.prior_5_days);
+                        } else {
+                            console.log('Unexpected prior_5_days type:', typeof card.f2p_scores.prior_5_days, card.f2p_scores.prior_5_days);
+                            scores = [];
+                        }
+                        
+                        if (Array.isArray(scores) && scores.length > 0) {
+                            // Calculate median score
+                            const medianScore = calculateMedianScore(scores);
+                            if (medianScore !== null) {
+                                const roundedMedian = Math.round(medianScore);
+                                const medianColor = getColorForRank(roundedMedian, 1000, true);
+                                medianHtml = `
+                                    <div class="median-score">
+                                        <span class="median-label">Median:</span>
+                                        <span class="median-badge" style="background-color: ${medianColor};">${roundedMedian}</span>
+                                    </div>
+                                `;
+                            }
+                            
+                            // Sort by date ascending for daily scores
+                            scores.sort((a, b) => new Date(a.date) - new Date(b.date));
+                            
+                            scoresHtml = `
+                                <div class="last-5-days">Last 5 Days</div>
+                                <div class="score-row">
+                                    ${scores.map(score => {
+                                        const roundedScore = Math.round(score.max_score);
+                                        const backgroundColor = getColorForRank(roundedScore, 1000, true);
+                                        const formattedDate = formatDateForTooltip(score.date);
+                                        return `<span class="score-badge" style="background-color: ${backgroundColor}; color: black; border-color: #333;" title="${formattedDate}">${roundedScore}</span>`;
+                                    }).join('')}
+                                </div>
+                            `;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing prior_5_days for hero:', card.hero_name);
+                        console.error('Raw prior_5_days value:', card.f2p_scores.prior_5_days);
+                        console.error('Error details:', e);
+                    }
+                }
+
+                html += `
+                    <div class="card">
+                        <div class="card-count">x${card.count}</div>
+                        <img src="${imgUrl}" alt="Hero" class="card-image">
+                        <div class="card-info">
+                            ${card.hero_name}
+                        </div>
+                        ${medianHtml}
+                        ${scoresHtml}
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        });
+        document.getElementById('result').innerHTML = html;
+    }
+
+    async function handleToken(token) {
+        if (!token.startsWith('ey')) {
+            alert("Please enter a valid Bearer token (starts with 'ey').");
+            return;
+        }
+        localStorage.setItem('privy:id_token', token); // Save to localStorage
+        document.getElementById('result').textContent = "";
+        document.getElementById('status').textContent = "Starting fetch...";
+        try {
+            const result = await fetchAllCards(token);
+            if (!result.cards || result.cards.length === 0) {
+                document.getElementById('status').textContent = "Token expired or no cards found.";
+                localStorage.removeItem('privy:id_token');
+                return;
+            }
+            document.getElementById('status').textContent = `Total cards: ${result.total}`;
+            renderCardsByStars(result.cards);
+        } catch (e) {
+            document.getElementById('status').textContent = "Token expired or invalid.";
+            document.getElementById('result').textContent = "";
+            localStorage.removeItem('privy:id_token');
+        }
+    }
+
+    document.getElementById('fetchBtn').onclick = async function() {
+        const token = document.getElementById('token').value.trim();
+        await handleToken(token);
+    };
+
+    // Try to auto-populate the token field from localStorage
+    window.addEventListener('DOMContentLoaded', async () => {
+        console.log("DOMContentLoaded event fired");
+        
+        // Fetch F2P scores data immediately when page loads
+        await fetchF2PScores();
+        
+        try {
+            const privyToken = localStorage.getItem('privy:id_token');
+            console.log("privy:id_token from localStorage:", privyToken);
+            if (privyToken && privyToken.startsWith('ey')) {
+                document.getElementById('token').value = privyToken;
+                document.getElementById('result').textContent = "";
+                document.getElementById('status').textContent = "Starting fetch...";
+                try {
+                    console.log("Calling fetchAllCards...");
+                    const result = await fetchAllCards(privyToken);
+                    document.getElementById('status').textContent = `Total cards: ${result.total}`;
+                    renderCardsByStars(result.cards);
+                } catch (e) {
+                    console.error("Error in fetchAllCards:", e);
+                    document.getElementById('status').textContent = "";
+                    document.getElementById('result').textContent = "Error: " + e.message;
+                }
+            }
+        } catch (e) {
+            console.error("Error in DOMContentLoaded handler:", e);
+        }
+    });
     </script>
 </body>
 </html>

@@ -41,7 +41,7 @@ join finished_tournaments t
    on ph.tournament_id::text = t.tournament_id::text
 where t.finished_tournament_seq_nbr <= 3   /*must have won .03 eth in the last 3 combined*/
 group by 1
-having suM(reward_eth) >= .025
+having suM(reward_eth) >= .02
 UNION 
 select player_id
 from flatten.get_player_basic_data tp

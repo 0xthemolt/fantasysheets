@@ -89,13 +89,13 @@
     }
 
     div.card img.card-image {
-        width: 50% !important;
+        width: 42.5% !important; /* Reduced from 50% by 15% */
         height: auto !important;
         border-radius: 0 !important;
         display: block !important;
         margin: 0 auto !important;
         object-fit: contain !important;
-        max-width: 120px !important;
+        max-width: 102px !important; /* Reduced from 120px by 15% */
     }
 
     .star-section {
@@ -196,6 +196,8 @@
         min-width: 35px;
         text-align: center;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        cursor: help; /* Add help cursor for tooltip */
+        position: relative;
     }
 
     .last-5-days {
@@ -208,21 +210,22 @@
     .score-row {
         display: flex;
         justify-content: center;
-        gap: 3px;
+        gap: 2px; /* Reduced from 3px */
         margin-top: 4px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap; /* Prevent wrapping */
     }
 
     .score-badge {
         background: #444;
         color: white;
-        padding: 2px 4px;
-        border-radius: 8px;
+        padding: 2px 3px; /* Reduced padding from 2px 4px */
+        border-radius: 6px; /* Reduced from 8px */
         border: 1px solid #666;
-        font-size: 0.8em;
+        font-size: 0.75em; /* Reduced from 0.8em */
         font-weight: bold;
-        min-width: 25px;
+        min-width: 22px; /* Reduced from 25px */
         text-align: center;
+        cursor: default; /* Change from pointer to default */
     }
 
     /* Update the optimal-deck-section styling to use league colors */
@@ -660,6 +663,7 @@
     // Global variable to store the query results
     let f2pScoresData = null;
     let currentCards = null; // Store current cards for deck generation
+    let originalCards = null; // This was missing!
 
     // Color cache and helper functions
     const colorCache = new Map();
@@ -762,37 +766,81 @@
         return { total, cards: allCards };
     }
 
-    // Helper function to format date for tooltip
+    // Fix the formatDateForTooltip function to show correct day of week
     function formatDateForTooltip(dateString) {
         const date = new Date(dateString);
         const options = { 
-            weekday: 'short', 
             month: 'short', 
-            day: 'numeric' 
+            day: 'numeric',
+            year: 'numeric'
         };
         return date.toLocaleDateString('en-US', options);
     }
 
-    // Helper function to calculate median of 4 highest scores
-    function calculateMedianScore(scores) {
-        if (!scores || scores.length === 0) return null;
+    // Add this helper function after formatDateForTooltip
+    function formatTimeToLocal(timeString) {
+        if (!timeString) return 'N/A';
         
-        // Get all max_score values and sort them descending
-        const maxScores = scores.map(s => s.max_score).sort((a, b) => b - a);
+        try {
+            // Parse the time string and convert to local time
+            const date = new Date(timeString);
+            
+            // Get day of week (short format)
+            const dayOptions = { weekday: 'short' };
+            const dayName = date.toLocaleDateString('en-US', dayOptions);
+            
+            // Get time in 12-hour format
+            const timeOptions = { 
+                hour: 'numeric', 
+                hour12: true 
+            };
+            const timeFormatted = date.toLocaleTimeString('en-US', timeOptions).toLowerCase();
+            
+            return `${dayName} ${timeFormatted}`;
+        } catch (e) {
+            console.error('Error formatting time:', timeString, e);
+            return 'N/A';
+        }
+    }
+
+    // Helper function to calculate median of top 7 scores from combined daily and weekly data
+    function calculateMedianScore(dailyScores, weeklyScores) {
+        const allScores = [];
         
-        // Take the 4 highest scores (or all if less than 4)
-        const top4 = maxScores.slice(0, Math.min(4, maxScores.length));
+        // Add daily scores
+        if (dailyScores && Array.isArray(dailyScores)) {
+            dailyScores.forEach(score => {
+                if (score && typeof score.max_score === 'number') {
+                    allScores.push(score.max_score);
+                }
+            });
+        }
         
-        if (top4.length === 0) return null;
+        // Add weekly scores
+        if (weeklyScores && Array.isArray(weeklyScores)) {
+            weeklyScores.forEach(score => {
+                if (score && typeof score.max_score === 'number') {
+                    allScores.push(score.max_score);
+                }
+            });
+        }
         
-        // Calculate median
-        top4.sort((a, b) => a - b); // Sort ascending for median calculation
-        const mid = Math.floor(top4.length / 2);
+        if (allScores.length === 0) return null;
         
-        if (top4.length % 2 === 0) {
-            return (top4[mid - 1] + top4[mid]) / 2;
+        // Sort all scores descending and take top 7 (drop 3 lowest)
+        allScores.sort((a, b) => b - a);
+        const top7 = allScores.slice(0, Math.min(7, allScores.length));
+        
+        if (top7.length === 0) return null;
+        
+        // Calculate median of top 7
+        top7.sort((a, b) => a - b); // Sort ascending for median calculation
+        const mid = Math.floor(top7.length / 2);
+        
+        if (top7.length % 2 === 0) {
+            return (top7[mid - 1] + top7[mid]) / 2;
         } else {
-            return top4[mid];
+            return top7[mid];
         }
     }
 
@@ -904,7 +952,8 @@
             const eligibleCards = currentCards.filter(card => {
                 const hasMedianScore = card.medianScore !== null && card.medianScore !== undefined;
                 const isAllowedRarity = allowedRarities.includes(card.rarity);
-                return isAllowedRarity && hasMedianScore && card.count > 0;
+                const hasAvailable = card.availableCards > 0;
+                return isAllowedRarity && hasMedianScore && hasAvailable;
             });
 
             // Update status with eligible cards count
@@ -934,31 +983,19 @@
 
                 // Strategic card selection based on league requirements
                 const topCards = [];
-                
-                // For each allowed rarity, get the top cards we might need
+                const starRange = [1,2,3,4,5,6,7,8];
+
                 allowedRarities.forEach(rarity => {
                     const maxNeeded = config.rarityLimits[rarity];
-                    const cardsOfThisRarity = eligibleCards.filter(card => card.rarity === rarity);
-                    
-                    // Sort by median score descending
-                    cardsOfThisRarity.sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
-                    
-                    // Calculate how many cards to take for this rarity
-                    let cardsToTake;
-                    if (leagueKey === 'bronze') {
-                        cardsToTake = maxNeeded * 8;
-                    } else if (leagueKey === 'silver') {
-                        cardsToTake = maxNeeded * 8;
-                    } else if (leagueKey === 'gold') {
-                        cardsToTake = maxNeeded * 8;
-                    } else if (leagueKey === 'elite') {
-                        cardsToTake = 40;
-                    }
-                    
-                    const selectedCards = cardsOfThisRarity.slice(0, cardsToTake);
-                    topCards.push(...selectedCards);
-                    
-                    console.log(`${config.name} - Rarity ${rarity}: selected ${selectedCards.length} cards (max needed: ${maxNeeded}, target: ${cardsToTake})`);
+                    starRange.forEach(star => {
+                        // Find all eligible cards of this rarity and star value
+                        const cardsOfThisRarityAndStar = eligibleCards.filter(card => card.rarity === rarity && card.stars === star);
+                        // Sort by median score descending
+                        cardsOfThisRarityAndStar.sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
+                        // Take up to maxNeeded best cards for this rarity/star
+                        const selectedCards = cardsOfThisRarityAndStar.slice(0, maxNeeded);
+                        topCards.push(...selectedCards);
+                    });
                 });
 
                 // Update status before heavy computation
@@ -1107,7 +1144,7 @@
                     <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
                         <span style="font-size: 0.7em; color: #ccc;">Score:</span>
                         <span style="background-color: ${medianColor}; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: bold;">
-                            ${Math.round(card.medianScore || 0)}
+                            ${Math.round(card.medianScore)}
                         </span>
                     </div>
                 </div>
@@ -1136,30 +1173,50 @@
         const enrichedCards = cards.map(card => {
             const f2pData = f2pScoresData ? f2pScoresData.find(score => score.hero_id === card.hero_id) : null;
             let medianScore = null;
-            
-            // Calculate median score
-            if (f2pData && f2pData.prior_5_days) {
-                try {
-                    let scores;
-                    if (Array.isArray(f2pData.prior_5_days)) {
-                        scores = f2pData.prior_5_days;
-                    } else if (typeof f2pData.prior_5_days === 'string') {
-                        scores = JSON.parse(f2pData.prior_5_days);
+            let adjustedMedianScore = null; // <-- Fix: declare outside
+
+            // Calculate median score using both daily and weekly data
+            if (f2pData) {
+                let dailyScores = null;
+                let weeklyScores = null;
+
+                // Parse daily scores
+                if (f2pData.prior_5_days) {
+                    try {
+                        if (Array.isArray(f2pData.prior_5_days)) {
+                            dailyScores = f2pData.prior_5_days;
+                        } else if (typeof f2pData.prior_5_days === 'string') {
+                            dailyScores = JSON.parse(f2pData.prior_5_days);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing prior_5_days for hero:', card.hero_id);
                     }
-                    
-                    if (Array.isArray(scores) && scores.length > 0) {
-                        medianScore = calculateMedianScore(scores);
-                    }
-                } catch (e) {
-                    console.error('Error parsing prior_5_days for hero:', card.hero_id);
                 }
+
+                // Parse weekly scores
+                if (f2pData.prior_5_weeks_dow_hh) {
+                    try {
+                        if (Array.isArray(f2pData.prior_5_weeks_dow_hh)) {
+                            weeklyScores = f2pData.prior_5_weeks_dow_hh;
+                        } else if (typeof f2pData.prior_5_weeks_dow_hh === 'string') {
+                            weeklyScores = JSON.parse(f2pData.prior_5_weeks_dow_hh);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing prior_5_weeks_dow_hh for hero:', card.hero_id);
+                    }
+                }
+
+                medianScore = calculateMedianScore(dailyScores, weeklyScores);
+                const rarityMultiplier = getRarityMultiplier(card.rarity);
+                adjustedMedianScore = medianScore !== null ? medianScore * rarityMultiplier : null;
             }
             
             return {
                 ...card,
                 hero_name: f2pData ? f2pData.hero_name : 'Unknown Hero',
                 f2p_scores: f2pData || null,
-                medianScore: medianScore
+                medianScore: adjustedMedianScore,
+                availableCards: card.count - (card.isInDeckCount || 0)
             };
         });
 
@@ -1169,7 +1226,7 @@
         
         // Set up filter event listeners
         setupFilterListeners();
-        setupStarSliderListeners(); // <-- Add this line
+        setupStarSliderListeners();
         // Apply initial filter (all rarities selected by default)
         applyFilters();
     }
@@ -1256,7 +1313,7 @@
         currentCards = filteredCards;
     }
 
-    // New function to render filtered cards (same as renderCardsByStars but without enrichment)
+    // Fix the renderFilteredCards function - it was incomplete
     function renderFilteredCards(cards) {
         const rarityMap = {
             1: "legendary",
@@ -1290,79 +1347,119 @@
                 
                 // Calculate median score and format daily scores
                 let medianHtml = '';
-                let scoresHtml = '';
+                let dailyScoresHtml = '';
+                let weeklyScoresHtml = '';
                 let postsHtml = '';
                 
-                if (card.f2p_scores && card.f2p_scores.prior_5_days) {
-                    try {
-                        let scores;
-                        
-                        // Check if prior_5_days is already an array (parsed) or a string (needs parsing)
-                        if (Array.isArray(card.f2p_scores.prior_5_days)) {
-                            scores = card.f2p_scores.prior_5_days;
-                        } else if (typeof card.f2p_scores.prior_5_days === 'string') {
-                            scores = JSON.parse(card.f2p_scores.prior_5_days);
-                        } else {
-                            scores = [];
-                        }
-                        
-                        if (Array.isArray(scores) && scores.length > 0) {
-                            // Calculate median score
-                            const medianScore = calculateMedianScore(scores);
-                            if (medianScore !== null) {
-                                const roundedMedian = Math.round(medianScore);
-                                const medianColor = getColorForRank(roundedMedian, 1000, true);
-                                medianHtml = `
-                                    <div class="median-score">
-                                        <span class="median-label">Median:</span>
-                                        <span class="median-badge" style="background-color: ${medianColor};">${roundedMedian}</span>
+                if (card.f2p_scores) {
+                    // Handle daily scores
+                    if (card.f2p_scores.prior_5_days) {
+                        try {
+                            let dailyScores;
+                            
+                            if (Array.isArray(card.f2p_scores.prior_5_days)) {
+                                dailyScores = card.f2p_scores.prior_5_days;
+                            } else if (typeof card.f2p_scores.prior_5_days === 'string') {
+                                dailyScores = JSON.parse(card.f2p_scores.prior_5_days);
+                            }
+                            
+                            if (Array.isArray(dailyScores) && dailyScores.length > 0) {
+                                // Sort by date ascending for daily scores
+                                dailyScores.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                
+                                // Update the score badge generation to use correct tooltip dates
+                                dailyScoresHtml = `
+                                    <div class="last-5-days">Last 5 Days</div>
+                                    <div class="score-row">
+                                        ${dailyScores.map(score => {
+                                            const roundedScore = Math.round(score.max_score);
+                                            const backgroundColor = getColorForRank(roundedScore, 1000, true);
+                                            const formattedDate = formatDateForTooltip(score.date);
+                                            return `<span class="score-badge" style="background-color: ${backgroundColor}; color: black; border-color: #333;" title="${formattedDate}">${roundedScore}</span>`;
+                                        }).join('')}
                                     </div>
                                 `;
                             }
-                            
-                            // Sort by date ascending for daily scores
-                            scores.sort((a, b) => new Date(a.date) - new Date(b.date));
-                            
-                            scoresHtml = `
-                                <div class="last-5-days">Last 5 Days</div>
-                                <div class="score-row">
-                                    ${scores.map(score => {
-                                        const roundedScore = Math.round(score.max_score);
-                                        const backgroundColor = getColorForRank(roundedScore, 1000, true);
-                                        const formattedDate = formatDateForTooltip(score.date);
-                                        return `<span class="score-badge" style="background-color: ${backgroundColor}; color: black; border-color: #333;" title="${formattedDate}">${roundedScore}</span>`;
-                                    }).join('')}
-                                </div>
-                            `;
+                        } catch (e) {
+                            console.error('Error parsing prior_5_days for hero:', card.hero_name);
                         }
-                    } catch (e) {
-                        console.error('Error parsing prior_5_days for hero:', card.hero_name);
-                        console.error('Raw prior_5_days value:', card.f2p_scores.prior_5_days);
-                        console.error('Error details:', e);
+                    }
+
+                    // Handle weekly scores
+                    if (card.f2p_scores.prior_5_weeks_dow_hh) {
+                        try {
+                            let weeklyScores;
+                            
+                            if (Array.isArray(card.f2p_scores.prior_5_weeks_dow_hh)) {
+                                weeklyScores = card.f2p_scores.prior_5_weeks_dow_hh;
+                            } else if (typeof card.f2p_scores.prior_5_weeks_dow_hh === 'string') {
+                                weeklyScores = JSON.parse(card.f2p_scores.prior_5_weeks_dow_hh);
+                            }
+                            
+                            if (Array.isArray(weeklyScores) && weeklyScores.length > 0) {
+                                // Sort by date ascending for weekly scores
+                                weeklyScores.sort((a, b) => new Date(a.date) - new Date(b.date));
+                                
+                                const timeDisplay = formatTimeToLocal(card.f2p_scores.time_24h_from_now);
+                                
+                                // Update the median HTML in renderFilteredCards to include tooltip
+                                weeklyScoresHtml = `
+                                    <div class="last-5-days" style="margin-top: 12px;">Last 5 Weeks ${timeDisplay}</div>
+                                    <div class="score-row">
+                                        ${weeklyScores.map(score => {
+                                            const roundedScore = Math.round(score.max_score);
+                                            const backgroundColor = getColorForRank(roundedScore, 1000, true);
+                                            const formattedDate = formatDateForTooltip(score.date);
+                                            return `<span class="score-badge" style="background-color: ${backgroundColor}; color: black; border-color: #333;" title="${formattedDate}">${roundedScore}</span>`;
+                                        }).join('')}
+                                    </div>
+                                `;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing prior_5_weeks_dow_hh for hero:', card.hero_name);
+                        }
+                    }
+
+                    // Calculate median from combined scores (already done in enrichment)
+                    if (card.medianScore !== null) {
+                        const roundedMedian = Math.round(card.medianScore);
+                        const medianColor = getColorForRank(roundedMedian, 1000, true);
+                        medianHtml = `
+                            <div class="median-score">
+                                <span class="median-label">Median:</span>
+                                <span class="median-badge" style="background-color: ${medianColor};" title="Lowest 3 of 10 Scores Excluded">${roundedMedian}</span>
+                            </div>
+                        `;
+                    }
+
+                    // Handle posts per day
+                    if (typeof card.f2p_scores.posts_per_day !== "undefined") {
+                        const postsPerDay = Number(card.f2p_scores.posts_per_day);
+                        postsHtml = `
+                            <div style="font-size:0.85em;color:#FACC15;font-weight:bold;margin-bottom:2px;">
+                                Posts: ${postsPerDay.toFixed(1)}/day
+                            </div>
+                        `;
                     }
                 }
 
-                if (card.f2p_scores && typeof card.f2p_scores.posts_per_day !== "undefined") {
-                    const postsPerDay = Number(card.f2p_scores.posts_per_day);
-                    postsHtml = `
-                        <div style="font-size:0.85em;color:#FACC15;font-weight:bold;margin-bottom:2px;">
-                            Posts: ${postsPerDay.toFixed(1)}/day
-                        </div>
-                    `;
-                } else {
-                    postsHtml = '';
-                }
+                // New card rendering logic with in-use count
+                const showInUse = card.isInDeckCount && card.isInDeckCount > 0;
+                const cardCountText = showInUse
+                    ? `x${card.count} (${card.isInDeckCount} in use)`
+                    : `x${card.count}`;
 
                 html += `
                     <div class="card">
-                        <div class="card-count">x${card.count}</div>
+                        <div class="card-count">${cardCountText}</div>
                         <img src="${imgUrl}" alt="Hero" class="card-image">
                         <div class="card-info">
                             ${card.hero_name}
                         </div>
                         ${postsHtml}
                         ${medianHtml}
-                        ${scoresHtml}
+                        ${dailyScoresHtml}
+                        ${weeklyScoresHtml}
                     </div>
                 `;
             });
@@ -1371,81 +1468,46 @@
         document.getElementById('result').innerHTML = html;
     }
 
-    async function handleToken(token) {
-        if (!token.startsWith('ey')) {
-            alert("Please enter a valid Bearer token (starts with 'ey').");
-            return;
-        }
-        localStorage.setItem('privy:id_token', token); // Save to localStorage
-        document.getElementById('result').textContent = "";
-        document.getElementById('status').textContent = "Starting fetch...";
-        try {
-            const result = await fetchAllCards(token);
-            if (!result.cards || result.cards.length === 0) {
-                document.getElementById('status').textContent = "Token expired or no cards found.";
-                localStorage.removeItem('privy:id_token');
-                return;
-            }
-            document.getElementById('status').textContent = `Total cards: ${result.total}`;
-            renderCardsByStars(result.cards);
-        } catch (e) {
-            document.getElementById('status').textContent = "Token expired or invalid.";
-            document.getElementById('result').textContent = "";
-            localStorage.removeItem('privy:id_token');
-        }
-    }
-
-    document.getElementById('fetchBtn').onclick = async function() {
-        const token = document.getElementById('token').value.trim();
-        await handleToken(token);
-    };
-
-    // Update the event listeners for all league buttons
-    document.getElementById('generateBronzeBtn').onclick = function() {
-        generateOptimalDeck('bronze');
-    };
-
-    document.getElementById('generateSilverBtn').onclick = function() {
-        generateOptimalDeck('silver');
-    };
-
-    document.getElementById('generateGoldBtn').onclick = function() {
-        generateOptimalDeck('gold');
-    };
-
-    document.getElementById('generateEliteBtn').onclick = function() {
-        generateOptimalDeck('elite');
-    };
-
-    // Try to auto-populate the token field from localStorage
-    window.addEventListener('DOMContentLoaded', async () => {
-        console.log("DOMContentLoaded event fired");
-        
-        // Fetch F2P scores data immediately when page loads
+    // Add the missing event listener for the fetch button
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Fetch F2P scores data on page load
         await fetchF2PScores();
         
-        try {
-            const privyToken = localStorage.getItem('privy:id_token');
-            console.log("privy:id_token from localStorage:", privyToken);
-            if (privyToken && privyToken.startsWith('ey')) {
-                document.getElementById('token').value = privyToken;
-                document.getElementById('result').textContent = "";
-                document.getElementById('status').textContent = "Starting fetch...";
-                try {
-                    console.log("Calling fetchAllCards...");
-                    const result = await fetchAllCards(privyToken);
-                    document.getElementById('status').textContent = `Total cards: ${result.total}`;
-                    renderCardsByStars(result.cards);
-                } catch (e) {
-                    console.error("Error in fetchAllCards:", e);
-                    document.getElementById('status').textContent = "";
-                    document.getElementById('result').textContent = "Error: " + e.message;
-                }
+        // Set up the fetch button event listener
+        document.getElementById('fetchBtn').addEventListener('click', async function() {
+            const token = document.getElementById('token').value.trim().replace(/^["']|["']$/g, '');
+            if (!token) {
+                alert('Please enter a bearer token');
+                return;
             }
-        } catch (e) {
-            console.error("Error in DOMContentLoaded handler:", e);
-        }
+
+            try {
+                document.getElementById('status').textContent = 'Fetching cards...';
+                const result = await fetchAllCards(token);
+                document.getElementById('status').textContent = `Total cards in inventory: ${result.total}`;
+                renderCardsByStars(result.cards);
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+            }
+        });
+        
+        // Set up deck generation buttons
+        document.getElementById('generateBronzeBtn').addEventListener('click', () => generateOptimalDeck('bronze'));
+        document.getElementById('generateSilverBtn').addEventListener('click', () => generateOptimalDeck('silver'));
+        document.getElementById('generateGoldBtn').addEventListener('click', () => generateOptimalDeck('gold'));
+        document.getElementById('generateEliteBtn').addEventListener('click', () => generateOptimalDeck('elite'));
     });
+
+    function getRarityMultiplier(rarity) {
+        switch (rarity) {
+            case 1: return 2.5; // legendary
+            case 2: return 2;   // epic
+            case 3: return 1.5; // rare
+            case 4: return 1;   // common
+            default: return 1;
+        }
+    }
     </script>
 </body>
 </html>

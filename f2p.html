@@ -16,6 +16,78 @@
     <title>Fantasy.Top F2P Deck Optimizer</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+    /* Add these new styles after the existing styles */
+    .header-container {
+        background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%);
+        border: 2px solid #555;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-title {
+        margin: 0 0 15px 0;
+        text-align: center;
+        color: white;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+
+    .input-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .input-row label {
+        color: white;
+        font-weight: bold;
+        white-space: nowrap;
+        min-width: 100px;
+    }
+
+    .input-row input {
+        flex: 1;
+        min-width: 200px;
+        max-width: 400px;
+        padding: 8px 12px;
+        border: 1px solid #555;
+        border-radius: 6px;
+        background: #444;
+        color: white;
+        font-size: 0.9em;
+    }
+
+    .input-row input::placeholder {
+        color: #aaa;
+    }
+
+    .input-row button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .input-row button:hover {
+        background: #0056b3;
+    }
+
+    .status-div {
+        color: #ccc;
+        font-size: 0.9em;
+        text-align: center;
+        min-height: 20px;
+        margin-top: 5px;
+    }
+
     div.card img.card-image {
         width: 50% !important;
         height: auto !important;
@@ -219,7 +291,7 @@
     /* New styles for league sections */
     #optimal-decks {
         display: none;
-        margin-top: 20px;
+        margin-top: 0;
     }
 
     .league-section {
@@ -273,40 +345,303 @@
     .optimal-deck-header {
         display: none;
     }
+
+    /* Add this CSS after the existing styles */
+
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .content-columns {
+        display: flex;
+        gap: 20px;
+    }
+
+    .left-side {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .right-column {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Make the layout responsive for smaller screens */
+    @media (max-width: 1200px) {
+        .content-columns {
+            flex-direction: column;
+        }
+    }
+
+    /* Add these styles to the existing <style> section */
+
+    .filter-container {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .filter-title {
+        color: white;
+        font-size: 1.1em;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Slightly reduced gap */
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-size: 11px; /* Reduced from 14px */
+        cursor: pointer;
+        padding: 5px 8px; /* Slightly smaller padding */
+        border-radius: 4px;
+        user-select: none;
+        color: #fff;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        transition: all 0.2s;
+    }
+
+    .checkbox-label:hover {
+        background: #3a3a3a;
+    }
+
+    .checkbox-label input {
+        margin-right: 6px;
+        accent-color: transparent;
+        transform: scale(0.8); /* Reduce checkbox size by 20% */
+    }
+
+    /* Rarity-specific colors for checked state */
+    .checkbox-label.legendary input:checked {
+        accent-color: #CACBD4;
+    }
+
+    .checkbox-label.epic input:checked {
+        accent-color: #E890FE;
+    }
+
+    .checkbox-label.rare input:checked {
+        accent-color: #00FFE2;
+    }
+
+    .checkbox-label.common input:checked {
+        accent-color: #94FF00;
+    }
+
+    /* Rarity-specific colors for label border */
+    .checkbox-label.legendary {
+        border-left: 3px solid #CACBD4;
+    }
+
+    .checkbox-label.epic {
+        border-left: 3px solid #E890FE;
+    }
+
+    .checkbox-label.rare {
+        border-left: 3px solid #00FFE2;
+    }
+
+    .checkbox-label.common {
+        border-left: 3px solid #94FF00;
+    }
+
+    /* Double Range Slider Styles */
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .double_range_slider_box {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        height: 36px;
+        background: rgba(30, 30, 30, 0.6);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        padding: 0 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 0 40px;
+        box-sizing: border-box;
+    }
+
+    .range_slider {
+        position: relative;
+        width: 100%;
+        height: 4px;
+        background: #444;
+        border-radius: 2px;
+    }
+
+    .range_slider .track {
+        position: absolute;
+        height: 4px;
+        background: #FACC15;
+        border-radius: 2px;
+        top: 0;
+    }
+
+    .range_slider input[type="range"] {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        top: 0;
+        background: transparent;
+        pointer-events: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .range_slider input[type="range"]::-webkit-slider-thumb {
+        pointer-events: all;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #FACC15;
+        border: 2px solid #333;
+        cursor: pointer;
+        -webkit-appearance: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .range_slider input[type="range"]::-moz-range-thumb {
+        pointer-events: all;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #FACC15;
+        border: 2px solid #333;
+        cursor: pointer;
+        -moz-appearance: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .range_values {
+        position: absolute;
+        left: -40px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #FACC15;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .range_values_right {
+        position: absolute;
+        right: -40px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #FACC15;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .star-filter-label {
+        color: white;
+        font-size: 1.1em;
+        font-weight: bold;
+        white-space: nowrap;
+    }
     </style>
 </head>
 <body>
-    <h2>Fantasy.Top F2P Deck Optimizer</h2>
-    <label for="token">Bearer Token:</label>
-    <input type="text" id="token" style="width:60%;" placeholder="Paste your Bearer token here (starts with 'ey')">
-    <br><br>
-    <button id="fetchBtn">Fetch Cards</button>
-    <div id="status"></div>
-    
-    <!-- Replace the optimal-decks section with league-colored styling: -->
-    <div id="optimal-decks" style="display: none;">
-        <div class="optimal-deck-section" style="border: 2px solid #FE8946; background: linear-gradient(135deg, rgba(254, 137, 70, 0.2) 0%, rgba(212, 115, 42, 0.2) 100%);">
-            <button id="generateBronzeBtn" class="generate-btn" style="background: #FE8946;">Generate Bronze Deck</button>
-            <div id="bronze-deck-result"></div>
+    <!-- Replace the header section with this compact container -->
+    <div class="header-container">
+        <h2 class="header-title">Fantasy.Top F2P Deck Optimizer</h2>
+        <div class="input-row">
+            <label for="token">Bearer Token:</label>
+            <input type="text" id="token" placeholder="Paste your Bearer token here (starts with 'ey')">
+            <button id="fetchBtn">Fetch Cards</button>
         </div>
-
-        <div class="optimal-deck-section" style="border: 2px solid #A7B8CF; background: linear-gradient(135deg, rgba(167, 184, 207, 0.2) 0%, rgba(138, 157, 184, 0.2) 100%);">
-            <button id="generateSilverBtn" class="generate-btn" style="background: #A7B8CF;">Generate Silver Deck</button>
-            <div id="silver-deck-result"></div>
-        </div>
-
-        <div class="optimal-deck-section" style="border: 2px solid #FFCE52; background: linear-gradient(135deg, rgba(255, 206, 82, 0.2) 0%, rgba(230, 184, 74, 0.2) 100%);">
-            <button id="generateGoldBtn" class="generate-btn" style="background: #FFCE52;">Generate Gold Deck</button>
-            <div id="gold-deck-result"></div>
-        </div>
-
-        <div class="optimal-deck-section" style="border: 2px solid #C78BFF; background: linear-gradient(135deg, rgba(199, 139, 255, 0.2) 0%, rgba(176, 118, 230, 0.2) 100%);">
-            <button id="generateEliteBtn" class="generate-btn" style="background: #C78BFF;">Generate Elite Deck</button>
-            <div id="elite-deck-result"></div>
-        </div>
+        <div id="status" class="status-div"></div>
     </div>
     
-    <div id="result"></div>
+    <!-- Replace the main-content section with this updated structure: -->
+    <div class="main-content">
+        <div class="content-columns">
+            <div class="left-side">
+                <div class="filter-container">
+                    <div class="filter-title">Filter Cards</div>
+                    <div class="filter-row">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label legendary">
+                                <input type="checkbox" id="filterLegendary" checked> Legendary
+                            </label>
+                            <label class="checkbox-label epic">
+                                <input type="checkbox" id="filterEpic" checked> Epic
+                            </label>
+                            <label class="checkbox-label rare">
+                                <input type="checkbox" id="filterRare" checked> Rare
+                            </label>
+                            <label class="checkbox-label common">
+                                <input type="checkbox" id="filterCommon" checked> Common
+                            </label>
+                        </div>
+                        
+                        <div class="star-filter-label">Stars:</div>
+                        <div class="double_range_slider_box">
+                            <div class="range_values" id="minStarValue">1</div>
+                            <div class="range_slider">
+                                <div class="track" id="starTrack"></div>
+                                <input type="range" id="minStarRange" min="1" max="8" value="1" step="1">
+                                <input type="range" id="maxStarRange" min="1" max="8" value="8" step="1">
+                            </div>
+                            <div class="range_values_right" id="maxStarValue">8</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="result"></div>
+            </div>
+            
+            <div class="right-column">
+                <div id="optimal-decks" style="display: none;">
+                    <div class="optimal-deck-section" style="border: 2px solid #FE8946; background: linear-gradient(135deg, rgba(254, 137, 70, 0.2) 0%, rgba(212, 115, 42, 0.2) 100%);">
+                        <button id="generateBronzeBtn" class="generate-btn" style="background: #FE8946;">Generate Bronze Deck</button>
+                        <div id="bronze-deck-result"></div>
+                    </div>
+
+                    <div class="optimal-deck-section" style="border: 2px solid #A7B8CF; background: linear-gradient(135deg, rgba(167, 184, 207, 0.2) 0%, rgba(138, 157, 184, 0.2) 100%);">
+                        <button id="generateSilverBtn" class="generate-btn" style="background: #A7B8CF;">Generate Silver Deck</button>
+                        <div id="silver-deck-result"></div>
+                    </div>
+
+                    <div class="optimal-deck-section" style="border: 2px solid #FFCE52; background: linear-gradient(135deg, rgba(255, 206, 82, 0.2) 0%, rgba(230, 184, 74, 0.2) 100%);">
+                        <button id="generateGoldBtn" class="generate-btn" style="background: #FFCE52;">Generate Gold Deck</button>
+                        <div id="gold-deck-result"></div>
+                    </div>
+
+                    <div class="optimal-deck-section" style="border: 2px solid #C78BFF; background: linear-gradient(135deg, rgba(199, 139, 255, 0.2) 0%, rgba(176, 118, 230, 0.2) 100%);">
+                        <button id="generateEliteBtn" class="generate-btn" style="background: #C78BFF;">Generate Elite Deck</button>
+                        <div id="elite-deck-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
     const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co'
@@ -739,7 +1074,7 @@
         // Store cards globally for deck generation
         currentCards = cards;
         
-        // Show the optimal deck sections (changed from 'optimal-deck' to 'optimal-decks')
+        // Show the optimal deck sections
         document.getElementById('optimal-decks').style.display = 'block';
 
         const rarityMap = {
@@ -780,12 +1115,141 @@
             };
         });
 
-        // Update global cards reference
+        // Store original enriched cards
+        originalCards = enrichedCards;
         currentCards = enrichedCards;
+        
+        // Set up filter event listeners
+        setupFilterListeners();
+        
+        // Apply initial filter (all rarities selected by default)
+        applyFilters();
+    }
 
-        // Group enriched cards by stars
+    // Function to set up filter event listeners
+    function setupFilterListeners() {
+        const filterIds = ['filterLegendary', 'filterEpic', 'filterRare', 'filterCommon'];
+        
+        filterIds.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.removeEventListener('change', applyFilters);
+                checkbox.addEventListener('change', applyFilters);
+            }
+        });
+
+        // Set up star range slider listeners
+        const minStarRange = document.getElementById('minStarRange');
+        const maxStarRange = document.getElementById('maxStarRange');
+        
+        if (minStarRange && maxStarRange) {
+            minStarRange.removeEventListener('input', updateStarRange);
+            maxStarRange.removeEventListener('input', updateStarRange);
+            minStarRange.addEventListener('input', updateStarRange);
+            maxStarRange.addEventListener('input', updateStarRange);
+            
+            // Initialize the track
+            updateStarTrack();
+        }
+    }
+
+    // Function to update star range slider
+    function updateStarRange() {
+        const minStarRange = document.getElementById('minStarRange');
+        const maxStarRange = document.getElementById('maxStarRange');
+        const minStarValue = document.getElementById('minStarValue');
+        const maxStarValue = document.getElementById('maxStarValue');
+        
+        let minVal = parseInt(minStarRange.value);
+        let maxVal = parseInt(maxStarRange.value);
+        
+        // Ensure min doesn't exceed max
+        if (minVal > maxVal) {
+            minVal = maxVal;
+            minStarRange.value = minVal;
+        }
+        
+        // Ensure max doesn't go below min
+        if (maxVal < minVal) {
+            maxVal = minVal;
+            maxStarRange.value = maxVal;
+        }
+        
+        // Update display values
+        minStarValue.textContent = minVal;
+        maxStarValue.textContent = maxVal;
+        
+        // Update track visual
+        updateStarTrack();
+        
+        // Apply filters
+        applyFilters();
+    }
+
+    // Function to update the visual track
+    function updateStarTrack() {
+        const minStarRange = document.getElementById('minStarRange');
+        const maxStarRange = document.getElementById('maxStarRange');
+        const track = document.getElementById('starTrack');
+        
+        const minVal = parseInt(minStarRange.value);
+        const maxVal = parseInt(maxStarRange.value);
+        const min = 1;
+        const max = 8;
+        
+        const leftPercent = ((minVal - min) / (max - min)) * 100;
+        const rightPercent = ((maxVal - min) / (max - min)) * 100;
+        
+        track.style.left = leftPercent + '%';
+        track.style.width = (rightPercent - leftPercent) + '%';
+    }
+
+    // Function to get selected star range
+    function getSelectedStarRange() {
+        const minStarRange = document.getElementById('minStarRange');
+        const maxStarRange = document.getElementById('maxStarRange');
+        
+        return {
+            min: parseInt(minStarRange.value),
+            max: parseInt(maxStarRange.value)
+        };
+    }
+
+    // Function to apply filters and re-render
+    function applyFilters() {
+        if (!originalCards) return;
+        
+        const selectedRarities = getSelectedRarities();
+        const starRange = getSelectedStarRange();
+        
+        // Filter cards by selected rarities and star range
+        const filteredCards = originalCards.filter(card => {
+            const rarityMatch = selectedRarities.includes(card.rarity);
+            const starMatch = card.stars >= starRange.min && card.stars <= starRange.max;
+            return rarityMatch && starMatch;
+        });
+        
+        console.log(`Filtered ${originalCards.length} cards down to ${filteredCards.length} cards (rarities: ${selectedRarities}, stars: ${starRange.min}-${starRange.max})`);
+        
+        // Re-render with filtered cards
+        renderFilteredCards(filteredCards);
+        
+        // Update currentCards for deck generation
+        currentCards = filteredCards;
+    }
+
+    // New function to render filtered cards (same as renderCardsByStars but without enrichment)
+    function renderFilteredCards(cards) {
+        const rarityMap = {
+            1: "legendary",
+            2: "epic",
+            3: "rare",
+            4: "common"
+        };
+
+        // Group cards by stars
         const groups = {};
-        enrichedCards.forEach(card => {
+        cards.forEach(card => {
             const stars = card.stars;
             if (!groups[stars]) groups[stars] = [];
             groups[stars].push(card);
@@ -820,7 +1284,6 @@
                         } else if (typeof card.f2p_scores.prior_5_days === 'string') {
                             scores = JSON.parse(card.f2p_scores.prior_5_days);
                         } else {
-                            console.log('Unexpected prior_5_days type:', typeof card.f2p_scores.prior_5_days, card.f2p_scores.prior_5_days);
                             scores = [];
                         }
                         

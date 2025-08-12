@@ -462,108 +462,114 @@
         border-left: 3px solid #94FF00;
     }
 
-    /* Double Range Slider Styles */
-    .filter-row {
+    .star-slider-container {
         display: flex;
         align-items: center;
-        gap: 20px;
-        flex-wrap: wrap;
+        position: relative;
+        min-width: 320px;
+        height: 40px;
+        justify-content: space-between;
     }
 
-    .double_range_slider_box {
-        position: relative;
-        width: 100%;
-        max-width: 300px;
-        height: 36px;
-        background: rgba(30, 30, 30, 0.6);
+    .star-label-group {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
         align-items: center;
-        border-radius: 6px;
-        padding: 0 50px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        margin: 0 40px;
-        box-sizing: border-box;
-    }
-
-    .range_slider {
+        gap: 4px;
         position: relative;
-        width: 100%;
-        height: 4px;
-        background: #444;
-        border-radius: 2px;
+        z-index: 4;
     }
 
-    .range_slider .track {
+    .star-label-group.left {
+        margin-right: 8px;
+    }
+
+    .star-label-group.right {
+        margin-left: 8px;
+    }
+
+    .gold-star {
+        color: #FACC15;
+        font-size: 1em;
+        margin-bottom: 2px;
+    }
+
+    .star-label {
+        font-weight: bold;
+        color: #FACC15;
+        font-size: 1em;
+        min-width: 24px;
+        text-align: center;
+        position: relative;
+    }
+
+    .star-slider-track {
         position: absolute;
-        height: 4px;
+        left: 60px;
+        right: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 8px;
         background: #FACC15;
-        border-radius: 2px;
-        top: 0;
+        border-radius: 4px;
+        z-index: 1;
+        width: auto;
     }
 
-    .range_slider input[type="range"] {
-        position: absolute;
-        width: 100%;
-        height: 4px;
-        top: 0;
-        background: transparent;
-        pointer-events: none;
+    .star-slider-container input[type="range"] {
         -webkit-appearance: none;
-        -moz-appearance: none;
         appearance: none;
+        position: absolute;
+        left: 60px;
+        width: calc(100% - 120px);
+        height: 40px;
+        background: transparent;
+        top: 0;
+        margin: 0;
+        pointer-events: auto;
     }
 
-    .range_slider input[type="range"]::-webkit-slider-thumb {
-        pointer-events: all;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #FACC15;
-        border: 2px solid #333;
-        cursor: pointer;
+    #minStarSlider {
+        z-index: 2;
+    }
+    #maxStarSlider {
+        z-index: 3;
+    }
+
+    .star-slider-container input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .range_slider input[type="range"]::-moz-range-thumb {
-        pointer-events: all;
-        width: 16px;
-        height: 16px;
+        appearance: none;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
         background: #FACC15;
-        border: 2px solid #333;
         cursor: pointer;
-        -moz-appearance: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        margin-top: -5px;
+        border: none;
     }
 
-    .range_values {
-        position: absolute;
-        left: -40px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #FACC15;
-        font-size: 12px;
-        font-weight: bold;
+    .star-slider-container input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #FACC15;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        border: none;
     }
 
-    .range_values_right {
-        position: absolute;
-        right: -40px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #FACC15;
-        font-size: 12px;
-        font-weight: bold;
+    .star-slider-container input[type="range"]:focus {
+        outline: none;
     }
 
-    .star-filter-label {
-        color: white;
-        font-size: 1.1em;
-        font-weight: bold;
-        white-space: nowrap;
+    .star-slider-container input[type="range"]::-webkit-slider-runnable-track {
+        height: 8px;
+        background: transparent;
+    }
+
+    .star-slider-container input[type="range"]::-ms-fill-lower,
+    .star-slider-container input[type="range"]::-ms-fill-upper {
+        background: transparent;
     }
     </style>
 </head>
@@ -585,7 +591,7 @@
             <div class="left-side">
                 <div class="filter-container">
                     <div class="filter-title">Filter Cards</div>
-                    <div class="filter-row">
+                    <div style="display: flex; align-items: center; gap: 18px;">
                         <div class="checkbox-group">
                             <label class="checkbox-label legendary">
                                 <input type="checkbox" id="filterLegendary" checked> Legendary
@@ -600,16 +606,19 @@
                                 <input type="checkbox" id="filterCommon" checked> Common
                             </label>
                         </div>
-                        
-                        <div class="star-filter-label">Stars:</div>
-                        <div class="double_range_slider_box">
-                            <div class="range_values" id="minStarValue">1</div>
-                            <div class="range_slider">
-                                <div class="track" id="starTrack"></div>
-                                <input type="range" id="minStarRange" min="1" max="8" value="1" step="1">
-                                <input type="range" id="maxStarRange" min="1" max="8" value="8" step="1">
+                        <!-- Double range slider for stars -->
+                        <div class="star-slider-container">
+                            <div class="star-label-group left">
+                                <span id="minStarLabel" class="star-label">1</span>
+                                <i class="fa-solid fa-star gold-star"></i>
                             </div>
-                            <div class="range_values_right" id="maxStarValue">8</div>
+                            <div class="star-slider-track"></div>
+                            <input type="range" id="minStarSlider" min="1" max="8" value="1" step="1">
+                            <input type="range" id="maxStarSlider" min="1" max="8" value="8" step="1">
+                            <div class="star-label-group right">
+                                <span id="maxStarLabel" class="star-label">8</span>
+                                <i class="fa-solid fa-star gold-star"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -879,139 +888,178 @@
             return;
         }
 
-        console.log(`Generating optimal ${config.name} deck...`);
+        // Show initial status
+        document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+            <div style="color: #FACC15; text-align: center; padding: 20px;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Analyzing ${config.name} deck combinations...
+            </div>
+        `;
 
-        // Filter for league eligible cards (any rarity that has a limit > 0)
-        const allowedRarities = Object.keys(config.rarityLimits).map(r => parseInt(r));
-        const eligibleCards = currentCards.filter(card => {
-            const hasMedianScore = card.medianScore !== null && card.medianScore !== undefined;
-            const isAllowedRarity = allowedRarities.includes(card.rarity);
-            return isAllowedRarity && hasMedianScore && card.count > 0;
-        });
+        // Use setTimeout to allow UI to update before heavy computation
+        setTimeout(() => {
+            console.log(`Generating optimal ${config.name} deck...`);
 
-        console.log(`${config.name} eligible cards found:`, eligibleCards.length);
+            // Filter for league eligible cards
+            const allowedRarities = Object.keys(config.rarityLimits).map(r => parseInt(r));
+            const eligibleCards = currentCards.filter(card => {
+                const hasMedianScore = card.medianScore !== null && card.medianScore !== undefined;
+                const isAllowedRarity = allowedRarities.includes(card.rarity);
+                return isAllowedRarity && hasMedianScore && card.count > 0;
+            });
 
-        if (eligibleCards.length === 0) {
-            const rarityNames = allowedRarities.map(r => {
-                const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
-                return rarityMap[r];
-            }).join(', ');
-
+            // Update status with eligible cards count
             document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
-                <p style="color: #ff6b6b;">No eligible cards found for ${config.name} league.</p>
-                <p style="color: #ccc; font-size: 0.9em;">Allowed rarities: ${rarityNames}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Cards with median scores: ${currentCards.filter(c => c.medianScore !== null).length}</p>
+                <div style="color: #FACC15; text-align: center; padding: 20px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Found ${eligibleCards.length} eligible cards<br>
+                    <span style="font-size: 0.9em;">Selecting top candidates...</span>
+                </div>
             `;
-            return;
-        }
 
-        // Strategic card selection based on league requirements
-        const topCards = [];
-        
-        // For each allowed rarity, get the top cards we might need
-        allowedRarities.forEach(rarity => {
-            const maxNeeded = config.rarityLimits[rarity];
-            const cardsOfThisRarity = eligibleCards.filter(card => card.rarity === rarity);
-            
-            // Sort by median score descending
-            cardsOfThisRarity.sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
-            
-            // Calculate how many cards to take for this rarity
-            let cardsToTake;
-            if (leagueKey === 'bronze') {
-                // Bronze: max 5 commons, 8 star levels, so 5 * 8 = 40 cards
-                cardsToTake = maxNeeded * 8;
-            } else if (leagueKey === 'silver') {
-                // Silver: max 3 rares (3 * 8 = 24), max 5 commons (5 * 8 = 40)
-                cardsToTake = maxNeeded * 8;
-            } else if (leagueKey === 'gold') {
-                // Gold: max 2 epics (2 * 8 = 16), max 4 rares (4 * 8 = 32), max 5 commons (5 * 8 = 40)
-                cardsToTake = maxNeeded * 8;
-            } else if (leagueKey === 'elite') {
-                // Elite: 5 of any rarity, so 5 * 8 = 40 for each rarity
-                cardsToTake = 40;
-            }
-            
-            // Take the top scoring cards for this rarity
-            const selectedCards = cardsOfThisRarity.slice(0, cardsToTake);
-            topCards.push(...selectedCards);
-            
-            console.log(`${config.name} - Rarity ${rarity}: selected ${selectedCards.length} cards (max needed: ${maxNeeded}, target: ${cardsToTake})`);
-        });
+            setTimeout(() => {
+                console.log(`${config.name} eligible cards found:`, eligibleCards.length);
 
-        console.log(`Total cards for ${config.name} optimization:`, topCards.length);
+                if (eligibleCards.length === 0) {
+                    const rarityNames = allowedRarities.map(r => {
+                        const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
+                        return rarityMap[r];
+                    }).join(', ');
 
-        // Generate all possible combinations of 5 cards with constraints
-        let bestCombination = null;
-        let bestScore = 0;
-        let validCombinationsFound = 0;
-        let totalCombinationsChecked = 0;
-        let duplicateHeroRejected = 0;
+                    document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                        <p style="color: #ff6b6b;">No eligible cards found for ${config.name} league.</p>
+                        <p style="color: #ccc; font-size: 0.9em;">Allowed rarities: ${rarityNames}</p>
+                        <p style="color: #ccc; font-size: 0.9em;">Cards with median scores: ${currentCards.filter(c => c.medianScore !== null).length}</p>
+                    `;
+                    return;
+                }
 
-        const findBestCombination = (cards) => {
-            const n = cards.length;
-            
-            for (let i = 0; i < n - 4; i++) {
-                for (let j = i + 1; j < n - 3; j++) {
-                    for (let k = j + 1; k < n - 2; k++) {
-                        for (let l = k + 1; l < n - 1; l++) {
-                            for (let m = l + 1; m < n; m++) {
-                                totalCombinationsChecked++;
-                                const combination = [cards[i], cards[j], cards[k], cards[l], cards[m]];
-                                
-                                // Check for unique heroes first (fastest check)
-                                if (!hasUniqueHeroes(combination)) {
-                                    duplicateHeroRejected++;
-                                    continue;
-                                }
-                                
-                                const totalStars = combination.reduce((sum, card) => sum + card.stars, 0);
-                                
-                                // Check star limit and rarity limits
-                                if (totalStars <= config.maxStars && isValidRarityCombination(combination, config)) {
-                                    validCombinationsFound++;
-                                    const totalScore = combination.reduce((sum, card) => sum + (card.medianScore || 0), 0);
-                                    
-                                    if (totalScore > bestScore) {
-                                        bestScore = totalScore;
-                                        bestCombination = combination;
+                // Strategic card selection based on league requirements
+                const topCards = [];
+                
+                // For each allowed rarity, get the top cards we might need
+                allowedRarities.forEach(rarity => {
+                    const maxNeeded = config.rarityLimits[rarity];
+                    const cardsOfThisRarity = eligibleCards.filter(card => card.rarity === rarity);
+                    
+                    // Sort by median score descending
+                    cardsOfThisRarity.sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
+                    
+                    // Calculate how many cards to take for this rarity
+                    let cardsToTake;
+                    if (leagueKey === 'bronze') {
+                        cardsToTake = maxNeeded * 8;
+                    } else if (leagueKey === 'silver') {
+                        cardsToTake = maxNeeded * 8;
+                    } else if (leagueKey === 'gold') {
+                        cardsToTake = maxNeeded * 8;
+                    } else if (leagueKey === 'elite') {
+                        cardsToTake = 40;
+                    }
+                    
+                    const selectedCards = cardsOfThisRarity.slice(0, cardsToTake);
+                    topCards.push(...selectedCards);
+                    
+                    console.log(`${config.name} - Rarity ${rarity}: selected ${selectedCards.length} cards (max needed: ${maxNeeded}, target: ${cardsToTake})`);
+                });
+
+                // Update status before heavy computation
+                const totalCombinations = topCards.length >= 5 ? 
+                    (topCards.length * (topCards.length - 1) * (topCards.length - 2) * (topCards.length - 3) * (topCards.length - 4)) / 120 : 0;
+                
+                document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                    <div style="color: #FACC15; text-align: center; padding: 20px;">
+                        <i class="fa-solid fa-cog fa-spin"></i> Computing optimal combination...<br>
+                        <span style="font-size: 0.9em;">Evaluating ${totalCombinations.toLocaleString()} possible decks</span>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    console.log(`Total cards for ${config.name} optimization:`, topCards.length);
+
+                    // Generate all possible combinations of 5 cards with constraints
+                    let bestCombination = null;
+                    let bestScore = 0;
+                    let validCombinationsFound = 0;
+                    let totalCombinationsChecked = 0;
+                    let duplicateHeroRejected = 0;
+
+                    const findBestCombination = (cards) => {
+                        const n = cards.length;
+                        
+                        for (let i = 0; i < n - 4; i++) {
+                            // Update progress every 1000 iterations
+                            if (i % 1000 === 0 && i > 0) {
+                                const progress = Math.round((i / (n - 4)) * 100);
+                                document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                                    <div style="color: #FACC15; text-align: center; padding: 20px;">
+                                        <i class="fa-solid fa-cog fa-spin"></i> Computing optimal combination...<br>
+                                        <span style="font-size: 0.9em;">Progress: ${progress}% (${validCombinationsFound} valid decks found)</span>
+                                    </div>
+                                `;
+                            }
+                            
+                            for (let j = i + 1; j < n - 3; j++) {
+                                for (let k = j + 1; k < n - 2; k++) {
+                                    for (let l = k + 1; l < n - 1; l++) {
+                                        for (let m = l + 1; m < n; m++) {
+                                            totalCombinationsChecked++;
+                                            const combination = [cards[i], cards[j], cards[k], cards[l], cards[m]];
+                                            
+                                            // Check for unique heroes first (fastest check)
+                                            if (!hasUniqueHeroes(combination)) {
+                                                duplicateHeroRejected++;
+                                                continue;
+                                            }
+                                            
+                                            const totalStars = combination.reduce((sum, card) => sum + card.stars, 0);
+                                            
+                                            // Check star limit and rarity limits
+                                            if (totalStars <= config.maxStars && isValidRarityCombination(combination, config)) {
+                                                validCombinationsFound++;
+                                                const totalScore = combination.reduce((sum, card) => sum + (card.medianScore || 0), 0);
+                                                
+                                                if (totalScore > bestScore) {
+                                                    bestScore = totalScore;
+                                                    bestCombination = combination;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
+                    };
+
+                    findBestCombination(topCards);
+
+                    console.log(`${config.name} - Total combinations checked:`, totalCombinationsChecked);
+                    console.log(`${config.name} - Rejected for duplicate heroes:`, duplicateHeroRejected);
+                    console.log(`${config.name} - Valid combinations found:`, validCombinationsFound);
+
+                    if (!bestCombination) {
+                        // Create rarity limits description
+                        const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
+                        const limitsDesc = Object.entries(config.rarityLimits)
+                            .map(([rarity, limit]) => `max ${limit} ${rarityMap[rarity]}`)
+                            .join(', ');
+
+                        document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                            <p style="color: #ff6b6b;">No valid combination found for ${config.name} league.</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Rarity limits: ${limitsDesc}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Max stars: ${config.maxStars}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Eligible cards: ${eligibleCards.length}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Cards selected for optimization: ${topCards.length}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Combinations checked: ${totalCombinationsChecked}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Rejected for duplicate heroes: ${duplicateHeroRejected}</p>
+                            <p style="color: #ccc; font-size: 0.9em;">Valid combinations found: ${validCombinationsFound}</p>
+                        `;
+                        return;
                     }
-                }
-            }
-        };
 
-        findBestCombination(topCards);
-
-        console.log(`${config.name} - Total combinations checked:`, totalCombinationsChecked);
-        console.log(`${config.name} - Rejected for duplicate heroes:`, duplicateHeroRejected);
-        console.log(`${config.name} - Valid combinations found:`, validCombinationsFound);
-
-        if (!bestCombination) {
-            // Create rarity limits description
-            const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
-            const limitsDesc = Object.entries(config.rarityLimits)
-                .map(([rarity, limit]) => `max ${limit} ${rarityMap[rarity]}`)
-                .join(', ');
-
-            document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
-                <p style="color: #ff6b6b;">No valid combination found for ${config.name} league.</p>
-                <p style="color: #ccc; font-size: 0.9em;">Rarity limits: ${limitsDesc}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Max stars: ${config.maxStars}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Eligible cards: ${eligibleCards.length}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Cards selected for optimization: ${topCards.length}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Combinations checked: ${totalCombinationsChecked}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Rejected for duplicate heroes: ${duplicateHeroRejected}</p>
-                <p style="color: #ccc; font-size: 0.9em;">Valid combinations found: ${validCombinationsFound}</p>
-            `;
-            return;
-        }
-
-        // Render the optimal deck
-        renderOptimalDeck(bestCombination, bestScore, leagueKey, config);
+                    // Render the optimal deck
+                    renderOptimalDeck(bestCombination, bestScore, leagueKey, config);
+                }, 50); // Small delay before heavy computation
+            }, 100); // Small delay after eligibility check
+        }, 50); // Small delay to show initial status
     }
 
     function renderOptimalDeck(cards, totalScore, leagueKey, config) {
@@ -1121,7 +1169,7 @@
         
         // Set up filter event listeners
         setupFilterListeners();
-        
+        setupStarSliderListeners(); // <-- Add this line
         // Apply initial filter (all rarities selected by default)
         applyFilters();
     }
@@ -1133,108 +1181,78 @@
         filterIds.forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) {
-                checkbox.removeEventListener('change', applyFilters);
+                checkbox.removeEventListener('change', applyFilters); // Remove existing listener
                 checkbox.addEventListener('change', applyFilters);
             }
         });
+    }
 
-        // Set up star range slider listeners
-        const minStarRange = document.getElementById('minStarRange');
-        const maxStarRange = document.getElementById('maxStarRange');
-        
-        if (minStarRange && maxStarRange) {
-            minStarRange.removeEventListener('input', updateStarRange);
-            maxStarRange.removeEventListener('input', updateStarRange);
-            minStarRange.addEventListener('input', updateStarRange);
-            maxStarRange.addEventListener('input', updateStarRange);
-            
-            // Initialize the track
-            updateStarTrack();
+    // Add after setupFilterListeners()
+    function setupStarSliderListeners() {
+        const minSlider = document.getElementById('minStarSlider');
+        const maxSlider = document.getElementById('maxStarSlider');
+        const minLabel = document.getElementById('minStarLabel');
+        const maxLabel = document.getElementById('maxStarLabel');
+
+        function updateLabelsAndFilter(event) {
+            let minVal = parseInt(minSlider.value);
+            let maxVal = parseInt(maxSlider.value);
+
+            // Don't allow values to cross over - prevent invalid movements
+            if (event && event.target === minSlider) {
+                // If min slider tries to go above max, stop it at max
+                if (minVal > maxVal) {
+                    minVal = maxVal;
+                    minSlider.value = minVal;
+                }
+            } else if (event && event.target === maxSlider) {
+                // If max slider tries to go below min, stop it at min
+                if (maxVal < minVal) {
+                    maxVal = minVal;
+                    maxSlider.value = maxVal;
+                }
+            }
+
+            minLabel.textContent = minVal;
+            maxLabel.textContent = maxVal;
+            applyFilters();
         }
+
+        minSlider.addEventListener('input', updateLabelsAndFilter);
+        maxSlider.addEventListener('input', updateLabelsAndFilter);
+        updateLabelsAndFilter();
     }
 
-    // Function to update star range slider
-    function updateStarRange() {
-        const minStarRange = document.getElementById('minStarRange');
-        const maxStarRange = document.getElementById('maxStarRange');
-        const minStarValue = document.getElementById('minStarValue');
-        const maxStarValue = document.getElementById('maxStarValue');
+    // Function to get currently selected rarities
+    function getSelectedRarities() {
+        const selectedRarities = [];
+        const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
         
-        let minVal = parseInt(minStarRange.value);
-        let maxVal = parseInt(maxStarRange.value);
-        
-        // Ensure min doesn't exceed max
-        if (minVal > maxVal) {
-            minVal = maxVal;
-            minStarRange.value = minVal;
-        }
-        
-        // Ensure max doesn't go below min
-        if (maxVal < minVal) {
-            maxVal = minVal;
-            maxStarRange.value = maxVal;
-        }
-        
-        // Update display values
-        minStarValue.textContent = minVal;
-        maxStarValue.textContent = maxVal;
-        
-        // Update track visual
-        updateStarTrack();
-        
-        // Apply filters
-        applyFilters();
-    }
-
-    // Function to update the visual track
-    function updateStarTrack() {
-        const minStarRange = document.getElementById('minStarRange');
-        const maxStarRange = document.getElementById('maxStarRange');
-        const track = document.getElementById('starTrack');
-        
-        const minVal = parseInt(minStarRange.value);
-        const maxVal = parseInt(maxStarRange.value);
-        const min = 1;
-        const max = 8;
-        
-        const leftPercent = ((minVal - min) / (max - min)) * 100;
-        const rightPercent = ((maxVal - min) / (max - min)) * 100;
-        
-        track.style.left = leftPercent + '%';
-        track.style.width = (rightPercent - leftPercent) + '%';
-    }
-
-    // Function to get selected star range
-    function getSelectedStarRange() {
-        const minStarRange = document.getElementById('minStarRange');
-        const maxStarRange = document.getElementById('maxStarRange');
-        
-        return {
-            min: parseInt(minStarRange.value),
-            max: parseInt(maxStarRange.value)
-        };
-    }
-
-    // Function to apply filters and re-render
-    function applyFilters() {
-        if (!originalCards) return;
-        
-        const selectedRarities = getSelectedRarities();
-        const starRange = getSelectedStarRange();
-        
-        // Filter cards by selected rarities and star range
-        const filteredCards = originalCards.filter(card => {
-            const rarityMatch = selectedRarities.includes(card.rarity);
-            const starMatch = card.stars >= starRange.min && card.stars <= starRange.max;
-            return rarityMatch && starMatch;
+        Object.entries(rarityMap).forEach(([rarityNum, rarityName]) => {
+            const checkbox = document.getElementById(`filter${rarityName.charAt(0).toUpperCase() + rarityName.slice(1)}`);
+            if (checkbox && checkbox.checked) {
+                selectedRarities.push(parseInt(rarityNum));
+            }
         });
         
-        console.log(`Filtered ${originalCards.length} cards down to ${filteredCards.length} cards (rarities: ${selectedRarities}, stars: ${starRange.min}-${starRange.max})`);
-        
-        // Re-render with filtered cards
+        return selectedRarities;
+    }
+
+    // Update applyFilters to use star slider values
+    function applyFilters() {
+        if (!originalCards) return;
+        const selectedRarities = getSelectedRarities();
+        const minStar = parseInt(document.getElementById('minStarSlider').value);
+        const maxStar = parseInt(document.getElementById('maxStarSlider').value);
+
+        // Filter cards by selected rarities and star range
+        const filteredCards = originalCards.filter(card => {
+            return selectedRarities.includes(card.rarity) &&
+                card.stars >= minStar && card.stars <= maxStar;
+        });
+
+        console.log(`Filtered ${originalCards.length} cards down to ${filteredCards.length} cards`);
         renderFilteredCards(filteredCards);
-        
-        // Update currentCards for deck generation
         currentCards = filteredCards;
     }
 
@@ -1273,6 +1291,7 @@
                 // Calculate median score and format daily scores
                 let medianHtml = '';
                 let scoresHtml = '';
+                let postsHtml = '';
                 
                 if (card.f2p_scores && card.f2p_scores.prior_5_days) {
                     try {
@@ -1323,6 +1342,17 @@
                     }
                 }
 
+                if (card.f2p_scores && typeof card.f2p_scores.posts_per_day !== "undefined") {
+                    const postsPerDay = Number(card.f2p_scores.posts_per_day);
+                    postsHtml = `
+                        <div style="font-size:0.85em;color:#FACC15;font-weight:bold;margin-bottom:2px;">
+                            Posts: ${postsPerDay.toFixed(1)}/day
+                        </div>
+                    `;
+                } else {
+                    postsHtml = '';
+                }
+
                 html += `
                     <div class="card">
                         <div class="card-count">x${card.count}</div>
@@ -1330,6 +1360,7 @@
                         <div class="card-info">
                             ${card.hero_name}
                         </div>
+                        ${postsHtml}
                         ${medianHtml}
                         ${scoresHtml}
                     </div>

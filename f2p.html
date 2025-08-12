@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Cards</title>
+    <title>Fantasy.Top F2P Deck Optimizer</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
     div.card img.card-image {
@@ -152,15 +152,135 @@
         min-width: 25px;
         text-align: center;
     }
+
+    .optimal-deck-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 2px solid #d4a574;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #4a3728 0%, #3d2e20 100%);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .optimal-deck-header {
+        margin: 0 0 15px 0;
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
+        color: black;
+        border-radius: 8px;
+        font-size: 1.3em;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .generate-btn {
+        background: #d4a574;
+        color: black;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 15px;
+        font-size: 1em;
+    }
+
+    .generate-btn:hover {
+        background: #c19660;
+    }
+
+    .deck-stats {
+        margin: 10px 0;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: white;
+    }
+
+    .deck-cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .deck-card {
+        border: 1px solid #d4a574;
+        padding: 8px;
+        width: 140px;
+        text-align: center;
+        border-radius: 8px;
+        background: rgba(212, 165, 116, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .deck-card img {
+        width: 60px !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        display: block !important;
+        margin: 0 auto 8px auto !important;
+        object-fit: contain !important;
+    }
     </style>
 </head>
 <body>
-    <h2>Fantasy Top Card Fetcher</h2>
+    <h2>Fantasy.Top F2P Deck Optimizer</h2>
     <label for="token">Bearer Token:</label>
     <input type="text" id="token" style="width:60%;" placeholder="Paste your Bearer token here (starts with 'ey')">
     <br><br>
     <button id="fetchBtn">Fetch Cards</button>
     <div id="status"></div>
+    
+    <div id="optimal-deck" class="optimal-deck-section" style="display: none;">
+        <!-- Bronze League -->
+        <div style="margin-bottom: 30px;">
+            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #FE8946 0%, #d4734a 100%);">
+                Optimal Bronze Deck
+            </div>
+            <button onclick="generateOptimalDeck('bronze')" class="generate-btn" style="background: #FE8946;">
+                Generate Bronze Deck
+            </button>
+            <div id="bronze-deck-result"></div>
+        </div>
+
+        <!-- Silver League -->
+        <div style="margin-bottom: 30px;">
+            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #A7B8CF 0%, #8ba3ba 100%);">
+                Optimal Silver Deck
+            </div>
+            <button onclick="generateOptimalDeck('silver')" class="generate-btn" style="background: #A7B8CF;">
+                Generate Silver Deck
+            </button>
+            <div id="silver-deck-result"></div>
+        </div>
+
+        <!-- Gold League -->
+        <div style="margin-bottom: 30px;">
+            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #FFCE52 0%, #e6b84a 100%);">
+                Optimal Gold Deck
+            </div>
+            <button onclick="generateOptimalDeck('gold')" class="generate-btn" style="background: #FFCE52;">
+                Generate Gold Deck
+            </button>
+            <div id="gold-deck-result"></div>
+        </div>
+
+        <!-- Elite League -->
+        <div style="margin-bottom: 30px;">
+            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #C78BFF 0%, #b078e6 100%);">
+                Optimal Elite Deck
+            </div>
+            <button onclick="generateOptimalDeck('elite')" class="generate-btn" style="background: #C78BFF;">
+                Generate Elite Deck
+            </button>
+            <div id="elite-deck-result"></div>
+        </div>
+    </div>
+    
     <div id="result"></div>
 
     <script>
@@ -170,6 +290,7 @@
 
     // Global variable to store the query results
     let f2pScoresData = null;
+    let currentCards = null; // Store current cards for deck generation
 
     // Color cache and helper functions
     const colorCache = new Map();
@@ -306,7 +427,221 @@
         }
     }
 
+    // League configurations based on config.json
+    const leagueConfigs = {
+        bronze: {
+            name: "Bronze",
+            color: "#FE8946",
+            maxStars: 18,
+            allowedRarities: [4], // common only
+            description: "5 common cards, max 18 stars"
+        },
+        silver: {
+            name: "Silver", 
+            color: "#A7B8CF",
+            maxStars: 23,
+            allowedRarities: [3, 4], // rare and common
+            description: "5 rare/common cards, max 25 stars"
+        },
+        gold: {
+            name: "Gold",
+            color: "#FFCE52", 
+            maxStars: 25,
+            allowedRarities: [2, 3, 4], // epic, rare, and common
+            description: "5 epic/rare/common cards, max 35 stars"
+        },
+        elite: {
+            name: "Elite",
+            color: "#C78BFF",
+            maxStars: 50,
+            allowedRarities: [1, 2, 3, 4], // all rarities
+            description: "5 cards of any rarity, max 50 stars"
+        }
+    };
+
+    // Generic function to generate optimal deck for any league
+    function generateOptimalDeck(leagueKey) {
+        if (!currentCards) {
+            document.getElementById(`${leagueKey}-deck-result`).innerHTML = '<p style="color: #ff6b6b;">No cards loaded. Please fetch cards first.</p>';
+            return;
+        }
+
+        const config = leagueConfigs[leagueKey];
+        if (!config) {
+            console.error('Invalid league key:', leagueKey);
+            return;
+        }
+
+        console.log(`Generating optimal ${config.name} deck...`);
+
+        // Filter for league eligible cards
+        const eligibleCards = currentCards.filter(card => {
+            const hasMedianScore = card.medianScore !== null && card.medianScore !== undefined;
+            const isAllowedRarity = config.allowedRarities.includes(card.rarity);
+            return isAllowedRarity && hasMedianScore && card.count > 0;
+        });
+
+        console.log(`${config.name} eligible cards found:`, eligibleCards.length);
+
+        if (eligibleCards.length === 0) {
+            const rarityNames = config.allowedRarities.map(r => {
+                const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
+                return rarityMap[r];
+            }).join(', ');
+
+            document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                <p style="color: #ff6b6b;">No eligible cards found for ${config.name} league.</p>
+                <p style="color: #ccc; font-size: 0.9em;">Required rarities: ${rarityNames}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Cards with median scores: ${currentCards.filter(c => c.medianScore !== null).length}</p>
+            `;
+            return;
+        }
+
+        // Group cards by star level and get top 5 for each
+        const cardsByStars = {};
+        eligibleCards.forEach(card => {
+            if (!cardsByStars[card.stars]) {
+                cardsByStars[card.stars] = [];
+            }
+            cardsByStars[card.stars].push(card);
+        });
+
+        // Get top 5 cards for each star level
+        const topCards = [];
+        Object.keys(cardsByStars).forEach(stars => {
+            const sortedCards = cardsByStars[stars].sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
+            const topStarCards = sortedCards.slice(0, 5);
+            topCards.push(...topStarCards);
+            console.log(`${stars} stars: ${cardsByStars[stars].length} cards, taking top ${topStarCards.length}`);
+        });
+
+        console.log(`Total cards for ${config.name} optimization:`, topCards.length);
+
+        // Generate all possible combinations of 5 cards with total stars <= maxStars
+        let bestCombination = null;
+        let bestScore = 0;
+        let validCombinationsFound = 0;
+
+        const findBestCombination = (cards) => {
+            const n = cards.length;
+            
+            for (let i = 0; i < n - 4; i++) {
+                for (let j = i + 1; j < n - 3; j++) {
+                    for (let k = j + 1; k < n - 2; k++) {
+                        for (let l = k + 1; l < n - 1; l++) {
+                            for (let m = l + 1; m < n; m++) {
+                                const combination = [cards[i], cards[j], cards[k], cards[l], cards[m]];
+                                const totalStars = combination.reduce((sum, card) => sum + card.stars, 0);
+                                
+                                if (totalStars <= config.maxStars) {
+                                    validCombinationsFound++;
+                                    const totalScore = combination.reduce((sum, card) => sum + (card.medianScore || 0), 0);
+                                    
+                                    if (totalScore > bestScore) {
+                                        bestScore = totalScore;
+                                        bestCombination = combination;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        findBestCombination(topCards);
+
+        console.log(`${config.name} - Valid combinations found:`, validCombinationsFound);
+
+        if (!bestCombination) {
+            document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
+                <p style="color: #ff6b6b;">No valid combination found for ${config.name} league.</p>
+                <p style="color: #ccc; font-size: 0.9em;">${config.description}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Eligible cards: ${eligibleCards.length}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Valid combinations found: ${validCombinationsFound}</p>
+            `;
+            return;
+        }
+
+        // Render the optimal deck
+        renderOptimalDeck(bestCombination, bestScore, leagueKey, config);
+    }
+
+    function renderOptimalDeck(cards, totalScore, leagueKey, config) {
+        const rarityMap = {
+            1: "legendary",
+            2: "epic", 
+            3: "rare",
+            4: "common"
+        };
+
+        const totalStars = cards.reduce((sum, card) => sum + card.stars, 0);
+        const avgScore = Math.round(totalScore / 5);
+
+        let html = `
+            <div class="deck-stats">
+                <strong>Total Combined Score:</strong> ${Math.round(totalScore)} | 
+                <strong>Average Score:</strong> ${avgScore} | 
+                <strong>Total Stars:</strong> ${totalStars}/${config.maxStars}
+            </div>
+            <div class="deck-cards-container">
+        `;
+
+        cards.forEach(card => {
+            const rarityName = rarityMap[card.rarity] || card.rarity;
+            const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
+            const medianColor = getColorForRank(card.medianScore || 0, 1000, true);
+
+            html += `
+                <div class="deck-card">
+                    <img src="${imgUrl}" alt="Hero">
+                    <div style="color: white; font-size: 0.8em; margin-bottom: 4px;">
+                        ${card.hero_name}
+                    </div>
+                    <div style="color: white; font-size: 0.7em; margin-bottom: 4px;">
+                        ${card.stars} Star${card.stars > 1 ? 's' : ''} • ${rarityName}
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
+                        <span style="font-size: 0.7em; color: #ccc;">Score:</span>
+                        <span style="background-color: ${medianColor}; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: bold;">
+                            ${Math.round(card.medianScore || 0)}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        document.getElementById(`${leagueKey}-deck-result`).innerHTML = html;
+    }
+
+    // Remove the old generateOptimalBronzeDeck function and replace with this
+    function generateOptimalBronzeDeck() {
+        generateOptimalDeck('bronze');
+    }
+
+    // Function to generate optimal Silver deck
+    function generateOptimalSilverDeck() {
+        generateOptimalDeck('silver');
+    }
+
+    // Function to generate optimal Gold deck
+    function generateOptimalGoldDeck() {
+        generateOptimalDeck('gold');
+    }
+
+    // Function to generate optimal Elite deck
+    function generateOptimalEliteDeck() {
+        generateOptimalDeck('elite');
+    }
+
     function renderCardsByStars(cards) {
+        // Store cards globally for deck generation
+        currentCards = cards;
+        
+        // Show the optimal deck section
+        document.getElementById('optimal-deck').style.display = 'block';
+
         const rarityMap = {
             1: "legendary",
             2: "epic",
@@ -317,12 +652,36 @@
         // Join cards with F2P scores data
         const enrichedCards = cards.map(card => {
             const f2pData = f2pScoresData ? f2pScoresData.find(score => score.hero_id === card.hero_id) : null;
+            let medianScore = null;
+            
+            // Calculate median score
+            if (f2pData && f2pData.prior_5_days) {
+                try {
+                    let scores;
+                    if (Array.isArray(f2pData.prior_5_days)) {
+                        scores = f2pData.prior_5_days;
+                    } else if (typeof f2pData.prior_5_days === 'string') {
+                        scores = JSON.parse(f2pData.prior_5_days);
+                    }
+                    
+                    if (Array.isArray(scores) && scores.length > 0) {
+                        medianScore = calculateMedianScore(scores);
+                    }
+                } catch (e) {
+                    console.error('Error parsing prior_5_days for hero:', card.hero_id);
+                }
+            }
+            
             return {
                 ...card,
                 hero_name: f2pData ? f2pData.hero_name : 'Unknown Hero',
-                f2p_scores: f2pData || null
+                f2p_scores: f2pData || null,
+                medianScore: medianScore
             };
         });
+
+        // Update global cards reference
+        currentCards = enrichedCards;
 
         // Group enriched cards by stars
         const groups = {};
@@ -445,6 +804,11 @@
     document.getElementById('fetchBtn').onclick = async function() {
         const token = document.getElementById('token').value.trim();
         await handleToken(token);
+    };
+
+    // Add event listener for deck generation
+    document.getElementById('generateBtn').onclick = function() {
+        generateOptimalBronzeDeck();
     };
 
     // Try to auto-populate the token field from localStorage

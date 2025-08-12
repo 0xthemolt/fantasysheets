@@ -153,41 +153,31 @@
         text-align: center;
     }
 
+    /* Update the optimal-deck-section styling to use league colors */
     .optimal-deck-section {
         margin: 20px 0;
         padding: 20px;
-        border: 2px solid #d4a574;
         border-radius: 12px;
-        background: linear-gradient(135deg, #4a3728 0%, #3d2e20 100%);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
-    .optimal-deck-header {
-        margin: 0 0 15px 0;
-        padding: 10px 15px;
-        background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
-        color: black;
-        border-radius: 8px;
-        font-size: 1.3em;
-        font-weight: bold;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
+    /* Remove the optimal-deck-header styles since we're removing it */
 
+    /* Update generate-btn to be more prominent */
     .generate-btn {
-        background: #d4a574;
         color: black;
         border: none;
-        padding: 10px 20px;
+        padding: 12px 24px;
         border-radius: 6px;
         font-weight: bold;
         cursor: pointer;
         margin-bottom: 15px;
-        font-size: 1em;
+        font-size: 1.1em;
+        width: 100%;
     }
 
     .generate-btn:hover {
-        background: #c19660;
+        opacity: 0.9;
     }
 
     .deck-stats {
@@ -225,6 +215,64 @@
         margin: 0 auto 8px auto !important;
         object-fit: contain !important;
     }
+
+    /* New styles for league sections */
+    #optimal-decks {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .league-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 2px solid #777;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #222 0%, #111 100%);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .league-header {
+        margin: 0 0 15px 0;
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #777 0%, #555 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 1.4em;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .league-description {
+        font-size: 0.9em;
+        color: #ccc;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .generate-league-btn {
+        display: block;
+        width: 100%;
+        background: #777;
+        color: white;
+        border: none;
+        padding: 10px 0;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 15px;
+        font-size: 1em;
+        text-align: center;
+    }
+
+    .generate-league-btn:hover {
+        background: #666;
+    }
+
+    /* Replace the optimal-deck-header styles since we're removing it */
+    .optimal-deck-header {
+        display: none;
+    }
     </style>
 </head>
 <body>
@@ -235,48 +283,25 @@
     <button id="fetchBtn">Fetch Cards</button>
     <div id="status"></div>
     
-    <div id="optimal-deck" class="optimal-deck-section" style="display: none;">
-        <!-- Bronze League -->
-        <div style="margin-bottom: 30px;">
-            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #FE8946 0%, #d4734a 100%);">
-                Optimal Bronze Deck
-            </div>
-            <button onclick="generateOptimalDeck('bronze')" class="generate-btn" style="background: #FE8946;">
-                Generate Bronze Deck
-            </button>
+    <!-- Replace the optimal-decks section with league-colored styling: -->
+    <div id="optimal-decks" style="display: none;">
+        <div class="optimal-deck-section" style="border: 2px solid #FE8946; background: linear-gradient(135deg, rgba(254, 137, 70, 0.2) 0%, rgba(212, 115, 42, 0.2) 100%);">
+            <button id="generateBronzeBtn" class="generate-btn" style="background: #FE8946;">Generate Bronze Deck</button>
             <div id="bronze-deck-result"></div>
         </div>
 
-        <!-- Silver League -->
-        <div style="margin-bottom: 30px;">
-            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #A7B8CF 0%, #8ba3ba 100%);">
-                Optimal Silver Deck
-            </div>
-            <button onclick="generateOptimalDeck('silver')" class="generate-btn" style="background: #A7B8CF;">
-                Generate Silver Deck
-            </button>
+        <div class="optimal-deck-section" style="border: 2px solid #A7B8CF; background: linear-gradient(135deg, rgba(167, 184, 207, 0.2) 0%, rgba(138, 157, 184, 0.2) 100%);">
+            <button id="generateSilverBtn" class="generate-btn" style="background: #A7B8CF;">Generate Silver Deck</button>
             <div id="silver-deck-result"></div>
         </div>
 
-        <!-- Gold League -->
-        <div style="margin-bottom: 30px;">
-            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #FFCE52 0%, #e6b84a 100%);">
-                Optimal Gold Deck
-            </div>
-            <button onclick="generateOptimalDeck('gold')" class="generate-btn" style="background: #FFCE52;">
-                Generate Gold Deck
-            </button>
+        <div class="optimal-deck-section" style="border: 2px solid #FFCE52; background: linear-gradient(135deg, rgba(255, 206, 82, 0.2) 0%, rgba(230, 184, 74, 0.2) 100%);">
+            <button id="generateGoldBtn" class="generate-btn" style="background: #FFCE52;">Generate Gold Deck</button>
             <div id="gold-deck-result"></div>
         </div>
 
-        <!-- Elite League -->
-        <div style="margin-bottom: 30px;">
-            <div class="optimal-deck-header" style="background: linear-gradient(135deg, #C78BFF 0%, #b078e6 100%);">
-                Optimal Elite Deck
-            </div>
-            <button onclick="generateOptimalDeck('elite')" class="generate-btn" style="background: #C78BFF;">
-                Generate Elite Deck
-            </button>
+        <div class="optimal-deck-section" style="border: 2px solid #C78BFF; background: linear-gradient(135deg, rgba(199, 139, 255, 0.2) 0%, rgba(176, 118, 230, 0.2) 100%);">
+            <button id="generateEliteBtn" class="generate-btn" style="background: #C78BFF;">Generate Elite Deck</button>
             <div id="elite-deck-result"></div>
         </div>
     </div>
@@ -355,13 +380,13 @@
     }
 
     // Function to get F2P score for a specific hero
-    function getF2PScore(heroHandle) {
+    function getF2PScore(heroId) {  // Changed from heroHandle to heroId
         if (!f2pScoresData) {
             console.warn('F2P scores data not loaded yet');
             return null;
         }
         
-        return f2pScoresData.find(score => score.hero_handle === heroHandle);
+        return f2pScoresData.find(score => score.hero_id === heroId);  // Changed to match by hero_id
     }
 
     // Function to get all F2P scores (for when you need the full dataset)
@@ -427,37 +452,84 @@
         }
     }
 
-    // League configurations based on config.json
+    // League configurations with rarity quantity limits (FIXED RARITY NUMBERS)
     const leagueConfigs = {
         bronze: {
             name: "Bronze",
             color: "#FE8946",
             maxStars: 18,
-            allowedRarities: [4], // common only
+            rarityLimits: {
+                4: 5 // max 5 commons (rarity 4)
+            },
             description: "5 common cards, max 18 stars"
         },
         silver: {
             name: "Silver", 
             color: "#A7B8CF",
             maxStars: 23,
-            allowedRarities: [3, 4], // rare and common
-            description: "5 rare/common cards, max 25 stars"
+            rarityLimits: {
+                3: 3, // max 3 rares (rarity 3)
+                4: 5  // max 5 commons (rarity 4)
+            },
+            description: "Max 3 rares + commons, max 23 stars"
         },
         gold: {
             name: "Gold",
             color: "#FFCE52", 
             maxStars: 25,
-            allowedRarities: [2, 3, 4], // epic, rare, and common
-            description: "5 epic/rare/common cards, max 35 stars"
+            rarityLimits: {
+                2: 2, // max 2 epics (rarity 2)
+                3: 4, // max 4 rares (rarity 3)
+                4: 5  // max 5 commons (rarity 4)
+            },
+            description: "Max 2 epics + max 4 rares + commons, max 25 stars"
         },
         elite: {
             name: "Elite",
             color: "#C78BFF",
             maxStars: 50,
-            allowedRarities: [1, 2, 3, 4], // all rarities
+            rarityLimits: {
+                1: 5, // max 5 legendaries (rarity 1)
+                2: 5, // max 5 epics (rarity 2)
+                3: 5, // max 5 rares (rarity 3)
+                4: 5  // max 5 commons (rarity 4)
+            },
             description: "5 cards of any rarity, max 50 stars"
         }
     };
+
+    // Helper function to check if a combination respects rarity limits
+    function isValidRarityCombination(cards, config) {
+        const rarityCounts = {};
+        
+        // Count cards by rarity
+        cards.forEach(card => {
+            rarityCounts[card.rarity] = (rarityCounts[card.rarity] || 0) + 1;
+        });
+        
+        // Check each rarity limit
+        for (const [rarity, limit] of Object.entries(config.rarityLimits)) {
+            const rarityNum = parseInt(rarity);
+            const count = rarityCounts[rarityNum] || 0;
+            if (count > limit) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // Helper function to check if a combination has unique hero_ids
+    function hasUniqueHeroes(cards) {
+        const heroIds = new Set();
+        for (const card of cards) {
+            if (heroIds.has(card.hero_id)) {
+                return false; // Duplicate hero_id found
+            }
+            heroIds.add(card.hero_id);
+        }
+        return true; // All hero_ids are unique
+    }
 
     // Generic function to generate optimal deck for any league
     function generateOptimalDeck(leagueKey) {
@@ -474,53 +546,72 @@
 
         console.log(`Generating optimal ${config.name} deck...`);
 
-        // Filter for league eligible cards
+        // Filter for league eligible cards (any rarity that has a limit > 0)
+        const allowedRarities = Object.keys(config.rarityLimits).map(r => parseInt(r));
         const eligibleCards = currentCards.filter(card => {
             const hasMedianScore = card.medianScore !== null && card.medianScore !== undefined;
-            const isAllowedRarity = config.allowedRarities.includes(card.rarity);
+            const isAllowedRarity = allowedRarities.includes(card.rarity);
             return isAllowedRarity && hasMedianScore && card.count > 0;
         });
 
         console.log(`${config.name} eligible cards found:`, eligibleCards.length);
 
         if (eligibleCards.length === 0) {
-            const rarityNames = config.allowedRarities.map(r => {
+            const rarityNames = allowedRarities.map(r => {
                 const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
                 return rarityMap[r];
             }).join(', ');
 
             document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
                 <p style="color: #ff6b6b;">No eligible cards found for ${config.name} league.</p>
-                <p style="color: #ccc; font-size: 0.9em;">Required rarities: ${rarityNames}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Allowed rarities: ${rarityNames}</p>
                 <p style="color: #ccc; font-size: 0.9em;">Cards with median scores: ${currentCards.filter(c => c.medianScore !== null).length}</p>
             `;
             return;
         }
 
-        // Group cards by star level and get top 5 for each
-        const cardsByStars = {};
-        eligibleCards.forEach(card => {
-            if (!cardsByStars[card.stars]) {
-                cardsByStars[card.stars] = [];
-            }
-            cardsByStars[card.stars].push(card);
-        });
-
-        // Get top 5 cards for each star level
+        // Strategic card selection based on league requirements
         const topCards = [];
-        Object.keys(cardsByStars).forEach(stars => {
-            const sortedCards = cardsByStars[stars].sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
-            const topStarCards = sortedCards.slice(0, 5);
-            topCards.push(...topStarCards);
-            console.log(`${stars} stars: ${cardsByStars[stars].length} cards, taking top ${topStarCards.length}`);
+        
+        // For each allowed rarity, get the top cards we might need
+        allowedRarities.forEach(rarity => {
+            const maxNeeded = config.rarityLimits[rarity];
+            const cardsOfThisRarity = eligibleCards.filter(card => card.rarity === rarity);
+            
+            // Sort by median score descending
+            cardsOfThisRarity.sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0));
+            
+            // Calculate how many cards to take for this rarity
+            let cardsToTake;
+            if (leagueKey === 'bronze') {
+                // Bronze: max 5 commons, 8 star levels, so 5 * 8 = 40 cards
+                cardsToTake = maxNeeded * 8;
+            } else if (leagueKey === 'silver') {
+                // Silver: max 3 rares (3 * 8 = 24), max 5 commons (5 * 8 = 40)
+                cardsToTake = maxNeeded * 8;
+            } else if (leagueKey === 'gold') {
+                // Gold: max 2 epics (2 * 8 = 16), max 4 rares (4 * 8 = 32), max 5 commons (5 * 8 = 40)
+                cardsToTake = maxNeeded * 8;
+            } else if (leagueKey === 'elite') {
+                // Elite: 5 of any rarity, so 5 * 8 = 40 for each rarity
+                cardsToTake = 40;
+            }
+            
+            // Take the top scoring cards for this rarity
+            const selectedCards = cardsOfThisRarity.slice(0, cardsToTake);
+            topCards.push(...selectedCards);
+            
+            console.log(`${config.name} - Rarity ${rarity}: selected ${selectedCards.length} cards (max needed: ${maxNeeded}, target: ${cardsToTake})`);
         });
 
         console.log(`Total cards for ${config.name} optimization:`, topCards.length);
 
-        // Generate all possible combinations of 5 cards with total stars <= maxStars
+        // Generate all possible combinations of 5 cards with constraints
         let bestCombination = null;
         let bestScore = 0;
         let validCombinationsFound = 0;
+        let totalCombinationsChecked = 0;
+        let duplicateHeroRejected = 0;
 
         const findBestCombination = (cards) => {
             const n = cards.length;
@@ -530,10 +621,19 @@
                     for (let k = j + 1; k < n - 2; k++) {
                         for (let l = k + 1; l < n - 1; l++) {
                             for (let m = l + 1; m < n; m++) {
+                                totalCombinationsChecked++;
                                 const combination = [cards[i], cards[j], cards[k], cards[l], cards[m]];
+                                
+                                // Check for unique heroes first (fastest check)
+                                if (!hasUniqueHeroes(combination)) {
+                                    duplicateHeroRejected++;
+                                    continue;
+                                }
+                                
                                 const totalStars = combination.reduce((sum, card) => sum + card.stars, 0);
                                 
-                                if (totalStars <= config.maxStars) {
+                                // Check star limit and rarity limits
+                                if (totalStars <= config.maxStars && isValidRarityCombination(combination, config)) {
                                     validCombinationsFound++;
                                     const totalScore = combination.reduce((sum, card) => sum + (card.medianScore || 0), 0);
                                     
@@ -551,13 +651,25 @@
 
         findBestCombination(topCards);
 
+        console.log(`${config.name} - Total combinations checked:`, totalCombinationsChecked);
+        console.log(`${config.name} - Rejected for duplicate heroes:`, duplicateHeroRejected);
         console.log(`${config.name} - Valid combinations found:`, validCombinationsFound);
 
         if (!bestCombination) {
+            // Create rarity limits description
+            const rarityMap = { 1: "legendary", 2: "epic", 3: "rare", 4: "common" };
+            const limitsDesc = Object.entries(config.rarityLimits)
+                .map(([rarity, limit]) => `max ${limit} ${rarityMap[rarity]}`)
+                .join(', ');
+
             document.getElementById(`${leagueKey}-deck-result`).innerHTML = `
                 <p style="color: #ff6b6b;">No valid combination found for ${config.name} league.</p>
-                <p style="color: #ccc; font-size: 0.9em;">${config.description}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Rarity limits: ${limitsDesc}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Max stars: ${config.maxStars}</p>
                 <p style="color: #ccc; font-size: 0.9em;">Eligible cards: ${eligibleCards.length}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Cards selected for optimization: ${topCards.length}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Combinations checked: ${totalCombinationsChecked}</p>
+                <p style="color: #ccc; font-size: 0.9em;">Rejected for duplicate heroes: ${duplicateHeroRejected}</p>
                 <p style="color: #ccc; font-size: 0.9em;">Valid combinations found: ${validCombinationsFound}</p>
             `;
             return;
@@ -577,12 +689,23 @@
 
         const totalStars = cards.reduce((sum, card) => sum + card.stars, 0);
         const avgScore = Math.round(totalScore / 5);
+        
+        // Count cards by rarity for display
+        const rarityCounts = {};
+        cards.forEach(card => {
+            rarityCounts[card.rarity] = (rarityCounts[card.rarity] || 0) + 1;
+        });
+        
+        const rarityBreakdown = Object.entries(rarityCounts)
+            .map(([rarity, count]) => `${count} ${rarityMap[rarity]}`)
+            .join(', ');
 
         let html = `
             <div class="deck-stats">
                 <strong>Total Combined Score:</strong> ${Math.round(totalScore)} | 
                 <strong>Average Score:</strong> ${avgScore} | 
-                <strong>Total Stars:</strong> ${totalStars}/${config.maxStars}
+                <strong>Total Stars:</strong> ${totalStars}/${config.maxStars}<br>
+                <strong>Composition:</strong> ${rarityBreakdown}
             </div>
             <div class="deck-cards-container">
         `;
@@ -595,11 +718,8 @@
             html += `
                 <div class="deck-card">
                     <img src="${imgUrl}" alt="Hero">
-                    <div style="color: white; font-size: 0.8em; margin-bottom: 4px;">
+                    <div style="color: white; font-size: 0.8em; margin-bottom: 8px;">
                         ${card.hero_name}
-                    </div>
-                    <div style="color: white; font-size: 0.7em; margin-bottom: 4px;">
-                        ${card.stars} Star${card.stars > 1 ? 's' : ''} • ${rarityName}
                     </div>
                     <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
                         <span style="font-size: 0.7em; color: #ccc;">Score:</span>
@@ -615,32 +735,12 @@
         document.getElementById(`${leagueKey}-deck-result`).innerHTML = html;
     }
 
-    // Remove the old generateOptimalBronzeDeck function and replace with this
-    function generateOptimalBronzeDeck() {
-        generateOptimalDeck('bronze');
-    }
-
-    // Function to generate optimal Silver deck
-    function generateOptimalSilverDeck() {
-        generateOptimalDeck('silver');
-    }
-
-    // Function to generate optimal Gold deck
-    function generateOptimalGoldDeck() {
-        generateOptimalDeck('gold');
-    }
-
-    // Function to generate optimal Elite deck
-    function generateOptimalEliteDeck() {
-        generateOptimalDeck('elite');
-    }
-
     function renderCardsByStars(cards) {
         // Store cards globally for deck generation
         currentCards = cards;
         
-        // Show the optimal deck section
-        document.getElementById('optimal-deck').style.display = 'block';
+        // Show the optimal deck sections (changed from 'optimal-deck' to 'optimal-decks')
+        document.getElementById('optimal-decks').style.display = 'block';
 
         const rarityMap = {
             1: "legendary",
@@ -806,9 +906,21 @@
         await handleToken(token);
     };
 
-    // Add event listener for deck generation
-    document.getElementById('generateBtn').onclick = function() {
-        generateOptimalBronzeDeck();
+    // Update the event listeners for all league buttons
+    document.getElementById('generateBronzeBtn').onclick = function() {
+        generateOptimalDeck('bronze');
+    };
+
+    document.getElementById('generateSilverBtn').onclick = function() {
+        generateOptimalDeck('silver');
+    };
+
+    document.getElementById('generateGoldBtn').onclick = function() {
+        generateOptimalDeck('gold');
+    };
+
+    document.getElementById('generateEliteBtn').onclick = function() {
+        generateOptimalDeck('elite');
     };
 
     // Try to auto-populate the token field from localStorage

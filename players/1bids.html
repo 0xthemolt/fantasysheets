@@ -320,7 +320,7 @@
     </header>
 
     <!-- Add this new section between header and main -->
-<div id="missing-bids-section" style="background-color: #2a2a2a; padding: 8px 16px; margin-bottom: 16px; border-radius: 4px; display: none;">
+    <div id="missing-bids-section" style="background-color: #2a2a2a; padding: 8px 16px; margin-bottom: 16px; border-radius: 4px; display: none;">
     <div style="color: #888; font-size: 0.85em; margin-bottom: 4px;">Missing Bid Bot Cards:</div>
     <div id="missing-bids-list" style="color: #fff; font-size: 0.9em; line-height: 1.4;"></div>
 </div>
@@ -513,6 +513,8 @@ async function fetchBids() {
         
         // Process all data (including failed ones with empty orderbooks)
         const processedData = { bids: allResults };
+        
+        showMissingBidBotCards(bidBotData, data);
         
         // Continue with existing processing logic...
         bidData = processedData.bids.map(item => {
@@ -1058,6 +1060,47 @@ document.getElementById('refresh-button').addEventListener('click', async () => 
             default: return 'unknown';
         }
     }
+    function getRarityLabel(rarity) {
+    switch (rarity) {
+        case 1: return 'legendary';
+        case 2: return 'epic';
+        case 3: return 'rare';
+        case 4: return 'common';
+        default: return 'unknown';
+    }
+}
+
+// Find cards in bid bot config not in personal bids
+function showMissingBidBotCards(bidBotData, personalBids) {
+    if (!Array.isArray(bidBotData) || !Array.isArray(personalBids)) return;
+
+    // Build a set of hero_id + rarity for personal bids
+    const personalSet = new Set(personalBids.map(bid => `${bid.hero_id}_${bid.rarity}`));
+
+    // Find missing cards - only include enabled bid bot entries
+    const missing = bidBotData.filter(bot =>
+        bot.enabled === true && !personalSet.has(`${bot.hero_id}_${bot.rarity_id}`)
+    );
+
+    const section = document.getElementById('missing-bids-section');
+    const listDiv = document.getElementById('missing-bids-list');
+
+    if (missing.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    // Format: hero_handle (rarity | my max X.XXXXX | high X.XXXXX)
+    const formatted = missing.map(card => {
+        const maxPrice = parseFloat(card.max_price_eth) || 0;
+        const bidPrice = parseFloat(card.bid_price) || 0;
+        
+        return `${card.hero_handle} (${card.rarity} | my max ${maxPrice.toFixed(5)} | high ${bidPrice.toFixed(5)})`;
+    }).join(', ');
+
+    listDiv.textContent = formatted;
+    section.style.display = 'block';
+}
 
     function isBot(traderAddress) {
         if (!traderAddress) return false;
@@ -1144,7 +1187,7 @@ renderBids = function() {
     originalRenderBids();
     filterByRarity();
 };
-</script>
+    </script>
 </body>
 </html>
 

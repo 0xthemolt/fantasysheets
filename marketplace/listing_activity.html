@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sell Order Listing Activity</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        
+        .price-change {
+            font-weight: bold;
+        }
+        
+        .price-increase {
+            color: green;
+        }
+        
+        .price-decrease {
+            color: red;
+        }
+        
+        .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+/* Filter container styles */
+        .filter-container {
+            width: 60%;
+            margin: 0 auto 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-box {
+            flex: 0 0; /* Change from flex: 1 to prevent expansion */
+            width: 275px; /* Reduced width (was approximately 300px) */
+            min-width: 275px; /* Added to prevent shrinking */
+            position: relative;
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        
+        .search-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-input-container {
+            position: relative;
+            width: 100%;
+            min-width: 0; /* Added to prevent overflow */
+            display: block;
+        }
+        
+        #playerHandleSearch {
+            width: 100%;
+            min-width: 0; /* Added to prevent overflow */
+            box-sizing: border-box;
+            padding: 8px 10px; /* Slightly smaller padding */
+            padding-right: 35px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 11px; /* Reduced from default (~14px) */
+            background: #1a1a1a;
+            color: #fff;
+            transition: border-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        #playerHandleSearch:focus {
+            outline: none;
+            border-color: #444;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 3px; /* Reduced from 4px */
+            display: none;
+            font-size: 14px; /* Reduce to fit narrower box */
+            transition: color 0.2s;
+        }
+        
+        .clear-search:hover {
+            color: #fff;
+        }
+        
+        .clear-search.visible {
+            display: block;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%; /* Use 100% of the container, which matches search box */
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-sizing: border-box;
+        }
+        
+        .autocomplete-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .player-preview-pic {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        /* Add styles for the selected hero handle tag */
+        .selected-player-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin: 4px 0;
+            font-size: 11px;
+            position: relative;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .selected-player-tag .remove-player {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #444;
+            color: #fff;
+            border: none;
+            margin-left: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: background-color 0.2s;
+            min-width: 16px;
+            flex-shrink: 0;
+        }
+
+        .selected-player-tag .remove-player:hover {
+            background: #555;
+        }
+
+        /* Hide the input when a player is selected */
+        .search-input-container.has-selected-player #playerHandleSearch {
+            display: none;
+        }
+
+        /* Show the selected player tag when a player is selected */
+        .search-input-container.has-selected-player .selected-player-tag {
+            display: inline-flex;
+        }
+
+        /* Hide the selected player tag when no player is selected */
+        .selected-player-tag {
+            display: none;
+        }
+
+        .refresh-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .refresh-btn.spinning i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Sell Order Listing Activity
+        </h1>
+    </div>
+    <div class="data-freshness">
+        <span>Listings: Live</span></span>
+        <span>| Scores & Trade History: <span id="freshnessTimeAgo"></span></span>
+    </div>
+    <div class="filter-container">
+        <div class="search-box">
+            <label for="playerSearch">Search by Player:</label>
+            <div class="search-input-container">
+                <input type="text" id="playerHandleSearch" placeholder="Enter player..." autocomplete="off">
+                <button class="clear-search"></button>
+            </div>
+            <div id="autocompleteResults" class="autocomplete-results"></div>
+        </div>
+        <button id="refreshButton" class="refresh-btn" title="Refresh player data">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    
+    <div id="loading" class="loading">Loading activity data...</div>
+    <div id="activity-container" style="display: none;">
+        <table id="activity-table" class="activity-table">
+            <thead>
+                <tr>
+                    <th>Seller</th>
+                    <th>Hero</th>
+                    <th>Current Price</th>
+                    <th>Prior Price</th>
+                    <th>Price Change</th>
+                    <th>Current Rank</th>
+                </tr>
+            </thead>
+            <tbody id="activity-tbody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let allSellers = [];
+        let filteredData = [];
+        let allActivityData = [];
+
+        // Function to fetch distinct sellers for autocomplete
+        async function fetchSellers() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('vwsell_order_detail_changes')
+                    .select('seller, seller_handle, pfp_url')
+                    .not('seller', 'is', null);
+
+                if (error) {
+                    console.error('Error fetching sellers:', error);
+                    return;
+                }
+
+                // Create distinct sellers map
+                const sellersMap = new Map();
+                data.forEach(row => {
+                    const key = row.seller || row.seller_handle;
+                    if (key && !sellersMap.has(key)) {
+                        sellersMap.set(key, {
+                            seller: row.seller,
+                            seller_handle: row.seller_handle,
+                            pfp_url: row.pfp_url
+                        });
+                    }
+                });
+
+                allSellers = Array.from(sellersMap.values());
+            } catch (err) {
+                console.error('Exception while fetching sellers:', err);
+            }
+        }
+
+        // Function to filter sellers based on search input
+        function filterSellers(searchTerm) {
+            if (!searchTerm || searchTerm.length < 2) {
+                return [];
+            }
+
+            const term = searchTerm.toLowerCase();
+            return allSellers.filter(seller => {
+                const sellerName = (seller.seller || '').toLowerCase();
+                const sellerHandle = (seller.seller_handle || '').toLowerCase();
+                return sellerName.includes(term) || sellerHandle.includes(term);
+            }).slice(0, 10); // Limit to 10 results
+        }
+
+        // Function to show autocomplete results
+        function showAutocompleteResults(sellers) {
+            const resultsContainer = document.getElementById('autocompleteResults');
+            
+            if (sellers.length === 0) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+            sellers.forEach(seller => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                
+                const displayName = seller.seller || seller.seller_handle || 'Unknown';
+                const pfpUrl = seller.pfp_url || '/icons/ft_logo.webp';
+                
+                item.innerHTML = `
+                    <img src="${pfpUrl}" alt="Profile" class="player-preview-pic" onerror="this.src='/icons/ft_logo.webp';">
+                    <span>${displayName}</span>
+                `;
+                
+                item.addEventListener('click', () => {
+                    selectPlayer(seller);
+                });
+                
+                resultsContainer.appendChild(item);
+            });
+            
+            resultsContainer.style.display = 'block';
+        }
+
+        // Function to hide autocomplete results
+        function hideAutocompleteResults() {
+            const resultsContainer = document.getElementById('autocompleteResults');
+            resultsContainer.style.display = 'none';
+        }
+
+        // Function to select a player
+        function selectPlayer(seller) {
+            const searchContainer = document.querySelector('.search-input-container');
+            const searchInput = document.getElementById('playerHandleSearch');
+            const clearButton = document.querySelector('.clear-search');
+            
+            // Create selected player tag
+            const selectedTag = document.createElement('div');
+            selectedTag.className = 'selected-player-tag';
+            
+            const displayName = seller.seller || seller.seller_handle || 'Unknown';
+            const pfpUrl = seller.pfp_url || '/icons/ft_logo.webp';
+            
+            selectedTag.innerHTML = `
+                <img src="${pfpUrl}" alt="Profile" class="player-preview-pic" onerror="this.src='/icons/ft_logo.webp';">
+                <span>${displayName}</span>
+                <button class="remove-player" onclick="clearPlayerSelection()">×</button>
+            `;
+            
+            // Hide search input and show selected tag
+            searchContainer.classList.add('has-selected-player');
+            searchInput.style.display = 'none';
+            clearButton.style.display = 'none';
+            
+            // Remove any existing selected tag
+            const existingTag = searchContainer.querySelector('.selected-player-tag');
+            if (existingTag) {
+                existingTag.remove();
+            }
+            
+            searchContainer.insertBefore(selectedTag, searchContainer.firstChild);
+            
+            hideAutocompleteResults();
+            
+            // Filter the activity data
+            filterActivityByPlayer(seller);
+        }
+
+        // Function to clear player selection
+        function clearPlayerSelection() {
+            const searchContainer = document.querySelector('.search-input-container');
+            const searchInput = document.getElementById('playerHandleSearch');
+            const clearButton = document.querySelector('.clear-search');
+            const selectedTag = searchContainer.querySelector('.selected-player-tag');
+            
+            if (selectedTag) {
+                selectedTag.remove();
+            }
+            
+            searchContainer.classList.remove('has-selected-player');
+            searchInput.style.display = 'block';
+            searchInput.value = '';
+            clearButton.style.display = 'none';
+            
+            // Show all activity data
+            renderActivityTable(allActivityData);
+        }
+
+        // Function to filter activity by selected player
+        function filterActivityByPlayer(seller) {
+            const sellerName = seller.seller;
+            const sellerHandle = seller.seller_handle;
+            
+            const filtered = allActivityData.filter(row => {
+                return row.seller === sellerName || row.seller_handle === sellerHandle;
+            });
+            
+            renderActivityTable(filtered);
+        }
+
+        // Update the main fetch function to store all data
+        async function fetchSellOrderActivity() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('vwsell_order_detail_changes')
+                    .select(`
+                        seller,
+                        seller_handle,
+                        pfp_url,
+                        hero_name,
+                        rarity,
+                        hero_id,
+                        stars,
+                        token_id,
+                        current_price,
+                        change_type,
+                        current_sell_rank,
+                        prior_price
+                    `)
+                    .order('insertdatetime', { ascending: false })
+                    .limit(1000);
+
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    return;
+                }
+
+                allActivityData = data;
+                renderActivityTable(data);
+            } catch (err) {
+                console.error('Exception while fetching data:', err);
+            }
+        }
+
+        // Function to render the activity table
+        function renderActivityTable(data) {
+            const tbody = document.getElementById('activity-tbody');
+            tbody.innerHTML = '';
+
+            let lastTime = null;
+
+            data.forEach(row => {
+                // Get HH:MM from insertdatetime
+                const dt = row.insertdatetime ? new Date(row.insertdatetime) : null;
+                const hhmm = dt ? dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+
+                // Insert divider if time changes
+                if (hhmm && hhmm !== lastTime) {
+                    const divider = document.createElement('tr');
+                    divider.innerHTML = `<td colspan="7" style="
+                        background: #2a003f;
+                        color: #ff69b4;
+                        font-weight: bold;
+                        text-align: center;
+                        border-top: 4px solid #ff69b4;
+                        border-bottom: 2px solid #ff69b4;
+                        font-size: 1.05em;
+                        ">
+                        ${hhmm}
+                    </td>`;
+                    tbody.appendChild(divider);
+                    lastTime = hhmm;
+                }
+
+                const tr = document.createElement('tr');
+                
+                // Calculate price change
+                const currentPrice = parseFloat(row.current_price) || 0;
+                const priorPrice = parseFloat(row.prior_price) || 0;
+                const priceChange = currentPrice - priorPrice;
+                const priceChangePercent = priorPrice ? ((priceChange / priorPrice) * 100).toFixed(2) : 0;
+                
+                // Determine price change class
+                let priceChangeClass = 'price-change';
+                if (priceChange > 0) priceChangeClass += ' price-increase';
+                else if (priceChange < 0) priceChangeClass += ' price-decrease';
+                
+                tr.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <img src="${row.pfp_url ? row.pfp_url : '/icons/ft_logo.webp'}"
+                                 alt="Profile"
+                                 class="profile-pic"
+                                 onerror="this.onerror=null;this.src='/icons/ft_logo.webp';">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-weight: bold;">${row.seller || 'Unknown'}</span>
+                                <span style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                                    ${getChangeTypeText(row.change_type)}
+                                    ${getChangeTypeIcon(row.change_type)}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <img 
+                                class="card-image" 
+                                src="https://r2.fantasy.top/v3/${row.rarity}/${row.hero_id}_${row.stars}.png" 
+                                alt="Hero Card"
+                                onerror="this.src='../icons/ft_logo.webp'"
+                                style="width:40px;height:auto;vertical-align:middle;"
+                            >
+                            <span style="color:#bbb; font-size:11px; margin-top:2px;">
+                                ${row.token_id ? row.token_id : ''}
+                            </span>
+                        </div>
+                    </td>
+                    <td>${currentPrice.toFixed(5)}</td>
+                    <td>
+                        ${row.change_type === 'NEW_LISTING' || row.change_type === 'REMOVED_LISTING' ? '' : priorPrice.toFixed(6) }
+                    </td>
+                    <td class="${priceChangeClass}">
+                        ${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(5)}
+                        (${priceChangePercent >= 0 ? '+' : ''}${priceChangePercent}%)
+                    </td>
+                    <td>#${row.current_sell_rank || 'N/A'}</td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+
+            // Show the table and hide loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('activity-container').style.display = 'block';
+        }
+
+        // Function to get rarity display name
+        function getRarityName(rarity) {
+            const rarityMap = {
+                1: 'Legendary',
+                2: 'Epic', 
+                3: 'Rare',
+                4: 'Common'
+            };
+            return rarityMap[rarity] || rarity;
+        }
+
+        function getChangeTypeText(changeType) {
+            switch (changeType) {
+                case 'REMOVED_LISTING': return `<span style="color:#ff4444;">Removed</span>`;
+                case 'NEW_LISTING': return `<span style="color:#FFD600;">New</span>`;
+                case 'PRICE_DECREASE': return `<span style="color:#4ADE80;">Decrease</span>`;
+                case 'PRICE_INCREASE': return `<span style="color:#ff69b4;">Increase</span>`;
+                default: return changeType || '';
+            }
+        }
+
+        function getChangeTypeIcon(changeType) {
+            switch (changeType) {
+                case 'REMOVED_LISTING':
+                    return `<i class="fas fa-times-circle" style="color:#ff4444;font-size:1.1em;"></i>`;
+                case 'NEW_LISTING':
+                    return `<i class="fas fa-star" style="color:#FFD600;font-size:1.1em;"></i>`;
+                case 'PRICE_DECREASE':
+                    return `<i class="fas fa-arrow-down" style="color:#4ADE80;font-size:1.1em;"></i>`;
+                case 'PRICE_INCREASE':
+                    return `<i class="fas fa-arrow-up" style="color:#ff69b4;font-size:1.1em;"></i>`;
+                default:
+                    return '';
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchSellers();
+            fetchSellOrderActivity();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(fetchSellOrderActivity, 30000);
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('playerHandleSearch');
+            const clearButton = document.querySelector('.clear-search');
+            
+            // Fetch sellers and activity data
+            fetchSellers();
+            fetchSellOrderActivity();
+            
+            // Search input event listeners
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim();
+                
+                if (searchTerm.length >= 2) {
+                    const filtered = filterSellers(searchTerm);
+                    showAutocompleteResults(filtered);
+                    clearButton.classList.add('visible');
+                } else {
+                    hideAutocompleteResults();
+                    clearButton.classList.remove('visible');
+                }
+            });
+            
+            // Clear search functionality
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                hideAutocompleteResults();
+                clearButton.classList.remove('visible');
+                searchInput.focus();
+            });
+            
+            // Hide autocomplete when clicking outside
+            document.addEventListener('click', function(event) {
+                const searchBox = document.querySelector('.search-box');
+                if (!searchBox.contains(event.target)) {
+                    hideAutocompleteResults();
+                }
+            });
+            
+            // Prevent hiding when clicking inside search box
+            document.querySelector('.search-box').addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+            
+            // Add refresh button click handler
+            const refreshButton = document.getElementById('refreshButton');
+            refreshButton.addEventListener('click', async () => {
+                // Add spinning class to button
+                refreshButton.classList.add('spinning');
+
+                // Get current selected player's ID from stored handle
+                const storedHandle = localStorage.getItem('selectedPlayerHandle');
+                if (storedHandle && allPlayers.length > 0) {
+                    const player = allPlayers.find(p => p.handle === storedHandle);
+                    if (player) {
+                        // Refresh listings for current player
+                        await fetchListings(player.id);
+                    }
+                }
+
+                // Remove spinning class after refresh
+                setTimeout(() => {
+                    refreshButton.classList.remove('spinning');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

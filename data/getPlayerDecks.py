@@ -35,7 +35,7 @@ cursor.close()
 # Create cursor and execute query
 cursor = conn.cursor()
 query = f"""
-set statement_timeout = '5min';
+set statement_timeout = '7min';
 WITH ordered_records AS (
 SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_num,hero_handle
 FROM flatten.hero_stats_tournament_current base 

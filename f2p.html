@@ -718,6 +718,14 @@
                 return null;
             }
 
+            // Preview data for Cirrus
+            const cirrus = data.find(row => row.hero_name === 'Cirrus');
+            if (cirrus) {
+                console.log('Cirrus F2P data:', cirrus);
+            } else {
+                console.log('No F2P data found for Cirrus');
+            }
+
             console.log('F2P scores data fetched successfully:', data.length, 'records');
             f2pScoresData = data;
             return data;
@@ -745,15 +753,28 @@
     async function fetchAllCards(token) {
         let allCards = [];
         const offset = 0;
-        const limit = 500;
+        const limit = 400;
         let total = null;
 
         document.getElementById('status').textContent = `Fetching ${limit} cards at offset ${offset}...`;
-        const url = `https://api-v2.fantasy.top/free-to-play/get-player-inventory?limit=${limit}&offset=${offset}&sortBy=expected_score_desc`;
+        const url = `https://api-v2.fantasy.top/free-to-play/get-player-inventory?name=&handle=&limit=${limit}&offset=${offset}&sortBy=score_desc`;
+
         const resp = await fetch(url, {
             headers: {
                 "accept": "application/json, text/plain, */*",
-                "authorization": "Bearer " + token
+                "accept-language": "en-US,en;q=0.9",
+                "authorization": "Bearer " + token,
+                // The following headers are important for mimicking a browser request:
+                "origin": "https://fantasy.top",
+                "referer": "https://fantasy.top/",
+                "sec-ch-ua": '"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": '"Windows"',
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-site",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
+                // Do NOT set Cookie or if-none-match headers in browser JS for security reasons
             }
         });
         if (!resp.ok) {
@@ -768,12 +789,13 @@
 
     // Fix the formatDateForTooltip function to show correct day of week
     function formatDateForTooltip(dateString) {
-        const date = new Date(dateString);
-        const options = { 
-            month: 'short', 
-            day: 'numeric',
-            year: 'numeric'
-        };
+        // Expecting dateString in "YYYY-MM-DD"
+        if (!dateString) return '';
+        const [year, month, day] = dateString.split('-').map(Number);
+        // month is 0-based in JS Date
+        const date = new Date(year, month - 1, day);
+        // Always show as "Aug 12, 2025"
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
         return date.toLocaleDateString('en-US', options);
     }
 
@@ -804,7 +826,7 @@
     }
 
     // Helper function to calculate median of top 7 scores from combined daily and weekly data
-    function calculateMedianScore(dailyScores, weeklyScores) {
+    function calculateMedianScore(dailyScores, weeklyScores, heroName = "") {
         const allScores = [];
         
         // Add daily scores
@@ -826,11 +848,17 @@
         }
         
         if (allScores.length === 0) return null;
-        
+
         // Sort all scores descending and take top 7 (drop 3 lowest)
         allScores.sort((a, b) => b - a);
         const top7 = allScores.slice(0, Math.min(7, allScores.length));
-        
+
+        // Debug logging for Hugo Fartingale
+        if (heroName === "Hugo Fartingale") {
+            console.log(`[Hugo Fartingale] All 10 scores (descending):`, allScores);
+            console.log(`[Hugo Fartingale] Top 7 scores used for median:`, top7);
+        }
+
         if (top7.length === 0) return null;
         
         // Calculate median of top 7
@@ -1341,7 +1369,7 @@
                     <div class="cards-container">`;
                 
             // Sort cards in this group by expected_score descending
-            groups[star].sort((a, b) => b.expected_score - a.expected_score).forEach(card => {
+            groups[star].sort((a, b) => (b.medianScore || 0) - (a.medianScore || 0)).forEach(card => {
                 const rarityName = rarityMap[card.rarity] || card.rarity;
                 const imgUrl = `https://r2.fantasy.top/v3/${rarityName}/${card.hero_id}_${card.stars}.png`;
                 
@@ -1472,6 +1500,19 @@
     document.addEventListener('DOMContentLoaded', async function() {
         // Fetch F2P scores data on page load
         await fetchF2PScores();
+
+        // --- Add this block to auto-calculate and log Hugo's median ---
+        if (f2pScoresData) {
+            const hugo = f2pScoresData.find(row => row.hero_name === "Hugo Fartingale");
+            if (hugo) {
+                let dailyScores = Array.isArray(hugo.prior_5_days) ? hugo.prior_5_days : JSON.parse(hugo.prior_5_days);
+                let weeklyScores = Array.isArray(hugo.prior_5_weeks_dow_hh) ? hugo.prior_5_weeks_dow_hh : JSON.parse(hugo.prior_5_weeks_dow_hh);
+                const median = calculateMedianScore(dailyScores, weeklyScores, "Hugo Fartingale");
+                console.log("Hugo Fartingale medianScore:", median);
+            } else {
+                console.log("No F2P data found for Hugo Fartingale");
+            }
+        }
         
         // Set up the fetch button event listener
         document.getElementById('fetchBtn').addEventListener('click', async function() {

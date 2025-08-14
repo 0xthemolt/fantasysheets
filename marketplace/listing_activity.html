@@ -459,7 +459,7 @@
             renderActivityTable(filtered);
         }
 
-        // Update the main fetch function to store all data
+        // Update the main fetch function to include insertdatetime
         async function fetchSellOrderActivity() {
             try {
                 const { data, error } = await supabaseClient
@@ -476,7 +476,8 @@
                         current_price,
                         change_type,
                         current_sell_rank,
-                        prior_price
+                        prior_price,
+                        insertdatetime
                     `)
                     .order('insertdatetime', { ascending: false })
                     .limit(1000);
@@ -677,25 +678,16 @@
             // Add refresh button click handler
             const refreshButton = document.getElementById('refreshButton');
             refreshButton.addEventListener('click', async () => {
-                // Add spinning class to button
                 refreshButton.classList.add('spinning');
-
-                // Get current selected player's ID from stored handle
-                const storedHandle = localStorage.getItem('selectedPlayerHandle');
-                if (storedHandle && allPlayers.length > 0) {
-                    const player = allPlayers.find(p => p.handle === storedHandle);
-                    if (player) {
-                        // Refresh listings for current player
-                        await fetchListings(player.id);
-                    }
-                }
-
-                // Remove spinning class after refresh
+                await fetchSellOrderActivity();
                 setTimeout(() => {
                     refreshButton.classList.remove('spinning');
                 }, 1000);
             });
         });
+
+        // Auto-refresh every 30 seconds
+        setInterval(fetchSellOrderActivity, 30000);
     </script>
 </body>
 </html>

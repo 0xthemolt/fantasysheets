@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tournament Rewards Value Added</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="../../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .league-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 2px solid #555;
+        }
+        
+        .league-tab {
+            padding: 10px 20px;
+            background: #444;
+            color: white;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            transition: background 0.3s;
+        }
+        
+        .league-tab.active {
+            background: #666;
+            border-bottom: 2px solid #666;
+        }
+        
+        .league-tab:hover {
+            background: #555;
+        }
+        
+        .matrix-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2d2d2d;
+            color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .matrix-table th,
+        .matrix-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border: 1px solid #555;
+        }
+        
+        .matrix-table th {
+            background: #444;
+            color: #ffffff;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .matrix-table .hero-col {
+            background: #3d3d3d;
+            color: #ffffff;
+            text-align: left;
+            min-width: 150px;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+        
+        .matrix-table .total-col {
+            background: #2a4d3a;
+            color: #ffffff;
+            font-weight: bold;
+            min-width: 100px;
+        }
+        
+        .matrix-table .value-cell {
+            min-width: 80px;
+            background: #2d2d2d;
+            color: #ffffff;
+        }
+        
+        .matrix-table .value-cell.positive {
+            background: #1e4d2b;
+            color: #4ade80;
+        }
+        
+        .matrix-table .value-cell.negative {
+            background: #4d1e1e;
+            color: #f87171;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #ccc;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title-header">
+            <a href="../../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            Tournament Rewards Value Added Matrix
+        </h1>
+    </div>
+
+    <div class="league-tabs" id="leagueTabs">
+        <!-- Tabs will be populated dynamically -->
+    </div>
+
+    <div class="matrix-container">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading tournament data...
+        </div>
+        <table class="matrix-table" id="matrixTable" style="display: none;">
+            <thead id="tableHeader">
+                <!-- Headers will be populated dynamically -->
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will be populated dynamically -->
+            </tbody>
+        </table>
+        <div id="noData" class="no-data" style="display: none;">
+            No data available for the selected league.
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let allData = [];
+        let currentLeague = null;
+
+        // Fetch data from Supabase - ADD MORE DEBUGGING
+        async function fetchRewardsData() {
+            try {
+                console.log('Starting to fetch rewards data...');
+                
+                const { data, error } = await supabaseClient
+                    .from('rewardsvalueadded')
+                    .select(`
+                        league,
+                        tournament_number,
+                        hero_handle,
+                        reward_value_added
+                    `)
+
+                if (error) {
+                    console.error('Detailed error:', error);
+                    
+                    document.getElementById('loading').innerHTML = `
+                        <div style="color: #f87171;">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Error loading data: ${error.message}
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log('Fetched data:', data.length, 'records');
+                console.log('Sample records:', data.slice(0, 10));
+                
+                // Debug: Show unique leagues and heroes
+                const uniqueLeagues = [...new Set(data.map(row => row.league))];
+                const uniqueHeroes = [...new Set(data.map(row => row.hero_handle))];
+                console.log('Unique leagues found:', uniqueLeagues);
+                console.log('Total unique heroes:', uniqueHeroes.length);
+                console.log('Heroes list:', uniqueHeroes.slice(0, 20)); // Show first 20
+                
+                allData = data;
+                setupLeagueTabs();
+                
+            } catch (err) {
+                console.error('Exception while fetching data:', err);
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #f87171;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Network error: ${err.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Setup league tabs
+        function setupLeagueTabs() {
+            const leagues = [...new Set(allData.map(row => row.league))].sort();
+            const tabsContainer = document.getElementById('leagueTabs');
+            
+            tabsContainer.innerHTML = '';
+            
+            leagues.forEach(league => {
+                const tab = document.createElement('button');
+                tab.className = 'league-tab';
+                tab.textContent = league;
+                tab.onclick = () => selectLeague(league);
+                tabsContainer.appendChild(tab);
+            });
+            
+            // Select first league by default
+            if (leagues.length > 0) {
+                selectLeague(leagues[0]);
+            }
+        }
+
+        // Select a league and render matrix
+        function selectLeague(league) {
+            currentLeague = league;
+            
+            // Update active tab
+            document.querySelectorAll('.league-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent === league);
+            });
+            
+            renderMatrix(league);
+        }
+
+        // Render matrix for selected league
+        function renderMatrix(league) {
+            console.log('Rendering matrix for league:', league);
+            const leagueData = allData.filter(row => row.league === league);
+            console.log('Records for this league:', leagueData.length);
+            
+            if (leagueData.length === 0) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('matrixTable').style.display = 'none';
+                document.getElementById('noData').style.display = 'block';
+                return;
+            }
+
+            // Get unique heroes and tournament numbers
+            const heroes = [...new Set(leagueData.map(row => row.hero_handle))].sort();
+            const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
+
+            console.log('Heroes in this league:', heroes.length, heroes);
+            console.log('Tournament numbers:', tournamentNumbers);
+
+            // Create matrix data structure
+            const matrix = {};
+            heroes.forEach(hero => {
+                matrix[hero] = {};
+                tournamentNumbers.forEach(tournNum => {
+                    matrix[hero][tournNum] = 0;
+                });
+            });
+
+            // Populate matrix with data
+            leagueData.forEach(row => {
+                if (matrix[row.hero_handle] && matrix[row.hero_handle].hasOwnProperty(row.tournament_number)) {
+                    matrix[row.hero_handle][row.tournament_number] += row.reward_value_added || 0;
+                }
+            });
+
+            // Calculate totals and sort heroes
+            const heroTotals = heroes.map(hero => {
+                const total = tournamentNumbers.reduce((sum, tournNum) => {
+                    return sum + (matrix[hero][tournNum] || 0);
+                }, 0);
+                return { hero, total };
+            }).sort((a, b) => b.total - a.total);
+
+            console.log('Hero totals calculated:', heroTotals.length);
+
+            // Render table
+            renderTable(heroTotals, tournamentNumbers, matrix);
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('matrixTable').style.display = 'table';
+            document.getElementById('noData').style.display = 'none';
+        }
+
+        // Render the matrix table
+        function renderTable(heroTotals, tournamentNumbers, matrix) {
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            // Create header
+            let headerHTML = '<tr>';
+            headerHTML += '<th class="hero-col">Hero</th>';
+            tournamentNumbers.forEach(tournNum => {
+                headerHTML += `<th class="value-cell">T${tournNum}</th>`;
+            });
+            headerHTML += '<th class="total-col">Total</th>';
+            headerHTML += '</tr>';
+            tableHeader.innerHTML = headerHTML;
+
+            // Create body rows
+            let bodyHTML = '';
+            heroTotals.forEach(({ hero, total }) => {
+                bodyHTML += '<tr>';
+                bodyHTML += `<td class="hero-col">${hero}</td>`;
+                
+                tournamentNumbers.forEach(tournNum => {
+                    const value = matrix[hero][tournNum] || 0;
+                    const formattedValue = value === 0 ? '-' : formatCurrency(value);
+                    const cellClass = value > 0 ? 'positive' : value < 0 ? 'negative' : '';
+                    bodyHTML += `<td class="value-cell ${cellClass}">${formattedValue}</td>`;
+                });
+                
+                const totalClass = total > 0 ? 'positive' : total < 0 ? 'negative' : '';
+                bodyHTML += `<td class="total-col ${totalClass}">${formatCurrency(total)}</td>`;
+                bodyHTML += '</tr>';
+            });
+            tableBody.innerHTML = bodyHTML;
+        }
+
+        // Format Ethereum values (remove $ symbol)
+        function formatCurrency(value) {
+            if (value === 0) return '0';
+            if (Math.abs(value) < 0.001) {
+                // For very small values, show more decimal places
+                return value.toFixed(6);
+            } else if (Math.abs(value) < 1) {
+                // For values less than 1, show 4 decimal places
+                return value.toFixed(4);
+            } else {
+                // For larger values, show 2 decimal places
+                return value.toFixed(2);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchRewardsData();
+        });
+    </script>
+</body>
+</html>

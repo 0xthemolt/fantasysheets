@@ -43,81 +43,6 @@
             background: #555;
         }
         
-        .matrix-container {
-            overflow-x: auto;
-            margin: 20px 0;
-        }
-        
-        .matrix-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #2d2d2d;
-            color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .matrix-table th,
-        .matrix-table td {
-            padding: 8px 12px;
-            text-align: center;
-            border: 1px solid #555;
-        }
-        
-        .matrix-table th {
-            background: #444;
-            color: #ffffff;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        .matrix-table .hero-col {
-            background: #3d3d3d;
-            color: #ffffff;
-            text-align: left;
-            min-width: 150px;
-            position: sticky;
-            left: 0;
-            z-index: 5;
-        }
-        
-        .matrix-table .total-col {
-            background: #2a4d3a;
-            color: #ffffff;
-            font-weight: bold;
-            min-width: 100px;
-        }
-        
-        .matrix-table .value-cell {
-            min-width: 80px;
-            background: #2d2d2d;
-            color: #ffffff;
-        }
-        
-        .matrix-table .value-cell.positive {
-            background: #1e4d2b;
-            color: #4ade80;
-        }
-        
-        .matrix-table .value-cell.negative {
-            background: #4d1e1e;
-            color: #f87171;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #ccc;
-        }
-        
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
     </style>
 </head>
 <body>
@@ -159,6 +84,8 @@
 
         let allData = [];
         let currentLeague = null;
+        let currentSort = { column: 'median', direction: 'desc' };
+        let colorScale = { min: 0, max: 1 }; // Add this missing variable
 
         // Fetch data from Supabase - ADD MORE DEBUGGING
         async function fetchRewardsData() {
@@ -171,6 +98,7 @@
                         league,
                         tournament_number,
                         hero_handle,
+                        hero_stars,
                         reward_value_added
                     `)
 
@@ -263,76 +191,235 @@
             console.log('Heroes in this league:', heroes.length, heroes);
             console.log('Tournament numbers:', tournamentNumbers);
 
-            // Create matrix data structure
+            // Create matrix data structure and store hero stars per tournament
             const matrix = {};
+            const starsMatrix = {};
             heroes.forEach(hero => {
                 matrix[hero] = {};
+                starsMatrix[hero] = {};
+                
                 tournamentNumbers.forEach(tournNum => {
                     matrix[hero][tournNum] = 0;
+                    starsMatrix[hero][tournNum] = 0;
                 });
             });
 
-            // Populate matrix with data
+            // Populate matrix with data and stars
             leagueData.forEach(row => {
                 if (matrix[row.hero_handle] && matrix[row.hero_handle].hasOwnProperty(row.tournament_number)) {
                     matrix[row.hero_handle][row.tournament_number] += row.reward_value_added || 0;
+                    starsMatrix[row.hero_handle][row.tournament_number] = row.hero_stars || 0;
                 }
             });
 
-            // Calculate totals and sort heroes
+            // Calculate totals and medians
             const heroTotals = heroes.map(hero => {
-                const total = tournamentNumbers.reduce((sum, tournNum) => {
-                    return sum + (matrix[hero][tournNum] || 0);
-                }, 0);
-                return { hero, total };
-            }).sort((a, b) => b.total - a.total);
+                const values = tournamentNumbers.map(tournNum => matrix[hero][tournNum] || 0);
+                const total = values.reduce((sum, val) => sum + val, 0);
+                const median = calculateMedian(values);
+                return { hero, total, median, values };
+            });
 
-            console.log('Hero totals calculated:', heroTotals.length);
+            // Calculate independent color scales
+            const matrixValues = [];
+            const totalValues = [];
+            const medianValues = [];
 
-            // Render table
-            renderTable(heroTotals, tournamentNumbers, matrix);
+            heroes.forEach(hero => {
+                tournamentNumbers.forEach(tournNum => {
+                    matrixValues.push(matrix[hero][tournNum] || 0);
+                });
+            });
+
+            heroTotals.forEach(({ total, median }) => {
+                totalValues.push(total);
+                medianValues.push(median);
+            });
+
+            const colorScales = {
+                matrix: {
+                    min: Math.min(...matrixValues),
+                    max: Math.max(...matrixValues)
+                },
+                total: {
+                    min: Math.min(...totalValues),
+                    max: Math.max(...totalValues)
+                },
+                median: {
+                    min: Math.min(...medianValues),
+                    max: Math.max(...medianValues)
+                }
+            };
+
+            console.log('Color scales:', colorScales);
+
+            // Sort by median descending initially
+            currentSort = { column: 'median', direction: 'desc' };
+            const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction);
+
+            console.log('Hero totals calculated:', sortedHeroTotals.length);
+
+            // Render table with independent color scales
+            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales);
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('matrixTable').style.display = 'table';
             document.getElementById('noData').style.display = 'none';
         }
 
-        // Render the matrix table
-        function renderTable(heroTotals, tournamentNumbers, matrix) {
+        // Replace the sortHeroes function:
+
+        function sortHeroes(heroTotals, column, direction) {
+            return [...heroTotals].sort((a, b) => {
+                let aVal, bVal;
+                
+                if (column === 'hero') {
+                    aVal = a.hero;
+                    bVal = b.hero;
+                    // String comparison
+                    if (direction === 'asc') {
+                        return aVal.localeCompare(bVal);
+                    } else {
+                        return bVal.localeCompare(aVal);
+                    }
+                } else if (column === 'total') {
+                    aVal = a.total;
+                    bVal = b.total;
+                } else if (column === 'median') {
+                    aVal = a.median;
+                    bVal = b.median;
+                } else if (column.startsWith('T')) {
+                    // Tournament column - need to fix this logic
+                    const tournNum = parseInt(column.substring(1));
+                    const tournIndex = heroTotals[0].values ? Object.keys(heroTotals[0].values).indexOf(tournNum.toString()) : -1;
+                    aVal = tournIndex >= 0 ? (a.values[tournIndex] || 0) : 0;
+                    bVal = tournIndex >= 0 ? (b.values[tournIndex] || 0) : 0;
+                }
+                
+                // Numeric comparison for non-hero columns
+                if (column !== 'hero') {
+                    if (direction === 'asc') {
+                        return aVal - bVal;
+                    } else {
+                        return bVal - aVal;
+                    }
+                }
+            });
+        }
+
+        // Update color calculation function to accept scale type
+        function getValueColor(value, colorScale) {
+            if (colorScale.max === colorScale.min) {
+                return { backgroundColor: '#2d2d2d', color: '#ffffff' };
+            }
+            
+            // Normalize value between 0 and 1
+            const normalized = (value - colorScale.min) / (colorScale.max - colorScale.min);
+            
+            if (value === 0) {
+                // Zero values get neutral dark color
+                return { backgroundColor: '#2d2d2d', color: '#888888' };
+            }
+            
+            // Create color scale from red (0) to green (1)
+            const red = Math.round(255 * (1 - normalized));
+            const green = Math.round(255 * normalized);
+            const blue = 0;
+            
+            const backgroundColor = `rgb(${Math.max(red, 40)}, ${Math.max(green, 40)}, ${blue + 20})`;
+            const textColor = normalized > 0.5 ? '#000000' : '#ffffff';
+            
+            return { backgroundColor, color: textColor };
+        }
+
+        // Update renderTable to use independent color scales
+        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales) {
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
 
-            // Create header
+            // Create header with sorting
             let headerHTML = '<tr>';
-            headerHTML += '<th class="hero-col">Hero</th>';
+            
+            // Hero header (sortable)
+            const heroSortClass = currentSort.column === 'hero' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleSort('hero')">Hero</th>`;
+            
+            // Tournament headers (sortable)
             tournamentNumbers.forEach(tournNum => {
-                headerHTML += `<th class="value-cell">T${tournNum}</th>`;
+                const colName = `T${tournNum}`;
+                const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
+                headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleSort('${colName}')">${colName}</th>`;
             });
-            headerHTML += '<th class="total-col">Total</th>';
+            
+            // Total and Median headers (sortable)
+            const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
+            const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="total-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
+            headerHTML += `<th class="total-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
-            // Create body rows
+            // Create body rows with independent color scaling
             let bodyHTML = '';
-            heroTotals.forEach(({ hero, total }) => {
+            heroTotals.forEach(({ hero, total, median }) => {
                 bodyHTML += '<tr>';
                 bodyHTML += `<td class="hero-col">${hero}</td>`;
                 
                 tournamentNumbers.forEach(tournNum => {
                     const value = matrix[hero][tournNum] || 0;
-                    const formattedValue = value === 0 ? '-' : formatCurrency(value);
-                    const cellClass = value > 0 ? 'positive' : value < 0 ? 'negative' : '';
-                    bodyHTML += `<td class="value-cell ${cellClass}">${formattedValue}</td>`;
+                    const stars = starsMatrix[hero][tournNum] || 0;
+                    const colors = getValueColor(value, colorScales.matrix); // Use matrix color scale
+                    
+                    if (value === 0) {
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">-</td>`;
+                    } else {
+                        const formattedValue = formatCurrency(value);
+                        const starDisplay = stars > 0 ? ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)` : '';
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}${starDisplay}</td>`;
+                    }
                 });
                 
-                const totalClass = total > 0 ? 'positive' : total < 0 ? 'negative' : '';
-                bodyHTML += `<td class="total-col ${totalClass}">${formatCurrency(total)}</td>`;
+                const totalColors = getValueColor(total, colorScales.total);   // Use total color scale
+                const medianColors = getValueColor(median, colorScales.median); // Use median color scale
+                bodyHTML += `<td class="total-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
+                bodyHTML += `<td class="total-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatCurrency(median)}</td>`;
                 bodyHTML += '</tr>';
             });
             tableBody.innerHTML = bodyHTML;
         }
 
-        // Format Ethereum values (remove $ symbol)
+        // Add sort handler
+        function handleSort(column) {
+            // If clicking the same column, toggle direction
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
+            } else {
+                // New column, default to descending
+                currentSort.column = column;
+                currentSort.direction = 'desc';
+            }
+            
+            // Re-render the current league with new sort
+            if (currentLeague) {
+                renderMatrix(currentLeague);
+            }
+        }
+
+        // Add the missing calculateMedian function
+        function calculateMedian(values) {
+            if (values.length === 0) return 0;
+            
+            const sorted = [...values].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            
+            if (sorted.length % 2 === 0) {
+                return (sorted[mid - 1] + sorted[mid]) / 2;
+            } else {
+                return sorted[mid];
+            }
+        }
+
+        // Add the missing formatCurrency function
         function formatCurrency(value) {
             if (value === 0) return '0';
             if (Math.abs(value) < 0.001) {

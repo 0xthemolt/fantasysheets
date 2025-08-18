@@ -349,7 +349,7 @@
         display: none;
     }
 
-    /* Add this CSS after the existing styles */
+    /* Add this CSS after the existing <style> section */
 
     .main-content {
         display: flex;
@@ -574,6 +574,128 @@
     .star-slider-container input[type="range"]::-ms-fill-upper {
         background: transparent;
     }
+
+    /* Add this CSS to your existing <style> section: */
+
+    .excluded-heroes-container {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+        border: 2px solid #444;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .excluded-heroes-title {
+        color: white;
+        font-size: 1.1em;
+        font-weight: bold;
+        margin: 0 0 15px 0;
+        text-align: center;
+    }
+
+    .excluded-hero-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        color: white;
+        font-size: 0.9em;
+    }
+
+    .excluded-hero-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rarity-badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        color: black;
+    }
+
+    .rarity-badge.legendary {
+        background-color: #CACBD4;
+    }
+
+    .rarity-badge.epic {
+        background-color: #E890FE;
+    }
+
+    .rarity-badge.rare {
+        background-color: #00FFE2;
+    }
+
+    .rarity-badge.common {
+        background-color: #94FF00;
+    }
+
+    .remove-hero-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.8em;
+    }
+
+    .remove-hero-btn:hover {
+        background: #ff6666;
+    }
+
+    .add-hero-section {
+        border-top: 1px solid #555;
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+
+    .add-hero-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .add-hero-input {
+        padding: 6px 8px;
+        background: #444;
+        border: 1px solid #666;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.9em;
+    }
+
+    .add-hero-input::placeholder {
+        color: #aaa;
+    }
+
+    .add-hero-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .add-hero-btn:hover {
+        background: #0056b3;
+    }
+
+    .no-excluded-heroes {
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        padding: 20px 0;
+    }
     </style>
 </head>
 <body>
@@ -651,6 +773,25 @@
                         <div id="elite-deck-result"></div>
                     </div>
                 </div>
+
+                <div class="excluded-heroes-container">
+                    <div class="excluded-heroes-title">Excluded Heroes</div>
+                    <div id="excluded-heroes-list">
+                        <!-- Excluded heroes will be populated here -->
+                    </div>
+                    <div class="add-hero-section">
+                        <div class="add-hero-form">
+                            <input type="text" id="add-hero-name" class="add-hero-input" placeholder="Hero name (e.g., GwartyGwart)">
+                            <select id="add-hero-rarity" class="add-hero-input">
+                                <option value="1">Legendary</option>
+                                <option value="2">Epic</option>
+                                <option value="3">Rare</option>
+                                <option value="4" selected>Common</option>
+                            </select>
+                            <button id="add-hero-btn" class="add-hero-btn">Add to Exclusion List</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -711,7 +852,7 @@
             console.log('Fetching F2P scores data...');
             const { data, error } = await supabaseClient
                 .from('vwf2p_here_24hr_scores')
-                .select('hero_id,hero_name, posts_per_day,time_24h_from_now, prior_5_days, prior_5_weeks_dow_hh');
+                .select('hero_id,hero_name, hero_handle, posts_per_day,time_24h_from_now, prior_5_days, prior_5_weeks_dow_hh');
 
             if (error) {
                 console.error('Error fetching F2P scores:', error);

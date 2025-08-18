@@ -348,7 +348,8 @@
     <script>
         // Replace the existing seasons definition with:
         const seasons = {
-            4: [              
+            4: [   
+                { seasonTournament: 2, mainTournament: 65 },        
                 { seasonTournament: 1, mainTournament: 64 }
             ],
             3: [
@@ -358,9 +359,6 @@
                 { seasonTournament: 3, mainTournament: 60 },
                 { seasonTournament: 2, mainTournament: 59 },
                 { seasonTournament: 1, mainTournament: 58 },
-            ],
-            2: [
-                { seasonTournament: 4, mainTournament: 57 }
             ]
         };
 
@@ -368,7 +366,6 @@
         const tournamentNumbers = [
             ...seasons[4].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[3].map(t => t.mainTournament),  // Season 3 tournaments
-            ...seasons[2].map(t => t.mainTournament)  // Season 2 tournaments
         ];
 
         const EXEMPT_HEROES = ['a'];

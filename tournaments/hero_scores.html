@@ -807,6 +807,7 @@
             const { data, error } = await supabaseClient
                 .from('tournaments')
                 .select('tournament_number, tournament_status')
+                .gte('start_timestamp', new Date(Date.now() - 3 * 30 * 24 * 60 * 60 * 1000).toISOString())
                 .order('start_timestamp', { ascending: true });
 
             if (error) {

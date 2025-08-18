@@ -23,7 +23,7 @@ conn = psycopg2.connect(
 # Create cursor and execute query
 cursor = conn.cursor()
 query = f"""
-set statement_timeout = '2min';
+set statement_timeout = '5min';
 with base as (
         select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle
         ,gtpp2.unique_player_rank,gt2.tournament_name
@@ -211,7 +211,7 @@ select
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
-    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0039), 0) as reward_value,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0043), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,

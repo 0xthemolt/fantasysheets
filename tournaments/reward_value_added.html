@@ -186,6 +186,7 @@
                         hero_name,
                         hero_pfp_url,
                         hero_stars,
+                        common_avg_price,
                         reward_value_added
                     `)
 
@@ -386,6 +387,7 @@
 
             // Build hero -> pfp map and unique hero list using hero_name (fallback to hero_handle)
             const heroPfpMap = {};
+            const heroCommonAvgMap = {};
             const heroSet = new Set();
             leagueData.forEach(row => {
                 const heroName = (row.hero_name || row.hero_handle || '').trim();
@@ -394,6 +396,10 @@
                 // try multiple possible field names for the pfp
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
                 if (pfp) heroPfpMap[heroName] = pfp;
+               // capture common avg price if present (use first non-null)
+               if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroName in heroCommonAvgMap)) {
+                   heroCommonAvgMap[heroName] = Number(row.common_avg_price);
+               }
             });
             const heroes = [...heroSet].sort();
 
@@ -449,7 +455,8 @@
                 const values = tournamentNumbers.map(tournNum => (matrix[hero][tournNum] === null || matrix[hero][tournNum] === undefined) ? 0 : Number(matrix[hero][tournNum]));
                 const total = values.reduce((sum, val) => sum + val, 0);
                 const median = calculateMedian(values);
-                return { hero, total, median, values };
+                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined) ? Number(heroCommonAvgMap[hero]) : null;
+                return { hero, total, median, values, commonAvg };
             });
 
             // Calculate independent color scales
@@ -524,6 +531,11 @@
                 } else if (column === 'median') {
                     aVal = Number(a.median) || 0;
                     bVal = Number(b.median) || 0;
+                } else if (column === 'common_avg_price') {
+                    // Numeric sort for the common avg price (use hero.commonAvg).
+                    // Treat null/undefined as missing so they sort to the bottom.
+                    aVal = (a.commonAvg === null || a.commonAvg === undefined || isNaN(Number(a.commonAvg))) ? -Infinity : Number(a.commonAvg);
+                    bVal = (b.commonAvg === null || b.commonAvg === undefined || isNaN(Number(b.commonAvg))) ? -Infinity : Number(b.commonAvg);
                 } else if (column.startsWith('T')) {
                     // Tournament column sorting: find index in tournamentNumbers and read values[]
                     const tournNum = parseInt(column.substring(1));
@@ -635,6 +647,9 @@
             headerHTML += `<th style="width:40px;">#</th>`; // Add rank column
             const heroSortClass = currentSort.column === 'hero' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleSort('hero')">Hero</th>`;
+            // Common Avg Price column (right of Hero)
+            const commonSortClass = currentSort.column === 'common_avg_price' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Common Price</th>`;
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
@@ -660,6 +675,10 @@
                 // truncate hero display name when long, keep full name in title
                 const displayName = truncateHeroName(hero);
                 bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(hero)}">${displayName}</span></div></td>`;
+                // Common Avg Price cell (right-aligned, 3 decimals)
+                const commonVal = (heroTotals && heroTotals[idx] && heroTotals[idx].commonAvg !== undefined) ? heroTotals[idx].commonAvg : null;
+                const commonDisplay = formatThreeDecimals(commonVal);
+                bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
 
                 tournamentNumbers.forEach(tournNum => {
                     // Distinguish three cases:
@@ -731,6 +750,12 @@
         // Add the missing formatCurrency function
         function formatCurrency(value) {
             return Number(value).toFixed(2);
+        }
+
+        // New helper: format number to 3 decimal places, add commas
+        function formatThreeDecimals(value) {
+            if (value === null || value === undefined) return null;
+            return Number(value).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
         }
 
         // Initialize on page load

@@ -26,42 +26,44 @@ select
     	t.tournament_id,
         t.tournament_unique_key,
         t2.league,
+        t2.tournament_number,
         t.hero_handle,
         t.hero_id,
         t.hero_rarity_index,
         t.hero_rarity,
-        t.hero_stars,
+        t.card_picture_url,
         t.hero_score,
         t.tournament_player_deck_id,
         t.player_rank,
+        t.player_score,
+        t.hero_stars,
+        eth.reward as eth_won,
+        frags.reward frag_won,
         coalesce(
         	(case 
         	      when t2.league = 'Reverse'  then
-        	      	case when t.player_score = 0 then eth_reward.reward / 5
-        	 	    else  
-        	 	    (1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) / 
-         				SUM(1 - (t.hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * eth_reward.reward
-        	 	    end
+        	      (t.hero_stars / (t.hero_Score + 1) / SUM(hero_stars::float / (hero_score + 1)) OVER (PARTITION BY t.tournament_player_deck_id) )   * (eth.reward + (frags.reward / 100 * .0039))
+--        	      	case when t.player_score = 0 then eth.reward / 5
+--        	 	    else  
+--        	 	    (1 - (hero_score::decimal / NULLIF(player_score, 0)::decimal)) / 
+--         				SUM(1 - (hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * (eth.reward + (frags.reward / 100 * .0039))
+--        	 	    end
         	 	  when t2.league <>  'Reverse'  then
         	 	  	case when t.hero_score  = 0 then 0 
-					else (
-                          coalesce((t.hero_score::float / t.player_score) * eth_reward.reward,0)
-                        + coalesce((t.hero_score::float / t.player_score) * ((frag_rewards.reward / 100) * .004),0)
-                        )
+					else (hero_score::float / t.player_score) * (eth.reward + (frags.reward / 100 * .0039))
 					end
 			end) ,0) as reward_value_added,
         t.db_updated_cst + interval '5 hours' as db_updated_utc
     from agg.tournamentownership t 
-    join flatten.get_tournaments t2 
-    	on t.tournament_id = t2.tournament_id
-	left join flatten.TOURNAMENT_REWARDS eth_reward 
-		on t.tournament_id = eth_reward.tournament_id
-		and t.player_rank between eth_reward.range_start  and eth_reward.range_end
-		and eth_reward.reward_type = 'ETH'
-    left join flatten.TOURNAMENT_REWARDS frag_rewards 
-		on t.tournament_id = frag_rewards.tournament_id
-		and t.player_rank between frag_rewards.range_start  and frag_rewards.range_end
-		and frag_rewards.reward_type = 'FRAGMENT'
+    join flatten.get_tournaments t2 on t.tournament_id = t2.tournament_id
+	left join flatten.tournament_rewards eth 
+		on t.tournament_id = eth.tournament_id
+		and t.player_rank between eth.range_start  and eth.range_end
+		and eth.reward_type = 'ETH'
+	left join flatten.tournament_rewards frags 
+		on t.tournament_id = frags.tournament_id
+		and t.player_rank between frags.range_start  and frags.range_end
+		and frags.reward_type = 'FRAGMENT'
     where t.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 )
@@ -82,7 +84,7 @@ order by 3 desc
     from base_records
     where player_rank <= 50
 ),
-itm_records as (
+ite_records as (
     select br.*
     from base_records br
     join flatten.TOURNAMENT_REWARDS rewards  --inner join to only get eth winning deck
@@ -96,8 +98,8 @@ itm_records as (
 --    from top50_records
 --    group by 1
 --    union all
-    select tournament_id,'itm' as category, count(distinct tournament_player_deck_id) as total_decks
-    from itm_records
+    select tournament_id,'ite' as category, count(distinct tournament_player_deck_id) as total_decks
+    from ite_records
     group by 1
 ),
 hero_stats as (
@@ -127,8 +129,8 @@ hero_stats as (
         t.hero_rarity,
         t.db_updated_utc,
         count(*) as hero_count,
-        'itm' as category
-    from itm_records t
+        'ite' as category
+    from ite_records t
     group by 1,2,3,4,5,6,7,8,9
 )
 ,base as (
@@ -217,7 +219,7 @@ for row in result:
     if league_key not in hero_data["tournaments"][tournament_id]["leagues"]:
         hero_data["tournaments"][tournament_id]["leagues"][league_key] = {
             "top50": [],
-            "itm": [],
+            "ite": [],
             "rva": []
         }
     

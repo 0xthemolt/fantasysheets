@@ -58,11 +58,11 @@
                         heroMap.set(hero.hero, heroData);
                     });
 
-                    // Add ITM data
-                    leagueData.itm?.slice(0, 10).forEach(hero => {
+                    // Add ite data
+                    leagueData.ite?.slice(0, 10).forEach(hero => {
                         const heroData = heroMap.get(hero.hero) || { ...hero };
-                        heroData.itm_percentage = hero.usage_percentage;
-                        heroData.itm_count = hero.hero_count;
+                        heroData.ite_percentage = hero.usage_percentage;
+                        heroData.ite_count = hero.hero_count;
                         heroMap.set(hero.hero, heroData);
                     });
 
@@ -89,8 +89,8 @@
                             </td>
                             <td>
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.itm_percentage ? Math.round(hero.itm_percentage) + '%' : '-'}</span>
-                                    <span style="font-size: 0.8em; color: #666;">${hero.itm_count ? `(${hero.itm_count})` : ''}</span>
+                                    <span style="font-size: 1.3em; font-weight: 700; color: #2a5a7c; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">${hero.ite_percentage ? Math.round(hero.ite_percentage) + '%' : '-'}</span>
+                                    <span style="font-size: 0.8em; color: #666;">${hero.ite_count ? `(${hero.ite_count})` : ''}</span>
                                 </div>
                             </td>
                         </tr>
@@ -146,12 +146,12 @@
                                 <th>
                                     RVA
                                     <i class="fas fa-info-circle" 
-                                       title="Rewards Value Added (RVA) attempts to show what value a hero's card contributed to the ETH rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * ETH Won"
+                                       title="Rewards Value Added (RVA) attempts to show what value a hero's card contributed to the rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * (ETH Won + (Frags Won / 100) * Frag Value)"
                                        style="font-size: 0.8em; cursor: help;">
                                     </i>
                                 </th>
 
-                                <th>ITM</th>
+                                <th>ITE</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -172,7 +172,7 @@
                             <tr>
                                 <th></th>
                                 <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
-                                <th>ITM</th>
+                                <th>ite</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -193,7 +193,7 @@
                             <tr>
                                 <th></th>
                                 <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
-                                <th>ITM</th>
+                                <th>ite</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -214,7 +214,7 @@
                             <tr>
                                 <th></th>
                                 <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
-                                <th>ITM</th>
+                                <th>ite</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -235,7 +235,7 @@
                             <tr>
                                 <th></th>
                                 <th title="Reward Value Added - The estimated ETH value this hero added to tournament rewards">RVA</th>
-                                <th>ITM</th>
+                                <th>ite</th>
                             </tr>
                         </thead>
                         <tbody>

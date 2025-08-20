@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tournament Rewards Value Added</title>
+    <title>Hero Rewards Value Added</title>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -133,7 +133,7 @@
             <a href="../../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Tournament Rewards Value Added Matrix
+            Hero Rewards Value Added Matrix
         </h1>
     </div>
 
@@ -294,13 +294,17 @@
             reverse: '#84D24C'
         };
 
+        // Desired league order
+        const leagueOrder = ['Bronze', 'Gold', 'Silver', 'Elite', 'Reverse'];
+
         // Setup league tabs
         function setupLeagueTabs() {
-            const leagues = [...new Set(allData.map(row => row.league))].sort();
+            // Use leagueOrder and filter to only those present in data
+            const leaguesInData = [...new Set(allData.map(row => row.league))];
+            const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
             const tabsContainer = document.getElementById('leagueTabs');
-            
             tabsContainer.innerHTML = '';
-            
+
             leagues.forEach(league => {
                 const tab = document.createElement('button');
                 tab.className = `league-tab ${league.toLowerCase()}`;
@@ -341,35 +345,47 @@
                 tabsContainer.appendChild(tab);
             });
             
+            // Add "By League" tab
+            const byLeagueTab = document.createElement('button');
+            byLeagueTab.className = 'league-tab by-league';
+            byLeagueTab.innerHTML = `<i class="fas fa-layer-group"></i> <span>By League</span>`;
+            byLeagueTab.dataset.leagueColor = '#888888';
+            byLeagueTab.onclick = () => selectLeague('BY_LEAGUE');
+            tabsContainer.appendChild(byLeagueTab);
+
             // Select first league by default
             if (leagues.length > 0) {
                 selectLeague(leagues[0]);
             }
         }
 
-        // Select a league and render matrix
+        // Update selectLeague to handle "BY_LEAGUE"
         function selectLeague(league) {
             currentLeague = league;
-            
-            // Update active tab visuals (solid 100% for active, 50% for others)
+
             document.querySelectorAll('.league-tab').forEach(tab => {
                 const tabText = tab.querySelector('span') ? tab.querySelector('span').textContent : '';
+                const isByLeague = league === 'BY_LEAGUE' && tab.classList.contains('by-league');
                 const colorValue = tab.dataset.leagueColor || '#666666';
 
-                if (tabText === league) {
+                if (tabText === league || isByLeague) {
                     tab.classList.add('active');
-                    tab.style.backgroundColor = colorToRgba(colorValue, 1); // solid 100%
+                    tab.style.backgroundColor = colorToRgba(colorValue, 1);
                     tab.style.color = readableTextColor(colorValue);
                     tab.style.borderBottomColor = colorToRgba(colorValue, 1);
                 } else {
                     tab.classList.remove('active');
-                    tab.style.backgroundColor = colorToRgba(colorValue, 0.4); // 50% opacity
+                    tab.style.backgroundColor = colorToRgba(colorValue, 0.4);
                     tab.style.color = readableTextColor(colorValue);
                     tab.style.borderBottomColor = colorToRgba(colorValue, 1);
                 }
             });
-            
-            renderMatrix(league);
+
+            if (league === 'BY_LEAGUE') {
+                renderByLeagueMatrix();
+            } else {
+                renderMatrix(league);
+            }
         }
 
         // Render matrix for selected league
@@ -762,6 +778,168 @@
         document.addEventListener('DOMContentLoaded', function() {
             fetchRewardsData();
         });
+
+        // Add sorting handler for By League tab
+        function handleByLeagueSort(column) {
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = column === 'hero' ? 'asc' : 'desc';
+            }
+            renderByLeagueMatrix();
+        }
+
+        // Render the By League summary matrix
+        function renderByLeagueMatrix() {
+            // Use leagueOrder and filter to only those present in data
+            const leaguesInData = [...new Set(allData.map(row => row.league))];
+            const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
+            const heroSet = new Set();
+            const heroPfpMap = {};
+            const heroCommonAvgMap = {};
+
+            allData.forEach(row => {
+                const heroName = (row.hero_name || row.hero_handle || '').trim();
+                if (!heroName) return;
+                heroSet.add(heroName);
+                const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
+                if (pfp) heroPfpMap[heroName] = pfp;
+                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroName in heroCommonAvgMap)) {
+                    heroCommonAvgMap[heroName] = Number(row.common_avg_price);
+                }
+            });
+            const heroes = [...heroSet].sort();
+
+            // 2. Aggregate reward_value_added by hero and league
+            const heroLeagueTotals = {};
+            heroes.forEach(hero => {
+                heroLeagueTotals[hero] = {};
+                leagues.forEach(league => {
+                    heroLeagueTotals[hero][league] = 0;
+                });
+            });
+
+            allData.forEach(row => {
+                const heroName = (row.hero_name || row.hero_handle || '').trim();
+                const league = row.league;
+                let val = row.reward_value_added;
+                if (val === null || val === undefined || isNaN(Number(val))) val = 0;
+                else val = Number(val);
+                if (heroLeagueTotals[heroName] && league in heroLeagueTotals[heroName]) {
+                    heroLeagueTotals[heroName][league] += val;
+                }
+            });
+
+            // 3. Prepare data for rendering
+            const summaryRows = heroes.map(hero => {
+                const leagueTotals = leagues.map(lg => heroLeagueTotals[hero][lg] || 0);
+                const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
+                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined) ? Number(heroCommonAvgMap[hero]) : null;
+                return { hero, leagueTotals, grandTotal, commonAvg };
+            });
+
+            // 4. Sort by grandTotal descending by default, or by currentSort
+            let sortCol = currentSort.column;
+            let sortDir = currentSort.direction;
+            if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
+                sortCol = 'grandTotal';
+                sortDir = 'desc';
+            }
+            summaryRows.sort((a, b) => {
+                if (sortCol === 'hero') {
+                    return sortDir === 'asc' ? a.hero.localeCompare(b.hero) : b.hero.localeCompare(a.hero);
+                } else if (leagues.includes(sortCol)) {
+                    const idx = leagues.indexOf(sortCol);
+                    return sortDir === 'asc'
+                        ? a.leagueTotals[idx] - b.leagueTotals[idx]
+                        : b.leagueTotals[idx] - a.leagueTotals[idx];
+                } else if (sortCol === 'common_avg_price') {
+                    return sortDir === 'asc'
+                        ? (a.commonAvg ?? -Infinity) - (b.commonAvg ?? -Infinity)
+                        : (b.commonAvg ?? -Infinity) - (a.commonAvg ?? -Infinity);
+                } else {
+                    return sortDir === 'asc'
+                        ? a.grandTotal - b.grandTotal
+                        : b.grandTotal - a.grandTotal;
+                }
+            });
+
+            // 5. Calculate total color scale for the grand total column
+            const totalVals = summaryRows.map(row => row.grandTotal);
+            const minTotal = Math.min(...totalVals);
+            const maxTotal = Math.max(...totalVals);
+
+            // Helper for blue-to-orange/red palette (same as league tabs)
+            function getTotalPaletteColor(normalized) {
+                // Blue to orange/red
+                if (normalized >= 0.9) return '#08306b';
+                if (normalized >= 0.8) return '#08519c';
+                if (normalized >= 0.7) return '#3182bd';
+                if (normalized >= 0.6) return '#6baed6';
+                if (normalized >= 0.5) return '#9ecae1';
+                if (normalized >= 0.4) return '#c6dbef';
+                if (normalized >= 0.3) return '#deebf7';
+                if (normalized >= 0.2) return '#f7fbff';
+                if (normalized >= 0.1) return '#fee8c8';
+                if (normalized >= 0.05) return '#fd8d3c';
+                return '#d94701';
+            }
+
+            // 6. Render table header
+            const tableHeader = document.getElementById('tableHeader');
+            let headerHTML = '<tr>';
+            headerHTML += `<th style="width:40px;">#</th>`;
+            const heroSortClass = sortCol === 'hero' ? `sort-${sortDir}` : '';
+            headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleByLeagueSort('hero')">Hero</th>`;
+            const commonSortClass = sortCol === 'common_avg_price' ? `sort-${sortDir}` : '';
+            // Wrap Common Price header text
+            headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px; white-space:normal; line-height:1.1;"><span style="white-space:normal;">Common<br>Price</span></th>`;
+            leagues.forEach(lg => {
+                const sortClass = sortCol === lg ? `sort-${sortDir}` : '';
+                // League icon only, no background fill
+                const iconHtml = `<img class="league-icon" src="../../icons/${lg.toLowerCase()}.webp" alt="${lg}" style="width:22px;height:22px;vertical-align:middle;">`;
+                headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleByLeagueSort('${lg}')">${iconHtml}</th>`;
+            });
+            const totalSortClass = sortCol === 'grandTotal' ? `sort-${sortDir}` : '';
+            headerHTML += `<th class="total-col sortable ${totalSortClass}" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
+            headerHTML += '</tr>';
+            tableHeader.innerHTML = headerHTML;
+
+            // 7. Render table body
+            const tableBody = document.getElementById('tableBody');
+            let bodyHTML = '';
+            summaryRows.forEach((row, idx) => {
+                bodyHTML += '<tr>';
+                bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`;
+                const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
+                const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
+                const displayName = truncateHeroName(row.hero);
+                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(row.hero)}">${displayName}</span></div></td>`;
+                const commonDisplay = formatThreeDecimals(row.commonAvg);
+                bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
+                row.leagueTotals.forEach((val, i) => {
+                    // League color with 20% opacity
+                    let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${leagues[i].toLowerCase()}`).trim();
+                    if (!colorValue) colorValue = defaultLeagueColors[leagues[i].toLowerCase()] || '#666666';
+                    const bg = colorToRgba(colorValue, 0.2);
+                    bodyHTML += `<td class="value-cell" style="background:${bg};">${formatCurrency(val)}</td>`;
+                });
+                // Total column: blue-to-orange/red palette at 20% opacity
+                let norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
+                const totalBgSolid = getTotalPaletteColor(norm);
+                const totalBg = colorToRgba(totalBgSolid, 0.2);
+                const totalTextColor = readableTextColor(totalBgSolid);
+                bodyHTML += `<td class="total-col" style="background:${totalBg};color:${totalTextColor};">${formatCurrency(row.grandTotal)}</td>`;
+                bodyHTML += '</tr>';
+            });
+            tableBody.innerHTML = bodyHTML;
+
+            // Show/hide elements
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('matrixTable').style.display = 'table';
+            document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
+        }
     </script>
 </body>
 </html>

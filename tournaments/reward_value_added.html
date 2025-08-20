@@ -26,23 +26,105 @@
         
         .league-tab {
             padding: 10px 20px;
-            background: #444;
-            color: white;
             cursor: pointer;
             border: none;
             border-radius: 5px 5px 0 0;
-            transition: background 0.3s;
-        }
-        
-        .league-tab.active {
-            background: #666;
-            border-bottom: 2px solid #666;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;              /* JS will set league color */
+            color: #fff;                           /* default text color */
+            border-bottom: 2px solid transparent;  /* JS will set border color */
         }
         
         .league-tab:hover {
-            background: #555;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+
+        .league-tab .league-icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        /* Visual emphasis for the active tab (JS will set exact background + text color) */
+        .league-tab.active {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Make body and html full height */
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent page-level scrolling */
+        }
+
+        /* Main container should be full height flex */
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Title container should not grow */
+        .title-container {
+            flex-shrink: 0;
+        }
+
+        /* League tabs should not grow */
+        .league-tabs {
+            flex-shrink: 0;
+        }
+
+        .matrix-container {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* important for flex children with overflow */
+            overflow: hidden; /* Prevent container overflow */
         }
         
+        .matrix-scroll-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #222;
+            /* Remove max-height to allow full expansion */
+        }
+        
+        .matrix-scroll-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: #444 #222;
+        }
+
+        /* For Webkit browsers (Chrome, Edge, Safari) */
+        .matrix-scroll-wrapper::-webkit-scrollbar {
+            width: 8px;
+            background: #222;
+        }
+        .matrix-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 6px;
+        }
+        .matrix-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        .matrix-scroll-wrapper::-webkit-scrollbar-corner {
+            background: #222;
+        }
+
+        .matrix-table thead th {
+            position: sticky;
+            top: 0;
+            background: #222;
+            z-index: 2;
+        }
     </style>
 </head>
 <body>
@@ -59,18 +141,21 @@
         <!-- Tabs will be populated dynamically -->
     </div>
 
+    <!-- Wrap your table in a scrollable div -->
     <div class="matrix-container">
         <div id="loading" class="loading">
             <i class="fas fa-spinner fa-spin"></i> Loading tournament data...
         </div>
-        <table class="matrix-table" id="matrixTable" style="display: none;">
-            <thead id="tableHeader">
-                <!-- Headers will be populated dynamically -->
-            </thead>
-            <tbody id="tableBody">
-                <!-- Data will be populated dynamically -->
-            </tbody>
-        </table>
+        <div class="matrix-scroll-wrapper">
+            <table class="matrix-table" id="matrixTable" style="display: none;">
+                <thead id="tableHeader">
+                    <!-- Headers will be populated dynamically -->
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
         <div id="noData" class="no-data" style="display: none;">
             No data available for the selected league.
         </div>
@@ -98,6 +183,8 @@
                         league,
                         tournament_number,
                         hero_handle,
+                        hero_name,
+                        hero_pfp_url,
                         hero_stars,
                         reward_value_added
                     `)
@@ -138,6 +225,74 @@
             }
         }
 
+        // Helper: convert hex -> {r,g,b} (already present lower in file, reused)
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        // New helper: convert hex to rgba() string with alpha
+        function hexToRgba(hex, alpha = 1) {
+            const { r, g, b } = hexToRgb(hex);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // Helper: convert any CSS color (hex, rgb, rgba, css-var) to {r,g,b}
+        function parseColorToRgb(color) {
+            // Create a temporary element to let the browser resolve any CSS color string
+            const el = document.createElement('div');
+            el.style.color = color;
+            document.body.appendChild(el);
+            const computed = getComputedStyle(el).color; // "rgb(r, g, b)" or "rgba(r, g, b, a)"
+            document.body.removeChild(el);
+            const m = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+            return m ? { r: parseInt(m[1], 10), g: parseInt(m[2], 10), b: parseInt(m[3], 10) } : { r: 0, g: 0, b: 0 };
+        }
+
+        // Convert resolved color -> rgba(...) string with alpha
+        function colorToRgba(color, alpha = 1) {
+            const { r, g, b } = parseColorToRgb(color);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // Choose readable text color (#000 or #fff) for a resolved color
+        function readableTextColor(color) {
+            const { r, g, b } = parseColorToRgb(color);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? '#000000' : '#ffffff';
+        }
+
+        // Hero name truncation settings and helpers
+        const HERO_TRUNCATE_THRESHOLD = 25; // if name length > threshold, truncate
+        const HERO_TRUNCATE_SHOW = 25;      // show this many chars then '..'
+
+        function truncateHeroName(name) {
+            if (!name) return '';
+            if (name.length > HERO_TRUNCATE_THRESHOLD) {
+                return name.slice(0, HERO_TRUNCATE_SHOW) + '..';
+            }
+            return name;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function (s) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]);
+            });
+        }
+
+        // Default league colors fallback (used if CSS variable missing)
+        const defaultLeagueColors = {
+            elite: '#C78BFF',
+            gold: '#FFCE52',
+            silver: '#A7B8CF',
+            bronze: '#FE8946',
+            reverse: '#84D24C'
+        };
+
         // Setup league tabs
         function setupLeagueTabs() {
             const leagues = [...new Set(allData.map(row => row.league))].sort();
@@ -147,8 +302,40 @@
             
             leagues.forEach(league => {
                 const tab = document.createElement('button');
-                tab.className = 'league-tab';
-                tab.textContent = league;
+                tab.className = `league-tab ${league.toLowerCase()}`;
+                
+                // Add league icon
+                const icon = document.createElement('img');
+                icon.src = `../../icons/${league.toLowerCase()}.webp`;
+                icon.alt = `${league} League`;
+                icon.className = 'league-icon';
+                icon.onerror = function() {
+                    this.style.display = 'none';
+                };
+                
+                // Add league text
+                const text = document.createElement('span');
+                text.textContent = league;
+                
+                tab.appendChild(icon);
+                tab.appendChild(text);
+
+                // Try to read CSS variable first, otherwise fallback to default map
+                const cssVarName = `--league-${league.toLowerCase()}`;
+                let colorValue = getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+                if (!colorValue) {
+                    colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
+                }
+
+                // Store resolved color string on the tab
+                tab.dataset.leagueColor = colorValue;
+
+                // Apply inactive (50% opacity) background and solid border color
+                tab.style.backgroundColor = colorToRgba(colorValue, 0.4);
+                tab.style.borderBottomColor = colorToRgba(colorValue, 1);
+                // Set appropriate text color for contrast (works for both active/inactive backgrounds)
+                tab.style.color = readableTextColor(colorValue);
+
                 tab.onclick = () => selectLeague(league);
                 tabsContainer.appendChild(tab);
             });
@@ -163,9 +350,22 @@
         function selectLeague(league) {
             currentLeague = league;
             
-            // Update active tab
+            // Update active tab visuals (solid 100% for active, 50% for others)
             document.querySelectorAll('.league-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.textContent === league);
+                const tabText = tab.querySelector('span') ? tab.querySelector('span').textContent : '';
+                const colorValue = tab.dataset.leagueColor || '#666666';
+
+                if (tabText === league) {
+                    tab.classList.add('active');
+                    tab.style.backgroundColor = colorToRgba(colorValue, 1); // solid 100%
+                    tab.style.color = readableTextColor(colorValue);
+                    tab.style.borderBottomColor = colorToRgba(colorValue, 1);
+                } else {
+                    tab.classList.remove('active');
+                    tab.style.backgroundColor = colorToRgba(colorValue, 0.4); // 50% opacity
+                    tab.style.color = readableTextColor(colorValue);
+                    tab.style.borderBottomColor = colorToRgba(colorValue, 1);
+                }
             });
             
             renderMatrix(league);
@@ -184,8 +384,19 @@
                 return;
             }
 
-            // Get unique heroes and tournament numbers
-            const heroes = [...new Set(leagueData.map(row => row.hero_handle))].sort();
+            // Build hero -> pfp map and unique hero list using hero_name (fallback to hero_handle)
+            const heroPfpMap = {};
+            const heroSet = new Set();
+            leagueData.forEach(row => {
+                const heroName = (row.hero_name || row.hero_handle || '').trim();
+                if (!heroName) return;
+                heroSet.add(heroName);
+                // try multiple possible field names for the pfp
+                const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
+                if (pfp) heroPfpMap[heroName] = pfp;
+            });
+            const heroes = [...heroSet].sort();
+
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
 
             console.log('Heroes in this league:', heroes.length, heroes);
@@ -199,22 +410,43 @@
                 starsMatrix[hero] = {};
                 
                 tournamentNumbers.forEach(tournNum => {
-                    matrix[hero][tournNum] = 0;
-                    starsMatrix[hero][tournNum] = 0;
+                    // Use null to represent an actually absent / unknown value.
+                    // This lets us distinguish "0" (a real value) from missing data.
+                    matrix[hero][tournNum] = null;
+                     starsMatrix[hero][tournNum] = 0;
                 });
             });
 
-            // Populate matrix with data and stars
+            // Populate matrix with data and stars (use hero_name fallback)
             leagueData.forEach(row => {
-                if (matrix[row.hero_handle] && matrix[row.hero_handle].hasOwnProperty(row.tournament_number)) {
-                    matrix[row.hero_handle][row.tournament_number] += row.reward_value_added || 0;
-                    starsMatrix[row.hero_handle][row.tournament_number] = row.hero_stars || 0;
+                const heroName = (row.hero_name || row.hero_handle || '').trim();
+                if (!heroName) return;
+                const tourn = row.tournament_number;
+                if (matrix[heroName] && matrix[heroName].hasOwnProperty(tourn)) {
+                    // Only treat reward_value_added as numeric when it's not null/undefined
+                    const rv = row.reward_value_added;
+                    if (rv !== null && rv !== undefined) {
+                        const num = Number(rv) || 0;
+                        if (matrix[heroName][tourn] === null) {
+                            matrix[heroName][tourn] = num;
+                        } else {
+                            matrix[heroName][tourn] += num;
+                        }
+                    }
+                    // Preserve stars if present; don't override with falsy zero unless that's intended
+                    starsMatrix[heroName][tourn] = (row.hero_stars !== undefined && row.hero_stars !== null)
+                        ? Number(row.hero_stars)
+                        : starsMatrix[heroName][tourn] || 0;
                 }
+                // preserve pfp if present
+                const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
+                if (pfp) heroPfpMap[heroName] = heroPfpMap[heroName] || pfp;
             });
 
             // Calculate totals and medians
             const heroTotals = heroes.map(hero => {
-                const values = tournamentNumbers.map(tournNum => matrix[hero][tournNum] || 0);
+                // For totals/median treat missing (null) as 0 for aggregation/median calculation
+                const values = tournamentNumbers.map(tournNum => (matrix[hero][tournNum] === null || matrix[hero][tournNum] === undefined) ? 0 : Number(matrix[hero][tournNum]));
                 const total = values.reduce((sum, val) => sum + val, 0);
                 const median = calculateMedian(values);
                 return { hero, total, median, values };
@@ -227,7 +459,9 @@
 
             heroes.forEach(hero => {
                 tournamentNumbers.forEach(tournNum => {
-                    matrixValues.push(matrix[hero][tournNum] || 0);
+                    // Only include numeric (present) values for matrix color scaling so missing/null don't skew the scale
+                    const v = matrix[hero][tournNum];
+                    if (v !== null && v !== undefined) matrixValues.push(Number(v));
                 });
             });
 
@@ -253,28 +487,31 @@
 
             console.log('Color scales:', colorScales);
 
-            // Sort by median descending initially
-            currentSort = { column: 'median', direction: 'desc' };
-            const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction);
+            // Do not overwrite currentSort here — keep the user's selected sort.
+            // If heroTotals is first render and currentSort not set, currentSort was initialized globally.
+            const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers);
 
             console.log('Hero totals calculated:', sortedHeroTotals.length);
 
-            // Render table with independent color scales
-            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales);
+            // Render table with independent color scales (pass heroPfpMap)
+            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap);
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('matrixTable').style.display = 'table';
             document.getElementById('noData').style.display = 'none';
         }
 
-        // Fix the sortHeroes function - Tournament column sorting was broken:
-        function sortHeroes(heroTotals, column, direction) {
+        // Fix the sortHeroes function - use heroTotals.values and tournamentNumbers
+        function sortHeroes(heroTotals, column, direction, tournamentNumbers) {
+            // Defensive: ensure tournamentNumbers is an array
+            tournamentNumbers = Array.isArray(tournamentNumbers) ? tournamentNumbers : [];
+
             return [...heroTotals].sort((a, b) => {
                 let aVal, bVal;
                 
                 if (column === 'hero') {
-                    aVal = a.hero;
-                    bVal = b.hero;
+                    aVal = a.hero || '';
+                    bVal = b.hero || '';
                     // String comparison
                     if (direction === 'asc') {
                         return aVal.localeCompare(bVal);
@@ -282,28 +519,27 @@
                         return bVal.localeCompare(aVal);
                     }
                 } else if (column === 'total') {
-                    aVal = a.total;
-                    bVal = b.total;
+                    aVal = Number(a.total) || 0;
+                    bVal = Number(b.total) || 0;
                 } else if (column === 'median') {
-                    aVal = a.median;
-                    bVal = b.median;
+                    aVal = Number(a.median) || 0;
+                    bVal = Number(b.median) || 0;
                 } else if (column.startsWith('T')) {
-                    // Fix tournament column sorting
+                    // Tournament column sorting: find index in tournamentNumbers and read values[]
                     const tournNum = parseInt(column.substring(1));
-                    // Find the index of this tournament number in the values array
-                    const tournamentNumbers = Object.keys(matrix[a.hero] || {}).map(Number).sort((x, y) => x - y);
                     const tournIndex = tournamentNumbers.indexOf(tournNum);
-                    aVal = tournIndex >= 0 ? (a.values[tournIndex] || 0) : 0;
-                    bVal = tournIndex >= 0 ? (b.values[tournIndex] || 0) : 0;
+                    aVal = tournIndex >= 0 ? Number(a.values[tournIndex] || 0) : 0;
+                    bVal = tournIndex >= 0 ? Number(b.values[tournIndex] || 0) : 0;
+                } else {
+                    // Unknown column -> keep original order
+                    return 0;
                 }
                 
-                // Numeric comparison for non-hero columns (only using reward_value_added, not stars)
-                if (column !== 'hero') {
-                    if (direction === 'asc') {
-                        return aVal - bVal;
-                    } else {
-                        return bVal - aVal;
-                    }
+                // Numeric comparison for non-hero columns (only reward_value_added)
+                if (direction === 'asc') {
+                    return aVal - bVal;
+                } else {
+                    return bVal - aVal;
                 }
             });
         }
@@ -313,14 +549,17 @@
             if (colorScale.max === colorScale.min) {
                 return { backgroundColor: '#2d2d2d', color: '#ffffff' };
             }
-            
-            if (value === 0) {
+
+            // Treat truly absent values (null/undefined/NaN) as neutral grey.
+            if (value === null || value === undefined || isNaN(Number(value))) {
                 return { backgroundColor: '#2d2d2d', color: '#888888' };
             }
-            
-            // Normalize value between 0 and 1
-            const normalized = (value - colorScale.min) / (colorScale.max - colorScale.min);
-            
+
+            // Normalize value between 0 and 1 (clamp inside range)
+            const v = Number(value);
+            const clamped = Math.max(colorScale.min, Math.min(colorScale.max, v));
+            const normalized = (clamped - colorScale.min) / (colorScale.max - colorScale.min);
+
             // Get background color based on type and normalized value
             let backgroundColor;
             if (type === 'matrix') {
@@ -332,12 +571,12 @@
             } else {
                 backgroundColor = getMatrixBackgroundColor(normalized); // Default
             }
-            
+
             // Determine text color based on background brightness
             const rgb = hexToRgb(backgroundColor);
             const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
             const textColor = brightness > 128 ? '#000000' : '#ffffff';
-            
+
             return { backgroundColor, color: textColor };
         }
 
@@ -386,36 +625,21 @@
             return '#de2d26';
         }
 
-        // Helper function to convert hex to RGB
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : { r: 0, g: 0, b: 0 };
-        }
-
-        // Update the renderTable function to pass the type parameter:
-        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales) {
+        // Update the renderTable function as follows:
+        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap) {
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
 
             // Create header with sorting
             let headerHTML = '<tr>';
-            
-            // Hero header (sortable)
+            headerHTML += `<th style="width:40px;">#</th>`; // Add rank column
             const heroSortClass = currentSort.column === 'hero' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleSort('hero')">Hero</th>`;
-            
-            // Tournament headers (sortable)
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
                 headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleSort('${colName}')">${colName}</th>`;
             });
-            
-            // Total and Median headers (sortable)
             const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
             const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="total-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
@@ -425,26 +649,47 @@
 
             // Create body rows with type-specific color scaling
             let bodyHTML = '';
-            heroTotals.forEach(({ hero, total, median }) => {
+            heroTotals.forEach(({ hero, total, median }, idx) => {
                 bodyHTML += '<tr>';
-                bodyHTML += `<td class="hero-col">${hero}</td>`;
-                
+                bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
+
+                // hero cell: image (if available) then name using .hero-image style
+                const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
+                const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
+
+                // truncate hero display name when long, keep full name in title
+                const displayName = truncateHeroName(hero);
+                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(hero)}">${displayName}</span></div></td>`;
+
                 tournamentNumbers.forEach(tournNum => {
-                    const value = matrix[hero][tournNum] || 0;
-                    const stars = starsMatrix[hero][tournNum] || 0;
-                    const colors = getValueColor(value, colorScales.matrix, 'matrix'); // Pass 'matrix' type
-                    
-                    if (value === 0) {
+                    // Distinguish three cases:
+                    // 1) value is present (number, including 0) -> show formatted number (and stars if any)
+                    // 2) value is absent/null but stars exist -> show "-" plus stars
+                    // 3) both absent/null and no stars -> show "-"
+                    const rawValue = matrix[hero][tournNum];
+                    const hasValue = rawValue !== null && rawValue !== undefined;
+                    const value = hasValue ? Number(rawValue) : null;
+                    const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
+
+                    if (!hasValue && (!stars || stars === 0)) {
+                        // truly absent -> dash
+                        const colors = { backgroundColor: '#2d2d2d', color: '#888888' };
                         bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">-</td>`;
+                    } else if (!hasValue && (stars && stars > 0)) {
+                        // no numeric value but stars present -> show "-" with stars
+                        const colors = { backgroundColor: '#2d2d2d', color: '#888888' };
+                        const starDisplay = ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)`;
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">-${starDisplay}</td>`;
                     } else {
+                        // numeric value present (could be 0) -> show number and stars
+                        const colors = getValueColor(value, colorScales.matrix, 'matrix');
                         const formattedValue = formatCurrency(value);
                         const starDisplay = stars > 0 ? ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)` : '';
                         bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}${starDisplay}</td>`;
                     }
                 });
-                
-                const totalColors = getValueColor(total, colorScales.total, 'total');     // Pass 'total' type
-                const medianColors = getValueColor(median, colorScales.median, 'median'); // Pass 'median' type
+                const totalColors = getValueColor(total, colorScales.total, 'total');
+                const medianColors = getValueColor(median, colorScales.median, 'median');
                 bodyHTML += `<td class="total-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
                 bodyHTML += `<td class="total-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatCurrency(median)}</td>`;
                 bodyHTML += '</tr>';
@@ -485,17 +730,7 @@
 
         // Add the missing formatCurrency function
         function formatCurrency(value) {
-            if (value === 0) return '0';
-            if (Math.abs(value) < 0.001) {
-                // For very small values, show more decimal places
-                return value.toFixed(6);
-            } else if (Math.abs(value) < 1) {
-                // For values less than 1, show 4 decimal places
-                return value.toFixed(4);
-            } else {
-                // For larger values, show 2 decimal places
-                return value.toFixed(2);
-            }
+            return Number(value).toFixed(2);
         }
 
         // Initialize on page load

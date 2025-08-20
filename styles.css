@@ -1,4 +1,11 @@
-/* styles.css */
+:root {
+    --league-elite: #C78BFF;
+    --league-gold: #FFCE52;
+    --league-silver: #A7B8CF;
+    --league-bronze: #FE8946;
+    --league-reverse: #84D24C;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 20px;

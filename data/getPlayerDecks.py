@@ -2,6 +2,7 @@ import psycopg2
 import json
 import os
 from datetime import datetime
+import time
 
 # Load configuration from config.json
 with open('C:/fantasy_top_analysis/pages/config.json', 'r') as config_file:
@@ -23,19 +24,39 @@ def supabase_db_connection():
     )
 
 
+def execute_with_retry(cursor, sql, attempts=2, retry_delay=1):
+    """
+    Execute SQL with a single retry on failure. Returns fetched rows or [] on failure.
+    """
+    last_err = None
+    for attempt in range(1, attempts + 1):
+        try:
+            cursor.execute(sql)
+            return cursor.fetchall()
+        except psycopg2.Error as e:
+            last_err = e
+            print(f"[getPlayerDecks] Query attempt {attempt} failed: {e}")
+            if attempt < attempts:
+                print(f"[getPlayerDecks] Retrying in {retry_delay}s...")
+                time.sleep(retry_delay)
+            else:
+                print("[getPlayerDecks] All attempts failed. Continuing gracefully.")
+    # Return empty result so downstream logic can continue
+    return []
+
+
 #get the tournament status
 conn = supabase_db_connection()
 cursor = conn.cursor()
 query = f"""select max(tournament_status) as tournament_status from flatten.get_tournaments where  tournament_unique_key  = 'Main {TOURNAMENT_NUMBER}'"""
-cursor.execute(query)
-rows = cursor.fetchall()
+rows = execute_with_retry(cursor, query)
 tournament_status = rows[0][0] if rows else None
 cursor.close()
 
 # Create cursor and execute query
 cursor = conn.cursor()
 query = f"""
-set statement_timeout = '10min';
+set statement_timeout = '5min';
 WITH ordered_records AS (
 SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_num,hero_handle
 FROM flatten.hero_stats_tournament_current base 
@@ -556,7 +577,6 @@ for row in rows:
 
 # Sort player_decks by player_handle and then player_rank before creating the final structure
 player_decks.sort(key=lambda x: (x['player_handle'], x['player_rank']))
-
 
 metadata = {
     'tournament_duration_hours': float(rows[0][2]) if rows[0][2] else None,

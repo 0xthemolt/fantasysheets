@@ -267,8 +267,7 @@
             document.getElementById('noData').style.display = 'none';
         }
 
-        // Replace the sortHeroes function:
-
+        // Fix the sortHeroes function - Tournament column sorting was broken:
         function sortHeroes(heroTotals, column, direction) {
             return [...heroTotals].sort((a, b) => {
                 let aVal, bVal;
@@ -289,14 +288,16 @@
                     aVal = a.median;
                     bVal = b.median;
                 } else if (column.startsWith('T')) {
-                    // Tournament column - need to fix this logic
+                    // Fix tournament column sorting
                     const tournNum = parseInt(column.substring(1));
-                    const tournIndex = heroTotals[0].values ? Object.keys(heroTotals[0].values).indexOf(tournNum.toString()) : -1;
+                    // Find the index of this tournament number in the values array
+                    const tournamentNumbers = Object.keys(matrix[a.hero] || {}).map(Number).sort((x, y) => x - y);
+                    const tournIndex = tournamentNumbers.indexOf(tournNum);
                     aVal = tournIndex >= 0 ? (a.values[tournIndex] || 0) : 0;
                     bVal = tournIndex >= 0 ? (b.values[tournIndex] || 0) : 0;
                 }
                 
-                // Numeric comparison for non-hero columns
+                // Numeric comparison for non-hero columns (only using reward_value_added, not stars)
                 if (column !== 'hero') {
                     if (direction === 'asc') {
                         return aVal - bVal;
@@ -308,31 +309,94 @@
         }
 
         // Update color calculation function to accept scale type
-        function getValueColor(value, colorScale) {
+        function getValueColor(value, colorScale, type) {
             if (colorScale.max === colorScale.min) {
                 return { backgroundColor: '#2d2d2d', color: '#ffffff' };
+            }
+            
+            if (value === 0) {
+                return { backgroundColor: '#2d2d2d', color: '#888888' };
             }
             
             // Normalize value between 0 and 1
             const normalized = (value - colorScale.min) / (colorScale.max - colorScale.min);
             
-            if (value === 0) {
-                // Zero values get neutral dark color
-                return { backgroundColor: '#2d2d2d', color: '#888888' };
+            // Get background color based on type and normalized value
+            let backgroundColor;
+            if (type === 'matrix') {
+                backgroundColor = getMatrixBackgroundColor(normalized);
+            } else if (type === 'total') {
+                backgroundColor = getTotalBackgroundColor(normalized);
+            } else if (type === 'median') {
+                backgroundColor = getMedianBackgroundColor(normalized);
+            } else {
+                backgroundColor = getMatrixBackgroundColor(normalized); // Default
             }
             
-            // Create color scale from red (0) to green (1)
-            const red = Math.round(255 * (1 - normalized));
-            const green = Math.round(255 * normalized);
-            const blue = 0;
-            
-            const backgroundColor = `rgb(${Math.max(red, 40)}, ${Math.max(green, 40)}, ${blue + 20})`;
-            const textColor = normalized > 0.5 ? '#000000' : '#ffffff';
+            // Determine text color based on background brightness
+            const rgb = hexToRgb(backgroundColor);
+            const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+            const textColor = brightness > 128 ? '#000000' : '#ffffff';
             
             return { backgroundColor, color: textColor };
         }
 
-        // Update renderTable to use independent color scales
+        // Matrix (tournament) color palette - Green to Red scale
+        function getMatrixBackgroundColor(normalized) {
+            if (normalized >= 0.9) return '#006837';
+            if (normalized >= 0.8) return '#18954e';
+            if (normalized >= 0.7) return '#42ab5a';
+            if (normalized >= 0.6) return '#70c164';
+            if (normalized >= 0.5) return '#a2d769';
+            if (normalized >= 0.4) return '#d1eb85';
+            if (normalized >= 0.3) return '#edf7a7';
+            if (normalized >= 0.2) return '#fef9b5';
+            if (normalized >= 0.1) return '#fdd884';
+            if (normalized >= 0.05) return '#f7864e';
+            return '#a50026';
+        }
+
+        // Total color palette - Blue scale
+        function getTotalBackgroundColor(normalized) {
+            if (normalized >= 0.9) return '#08306b';
+            if (normalized >= 0.8) return '#08519c';
+            if (normalized >= 0.7) return '#3182bd';
+            if (normalized >= 0.6) return '#6baed6';
+            if (normalized >= 0.5) return '#9ecae1';
+            if (normalized >= 0.4) return '#c6dbef';
+            if (normalized >= 0.3) return '#deebf7';
+            if (normalized >= 0.2) return '#f7fbff';
+            if (normalized >= 0.1) return '#fee8c8';
+            if (normalized >= 0.05) return '#fd8d3c';
+            return '#d94701';
+        }
+
+        // Median color palette - Purple scale
+        function getMedianBackgroundColor(normalized) {
+            if (normalized >= 0.9) return '#3f007d';
+            if (normalized >= 0.8) return '#54278f';
+            if (normalized >= 0.7) return '#756bb1';
+            if (normalized >= 0.6) return '#9e9ac8';
+            if (normalized >= 0.5) return '#bcbddc';
+            if (normalized >= 0.4) return '#dadaeb';
+            if (normalized >= 0.3) return '#efedf5';
+            if (normalized >= 0.2) return '#fcfbfd';
+            if (normalized >= 0.1) return '#fee0d2';
+            if (normalized >= 0.05) return '#fc9272';
+            return '#de2d26';
+        }
+
+        // Helper function to convert hex to RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        // Update the renderTable function to pass the type parameter:
         function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales) {
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
@@ -359,7 +423,7 @@
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
-            // Create body rows with independent color scaling
+            // Create body rows with type-specific color scaling
             let bodyHTML = '';
             heroTotals.forEach(({ hero, total, median }) => {
                 bodyHTML += '<tr>';
@@ -368,7 +432,7 @@
                 tournamentNumbers.forEach(tournNum => {
                     const value = matrix[hero][tournNum] || 0;
                     const stars = starsMatrix[hero][tournNum] || 0;
-                    const colors = getValueColor(value, colorScales.matrix); // Use matrix color scale
+                    const colors = getValueColor(value, colorScales.matrix, 'matrix'); // Pass 'matrix' type
                     
                     if (value === 0) {
                         bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">-</td>`;
@@ -379,8 +443,8 @@
                     }
                 });
                 
-                const totalColors = getValueColor(total, colorScales.total);   // Use total color scale
-                const medianColors = getValueColor(median, colorScales.median); // Use median color scale
+                const totalColors = getValueColor(total, colorScales.total, 'total');     // Pass 'total' type
+                const medianColors = getValueColor(median, colorScales.median, 'median'); // Pass 'median' type
                 bodyHTML += `<td class="total-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
                 bodyHTML += `<td class="total-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatCurrency(median)}</td>`;
                 bodyHTML += '</tr>';

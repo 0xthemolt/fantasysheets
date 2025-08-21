@@ -404,6 +404,7 @@
             // Build hero -> pfp map and unique hero list using hero_name (fallback to hero_handle)
             const heroPfpMap = {};
             const heroCommonAvgMap = {};
+            const heroStarsMap = {};
             const heroSet = new Set();
             leagueData.forEach(row => {
                 const heroName = (row.hero_name || row.hero_handle || '').trim();
@@ -416,6 +417,12 @@
                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroName in heroCommonAvgMap)) {
                    heroCommonAvgMap[heroName] = Number(row.common_avg_price);
                }
+               // Aggregate max stars
+               if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
+                    if (!(heroName in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroName]) {
+                        heroStarsMap[heroName] = Number(row.hero_stars);
+                    }
+                }
             });
             const heroes = [...heroSet].sort();
 
@@ -666,6 +673,11 @@
             // Common Avg Price column (right of Hero)
             const commonSortClass = currentSort.column === 'common_avg_price' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Common Price</th>`;
+            // New Hero Stars column
+            const heroStarsSortClass = currentSort.column === 'hero_stars' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
+                <span title="Hero Stars">Hero<br>Stars <i class="fas fa-star" style="color:#ffd700"></i></span>
+            </th>`;
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
@@ -695,6 +707,9 @@
                 const commonVal = (heroTotals && heroTotals[idx] && heroTotals[idx].commonAvg !== undefined) ? heroTotals[idx].commonAvg : null;
                 const commonDisplay = formatThreeDecimals(commonVal);
                 bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
+                // Hero Stars cell
+                const heroStars = heroStarsMap[row.hero] !== undefined ? heroStarsMap[row.hero] : '';
+                bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${heroStars !== '' ? heroStars + ' <i class="fas fa-star" style="color:#ffd700"></i>' : '-'}</td>`;
 
                 tournamentNumbers.forEach(tournNum => {
                     // Distinguish three cases:
@@ -895,6 +910,11 @@
             const commonSortClass = sortCol === 'common_avg_price' ? `sort-${sortDir}` : '';
             // Wrap Common Price header text
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px; white-space:normal; line-height:1.1;"><span style="white-space:normal;">Common<br>Price</span></th>`;
+            // New Hero Stars column
+            const heroStarsSortClass = sortCol === 'hero_stars' ? `sort-${sortDir}` : '';
+            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
+                <span title="Hero Stars">Hero<br>Stars <i class="fas fa-star" style="color:#ffd700"></i></span>
+            </th>`;
             leagues.forEach(lg => {
                 const sortClass = sortCol === lg ? `sort-${sortDir}` : '';
                 // League icon only, no background fill
@@ -918,6 +938,9 @@
                 bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(row.hero)}">${displayName}</span></div></td>`;
                 const commonDisplay = formatThreeDecimals(row.commonAvg);
                 bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
+                // Hero Stars cell
+                const starsVal = (heroStarsMap && heroStarsMap[row.hero] !== undefined) ? heroStarsMap[row.hero] : 0;
+                bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${starsVal > 0 ? starsVal + ' <i class="fas fa-star" style="color: #ffd700;"></i>' : '-'}</td>`;
                 row.leagueTotals.forEach((val, i) => {
                     // League color with 20% opacity
                     let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${leagues[i].toLowerCase()}`).trim();

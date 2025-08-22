@@ -125,6 +125,12 @@
             background: #222;
             z-index: 2;
         }
+
+        .summary-col {
+            border-left: 2px solid #555; /* Subtle left border */
+            background-color: rgba(255, 255, 255, 0.05); /* Slightly different background */
+            padding: 0 12px; /* Add horizontal padding for spacing */
+        }
     </style>
 </head>
 <body>
@@ -188,7 +194,8 @@
                         hero_stars,
                         hero_score,
                         common_avg_price,
-                        reward_value_added
+                        reward_value_added,
+                        appearances
                     `)
 
                 if (error) {
@@ -679,14 +686,12 @@
             headerHTML += `<th style="width:40px;">#</th>`; // Add rank column
             const heroSortClass = currentSort.column === 'hero' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleSort('hero')">Hero</th>`;
-            // Common Avg Price column (right of Hero)
             const commonSortClass = currentSort.column === 'common_avg_price' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Common Price</th>`;
-            // New Hero Stars column
             const heroStarsSortClass = currentSort.column === 'hero_stars' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
-                <span title="Stars">Hero<br>Stars <i class="fas fa-star" style="color:#ffd700"></i></span>
-            </th>`;
+        <span title="Stars">Stars</span>
+    </th>`;
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
@@ -694,69 +699,67 @@
             });
             const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
             const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
-            headerHTML += `<th class="total-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
-            headerHTML += `<th class="total-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
+            headerHTML += `<th class="total-col summary-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
+            headerHTML += `<th class="total-col summary-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
+            headerHTML += `<th class="total-col summary-col">Avg Rewards / Appearance</th>`; // New column header
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
             // Create body rows with type-specific color scaling
             let bodyHTML = '';
-            heroTotals.forEach(({ hero, total, median }, idx) => {
+            heroTotals.forEach(({ hero, total, median, values, appearances }, idx) => {
                 bodyHTML += '<tr>';
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
 
-                // hero cell: image (if available) then name using .hero-image style
+                // Hero cell: image (if available) then name using .hero-image style
                 const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
                 const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
 
-                // truncate hero display name when long, keep full name in title
+                // Truncate hero display name when long, keep full name in title
                 const displayName = truncateHeroName(hero);
                 bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(hero)}">${displayName}</span></div></td>`;
+
                 // Common Avg Price cell (right-aligned, 3 decimals)
                 const commonVal = (heroTotals && heroTotals[idx] && heroTotals[idx].commonAvg !== undefined) ? heroTotals[idx].commonAvg : null;
                 const commonDisplay = formatThreeDecimals(commonVal);
                 bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
-                // Hero Stars cell - fix the reference
+
+                // Hero Stars cell
                 const heroStars = (heroStarsMap && heroStarsMap[hero] !== undefined) ? heroStarsMap[hero] : '';
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${heroStars !== '' ? heroStars + ' <i class="fas fa-star" style="color:#ffd700"></i>' : '-'}</td>`;
 
                 tournamentNumbers.forEach(tournNum => {
-                    // Distinguish three cases:
-                    // 1) value is present (number, including 0) -> show formatted number (and stars if any)
-                    // 2) value is absent/null but stars exist -> show "-" plus stars
-                    // 3) both absent/null and no stars -> show "-"
                     const rawValue = matrix[hero][tournNum];
                     const hasValue = rawValue !== null && rawValue !== undefined;
                     const value = hasValue ? Number(rawValue) : null;
                     const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
-                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum]) ? scoreMatrix[hero][tournNum] : null;
-                    
-                    // Create tooltip text
-                    const tooltipText = heroScore !== null ? `Hero Score: ${heroScore}` : '';
 
                     if (!hasValue && (!stars || stars === 0)) {
-                        // truly absent -> dash
-                        const colors = { backgroundColor: '#2d2d2d', color: '#888888' };
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">-</td>`;
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">-</td>`;
                     } else if (!hasValue && (stars && stars > 0)) {
-                        // no numeric value but stars present -> show "-" with stars
-                        const colors = { backgroundColor: '#2d2d2d', color: '#888888' };
-                        const starDisplay = ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)`;
-                        const titleAttr = tooltipText ? ` title="${tooltipText}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};"${titleAttr}>-${starDisplay}</td>`;
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">- (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</td>`;
                     } else {
-                        // numeric value present (could be 0) -> show number and stars
                         const colors = getValueColor(value, colorScales.matrix, 'matrix');
                         const formattedValue = formatCurrency(value);
                         const starDisplay = stars > 0 ? ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)` : '';
-                        const titleAttr = tooltipText ? ` title="${tooltipText}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};"${titleAttr}>${formattedValue}${starDisplay}</td>`;
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}${starDisplay}</td>`;
                     }
                 });
+
+                // Total column
                 const totalColors = getValueColor(total, colorScales.total, 'total');
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
+
+                // Median column
                 const medianColors = getValueColor(median, colorScales.median, 'median');
-                bodyHTML += `<td class="total-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
-                bodyHTML += `<td class="total-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatCurrency(median)}</td>`;
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatMedian(median)}</td>`;
+
+                // New Avg Rewards / Appearance column
+                const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
+                const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards'); // New color scale
+                const tooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${tooltip}">${formatCurrency(avgRewardsPerAppearance)}</td>`;
+
                 bodyHTML += '</tr>';
             });
             tableBody.innerHTML = bodyHTML;
@@ -793,9 +796,14 @@
             }
         }
 
-        // Add the missing formatCurrency function
+        // General formatting for 2 decimal places
         function formatCurrency(value) {
             return Number(value).toFixed(2);
+        }
+
+        // Specific formatting for median values (3 decimal places)
+        function formatMedian(value) {
+            return Number(value).toFixed(3);
         }
 
         // New helper: format number to 3 decimal places, add commas
@@ -939,7 +947,7 @@
             // New Hero Stars column
             const heroStarsSortClass = sortCol === 'hero_stars' ? `sort-${sortDir}` : '';
             headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
-                <span title="Stars">Hero<br>Stars <i class="fas fa-star" style="color:#ffd700"></i></span>
+                <span title="Stars">Stars</span>
             </th>`;
             leagues.forEach(lg => {
                 const sortClass = sortCol === lg ? `sort-${sortDir}` : '';

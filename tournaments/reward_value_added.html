@@ -175,7 +175,7 @@
 
         let allData = [];
         let currentLeague = null;
-        let currentSort = { column: 'median', direction: 'desc' };
+        let currentSort = { column: 'avgRewards', direction: 'desc' }; // Changed from 'median' to 'avgRewards'
         let colorScale = { min: 0, max: 1 }; // Add this missing variable
 
         // Fetch data from Supabase - ADD MORE DEBUGGING
@@ -495,39 +495,58 @@
                 const total = values.reduce((sum, val) => sum + val, 0);
                 const median = calculateMedian(values);
                 const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined) ? Number(heroCommonAvgMap[hero]) : null;
-                return { hero, total, median, values, commonAvg };
+                
+                // Get appearances from the data for this hero
+                const heroAppearances = leagueData.filter(row => {
+                    const heroName = (row.hero_name || row.hero_handle || '').trim();
+                    return heroName === hero;
+                }).reduce((sum, row) => sum + (row.appearances || 0), 0);
+                
+                return { hero, total, median, values, commonAvg, appearances: heroAppearances };
             });
 
             // Calculate independent color scales
             const matrixValues = [];
             const totalValues = [];
             const medianValues = [];
+            const avgRewardsValues = []; // Add this line
 
+            // Populate the arrays with values
             heroes.forEach(hero => {
                 tournamentNumbers.forEach(tournNum => {
-                    // Only include numeric (present) values for matrix color scaling so missing/null don't skew the scale
                     const v = matrix[hero][tournNum];
                     if (v !== null && v !== undefined) matrixValues.push(Number(v));
                 });
             });
 
-            heroTotals.forEach(({ total, median }) => {
+            heroTotals.forEach(({ total, median, appearances }) => {
                 totalValues.push(total);
                 medianValues.push(median);
+                // Add avg rewards calculation
+                const avgRewards = appearances > 0 ? total / appearances : 0;
+                avgRewardsValues.push(avgRewards);
             });
+
+            // Ensure arrays are not empty before calculating min/max
+            const safeMin = (arr) => arr.length > 0 ? Math.min(...arr) : 0;
+            const safeMax = (arr) => arr.length > 0 ? Math.max(...arr) : 1;
 
             const colorScales = {
                 matrix: {
-                    min: Math.min(...matrixValues),
-                    max: Math.max(...matrixValues)
+                    min: safeMin(matrixValues),
+                    max: safeMax(matrixValues)
                 },
                 total: {
-                    min: Math.min(...totalValues),
-                    max: Math.max(...totalValues)
+                    min: safeMin(totalValues),
+                    max: safeMax(totalValues)
                 },
                 median: {
-                    min: Math.min(...medianValues),
-                    max: Math.max(...medianValues)
+                    min: safeMin(medianValues),
+                    max: safeMax(medianValues)
+                },
+                avgRewards: {  // Add this color scale
+                    min: safeMin(avgRewardsValues),
+                    max: safeMax(avgRewardsValues)
                 }
             };
 
@@ -570,6 +589,9 @@
                 } else if (column === 'median') {
                     aVal = Number(a.median) || 0;
                     bVal = Number(b.median) || 0;
+                } else if (column === 'avgRewards') { // Add this new case
+                    aVal = a.appearances > 0 ? a.total / a.appearances : 0;
+                    bVal = b.appearances > 0 ? b.total / b.appearances : 0;
                 } else if (column === 'common_avg_price') {
                     // Numeric sort for the common avg price (use hero.commonAvg).
                     // Treat null/undefined as missing so they sort to the bottom.
@@ -619,6 +641,8 @@
                 backgroundColor = getTotalBackgroundColor(normalized);
             } else if (type === 'median') {
                 backgroundColor = getMedianBackgroundColor(normalized);
+            } else if (type === 'avgRewards') {
+                backgroundColor = getAvgRewardsBackgroundColor(normalized);
             } else {
                 backgroundColor = getMatrixBackgroundColor(normalized); // Default
             }
@@ -676,6 +700,20 @@
             return '#de2d26';
         }
 
+        // Avg Rewards color palette - Dark Green to Light Green scale
+        function getAvgRewardsBackgroundColor(normalized) {
+            if (normalized >= 0.9) return '#00441b';
+            if (normalized >= 0.8) return '#006d2c';
+            if (normalized >= 0.7) return '#238b45';
+            if (normalized >= 0.6) return '#41ae76';
+            if (normalized >= 0.5) return '#66c2a4';
+            if (normalized >= 0.4) return '#99d8c9';
+            if (normalized >= 0.3) return '#ccece6';
+            if (normalized >= 0.2) return '#edf8fb';
+            if (normalized >= 0.1) return '#fee8c8';
+            return '#fdd49e';
+        }
+
         // Update the renderTable function as follows:
         function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix) {
             const tableHeader = document.getElementById('tableHeader');
@@ -701,7 +739,8 @@
             const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="total-col summary-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
             headerHTML += `<th class="total-col summary-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
-            headerHTML += `<th class="total-col summary-col">Avg Rewards / Appearance</th>`; // New column header
+            const avgRewardsSortClass = currentSort.column === 'avgRewards' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="total-col summary-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App.</th>`; // New column header
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
@@ -733,16 +772,39 @@
                     const hasValue = rawValue !== null && rawValue !== undefined;
                     const value = hasValue ? Number(rawValue) : null;
                     const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
+                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined) ? Number(scoreMatrix[hero][tournNum]) : null;
+
+                    // Build tooltip with hero score if available (including when score is 0)
+                    let tooltip = '';
+                    if (heroScore !== null) {
+                        tooltip = `Hero Score: ${heroScore}`;
+                        if (hasValue) {
+                            tooltip += `, RVA: ${formatCurrency(value)}`;
+                        }
+                        if (stars > 0) {
+                            tooltip += `, Stars: ${stars}`;
+                        }
+                    } else if (hasValue) {
+                        tooltip = `RVA: ${formatCurrency(value)}`;
+                        if (stars > 0) {
+                            tooltip += `, Stars: ${stars}`;
+                        }
+                    } else if (stars > 0) {
+                        tooltip = `Stars: ${stars}`;
+                    }
 
                     if (!hasValue && (!stars || stars === 0)) {
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">-</td>`;
+                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>-</td>`;
                     } else if (!hasValue && (stars && stars > 0)) {
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">- (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</td>`;
+                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>- (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</td>`;
                     } else {
                         const colors = getValueColor(value, colorScales.matrix, 'matrix');
                         const formattedValue = formatCurrency(value);
                         const starDisplay = stars > 0 ? ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}${starDisplay}</td>`;
+                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};"${titleAttr}>${formattedValue}${starDisplay}</td>`;
                     }
                 });
 
@@ -758,7 +820,7 @@
                 const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
                 const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards'); // New color scale
                 const tooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${tooltip}">${formatCurrency(avgRewardsPerAppearance)}</td>`;
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${tooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
 
                 bodyHTML += '</tr>';
             });
@@ -805,6 +867,12 @@
         function formatMedian(value) {
             return Number(value).toFixed(3);
         }
+
+        // Specific formatting for median values (3 decimal places)
+        function formatFourDecimals(value) {
+            return Number(value).toFixed(4);
+        }
+
 
         // New helper: format number to 3 decimal places, add commas
         function formatThreeDecimals(value) {

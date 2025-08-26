@@ -53,15 +53,15 @@ rows = execute_with_retry(cursor, query)
 tournament_status = rows[0][0] if rows else None
 cursor.close()
 
-# Create cursor and execute query
+# Create cursor and execute query with retry logic
 cursor = conn.cursor()
 query = f"""
-set statement_timeout = '5min';
+set statement_timeout = '6min';
 WITH ordered_records AS (
 SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_num,hero_handle
 FROM flatten.hero_stats_tournament_current base 
 join flatten.get_tournaments gt 
-	on base.tournament_id = gt.tournament_id 
+    on base.tournament_id = gt.tournament_id 
 where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
 )
 ,hero_count as (select COUNT(*) as hero_count from ordered_records)
@@ -218,9 +218,13 @@ where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
     where gt.tournament_unique_key = 'Main {TOURNAMENT_NUMBER}'
     order by player_score desc
 """
-cursor.execute(query)
+# Use the retry logic for the main query
+rows = execute_with_retry(cursor, query, attempts=3, retry_delay=2)
 
-rows = cursor.fetchall()
+if not rows:
+    print("Failed to fetch player decks data after all retry attempts.")
+    conn.close()
+    exit(1)
 
 # optimal_decks_query = f"""
 # with current_mains as (

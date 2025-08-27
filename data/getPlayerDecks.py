@@ -57,15 +57,7 @@ cursor.close()
 cursor = conn.cursor()
 query = f"""
 set statement_timeout = '6min';
-WITH ordered_records AS (
-SELECT score ,rank as rank, ROW_NUMBER() OVER (ORDER BY base.score DESC) AS row_num,hero_handle
-FROM flatten.hero_stats_tournament_current base 
-join flatten.get_tournaments gt 
-    on base.tournament_id = gt.tournament_id 
-where gt.tournament_league_unique_key = 'Elite Main {TOURNAMENT_NUMBER}'
-)
-,hero_count as (select COUNT(*) as hero_count from ordered_records)
-    select 
+select 
         gt.tournament_name as league_name, -- column 0
         gtpp.tournament_league_unique_key, -- column 1
         null as tournament_duration_hours, -- column 2

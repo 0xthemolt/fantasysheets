@@ -131,6 +131,27 @@
             background-color: rgba(255, 255, 255, 0.05); /* Slightly different background */
             padding: 0 12px; /* Add horizontal padding for spacing */
         }
+
+        /* Hide star information by default */
+        .star-info {
+            display: none;
+        }
+
+        /* Show star information when hovering over the table row */
+        .matrix-table tbody tr:hover .star-info {
+            display: inline;
+        }
+
+        /* Optional: Add a subtle transition for smooth appearance */
+        .star-info {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .matrix-table tbody tr:hover .star-info {
+            display: inline;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -509,7 +530,8 @@
             const matrixValues = [];
             const totalValues = [];
             const medianValues = [];
-            const avgRewardsValues = []; // Add this line
+            const avgRewardsValues = [];
+            const roiValues = []; // Add ROI values array
 
             // Populate the arrays with values
             heroes.forEach(hero => {
@@ -519,12 +541,15 @@
                 });
             });
 
-            heroTotals.forEach(({ total, median, appearances }) => {
+            heroTotals.forEach(({ total, median, appearances, commonAvg }) => {
                 totalValues.push(total);
                 medianValues.push(median);
                 // Add avg rewards calculation
                 const avgRewards = appearances > 0 ? total / appearances : 0;
                 avgRewardsValues.push(avgRewards);
+                // Add ROI calculation
+                const roi = (commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : 0;
+                roiValues.push(roi);
             });
 
             // Ensure arrays are not empty before calculating min/max
@@ -544,9 +569,13 @@
                     min: safeMin(medianValues),
                     max: safeMax(medianValues)
                 },
-                avgRewards: {  // Add this color scale
+                avgRewards: {
                     min: safeMin(avgRewardsValues),
                     max: safeMax(avgRewardsValues)
+                },
+                roi: {  // Add ROI color scale
+                    min: safeMin(roiValues),
+                    max: safeMax(roiValues)
                 }
             };
 
@@ -728,19 +757,22 @@
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Common Price</th>`;
             const heroStarsSortClass = currentSort.column === 'hero_stars' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
-        <span title="Stars">Stars</span>
-    </th>`;
+    <span title="Stars">Stars</span>
+</th>`;
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
                 headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleSort('${colName}')">${colName}</th>`;
             });
-            const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
-            const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
-            headerHTML += `<th class="total-col summary-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
-            headerHTML += `<th class="total-col summary-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
+            // Rearranged summary columns: ROI, Avg Per App, Median, Total
+            const roiSortClass = currentSort.column === 'roi' ? `sort-${currentSort.direction}` : '';
             const avgRewardsSortClass = currentSort.column === 'avgRewards' ? `sort-${currentSort.direction}` : '';
-            headerHTML += `<th class="total-col summary-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App.</th>`; // New column header
+            const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
+            const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
+            headerHTML += `<th class="total-col summary-col sortable ${roiSortClass}" onclick="handleSort('roi')">ROI</th>`;
+            headerHTML += `<th class="total-col summary-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App</th>`;
+            headerHTML += `<th class="total-col summary-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
+            headerHTML += `<th class="total-col summary-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
@@ -798,29 +830,38 @@
                         bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>-</td>`;
                     } else if (!hasValue && (stars && stars > 0)) {
                         const titleAttr = tooltip ? ` title="${tooltip}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>- (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</td>`;
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>-<span class="star-info"> (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</span></td>`;
                     } else {
                         const colors = getValueColor(value, colorScales.matrix, 'matrix');
                         const formattedValue = formatCurrency(value);
-                        const starDisplay = stars > 0 ? ` (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)` : '';
+                        const starDisplay = stars > 0 ? `<span class="star-info"> (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</span>` : '';
                         const titleAttr = tooltip ? ` title="${tooltip}"` : '';
                         bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};"${titleAttr}>${formattedValue}${starDisplay}</td>`;
                     }
                 });
 
-                // Total column
-                const totalColors = getValueColor(total, colorScales.total, 'total');
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
+                // Rearranged summary columns: ROI, Avg Per App, Median, Total
+                const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
+                const commonPrice = heroTotals[idx].commonAvg || null;
+                const roi = (commonPrice && commonPrice > 0) ? (avgRewardsPerAppearance / commonPrice) * 100 : 0;
+
+                // ROI column
+                const roiColors = getValueColor(roi, colorScales.roi, 'roi');
+                const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Common Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${roi > 0 ? formatCurrency(roi) + '%' : '-'}</td>`;
+
+                // Avg Per App column
+                const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards');
+                const avgTooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${avgTooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
 
                 // Median column
                 const medianColors = getValueColor(median, colorScales.median, 'median');
                 bodyHTML += `<td class="total-col summary-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatMedian(median)}</td>`;
 
-                // New Avg Rewards / Appearance column
-                const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
-                const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards'); // New color scale
-                const tooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${tooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
+                // Total column
+                const totalColors = getValueColor(total, colorScales.total, 'total');
+                bodyHTML += `<td class="total-col summary-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
 
                 bodyHTML += '</tr>';
             });
@@ -1044,11 +1085,31 @@
                 const starsVal = (heroStarsMap && heroStarsMap[row.hero] !== undefined) ? heroStarsMap[row.hero] : 0;
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${starsVal > 0 ? starsVal + ' <i class="fas fa-star" style="color: #ffd700;"></i>' : '-'}</td>`;
                 row.leagueTotals.forEach((val, i) => {
+                    const league = leagues[i];
+                    
+                    // Get star count for this hero in this specific league
+                    const heroLeagueStars = allData
+                        .filter(dataRow => {
+                            const heroName = (dataRow.hero_name || dataRow.hero_handle || '').trim();
+                            return heroName === row.hero && dataRow.league === league;
+                        })
+                        .reduce((maxStars, dataRow) => {
+                            const stars = dataRow.hero_stars || 0;
+                            return Math.max(maxStars, stars);
+                        }, 0);
+                    
                     // League color with 20% opacity
-                    let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${leagues[i].toLowerCase()}`).trim();
-                    if (!colorValue) colorValue = defaultLeagueColors[leagues[i].toLowerCase()] || '#666666';
+                    let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${league.toLowerCase()}`).trim();
+                    if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
                     const bg = colorToRgba(colorValue, 0.2);
-                    bodyHTML += `<td class="value-cell" style="background:${bg};">${formatCurrency(val)}</td>`;
+                    
+                    // Build cell content with value and hidden stars
+                    let cellContent = `<div>${formatCurrency(val)}</div>`;
+                    if (heroLeagueStars > 0) {
+                        cellContent += `<div class="star-info" style="font-size: 0.9em; margin-top: 4px;">(${heroLeagueStars} <i class="fas fa-star" style="color: #ffd700;"></i>)</div>`;
+                    }
+                    
+                    bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
                 });
                 // Total column: blue-to-orange/red palette at 20% opacity
                 let norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);

@@ -208,6 +208,31 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .hero-column {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .rarity-badge {
+            display: inline-block;
+            padding: 2px 6px 3px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid rgba(0,0,0,0.25);
+            box-shadow: 0 0 2px rgba(0,0,0,0.4);
+            position: relative;
+            top: -1px;
+        }
+        .rarity-badge.rarity-common    { background:#ABFF2B; color:#102000; }
+        .rarity-badge.rarity-rare      { background:#5FFFEA; color:#00322E; }
+        .rarity-badge.rarity-epic      { background:#FF7BCF; color:#3C0025; }
+        .rarity-badge.rarity-legendary { background:#CEEB7C; color:#223000; }
+        .rarity-badge.rarity-all       { background:#666666; color:#ffffff; }
     </style>
 </head>
 <body>
@@ -509,8 +534,11 @@
                 }
             });
             const heroes = [...heroSet].sort((a, b) => {
-                // sort by display name (so rarity becomes part of grouping label)
-                return displayHeroNameFromKey(a).localeCompare(displayHeroNameFromKey(b));
+                // sort by base name then rarity
+                const pa = parseHeroKey(a);
+                const pb = parseHeroKey(b);
+                const n = pa.name.localeCompare(pb.name);
+                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
             });
 
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
@@ -667,11 +695,12 @@
                  let aVal, bVal;
                  
                 if (column === 'hero') {
-                    // Compare by display label (includes rarity)
-                    aVal = displayHeroNameFromKey(a.hero || '');
-                    bVal = displayHeroNameFromKey(b.hero || '');
-                    if (direction === 'asc') return aVal.localeCompare(bVal);
-                    return bVal.localeCompare(aVal);
+                    const pa = parseHeroKey(a.hero || '');
+                    const pb = parseHeroKey(b.hero || '');
+                    aVal = pa.name + '|' + pa.rarity;
+                    bVal = pb.name + '|' + pb.rarity;
+                     if (direction === 'asc') return aVal.localeCompare(bVal);
+                     return bVal.localeCompare(aVal);
                  } else if (column === 'total') {
                     aVal = Number(a.total) || 0;
                     bVal = Number(b.total) || 0;
@@ -842,9 +871,16 @@
                  const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
 
                 // Truncate hero display name (use display label that includes rarity), keep full label in title
-                const fullLabel = displayHeroNameFromKey(hero);
-                const displayName = truncateHeroName(fullLabel);
-                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(fullLabel)}">${displayName}</span></div></td>`;
+                const baseName = displayHeroBaseName(hero);
+                const displayName = truncateHeroName(baseName);
+                const badge = buildRarityBadge(hero);
+                bodyHTML += `<td class="hero-col">
+                    <div class="hero-column">
+                        ${imgHtml}
+                        <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
+                        ${badge}
+                    </div>
+                </td>`;
 
                 // Common Avg Price cell (right-aligned, 3 decimals)
                 const commonVal = (heroTotals && heroTotals[idx] && heroTotals[idx].commonAvg !== undefined) ? heroTotals[idx].commonAvg : null;
@@ -1044,7 +1080,13 @@
                     }
                 }
             });
-            const heroes = [...heroSet].sort((a, b) => displayHeroNameFromKey(a).localeCompare(displayHeroNameFromKey(b)));
+            const heroes = [...heroSet].sort((a, b) => {
+                // sort by base name then rarity
+                const pa = parseHeroKey(a);
+                const pb = parseHeroKey(b);
+                const n = pa.name.localeCompare(pb.name);
+                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+            });
 
             // 2. Aggregate reward_value_added by hero and league
             const heroLeagueTotals = {};
@@ -1154,8 +1196,16 @@
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`;
                 const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
                 const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
-                const displayName = truncateHeroName(row.hero);
-                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(row.hero)}">${displayName}</span></div></td>`;
+                const baseName = displayHeroBaseName(row.hero);
+                const displayName = truncateHeroName(baseName);
+                const badge = buildRarityBadge(row.hero);
+                bodyHTML += `<td class="hero-col">
+                    <div class="hero-column">
+                        ${imgHtml}
+                        <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
+                        ${badge}
+                    </div>
+                </td>`;
                 const commonDisplay = formatThreeDecimals(row.commonAvg);
                 bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
                 // Hero Stars cell
@@ -1213,11 +1263,23 @@ function heroKeyFromRow(row) {
 }
 function parseHeroKey(key) {
     const parts = (key || '').split('||');
-    return { name: parts[0] || '', rarity: parts[1] || '' };
+    return { name: parts[0] || '', rarity: (parts[1] || '').toLowerCase() };
 }
-function displayHeroNameFromKey(key) {
-    const { name, rarity } = parseHeroKey(key);
-    return rarity ? `${name} (${rarity})` : name;
+function displayHeroBaseName(key) {
+    return parseHeroKey(key).name;
+}
+const rarityColors = {
+    common: '#ABFF2B',
+    rare: '#5FFFEA',
+    epic: '#FF7BCF',
+    legendary: '#CEEB7C',
+    all: '#666666'
+};
+function buildRarityBadge(key) {
+    const { rarity } = parseHeroKey(key);
+    if (!rarity) return '';
+    const safe = rarity.replace(/[^a-z0-9_-]/g,'');
+    return `<span class="rarity-badge rarity-${safe}" title="Rarity: ${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>`;
 }
     </script>
 </body>

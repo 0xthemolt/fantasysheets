@@ -209,24 +209,32 @@
             white-space: nowrap;
         }
         .hero-column {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .hero-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.05;
+            align-items: flex-start;
+        }
+        .hero-name-text {
+            display: inline-block;
+            font-weight: 600;
         }
         .rarity-badge {
             display: inline-block;
-            padding: 2px 6px 3px 6px;
-            border-radius: 10px;
-            font-size: 10px;
+            padding: 1px 5px 2px 5px;
+            margin-top: 2px;
+            border-radius: 8px;
+            font-size: 8.5px; /* ~15% smaller than 10px */
             font-weight: 600;
             line-height: 1;
             letter-spacing: 0.5px;
             text-transform: uppercase;
             border: 1px solid rgba(0,0,0,0.25);
-            box-shadow: 0 0 2px rgba(0,0,0,0.4);
-            position: relative;
-            top: -1px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.35);
         }
         .rarity-badge.rarity-common    { background:#ABFF2B; color:#102000; }
         .rarity-badge.rarity-rare      { background:#5FFFEA; color:#00322E; }
@@ -521,25 +529,24 @@
                 heroSet.add(heroKey);
                 // try multiple possible field names for the pfp
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp) heroPfpMap[heroKey] = heroPfpMap[heroKey] || pfp;
+                if (pfp && !heroPfpMap[heroKey]) heroPfpMap[heroKey] = pfp;
                // capture common avg price if present (use first non-null)
                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroKey in heroCommonAvgMap)) {
                    heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
                }
                // Aggregate max stars
-               if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
+               if (row.hero_stars !== undefined && row.hero_stars !== null) {
                     if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
                         heroStarsMap[heroKey] = Number(row.hero_stars);
                     }
                 }
             });
             const heroes = [...heroSet].sort((a, b) => {
-                // sort by base name then rarity
-                const pa = parseHeroKey(a);
-                const pb = parseHeroKey(b);
-                const n = pa.name.localeCompare(pb.name);
-                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
-            });
+                 const pa = parseHeroKey(a);
+                 const pb = parseHeroKey(b);
+                 const n = pa.name.localeCompare(pb.name);
+                 return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+             });
 
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
 
@@ -614,7 +621,9 @@
                     const v = appearancesMatrix[hero][t];
                     return sum + ((v === null || v === undefined) ? 0 : Number(v));
                 }, 0);
-                return { hero, total, median, values, commonAvg, appearances: heroAppearances };
+                const avgRewards = heroAppearances > 0 ? total / heroAppearances : 0;
+                const roi = (commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : 0;
+                return { hero, total, median, values, commonAvg, appearances: heroAppearances, avgRewards, roi };
             });
 
             // Calculate independent color scales
@@ -702,15 +711,18 @@
                      if (direction === 'asc') return aVal.localeCompare(bVal);
                      return bVal.localeCompare(aVal);
                  } else if (column === 'total') {
-                    aVal = Number(a.total) || 0;
-                    bVal = Number(b.total) || 0;
-                } else if (column === 'median') {
-                    aVal = Number(a.median) || 0;
-                    bVal = Number(b.median) || 0;
-                } else if (column === 'avgRewards') { // Add this new case
-                    aVal = a.appearances > 0 ? a.total / a.appearances : 0;
-                    bVal = b.appearances > 0 ? b.total / b.appearances : 0;
-                } else if (column === 'common_avg_price') {
+                     aVal = Number(a.total) || 0;
+                     bVal = Number(b.total) || 0;
+                 } else if (column === 'median') {
+                     aVal = Number(a.median) || 0;
+                     bVal = Number(b.median) || 0;
+                 } else if (column === 'avgRewards') {
+                    aVal = Number(a.avgRewards) || 0;
+                    bVal = Number(b.avgRewards) || 0;
+                } else if (column === 'roi') {
+                    aVal = Number(a.roi) || 0;
+                    bVal = Number(b.roi) || 0;
+                 } else if (column === 'common_avg_price') {
                     // Numeric sort for the common avg price (use hero.commonAvg).
                     // Treat null/undefined as missing so they sort to the bottom.
                     aVal = (a.commonAvg === null || a.commonAvg === undefined || isNaN(Number(a.commonAvg))) ? -Infinity : Number(a.commonAvg);
@@ -837,7 +849,7 @@
             const heroSortClass = currentSort.column === 'hero' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleSort('hero')">Hero</th>`;
             const commonSortClass = currentSort.column === 'common_avg_price' ? `sort-${currentSort.direction}` : '';
-            headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Common Price</th>`;
+            headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
             const heroStarsSortClass = currentSort.column === 'hero_stars' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
     <span title="Stars">Stars</span>
@@ -877,8 +889,10 @@
                 bodyHTML += `<td class="hero-col">
                     <div class="hero-column">
                         ${imgHtml}
-                        <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
-                        ${badge}
+                        <div class="hero-info">
+                            <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
+                            ${badge}
+                        </div>
                     </div>
                 </td>`;
 
@@ -901,19 +915,19 @@
                         bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">-</td>`;
                     } else {
                         const colors = getValueColor(value, colorScales.matrix, 'matrix');
-                        const formattedValue = formatCurrency(value);
+                        const formattedValue = formatRva(value);
                         bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}</td>`;
                     }
                 });
 
                 // Summary columns (main data)
-                const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
+                const avgRewardsPerAppearance = heroTotals[idx].avgRewards;
                 const commonPrice = heroTotals[idx].commonAvg || null;
-                const roi = (commonPrice && commonPrice > 0) ? (avgRewardsPerAppearance / commonPrice) * 100 : 0;
+                const roi = heroTotals[idx].roi;
 
                 // ROI column
                 const roiColors = getValueColor(roi, colorScales.roi, 'roi');
-                const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Common Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
+                const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Est Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
                 bodyHTML += `<td class="total-col summary-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${roi > 0 ? formatCurrency(roi) + '%' : '-'}</td>`;
 
                 // Avg Per App column
@@ -936,33 +950,30 @@
                 bodyHTML += `<td></td>`; // Empty rank cell
                 bodyHTML += `<td>Stars & Scores</td>`; // Hero cell label
 
-                bodyHTML += `<td></td>`; // Empty common price cell
+                bodyHTML += `<td></td>`; // Empty est price cell
                 bodyHTML += `<td></td>`; // Empty hero stars cell
 
                 // Tournament info columns
                 tournamentNumbers.forEach(tournNum => {
                     const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
-                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined) ? Number(scoreMatrix[hero][tournNum]) : null;
-                    const tournamentAppearances = (appearancesMatrix[hero] && appearancesMatrix[hero][tournNum] !== null && appearancesMatrix[hero][tournNum] !== undefined) ? Number(appearancesMatrix[hero][tournNum]) : null;
-                    
-                    let infoContent = '';
-                    if (heroScore !== null && stars > 0 && tournamentAppearances !== null) {
-                        infoContent = `Score: ${heroScore}<br>Stars: ${stars}<br>App: ${tournamentAppearances}`;
-                    } else if (heroScore !== null && tournamentAppearances !== null) {
-                        infoContent = `Score: ${heroScore}<br>App: ${tournamentAppearances}`;
-                    } else if (stars > 0 && tournamentAppearances !== null) {
-                        infoContent = `Stars: ${stars}<br>App: ${tournamentAppearances}`;
-                    } else if (heroScore !== null) {
-                        infoContent = `Score: ${heroScore}`;
-                    } else if (stars > 0) {
-                        infoContent = `Stars: ${stars}`;
-                    } else if (tournamentAppearances !== null) {
-                        infoContent = `App: ${tournamentAppearances}`;
-                    } else {
-                        infoContent = '-';
-                    }
-                    
-                    bodyHTML += `<td>${infoContent}</td>`;
+                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined)
+                        ? Number(scoreMatrix[hero][tournNum])
+                        : null;
+                    const tournamentAppearances = (appearancesMatrix[hero] && appearancesMatrix[hero][tournNum] !== null && appearancesMatrix[hero][tournNum] !== undefined)
+                        ? Number(appearancesMatrix[hero][tournNum])
+                        : null;
+                    const rawRva = (matrix[hero] && matrix[hero][tournNum] !== null && matrix[hero][tournNum] !== undefined)
+                        ? Number(matrix[hero][tournNum])
+                        : null;
+
+                    const lines = [];
+                    if (stars > 0) lines.push(`Stars: ${stars}`);
+                    if (rawRva !== null) lines.push(`RVA: ${formatRva(rawRva)}`);
+                    if (heroScore !== null) lines.push(`Score: ${heroScore}`);
+                    if (tournamentAppearances !== null) lines.push(`App: ${tournamentAppearances}`);
+                    if (lines.length === 0) lines.push('-');
+
+                    bodyHTML += `<td>${lines.join('<br>')}</td>`;
                 });
 
                 // Empty summary columns for info row
@@ -1012,6 +1023,12 @@
             return Number(value).toFixed(2);
         }
 
+        // Generic 3-decimal formatter (used for Est Price)
+        function formatThreeDecimals(value) {
+            if (value === null || value === undefined || isNaN(Number(value))) return '-';
+            return Number(value).toFixed(3);
+        }
+
         // Specific formatting for median values (3 decimal places)
         function formatMedian(value) {
             return Number(value).toFixed(3);
@@ -1022,11 +1039,10 @@
             return Number(value).toFixed(4);
         }
 
-
-        // New helper: format number to 3 decimal places, add commas
-        function formatThreeDecimals(value) {
-            if (value === null || value === undefined) return null;
-            return Number(value).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+        // RVA formatting (3 decimals)
+        function formatRva(value) {
+            if (value === null || value === undefined || isNaN(Number(value))) return '-';
+            return Number(value).toFixed(3);
         }
 
         // Initialize on page load
@@ -1070,11 +1086,11 @@
                 if (!heroKey) return;
                 heroSet.add(heroKey);
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp) heroPfpMap[heroKey] = heroPfpMap[heroKey] || pfp;
-                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroKey in heroCommonAvgMap)) {
+                if (pfp && !heroPfpMap[heroKey]) heroPfpMap[heroKey] = pfp;
+                if (row.common_avg_price !== undefined && row.common_avg_price !== null && !(heroKey in heroCommonAvgMap)) {
                     heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
                 }
-                if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
+                if (row.hero_stars !== undefined && row.hero_stars !== null) {
                     if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
                         heroStarsMap[heroKey] = Number(row.hero_stars);
                     }
@@ -1090,21 +1106,19 @@
 
             // 2. Aggregate reward_value_added by hero and league
             const heroLeagueTotals = {};
-            heroes.forEach(hero => {
-                heroLeagueTotals[hero] = {};
-                leagues.forEach(league => {
-                    heroLeagueTotals[hero][league] = 0;
-                });
+            heroes.forEach(heroKey => {
+                heroLeagueTotals[heroKey] = {};
+                leagues.forEach(lg => { heroLeagueTotals[heroKey][lg] = 0; });
             });
 
             allData.forEach(row => {
-                const heroName = (row.hero_name || row.hero_handle || '').trim();
+                const heroKey = heroKeyFromRow(row);
+                if (!heroKey) return;
                 const league = row.league;
                 let val = row.reward_value_added;
-                if (val === null || val === undefined || isNaN(Number(val))) val = 0;
-                else val = Number(val);
-                if (heroLeagueTotals[heroName] && league in heroLeagueTotals[heroName]) {
-                    heroLeagueTotals[heroName][league] += val;
+                val = (val === null || val === undefined || isNaN(Number(val))) ? 0 : Number(val);
+                if (heroLeagueTotals[heroKey] && (league in heroLeagueTotals[heroKey])) {
+                    heroLeagueTotals[heroKey][league] += val;
                 }
             });
 
@@ -1170,7 +1184,7 @@
             const heroSortClass = sortCol === 'hero' ? `sort-${sortDir}` : '';
             headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleByLeagueSort('hero')">Hero</th>`;
             const commonSortClass = sortCol === 'common_avg_price' ? `sort-${sortDir}` : '';
-            // Wrap Common Price header text
+            // Wrap Est Price header text
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px; white-space:normal; line-height:1.1;"><span style="white-space:normal;">Common<br>Price</span></th>`;
             // New Hero Stars column
             const heroStarsSortClass = sortCol === 'hero_stars' ? `sort-${sortDir}` : '';
@@ -1202,8 +1216,10 @@
                 bodyHTML += `<td class="hero-col">
                     <div class="hero-column">
                         ${imgHtml}
-                        <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
-                        ${badge}
+                        <div class="hero-info">
+                            <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
+                            ${badge}
+                        </div>
                     </div>
                 </td>`;
                 const commonDisplay = formatThreeDecimals(row.commonAvg);
@@ -1231,7 +1247,7 @@
                     const bg = colorToRgba(colorValue, 0.2);
                     
                     // Build cell content with value and hidden stars
-                    let cellContent = `<div>${formatCurrency(val)}</div>`;
+                    let cellContent = `<div>${formatRva(val)}</div>`;
                     if (heroLeagueStars > 0) {
                         cellContent += `<div class="star-info" style="font-size: 0.9em; margin-top: 4px;">(${heroLeagueStars} <i class="fas fa-star" style="color: #ffd700;"></i>)</div>`;
                     }

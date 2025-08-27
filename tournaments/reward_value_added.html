@@ -152,6 +152,38 @@
             display: inline;
             opacity: 1;
         }
+
+        /* Style for the dynamic info row */
+        .info-row {
+            background-color: #333 !important;
+            border-top: 1px solid #555;
+            border-bottom: 1px solid #555;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .info-row td {
+            padding: 4px 8px !important;
+            background-color: #333 !important;
+            border: none !important;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Hide info rows by default */
+        .info-row {
+            display: none;
+        }
+
+        /* Show info row when hovering over the previous row */
+        .matrix-table tbody tr:hover + .info-row {
+            display: table-row;
+        }
+
+        /* Keep info row visible when hovering over it */
+        .info-row:hover {
+            display: table-row;
+        }
     </style>
 </head>
 <body>
@@ -779,6 +811,7 @@
             // Create body rows with type-specific color scaling
             let bodyHTML = '';
             heroTotals.forEach(({ hero, total, median, values, appearances }, idx) => {
+                // Main data row
                 bodyHTML += '<tr>';
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
 
@@ -799,48 +832,22 @@
                 const heroStars = (heroStarsMap && heroStarsMap[hero] !== undefined) ? heroStarsMap[hero] : '';
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${heroStars !== '' ? heroStars + ' <i class="fas fa-star" style="color:#ffd700"></i>' : '-'}</td>`;
 
+                // Tournament columns (main data)
                 tournamentNumbers.forEach(tournNum => {
                     const rawValue = matrix[hero][tournNum];
                     const hasValue = rawValue !== null && rawValue !== undefined;
                     const value = hasValue ? Number(rawValue) : null;
-                    const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
-                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined) ? Number(scoreMatrix[hero][tournNum]) : null;
 
-                    // Build tooltip with hero score if available (including when score is 0)
-                    let tooltip = '';
-                    if (heroScore !== null) {
-                        tooltip = `Hero Score: ${heroScore}`;
-                        if (hasValue) {
-                            tooltip += `, RVA: ${formatCurrency(value)}`;
-                        }
-                        if (stars > 0) {
-                            tooltip += `, Stars: ${stars}`;
-                        }
-                    } else if (hasValue) {
-                        tooltip = `RVA: ${formatCurrency(value)}`;
-                        if (stars > 0) {
-                            tooltip += `, Stars: ${stars}`;
-                        }
-                    } else if (stars > 0) {
-                        tooltip = `Stars: ${stars}`;
-                    }
-
-                    if (!hasValue && (!stars || stars === 0)) {
-                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>-</td>`;
-                    } else if (!hasValue && (stars && stars > 0)) {
-                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;"${titleAttr}>-<span class="star-info"> (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</span></td>`;
+                    if (!hasValue) {
+                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">-</td>`;
                     } else {
                         const colors = getValueColor(value, colorScales.matrix, 'matrix');
                         const formattedValue = formatCurrency(value);
-                        const starDisplay = stars > 0 ? `<span class="star-info"> (${stars} <i class="fas fa-star" style="color: #ffd700;"></i>)</span>` : '';
-                        const titleAttr = tooltip ? ` title="${tooltip}"` : '';
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};"${titleAttr}>${formattedValue}${starDisplay}</td>`;
+                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}</td>`;
                     }
                 });
 
-                // Rearranged summary columns: ROI, Avg Per App, Median, Total
+                // Summary columns (main data)
                 const avgRewardsPerAppearance = appearances > 0 ? total / appearances : 0;
                 const commonPrice = heroTotals[idx].commonAvg || null;
                 const roi = (commonPrice && commonPrice > 0) ? (avgRewardsPerAppearance / commonPrice) * 100 : 0;
@@ -862,6 +869,41 @@
                 // Total column
                 const totalColors = getValueColor(total, colorScales.total, 'total');
                 bodyHTML += `<td class="total-col summary-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
+
+                bodyHTML += '</tr>';
+
+                // Info row (stars and hero scores)
+                bodyHTML += '<tr class="info-row">';
+                bodyHTML += `<td></td>`; // Empty rank cell
+                bodyHTML += `<td>Stars & Scores</td>`; // Hero cell label
+
+                bodyHTML += `<td></td>`; // Empty common price cell
+                bodyHTML += `<td></td>`; // Empty hero stars cell
+
+                // Tournament info columns
+                tournamentNumbers.forEach(tournNum => {
+                    const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
+                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined) ? Number(scoreMatrix[hero][tournNum]) : null;
+                    
+                    let infoContent = '';
+                    if (heroScore !== null && stars > 0) {
+                        infoContent = `Score: ${heroScore}<br>⭐ ${stars}`;
+                    } else if (heroScore !== null) {
+                        infoContent = `Score: ${heroScore}`;
+                    } else if (stars > 0) {
+                        infoContent = `⭐ ${stars}`;
+                    } else {
+                        infoContent = '-';
+                    }
+                    
+                    bodyHTML += `<td>${infoContent}</td>`;
+                });
+
+                // Empty summary columns for info row
+                bodyHTML += `<td></td>`; // ROI
+                bodyHTML += `<td></td>`; // Avg Per App
+                bodyHTML += `<td></td>`; // Median
+                bodyHTML += `<td></td>`; // Total
 
                 bodyHTML += '</tr>';
             });

@@ -265,6 +265,7 @@
                         tournament_number,
                         hero_handle,
                         hero_name,
+                        hero_rarity,
                         hero_pfp_url,
                         hero_stars,
                         hero_score,
@@ -490,24 +491,27 @@
             const heroStarsMap = {};
             const heroSet = new Set();
             leagueData.forEach(row => {
-                const heroName = (row.hero_name || row.hero_handle || '').trim();
-                if (!heroName) return;
-                heroSet.add(heroName);
+                const heroKey = heroKeyFromRow(row);
+                if (!heroKey) return;
+                heroSet.add(heroKey);
                 // try multiple possible field names for the pfp
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp) heroPfpMap[heroName] = pfp;
+                if (pfp) heroPfpMap[heroKey] = heroPfpMap[heroKey] || pfp;
                // capture common avg price if present (use first non-null)
-               if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroName in heroCommonAvgMap)) {
-                   heroCommonAvgMap[heroName] = Number(row.common_avg_price);
+               if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroKey in heroCommonAvgMap)) {
+                   heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
                }
                // Aggregate max stars
                if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
-                    if (!(heroName in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroName]) {
-                        heroStarsMap[heroName] = Number(row.hero_stars);
+                    if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
+                        heroStarsMap[heroKey] = Number(row.hero_stars);
                     }
                 }
             });
-            const heroes = [...heroSet].sort();
+            const heroes = [...heroSet].sort((a, b) => {
+                // sort by display name (so rarity becomes part of grouping label)
+                return displayHeroNameFromKey(a).localeCompare(displayHeroNameFromKey(b));
+            });
 
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
 
@@ -537,54 +541,51 @@
 
             // Populate matrix with data and stars (use hero_name fallback)
             leagueData.forEach(row => {
-                const heroName = (row.hero_name || row.hero_handle || '').trim();
-                if (!heroName) return;
+                const heroKey = heroKeyFromRow(row);
+                if (!heroKey) return;
                 const tourn = row.tournament_number;
-                if (matrix[heroName] && matrix[heroName].hasOwnProperty(tourn)) {
-                    // Only treat reward_value_added as numeric when it's not null/undefined
+                if (matrix[heroKey] && matrix[heroKey].hasOwnProperty(tourn)) {
                     const rv = row.reward_value_added;
                     if (rv !== null && rv !== undefined) {
                         const num = Number(rv) || 0;
-                        if (matrix[heroName][tourn] === null) {
-                            matrix[heroName][tourn] = num;
+                        if (matrix[heroKey][tourn] === null) {
+                            matrix[heroKey][tourn] = num;
                         } else {
-                            matrix[heroName][tourn] += num;
+                            matrix[heroKey][tourn] += num;
                         }
                     }
-                    // Preserve stars if present; don't override with falsy zero unless that's intended
-                    starsMatrix[heroName][tourn] = (row.hero_stars !== undefined && row.hero_stars !== null)
+                    starsMatrix[heroKey][tourn] = (row.hero_stars !== undefined && row.hero_stars !== null)
                         ? Number(row.hero_stars)
-                        : starsMatrix[heroName][tourn] || 0;
+                        : starsMatrix[heroKey][tourn] || 0;
 
-                    // Add hero_score storage
                     if (row.hero_score !== null && row.hero_score !== undefined) {
-                        scoreMatrix[heroName][tourn] = Math.round(Number(row.hero_score));
+                        scoreMatrix[heroKey][tourn] = Math.round(Number(row.hero_score));
                     }
                     
-                    // Add appearances storage
                     if (row.appearances !== null && row.appearances !== undefined) {
-                        appearancesMatrix[heroName][tourn] = Number(row.appearances);
+                        appearancesMatrix[heroKey][tourn] = Number(row.appearances);
                     }
                 }
-                // preserve pfp if present
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp) heroPfpMap[heroName] = heroPfpMap[heroName] || pfp;
+                if (pfp) heroPfpMap[heroKey] = heroPfpMap[heroKey] || pfp;
             });
 
             // Calculate totals and medians
             const heroTotals = heroes.map(hero => {
-                // For totals/median treat missing (null) as 0 for aggregation/median calculation
-                const values = tournamentNumbers.map(tournNum => (matrix[hero][tournNum] === null || matrix[hero][tournNum] === undefined) ? 0 : Number(matrix[hero][tournNum]));
-                const total = values.reduce((sum, val) => sum + val, 0);
+                // Per-tournament reward values (missing => 0)
+                const values = tournamentNumbers.map(t =>
+                    (matrix[hero][t] === null || matrix[hero][t] === undefined) ? 0 : Number(matrix[hero][t])
+                );
+                const total = values.reduce((s, v) => s + v, 0);
                 const median = calculateMedian(values);
-                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined) ? Number(heroCommonAvgMap[hero]) : null;
-                
-                // Get appearances from the data for this hero
-                const heroAppearances = leagueData.filter(row => {
-                    const heroName = (row.hero_name || row.hero_handle || '').trim();
-                    return heroName === hero;
-                }).reduce((sum, row) => sum + (row.appearances || 0), 0);
-                
+                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined)
+                    ? Number(heroCommonAvgMap[hero])
+                    : null;
+                // Sum appearances from the appearancesMatrix (correctly keyed by composite hero key)
+                const heroAppearances = tournamentNumbers.reduce((sum, t) => {
+                    const v = appearancesMatrix[hero][t];
+                    return sum + ((v === null || v === undefined) ? 0 : Number(v));
+                }, 0);
                 return { hero, total, median, values, commonAvg, appearances: heroAppearances };
             });
 
@@ -661,20 +662,17 @@
         function sortHeroes(heroTotals, column, direction, tournamentNumbers) {
             // Defensive: ensure tournamentNumbers is an array
             tournamentNumbers = Array.isArray(tournamentNumbers) ? tournamentNumbers : [];
-
-            return [...heroTotals].sort((a, b) => {
-                let aVal, bVal;
-                
+ 
+             return [...heroTotals].sort((a, b) => {
+                 let aVal, bVal;
+                 
                 if (column === 'hero') {
-                    aVal = a.hero || '';
-                    bVal = b.hero || '';
-                    // String comparison
-                    if (direction === 'asc') {
-                        return aVal.localeCompare(bVal);
-                    } else {
-                        return bVal.localeCompare(aVal);
-                    }
-                } else if (column === 'total') {
+                    // Compare by display label (includes rarity)
+                    aVal = displayHeroNameFromKey(a.hero || '');
+                    bVal = displayHeroNameFromKey(b.hero || '');
+                    if (direction === 'asc') return aVal.localeCompare(bVal);
+                    return bVal.localeCompare(aVal);
+                 } else if (column === 'total') {
                     aVal = Number(a.total) || 0;
                     bVal = Number(b.total) || 0;
                 } else if (column === 'median') {
@@ -713,18 +711,12 @@
             if (colorScale.max === colorScale.min) {
                 return { backgroundColor: '#2d2d2d', color: '#ffffff' };
             }
-
-            // Treat truly absent values (null/undefined/NaN) as neutral grey.
             if (value === null || value === undefined || isNaN(Number(value))) {
                 return { backgroundColor: '#2d2d2d', color: '#888888' };
             }
-
-            // Normalize value between 0 and 1 (clamp inside range)
             const v = Number(value);
             const clamped = Math.max(colorScale.min, Math.min(colorScale.max, v));
             const normalized = (clamped - colorScale.min) / (colorScale.max - colorScale.min);
-
-            // Get background color based on type and normalized value
             let backgroundColor;
             if (type === 'matrix') {
                 backgroundColor = getMatrixBackgroundColor(normalized);
@@ -734,15 +726,15 @@
                 backgroundColor = getMedianBackgroundColor(normalized);
             } else if (type === 'avgRewards') {
                 backgroundColor = getAvgRewardsBackgroundColor(normalized);
+            } else if (type === 'roi') {
+                // Reuse avg rewards palette (or create a dedicated ROI palette)
+                backgroundColor = getAvgRewardsBackgroundColor(normalized);
             } else {
-                backgroundColor = getMatrixBackgroundColor(normalized); // Default
+                backgroundColor = getMatrixBackgroundColor(normalized);
             }
-
-            // Determine text color based on background brightness
             const rgb = hexToRgb(backgroundColor);
             const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
             const textColor = brightness > 128 ? '#000000' : '#ffffff';
-
             return { backgroundColor, color: textColor };
         }
 
@@ -846,12 +838,13 @@
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
 
                 // Hero cell: image (if available) then name using .hero-image style
-                const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
-                const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
+                 const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
+                 const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
 
-                // Truncate hero display name when long, keep full name in title
-                const displayName = truncateHeroName(hero);
-                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(hero)}">${displayName}</span></div></td>`;
+                // Truncate hero display name (use display label that includes rarity), keep full label in title
+                const fullLabel = displayHeroNameFromKey(hero);
+                const displayName = truncateHeroName(fullLabel);
+                bodyHTML += `<td class="hero-col"><div class="hero-column">${imgHtml}<span class="hero-name-text" title="${escapeHtml(fullLabel)}">${displayName}</span></div></td>`;
 
                 // Common Avg Price cell (right-aligned, 3 decimals)
                 const commonVal = (heroTotals && heroTotals[idx] && heroTotals[idx].commonAvg !== undefined) ? heroTotals[idx].commonAvg : null;
@@ -1037,16 +1030,21 @@
             });
 
             allData.forEach(row => {
-                const heroName = (row.hero_name || row.hero_handle || '').trim();
-                if (!heroName) return;
-                heroSet.add(heroName);
+                const heroKey = heroKeyFromRow(row);
+                if (!heroKey) return;
+                heroSet.add(heroKey);
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp) heroPfpMap[heroName] = pfp;
-                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroName in heroCommonAvgMap)) {
-                    heroCommonAvgMap[heroName] = Number(row.common_avg_price);
+                if (pfp) heroPfpMap[heroKey] = heroPfpMap[heroKey] || pfp;
+                if ((row.common_avg_price !== undefined && row.common_avg_price !== null) && !(heroKey in heroCommonAvgMap)) {
+                    heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
+                }
+                if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
+                    if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
+                        heroStarsMap[heroKey] = Number(row.hero_stars);
+                    }
                 }
             });
-            const heroes = [...heroSet].sort();
+            const heroes = [...heroSet].sort((a, b) => displayHeroNameFromKey(a).localeCompare(displayHeroNameFromKey(b)));
 
             // 2. Aggregate reward_value_added by hero and league
             const heroLeagueTotals = {};
@@ -1205,6 +1203,22 @@
             document.getElementById('matrixTable').style.display = 'table';
             document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
         }
+
+        // Helper: create / parse composite hero key (name + rarity) and display name
+function heroKeyFromRow(row) {
+    const name = (row.hero_name || row.hero_handle || '').trim();
+    const rarity = (row.hero_rarity || '').toString().trim();
+    if (!name) return null;
+    return `${name}||${rarity}`;
+}
+function parseHeroKey(key) {
+    const parts = (key || '').split('||');
+    return { name: parts[0] || '', rarity: parts[1] || '' };
+}
+function displayHeroNameFromKey(key) {
+    const { name, rarity } = parseHeroKey(key);
+    return rarity ? `${name} (${rarity})` : name;
+}
     </script>
 </body>
 </html>

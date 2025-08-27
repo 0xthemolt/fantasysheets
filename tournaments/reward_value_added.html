@@ -160,6 +160,7 @@
             border-bottom: 1px solid #555;
             font-size: 0.9em;
             color: #ccc;
+            height: 40px; /* Fixed height to prevent jumping */
         }
 
         .info-row td {
@@ -168,6 +169,13 @@
             border: none !important;
             text-align: center;
             font-style: italic;
+            vertical-align: middle;
+            width: inherit; /* Inherit width from parent column */
+            min-width: inherit;
+            max-width: inherit;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Hide info rows by default */
@@ -183,6 +191,22 @@
         /* Keep info row visible when hovering over it */
         .info-row:hover {
             display: table-row;
+        }
+
+        /* Fixed table layout to prevent resizing */
+        .matrix-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        /* Fixed width for tournament columns */
+        .value-cell {
+            width: 80px; /* Adjust this value as needed */
+            min-width: 80px;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -206,12 +230,10 @@
             <i class="fas fa-spinner fa-spin"></i> Loading tournament data...
         </div>
         <div class="matrix-scroll-wrapper">
-            <table class="matrix-table" id="matrixTable" style="display: none;">
+            <table class="matrix-table" id="matrixTable">
                 <thead id="tableHeader">
-                    <!-- Headers will be populated dynamically -->
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Data will be populated dynamically -->
                 </tbody>
             </table>
         </div>
@@ -496,10 +518,12 @@
             const matrix = {};
             const starsMatrix = {};
             const scoreMatrix = {};
+            const appearancesMatrix = {}; // Add this new matrix
             heroes.forEach(hero => {
                 matrix[hero] = {};
                 starsMatrix[hero] = {};
                 scoreMatrix[hero] = {};
+                appearancesMatrix[hero] = {}; // Initialize appearances matrix
                 
                 tournamentNumbers.forEach(tournNum => {
                     // Use null to represent an actually absent / unknown value.
@@ -507,6 +531,7 @@
                     matrix[hero][tournNum] = null;
                      starsMatrix[hero][tournNum] = 0;
                      scoreMatrix[hero][tournNum] = null;
+                     appearancesMatrix[hero][tournNum] = null; // Initialize as null
                 });
             });
 
@@ -534,6 +559,11 @@
                     // Add hero_score storage
                     if (row.hero_score !== null && row.hero_score !== undefined) {
                         scoreMatrix[heroName][tourn] = Math.round(Number(row.hero_score));
+                    }
+                    
+                    // Add appearances storage
+                    if (row.appearances !== null && row.appearances !== undefined) {
+                        appearancesMatrix[heroName][tourn] = Number(row.appearances);
                     }
                 }
                 // preserve pfp if present
@@ -620,7 +650,7 @@
             console.log('Hero totals calculated:', sortedHeroTotals.length);
 
             // Render table with independent color scales (pass heroPfpMap)
-            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix);
+            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix);
             
             document.getElementById('loading').style.display = 'none';
             document.getElementById('matrixTable').style.display = 'table';
@@ -776,7 +806,7 @@
         }
 
         // Update the renderTable function as follows:
-        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix) {
+        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix) {
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
 
@@ -884,14 +914,21 @@
                 tournamentNumbers.forEach(tournNum => {
                     const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
                     const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined) ? Number(scoreMatrix[hero][tournNum]) : null;
+                    const tournamentAppearances = (appearancesMatrix[hero] && appearancesMatrix[hero][tournNum] !== null && appearancesMatrix[hero][tournNum] !== undefined) ? Number(appearancesMatrix[hero][tournNum]) : null;
                     
                     let infoContent = '';
-                    if (heroScore !== null && stars > 0) {
-                        infoContent = `Score: ${heroScore}<br>⭐ ${stars}`;
+                    if (heroScore !== null && stars > 0 && tournamentAppearances !== null) {
+                        infoContent = `Score: ${heroScore}<br>Stars: ${stars}<br>App: ${tournamentAppearances}`;
+                    } else if (heroScore !== null && tournamentAppearances !== null) {
+                        infoContent = `Score: ${heroScore}<br>App: ${tournamentAppearances}`;
+                    } else if (stars > 0 && tournamentAppearances !== null) {
+                        infoContent = `Stars: ${stars}<br>App: ${tournamentAppearances}`;
                     } else if (heroScore !== null) {
                         infoContent = `Score: ${heroScore}`;
                     } else if (stars > 0) {
-                        infoContent = `⭐ ${stars}`;
+                        infoContent = `Stars: ${stars}`;
+                    } else if (tournamentAppearances !== null) {
+                        infoContent = `App: ${tournamentAppearances}`;
                     } else {
                         infoContent = '-';
                     }

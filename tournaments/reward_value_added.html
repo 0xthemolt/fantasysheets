@@ -706,10 +706,10 @@
                 if (column === 'hero') {
                     const pa = parseHeroKey(a.hero || '');
                     const pb = parseHeroKey(b.hero || '');
-                    aVal = pa.name + '|' + pa.rarity;
-                    bVal = pb.name + '|' + pb.rarity;
-                     if (direction === 'asc') return aVal.localeCompare(bVal);
-                     return bVal.localeCompare(aVal);
+                    const cmpName = pa.name.localeCompare(pb.name);
+                    const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
+                     if (direction === 'asc') return cmp;
+                     return -cmp;
                  } else if (column === 'total') {
                      aVal = Number(a.total) || 0;
                      bVal = Number(b.total) || 0;
@@ -1123,11 +1123,11 @@
             });
 
             // 3. Prepare data for rendering
-            const summaryRows = heroes.map(hero => {
-                const leagueTotals = leagues.map(lg => heroLeagueTotals[hero][lg] || 0);
+            const summaryRows = heroes.map(heroKey => {
+                const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
                 const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
-                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined) ? Number(heroCommonAvgMap[hero]) : null;
-                return { hero, leagueTotals, grandTotal, commonAvg };
+                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
+                return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
             });
 
             // 4. Sort by grandTotal descending by default, or by currentSort
@@ -1139,7 +1139,11 @@
             }
             summaryRows.sort((a, b) => {
                 if (sortCol === 'hero') {
-                    return sortDir === 'asc' ? a.hero.localeCompare(b.hero) : b.hero.localeCompare(a.hero);
+                    const pa = parseHeroKey(a.hero);
+                    const pb = parseHeroKey(b.hero);
+                    const cmpName = pa.name.localeCompare(pb.name);
+                    const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
+                    return sortDir === 'asc' ? cmp : -cmp;
                 } else if (leagues.includes(sortCol)) {
                     const idx = leagues.indexOf(sortCol);
                     return sortDir === 'asc'

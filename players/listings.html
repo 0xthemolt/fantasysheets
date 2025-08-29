@@ -526,6 +526,8 @@
         // Add missing global variable
         let allPlayers = [];
         let currentFilter = null;
+        let searchDebounceTimer = null;
+        let lastMatchingPlayers = [];
 
         // Function to fetch all unique player handles with profile pictures
         async function fetchPlayers() {
@@ -1160,6 +1162,8 @@ Price: ${p.priceFormatted} ETH</title>
             // Check if we have players loaded
             if (!allPlayers || allPlayers.length === 0) {
                 console.warn('No players available for autocomplete');
+                lastMatchingPlayers = [];
+                resultsContainer.style.display = 'none';
                 return;
             }
             
@@ -1168,17 +1172,22 @@ Price: ${p.priceFormatted} ETH</title>
                 // Show all players if no input
                 matchingPlayers = allPlayers.slice(0, 10); // Only show first 10 by default
             } else {
-                // Filter players based on input
+                const q = inputValue.toLowerCase();
+                // guard handle to avoid runtime error if handle is null
                 matchingPlayers = allPlayers.filter(item => 
-                    item.handle.toLowerCase().includes(inputValue.toLowerCase())
+                    (item.handle || '').toString().toLowerCase().includes(q) ||
+                    (item.name || '').toString().toLowerCase().includes(q)
                 );
             }
-            
+
+            // store last results for debounce check
+            lastMatchingPlayers = matchingPlayers;
+
             // Display matching players
             resultsContainer.innerHTML = matchingPlayers.map(player => `
                 <div class="autocomplete-item">
                     <img class="player-pfp" src="${player.pfp || '../icons/ft_logo.webp'}" alt="Profile">
-                    <span>${player.handle}</span>
+                    <span>${player.handle || player.name || ''}</span>
                 </div>
             `).join('');
             
@@ -1539,11 +1548,29 @@ PnL:     ${pnl ? formatPnlValue(pnl).padStart(10) : '-'.padStart(10)}" style="te
             // Set up input event listeners
             searchInput.addEventListener('input', (e) => {
                 const value = e.target.value;
+                // immediate results
                 showAutocompleteResults(value);
                 clearButton.style.display = value ? 'block' : 'none';
+
+                // debounce: if after 2s there are no results, show "No results found"
+                if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+                searchDebounceTimer = setTimeout(() => {
+                    // only show message for non-empty queries and when matching array is empty
+                    if (value.trim() !== '' && lastMatchingPlayers && lastMatchingPlayers.length === 0) {
+                        const resultsContainer = document.getElementById('autocompleteResults');
+                        resultsContainer.innerHTML = `
+                            <div class="autocomplete-item" style="justify-content:center;color:#aaa;cursor:default;">
+                                No results found, only players with listings will appear
+                            </div>
+                        `;
+                        resultsContainer.style.display = 'block';
+                    }
+                }, 1000);
             });
 
             clearButton.addEventListener('click', () => {
+                // ensure debounce timer cleared and no-results removed
+                if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
                 searchInput.value = '';
                 clearButton.style.display = 'none';
                 showAutocompleteResults('');

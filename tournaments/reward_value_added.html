@@ -17,6 +17,48 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        :root{
+            /* Adjustable column widths - change these values to control layout */
+            --col-hero-width: 150px;    /* left hero column */
+            --col-avg-width: 50px;     /* Avg Per App summary column */
+            --col-roi-width: 50px;      /* ROI summary column (far right) */
+        }
+        
+        .hero-image {
+            width: 32px;        /* Fixed small width */
+            height: auto;       /* Maintain original aspect ratio */
+            border-radius: 0px;
+            object-fit: contain; /* Preserve card proportions */
+            flex-shrink: 0;
+        }
+
+        /* Restrict matrix to 80% of viewport and center it */
+        .matrix-container {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* important for flex children with overflow */
+            overflow: hidden; /* Prevent container overflow */
+            width: 80%;            /* limit width to 80% of viewport */
+            max-width: 80vw;       /* defensive clamp for very small screens */
+            margin: 0 auto;        /* center horizontally */
+            box-sizing: border-box;
+            padding-left: 8px;     /* optional breathing room */
+            padding-right: 8px;
+        }
+
+        .matrix-scroll-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #222;
+            width: 100%;            /* ensure it fills the container */
+            box-sizing: border-box;
+        }
+        
         .league-tabs {
             display: flex;
             gap: 10px;
@@ -95,7 +137,8 @@
             border: 1px solid #444;
             border-radius: 6px;
             background: #222;
-            /* Remove max-height to allow full expansion */
+            width: 100%;            /* ensure it fills the container */
+            box-sizing: border-box;
         }
         
         .matrix-scroll-wrapper {
@@ -130,6 +173,28 @@
             border-left: 2px solid #555; /* Subtle left border */
             background-color: rgba(255, 255, 255, 0.05); /* Slightly different background */
             padding: 0 12px; /* Add horizontal padding for spacing */
+        }
+
+        /* Column width controls using CSS variables */
+        .matrix-table th.hero-col,
+        .matrix-table td.hero-col { 
+            width: var(--col-hero-width);
+            min-width: var(--col-hero-width);
+            max-width: var(--col-hero-width);
+        }
+        .matrix-table th.avg-per-app-col,
+        .matrix-table td.avg-per-app-col {
+            width: var(--col-avg-width);
+            min-width: var(--col-avg-width);
+            max-width: var(--col-avg-width);
+            text-align: right;
+        }
+        .matrix-table th.roi-col,
+        .matrix-table td.roi-col {
+            width: var(--col-roi-width);
+            min-width: var(--col-roi-width);
+            max-width: var(--col-roi-width);
+            text-align: right;
         }
 
         /* Hide star information by default */
@@ -183,8 +248,14 @@
             display: none;
         }
 
-        /* Show info row when hovering over the previous row */
-        .matrix-table tbody tr:hover + .info-row {
+        /* Show info row when hovering over tournament value cells only */
+        .matrix-table tbody tr .value-cell:hover + * + * + * + .info-row,
+        .matrix-table tbody tr:has(.value-cell:hover) + .info-row {
+            display: table-row;
+        }
+
+        /* Alternative approach: use class-based hover detection */
+        .matrix-table tbody tr.show-info + .info-row {
             display: table-row;
         }
 
@@ -241,6 +312,244 @@
         .rarity-badge.rarity-epic      { background:#FF7BCF; color:#3C0025; }
         .rarity-badge.rarity-legendary { background:#CEEB7C; color:#223000; }
         .rarity-badge.rarity-all       { background:#666666; color:#ffffff; }
+
+        /* Add skeleton loading animation */
+        .skeleton {
+            background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Smooth transitions */
+        .matrix-table td, .matrix-table th {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Better hover states */
+        .sortable:hover {
+            background-color: rgba(255,255,255,0.1);
+            cursor: pointer;
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+                /* Filter container styles */
+        .filter-container {
+            width: 68%;
+            margin: 0 auto 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-box {
+            flex: 0 0 auto; /* Change from flex: 1 to prevent expansion */
+            width: 180px; /* Reduced width (was approximately 300px) */
+            position: relative;
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+        
+        .search-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 80%; /* Reduce text size by 20% */
+        }
+        
+        .search-input-container {
+            position: relative;
+            width: 100%;
+            display: block;
+        }
+
+             #heroHandleSearch {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 10px; /* Slightly smaller padding */
+            padding-right: 35px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 11px; /* Reduced from default (~14px) */
+            background: #1a1a1a;
+            color: #fff;
+            transition: border-color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        #heroHandleSearch:focus {
+            outline: none;
+            border-color: #444;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 3px; /* Reduced from 4px */
+            display: none;
+            font-size: 14px; /* Reduce to fit narrower box */
+            transition: color 0.2s;
+        }
+        
+        .clear-search:hover {
+            color: #fff;
+        }
+        
+        .clear-search.visible {
+            display: block;
+        }
+        
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%; /* Use 100% of the container, which matches search box */
+            background: #2a2a2a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-top: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-sizing: border-box;
+        }
+        
+        .autocomplete-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .hero-preview-pic {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+            .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Slightly reduced gap */
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 11px; /* Reduced from 14px */
+            cursor: pointer;
+            padding: 5px 8px; /* Slightly smaller padding */
+            border-radius: 4px;
+            user-select: none;
+            color: #fff;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-label:hover {
+            background: #3a3a3a;
+        }
+        
+        .checkbox-label input {
+            margin-right: 6px;
+            accent-color: transparent;
+            transform: scale(0.8); /* Reduce checkbox size by 20% */
+        }
+        
+        /* Rarity-specific colors for checked state */
+        .checkbox-label.legendary input:checked {
+            accent-color: #CACBD4;
+        }
+        
+        .checkbox-label.epic input:checked {
+            accent-color: #E890FE;
+        }
+        
+        .checkbox-label.rare input:checked {
+            accent-color: #00FFE2;
+        }
+        
+        .checkbox-label.common input:checked {
+            accent-color: #94FF00;
+        }
+        
+        /* Rarity-specific colors for label border */
+        .checkbox-label.legendary {
+            border-left: 3px solid #CACBD4;
+        }
+        
+        .checkbox-label.epic {
+            border-left: 3px solid #E890FE;
+        }
+        
+        .checkbox-label.rare {
+            border-left: 3px solid #00FFE2;
+        }
+        
+        .checkbox-label.common {
+            border-left: 3px solid #94FF00;
+        }
+        
+        .clear-button {
+            padding: 8px 16px; /* Slightly smaller padding */
+            background-color: #2a2a2a;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-size: 11px; /* Reduced from default */
+        }
+        
+        .clear-button:hover {
+            background-color: #3a3a3a;
+        }
     </style>
 </head>
 <body>
@@ -257,10 +566,50 @@
         <!-- Tabs will be populated dynamically -->
     </div>
 
+    <div class="filter-container">
+            <div class="search-box">
+                <label for="heroHandleSearch">Search by Hero Handle:</label>
+                <div class="search-input-container">
+                    <input type="text" id="heroHandleSearch" placeholder="Enter hero handle..." autocomplete="off">
+                    <button class="clear-search"></button>
+                </div>
+                <div id="autocompleteResults" class="autocomplete-results"></div>
+            </div>
+            
+            <div class="sell-orders-filter">
+                 <label>Rarity:</label>
+                 <div class="checkbox-group">
+                     <label class="checkbox-label legendary">
+                         <input type="checkbox" id="filterLegendary"> Legendary
+                     </label>
+                     <label class="checkbox-label epic">
+                         <input type="checkbox" id="filterEpic"> Epic
+                     </label>
+                     <label class="checkbox-label rare">
+                         <input type="checkbox" id="filterRare"> Rare
+                     </label>
+                     <label class="checkbox-label common">
+                         <input type="checkbox" id="filterCommon"> Common
+                     </label>
+                 </div>
+             </div>
+            
+            <div class="display-mode-toggle" id="displayModeToggle" style="align-self:center; display:flex; flex-direction:column; gap:6px; padding-top:6px;">
+                <label style="font-size:80%; color:#fff; margin-bottom:4px;">Display Mode</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <label style="font-size:11px; color:#fff;"><input type="radio" name="displayMode" value="avg" checked> Avg Per App</label>
+                    <label style="font-size:11px; color:#fff;"><input type="radio" name="displayMode" value="total"> Total RVA</label>
+                </div>
+            </div>
+ 
+             <button id="clearFilter" class="clear-button">Clear Filter</button>
+         </div>
+
+
     <!-- Wrap your table in a scrollable div -->
     <div class="matrix-container">
         <div id="loading" class="loading">
-            <i class="fas fa-spinner fa-spin"></i> Loading tournament data...
+            <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
         <div class="matrix-scroll-wrapper">
             <table class="matrix-table" id="matrixTable">
@@ -286,51 +635,81 @@
         let currentSort = { column: 'avgRewards', direction: 'desc' }; // Changed from 'median' to 'avgRewards'
         let colorScale = { min: 0, max: 1 }; // Add this missing variable
 
+        // Search / autocomplete state
+        let searchTerm = '';
+        let selectedHeroKey = null;
+        let selectedHeroBase = null; // when set, filter matches hero name across rarities
+        let autocompleteIndex = -1;
+        let heroLookupAll = {}; // map heroKey -> { name, handle, pfp }
+        let heroLookupDistinct = {}; // map normalized baseName/handle -> { key: representativeHeroKey, name, handle, pfp }
+
+        // true = show avg reward per appearance in tournament grid (default), 
+        // false = show raw total reward_value_added
+        let showAvgPerAppearance = true;
+        // Display mode toggle setup (was missing)
+        function setupDisplayModeToggle() {
+            const container = document.getElementById('displayModeToggle');
+            if (!container) return;
+            const radios = container.querySelectorAll('input[name="displayMode"]');
+            radios.forEach(r => {
+                r.addEventListener('change', (e) => {
+                    showAvgPerAppearance = (e.target.value === 'avg');
+                    renderCurrentView();
+                });
+            });
+        }
+
         // Fetch data from Supabase - ADD MORE DEBUGGING
         async function fetchRewardsData() {
             try {
                 console.log('Starting to fetch rewards data...');
                 
-                const { data, error } = await supabaseClient
+                // Fetch data with exact count (no explicit .limit() was present previously)
+                const { data, error, count } = await supabaseClient
                     .from('rewardsvalueadded')
                     .select(`
-                        league,
-                        tournament_number,
-                        hero_handle,
-                        hero_name,
-                        hero_rarity,
-                        hero_pfp_url,
-                        hero_stars,
-                        hero_score,
-                        common_avg_price,
-                        reward_value_added,
-                        appearances
-                    `)
-
-                if (error) {
-                    console.error('Detailed error:', error);
-                    
-                    document.getElementById('loading').innerHTML = `
-                        <div style="color: #f87171;">
-                            <i class="fas fa-exclamation-triangle"></i> 
-                            Error loading data: ${error.message}
-                        </div>
-                    `;
-                    return;
-                }
-
-                console.log('Fetched data:', data.length, 'records');
-                console.log('Sample records:', data.slice(0, 10));
-                
-                // Debug: Show unique leagues and heroes
-                const uniqueLeagues = [...new Set(data.map(row => row.league))];
-                const uniqueHeroes = [...new Set(data.map(row => row.hero_handle))];
-                console.log('Unique leagues found:', uniqueLeagues);
-                console.log('Total unique heroes:', uniqueHeroes.length);
-                console.log('Heroes list:', uniqueHeroes.slice(0, 20)); // Show first 20
-                
-                allData = data;
-                setupLeagueTabs();
+                         league,
+                         tournament_number,
+                         hero_handle,
+                         hero_name,
+                         hero_rarity,
+                         hero_pfp_url,
+                         hero_stars,
+                         current_hero_stars,
+                         hero_score,
+                         hero_id,
+                         common_avg_price,
+                         reward_value_added,
+                         appearances
+                     `, { count: 'exact' })
+ 
+                 if (error) {
+                     console.error('Detailed error:', error);
+                     
+                     document.getElementById('loading').innerHTML = `
+                         <div style="color: #f87171;">
+                             <i class="fas fa-exclamation-triangle"></i> 
+                             Error loading data: ${error.message}
+                         </div>
+                     `;
+                     return;
+                 }
+ 
+-                console.log('Fetched data:', data.length, 'records');
+-                console.log('Sample records:', data.slice(0, 10));
++                console.log('Fetched data array length:', Array.isArray(data) ? data.length : 0, 'records; server count:', count);
++                console.log('Sample records:', Array.isArray(data) ? data.slice(0, 10) : []);
+                 
+                 // Debug: Show unique leagues and heroes
+                 const uniqueLeagues = [...new Set(data.map(row => row.league))];
+                 const uniqueHeroes = [...new Set(data.map(row => row.hero_handle))];
+                 console.log('Unique leagues found:', uniqueLeagues);
+                 console.log('Total unique heroes:', uniqueHeroes.length);
+                 console.log('Heroes list:', uniqueHeroes.slice(0, 20)); // Show first 20
+                 
+                 allData = data;
+                 setupLeagueTabs();
+                 setupSearch(); // initialize search/autocomplete once data loaded
                 
             } catch (err) {
                 console.error('Exception while fetching data:', err);
@@ -505,6 +884,190 @@
             }
         }
 
+        // Build global hero lookups:
+        // - heroLookupAll keyed by composite heroKey (name||rarity) - used elsewhere in the app
+        // - heroLookupDistinct keyed by normalized hero handle/name to ensure autocomplete shows unique heroes
+        function buildHeroLookupAll() {
+            heroLookupAll = {};
+            heroLookupDistinct = {};
+            allData.forEach(row => {
+                const key = heroKeyFromRow(row);
+                if (!key) return;
+                const name = (row.hero_name || row.hero_handle || '').trim();
+                const handle = (row.hero_handle || row.hero_name || '').trim();
+                const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
+
+                // populate full map by composite key (keeps existing behavior)
+                if (!heroLookupAll[key]) {
+                    heroLookupAll[key] = { name, handle, pfp };
+                }
+
+                // populate distinct map keyed by normalized base (prefer handle, then name)
+                const base = (row.hero_handle || row.hero_name || '').trim();
+                const baseKey = base.toLowerCase();
+                if (!baseKey) return;
+                // keep first-seen representative composite key for this base hero
+                if (!heroLookupDistinct[baseKey]) {
+                    heroLookupDistinct[baseKey] = {
+                        key,       // representative composite hero key to use when selecting
+                        name,
+                        handle,
+                        pfp
+                    };
+                }
+            });
+        }
+        
+        // Simple fuzzy match: true if query is substring OR chars appear in order in target
+        function fuzzyMatch(query, target) {
+            if (!query) return true;
+            if (!target) return false;
+            if (target.includes(query)) return true;
+            // subsequence match
+            let qi = 0;
+            for (let i = 0; i < target.length && qi < query.length; i++) {
+                if (target[i] === query[qi]) qi++;
+            }
+            return qi === query.length;
+        }
+        
+        function setupSearch() {
+            buildHeroLookupAll();
+            const input = document.getElementById('heroHandleSearch');
+            const results = document.getElementById('autocompleteResults');
+            const clearBtn = document.querySelector('.clear-search');
+
+            function updateSuggestions() {
+                const q = (input.value || '').trim().toLowerCase();
+                searchTerm = q;
+                selectedHeroKey = null; // typing clears explicit selection
+                selectedHeroBase = null; // typing clears base name across rarities
+                autocompleteIndex = -1;
+                if (!q) {
+                    results.style.display = 'none';
+                    clearBtn.classList.remove('visible');
+                    renderCurrentView();
+                    return;
+                }
+                clearBtn.classList.add('visible');
+
+                // score: substring matches first, then fuzzy matches
+                // iterate distinct heroes so autocomplete shows one entry per hero (not per rarity)
+                const matches = Object.keys(heroLookupDistinct).map(k => {
+                    const item = heroLookupDistinct[k];
+                    const name = (item.name || '').toLowerCase();
+                    const handle = (item.handle || '').toLowerCase();
+                    const score = (name.includes(q) || handle.includes(q)) ? 2 : (fuzzyMatch(q, name) || fuzzyMatch(q, handle) ? 1 : 0);
+                    // use representative composite key for selection (item.key)
+                    return { key: item.key, name: item.name, handle: item.handle, pfp: item.pfp, score };
+                }).filter(x => x.score > 0)
+                    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+                    .slice(0, 12);
+
+                if (matches.length === 0) {
+                    results.innerHTML = `<div class="autocomplete-item">No matches</div>`;
+                    results.style.display = 'block';
+                    return;
+                }
+
+                results.innerHTML = matches.map(m => {
+                    const pic = m.pfp ? `<img class="hero-preview-pic" src="${escapeHtml(m.pfp)}" onerror="this.style.display='none'">` : '';
+                    // Show only the hero name in the autocomplete preview (no handle in parentheses)
+                    const label = escapeHtml(m.name || m.handle || m.key);
+                    return `<div class="autocomplete-item" data-key="${escapeHtml(m.key)}">${pic}<div><div>${label}</div></div></div>`;
+                }).join('');
+                results.style.display = 'block';
+            }
+
+            input.addEventListener('input', (e) => {
+                updateSuggestions();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                const items = results.querySelectorAll('.autocomplete-item');
+                if (!items.length) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    autocompleteIndex = Math.min(autocompleteIndex + 1, items.length - 1);
+                    items.forEach((it, i) => it.style.background = i === autocompleteIndex ? '#333' : '');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    autocompleteIndex = Math.max(autocompleteIndex - 1, 0);
+                    items.forEach((it, i) => it.style.background = i === autocompleteIndex ? '#333' : '');
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const sel = items[autocompleteIndex] || items[0];
+                    if (sel) {
+                        const key = sel.dataset.key;
+                        selectAutocompleteItem(key);
+                    }
+                } else if (e.key === 'Escape') {
+                    hideAutocomplete();
+                }
+            });
+
+            results.addEventListener('click', (ev) => {
+                const el = ev.target.closest('.autocomplete-item');
+                if (!el) return;
+                const key = el.dataset.key;
+                selectAutocompleteItem(key);
+            });
+
+            clearBtn.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                clearSearch();
+            });
+
+            document.addEventListener('click', (ev) => {
+                if (!ev.target.closest('.search-box')) {
+                    hideAutocomplete();
+                }
+            });
+        }
+
+        function selectAutocompleteItem(key) {
+            if (!key) return;
+            // Select by base hero name so we show all rarities for this hero
+            const base = displayHeroBaseName(key);
+            selectedHeroBase = base || null;
+            // keep selectedHeroKey null so filtering uses base name (not a single rarity)
+            selectedHeroKey = null;
+            searchTerm = '';
+            const input = document.getElementById('heroHandleSearch');
+            const results = document.getElementById('autocompleteResults');
+            input.value = base || heroLookupAll[key]?.handle || '';
+            results.style.display = 'none';
+            document.querySelector('.clear-search').classList.add('visible');
+            renderCurrentView();
+        }
+
+        function clearSearch() {
+            selectedHeroKey = null;
+            selectedHeroBase = null;
+             searchTerm = '';
+             autocompleteIndex = -1;
+             const input = document.getElementById('heroHandleSearch');
+             const results = document.getElementById('autocompleteResults');
+             input.value = '';
+             results.style.display = 'none';
+             document.querySelector('.clear-search').classList.remove('visible');
+             renderCurrentView();
+         }
+
+        function hideAutocomplete() {
+            const results = document.getElementById('autocompleteResults');
+            if (results) results.style.display = 'none';
+        }
+
+        // helper to re-render current view (league or by-league) after search/filter updates
+        function renderCurrentView() {
+            if (currentLeague === 'BY_LEAGUE') {
+                renderByLeagueMatrix();
+            } else if (currentLeague) {
+                renderMatrix(currentLeague);
+            }
+        }
+
         // Render matrix for selected league
         function renderMatrix(league) {
             console.log('Rendering matrix for league:', league);
@@ -522,12 +1085,24 @@
             const heroPfpMap = {};
             const heroCommonAvgMap = {};
             const heroStarsMap = {};
+            const heroIdMap = {};
+            const heroRarityMap = {};
             const heroSet = new Set();
-            leagueData.forEach(row => {
-                const heroKey = heroKeyFromRow(row);
-                if (!heroKey) return;
-                heroSet.add(heroKey);
-                // try multiple possible field names for the pfp
+            const heroLookupLocal = {}; // map heroKey -> {name, handle, pfp}
+             leagueData.forEach(row => {
+                 const heroKey = heroKeyFromRow(row);
+                 if (!heroKey) return;
+                 heroLookupLocal[heroKey] = heroLookupLocal[heroKey] || {
+                     name: (row.hero_name || row.hero_handle || '').trim(),
+                     handle: (row.hero_handle || row.hero_name || '').trim(),
+                     pfp: row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || ''
+                 };
+                 heroSet.add(heroKey);
+                 // Store hero_id and hero_rarity for card URL generation
+                 if (row.hero_id && !heroIdMap[heroKey]) heroIdMap[heroKey] = row.hero_id;
+                 if (row.hero_rarity && !heroRarityMap[heroKey]) heroRarityMap[heroKey] = row.hero_rarity;
+                
+                // try multiple possible field names for the pfp (fallback only)
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
                 if (pfp && !heroPfpMap[heroKey]) heroPfpMap[heroKey] = pfp;
                // capture common avg price if present (use first non-null)
@@ -535,18 +1110,34 @@
                    heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
                }
                // Aggregate max stars
-               if (row.hero_stars !== undefined && row.hero_stars !== null) {
-                    if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
-                        heroStarsMap[heroKey] = Number(row.hero_stars);
+               if (row.current_hero_stars !== undefined && row.current_hero_stars !== null) {
+                    if (!(heroKey in heroStarsMap) || Number(row.current_hero_stars) > heroStarsMap[heroKey]) {
+                        heroStarsMap[heroKey] = Number(row.current_hero_stars);
                     }
                 }
             });
-            const heroes = [...heroSet].sort((a, b) => {
-                 const pa = parseHeroKey(a);
-                 const pb = parseHeroKey(b);
-                 const n = pa.name.localeCompare(pb.name);
-                 return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
-             });
+            let heroes = [...heroSet].sort((a, b) => {
+                   const pa = parseHeroKey(a);
+                   const pb = parseHeroKey(b);
+                   const n = pa.name.localeCompare(pb.name);
+                   return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+               });
+           // Apply search / selection filter:
+           // - selectedHeroKey (specific composite key) takes highest precedence
+           // - selectedHeroBase matches hero name across all rarities
+           // - otherwise use typed searchTerm fuzzy matching
+           if (selectedHeroKey) {
+               heroes = heroes.filter(h => h === selectedHeroKey);
+           } else if (selectedHeroBase) {
+               const baseLower = selectedHeroBase.toLowerCase();
+               heroes = heroes.filter(h => parseHeroKey(h).name.toLowerCase() === baseLower);
+           } else if (searchTerm && searchTerm.trim().length > 0) {
+               const q = searchTerm.trim().toLowerCase();
+               heroes = heroes.filter(h => {
+                   const info = heroLookupLocal[h] || {};
+                   return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
+               });
+           }
 
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
 
@@ -554,23 +1145,23 @@
             console.log('Tournament numbers:', tournamentNumbers);
 
             // Create matrix data structure and store hero stars per tournament
-            const matrix = {};
+            const matrix = {};               // will store raw total rewards per hero/tourn
             const starsMatrix = {};
             const scoreMatrix = {};
-            const appearancesMatrix = {}; // Add this new matrix
+            const appearancesMatrix = {};    // will store summed appearances per hero/tourn
             heroes.forEach(hero => {
                 matrix[hero] = {};
                 starsMatrix[hero] = {};
                 scoreMatrix[hero] = {};
-                appearancesMatrix[hero] = {}; // Initialize appearances matrix
+                appearancesMatrix[hero] = {};
                 
                 tournamentNumbers.forEach(tournNum => {
                     // Use null to represent an actually absent / unknown value.
                     // This lets us distinguish "0" (a real value) from missing data.
                     matrix[hero][tournNum] = null;
-                     starsMatrix[hero][tournNum] = 0;
-                     scoreMatrix[hero][tournNum] = null;
-                     appearancesMatrix[hero][tournNum] = null; // Initialize as null
+                    starsMatrix[hero][tournNum] = 0;
+                    scoreMatrix[hero][tournNum] = null;
+                    appearancesMatrix[hero][tournNum] = null; // Initialize as null
                 });
             });
 
@@ -589,16 +1180,21 @@
                             matrix[heroKey][tourn] += num;
                         }
                     }
+                    // Sum appearances (if provided) instead of overwriting
+                    if (row.appearances !== null && row.appearances !== undefined) {
+                        const app = Number(row.appearances) || 0;
+                        if (appearancesMatrix[heroKey][tourn] === null) {
+                            appearancesMatrix[heroKey][tourn] = app;
+                        } else {
+                            appearancesMatrix[heroKey][tourn] += app;
+                        }
+                    }
                     starsMatrix[heroKey][tourn] = (row.hero_stars !== undefined && row.hero_stars !== null)
-                        ? Number(row.hero_stars)
+                        ? Math.max(Number(row.hero_stars), starsMatrix[heroKey][tourn] || 0)
                         : starsMatrix[heroKey][tourn] || 0;
 
                     if (row.hero_score !== null && row.hero_score !== undefined) {
                         scoreMatrix[heroKey][tourn] = Math.round(Number(row.hero_score));
-                    }
-                    
-                    if (row.appearances !== null && row.appearances !== undefined) {
-                        appearancesMatrix[heroKey][tourn] = Number(row.appearances);
                     }
                 }
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
@@ -607,12 +1203,24 @@
 
             // Calculate totals and medians
             const heroTotals = heroes.map(hero => {
-                // Per-tournament reward values (missing => 0)
-                const values = tournamentNumbers.map(t =>
+                // Per-tournament raw reward totals (missing => 0)
+                const rawTotals = tournamentNumbers.map(t =>
                     (matrix[hero][t] === null || matrix[hero][t] === undefined) ? 0 : Number(matrix[hero][t])
                 );
-                const total = values.reduce((s, v) => s + v, 0);
-                const median = calculateMedian(values);
+                // Per-tournament avg per appearance (missing => 0)
+                const avgPerAppValues = tournamentNumbers.map(t => {
+                    const tot = matrix[hero][t];
+                    const apps = appearancesMatrix[hero][t];
+                    if (tot === null || tot === undefined) return 0;
+                    if (apps === null || apps === undefined || apps === 0) return 0;
+                    return Number(tot) / Number(apps);
+                });
+
+                // Total = sum of raw reward_value_added across tournaments (per hero/rarity)
+                const total = rawTotals.reduce((s, v) => s + v, 0);
+                // Median = median of the raw per-tournament reward_value_added values
+                const median = calculateMedian(rawTotals);
+
                 const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[hero] !== undefined)
                     ? Number(heroCommonAvgMap[hero])
                     : null;
@@ -623,11 +1231,11 @@
                 }, 0);
                 const avgRewards = heroAppearances > 0 ? total / heroAppearances : 0;
                 const roi = (commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : 0;
-                return { hero, total, median, values, commonAvg, appearances: heroAppearances, avgRewards, roi };
+                return { hero, total, median, values: avgPerAppValues, commonAvg, appearances: heroAppearances, avgRewards, roi };
             });
 
             // Calculate independent color scales
-            const matrixValues = [];
+            const matrixValues = []; // will contain avg-per-app values (for tournament cell color)
             const totalValues = [];
             const medianValues = [];
             const avgRewardsValues = [];
@@ -635,12 +1243,23 @@
 
             // Populate the arrays with values
             heroes.forEach(hero => {
-                tournamentNumbers.forEach(tournNum => {
-                    const v = matrix[hero][tournNum];
-                    if (v !== null && v !== undefined) matrixValues.push(Number(v));
-                });
-            });
-
+                 tournamentNumbers.forEach(tournNum => {
+                     const rawTot = matrix[hero][tournNum];
+                     const apps = appearancesMatrix[hero][tournNum];
+    if (rawTot !== null && rawTot !== undefined) {
+        if (showAvgPerAppearance) {
+            if (apps && apps > 0) {
+                const avg = Number(rawTot) / Number(apps);
+                matrixValues.push(avg);
+            }
+        } else {
+            // use raw totals for matrix coloring when toggled to Total RVA
+            matrixValues.push(Number(rawTot));
+        }
+    }
+});
+             });
+ 
             heroTotals.forEach(({ total, median, appearances, commonAvg }) => {
                 totalValues.push(total);
                 medianValues.push(median);
@@ -682,34 +1301,35 @@
             console.log('Color scales:', colorScales);
 
             // Do not overwrite currentSort here — keep the user's selected sort.
-            // If heroTotals is first render and currentSort not set, currentSort was initialized globally.
-            const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers);
-
-            console.log('Hero totals calculated:', sortedHeroTotals.length);
-
-            // Render table with independent color scales (pass heroPfpMap)
-            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix);
-            
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('matrixTable').style.display = 'table';
-            document.getElementById('noData').style.display = 'none';
-        }
-
-        // Fix the sortHeroes function - use heroTotals.values and tournamentNumbers
-        function sortHeroes(heroTotals, column, direction, tournamentNumbers) {
-            // Defensive: ensure tournamentNumbers is an array
-            tournamentNumbers = Array.isArray(tournamentNumbers) ? tournamentNumbers : [];
+            // Pass matrix/appearances and the display toggle so sorting respects Avg vs Total toggle.
+            const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers, matrix, appearancesMatrix, showAvgPerAppearance);
  
-             return [...heroTotals].sort((a, b) => {
-                 let aVal, bVal;
-                 
-                if (column === 'hero') {
-                    const pa = parseHeroKey(a.hero || '');
-                    const pb = parseHeroKey(b.hero || '');
-                    const cmpName = pa.name.localeCompare(pb.name);
-                    const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
-                     if (direction === 'asc') return cmp;
-                     return -cmp;
+             console.log('Hero totals calculated:', sortedHeroTotals.length);
+ 
+             // Render table with independent color scales (pass heroPfpMap)
+             renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
+             
+             document.getElementById('loading').style.display = 'none';
+             document.getElementById('matrixTable').style.display = 'table';
+             document.getElementById('noData').style.display = 'none';
+         }
+ 
+        // Fix the sortHeroes function - accept matrix/appearances and toggle so tournament-column sorting
+        // uses avg-per-appearance or raw total depending on the UI toggle.
+        function sortHeroes(heroTotals, column, direction, tournamentNumbers, matrix, appearancesMatrix, useAvgPerAppearance) {
+             // Defensive: ensure tournamentNumbers is an array
+             tournamentNumbers = Array.isArray(tournamentNumbers) ? tournamentNumbers : [];
+  
+              return [...heroTotals].sort((a, b) => {
+                  let aVal, bVal;
+                  
+                 if (column === 'hero') {
+                     const pa = parseHeroKey(a.hero || '');
+                     const pb = parseHeroKey(b.hero || '');
+                     const cmpName = pa.name.localeCompare(pb.name);
+                     const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
+                      if (direction === 'asc') return cmp;
+                      return -cmp;
                  } else if (column === 'total') {
                      aVal = Number(a.total) || 0;
                      bVal = Number(b.total) || 0;
@@ -728,24 +1348,34 @@
                     aVal = (a.commonAvg === null || a.commonAvg === undefined || isNaN(Number(a.commonAvg))) ? -Infinity : Number(a.commonAvg);
                     bVal = (b.commonAvg === null || b.commonAvg === undefined || isNaN(Number(b.commonAvg))) ? -Infinity : Number(b.commonAvg);
                 } else if (column.startsWith('T')) {
-                    // Tournament column sorting: find index in tournamentNumbers and read values[]
-                    const tournNum = parseInt(column.substring(1));
-                    const tournIndex = tournamentNumbers.indexOf(tournNum);
-                    aVal = tournIndex >= 0 ? Number(a.values[tournIndex] || 0) : 0;
-                    bVal = tournIndex >= 0 ? Number(b.values[tournIndex] || 0) : 0;
-                } else {
-                    // Unknown column -> keep original order
-                    return 0;
-                }
-                
-                // Numeric comparison for non-hero columns (only reward_value_added)
-                if (direction === 'asc') {
-                    return aVal - bVal;
-                } else {
-                    return bVal - aVal;
-                }
-            });
-        }
+                     // Tournament column sorting: use matrix + appearancesMatrix so we can respect
+                     // Avg Per App vs Total RVA toggle.
+                     const tournNum = parseInt(column.substring(1));
+                     // derive values directly from the raw matrix for a and b
+                     const aRaw = (matrix && matrix[a.hero] && matrix[a.hero][tournNum] !== null && matrix[a.hero][tournNum] !== undefined) ? Number(matrix[a.hero][tournNum]) : 0;
+                     const bRaw = (matrix && matrix[b.hero] && matrix[b.hero][tournNum] !== null && matrix[b.hero][tournNum] !== undefined) ? Number(matrix[b.hero][tournNum]) : 0;
+                     if (useAvgPerAppearance) {
+                         const aApps = (appearancesMatrix && appearancesMatrix[a.hero] && appearancesMatrix[a.hero][tournNum]) ? Number(appearancesMatrix[a.hero][tournNum]) : 0;
+                         const bApps = (appearancesMatrix && appearancesMatrix[b.hero] && appearancesMatrix[b.hero][tournNum]) ? Number(appearancesMatrix[b.hero][tournNum]) : 0;
+                         aVal = (aApps > 0) ? (aRaw / aApps) : 0;
+                         bVal = (bApps > 0) ? (bRaw / bApps) : 0;
+                     } else {
+                         aVal = aRaw;
+                         bVal = bRaw;
+                     }
+                 } else {
+                     // Unknown column -> keep original order
+                     return 0;
+                 }
+                 
+                 // Numeric comparison for non-hero columns (only reward_value_added)
+                 if (direction === 'asc') {
+                     return aVal - bVal;
+                 } else {
+                     return bVal - aVal;
+                 }
+             });
+         }
 
         // Update color calculation function to accept scale type
         function getValueColor(value, colorScale, type) {
@@ -839,7 +1469,7 @@
         }
 
         // Update the renderTable function as follows:
-        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix) {
+        function renderTable(heroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap) {
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
 
@@ -859,15 +1489,16 @@
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
                 headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleSort('${colName}')">${colName}</th>`;
             });
-            // Rearranged summary columns: ROI, Avg Per App, Median, Total
-            const roiSortClass = currentSort.column === 'roi' ? `sort-${currentSort.direction}` : '';
+            // Summary columns: Avg Per App, Total, Median, ROI (ROI remains far right)
             const avgRewardsSortClass = currentSort.column === 'avgRewards' ? `sort-${currentSort.direction}` : '';
-            const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
             const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
-            headerHTML += `<th class="total-col summary-col sortable ${roiSortClass}" onclick="handleSort('roi')">ROI</th>`;
-            headerHTML += `<th class="total-col summary-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App</th>`;
-            headerHTML += `<th class="total-col summary-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
-            headerHTML += `<th class="total-col summary-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
+            const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
+            const roiSortClass = currentSort.column === 'roi' ? `sort-${currentSort.direction}` : '';
+            // New order: Avg Per App, ROI, Total, Median
+            headerHTML += `<th class="total-col summary-col avg-per-app-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App</th>`;
+            headerHTML += `<th class="total-col summary-col roi-col sortable ${roiSortClass}" onclick="handleSort('roi')">ROI</th>`;
+            headerHTML += `<th class="total-col summary-col total-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
+            headerHTML += `<th class="total-col summary-col median-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
             headerHTML += '</tr>';
             tableHeader.innerHTML = headerHTML;
 
@@ -878,9 +1509,21 @@
                 bodyHTML += '<tr>';
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
 
-                // Hero cell: image (if available) then name using .hero-image style
-                 const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
-                 const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
+                // Hero cell: generate card URL using hero_id, hero_rarity, and hero_stars
+                const heroId = (heroIdMap && heroIdMap[hero]) ? heroIdMap[hero] : '';
+                const heroRarity = (heroRarityMap && heroRarityMap[hero]) ? heroRarityMap[hero] : '';
+                const heroStarsForCard = (heroStarsMap && heroStarsMap[hero]) ? heroStarsMap[hero] : 0;
+                
+                let imgHtml = '';
+                if (heroId && heroRarity && heroStarsForCard) {
+                    // Generate card URL: https://r2.fantasy.top/v3/{rarity}/{id}_{stars}.png
+                    const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
+                    imgHtml = `<img class="hero-image" src="${cardUrl}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">`;
+                } else {
+                    // Fallback to pfp if card data unavailable
+                    const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
+                    imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
+                }
 
                 // Truncate hero display name (use display label that includes rarity), keep full label in title
                 const baseName = displayHeroBaseName(hero);
@@ -905,103 +1548,134 @@
                 const heroStars = (heroStarsMap && heroStarsMap[hero] !== undefined) ? heroStarsMap[hero] : '';
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${heroStars !== '' ? heroStars + ' <i class="fas fa-star" style="color:#ffd700"></i>' : '-'}</td>`;
 
-                // Tournament columns (main data)
+                // Tournament columns (main data) - show avg per appearance (reward/appearances)
+                // Add hover detection for expanding info rows
                 tournamentNumbers.forEach(tournNum => {
-                    const rawValue = matrix[hero][tournNum];
-                    const hasValue = rawValue !== null && rawValue !== undefined;
-                    const value = hasValue ? Number(rawValue) : null;
-
-                    if (!hasValue) {
-                        bodyHTML += `<td class="value-cell" style="background-color: #2d2d2d; color: #888888;">-</td>`;
-                    } else {
-                        const colors = getValueColor(value, colorScales.matrix, 'matrix');
-                        const formattedValue = formatRva(value);
-                        bodyHTML += `<td class="value-cell" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}</td>`;
-                    }
+                    const rawTotal = matrix[hero][tournNum];
+                    const apps = appearancesMatrix[hero][tournNum];
+// Determine presence depending on display mode
+let hasValue = false;
+let displayValue = null;
+if (rawTotal !== null && rawTotal !== undefined) {
+    if (showAvgPerAppearance) {
+        if (apps && apps > 0) {
+            hasValue = true;
+            displayValue = Number(rawTotal) / Number(apps);
+        }
+    } else {
+        // show raw total even if apps is zero/missing
+        hasValue = true;
+        displayValue = Number(rawTotal);
+    }
+}
+if (!hasValue) {
+    bodyHTML += `<td class="value-cell hover-expand" style="background-color: #2d2d2d; color: #888888;">-</td>`;
+} else {
+    const colors = getValueColor(displayValue, colorScales.matrix, 'matrix');
+    const formattedValue = formatRva(displayValue);
+    bodyHTML += `<td class="value-cell hover-expand" style="background-color: ${colors.backgroundColor}; color: ${colors.color};">${formattedValue}</td>`;
+}
                 });
 
-                // Summary columns (main data)
+                // Summary columns (main data) - ROI and Avg Per App only
                 const avgRewardsPerAppearance = heroTotals[idx].avgRewards;
                 const commonPrice = heroTotals[idx].commonAvg || null;
                 const roi = heroTotals[idx].roi;
 
-                // ROI column
-                const roiColors = getValueColor(roi, colorScales.roi, 'roi');
-                const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Est Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${roi > 0 ? formatCurrency(roi) + '%' : '-'}</td>`;
-
-                // Avg Per App column
+                // Avg Per App column (first of summary columns)
                 const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards');
                 const avgTooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${avgTooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
+                bodyHTML += `<td class="total-col summary-col avg-per-app-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${avgTooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
 
-                // Median column
-                const medianColors = getValueColor(median, colorScales.median, 'median');
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};">${formatMedian(median)}</td>`;
+                // ROI column (now directly after Avg Per App)
+                const roiColors = getValueColor(roi, colorScales.roi, 'roi');
+                const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Est Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
+                bodyHTML += `<td class="total-col summary-col roi-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${roi > 0 ? formatCurrency(roi) + '%' : '-'}</td>`;
 
-                // Total column
+                // Total column (blue palette)
                 const totalColors = getValueColor(total, colorScales.total, 'total');
-                bodyHTML += `<td class="total-col summary-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};">${formatCurrency(total)}</td>`;
+                bodyHTML += `<td class="total-col summary-col total-col" style="background-color: ${totalColors.backgroundColor}; color: ${totalColors.color};" title="Total RVA: ${formatCurrency(total)}">${formatCurrency(total)}</td>`;
 
-                bodyHTML += '</tr>';
+                // Median column (purple palette) - median of raw per-tournament rewards
+                const medianColors = getValueColor(median, colorScales.median, 'median');
+                bodyHTML += `<td class="total-col summary-col median-col" style="background-color: ${medianColors.backgroundColor}; color: ${medianColors.color};" title="Median RVA: ${formatMedian(median)}">${formatMedian(median)}</td>`;
+ 
+                 bodyHTML += '</tr>';
+ 
+                 // Info row (stars and hero scores)
+                 bodyHTML += '<tr class="info-row">';
+                 bodyHTML += `<td></td>`; // Empty rank cell
+                 bodyHTML += `<td>Stars & Scores</td>`; // Hero cell label
+ 
+                 bodyHTML += `<td></td>`; // Empty est price cell
+                 bodyHTML += `<td></td>`; // Empty hero stars cell
+ 
+                 // Tournament info columns
+                 tournamentNumbers.forEach(tournNum => {
+                     const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
+                     const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined)
+                         ? Number(scoreMatrix[hero][tournNum])
+                         : null;
+                     const tournamentAppearances = (appearancesMatrix[hero] && appearancesMatrix[hero][tournNum] !== null && appearancesMatrix[hero][tournNum] !== undefined)
+                         ? Number(appearancesMatrix[hero][tournNum])
+                         : null;
+ 
+                     // Raw TRVA value for this hero/rarity/tournament (sum from query stored in matrix)
+                     const rawRva = (matrix[hero] && matrix[hero][tournNum] !== null && matrix[hero][tournNum] !== undefined)
+                         ? Number(matrix[hero][tournNum])
+                         : null;
+ 
+                     const lines = [];
+                     if (stars > 0) lines.push(`Stars: ${stars}`);
+                     if (heroScore !== null) lines.push(`Score: ${heroScore}`);
+                     if (tournamentAppearances !== null) lines.push(`App: ${tournamentAppearances}`);
+                     if (lines.length === 0) lines.push('-');
+ 
+                     bodyHTML += `<td>${lines.join('<br>')}</td>`;
+                 });
+                // Empty summary columns for info row (Avg Per App, ROI, Total, Median) - keep same order as
+                bodyHTML += `<td class="avg-per-app-col"></td>`; // Avg Per App
+                bodyHTML += `<td class="roi-col"></td>`; // ROI
+                bodyHTML += `<td class="total-col"></td>`; // Total
+                bodyHTML += `<td class="median-col"></td>`; // Median
+ 
+                 bodyHTML += '</tr>';
+             });
+             tableBody.innerHTML = bodyHTML;
+         }
 
-                // Info row (stars and hero scores)
-                bodyHTML += '<tr class="info-row">';
-                bodyHTML += `<td></td>`; // Empty rank cell
-                bodyHTML += `<td>Stars & Scores</td>`; // Hero cell label
-
-                bodyHTML += `<td></td>`; // Empty est price cell
-                bodyHTML += `<td></td>`; // Empty hero stars cell
-
-                // Tournament info columns
-                tournamentNumbers.forEach(tournNum => {
-                    const stars = (starsMatrix[hero] && starsMatrix[hero][tournNum]) ? Number(starsMatrix[hero][tournNum]) : 0;
-                    const heroScore = (scoreMatrix[hero] && scoreMatrix[hero][tournNum] !== null && scoreMatrix[hero][tournNum] !== undefined)
-                        ? Number(scoreMatrix[hero][tournNum])
-                        : null;
-                    const tournamentAppearances = (appearancesMatrix[hero] && appearancesMatrix[hero][tournNum] !== null && appearancesMatrix[hero][tournNum] !== undefined)
-                        ? Number(appearancesMatrix[hero][tournNum])
-                        : null;
-                    const rawRva = (matrix[hero] && matrix[hero][tournNum] !== null && matrix[hero][tournNum] !== undefined)
-                        ? Number(matrix[hero][tournNum])
-                        : null;
-
-                    const lines = [];
-                    if (stars > 0) lines.push(`Stars: ${stars}`);
-                    if (rawRva !== null) lines.push(`RVA: ${formatRva(rawRva)}`);
-                    if (heroScore !== null) lines.push(`Score: ${heroScore}`);
-                    if (tournamentAppearances !== null) lines.push(`App: ${tournamentAppearances}`);
-                    if (lines.length === 0) lines.push('-');
-
-                    bodyHTML += `<td>${lines.join('<br>')}</td>`;
-                });
-
-                // Empty summary columns for info row
-                bodyHTML += `<td></td>`; // ROI
-                bodyHTML += `<td></td>`; // Avg Per App
-                bodyHTML += `<td></td>`; // Median
-                bodyHTML += `<td></td>`; // Total
-
-                bodyHTML += '</tr>';
-            });
-            tableBody.innerHTML = bodyHTML;
+        // Add loading state management
+        function showLoading(message = 'Loading...') {
+            const loading = document.getElementById('loading');
+            loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
+            loading.style.display = 'flex';
         }
-
-        // Add sort handler
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // Add debounced sorting to prevent rapid re-renders
+        let sortTimeout;
         function handleSort(column) {
-            // If clicking the same column, toggle direction
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
-            } else {
-                // New column, default to descending
-                currentSort.column = column;
-                currentSort.direction = 'desc';
-            }
-            
-            // Re-render the current league with new sort
-            if (currentLeague) {
-                renderMatrix(currentLeague);
-            }
+            if (sortTimeout) clearTimeout(sortTimeout);
+            sortTimeout = setTimeout(() => {
+                // Remove the showLoading('Sorting...') call
+                // If clicking the same column, toggle direction
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'desc';
+                }
+                
+                // Re-render immediately without delay for smoother UX
+                if (currentLeague && currentLeague !== 'BY_LEAGUE') {
+                    renderMatrix(currentLeague);
+                } else if (currentLeague === 'BY_LEAGUE') {
+                    renderByLeagueMatrix();
+                }
+            }, 50); // Reduced debounce time from 150ms to 50ms
         }
 
         // Add the missing calculateMedian function
@@ -1039,14 +1713,16 @@
             return Number(value).toFixed(4);
         }
 
-        // RVA formatting (3 decimals)
+        // RVA formatting (4 decimals for per-tournament / TRVA previews)
         function formatRva(value) {
             if (value === null || value === undefined || isNaN(Number(value))) return '-';
-            return Number(value).toFixed(3);
+            return Number(value).toFixed(4);
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // attach toggle handler early
+            setupDisplayModeToggle();
             fetchRewardsData();
         });
 
@@ -1063,28 +1739,26 @@
 
         // Render the By League summary matrix
         function renderByLeagueMatrix() {
-            // Use leagueOrder and filter to only those present in data
-            const leaguesInData = [...new Set(allData.map(row => row.league))];
-            const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
-            const heroSet = new Set();
-            const heroPfpMap = {};
-            const heroCommonAvgMap = {};
-            const heroStarsMap = {};
-            
-            allData.forEach(row => {
-                const heroName = (row.hero_name || row.hero_handle || '').trim();
-                if (!heroName) return;
-                if ((row.hero_stars !== undefined && row.hero_stars !== null)) {
-                    if (!(heroName in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroName]) {
-                        heroStarsMap[heroName] = Number(row.hero_stars);
-                    }
-                }
-            });
-
+            const tableBody = document.getElementById('tableBody');
+             // Use leagueOrder and filter to only those present in data
+             const leaguesInData = [...new Set(allData.map(row => row.league))];
+             const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
+             const heroSet = new Set();
+             const heroPfpMap = {};
+             const heroCommonAvgMap = {};
+             const heroStarsMap = {};
+             const heroIdMap = {};
+             const heroRarityMap = {};
+             
             allData.forEach(row => {
                 const heroKey = heroKeyFromRow(row);
                 if (!heroKey) return;
                 heroSet.add(heroKey);
+                
+                // Store hero_id and hero_rarity for card URL generation
+                if (row.hero_id && !heroIdMap[heroKey]) heroIdMap[heroKey] = row.hero_id;
+                if (row.hero_rarity && !heroRarityMap[heroKey]) heroRarityMap[heroKey] = row.hero_rarity;
+                
                 const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
                 if (pfp && !heroPfpMap[heroKey]) heroPfpMap[heroKey] = pfp;
                 if (row.common_avg_price !== undefined && row.common_avg_price !== null && !(heroKey in heroCommonAvgMap)) {
@@ -1096,13 +1770,42 @@
                     }
                 }
             });
-            const heroes = [...heroSet].sort((a, b) => {
-                // sort by base name then rarity
-                const pa = parseHeroKey(a);
-                const pb = parseHeroKey(b);
-                const n = pa.name.localeCompare(pb.name);
-                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+            let heroes = [...heroSet].sort((a, b) => {
+                  // sort by base name then rarity
+                  const pa = parseHeroKey(a);
+                  const pb = parseHeroKey(b);
+                  const n = pa.name.localeCompare(pb.name);
+                  return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+              });
+            // Apply global search/selection across all heroes (heroLookupAll built in setupSearch)
+            if (selectedHeroKey) {
+                heroes = heroes.filter(h => h === selectedHeroKey);
+            } else if (selectedHeroBase) {
+                const baseLower = selectedHeroBase.toLowerCase();
+                heroes = heroes.filter(h => parseHeroKey(h).name.toLowerCase() === baseLower);
+            } else if (searchTerm && searchTerm.trim().length > 0) {
+                const q = searchTerm.trim().toLowerCase();
+                heroes = heroes.filter(h => {
+                    const info = heroLookupAll[h] || {};
+                    return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
+                });
+            }
+
+            // Build table header for "By League" view (replace previous tournament header)
+            const tableHeader = document.getElementById('tableHeader');
+            let headerHTML = '<tr>';
+            headerHTML += `<th style="width:40px;">#</th>`; // rank
+            headerHTML += `<th class="hero-col sortable" onclick="handleByLeagueSort('hero')">Hero</th>`;
+            headerHTML += `<th class="common-price-col sortable" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
+            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;"><span title="Stars">Stars</span></th>`;
+            // league columns across top
+            leagues.forEach(lg => {
+                headerHTML += `<th class="value-cell sortable" onclick="handleByLeagueSort('${lg}')">${lg}</th>`;
             });
+            // grand total column
+            headerHTML += `<th class="total-col sortable" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
+            headerHTML += '</tr>';
+            tableHeader.innerHTML = headerHTML;
 
             // 2. Aggregate reward_value_added by hero and league
             const heroLeagueTotals = {};
@@ -1110,7 +1813,7 @@
                 heroLeagueTotals[heroKey] = {};
                 leagues.forEach(lg => { heroLeagueTotals[heroKey][lg] = 0; });
             });
-
+            
             allData.forEach(row => {
                 const heroKey = heroKeyFromRow(row);
                 if (!heroKey) return;
@@ -1118,22 +1821,28 @@
                 let val = row.reward_value_added;
                 val = (val === null || val === undefined || isNaN(Number(val))) ? 0 : Number(val);
                 if (heroLeagueTotals[heroKey] && (league in heroLeagueTotals[heroKey])) {
+                   
                     heroLeagueTotals[heroKey][league] += val;
                 }
             });
 
             // 3. Prepare data for rendering
             const summaryRows = heroes.map(heroKey => {
-                const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
-                const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
-                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
-                return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
-            });
+                 const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
+                 const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
+                 const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
+                 return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
+             });
+ 
+            // compute min/max grandTotal for coloring
+            const totalsArray = summaryRows.map(r => r.grandTotal || 0);
+const minTotal = totalsArray.length ? Math.min(...totalsArray) : 0;
+const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
 
-            // 4. Sort by grandTotal descending by default, or by currentSort
-            let sortCol = currentSort.column;
-            let sortDir = currentSort.direction;
-            if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
+ // 4. Sort by grandTotal descending by default, or by currentSort
+ let sortCol = currentSort.column;
+ let sortDir = currentSort.direction;
+             if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
                 sortCol = 'grandTotal';
                 sortDir = 'desc';
             }
@@ -1143,71 +1852,22 @@
                     const pb = parseHeroKey(b.hero);
                     const cmpName = pa.name.localeCompare(pb.name);
                     const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
-                    return sortDir === 'asc' ? cmp : -cmp;
-                } else if (leagues.includes(sortCol)) {
-                    const idx = leagues.indexOf(sortCol);
-                    return sortDir === 'asc'
-                        ? a.leagueTotals[idx] - b.leagueTotals[idx]
-                        : b.leagueTotals[idx] - a.leagueTotals[idx];
-                } else if (sortCol === 'common_avg_price') {
-                    return sortDir === 'asc'
-                        ? (a.commonAvg ?? -Infinity) - (b.commonAvg ?? -Infinity)
-                        : (b.commonAvg ?? -Infinity) - (a.commonAvg ?? -Infinity);
+                    if (sortDir === 'asc') return cmp;
+                    return -cmp;
                 } else {
-                    return sortDir === 'asc'
-                        ? a.grandTotal - b.grandTotal
-                        : b.grandTotal - a.grandTotal;
+                    let aVal, bVal;
+                    if (sortCol === 'grandTotal') {
+                        aVal = a.grandTotal;
+                        bVal = b.grandTotal;
+                    } else {
+                        aVal = a.leagueTotals[leagues.indexOf(sortCol)] || 0;
+                        bVal = b.leagueTotals[leagues.indexOf(sortCol)] || 0;
+                    }
+                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
                 }
             });
 
-            // 5. Calculate total color scale for the grand total column
-            const totalVals = summaryRows.map(row => row.grandTotal);
-            const minTotal = Math.min(...totalVals);
-            const maxTotal = Math.max(...totalVals);
-
-            // Helper for blue-to-orange/red palette (same as league tabs)
-            function getTotalPaletteColor(normalized) {
-                // Blue to orange/red
-                if (normalized >= 0.9) return '#08306b';
-                if (normalized >= 0.8) return '#08519c';
-                if (normalized >= 0.7) return '#3182bd';
-                if (normalized >= 0.6) return '#6baed6';
-                if (normalized >= 0.5) return '#9ecae1';
-                if (normalized >= 0.4) return '#c6dbef';
-                if (normalized >= 0.3) return '#deebf7';
-                if (normalized >= 0.2) return '#f7fbff';
-                if (normalized >= 0.1) return '#fee8c8';
-                if (normalized >= 0.05) return '#fd8d3c';
-                return '#d94701';
-            }
-
-            // 6. Render table header
-            const tableHeader = document.getElementById('tableHeader');
-            let headerHTML = '<tr>';
-            headerHTML += `<th style="width:40px;">#</th>`;
-            const heroSortClass = sortCol === 'hero' ? `sort-${sortDir}` : '';
-            headerHTML += `<th class="hero-col sortable ${heroSortClass}" onclick="handleByLeagueSort('hero')">Hero</th>`;
-            const commonSortClass = sortCol === 'common_avg_price' ? `sort-${sortDir}` : '';
-            // Wrap Est Price header text
-            headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px; white-space:normal; line-height:1.1;"><span style="white-space:normal;">Common<br>Price</span></th>`;
-            // New Hero Stars column
-            const heroStarsSortClass = sortCol === 'hero_stars' ? `sort-${sortDir}` : '';
-            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
-                <span title="Stars">Stars</span>
-            </th>`;
-            leagues.forEach(lg => {
-                const sortClass = sortCol === lg ? `sort-${sortDir}` : '';
-                // League icon only, no background fill
-                const iconHtml = `<img class="league-icon" src="../../icons/${lg.toLowerCase()}.webp" alt="${lg}" style="width:22px;height:22px;vertical-align:middle;">`;
-                headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleByLeagueSort('${lg}')">${iconHtml}</th>`;
-            });
-            const totalSortClass = sortCol === 'grandTotal' ? `sort-${sortDir}` : '';
-            headerHTML += `<th class="total-col sortable ${totalSortClass}" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
-            headerHTML += '</tr>';
-            tableHeader.innerHTML = headerHTML;
-
-            // 7. Render table body
-            const tableBody = document.getElementById('tableBody');
+            // Render table for By League summary
             let bodyHTML = '';
             summaryRows.forEach((row, idx) => {
                 bodyHTML += '<tr>';
@@ -1237,11 +1897,11 @@
                     // Get star count for this hero in this specific league
                     const heroLeagueStars = allData
                         .filter(dataRow => {
-                            const heroName = (dataRow.hero_name || dataRow.hero_handle || '').trim();
-                            return heroName === row.hero && dataRow.league === league;
+                            const dataKey = heroKeyFromRow(dataRow);
+                            return dataKey === row.hero && dataRow.league === league;
                         })
                         .reduce((maxStars, dataRow) => {
-                            const stars = dataRow.hero_stars || 0;
+                            const stars = (dataRow.hero_stars !== undefined && dataRow.hero_stars !== null) ? Number(dataRow.hero_stars) : 0;
                             return Math.max(maxStars, stars);
                         }, 0);
                     
@@ -1258,21 +1918,21 @@
                     
                     bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
                 });
-                // Total column: blue-to-orange/red palette at 20% opacity
-                let norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
-                const totalBgSolid = getTotalPaletteColor(norm);
+                // Total column: use getTotalBackgroundColor palette and apply 20% opacity
+                const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
+                const totalBgSolid = getTotalBackgroundColor(norm);
                 const totalBg = colorToRgba(totalBgSolid, 0.2);
                 const totalTextColor = readableTextColor(totalBgSolid);
                 bodyHTML += `<td class="total-col" style="background:${totalBg};color:${totalTextColor};">${formatCurrency(row.grandTotal)}</td>`;
                 bodyHTML += '</tr>';
             });
-            tableBody.innerHTML = bodyHTML;
-
-            // Show/hide elements
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('matrixTable').style.display = 'table';
-            document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
-        }
+             tableBody.innerHTML = bodyHTML;
+ 
+             // Show/hide elements
+             document.getElementById('loading').style.display = 'none';
+             document.getElementById('matrixTable').style.display = 'table';
+             document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
+         }
 
         // Helper: create / parse composite hero key (name + rarity) and display name
 function heroKeyFromRow(row) {
@@ -1296,11 +1956,11 @@ const rarityColors = {
     all: '#666666'
 };
 function buildRarityBadge(key) {
-    const { rarity } = parseHeroKey(key);
-    if (!rarity) return '';
-    const safe = rarity.replace(/[^a-z0-9_-]/g,'');
-    return `<span class="rarity-badge rarity-${safe}" title="Rarity: ${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>`;
-}
+     const { rarity } = parseHeroKey(key);
+     if (!rarity) return '';
+     const safe = rarity.replace(/[^a-z0-9_-]/g,'');
+     return `<span class="rarity-badge rarity-${safe}" title="Rarity: ${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>`;
+ }
     </script>
 </body>
 </html>

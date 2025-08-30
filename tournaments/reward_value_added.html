@@ -22,7 +22,7 @@
             --col-hero-width: 150px;    /* left hero column */
             --col-avg-width: 50px;     /* Avg Per App summary column */
             --col-roi-width: 50px;      /* ROI summary column (far right) */
-            --col-total-width: 110px;  /* width for Total RVA summary column (customizable) */
+            --col-total-width: 50px;  /* width for Total RVA summary column (customizable) */
         }
         
         .hero-image {
@@ -890,9 +890,10 @@
             });
 
             if (league === 'BY_LEAGUE') {
-                renderByLeagueMatrix();
+                // Defer the actual heavy render so the browser can paint the loading indicator
+                setTimeout(() => renderByLeagueMatrix(), 16);
             } else {
-                renderMatrix(league);
+                setTimeout(() => renderMatrix(league), 16);
             }
         }
 
@@ -1088,10 +1089,12 @@
             
             if (leagueData.length === 0) {
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('matrixTable').style.display = 'none';
-                document.getElementById('noData').style.display = 'block';
-                return;
-            }
+                // Ensure loading indicator is hidden if no data
+                hideLoading();
+                 document.getElementById('matrixTable').style.display = 'none';
+                 document.getElementById('noData').style.display = 'block';
+                 return;
+             }
 
             // Build hero -> pfp map and unique hero list using hero_name (fallback to hero_handle)
             const heroPfpMap = {};
@@ -1316,17 +1319,19 @@
             // Pass matrix/appearances and the display toggle so sorting respects Avg vs Total toggle.
             const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers, matrix, appearancesMatrix, showAvgPerAppearance);
  
-             console.log('Hero totals calculated:', sortedHeroTotals.length);
+              console.log('Hero totals calculated:', sortedHeroTotals.length);
  
-             // Render table with independent color scales (pass heroPfpMap)
-             renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
-             
+              // Render table with independent color scales (pass heroPfpMap)
+              renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
+              
              document.getElementById('loading').style.display = 'none';
              // Hide loading when rendering is complete
              hideLoading();
-             document.getElementById('matrixTable').style.display = 'table';
-             document.getElementById('noData').style.display = 'none';
-         }
+            // Hide loading when rendering is complete
+            hideLoading();
+              document.getElementById('matrixTable').style.display = 'table';
+              document.getElementById('noData').style.display = 'none';
+          }
  
         // Fix the sortHeroes function - accept matrix/appearances and toggle so tournament-column sorting
         // uses avg-per-appearance or raw total depending on the UI toggle.
@@ -1654,13 +1659,11 @@ if (!hasValue) {
                  bodyHTML += '</tr>';
              });
              tableBody.innerHTML = bodyHTML;
-+            
-+            // Hide loading when rendering is complete
-+            hideLoading();
- 
-             // Show/hide elements
-             document.getElementById('matrixTable').style.display = 'table';
-             document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
+             hideLoading(); // <-- Add this line!
+
+            // Show/hide elements
+            document.getElementById('matrixTable').style.display = 'table';
+            document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
          }
 
         // Add loading state management
@@ -1758,7 +1761,7 @@ if (!hasValue) {
 
         // Render the By League summary matrix
         function renderByLeagueMatrix() {
-            const tableBody = document.getElementById('tableBody');
+             const tableBody = document.getElementById('tableBody');
              // Use leagueOrder and filter to only those present in data
              const leaguesInData = [...new Set(allData.map(row => row.league))];
              const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
@@ -1891,8 +1894,19 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
             summaryRows.forEach((row, idx) => {
                 bodyHTML += '<tr>';
                 bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`;
-                const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
-                const imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
+                // Prefer rendering the card image when hero_id, rarity and stars are available,
+                // otherwise fall back to pfp.
+                let imgHtml = '';
+                const heroId = (heroIdMap && heroIdMap[row.hero]) ? heroIdMap[row.hero] : '';
+                const heroRarity = (heroRarityMap && heroRarityMap[row.hero]) ? heroRarityMap[row.hero] : '';
+                const heroStarsForCard = (heroStarsMap && heroStarsMap[row.hero]) ? heroStarsMap[row.hero] : 0;
+                if (heroId && heroRarity && heroStarsForCard) {
+                    const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
+                    imgHtml = `<img class="hero-image" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">`;
+                } else {
+                    const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
+                    imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
+                }
                 const baseName = displayHeroBaseName(row.hero);
                 const displayName = truncateHeroName(baseName);
                 const badge = buildRarityBadge(row.hero);
@@ -1913,17 +1927,6 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
                 row.leagueTotals.forEach((val, i) => {
                     const league = leagues[i];
                     
-                    // Get star count for this hero in this specific league
-                    const heroLeagueStars = allData
-                        .filter(dataRow => {
-                            const dataKey = heroKeyFromRow(dataRow);
-                            return dataKey === row.hero && dataRow.league === league;
-                        })
-                        .reduce((maxStars, dataRow) => {
-                            const stars = (dataRow.hero_stars !== undefined && dataRow.hero_stars !== null) ? Number(dataRow.hero_stars) : 0;
-                            return Math.max(maxStars, stars);
-                        }, 0);
-                    
                     // League color with 20% opacity
                     let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${league.toLowerCase()}`).trim();
                     if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
@@ -1932,7 +1935,7 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
                     // Build cell content with value (format as 2 decimals for by-league cells) - no star hover info
                     let cellContent = `<div>${formatCurrency(val)}</div>`;
                     
-                     bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
+                    bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
                 });
                 // Total column: use getTotalBackgroundColor palette and apply 20% opacity
                 const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
@@ -1943,10 +1946,11 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
                 bodyHTML += '</tr>';
             });
              tableBody.innerHTML = bodyHTML;
- 
-             // Show/hide elements
-             document.getElementById('matrixTable').style.display = 'table';
-             document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
+             hideLoading();
+
+            // Show/hide elements
+            document.getElementById('matrixTable').style.display = 'table';
+            document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
          }
 
         // Helper: create / parse composite hero key (name + rarity) and display name

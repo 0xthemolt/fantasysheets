@@ -22,6 +22,7 @@
             --col-hero-width: 150px;    /* left hero column */
             --col-avg-width: 50px;     /* Avg Per App summary column */
             --col-roi-width: 50px;      /* ROI summary column (far right) */
+            --col-total-width: 110px;  /* width for Total RVA summary column (customizable) */
         }
         
         .hero-image {
@@ -194,6 +195,14 @@
             width: var(--col-roi-width);
             min-width: var(--col-roi-width);
             max-width: var(--col-roi-width);
+            text-align: right;
+        }
+        /* Total RVA column width (customizable via --col-total-width) */
+        .matrix-table th.total-col,
+        .matrix-table td.total-col {
+            width: var(--col-total-width);
+            min-width: var(--col-total-width);
+            max-width: var(--col-total-width);
             text-align: right;
         }
 
@@ -858,6 +867,9 @@
         // Update selectLeague to handle "BY_LEAGUE"
         function selectLeague(league) {
             currentLeague = league;
+            
+            // Show loading immediately when switching tabs
+            showLoading('Loading league data...');
 
             document.querySelectorAll('.league-tab').forEach(tab => {
                 const tabText = tab.querySelector('span') ? tab.querySelector('span').textContent : '';
@@ -1310,6 +1322,8 @@
              renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
              
              document.getElementById('loading').style.display = 'none';
+             // Hide loading when rendering is complete
+             hideLoading();
              document.getElementById('matrixTable').style.display = 'table';
              document.getElementById('noData').style.display = 'none';
          }
@@ -1518,10 +1532,8 @@
                 if (heroId && heroRarity && heroStarsForCard) {
                     // Generate card URL: https://r2.fantasy.top/v3/{rarity}/{id}_{stars}.png
                     const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
-                    imgHtml = `<img class="hero-image" src="${cardUrl}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">`;
+                    imgHtml = `<img class="hero-image" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">`;
                 } else {
-                    // Fallback to pfp if card data unavailable
-                    const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
                     imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
                 }
 
@@ -1642,6 +1654,13 @@ if (!hasValue) {
                  bodyHTML += '</tr>';
              });
              tableBody.innerHTML = bodyHTML;
++            
++            // Hide loading when rendering is complete
++            hideLoading();
+ 
+             // Show/hide elements
+             document.getElementById('matrixTable').style.display = 'table';
+             document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
          }
 
         // Add loading state management
@@ -1910,13 +1929,10 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
                     if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
                     const bg = colorToRgba(colorValue, 0.2);
                     
-                    // Build cell content with value and hidden stars
-                    let cellContent = `<div>${formatRva(val)}</div>`;
-                    if (heroLeagueStars > 0) {
-                        cellContent += `<div class="star-info" style="font-size: 0.9em; margin-top: 4px;">(${heroLeagueStars} <i class="fas fa-star" style="color: #ffd700;"></i>)</div>`;
-                    }
+                    // Build cell content with value (format as 2 decimals for by-league cells) - no star hover info
+                    let cellContent = `<div>${formatCurrency(val)}</div>`;
                     
-                    bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
+                     bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">${cellContent}</td>`;
                 });
                 // Total column: use getTotalBackgroundColor palette and apply 20% opacity
                 const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
@@ -1929,7 +1945,6 @@ const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
              tableBody.innerHTML = bodyHTML;
  
              // Show/hide elements
-             document.getElementById('loading').style.display = 'none';
              document.getElementById('matrixTable').style.display = 'table';
              document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
          }

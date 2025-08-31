@@ -1669,6 +1669,7 @@ if (!hasValue) {
         // Add loading state management
         function showLoading(message = 'Loading...') {
             const loading = document.getElementById('loading');
+
             loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
             loading.style.display = 'flex';
         }
@@ -1811,6 +1812,17 @@ if (!hasValue) {
                     const info = heroLookupAll[h] || {};
                     return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
                 });
+            }
+
+            // After building the heroes array in renderByLeagueMatrix()
+            let selectedRarities = [];
+            if (document.getElementById('filterLegendary')?.checked) selectedRarities.push('legendary');
+            if (document.getElementById('filterEpic')?.checked) selectedRarities.push('epic');
+            if (document.getElementById('filterRare')?.checked) selectedRarities.push('rare');
+            if (document.getElementById('filterCommon')?.checked) selectedRarities.push('common');
+
+            if (selectedRarities.length > 0) {
+                heroes = heroes.filter(h => selectedRarities.includes(parseHeroKey(h).rarity));
             }
 
             // Build table header for "By League" view (replace previous tournament header)

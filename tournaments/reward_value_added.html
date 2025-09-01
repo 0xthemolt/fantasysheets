@@ -22,7 +22,7 @@
             --col-hero-width: 150px;    /* left hero column */
             --col-avg-width: 50px;     /* Avg Per App summary column */
             --col-roi-width: 50px;      /* ROI summary column (far right) */
-            --col-total-width: 50px;  /* width for Total RVA summary column (customizable) */
+            --col-total-width: 55px;  /* width for Total RVA summary column (customizable) */
         }
         
         .hero-image {
@@ -204,6 +204,9 @@
             min-width: var(--col-total-width);
             max-width: var(--col-total-width);
             text-align: right;
+            /* Make Total column header & values a bit larger and always white */
+            font-size: 1.08em;
+            color: #ffffff !important;
         }
 
         /* Hide star information by default */
@@ -643,6 +646,8 @@
         let currentLeague = null;
         let currentSort = { column: 'avgRewards', direction: 'desc' }; // Changed from 'median' to 'avgRewards'
         let colorScale = { min: 0, max: 1 }; // Add this missing variable
+        // Only show loading overlay on the initial page load
+        let initialLoad = true;
 
         // Search / autocomplete state
         let searchTerm = '';
@@ -1671,14 +1676,19 @@ if (!hasValue) {
        
         // Add loading state management
         function showLoading(message = 'Loading...') {
+            // Only show the overlay on the first (initial) load.
+            if (!initialLoad) return;
             const loading = document.getElementById('loading');
-
+            if (!loading) return;
             loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
             loading.style.display = 'flex';
         }
         
         function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'none';
+            // After the first hide, mark initial load complete so future showLoading() calls are ignored.
+            if (initialLoad) initialLoad = false;
         }
         
         // Add debounced sorting to prevent rapid re-renders
@@ -1985,9 +1995,9 @@ if (!hasValue) {
                 const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
                 const totalBgSolid = getTotalBackgroundColor(norm);
                 const totalBg = colorToRgba(totalBgSolid, 0.2);
-                const totalTextColor = readableTextColor(totalBgSolid);
                 const grandTotalRank = grandTotalRankings[row.hero];
-                bodyHTML += `<td class="total-col" style="background:${totalBg};color:${totalTextColor};">
+                // Force white text for the total column and slightly larger font
+                bodyHTML += `<td class="total-col" style="background:${totalBg}; color: #ffffff; font-size: 1.08em;">
                     <strong>${formatCurrency(row.grandTotal)}</strong> <span style="color: #888; font-size: 0.85em;">(#${grandTotalRank})</span>
                 </td>`;
                 bodyHTML += '</tr>';

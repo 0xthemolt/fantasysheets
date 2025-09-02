@@ -686,7 +686,6 @@
         async function fetchRewardsData() {
              try {
                 console.log('Starting to fetch rewards data...');
-                
                 // Fetch data with exact count (no explicit .limit() was present previously)
                 const { data, error, count } = await supabaseClient
                     .from('rewardsvalueadded')
@@ -708,7 +707,6 @@
  
                  if (error) {
                      console.error('Detailed error:', error);
-                     
                      document.getElementById('loading').innerHTML = `
                          <div style="color: #f87171;">
                              <i class="fas fa-exclamation-triangle"></i> 
@@ -718,19 +716,20 @@
                      return;
                  }
  
-                // One debug log only
                 console.log('Fetched records:', Array.isArray(data) ? data.length : 0);
                  
-                 // Debug: Show unique leagues and heroes
                  const uniqueLeagues = [...new Set(data.map(row => row.league))];
-                 const uniqueHeroes = [...new Set(data.map(row => row.hero_handle))];
+                 const uniqueHeroes = [...new Set(data.map(row => heroKeyFromRow(row)).filter(Boolean))];
                  console.log('Unique leagues found:', uniqueLeagues);
-                 console.log('Total unique heroes:', uniqueHeroes.length);
-                 console.log('Heroes list:', uniqueHeroes.slice(0, 20)); // Show first 20
+                 console.log('Total unique heroes (composite keys):', uniqueHeroes.length);
+                 console.log('Heroes list (first 20):', uniqueHeroes.slice(0, 20));
                  
                  allData = data;
                  setupLeagueTabs();
                  setupSearch(); // initialize search/autocomplete once data loaded
+
+                 // Precompute global By-League rankings once for all heroes/rarities
+                 computeGlobalLeagueRankings();
                 
             } catch (err) {
                 console.error('Exception while fetching data:', err);

@@ -358,130 +358,132 @@
             z-index: 10;
         }
 
-                /* Filter container styles */
+        /* Filter container styles */
         .filter-container {
             width: 68%;
             margin: 0 auto 20px auto;
-            padding: 20px;
-            background: #1a1a1a;
-            border-radius: 8px;
+            padding: 12px 0; /* keep breathing room but remove heavy box feel */
+            background: transparent; /* remove outer fill to match sell-order-filter */
+            border-radius: 4px;
             display: flex;
-            align-items: flex-start;
-            gap: 20px;
+            align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
-            font-size: 80%; /* Reduce text size by 20% */
+            font-size: 90%;
+        }
+
+        /* Use same label styling for Search, Rarity, Display to keep visual consistency */
+        .filter-container > div > label,
+        .filter-container label[for="heroHandleSearch"] {
+            display: block;
+            margin: 0 6px 0 0;
+            font-weight: 600;
+            color: #fff;
+            font-size: 11px;
         }
         
         .search-box {
-            flex: 0 0 auto; /* Change from flex: 1 to prevent expansion */
-            width: 180px; /* Reduced width (was approximately 300px) */
+            flex: 0 0 auto;
+            width: 220px;
             position: relative;
-            background: #2a2a2a;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #333;
-        }
-        
-        .search-box label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #fff;
-            font-size: 80%; /* Reduce text size by 20% */
-        }
-        
-        .search-input-container {
-            position: relative;
-            width: 100%;
-            display: block;
-        }
-
-             #heroHandleSearch {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 8px 10px; /* Slightly smaller padding */
-            padding-right: 35px;
-            border: 1px solid #333;
-            border-radius: 6px;
-            font-size: 11px; /* Reduced from default (~14px) */
-            background: #1a1a1a;
-            color: #fff;
-            transition: border-color 0.2s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        #heroHandleSearch:focus {
-            outline: none;
-            border-color: #444;
-        }
-        
-        .clear-search {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
+            padding: 0; /* remove interior box padding */
+            margin-right: 6px;
+            background: transparent;
             border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 3px; /* Reduced from 4px */
-            display: none;
-            font-size: 14px; /* Reduce to fit narrower box */
-            transition: color 0.2s;
         }
         
-        .clear-search:hover {
-            color: #fff;
-        }
-        
-        .clear-search.visible {
+        /* keep input styling but visually flat (no box around the whole search container) */
+        .search-box .search-input-container {
+            width: 100%;
             display: block;
         }
         
-        .autocomplete-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%; /* Use 100% of the container, which matches search box */
-            background: #2a2a2a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            margin-top: 4px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-sizing: border-box;
-        }
-        
-        .autocomplete-item {
-            padding: 4px 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s;
-            color: #fff;
-            font-size: 12px;
-        }
-        
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-        
-        .autocomplete-item:hover {
-            background-color: #3a3a3a;
-        }
-        
-        .hero-preview-pic {
-            width: 21px;
-            height: 21px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid #444;
-        }
+              #heroHandleSearch {
+             width: 100%;
+             box-sizing: border-box;
+             padding: 8px 10px; /* Slightly smaller padding */
+             padding-right: 35px;
+             border: 1px solid #333;
+             border-radius: 6px;
+             font-size: 11px; /* Reduced from default (~14px) */
+             background: #1a1a1a;
+             color: #fff;
+             transition: border-color 0.2s;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+         }
+         
+         #heroHandleSearch:focus {
+             outline: none;
+             border-color: #444;
+         }
+         
+         .clear-search {
+             position: absolute;
+             right: 8px;
+             top: 50%;
+             transform: translateY(-50%);
+             background: none;
+             border: none;
+             color: #666;
+             cursor: pointer;
+             padding: 3px; /* Reduced from 4px */
+             display: none;
+             font-size: 14px; /* Reduce to fit narrower box */
+             transition: color 0.2s;
+         }
+         
+         .clear-search:hover {
+             color: #fff;
+         }
+         
+         .clear-search.visible {
+             display: block;
+         }
+         
+         .autocomplete-results {
+             position: absolute;
+             top: 100%;
+             left: 0;
+             width: 100%; /* Use 100% of the container, which matches search box */
+             background: #2a2a2a;
+             border: 1px solid #333;
+             border-radius: 6px;
+             margin-top: 4px;
+             max-height: 400px;
+             overflow-y: auto;
+             z-index: 1000;
+             display: none;
+             box-sizing: border-box;
+         }
+         
+         .autocomplete-item {
+             padding: 4px 8px;
+             cursor: pointer;
+             display: flex;
+             align-items: center;
+             gap: 8px;
+             transition: background-color 0.2s;
+             color: #fff;
+             font-size: 12px;
+         }
+         
+         .autocomplete-item:last-child {
+             border-bottom: none;
+         }
+         
+         .autocomplete-item:hover {
+             background-color: #3a3a3a;
+         }
+         
+         .hero-preview-pic {
+             width: 21px;
+             height: 21px;
+             border-radius: 50%;
+             object-fit: cover;
+             border: 1px solid #444;
+         }
 
             .checkbox-group {
             display: flex;
@@ -644,19 +646,10 @@
 
         let allData = [];
         let currentLeague = null;
-        let currentSort = { column: 'avgRewards', direction: 'desc' };
-        let colorScale = { min: 0, max: 1 };
+        let currentSort = { column: 'avgRewards', direction: 'desc' }; // Changed from 'median' to 'avgRewards'
+        let colorScale = { min: 0, max: 1 }; // Add this missing variable
+        // Only show loading overlay on the initial page load
         let initialLoad = true;
-
-        // Simple per-league cache to avoid recomputing matrices/heroTotals on every tab switch
-        const leagueCache = {
-            // keys: league name (e.g. "Bronze") or "BY_LEAGUE"
-            // values: { tournamentNumbers, matrix, appearancesMatrix, starsMatrix, heroTotals, heroPfpMap, heroStarsMap, scoreMatrix, heroIdMap, heroRarityMap, renderedHtml? }
-        };
-
-        // Global precomputed rankings (calculated once on load for ALL heroes+rarities)
-        let globalLeagueRankings = null;       // { leagueName: { heroKey: rank, ... }, ... }
-        let globalGrandTotalRankings = null;   // { heroKey: rank, ... }
 
         // Search / autocomplete state
         let searchTerm = '';
@@ -669,6 +662,20 @@
         // true = show avg reward per appearance in tournament grid (default), 
         // false = show raw total reward_value_added
         let showAvgPerAppearance = true;
+
+        // Add helper function to format ranks with trophy icons
+        function formatRank(rank) {
+            if (rank === 1) {
+                return '<i class="fas fa-trophy" style="color: #FFD700;" title="1st Place"></i>';
+            } else if (rank === 2) {
+                return '<i class="fas fa-trophy" style="color: #C0C0C0;" title="2nd Place"></i>';
+            } else if (rank === 3) {
+                return '<i class="fas fa-trophy" style="color: #CD7F32;" title="3rd Place"></i>';
+            } else {
+                return `#${rank}`;
+            }
+        }
+
         // Display mode toggle setup (was missing)
         function setupDisplayModeToggle() {
             const container = document.getElementById('displayModeToggle');
@@ -682,10 +689,28 @@
             });
         }
 
+        // Setup rarity checkbox listeners and clear button
+        function setupFilters() {
+            const ids = ['filterLegendary','filterEpic','filterRare','filterCommon'];
+            ids.forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb) cb.addEventListener('change', () => renderCurrentView());
+            });
+            const clearBtn = document.getElementById('clearFilter');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    ids.forEach(id => { const c = document.getElementById(id); if (c) c.checked = false; });
+                    renderCurrentView();
+                });
+            }
+        }
+
         // Fetch data from Supabase - ADD MORE DEBUGGING
         async function fetchRewardsData() {
-             try {
+            try {
                 console.log('Starting to fetch rewards data...');
+                
                 // Fetch data with exact count (no explicit .limit() was present previously)
                 const { data, error, count } = await supabaseClient
                     .from('rewardsvalueadded')
@@ -707,6 +732,7 @@
  
                  if (error) {
                      console.error('Detailed error:', error);
+                     
                      document.getElementById('loading').innerHTML = `
                          <div style="color: #f87171;">
                              <i class="fas fa-exclamation-triangle"></i> 
@@ -716,20 +742,21 @@
                      return;
                  }
  
-                console.log('Fetched records:', Array.isArray(data) ? data.length : 0);
+-                console.log('Fetched data:', data.length, 'records');
+-                console.log('Sample records:', data.slice(0, 10));
++                console.log('Fetched data array length:', Array.isArray(data) ? data.length : 0, 'records; server count:', count);
++                console.log('Sample records:', Array.isArray(data) ? data.slice(0, 10) : []);
                  
+                 // Debug: Show unique leagues and heroes
                  const uniqueLeagues = [...new Set(data.map(row => row.league))];
-                 const uniqueHeroes = [...new Set(data.map(row => heroKeyFromRow(row)).filter(Boolean))];
+                 const uniqueHeroes = [...new Set(data.map(row => row.hero_handle))];
                  console.log('Unique leagues found:', uniqueLeagues);
-                 console.log('Total unique heroes (composite keys):', uniqueHeroes.length);
-                 console.log('Heroes list (first 20):', uniqueHeroes.slice(0, 20));
+                 console.log('Total unique heroes:', uniqueHeroes.length);
+                 console.log('Heroes list:', uniqueHeroes.slice(0, 20)); // Show first 20
                  
                  allData = data;
                  setupLeagueTabs();
                  setupSearch(); // initialize search/autocomplete once data loaded
-
-                 // Precompute global By-League rankings once for all heroes/rarities
-                 computeGlobalLeagueRankings();
                 
             } catch (err) {
                 console.error('Exception while fetching data:', err);
@@ -811,7 +838,7 @@
         };
 
         // Desired league order
-        const leagueOrder = ['Bronze', 'Silver', 'Elite', 'Gold', 'Reverse'];
+        const leagueOrder = ['Elite','Gold','Silver','Bronze', 'Reverse'];
 
         // Setup league tabs
         function setupLeagueTabs() {
@@ -1094,25 +1121,14 @@
 
         // Render matrix for selected league
         function renderMatrix(league) {
-            // reuse cached computations where available
-            if (leagueCache[league] && !selectedHeroKey && !selectedHeroBase && !searchTerm) {
-                // If no search/selection filter active, reuse cached rendered HTML if present
-                const cached = leagueCache[league];
-                if (cached.renderedHtml) {
-                    document.getElementById('tableHeader').innerHTML = cached.headerHtml;
-                    document.getElementById('tableBody').innerHTML = cached.renderedHtml;
-                    document.getElementById('matrixTable').style.display = 'table';
-                    document.getElementById('noData').style.display = 'none';
-                    hideLoading();
-                    return;
-                }
-            }
+            console.log('Rendering matrix for league:', league);
             const leagueData = allData.filter(row => row.league === league);
-
-             if (leagueData.length === 0) {
-                 document.getElementById('loading').style.display = 'none';
-                 // Ensure loading indicator is hidden if no data
-                 hideLoading();
+            console.log('Records for this league:', leagueData.length);
+            
+            if (leagueData.length === 0) {
+                document.getElementById('loading').style.display = 'none';
+                // Ensure loading indicator is hidden if no data
+                hideLoading();
                  document.getElementById('matrixTable').style.display = 'none';
                  document.getElementById('noData').style.display = 'block';
                  return;
@@ -1175,6 +1191,15 @@
                    return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
                });
            }
+          // Apply rarity filter (same behavior as By-League view)
+          let selectedRarities = [];
+          if (document.getElementById('filterLegendary')?.checked) selectedRarities.push('legendary');
+          if (document.getElementById('filterEpic')?.checked) selectedRarities.push('epic');
+          if (document.getElementById('filterRare')?.checked) selectedRarities.push('rare');
+          if (document.getElementById('filterCommon')?.checked) selectedRarities.push('common');
+          if (selectedRarities.length > 0) {
+              heroes = heroes.filter(h => selectedRarities.includes(parseHeroKey(h).rarity));
+          }
 
             const tournamentNumbers = [...new Set(leagueData.map(row => row.tournament_number))].sort((a, b) => a - b);
 
@@ -1335,18 +1360,24 @@
                 }
             };
 
+            console.log('Color scales:', colorScales);
+
             // Do not overwrite currentSort here — keep the user's selected sort.
+            // Pass matrix/appearances and the display toggle so sorting respects Avg vs Total toggle.
             const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers, matrix, appearancesMatrix, showAvgPerAppearance);
-            // Render and cache header/body HTML for later reuse (only when no active search/selection)
-            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
-            if (!selectedHeroKey && !selectedHeroBase && !searchTerm) {
-                leagueCache[league] = leagueCache[league] || {};
-                leagueCache[league].renderedHtml = document.getElementById('tableBody').innerHTML;
-                leagueCache[league].headerHtml = document.getElementById('tableHeader').innerHTML;
-            }
-            document.getElementById('matrixTable').style.display = 'table';
-            document.getElementById('noData').style.display = 'none';
+ 
+              console.log('Hero totals calculated:', sortedHeroTotals.length);
+ 
+              // Render table with independent color scales (pass heroPfpMap)
+              renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
+              
+             document.getElementById('loading').style.display = 'none';
+             // Hide loading when rendering is complete
+             hideLoading();
+            // Hide loading when rendering is complete
             hideLoading();
+              document.getElementById('matrixTable').style.display = 'table';
+              document.getElementById('noData').style.display = 'none';
           }
  
         // Fix the sortHeroes function - accept matrix/appearances and toggle so tournament-column sorting
@@ -1517,7 +1548,7 @@
             headerHTML += `<th class="common-price-col sortable ${commonSortClass}" onclick="handleSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
             const heroStarsSortClass = currentSort.column === 'hero_stars' ? `sort-${currentSort.direction}` : '';
             headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;">
-    <span title="Stars">Stars</span>
+<span title="Stars">Stars</span>
 </th>`;
             tournamentNumbers.forEach(tournNum => {
                 const colName = `T${tournNum}`;
@@ -1542,7 +1573,7 @@
             heroTotals.forEach(({ hero, total, median, values, appearances }, idx) => {
                 // Main data row
                 bodyHTML += '<tr>';
-                bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`; // Row rank
+                bodyHTML += `<td style="text-align:center;">${formatRank(idx + 1)}</td>`; // Row rank with trophy icons
 
                 // Hero cell: generate card URL using hero_id, hero_rarity, and hero_stars
                 const heroId = (heroIdMap && heroIdMap[hero]) ? heroIdMap[hero] : '';
@@ -1667,7 +1698,6 @@ if (!hasValue) {
  
                      bodyHTML += `<td>${lines.join('<br>')}</td>`;
                  });
-               
                 // Empty summary columns for info row (Avg Per App, ROI, Total, Median) - keep same order as
                 bodyHTML += `<td class="avg-per-app-col"></td>`; // Avg Per App
                 bodyHTML += `<td class="roi-col"></td>`; // ROI
@@ -1679,6 +1709,7 @@ if (!hasValue) {
              tableBody.innerHTML = bodyHTML;
              hideLoading();
 
+           
             // Show/hide elements
 
             document.getElementById('matrixTable').style.display = 'table';
@@ -1771,6 +1802,7 @@ if (!hasValue) {
         document.addEventListener('DOMContentLoaded', function() {
             // attach toggle handler early
             setupDisplayModeToggle();
++            setupFilters();
             fetchRewardsData();
         });
 
@@ -1818,112 +1850,125 @@ if (!hasValue) {
                     }
                 }
             });
-            let heroes = [...heroSet].sort((a, b) => {
-          // sort by base name then rarity
-          const pa = parseHeroKey(a);
-          const pb = parseHeroKey(b);
-          const n = pa.name.localeCompare(pb.name);
-          return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
-      });
-    // Apply global search/selection across all heroes (heroLookupAll built in setupSearch)
-    if (selectedHeroKey) {
-        heroes = heroes.filter(h => h === selectedHeroKey);
-    } else if (selectedHeroBase) {
-        const baseLower = selectedHeroBase.toLowerCase();
-        heroes = heroes.filter(h => parseHeroKey(h).name.toLowerCase() === baseLower);
-    } else if (searchTerm && searchTerm.trim().length > 0) {
-        const q = searchTerm.trim().toLowerCase();
-        heroes = heroes.filter(h => {
-            const info = heroLookupAll[h] || {};
-            return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
-        });
-    }
 
-    // After building the heroes array in renderByLeagueMatrix()
-    let selectedRarities = [];
-    if (document.getElementById('filterLegendary')?.checked) selectedRarities.push('legendary');
-    if (document.getElementById('filterEpic')?.checked) selectedRarities.push('epic');
-    if (document.getElementById('filterRare')?.checked) selectedRarities.push('rare');
-    if (document.getElementById('filterCommon')?.checked) selectedRarities.push('common');
+            // Build a stable full hero list (sorted) BEFORE any filtering — rankings will be computed from this.
+            const fullHeroes = [...heroSet].sort((a, b) => {
+                const pa = parseHeroKey(a);
+                const pb = parseHeroKey(b);
+                const n = pa.name.localeCompare(pb.name);
+                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
+            });
 
-    if (selectedRarities.length > 0) {
-        heroes = heroes.filter(h => selectedRarities.includes(parseHeroKey(h).rarity));
-    }
+            // Aggregate reward_value_added across ALL data per hero+league (for ranking baseline)
+            const heroLeagueTotalsFull = {};
+            fullHeroes.forEach(h => {
+                heroLeagueTotalsFull[h] = {};
+                leagues.forEach(lg => { heroLeagueTotalsFull[h][lg] = 0; });
+            });
+            allData.forEach(row => {
+                const heroKey = heroKeyFromRow(row);
+                if (!heroKey) return;
+                const league = row.league;
+                const val = (row.reward_value_added === null || row.reward_value_added === undefined || isNaN(Number(row.reward_value_added))) ? 0 : Number(row.reward_value_added);
+                if (heroLeagueTotalsFull[heroKey] && (league in heroLeagueTotalsFull[heroKey])) {
+                    heroLeagueTotalsFull[heroKey][league] += val;
+                }
+            });
 
-    // Build table header for "By League" view (replace previous tournament header)
-    const tableHeader = document.getElementById('tableHeader');
-    let headerHTML = '<tr>';
-    headerHTML += `<th style="width:40px;">#</th>`; // rank
-    headerHTML += `<th class="hero-col sortable" onclick="handleByLeagueSort('hero')">Hero</th>`;
-    headerHTML += `<th class="common-price-col sortable" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
-    headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;"><span title="Stars">Stars</span></th>`;
-    // league columns across top
-    leagues.forEach(lg => {
-        headerHTML += `<th class="value-cell sortable" onclick="handleByLeagueSort('${lg}')">${lg}</th>`;
-    });
-    // grand total column
-    headerHTML += `<th class="total-col sortable" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
-    headerHTML += '</tr>';
-    tableHeader.innerHTML = headerHTML;
+            // Compute static rankings from the full set (these will NOT change when filtering)
+            const leagueRankings = {};
+            leagues.forEach((league, leagueIdx) => {
+                const sorted = fullHeroes
+                    .map(h => ({ hero: h, leagueValue: heroLeagueTotalsFull[h][league] || 0 }))
+                    .sort((a, b) => b.leagueValue - a.leagueValue);
+                leagueRankings[league] = {};
+                sorted.forEach((row, rank) => {
+                    leagueRankings[league][row.hero] = rank + 1;
+                });
+            });
 
-    // 2. Aggregate reward_value_added by hero and league
-    const heroLeagueTotals = {};
-    heroes.forEach(heroKey => {
-        heroLeagueTotals[heroKey] = {};
-        leagues.forEach(lg => { heroLeagueTotals[heroKey][lg] = 0; });
-    });
-    
-    allData.forEach(row => {
-        const heroKey = heroKeyFromRow(row);
-        if (!heroKey) return;
-        const league = row.league;
-        let val = row.reward_value_added;
-        val = (val === null || val === undefined || isNaN(Number(val))) ? 0 : Number(val);
-        if (heroLeagueTotals[heroKey] && (league in heroLeagueTotals[heroKey])) {
-           
-            heroLeagueTotals[heroKey][league] += val;
-        }
-    });
+            const grandTotalRankings = {};
+            const sortedByGrandTotal = fullHeroes
+                .map(h => {
+                    const grand = leagues.reduce((s, lg) => s + (heroLeagueTotalsFull[h][lg] || 0), 0);
+                    return { hero: h, grandTotal: grand };
+                })
+                .sort((a, b) => b.grandTotal - a.grandTotal);
+            sortedByGrandTotal.forEach((row, rank) => {
+                grandTotalRankings[row.hero] = rank + 1;
+            });
 
-    // 3. Prepare data for rendering
-    const summaryRows = heroes.map(heroKey => {
-         const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
-         const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
-         const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
-         return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
-     });
- 
-    // compute min/max grandTotal for coloring
-    const totalsArray = summaryRows.map(r => r.grandTotal || 0);
-    const minTotal = totalsArray.length ? Math.min(...totalsArray) : 0;
-    const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
+            // Now build the render-time hero list and apply search/selection/rarity filters.
+            let heroes = [...fullHeroes];
 
-    // Calculate rankings for each league and grand total
-    const leagueRankings = {};
-    leagues.forEach((league, leagueIdx) => {
-        const sorted = [...summaryRows]
-            .map((row, originalIdx) => ({ ...row, originalIdx, leagueValue: row.leagueTotals[leagueIdx] }))
-            .sort((a, b) => b.leagueValue - a.leagueValue);
-        
-        leagueRankings[league] = {};
-        sorted.forEach((row, rank) => {
-            leagueRankings[league][row.hero] = rank + 1;
-        });
-    });
+            // Apply global search/selection across all heroes (heroLookupAll built in setupSearch)
+            if (selectedHeroKey) {
+                heroes = heroes.filter(h => h === selectedHeroKey);
+            } else if (selectedHeroBase) {
+                const baseLower = selectedHeroBase.toLowerCase();
+                heroes = heroes.filter(h => parseHeroKey(h).name.toLowerCase() === baseLower);
+            } else if (searchTerm && searchTerm.trim().length > 0) {
+                const q = searchTerm.trim().toLowerCase();
+                heroes = heroes.filter(h => {
+                    const info = heroLookupAll[h] || {};
+                    return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
+                });
+            }
 
-    // Calculate grand total rankings
-    const grandTotalRankings = {};
-    const sortedByGrandTotal = [...summaryRows]
-        .sort((a, b) => b.grandTotal - a.grandTotal);
-    
-    sortedByGrandTotal.forEach((row, rank) => {
-        grandTotalRankings[row.hero] = rank + 1;
-    });
+            // Apply rarity filter (use the fullHeroes' parsed rarity)
+            let selectedRarities = [];
+            if (document.getElementById('filterLegendary')?.checked) selectedRarities.push('legendary');
+            if (document.getElementById('filterEpic')?.checked) selectedRarities.push('epic');
+            if (document.getElementById('filterRare')?.checked) selectedRarities.push('rare');
+            if (document.getElementById('filterCommon')?.checked) selectedRarities.push('common');
+            if (selectedRarities.length > 0) {
+                heroes = heroes.filter(h => selectedRarities.includes(parseHeroKey(h).rarity));
+            }
 
- // 4. Sort by grandTotal descending by default, or by currentSort
- let sortCol = currentSort.column;
- let sortDir = currentSort.direction;
-             if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
+            // Build table header for "By League" view (replace previous tournament header)
+            const tableHeader = document.getElementById('tableHeader');
+            let headerHTML = '<tr>';
+            headerHTML += `<th style="width:40px;">#</th>`; // rank
+            headerHTML += `<th class="hero-col sortable" onclick="handleByLeagueSort('hero')">Hero</th>`;
+            headerHTML += `<th class="common-price-col sortable" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
+            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;"><span title="Stars">Stars</span></th>`;
+            // league columns across top
+            leagues.forEach(lg => {
+                headerHTML += `<th class="value-cell sortable" onclick="handleByLeagueSort('${lg}')">${lg}</th>`;
+            });
+            // grand total column
+            headerHTML += `<th class="total-col sortable" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
+            headerHTML += '</tr>';
+            tableHeader.innerHTML = headerHTML;
+
+            // 2. Use pre-aggregated heroLeagueTotalsFull to prepare summary rows for the filtered heroes
+            const heroLeagueTotals = {};
+            heroes.forEach(heroKey => {
+                // clone values from full aggregation (no re-scan of allData)
+                heroLeagueTotals[heroKey] = {};
+                leagues.forEach(lg => {
+                    heroLeagueTotals[heroKey][lg] = (heroLeagueTotalsFull[heroKey] && heroLeagueTotalsFull[heroKey][lg]) ? heroLeagueTotalsFull[heroKey][lg] : 0;
+                });
+            });
+
+            // 3. Prepare data for rendering
+            const summaryRows = heroes.map(heroKey => {
+                const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
+                const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
+                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
+                return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
+            });
+
+            // compute min/max grandTotal for coloring
+            const totalsArray = summaryRows.map(r => r.grandTotal || 0);
+            const minTotal = totalsArray.length ? Math.min(...totalsArray) : 0;
+            const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
+
+            // NOTE: Use the precomputed leagueRankings and grandTotalRankings (from fullHeroes).
+            // 4. Sort by grandTotal descending by default, or by currentSort
+            let sortCol = currentSort.column;
+            let sortDir = currentSort.direction;
+            if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
                 sortCol = 'grandTotal';
                 sortDir = 'desc';
             }
@@ -1955,7 +2000,9 @@ if (!hasValue) {
             let bodyHTML = '';
             summaryRows.forEach((row, idx) => {
                 bodyHTML += '<tr>';
-                bodyHTML += `<td style="text-align:center;">${idx + 1}</td>`;
+                // Use the STATIC grandTotalRankings for display rank
+                const displayRank = grandTotalRankings[row.hero] || (idx + 1);
+                bodyHTML += `<td style="text-align:center;">${formatRank(displayRank)}</td>`;
                 // Prefer rendering the card image when hero_id, rarity and stars are available,
                 // otherwise fall back to pfp.
                 let imgHtml = '';
@@ -1987,19 +2034,20 @@ if (!hasValue) {
                 const starsVal = (heroStarsMap && heroStarsMap[row.hero] !== undefined) ? heroStarsMap[row.hero] : 0;
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${starsVal > 0 ? starsVal + ' <i class="fas fa-star" style="color: #ffd700;"></i>' : '-'}</td>`;
                 
-                // League columns with rankings
+                // League columns with rankings - also use trophy icons for rankings
                 row.leagueTotals.forEach((val, i) => {
                     const league = leagues[i];
-                    const rank = leagueRankings[league][row.hero];
+                    // Use STATIC leagueRankings computed from the full set
+                    const rank = (leagueRankings[league] && leagueRankings[league][row.hero]) ? leagueRankings[league][row.hero] : '-';
                     
                     // League color with 20% opacity
                     let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${league.toLowerCase()}`).trim();
                     if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
                     const bg = colorToRgba(colorValue, 0.2);
                     
-                    // Build cell content with BOLD value and rank in gray
+                    // Build cell content with BOLD value and rank with trophy icons
                     bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">
-                        <strong>${formatCurrency(val)}</strong> <span style="color: #888; font-size: 0.85em;">(#${rank})</span>
+                        <strong>${formatCurrency(val)}</strong> <span style="color: #888; font-size: 0.85em;">(${formatRank(rank)})</span>
                     </td>`;
                 });
                 
@@ -2007,10 +2055,10 @@ if (!hasValue) {
                 const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
                 const totalBgSolid = getTotalBackgroundColor(norm);
                 const totalBg = colorToRgba(totalBgSolid, 0.2);
-                const grandTotalRank = grandTotalRankings[row.hero];
-                // Force white text for the total column and slightly larger font
+                const grandTotalRank = grandTotalRankings[row.hero] || (idx + 1);
+                // Force white text for the total column and slightly larger font - also use trophy icons
                 bodyHTML += `<td class="total-col" style="background:${totalBg}; color: #ffffff; font-size: 1.08em;">
-                    <strong>${formatCurrency(row.grandTotal)}</strong> <span style="color: #888; font-size: 0.85em;">(#${grandTotalRank})</span>
+                    <strong>${formatCurrency(row.grandTotal)}</strong> <span style="color: #888; font-size: 0.85em;">(${formatRank(grandTotalRank)})</span>
                 </td>`;
                 bodyHTML += '</tr>';
             });

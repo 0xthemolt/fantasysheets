@@ -576,6 +576,65 @@
         .clear-button:hover {
             background-color: #3a3a3a;
         }
+
+        /* Guide modal styles */
+        .guide-button {
+            padding: 6px 10px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-right: 8px;
+        }
+        .guide-button:hover { background: #3a3a3a; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #1d1d1d;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 8px;
+            max-width: 680px;
+            width: 100%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #2e2e2e;
+            font-weight: 700;
+        }
+        .modal-body {
+            padding: 14px 16px;
+            font-size: 13px;
+            line-height: 1.45;
+            color: #e6e6e6;
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 6px;
+        }
+        .modal-close:hover { color: #fff; }
     </style>
 </head>
 <body>
@@ -593,6 +652,8 @@
     </div>
 
     <div class="filter-container">
+            <!-- Guide button left of the hero search -->
+            <button id="guideButton" class="guide-button" type="button" aria-haspopup="dialog" aria-controls="guideModal">Guide</button>
             <div class="search-box">
                 <label for="heroHandleSearch">Search by Hero Handle:</label>
                 <div class="search-input-container">
@@ -1647,6 +1708,7 @@ if (rawTotal !== null && rawTotal !== undefined) {
 }
 if (!hasValue) {
     bodyHTML += `<td class="value-cell hover-expand" style="background-color: #2d2d2d; color: #888888;">-</td>`;
+
 } else {
     const colors = getValueColor(displayValue, colorScales.matrix, 'matrix');
     const formattedValue = formatRva(displayValue);
@@ -1814,303 +1876,50 @@ if (!hasValue) {
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // attach toggle handler early
-            setupDisplayModeToggle();
-+            setupFilters();
-            fetchRewardsData();
-        });
-
-        // Add sorting handler for By League tab
-        function handleByLeagueSort(column) {
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'desc' ? 'asc' : 'desc';
-            } else {
-                currentSort.column = column;
-                currentSort.direction = column === 'hero' ? 'asc' : 'desc';
+             // attach toggle handler early
+             setupDisplayModeToggle();
+             setupFilters();
+             fetchRewardsData();
+         });
+ 
+        // Guide modal behavior
+        (function setupGuideModal() {
+            const guideBtn = document.getElementById('guideButton');
+            const modal = document.getElementById('guideModal');
+            const closeBtn = document.getElementById('guideCloseBtn');
+            const closeBtn2 = document.getElementById('guideCloseBtn2');
+ 
+            if (!guideBtn || !modal) return;
+ 
+            function openModal() {
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                // trap focus briefly on close
+                (closeBtn || closeBtn2)?.focus();
             }
-            renderByLeagueMatrix();
-        }
-
-        // Render the By League summary matrix
-        function renderByLeagueMatrix() {
-            const tableBody = document.getElementById('tableBody');
-            // Use leagueOrder and filter to only those present in data
-            const leaguesInData = [...new Set(allData.map(row => row.league))];
-            const leagues = leagueOrder.filter(lg => leaguesInData.includes(lg));
-            const heroSet = new Set();
-            const heroPfpMap = {};
-            const heroCommonAvgMap = {};
-            const heroStarsMap = {};
-            const heroIdMap = {};
-            const heroRarityMap = {};
-            
-            allData.forEach(row => {
-                const heroKey = heroKeyFromRow(row);
-                if (!heroKey) return;
-                heroSet.add(heroKey);
-                
-                // Store hero_id and hero_rarity for card URL generation
-                if (row.hero_id && !heroIdMap[heroKey]) heroIdMap[heroKey] = row.hero_id;
-                if (row.hero_rarity && !heroRarityMap[heroKey]) heroRarityMap[heroKey] = row.hero_rarity;
-                
-                const pfp = row.hero_pfp_url || row.hero_pfp_Url || row.heroPfpUrl || '';
-                if (pfp && !heroPfpMap[heroKey]) heroPfpMap[heroKey] = pfp;
-                if (row.common_avg_price !== undefined && row.common_avg_price !== null && !(heroKey in heroCommonAvgMap)) {
-                    heroCommonAvgMap[heroKey] = Number(row.common_avg_price);
-                }
-                if (row.hero_stars !== undefined && row.hero_stars !== null) {
-                    if (!(heroKey in heroStarsMap) || Number(row.hero_stars) > heroStarsMap[heroKey]) {
-                        heroStarsMap[heroKey] = Number(row.hero_stars);
-                    }
-                }
-            });
-
-            // Build a stable full hero list (sorted) BEFORE any filtering — rankings will be computed from this.
-            const fullHeroes = [...heroSet].sort((a, b) => {
-                const pa = parseHeroKey(a);
-                const pb = parseHeroKey(b);
-                const n = pa.name.localeCompare(pb.name);
-                return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
-            });
-
-            // Aggregate reward_value_added across ALL data per hero+league (for ranking baseline)
-            const heroLeagueTotalsFull = {};
-            fullHeroes.forEach(h => {
-                heroLeagueTotalsFull[h] = {};
-                leagues.forEach(lg => { heroLeagueTotalsFull[h][lg] = 0; });
-            });
-            allData.forEach(row => {
-                const heroKey = heroKeyFromRow(row);
-                if (!heroKey) return;
-                const league = row.league;
-                const val = (row.reward_value_added === null || row.reward_value_added === undefined || isNaN(Number(row.reward_value_added))) ? 0 : Number(row.reward_value_added);
-                if (heroLeagueTotalsFull[heroKey] && (league in heroLeagueTotalsFull[heroKey])) {
-                    heroLeagueTotalsFull[heroKey][league] += val;
-                }
-            });
-
-            // Compute static rankings from the full set (these will NOT change when filtering)
-            const leagueRankings = {};
-            leagues.forEach((league, leagueIdx) => {
-                const sorted = fullHeroes
-                    .map(h => ({ hero: h, leagueValue: heroLeagueTotalsFull[h][league] || 0 }))
-                    .sort((a, b) => b.leagueValue - a.leagueValue);
-                leagueRankings[league] = {};
-                sorted.forEach((row, rank) => {
-                    leagueRankings[league][row.hero] = rank + 1;
-                });
-            });
-
-            const grandTotalRankings = {};
-            const sortedByGrandTotal = fullHeroes
-                .map(h => {
-                    const grand = leagues.reduce((s, lg) => s + (heroLeagueTotalsFull[h][lg] || 0), 0);
-                    return { hero: h, grandTotal: grand };
-                })
-                .sort((a, b) => b.grandTotal - a.grandTotal);
-            sortedByGrandTotal.forEach((row, rank) => {
-                grandTotalRankings[row.hero] = rank + 1;
-            });
-
-            // Now build the render-time hero list and apply search/selection/rarity filters.
-            let heroes = [...fullHeroes];
-
-            // Apply global search/selection across all heroes (heroLookupAll built in setupSearch)
-            if (selectedHeroKey) {
-                heroes = heroes.filter(h => h === selectedHeroKey);
-            } else if (selectedHeroBase) {
-                const baseLower = selectedHeroBase.toLowerCase();
-                heroes = heroes.filter(h => parseHeroKey(h).name.toLowerCase() === baseLower);
-            } else if (searchTerm && searchTerm.trim().length > 0) {
-                const q = searchTerm.trim().toLowerCase();
-                heroes = heroes.filter(h => {
-                    const info = heroLookupAll[h] || {};
-                    return fuzzyMatch(q, (info.name || '').toLowerCase()) || fuzzyMatch(q, (info.handle || '').toLowerCase());
-                });
+            function closeModal() {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                guideBtn.focus();
             }
-
-            // Apply rarity filter (use the fullHeroes' parsed rarity)
-            let selectedRarities = [];
-            if (document.getElementById('filterLegendary')?.checked) selectedRarities.push('legendary');
-            if (document.getElementById('filterEpic')?.checked) selectedRarities.push('epic');
-            if (document.getElementById('filterRare')?.checked) selectedRarities.push('rare');
-            if (document.getElementById('filterCommon')?.checked) selectedRarities.push('common');
-            if (selectedRarities.length > 0) {
-                heroes = heroes.filter(h => selectedRarities.includes(parseHeroKey(h).rarity));
-            }
-
-            // Build table header for "By League" view (replace previous tournament header)
-            const tableHeader = document.getElementById('tableHeader');
-            let headerHTML = '<tr>';
-            headerHTML += `<th style="width:40px;">#</th>`; // rank
-            headerHTML += `<th class="hero-col sortable" onclick="handleByLeagueSort('hero')">Hero</th>`;
-            headerHTML += `<th class="common-price-col sortable" onclick="handleByLeagueSort('common_avg_price')" style="text-align:right; width:110px;">Est Price</th>`;
-            headerHTML += `<th class="hero-stars-col" style="text-align:center; width:70px;"><span title="Stars">Stars</span></th>`;
-            // league columns across top
-            leagues.forEach(lg => {
-                headerHTML += `<th class="value-cell sortable" onclick="handleByLeagueSort('${lg}')">${lg}</th>`;
+ 
+            guideBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal();
             });
-            // grand total column
-            headerHTML += `<th class="total-col sortable" onclick="handleByLeagueSort('grandTotal')">Total</th>`;
-            headerHTML += '</tr>';
-            tableHeader.innerHTML = headerHTML;
-
-            // 2. Use pre-aggregated heroLeagueTotalsFull to prepare summary rows for the filtered heroes
-            const heroLeagueTotals = {};
-            heroes.forEach(heroKey => {
-                // clone values from full aggregation (no re-scan of allData)
-                heroLeagueTotals[heroKey] = {};
-                leagues.forEach(lg => {
-                    heroLeagueTotals[heroKey][lg] = (heroLeagueTotalsFull[heroKey] && heroLeagueTotalsFull[heroKey][lg]) ? heroLeagueTotalsFull[heroKey][lg] : 0;
-                });
+            if (closeBtn) closeBtn.addEventListener('click', closeModal);
+            if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
+ 
+            // click outside modal content closes it
+            modal.addEventListener('click', (ev) => {
+                if (ev.target === modal) closeModal();
             });
-
-            // 3. Prepare data for rendering
-            const summaryRows = heroes.map(heroKey => {
-                const leagueTotals = leagues.map(lg => heroLeagueTotals[heroKey][lg] || 0);
-                const grandTotal = leagueTotals.reduce((a, b) => a + b, 0);
-                const commonAvg = (heroCommonAvgMap && heroCommonAvgMap[heroKey] !== undefined) ? Number(heroCommonAvgMap[heroKey]) : null;
-                return { hero: heroKey, leagueTotals, grandTotal, commonAvg };
+            // allow Esc to close
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && modal.classList.contains('open')) closeModal();
             });
-
-            // compute min/max grandTotal for coloring
-            const totalsArray = summaryRows.map(r => r.grandTotal || 0);
-            const minTotal = totalsArray.length ? Math.min(...totalsArray) : 0;
-            const maxTotal = totalsArray.length ? Math.max(...totalsArray) : 1;
-
-            // NOTE: Use the precomputed leagueRankings and grandTotalRankings (from fullHeroes).
-            // 4. Sort by grandTotal descending by default, or by currentSort
-            let sortCol = currentSort.column;
-            let sortDir = currentSort.direction;
-            if (sortCol !== 'grandTotal' && sortCol !== 'hero' && !leagues.includes(sortCol) && sortCol !== 'common_avg_price') {
-                sortCol = 'grandTotal';
-                sortDir = 'desc';
-            }
-            summaryRows.sort((a, b) => {
-                if (sortCol === 'hero') {
-                    const pa = parseHeroKey(a.hero);
-                    const pb = parseHeroKey(b.hero);
-                    const cmpName = pa.name.localeCompare(pb.name);
-                    const cmp = cmpName !== 0 ? cmpName : pa.rarity.localeCompare(pb.rarity);
-                    if (sortDir === 'asc') return cmp;
-                    return -cmp;
-                } else {
-                    let aVal, bVal;
-                    if (sortCol === 'grandTotal') {
-                        aVal = a.grandTotal;
-                        bVal = b.grandTotal;
-                    } else if (sortCol === 'common_avg_price') {
-                        aVal = (a.commonAvg === null || a.commonAvg === undefined || isNaN(Number(a.commonAvg))) ? -Infinity : Number(a.commonAvg);
-                        bVal = (b.commonAvg === null || b.commonAvg === undefined || isNaN(Number(b.commonAvg))) ? -Infinity : Number(b.commonAvg);
-                    } else {
-                        aVal = a.leagueTotals[leagues.indexOf(sortCol)] || 0;
-                        bVal = b.leagueTotals[leagues.indexOf(sortCol)] || 0;
-                    }
-                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
-                }
-            });
-
-            // Render table for By League summary
-            let bodyHTML = '';
-            summaryRows.forEach((row, idx) => {
-                bodyHTML += '<tr>';
-                // Use the STATIC grandTotalRankings for display rank
-                const displayRank = grandTotalRankings[row.hero] || (idx + 1);
-                bodyHTML += `<td style="text-align:center;">${formatRank(displayRank)}</td>`;
-                // Prefer rendering the card image when hero_id, rarity and stars are available,
-                // otherwise fall back to pfp.
-                let imgHtml = '';
-                const heroId = (heroIdMap && heroIdMap[row.hero]) ? heroIdMap[row.hero] : '';
-                const heroRarity = (heroRarityMap && heroRarityMap[row.hero]) ? heroRarityMap[row.hero] : '';
-                const heroStarsForCard = (heroStarsMap && heroStarsMap[row.hero]) ? heroStarsMap[row.hero] : 0;
-                if (heroId && heroRarity && heroStarsForCard) {
-                    const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
-                    imgHtml = `<img class="hero-image" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">`;
-                } else {
-                    const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
-                    imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
-                }
-                const baseName = displayHeroBaseName(row.hero);
-                const displayName = truncateHeroName(baseName);
-                const badge = buildRarityBadge(row.hero);
-                bodyHTML += `<td class="hero-col">
-                    <div class="hero-column">
-                        ${imgHtml}
-                        <div class="hero-info">
-                            <span class="hero-name-text" title="${escapeHtml(baseName)}">${displayName}</span>
-                            ${badge}
-                        </div>
-                    </div>
-                </td>`;
-                const commonDisplay = formatThreeDecimals(row.commonAvg);
-                bodyHTML += `<td class="common-price-col" style="text-align:right;">${commonDisplay !== null ? commonDisplay : '-'}</td>`;
-                // Hero Stars cell
-                const starsVal = (heroStarsMap && heroStarsMap[row.hero] !== undefined) ? heroStarsMap[row.hero] : 0;
-                bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${starsVal > 0 ? starsVal + ' <i class="fas fa-star" style="color: #ffd700;"></i>' : '-'}</td>`;
-                
-                // League columns with rankings - also use trophy icons
-                row.leagueTotals.forEach((val, i) => {
-                    const league = leagues[i];
-                    // Use STATIC leagueRankings computed from the full set
-                    const rank = (leagueRankings[league] && leagueRankings[league][row.hero]) ? leagueRankings[league][row.hero] : '-';
-                    
-                    // League color with 20% opacity
-                    let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${league.toLowerCase()}`).trim();
-                    if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
-                    const bg = colorToRgba(colorValue, 0.2);
-                    
-                    // Build cell content with BOLD value and rank with trophy icons
-                    bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">
-                        <strong>${formatCurrency(val)}</strong> <span style="color: #888; font-size: 0.85em;">(${formatRank(rank)})</span>
-                    </td>`;
-                });
-                
-                // Total column: use getTotalBackgroundColor palette and apply 20% opacity
-                const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
-                // Use getValueColor to pick an appropriate foreground color for contrast
-                const totalColors = getValueColor(row.grandTotal, { min: minTotal, max: maxTotal }, 'total');
-                const totalBg = colorToRgba(totalColors.backgroundColor, 0.2);
-                const grandTotalRank = grandTotalRankings[row.hero] || (idx + 1);
-                bodyHTML += `<td class="total-col" style="background:${totalBg}; color: ${totalColors.color}; font-size: 1.08em;">
-                    <strong>${formatCurrency(row.grandTotal)}</strong> <span style="color: #888; font-size: 0.85em;">(${formatRank(grandTotalRank)})</span>
-                </td>`;
-                bodyHTML += '</tr>';
-            });
-             tableBody.innerHTML = bodyHTML;
-             hideLoading();
-
-            // Show/hide elements
-            document.getElementById('matrixTable').style.display = 'table';
-            document.getElementById('noData').style.display = summaryRows.length === 0 ? 'block' : 'none';
-         }
-
-        // Helper: create / parse composite hero key (name + rarity) and display name
-function heroKeyFromRow(row) {
-    const name = (row.hero_name || row.hero_handle || '').trim();
-    const rarity = (row.hero_rarity || '').toString().trim();
-    if (!name) return null;
-    return `${name}||${rarity}`;
-}
-function parseHeroKey(key) {
-    const parts = (key || '').split('||');
-    return { name: parts[0] || '', rarity: (parts[1] || '').toLowerCase() };
-}
-function displayHeroBaseName(key) {
-    return parseHeroKey(key).name;
-}
-const rarityColors = {
-    common: '#ABFF2B',
-    rare: '#5FFFEA',
-    epic: '#FF7BCF',
-    legendary: '#CEEB7C',
-    all: '#666666'
-};
-function buildRarityBadge(key) {
-     const { rarity } = parseHeroKey(key);
-     if (!rarity) return '';
-     const safe = rarity.replace(/[^a-z0-9_-]/g,'');
-     return `<span class="rarity-badge rarity-${safe}" title="Rarity: ${escapeHtml(rarity)}">${escapeHtml(rarity)}</span>`;
- }
+        })();
+ 
     </script>
 </body>
 </html>

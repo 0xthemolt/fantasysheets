@@ -654,6 +654,10 @@
             // values: { tournamentNumbers, matrix, appearancesMatrix, starsMatrix, heroTotals, heroPfpMap, heroStarsMap, scoreMatrix, heroIdMap, heroRarityMap, renderedHtml? }
         };
 
+        // Global precomputed rankings (calculated once on load for ALL heroes+rarities)
+        let globalLeagueRankings = null;       // { leagueName: { heroKey: rank, ... }, ... }
+        let globalGrandTotalRankings = null;   // { heroKey: rank, ... }
+
         // Search / autocomplete state
         let searchTerm = '';
         let selectedHeroKey = null;

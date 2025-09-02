@@ -644,10 +644,15 @@
 
         let allData = [];
         let currentLeague = null;
-        let currentSort = { column: 'avgRewards', direction: 'desc' }; // Changed from 'median' to 'avgRewards'
-        let colorScale = { min: 0, max: 1 }; // Add this missing variable
-        // Only show loading overlay on the initial page load
+        let currentSort = { column: 'avgRewards', direction: 'desc' };
+        let colorScale = { min: 0, max: 1 };
         let initialLoad = true;
+
+        // Simple per-league cache to avoid recomputing matrices/heroTotals on every tab switch
+        const leagueCache = {
+            // keys: league name (e.g. "Bronze") or "BY_LEAGUE"
+            // values: { tournamentNumbers, matrix, appearancesMatrix, starsMatrix, heroTotals, heroPfpMap, heroStarsMap, scoreMatrix, heroIdMap, heroRarityMap, renderedHtml? }
+        };
 
         // Search / autocomplete state
         let searchTerm = '';
@@ -675,7 +680,7 @@
 
         // Fetch data from Supabase - ADD MORE DEBUGGING
         async function fetchRewardsData() {
-            try {
+             try {
                 console.log('Starting to fetch rewards data...');
                 
                 // Fetch data with exact count (no explicit .limit() was present previously)
@@ -709,10 +714,8 @@
                      return;
                  }
  
--                console.log('Fetched data:', data.length, 'records');
--                console.log('Sample records:', data.slice(0, 10));
-+                console.log('Fetched data array length:', Array.isArray(data) ? data.length : 0, 'records; server count:', count);
-+                console.log('Sample records:', Array.isArray(data) ? data.slice(0, 10) : []);
+                // One debug log only
+                console.log('Fetched records:', Array.isArray(data) ? data.length : 0);
                  
                  // Debug: Show unique leagues and heroes
                  const uniqueLeagues = [...new Set(data.map(row => row.league))];
@@ -1088,14 +1091,25 @@
 
         // Render matrix for selected league
         function renderMatrix(league) {
-            console.log('Rendering matrix for league:', league);
+            // reuse cached computations where available
+            if (leagueCache[league] && !selectedHeroKey && !selectedHeroBase && !searchTerm) {
+                // If no search/selection filter active, reuse cached rendered HTML if present
+                const cached = leagueCache[league];
+                if (cached.renderedHtml) {
+                    document.getElementById('tableHeader').innerHTML = cached.headerHtml;
+                    document.getElementById('tableBody').innerHTML = cached.renderedHtml;
+                    document.getElementById('matrixTable').style.display = 'table';
+                    document.getElementById('noData').style.display = 'none';
+                    hideLoading();
+                    return;
+                }
+            }
             const leagueData = allData.filter(row => row.league === league);
-            console.log('Records for this league:', leagueData.length);
-            
-            if (leagueData.length === 0) {
-                document.getElementById('loading').style.display = 'none';
-                // Ensure loading indicator is hidden if no data
-                hideLoading();
+
+             if (leagueData.length === 0) {
+                 document.getElementById('loading').style.display = 'none';
+                 // Ensure loading indicator is hidden if no data
+                 hideLoading();
                  document.getElementById('matrixTable').style.display = 'none';
                  document.getElementById('noData').style.display = 'block';
                  return;
@@ -1318,24 +1332,18 @@
                 }
             };
 
-            console.log('Color scales:', colorScales);
-
             // Do not overwrite currentSort here — keep the user's selected sort.
-            // Pass matrix/appearances and the display toggle so sorting respects Avg vs Total toggle.
             const sortedHeroTotals = sortHeroes(heroTotals, currentSort.column, currentSort.direction, tournamentNumbers, matrix, appearancesMatrix, showAvgPerAppearance);
- 
-              console.log('Hero totals calculated:', sortedHeroTotals.length);
- 
-              // Render table with independent color scales (pass heroPfpMap)
-              renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
-              
-             document.getElementById('loading').style.display = 'none';
-             // Hide loading when rendering is complete
-             hideLoading();
-            // Hide loading when rendering is complete
+            // Render and cache header/body HTML for later reuse (only when no active search/selection)
+            renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
+            if (!selectedHeroKey && !selectedHeroBase && !searchTerm) {
+                leagueCache[league] = leagueCache[league] || {};
+                leagueCache[league].renderedHtml = document.getElementById('tableBody').innerHTML;
+                leagueCache[league].headerHtml = document.getElementById('tableHeader').innerHTML;
+            }
+            document.getElementById('matrixTable').style.display = 'table';
+            document.getElementById('noData').style.display = 'none';
             hideLoading();
-              document.getElementById('matrixTable').style.display = 'table';
-              document.getElementById('noData').style.display = 'none';
           }
  
         // Fix the sortHeroes function - accept matrix/appearances and toggle so tournament-column sorting
@@ -1656,6 +1664,7 @@ if (!hasValue) {
  
                      bodyHTML += `<td>${lines.join('<br>')}</td>`;
                  });
+               
                 // Empty summary columns for info row (Avg Per App, ROI, Total, Median) - keep same order as
                 bodyHTML += `<td class="avg-per-app-col"></td>`; // Avg Per App
                 bodyHTML += `<td class="roi-col"></td>`; // ROI

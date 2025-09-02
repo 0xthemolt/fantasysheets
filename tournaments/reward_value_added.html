@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hero Rewards Value Added</title>
+    <title>Hero Profitability (RVA)</title>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -20,9 +20,10 @@
         :root{
             /* Adjustable column widths - change these values to control layout */
             --col-hero-width: 150px;    /* left hero column */
-            --col-avg-width: 50px;     /* Avg Per App summary column */
-            --col-roi-width: 50px;      /* ROI summary column (far right) */
-            --col-total-width: 55px;  /* width for Total RVA summary column (customizable) */
+            --col-avg-width: 45px;     /* Avg Per App summary column */
+            --col-roi-width: 45px;      /* ROI summary column (far right) */
+            --col-total-width: 50px;  /* width for Total RVA summary column (customizable) */
+            --col-tournament-width: 60px; /* width for each tournament number column (default 80px) */
         }
         
         .hero-image {
@@ -204,9 +205,9 @@
             min-width: var(--col-total-width);
             max-width: var(--col-total-width);
             text-align: right;
-            /* Make Total column header & values a bit larger and always white */
+            /* Make Total column header & values a bit larger; color should be set by JS based on background brightness */
             font-size: 1.08em;
-            color: #ffffff !important;
+            color: inherit;
         }
 
         /* Hide star information by default */
@@ -284,9 +285,9 @@
 
         /* Fixed width for tournament columns */
         .value-cell {
-            width: 80px; /* Adjust this value as needed */
-            min-width: 80px;
-            max-width: 80px;
+            width: var(--col-tournament-width);
+            min-width: var(--col-tournament-width);
+            max-width: var(--col-tournament-width);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -362,15 +363,26 @@
         .filter-container {
             width: 68%;
             margin: 0 auto 20px auto;
-            padding: 12px 0; /* keep breathing room but remove heavy box feel */
-            background: transparent; /* remove outer fill to match sell-order-filter */
+            padding: 10px 0; /* breathing room */
+            background: transparent;
             border-radius: 4px;
             display: flex;
             align-items: center;
+            justify-content: space-between; /* distribute 3 columns evenly */
             gap: 12px;
-            flex-wrap: wrap;
             font-size: 90%;
         }
+
+        /* Three equal areas: left (search), center (rarity), right (display + actions) */
+        .filter-left, .filter-center, .filter-right {
+            flex: 1 1 0;
+            display: flex;
+            align-items: center;
+            min-width: 0; /* allow children to shrink */
+        }
+        .filter-left { justify-content: flex-start; }
+        .filter-center { justify-content: center; }
+        .filter-right { justify-content: flex-end; gap: 8px; }
 
         /* Use same label styling for Search, Rarity, Display to keep visual consistency */
         .filter-container > div > label,
@@ -572,7 +584,7 @@
             <a href="../../index.html" class="home-link">
                 <i class="fas fa-home"></i>
             </a>
-            Hero Rewards Value Added Matrix
+            Hero Profitability (based on RVA)
         </h1>
     </div>
 
@@ -1779,7 +1791,9 @@ if (!hasValue) {
         // Generic 3-decimal formatter (used for Est Price)
         function formatThreeDecimals(value) {
             if (value === null || value === undefined || isNaN(Number(value))) return '-';
-            return Number(value).toFixed(3);
+            const n = Number(value);
+            // If Est Price > 1 show one decimal (e.g. 2.3), otherwise keep 3 decimals for precision < 1
+            return n > 1 ? n.toFixed(1) : n.toFixed(3);
         }
 
         // Specific formatting for median values (3 decimal places)
@@ -2034,7 +2048,7 @@ if (!hasValue) {
                 const starsVal = (heroStarsMap && heroStarsMap[row.hero] !== undefined) ? heroStarsMap[row.hero] : 0;
                 bodyHTML += `<td class="hero-stars-col" style="text-align:center;">${starsVal > 0 ? starsVal + ' <i class="fas fa-star" style="color: #ffd700;"></i>' : '-'}</td>`;
                 
-                // League columns with rankings - also use trophy icons for rankings
+                // League columns with rankings - also use trophy icons
                 row.leagueTotals.forEach((val, i) => {
                     const league = leagues[i];
                     // Use STATIC leagueRankings computed from the full set
@@ -2053,11 +2067,11 @@ if (!hasValue) {
                 
                 // Total column: use getTotalBackgroundColor palette and apply 20% opacity
                 const norm = (maxTotal === minTotal) ? 0 : (row.grandTotal - minTotal) / (maxTotal - minTotal);
-                const totalBgSolid = getTotalBackgroundColor(norm);
-                const totalBg = colorToRgba(totalBgSolid, 0.2);
+                // Use getValueColor to pick an appropriate foreground color for contrast
+                const totalColors = getValueColor(row.grandTotal, { min: minTotal, max: maxTotal }, 'total');
+                const totalBg = colorToRgba(totalColors.backgroundColor, 0.2);
                 const grandTotalRank = grandTotalRankings[row.hero] || (idx + 1);
-                // Force white text for the total column and slightly larger font - also use trophy icons
-                bodyHTML += `<td class="total-col" style="background:${totalBg}; color: #ffffff; font-size: 1.08em;">
+                bodyHTML += `<td class="total-col" style="background:${totalBg}; color: ${totalColors.color}; font-size: 1.08em;">
                     <strong>${formatCurrency(row.grandTotal)}</strong> <span style="color: #888; font-size: 0.85em;">(${formatRank(grandTotalRank)})</span>
                 </td>`;
                 bodyHTML += '</tr>';

@@ -2092,14 +2092,18 @@ if (!hasValue) {
                     // Use STATIC leagueRankings computed from the full set
                     const rank = (leagueRankings[league] && leagueRankings[league][row.hero]) ? leagueRankings[league][row.hero] : '-';
                     
+                    // Calculate total count for this league
+                    const totalCount = Object.keys(leagueRankings[league] || {}).length;
+                    
                     // League color with 20% opacity
                     let colorValue = getComputedStyle(document.documentElement).getPropertyValue(`--league-${league.toLowerCase()}`).trim();
                     if (!colorValue) colorValue = defaultLeagueColors[league.toLowerCase()] || '#666666';
                     const bg = colorToRgba(colorValue, 0.2);
                     
-                    // Build cell content with BOLD value and rank with trophy icons
+                    // Build cell content with BOLD value and rank with total count
+                    const rankDisplay = rank !== '-' ? `(${rank} of ${totalCount})` : '-';
                     bodyHTML += `<td class="value-cell" style="background:${bg}; text-align:center; vertical-align:middle; line-height:1.2;">
-                        <strong>${formatCurrency(val)}</strong><br><span style="color: #888; font-size: 0.85em;">(${formatRank(rank)})</span>
+                        <strong>${formatCurrency(val)}</strong><br><span style="color: #888; font-size: 0.85em;">${rankDisplay}</span>
                     </td>`;
                 });
 
@@ -2109,8 +2113,10 @@ if (!hasValue) {
                 const totalColors = getValueColor(row.grandTotal, { min: minTotal, max: maxTotal }, 'total');
                 const totalBg = colorToRgba(totalColors.backgroundColor, 0.2);
                 const grandTotalRank = grandTotalRankings[row.hero] || (idx + 1);
+                const grandTotalCount = Object.keys(grandTotalRankings).length;
+                const grandRankDisplay = `(${grandTotalRank} of ${grandTotalCount})`;
                 bodyHTML += `<td class="total-col" style="background:${totalBg}; color: ${totalColors.color}; font-size: 1.08em; text-align:center; vertical-align:middle; line-height:1.2;">
-                    <strong>${formatCurrency(row.grandTotal)}</strong><br><span style="color: #888; font-size: 0.85em;">(${formatRank(grandTotalRank)})</span>
+                    <strong>${formatCurrency(row.grandTotal)}</strong><br><span style="color: #888; font-size: 0.85em;">${grandRankDisplay}</span>
                 </td>`;
                 bodyHTML += '</tr>';
              });

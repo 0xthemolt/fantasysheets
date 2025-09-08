@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="icons/favicon.webp">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
-    <script src="/js/config.js"></script>
+    <script src="/js/config.js?v=1.0.0"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -25,7 +25,7 @@
                 <i class="fas fa-home"></i>
             </a>
             Hero Score Tracking
-            <span class="tournament-badge">Main 67</span>
+            <span class="tournament-badge"><span id="tournament-text">Main</span></span>
         </h1>
     </div>
     <div id="search-container" style="display: flex; align-items: center;">
@@ -105,11 +105,11 @@
     </div>
     <script>
     
-        const API_CONFIG = {
-    BASE_URL: 'https://api-v2.fantasy.top',
-    API_KEY: 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
-    TOURNAMENT_NUMBER: 67
-};
+         const API_CONFIG = {
+            BASE_URL: (window.FT_CONFIG && window.FT_CONFIG.api && window.FT_CONFIG.api.baseUrl) || 'https://api-v2.fantasy.top',
+            API_KEY: (window.FT_CONFIG && window.FT_CONFIG.api && window.FT_CONFIG.api.apiKey) || 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+            TOURNAMENT_NUMBER: (window.FT_CONFIG && window.FT_CONFIG.tournament_number) || 67
+        };
 
 const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
@@ -516,6 +516,12 @@ function updateScoresLastChanged() {
 
 // Update the DOMContentLoaded event handler
 document.addEventListener('DOMContentLoaded', async function() {
+    // Update tournament badge text from config (safe fallback)
+    const tournamentTextEl = document.getElementById('tournament-text');
+    if (tournamentTextEl) {
+        const tn = Number(API_CONFIG?.TOURNAMENT_NUMBER ?? window.FT_CONFIG?.tournament_number ?? 67);
+        tournamentTextEl.textContent = `Main ${tn}`;
+    }
     // Show loading message
     document.getElementById('loading-message').style.display = 'block';
     document.getElementById('heroesTable').style.display = 'none';

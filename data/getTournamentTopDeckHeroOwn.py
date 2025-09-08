@@ -11,9 +11,11 @@ with open('C:/fantasy_top_analysis/pages/config.json', 'r') as config_file:
 def get_db_connection():
     return psycopg2.connect(
         dbname="postgres",
-        user="postgres.hhcuqhvmzwmehdsaamhn",
+        # user="postgres.hhcuqhvmzwmehdsaamhn",
+        user="postgres",
         password="Wafj2DCrI6Yjbe4I",
-        host="aws-0-us-west-1.pooler.supabase.com",
+        # host="aws-0-us-west-1.pooler.supabase.com",
+        host="db.hhcuqhvmzwmehdsaamhn.supabase.co",
         port="5432"
     )
 

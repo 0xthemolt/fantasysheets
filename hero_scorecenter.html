@@ -14,6 +14,7 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     <link rel="stylesheet" href="./styles.css">
     <link rel="icon" type="image/png" href="icons/favicon.webp">
+    <script src="/js/config.js?v=1.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -81,7 +82,8 @@
             </a>
             King of the Hill
             <span class="tournament-badge" id="tournament-selector">
-    Main 67 <i class="fas fa-chevron-down" id="dropdown-icon" style="color: black;"></i>
+    <span class="tournament-text" id="tournament-text">Main</span>
+    <i class="fas fa-chevron-down" id="dropdown-icon" style="color: black;"></i>
     <div class="tournament-dropdown-content" id="tournament-dropdown"></div>
 </span>
         </h1>
@@ -238,14 +240,12 @@
         </div>
     </div>
     <script>
-        // API configuration
         const API_CONFIG = {
-            BASE_URL: 'https://api-v2.fantasy.top',
-            API_KEY: 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
-            TOURNAMENT_NUMBER: 67
+            BASE_URL: (window.FT_CONFIG && window.FT_CONFIG.api && window.FT_CONFIG.api.baseUrl) || 'https://api-v2.fantasy.top',
+            API_KEY: (window.FT_CONFIG && window.FT_CONFIG.api && window.FT_CONFIG.api.apiKey) || 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6',
+            TOURNAMENT_NUMBER: (window.FT_CONFIG && window.FT_CONFIG.tournament_number) || 67
         };
-
-        // Function to fetch hero data from API
+                // Function to fetch hero data from API
         async function fetchHeroData(tournamentNumber = API_CONFIG.TOURNAMENT_NUMBER) {
             try {
                 const response = await fetch(
@@ -748,7 +748,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize the page with API data first
             initializePage();
-            
+
+            // Set initial tournament text from API_CONFIG
+            const tournamentTextEl = document.getElementById('tournament-text');
+            if (tournamentTextEl) {
+                tournamentTextEl.textContent = `Main ${API_CONFIG.TOURNAMENT_NUMBER}`;
+            }
+             
             // Initialize search functionality
             searchHeroes();
             
@@ -885,7 +891,7 @@
                     });
                 }
             });
-
+            
             // Close dropdown when clicking outside
             document.addEventListener('click', function() {
                 dropdownContent.classList.remove('show');
@@ -894,8 +900,5 @@
             });
         });
     </script>
-    <script src="/js/config.js?v=1.0.0" defer></script>
-    <script src="/js/toolTip.js?v=1.0.0" defer></script>
-    <script src="/js/chartComponent.js?v=1.0.1" defer></script>
 </body>
 </html>

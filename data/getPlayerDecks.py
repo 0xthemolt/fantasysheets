@@ -17,9 +17,11 @@ REWARD_IMAGES = config['reward_images']
 def supabase_db_connection():
     return psycopg2.connect(
         dbname="postgres",
-        user="postgres.hhcuqhvmzwmehdsaamhn",
+        # user="postgres.hhcuqhvmzwmehdsaamhn",
+        user="postgres",
         password="Wafj2DCrI6Yjbe4I",
-        host="aws-0-us-west-1.pooler.supabase.com",
+        # host="aws-0-us-west-1.pooler.supabase.com",
+        host="db.hhcuqhvmzwmehdsaamhn.supabase.co",
         port="5432"
     )
 
@@ -165,23 +167,23 @@ select
     left join flatten.temp_trade_history_base  buyer_cost_card1
     	on gtpp.card1_id = buyer_cost_card1.base_card_id
     	and gtpp.player_id = buyer_cost_card1.buyer_id
-		and buyer_cost_card1.buyer_last_buy_card_id = 1
+	--	and buyer_cost_card1.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card2
     	on gtpp.card2_id = buyer_cost_card2.base_card_id
     	and gtpp.player_id = buyer_cost_card2.buyer_id
-		and buyer_cost_card2.buyer_last_buy_card_id = 1
+		--and buyer_cost_card2.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card3
     	on gtpp.card3_id = buyer_cost_card3.base_card_id
     	and gtpp.player_id = buyer_cost_card3.buyer_id
-		and buyer_cost_card3.buyer_last_buy_card_id = 1
+		--and buyer_cost_card3.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card4
     	on gtpp.card4_id = buyer_cost_card4.base_card_id
     	and gtpp.player_id = buyer_cost_card4.buyer_id
-		and buyer_cost_card4.buyer_last_buy_card_id = 1
+		--and buyer_cost_card4.buyer_last_buy_card_id = 1
     left join flatten.temp_trade_history_base  buyer_cost_card5
     	on gtpp.card5_id = buyer_cost_card5.base_card_id
     	and gtpp.player_id = buyer_cost_card5.buyer_id
-		and buyer_cost_card5.buyer_last_buy_card_id = 1
+		--and buyer_cost_card5.buyer_last_buy_card_id = 1
 	left join flatten.vwhero_cards_est_value market_l5_cost_card1  
 		on gtpp.card1_hero_rarity_index = market_l5_cost_card1.hero_rarity_id
 	left join flatten.vwhero_cards_est_value market_l5_cost_card2

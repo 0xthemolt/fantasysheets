@@ -114,12 +114,13 @@
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
     <link rel="stylesheet" href="../styles.css">
     <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <script src="/js/config.js?v=1.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/timeUtils.js?v=1.0.0" defer></script>
 </head>
-
+ 
 <body>
     <div class="title-container">
         <h1 class="title-header">
@@ -127,7 +128,7 @@
                 <i class="fas fa-home"></i>
             </a>
             Tournament Hero League Winners
-            <span class="tournament-badge">S4M4</span>
+            <span class="tournament-badge"><span id="tournament-text">S4M5</span></span>
         </h1>
     </div>
     <div class="small-text">
@@ -246,6 +247,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Central global config read by pages. -->
+    <!-- Edit tournament_number here. -->
+    <script>
+        // Respect values set by /js/config.js; only apply safe defaults if not present
+        window.FT_CONFIG = window.FT_CONFIG || {};
+        window.FT_CONFIG.tournament_number = window.FT_CONFIG.tournament_number ?? 68;
+        window.FT_CONFIG.api = window.FT_CONFIG.api ?? {
+            baseUrl: 'https://api-v2.fantasy.top',
+            apiKey: 'cbc57228-5495-47b0-ae2f-b43ba6d5a9b6'
+        };
+    </script>
+    <script>
+        // Set tournament badge using shared config (safe fallback)
+        document.addEventListener('DOMContentLoaded', function () {
+            const el = document.getElementById('tournament-text');
+            if (!el) return;
+            const tn = Number(window.FT_CONFIG?.tournament_number ?? 68);
+            // Keep existing label (S4M5) and append tournament number, adjust as needed
+            el.textContent = `S4M5 ${tn}`;
+        });
+    </script>
 </body>
 
 <style>

@@ -6,11 +6,13 @@ import pandas as pd
 
 def get_db_connection():
     return psycopg2.connect(
-    dbname="postgres",
-    user="postgres.hhcuqhvmzwmehdsaamhn",
-    password="Wafj2DCrI6Yjbe4I",
-    host="aws-0-us-west-1.pooler.supabase.com",
-    port="5432"
+dbname="postgres",
+        # user="postgres.hhcuqhvmzwmehdsaamhn",
+        user="postgres",
+        password="Wafj2DCrI6Yjbe4I",
+        # host="aws-0-us-west-1.pooler.supabase.com",
+        host="db.hhcuqhvmzwmehdsaamhn.supabase.co",
+        port="5432"
     )
 
 # First query into league_decks_df

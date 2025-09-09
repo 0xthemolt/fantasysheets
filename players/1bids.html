@@ -542,7 +542,7 @@ async function fetchBids() {
             // Get bid bot info
             const bidBotInfo = item.bidBot;
             const bidCeiling = bidBotInfo && bidBotInfo.max_price_eth && bidBotInfo.max_price_eth > 0 
-                ? bidBotInfo.max_price_eth.toFixed(5) 
+                ? bidBotInfo.max_price_eth.toFixed(4) 
                 : 'N/A';
             const botEnabled = bidBotInfo ? bidBotInfo.enabled : false;
             const botIconColor = botEnabled ? '#4ADE80' : '#888';
@@ -720,10 +720,10 @@ async function fetchBids() {
                 <h3>${item.name}</h3>
                 <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    Floor: ${item.floorPrice ? Number(item.floorPrice).toFixed(5) : 'N/A'}
+                    Floor: ${item.floorPrice ? Number(item.floorPrice).toFixed(4) : 'N/A'}
                 </p>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
-                    My Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(5) : 'N/A'}
+                    My Max: ${item.bidCeiling !== 'N/A' ? Number(item.bidCeiling).toFixed(4) : 'N/A'}
                     ${
                       (() => {
                         const ceiling = parseFloat(item.bidCeiling);
@@ -1096,7 +1096,7 @@ function showMissingBidBotCards(bidBotData, personalBids) {
         const maxPrice = parseFloat(card.max_price_eth) || 0;
         const bidPrice = parseFloat(card.bid_price) || 0;
         
-        return `${card.hero_handle} (${card.rarity} | my max ${maxPrice.toFixed(5)} | high ${bidPrice.toFixed(5)})`;
+        return `${card.hero_handle} (${card.rarity} | my max ${maxPrice.toFixed(4)} | high ${bidPrice.toFixed(4)})`;
     }).join(', ');
 
     listDiv.textContent = formatted;

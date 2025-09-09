@@ -28,11 +28,12 @@
         }
         
         .hero-image {
-            width: 32px;        /* Fixed small width */
-            height: auto;       /* Maintain original aspect ratio */
+            width: 32px;
+            height: 32px;       /* Reserve height to prevent reflow */
             border-radius: 0px;
             object-fit: contain; /* Preserve card proportions */
             flex-shrink: 0;
+            display: block;     /* Avoid baseline shift in table cells */
         }
 
         /* Restrict matrix to 80% of viewport and center it */
@@ -58,10 +59,14 @@
             border: 1px solid #444;
             border-radius: 6px;
             background: #222;
-            width: 100%;            /* ensure it fills the container */
+            width: 100%;
             box-sizing: border-box;
             content-visibility: auto;
-            contain-intrinsic-size: 800px 600px; /* reasonable placeholder */
+            contain-intrinsic-size: 800px 600px;
+            /* Reduce CLS from scrollbar appearance and isolate layout */
+            scrollbar-gutter: stable both-edges;
+            contain: layout paint;
+            min-height: 480px; /* reserve below-the-fold area so table insertion doesn't shift */
         }
         
         .league-tabs {
@@ -733,11 +738,17 @@
         </div>
     </div>
 
-    <script>
-        // Initialize Supabase client
+    <script type="module">
+        // Lazy Supabase (loaded after first paint)
         const supabaseUrl = 'https://hhcuqhvmzwmehdsaamhn.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhoY3VxaHZtendtZWhkc2FhbWhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzIwMTIsImV4cCI6MjA1MDU0ODAxMn0.xJNGoFLnpnmQGLj8RY_4VLmefPmFzuOyiVHLvFtPkkE'
+        let supabaseClient;
+        async function ensureSupabase() {
+            if (supabaseClient) return supabaseClient;
+            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+            supabaseClient = createClient(supabaseUrl, supabaseKey);
+            return supabaseClient;
+        }
 
         let allData = [];
         let currentLeague = null;
@@ -760,16 +771,16 @@
 
         // Add helper function to format ranks with trophy icons
         function formatRank(rank) {
-            if (rank === 1) {
-                return '<i class="fas fa-trophy" style="color: #FFD700;" title="1st Place"></i>';
-            } else if (rank === 2) {
-                return '<i class="fas fa-trophy" style="color: #C0C0C0;" title="2nd Place"></i>';
-            } else if (rank === 3) {
-                return '<i class="fas fa-trophy" style="color: #CD7F32;" title="3rd Place"></i>';
-            } else {
-                return `#${rank}`;
-            }
-        }
+            const svg = (fill, title) => `
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-label="${title}" role="img" style="vertical-align:middle;">
+        <title>${title}</title>
+        <path fill="${fill}" d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a4 4 0 0 0 3.446 3.959A5.996 5.996 0 0 0 11 12.816V17H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-4.184a5.996 5.996 0 0 0 2.554-3.857A4 4 0 0 0 19 5V3a1 1 0 0 0-1-1Zm-9 3a2 2 0 0 1-2-2h2v2Zm8 0a2 2 0 0 1-2-2h2v2Z"/>
+      </svg>`;
+    if (rank === 1) return svg('#FFD700', '1st');
+    if (rank === 2) return svg('#C0C0C0', '2nd');
+    if (rank === 3) return svg('#CD7F32', '3rd');
+    return `<span>#${rank}</span>`;
+}
 
         // Display mode toggle setup (was missing)
         function setupDisplayModeToggle() {
@@ -804,12 +815,14 @@
         // Fetch data from Supabase - ADD MORE DEBUGGING
         async function fetchRewardsData() {
             try {
+                // Load Supabase only when needed (after paint/idle)
+                await ensureSupabase();
                 console.log('Starting to fetch rewards data...');
                 
                 // Fetch data with exact count (no explicit .limit() was present previously)
                 const { data, error, count } = await supabaseClient
-                    .from('rewardsvalueadded')
-                    .select(`
+                     .from('rewardsvalueadded')
+                     .select(`
                          league,
                          tournament_number,
                          hero_handle,
@@ -992,6 +1005,8 @@
                 icon.src = `../../icons/${league.toLowerCase()}.webp`;
                 icon.alt = `${league} League`;
                 icon.className = 'league-icon';
+                icon.width = 20;  // reserve size to prevent reflow
+                icon.height = 20;
                 icon.onerror = function() {
                     this.style.display = 'none';
                 };
@@ -1245,7 +1260,7 @@
             if (results) results.style.display = 'none';
         }
 
-        // helper to re-render current view (league or by-league) after search/filter updates
+        /* helper to re-render current view (league or by-league) after search/filter updates */
         function renderCurrentView() {
             if (currentLeague === 'BY_LEAGUE') {
                 renderByLeagueMatrix();
@@ -1506,6 +1521,7 @@
               // Render table with independent color scales (pass heroPfpMap)
               renderTable(sortedHeroTotals, tournamentNumbers, matrix, starsMatrix, colorScales, heroPfpMap, heroStarsMap, scoreMatrix, appearancesMatrix, heroIdMap, heroRarityMap);
               
+            
              document.getElementById('loading').style.display = 'none';
              // Hide loading when rendering is complete
              hideLoading();
@@ -1524,6 +1540,7 @@
               return [...heroTotals].sort((a, b) => {
                   let aVal, bVal;
                   
+
                  if (column === 'hero') {
                      const pa = parseHeroKey(a.hero || '');
                      const pb = parseHeroKey(b.hero || '');
@@ -1686,7 +1703,8 @@
 <span title="Stars">Stars</span>
 </th>`;
             tournamentNumbers.forEach(tournNum => {
-                const colName = `T${tournNum}`;
+                                                                                                                                                                                        
+                               const colName = `T${tournNum}`;
                 const sortClass = currentSort.column === colName ? `sort-${currentSort.direction}` : '';
                 headerHTML += `<th class="value-cell sortable ${sortClass}" onclick="handleSort('${colName}')">${colName}</th>`;
             });
@@ -1720,10 +1738,10 @@
                 if (heroId && heroRarity && heroStarsForCard) {
                     // Generate card URL: https://r2.fantasy.top/v3/{rarity}/{id}_{stars}.png
                     const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
-                    imgHtml = `<img class="hero-image" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">`;
+                    imgHtml = `<img class="hero-image" width="32" height="32" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">`;
                 } else {
                     const pfp = (heroPfpMap && heroPfpMap[hero]) ? heroPfpMap[hero] : '';
-                    imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
+                    imgHtml = pfp ? `<img class="hero-image" width="32" height="32" src="${escapeHtml(pfp)}" alt="${escapeHtml(hero)}" onerror="this.style.display='none'">` : '';
                 }
 
                 // Truncate hero display name (use display label that includes rarity), keep full label in title
@@ -2092,10 +2110,10 @@ if (!hasValue) {
                 const heroStarsForCard = (heroStarsMap && heroStarsMap[row.hero]) ? heroStarsMap[row.hero] : 0;
                 if (heroId && heroRarity && heroStarsForCard) {
                     const cardUrl = `https://r2.fantasy.top/v3/${heroRarity}/${heroId}_${heroStarsForCard}.png`;
-                    imgHtml = `<img class="hero-image" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">`;
+                    imgHtml = `<img class="hero-image" width="32" height="32" src="${escapeHtml(cardUrl)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">`;
                 } else {
                     const pfp = (heroPfpMap && heroPfpMap[row.hero]) ? heroPfpMap[row.hero] : '';
-                    imgHtml = pfp ? `<img class="hero-image" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
+                    imgHtml = pfp ? `<img class="hero-image" width="32" height="32" src="${escapeHtml(pfp)}" alt="${escapeHtml(row.hero)}" onerror="this.style.display='none'">` : '';
                 }
                 const baseName = displayHeroBaseName(row.hero);
                 const displayName = truncateHeroName(baseName);
@@ -2252,11 +2270,17 @@ if (!hasValue) {
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-             // attach toggle handler early
-             setupDisplayModeToggle();
-             setupFilters();
-             fetchRewardsData();
-         });
+            // Set up UI immediately so first paint happens fast
+            setupDisplayModeToggle();
+            setupFilters();
+            // Defer network work until idle (fallback to next frame)
+            const start = () => fetchRewardsData();
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(start, { timeout: 300 });
+            } else {
+                requestAnimationFrame(start);
+            }
+        });
  
         // Guide modal behavior
         (function setupGuideModal() {
@@ -2295,7 +2319,12 @@ if (!hasValue) {
                 if (ev.key === 'Escape' && modal.classList.contains('open')) closeModal();
             });
         })();
- 
+
+        // Expose handlers for inline onclick attributes
+        if (typeof window !== 'undefined') {
+            window.handleSort = (col) => handleSort(col);
+            window.handleByLeagueSort = (col) => handleByLeagueSort(col);
+        }
     </script>
 </body>
 </html>

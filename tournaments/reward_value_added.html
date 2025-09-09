@@ -708,7 +708,7 @@
                     <label style="font-size:11px; color:#fff;"><input type="radio" name="valueBasis" value="eth"> ETH</label>
                 </div>
             </div>
- 
+
              <button id="clearFilter" class="clear-button">Clear Filter</button>
          </div>
 
@@ -781,15 +781,18 @@
         // false = show raw total reward_value_added
         let showAvgPerAppearance = true;
 
-        // NEW: base value mode for calculations: 'rva' (default) or 'eth'
-        let valueBasis = 'rva';
-        function getRvaValueFromRow(row) {
-            // returns Number or null
-            const v = valueBasis === 'eth' ? row?.reward_value_added_eth : row?.reward_value_added;
-            if (v === null || v === undefined) return null;
-            const n = Number(v);
-            return Number.isNaN(n) ? null : n;
-        }
+        // Add helper function to format ranks with trophy icons
+        function formatRank(rank) {
+            const svg = (fill, title) => `
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-label="${title}" role="img" style="vertical-align:middle;">
+        <title>${title}</title>
+        <path fill="${fill}" d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a4 4 0 0 0 3.446 3.959A5.996 5.996 0 0 0 11 12.816V17H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-4.184a5.996 5.996 0 0 0 2.554-3.857A4 4 0 0 0 19 5V3a1 1 0 0 0-1-1Zm-9 3a2 2 0 0 1-2-2h2v2Zm8 0a2 2 0 0 1-2-2h2v2Z"/>
+      </svg>`;
+    if (rank === 1) return svg('#FFD700', '1st');
+    if (rank === 2) return svg('#C0C0C0', '2nd');
+    if (rank === 3) return svg('#CD7F32', '3rd');
+    return `<span>#${rank}</span>`;
+}
 
         // Display mode toggle setup (was missing)
         function setupDisplayModeToggle() {
@@ -799,19 +802,6 @@
             radios.forEach(r => {
                 r.addEventListener('change', (e) => {
                     showAvgPerAppearance = (e.target.value === 'avg');
-                    renderCurrentView();
-                });
-            });
-        }
-
-        // NEW: Value basis toggle setup
-        function setupValueBasisToggle() {
-            const container = document.getElementById('valueBasisToggle');
-            if (!container) return;
-            const radios = container.querySelectorAll('input[name="valueBasis"]');
-            radios.forEach(r => {
-                r.addEventListener('change', (e) => {
-                    valueBasis = e.target.value === 'eth' ? 'eth' : 'rva';
                     renderCurrentView();
                 });
             });
@@ -1406,9 +1396,8 @@
                 if (!heroKey) return;
                 const tourn = row.tournament_number;
                 if (matrix[heroKey] && matrix[heroKey].hasOwnProperty(tourn)) {
-                    // CHANGED: use selected basis (RVA vs ETH)
-                    const rv = getRvaValueFromRow(row);
-                    if (rv !== null) {
+                    const rv = row.reward_value_added;
+                    if (rv !== null && rv !== undefined) {
                         const num = Number(rv) || 0;
                         if (matrix[heroKey][tourn] === null) {
                             matrix[heroKey][tourn] = num;
@@ -1466,8 +1455,7 @@
                     return sum + ((v === null || v === undefined) ? 0 : Number(v));
                 }, 0);
                 const avgRewards = heroAppearances > 0 ? total / heroAppearances : 0;
-                // CHANGED: ROI only meaningful in ETH mode
-                const roi = (valueBasis === 'eth' && commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : null;
+                const roi = (commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : 0;
                 return { hero, total, median, values: avgPerAppValues, commonAvg, appearances: heroAppearances, avgRewards, roi };
             });
 
@@ -1497,13 +1485,15 @@
 });
              });
  
-            heroTotals.forEach(({ total, median, appearances, commonAvg, roi }) => {
+            heroTotals.forEach(({ total, median, appearances, commonAvg }) => {
                 totalValues.push(total);
                 medianValues.push(median);
+                // Add avg rewards calculation
                 const avgRewards = appearances > 0 ? total / appearances : 0;
                 avgRewardsValues.push(avgRewards);
-                // CHANGED: only push ROI values when in ETH mode
-                if (valueBasis === 'eth' && roi !== null) roiValues.push(roi);
+                // Add ROI calculation
+                const roi = (commonAvg && commonAvg > 0) ? (avgRewards / commonAvg) * 100 : 0;
+                roiValues.push(roi);
             });
 
             // Ensure arrays are not empty before calculating min/max
@@ -1736,11 +1726,9 @@
             const totalSortClass = currentSort.column === 'total' ? `sort-${currentSort.direction}` : '';
             const medianSortClass = currentSort.column === 'median' ? `sort-${currentSort.direction}` : '';
             const roiSortClass = currentSort.column === 'roi' ? `sort-${currentSort.direction}` : '';
-            // NEW: dynamic labels based on value basis
-            const avgLabel = valueBasis === 'eth' ? 'Avg Per App (ETH)' : 'Avg Per App (RVA)';
-            const roiLabel = valueBasis === 'eth' ? 'ROI' : 'ROI (ETH only)';
-            headerHTML += `<th class="total-col summary-col avg-per-app-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">${avgLabel}</th>`;
-            headerHTML += `<th class="total-col summary-col roi-col sortable ${roiSortClass}" onclick="handleSort('roi')">${roiLabel}</th>`;
+            // New order: Avg Per App, ROI, Total, Median
+            headerHTML += `<th class="total-col summary-col avg-per-app-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App</th>`;
+            headerHTML += `<th class="total-col summary-col roi-col sortable ${roiSortClass}" onclick="handleSort('roi')">ROI</th>`;
             tableHeader.innerHTML = headerHTML;
 
             // Create body rows with type-specific color scaling
@@ -1824,16 +1812,15 @@ if (!hasValue) {
                 const commonPrice = heroTotals[idx].commonAvg || null;
                 const roi = heroTotals[idx].roi;
 
-                // Avg Per App column
+                // Avg Per App column (first of summary columns)
                 const avgColors = getValueColor(avgRewardsPerAppearance, colorScales.avgRewards, 'avgRewards');
                 const avgTooltip = `Total: ${formatCurrency(total)}, Appearances: ${appearances}`;
                 bodyHTML += `<td class="total-col summary-col avg-per-app-col" style="background-color: ${avgColors.backgroundColor}; color: ${avgColors.color};" title="${avgTooltip}">${formatFourDecimals(avgRewardsPerAppearance)}</td>`;
 
-                // ROI column (ETH mode only shows a value)
+                // ROI column (now directly after Avg Per App)
                 const roiColors = getValueColor(roi, colorScales.roi, 'roi');
                 const roiTooltip = `Avg Per App: ${formatFourDecimals(avgRewardsPerAppearance)}, Est Price: ${commonPrice ? formatThreeDecimals(commonPrice) : 'N/A'}`;
-                const showRoi = (valueBasis === 'eth' && roi !== null && roi > 0);
-                bodyHTML += `<td class="total-col summary-col roi-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${showRoi ? formatCurrency(roi) + '%' : '-'}</td>`;
+                bodyHTML += `<td class="total-col summary-col roi-col" style="background-color: ${roiColors.backgroundColor}; color: ${roiColors.color};" title="${roiTooltip}">${roi > 0 ? formatCurrency(roi) + '%' : '-'}</td>`;
 
                 // Total column (blue palette)
                 const totalColors = getValueColor(total, colorScales.total, 'total');
@@ -1951,7 +1938,7 @@ if (!hasValue) {
                 return n !== 0 ? n : pa.rarity.localeCompare(pb.rarity);
             });
 
-            // Aggregate totals per hero+league using selected basis
+            // Aggregate reward_value_added across ALL data per hero+league (for ranking baseline)
             const heroLeagueTotalsFull = {};
             fullHeroes.forEach(h => {
                 heroLeagueTotalsFull[h] = {};
@@ -1961,8 +1948,7 @@ if (!hasValue) {
                 const heroKey = heroKeyFromRow(row);
                 if (!heroKey) return;
                 const league = row.league;
-                const raw = getRvaValueFromRow(row);
-                const val = (raw === null || raw === undefined || isNaN(Number(raw))) ? 0 : Number(raw);
+                const val = (row.reward_value_added === null || row.reward_value_added === undefined || isNaN(Number(row.reward_value_added))) ? 0 : Number(row.reward_value_added);
                 if (heroLeagueTotalsFull[heroKey] && (league in heroLeagueTotalsFull[heroKey])) {
                     heroLeagueTotalsFull[heroKey][league] += val;
                 }
@@ -2296,8 +2282,6 @@ if (!hasValue) {
         document.addEventListener('DOMContentLoaded', function() {
             // Set up UI immediately so first paint happens fast
             setupDisplayModeToggle();
-            // NEW: value basis toggle setup
-            setupValueBasisToggle();
             setupFilters();
             // Defer network work until idle (fallback to next frame)
             const start = () => fetchRewardsData();

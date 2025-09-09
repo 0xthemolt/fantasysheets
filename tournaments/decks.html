@@ -999,14 +999,14 @@
         height: 100%;
     "></div>
     
-    <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative; overflow: visible; padding: 0; margin: 0;">
+    <div class="rewards-summary-content" style="display: flex; flex-direction: column; gap: 5px; position: relative; overflow: hidden; padding: 0; margin: 0;">
         <div class="summary-card" style="position: relative;">
             <div class="summary-content">
                 <!-- Existing rewards summary content -->
             </div>
         </div>
         
-        <div class="scoring-view" style="position: relative; overflow: visible; margin: 0;">
+        <div class="scoring-view" style="position: relative; overflow: hidden; margin: 0;">
             <div class="summary-header">
             </div>
             <div class="league-scores">
@@ -2270,141 +2270,6 @@ function adjustColor(color, amount) {
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
-// Portal tooltips: clone .pin-tooltip to document.body while hovered so ancestor overflow can't clip it
-(function () {
-    const activeClones = new WeakMap(); // marker -> { clone, original }
-    const activeMarkers = new Set(); // iterable list of markers for cleanup
-
-    function createClone(marker, tooltip) {
-        // If already created, return existing clone
-        if (activeClones.has(marker)) {
-            return activeClones.get(marker).clone;
-        }
-
-        // hide the original tooltip so CSS hover doesn't show it while portal is active
-        tooltip.dataset._portalHidden = '1';
-        tooltip._prevDisplay = tooltip.style.display;
-        tooltip.style.display = 'none';
-
-        const clone = tooltip.cloneNode(true);
-        clone.classList.add('pin-tooltip-portal');
-        clone.style.position = 'fixed';
-        clone.style.display = 'block';
-        clone.style.zIndex = 20000;
-        clone.style.pointerEvents = 'auto';
-        clone.style.left = '-9999px';
-        clone.style.top = '-9999px';
-        // Attach reference back to marker for easy lookups
-        clone._portalMarker = marker;
-
-        // When pointer leaves the clone, remove it unless pointer moved back into the marker
-        clone.addEventListener('pointerleave', (ev) => {
-            const related = ev.relatedTarget;
-            if (related && marker.contains(related)) return; // moved back to marker
-            removeClone(marker);
-        }, { passive: true });
-
-        // Optional: close portal if clicked outside
-        clone.addEventListener('pointerdown', (ev) => {
-            // allow interactions inside the clone; clicks outside will be handled globally
-            ev.stopPropagation();
-        });
-
-        document.body.appendChild(clone);
-        activeClones.set(marker, { clone, original: tooltip });
-        activeMarkers.add(marker);
-        return clone;
-    }
-
-    function removeClone(marker) {
-        const entry = activeClones.get(marker);
-        if (!entry) return;
-        try { entry.clone.remove(); } catch (e) {}
-        // restore original tooltip visibility
-        try {
-            const tooltip = entry.original;
-            if (tooltip && tooltip.dataset._portalHidden) {
-                tooltip.style.display = tooltip._prevDisplay || '';
-                delete tooltip.dataset._portalHidden;
-                delete tooltip._prevDisplay;
-            }
-        } catch (e) {}
-        activeClones.delete(marker);
-        activeMarkers.delete(marker);
-    }
-
-    function positionClone(marker, clone) {
-        const rect = marker.getBoundingClientRect();
-        // center above marker
-        clone.style.left = (rect.left + rect.width / 2 - clone.offsetWidth / 2) + 'px';
-        clone.style.top = (rect.top - clone.offsetHeight - 8) + 'px';
-        // clamp horizontally
-        const minLeft = 6;
-        const maxLeft = window.innerWidth - clone.offsetWidth - 6;
-        let left = parseFloat(clone.style.left) || 0;
-        if (left < minLeft) left = minLeft;
-        if (left > maxLeft) left = maxLeft;
-        clone.style.left = `${left}px`;
-        // if no room above, place below
-        if ((parseFloat(clone.style.top) || 0) < 6) {
-            clone.style.top = (rect.bottom + 8) + 'px';
-        }
-    }
-
-    // Create clone on entering a marker (deduplicated)
-    document.addEventListener('pointerenter', (ev) => {
-        const marker = ev.target.closest && ev.target.closest('.player-score-marker');
-        if (!marker) return;
-        // If pointer entered a child of the same marker, skip
-        if (activeClones.has(marker)) return;
-        const tooltip = marker.querySelector('.pin-tooltip');
-        if (!tooltip) return;
-        const clone = createClone(marker, tooltip);
-        // measure & position next frame
-        requestAnimationFrame(() => positionClone(marker, clone));
-    }, true);
-
-    // Remove clone only when pointer actually leaves both marker and its portal
-    document.addEventListener('pointerleave', (ev) => {
-        const marker = ev.target.closest && ev.target.closest('.player-score-marker');
-        if (!marker) return;
-        const entry = activeClones.get(marker);
-        if (!entry) {
-            // nothing to remove
-            return;
-        }
-        const related = ev.relatedTarget;
-        // If pointer moved into the portal clone, keep it open
-        if (related && (related === entry.clone || entry.clone.contains(related))) return;
-        removeClone(marker);
-    }, true);
-
-    // Update position while pointer moves inside the marker (or when moving over clone)
-    document.addEventListener('pointermove', (ev) => {
-        // prefer marker under pointer
-        const marker = ev.target.closest && ev.target.closest('.player-score-marker');
-        if (!marker) return;
-        const entry = activeClones.get(marker);
-        if (!entry) return;
-        positionClone(marker, entry.clone);
-    }, true);
-
-    // Close portals when clicking/touching outside markers and portals
-    document.addEventListener('pointerdown', (ev) => {
-        if (ev.target.closest('.player-score-marker') || ev.target.closest('.pin-tooltip-portal')) return;
-        // remove all active clones
-        activeMarkers.forEach(m => removeClone(m));
-    }, true);
-
-    // Cleanup on scroll/resize/visibilitychange
-    ['scroll', 'resize', 'visibilitychange'].forEach(evt => {
-        window.addEventListener(evt, () => {
-            activeMarkers.forEach(marker => removeClone(marker));
-            // best effort remove any leftover portals
-            document.querySelectorAll('.pin-tooltip-portal').forEach(n => n.remove());
-        }, { passive: true });
-    });
-})();
 </script>
 
 </body>

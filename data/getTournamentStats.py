@@ -330,7 +330,7 @@ select tournament_unique_key
 ,max(views) views
 ,max(score_0_count) score_0_count
 from base
-where hours_since_Start <= (24*2)
+where hours_since_Start <= (24*3)
 group by 1,2
 order by 1,2"""
 tournament_views_df = pd.read_sql_query(tournament_views_query, conn_two)

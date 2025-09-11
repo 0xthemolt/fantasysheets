@@ -198,7 +198,7 @@ select
     COALESCE(hr.reward_gold, 0)  as reward_gold,
     COALESCE(r.decks, 0)  as decks, /*still have to use this to get deck itm but it won't be accurate for first few*/
     GREATEST(r.itm_decks,hr.itm_decks) as itm_decks, /*rewards should be more accurate, but in some cases the rewards ranges were overridden or bugged, use the greater of the two*/
-    coalesce(r.decks_est_value, 0) as decks_est_value,
+    0 as decks_est_value,
     p.timestamp
 FROM all_mains m
 CROSS join LATERAL (

@@ -1729,6 +1729,8 @@
             // New order: Avg Per App, ROI, Total, Median
             headerHTML += `<th class="total-col summary-col avg-per-app-col sortable ${avgRewardsSortClass}" onclick="handleSort('avgRewards')">Avg Per App</th>`;
             headerHTML += `<th class="total-col summary-col roi-col sortable ${roiSortClass}" onclick="handleSort('roi')">ROI</th>`;
+            headerHTML += `<th class="total-col summary-col total-col sortable ${totalSortClass}" onclick="handleSort('total')">Total</th>`;
+            headerHTML += `<th class="total-col summary-col median-col sortable ${medianSortClass}" onclick="handleSort('median')">Median</th>`;
             tableHeader.innerHTML = headerHTML;
 
             // Create body rows with type-specific color scaling

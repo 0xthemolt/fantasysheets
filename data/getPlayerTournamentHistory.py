@@ -30,9 +30,29 @@ with base as (
         select gt2.start_timestamp,gt2.tournament_unique_key,gt2.league,gtpp2.tournament_id, case when gtpp2.tournament_id = '7a90ddb8-6dc6-41cc-aa82-e3fd50bbc272' then 'd37feec7-ed2c-4dc5-8ac3-a21a622df1f7' else gtpp2.tournament_id end rewards_tournament_id,gtpp2.player_pic,gtpp2.player_id,gtpp2.player_handle
         ,gtpp2.unique_player_rank,gt2.tournament_name
         ,(gtpp2.db_updated_cst)::timestamp as timestamp
+           ,vcev1.est_value  card1_est_value
+        ,vcev2.est_value  card2_est_value
+        ,vcev3.est_value  card3_est_value
+        ,vcev4.est_value  card4_est_value
+        ,vcev5.est_value  card5_est_value
+--        ,gtpp2.card1_hero_handle
+--        ,gtpp2.card2_hero_handle
+--        ,gtpp2.card3_hero_handle
+--        ,gtpp2.card4_hero_handle
+--        ,gtpp2.card5_hero_handle
     from flatten.tournament_players gtpp2 
         join flatten.get_tournaments gt2 
             on gtpp2.tournament_id = gt2.tournament_id
+         left join flatten.vwhero_cards_est_value vcev1  
+           	on gtpp2.card1_hero_rarity_index  = vcev1.hero_rarity_id 
+left join flatten.vwhero_cards_est_value vcev2  
+           	on gtpp2.card2_hero_rarity_index  = vcev2.hero_rarity_id 
+    left join flatten.vwhero_cards_est_value vcev3  
+           	on gtpp2.card3_hero_rarity_index  = vcev3.hero_rarity_id 
+     left join flatten.vwhero_cards_est_value vcev4  
+           	on gtpp2.card4_hero_rarity_index  = vcev4.hero_rarity_id 
+ left join flatten.vwhero_cards_est_value vcev5 
+           	on gtpp2.card5_hero_rarity_index  = vcev5.hero_rarity_id 
    -- where gtpp2.player_handle = '0xthemolt'
        --and gtpp2.tournament_unique_key = 'Main 24'
     order by 1 desc
@@ -99,7 +119,8 @@ group by 1,2
         sum(coalesce(reward_pack.reward,0)) as reward_pack,
         sum(coalesce(reward_fan.reward,0)) as reward_fan,
         sum(coalesce(reward_frag.reward,0)) as reward_frag,
-        sum(coalesce(reward_gold.reward,0)) as reward_gold
+        sum(coalesce(reward_gold.reward,0)) as reward_gold,
+        sum(coalesce(gtpp2.card1_est_value,0) + coalesce(gtpp2.card2_est_value,0) + coalesce(gtpp2.card3_est_value,0) + coalesce(gtpp2.card4_est_value,0)+ coalesce(gtpp2.card5_est_value,0)) as decks_est_value
   from base gtpp2
     LEFT JOIN flatten.tournament_rewards reward_eth
         ON gtpp2.rewards_tournament_id  = reward_eth.tournament_id 
@@ -177,6 +198,7 @@ select
     COALESCE(hr.reward_gold, 0)  as reward_gold,
     COALESCE(r.decks, 0)  as decks, /*still have to use this to get deck itm but it won't be accurate for first few*/
     GREATEST(r.itm_decks,hr.itm_decks) as itm_decks, /*rewards should be more accurate, but in some cases the rewards ranges were overridden or bugged, use the greater of the two*/
+    coalesce(r.decks_est_value, 0) as decks_est_value,
     p.timestamp
 FROM all_mains m
 CROSS join LATERAL (
@@ -213,7 +235,7 @@ select
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
-    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.00267), 0) as reward_value,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.0024), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,
@@ -221,6 +243,7 @@ select
     COALESCE(r.reward_gold, 0)  as reward_gold,
     COALESCE(r.decks, 0)  as decks,
     COALESCE(r.itm_decks, 0) as itm_decks,
+    coalesce(r.decks_est_value, 0) as decks_est_value,
     p.timestamp
 FROM all_mains m
 CROSS join LATERAL (
@@ -243,7 +266,7 @@ cursor.execute(query)
 rows = cursor.fetchall()
 
 # Find the max latest_score_timestamp
-max_timestamp = max(row[19] for row in rows if row[19] is not None)
+max_timestamp = max(row[20] for row in rows if row[20] is not None)  # Changed from row[19] to row[20]
 
 # Convert the results to a list of dictionaries
 player_history = []
@@ -269,7 +292,8 @@ for row in rows:
         'reward_gold': int(row[16]) if row[16] else 0,
         'decks': int(row[17]) if row[17] else 0,
         'itm_decks': int(row[18]) if row[18] else 0,
-        'timestamp': row[19]
+        'decks_est_value': float(row[19]) if row[19] else 0.0,  # Added this line
+        'timestamp': row[20]  # Changed from row[19] to row[20]
     }
     player_history.append(player_data)
 

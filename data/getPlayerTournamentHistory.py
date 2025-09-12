@@ -217,6 +217,7 @@ left join rewards r
 	and m.tournament_unique_key = r.tournament_unique_key
 where m.tournament_status  <> 'live'
 	and m.is_rewards_final = 1
+    and m.tournament_seq_nbr <> 1
 union
 select
 	m.tournament_seq_nbr,
@@ -257,7 +258,7 @@ left join nbc_wallets nbc
 left join rewards r
 	on p.player_id = r.player_id
 	and m.tournament_unique_key = r.tournament_unique_key
-where tournament_status  = 'live' or m.is_rewards_final = 0
+where tournament_status  = 'live' or m.is_rewards_final = 0 or m.tournament_seq_nbr = 1
 and decks <> 0
 order by 1
 """

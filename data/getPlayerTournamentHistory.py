@@ -168,16 +168,22 @@ left join rewards_final on
 where gt.tournament_Status in ('finished','live' )
 )
 , player_latest as (
-	select tournament_unique_key,player_handle,base.player_id,player_pic
+	select tournament_unique_key
+    ,p.player_handle
+    ,base.player_id
+    ,base.player_pic
+    ,p.player_name
 	,row_number() over (partition by base.player_id order by start_timestamp desc) as last_pic_seq_nbr  
 	,timestamp
-	from base join current_main_itm on base.player_id = current_main_itm.player_id 
+	from base 
+    join current_main_itm on base.player_id = current_main_itm.player_id 
+    join flatten.get_player_basic_data p on base.player_id = p.player_id
 )
 select
 	m.tournament_seq_nbr,
     m.tournament_unique_key,
     p.player_pic,
-    p.player_handle,
+    p.player_name as player_handle,
 	ARRAY_REMOVE(ARRAY[
 	    CASE WHEN h.is_deleted = 1 THEN 0 END,
 	    CASE WHEN h.is_deleted = 0 THEN 1 END,
@@ -223,7 +229,7 @@ select
 	m.tournament_seq_nbr,
     m.tournament_unique_key,
     p.player_pic,
-    p.player_handle,
+    p.player_name as player_handle,
 	ARRAY_REMOVE(ARRAY[
 	    CASE WHEN h.is_deleted = 1 THEN 0 END,
 	    CASE WHEN h.is_deleted = 0 THEN 1 END,

@@ -1323,7 +1323,7 @@ async function fetchData(tournamentNumber) {
         }
 
         // Add order by
-        query = query.order('player_rank', { ascending: true });
+        query = query.order('unique_player_rank', { ascending: true });
 
         // Execute query with limit only if not viewing personal decks/leagues
         const { data, error } = await (!(myDecksButton.classList.contains('active') || myLeaguesButton.classList.contains('active')) 
@@ -1335,7 +1335,7 @@ async function fetchData(tournamentNumber) {
         }
 
         // Debugging: Count players with player_rank = 1
-        const rankOneCount = data.filter(player => player.player_rank === 1).length;
+        const rankOneCount = data.filter(player => player.unique_player_rank === 1).length;
         console.log(`Number of players with rank 1: ${rankOneCount}`);
 
         // Continue with existing code...
@@ -1714,7 +1714,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                         </div>
                                         <div style="display: flex; gap: 10px; justify-content: center; padding-top: 4px; border-top: 1px solid #404040;">
                                             <div style="color: #ffffff; font-size: 12px;">
-                                                #${player.player_rank}
+                                                #${player.unique_player_rank}
                                             </div>
                                             <div style="color: #ffffff; font-size: 12px;">
                                                 ${formatInt(player.player_score)}
@@ -1722,7 +1722,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                             ${player.eth_won ? `
                                                 <div style="display: flex; align-items: center; gap: 2px; font-size: 12px;">
                                                     <span style="color: ${getRewardColor('eth')}">
-                                                        ${player.eth_won.toFixed(2)}
+                                                        ${player.eth_won.toFixed(3)}
                                                     </span>
                                                     <img src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
                                                 </div>
@@ -1799,8 +1799,8 @@ function updateTableWithData(data, preserveFiltered = false) {
             group.count++;
             
             // Update best rank and corresponding deck
-            if (player.player_rank < group.best_rank) {
-                group.best_rank = player.player_rank;
+            if (player.unique_player_rank < group.best_rank) {
+                group.best_rank = player.unique_player_rank;
                 group.best_deck = player;
             }
         });
@@ -1975,14 +1975,14 @@ function updateTableWithData(data, preserveFiltered = false) {
         row.innerHTML = `
             <td style="width: 42.5%;">
                 <div class="player-info-container" style="display: flex; align-items: center; gap: 0;"> <!-- Adjusted gap to 0 -->
-                    <div class="rank-circle rank-${player.player_rank <= 3 ? player.player_rank : 'other'}">
+                    <div class="rank-circle rank-${player.unique_player_rank <= 3 ? player.unique_player_rank : 'other'}">
                         <img class="circle-img player-avatar" 
                              src="${player.player_pic}" 
                              alt="${player.player_handle}"
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp';"
                              onload="this.style.display='block'"
                              onerror="this.onerror=null; this.src='/icons/ft_logo.webp'; return true;">
-                        <span class="rank-label">${player.player_rank}</span>
+                        <span class="rank-label">${player.unique_player_rank}</span>
                     </div>
                     <div class="player-details" style="display: flex; flex-direction: column; gap: 0; margin: 2px;">
                         <div class="player-handle" style="text-align: left; margin-top: 0;">
@@ -1993,7 +1993,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                                 ${player.eth_won ? `
                                     <div class="eth-reward" style="display: flex; align-items: center; gap: 2px;">
                                         <span class="eth-amount" style="color: ${getRewardColor('eth')}">
-                                            ${player.eth_won.toFixed(2)}
+                                            ${player.eth_won.toFixed(3)}
                                         </span>
                                         <img class="eth-icon" src="/icons/eth.webp" alt="ETH" style="width: 12px; height: 12px;">
                                     </div>

@@ -170,8 +170,10 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,suM(players.stars) stars
 ,sum(player_deck_counts.deck_count) as decks
 ,suM(players.number_of_cards) as cards
-,max(touranment_rankings_elite.avg_best_deck_norm_rank) as elite_norm_rank
-,max(touranment_rankings_elite_l5.avg_best_deck_norm_rank) as elite_norm_rank_l5
+,max(touranment_rankings_diamond.avg_best_deck_norm_rank) as diamond_norm_rank
+,max(touranment_rankings_diamond_l5.avg_best_deck_norm_rank) as diamond_norm_rank_l5
+,max(touranment_rankings_plat.avg_best_deck_norm_rank) as platinum_norm_rank
+,max(touranment_rankings_plat_l5.avg_best_deck_norm_rank) as platinum_norm_rank_l5
 ,max(touranment_rankings_gold.avg_best_deck_norm_rank) as gold_norm_rank
 ,max(touranment_rankings_gold_l5.avg_best_deck_norm_rank) as gold_norm_rank_l5
 ,max(touranment_rankings_silver.avg_best_deck_norm_rank) as silver_norm_rank
@@ -199,9 +201,12 @@ join player_deck_counts
 	on players.player_id  = player_deck_counts.player_id
 left join trade_volume_by_player tvbp
 	on players.player_id = tvbp.player_id
-left join league_ranking touranment_rankings_elite
-    on players.player_id = touranment_rankings_elite.player_id
-    and touranment_rankings_elite.league = 'Elite'
+left join league_ranking touranment_rankings_diamond
+    on players.player_id = touranment_rankings_diamond.player_id
+    and touranment_rankings_diamond.league = 'Diamond'
+left join league_ranking touranment_rankings_plat
+    on players.player_id = touranment_rankings_plat.player_id
+    and touranment_rankings_plat.league = 'Platinunm'
 left join league_ranking touranment_rankings_gold
     on players.player_id = touranment_rankings_gold.player_id
     and touranment_rankings_gold.league = 'Gold'
@@ -214,9 +219,12 @@ left join league_ranking touranment_rankings_bronze
 left join league_ranking touranment_rankings_reverse
     on players.player_id = touranment_rankings_reverse.player_id
     and touranment_rankings_reverse.league = 'Reverse'
-left join league_ranking_l5 touranment_rankings_elite_l5
-    on players.player_id = touranment_rankings_elite_l5.player_id
-    and touranment_rankings_elite_l5.league = 'Elite'
+left join league_ranking_l5 touranment_rankings_diamond_l5
+    on players.player_id = touranment_rankings_diamond_l5.player_id
+    and touranment_rankings_diamond_l5.league = 'Diamond'
+left join league_ranking_l5 touranment_rankings_plat_l5
+    on players.player_id = touranment_rankings_plat_l5.player_id
+    and touranment_rankings_plat_l5.league = 'Platinum'
 left join league_ranking_l5 touranment_rankings_gold_l5
     on players.player_id = touranment_rankings_gold_l5.player_id
     and touranment_rankings_gold_l5.league = 'Gold'
@@ -247,7 +255,7 @@ os.makedirs(output_dir, exist_ok=True)
 player_ranking_df['freshness_timestamp'] = player_ranking_df['freshness_timestamp'].astype(str)
 
 # Handle NaN values in norm rank columns
-rank_columns = ['elite_norm_rank', 'gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank','elite_norm_rank_l5','gold_norm_rank_l5','silver_norm_rank_l5','bronze_norm_rank_l5','reverse_norm_rank_l5']
+rank_columns = ['diamond_norm_rank', 'platinum_norm_rank','gold_norm_rank', 'silver_norm_rank', 'bronze_norm_rank', 'reverse_norm_rank','diamond_norm_rank_l5','platinum_norm_rank_l5','gold_norm_rank_l5','silver_norm_rank_l5','bronze_norm_rank_l5','reverse_norm_rank_l5']
 for col in rank_columns:
     player_ranking_df[col] = player_ranking_df[col].fillna(0).astype(float)
 

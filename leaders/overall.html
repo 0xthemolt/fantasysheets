@@ -117,7 +117,7 @@
     th[data-sort="blastGold"],
     th[data-sort="stars"] { width: 70px; }
     th[data-sort="decks"] { width: 60px; }
-    th[data-sort="elite"],
+    th[data-sort="diamond"],
     th[data-sort="gold"],
     th[data-sort="silver"],
     th[data-sort="bronze"],
@@ -343,8 +343,8 @@
                             Decks
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="elite">
-                            <img src="../icons/elite.webp" alt="Elite" style="height: 16px; vertical-align: middle;">
+                        <th class="sortable" data-sort="diamond">
+                            <img src="../icons/diamond.webp" alt="Diamond" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="gold">
@@ -461,12 +461,12 @@
                     stars: Math.round(player.stars),
                     decks: Math.round(player.decks),
                     cards: Math.round(player.cards),
-                    elite: Math.round(player.elite_norm_rank),
+                    diamond: Math.round(player.diamond_norm_rank),
                     gold: Math.round(player.gold_norm_rank),
                     silver: Math.round(player.silver_norm_rank),
                     bronze: Math.round(player.bronze_norm_rank),
                     reverse: Math.round(player.reverse_norm_rank),
-                    elite_l5: Math.round(player.elite_norm_rank_l5),
+                    diamond_l5: Math.round(player.diamond_norm_rank_l5),
                     gold_l5: Math.round(player.gold_norm_rank_l5),
                     silver_l5: Math.round(player.silver_norm_rank_l5),
                     bronze_l5: Math.round(player.bronze_norm_rank_l5),
@@ -509,20 +509,20 @@
  
                     <td>${formatInt(player.decks)}</td>
                     <td data-column="league_norm_rank" style="background-color: #a8ccde26">
-                        ${player.elite == 0 ? '-' : 
-                          player.elite == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
-                          player.elite == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
-                          player.elite == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.elite <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elite)}</span>` :
-                          formatInt(player.elite)}
+                        ${player.diamond == 0 ? '-' : 
+                          player.diamond == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.diamond == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.diamond == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.diamond <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond)}</span>` :
+                          formatInt(player.diamond)}
                     </td>
                     <td data-column="league_norm_rank_l5" style="background-color: #a8ccde26; display: none;">
-                        ${player.elite_l5 == 0 ? '-' : 
-                          player.elite_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
-                          player.elite_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
-                          player.elite_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.elite_l5 <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.elite_l5)}</span>` :
-                          formatInt(player.elite_l5)}
+                        ${player.diamond_l5 == 0 ? '-' : 
+                          player.diamond_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.diamond_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.diamond_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.diamond_l5 <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond_l5)}</span>` :
+                          formatInt(player.diamond_l5)}
                     </td>
                     <td data-column="league_norm_rank" style="background-color: #dacc8626">
                         ${player.gold == 0 ? '-' : 
@@ -714,7 +714,7 @@
                     
                     // Determine the actual column to sort by (add _l5 suffix if Last 5 is active)
                     let sortColumn = column;
-                    if (isLast5Active && ['elite', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
+                    if (isLast5Active && ['diamond', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
                         sortColumn = `${column}_l5`;
                     }
 
@@ -725,7 +725,7 @@
                         currentSort.column = sortColumn;
                         // Set specific columns to sort ascending by default
                         const baseColumn = sortColumn.replace('_l5', '');
-                        currentSort.direction = (['elite', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
+                        currentSort.direction = (['diamond', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
                     }
 
                     // Update arrow on clicked header

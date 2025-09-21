@@ -20,102 +20,102 @@ conn = supabase_db_connection()
 cursor = conn.cursor()
 league_decks_query = f"""
 with override as (
- SELECT 'Main 50'  AS tournament_unique_key, 'Elite' as league,1507 as registered_decks,652 AS player_count union all
+ SELECT 'Main 50'  AS tournament_unique_key, 'Diamond' as league,1507 as registered_decks,652 AS player_count union all
   SELECT 'Main 50'  AS tournament_unique_key, 'Gold' as league,3133 as registered_decks,946 AS player_count union all
    SELECT 'Main 50'  AS tournament_unique_key, 'Silver' as league,5261 as registered_decks,1850 AS player_count union all
     SELECT 'Main 50'  AS tournament_unique_key, 'Bronze' as league,9217 as registered_decks,2877 AS player_count union all
      SELECT 'Main 50'  AS tournament_unique_key, 'Reverse' as league,5644 as registered_decks,1514 AS player_count union all
-      SELECT 'Main 51'  AS tournament_unique_key, 'Elite' as league,1674 as registered_decks,676 AS player_count union all
+      SELECT 'Main 51'  AS tournament_unique_key, 'Diamond' as league,1674 as registered_decks,676 AS player_count union all
   SELECT 'Main 51'  AS tournament_unique_key, 'Gold' as league,3321 as registered_decks,945 AS player_count union all
    SELECT 'Main 51'  AS tournament_unique_key, 'Silver' as league,5164 as registered_decks,1789 AS player_count union all
     SELECT 'Main 51'  AS tournament_unique_key, 'Bronze' as league,9449 as registered_decks,2840 AS player_count union all
      SELECT 'Main 51'  AS tournament_unique_key, 'Reverse' as league,5449 as registered_decks,1526 AS player_count union all
-      SELECT 'Main 52'  AS tournament_unique_key, 'Elite' as league,1593 as registered_decks,600 AS player_count union all
+      SELECT 'Main 52'  AS tournament_unique_key, 'Diamond' as league,1593 as registered_decks,600 AS player_count union all
   SELECT 'Main 52'  AS tournament_unique_key, 'Gold' as league,2913 as registered_decks,878 AS player_count union all
    SELECT 'Main 52'  AS tournament_unique_key, 'Silver' as league,5192 as registered_decks,1639 AS player_count union all
     SELECT 'Main 52'  AS tournament_unique_key, 'Bronze' as league,10820 as registered_decks,2886 AS player_count union all
      SELECT 'Main 52'  AS tournament_unique_key, 'Reverse' as league,5126 as registered_decks,1349 AS player_count union all
-SELECT 'Main 53'  AS tournament_unique_key, 'Elite' as league,1576 as registered_decks,578 AS player_count union all
+SELECT 'Main 53'  AS tournament_unique_key, 'Diamond' as league,1576 as registered_decks,578 AS player_count union all
   SELECT 'Main 53'  AS tournament_unique_key, 'Gold' as league,2648 as registered_decks,839 AS player_count union all
    SELECT 'Main 53'  AS tournament_unique_key, 'Silver' as league,5006 as registered_decks,1610 AS player_count union all
     SELECT 'Main 53'  AS tournament_unique_key, 'Bronze' as league,12127 as registered_decks,3032 AS player_count union all
      SELECT 'Main 53'  AS tournament_unique_key, 'Reverse' as league,3470 as registered_decks,946 AS player_count union all
-     SELECT 'Main 54'  AS tournament_unique_key, 'Elite' as league,1371 as registered_decks,553 AS player_count union all
+     SELECT 'Main 54'  AS tournament_unique_key, 'Diamond' as league,1371 as registered_decks,553 AS player_count union all
   SELECT 'Main 54'  AS tournament_unique_key, 'Gold' as league,2942 as registered_decks,830 AS player_count union all
    SELECT 'Main 54'  AS tournament_unique_key, 'Silver' as league,5492 as registered_decks,1608 AS player_count union all
     SELECT 'Main 54'  AS tournament_unique_key, 'Bronze' as league,12652 as registered_decks,3071 AS player_count union all
      SELECT 'Main 54'  AS tournament_unique_key, 'Reverse' as league,3663 as registered_decks,1007 AS player_count union all 
-          SELECT 'Main 55'  AS tournament_unique_key, 'Elite' as league,1777 as registered_decks,583 AS player_count union all
+          SELECT 'Main 55'  AS tournament_unique_key, 'Diamond' as league,1777 as registered_decks,583 AS player_count union all
   SELECT 'Main 55'  AS tournament_unique_key, 'Gold' as league,2867 as registered_decks,821 AS player_count union all
    SELECT 'Main 55'  AS tournament_unique_key, 'Silver' as league,4872 as registered_decks,1475 AS player_count union all
     SELECT 'Main 55'  AS tournament_unique_key, 'Bronze' as league,11075 as registered_decks,2899 AS player_count union all
      SELECT 'Main 55'  AS tournament_unique_key, 'Reverse' as league,4088 as registered_decks,1045 AS player_count union all
-               SELECT 'Main 56'  AS tournament_unique_key, 'Elite' as league,1642 as registered_decks,569 AS player_count union all
+               SELECT 'Main 56'  AS tournament_unique_key, 'Diamond' as league,1642 as registered_decks,569 AS player_count union all
   SELECT 'Main 56'  AS tournament_unique_key, 'Gold' as league,2720 as registered_decks,788 AS player_count union all
    SELECT 'Main 56'  AS tournament_unique_key, 'Silver' as league,5019 as registered_decks,1471 AS player_count union all
     SELECT 'Main 56'  AS tournament_unique_key, 'Bronze' as league,12148 as registered_decks,2906 AS player_count union all
      SELECT 'Main 56'  AS tournament_unique_key, 'Reverse' as league,3691 as registered_decks,861 AS player_count union all
-                    SELECT 'Main 57'  AS tournament_unique_key, 'Elite' as league,1688 as registered_decks,573 AS player_count union all
+                    SELECT 'Main 57'  AS tournament_unique_key, 'Diamond' as league,1688 as registered_decks,573 AS player_count union all
   SELECT 'Main 57'  AS tournament_unique_key, 'Gold' as league,2880 as registered_decks,809 AS player_count union all
    SELECT 'Main 57'  AS tournament_unique_key, 'Silver' as league,5028 as registered_decks,1442 AS player_count union all
     SELECT 'Main 57'  AS tournament_unique_key, 'Bronze' as league,10856 as registered_decks,2653 AS player_count union all
      SELECT 'Main 57'  AS tournament_unique_key, 'Reverse' as league,4952 as registered_decks,1091 AS player_count union all 
-                         SELECT 'Main 58'  AS tournament_unique_key, 'Elite' as league,1485 as registered_decks,508 AS player_count union all
+                         SELECT 'Main 58'  AS tournament_unique_key, 'Diamond' as league,1485 as registered_decks,508 AS player_count union all
   SELECT 'Main 58'  AS tournament_unique_key, 'Gold' as league,2656 as registered_decks,752 AS player_count union all
    SELECT 'Main 58'  AS tournament_unique_key, 'Silver' as league,4866 as registered_decks,1431 AS player_count union all
     SELECT 'Main 58'  AS tournament_unique_key, 'Bronze' as league,12033 as registered_decks,2680 AS player_count union all
      SELECT 'Main 58'  AS tournament_unique_key, 'Reverse' as league,4560 as registered_decks,1025 AS player_count union all 
-                              SELECT 'Main 59'  AS tournament_unique_key, 'Elite' as league,1470 as registered_decks,505 AS player_count union all
+                              SELECT 'Main 59'  AS tournament_unique_key, 'Diamond' as league,1470 as registered_decks,505 AS player_count union all
   SELECT 'Main 59'  AS tournament_unique_key, 'Gold' as league,2738 as registered_decks,777 AS player_count union all
    SELECT 'Main 59'  AS tournament_unique_key, 'Silver' as league,4787 as registered_decks,1349 AS player_count union all
     SELECT 'Main 59'  AS tournament_unique_key, 'Bronze' as league,12132 as registered_decks,2696 AS player_count union all
      SELECT 'Main 59'  AS tournament_unique_key, 'Reverse' as league,4757 as registered_decks,946 AS player_count union all 
-               SELECT 'Main 60'  AS tournament_unique_key, 'Elite' as league,1404 as registered_decks,493 AS player_count union all
+               SELECT 'Main 60'  AS tournament_unique_key, 'Diamond' as league,1404 as registered_decks,493 AS player_count union all
   SELECT 'Main 60'  AS tournament_unique_key, 'Gold' as league,2668 as registered_decks,757 AS player_count union all
    SELECT 'Main 60'  AS tournament_unique_key, 'Silver' as league,4727 as registered_decks,1415 AS player_count union all
     SELECT 'Main 60'  AS tournament_unique_key, 'Bronze' as league,12159 as registered_decks,2687 AS player_count union all
      SELECT 'Main 60'  AS tournament_unique_key, 'Reverse' as league,4160 as registered_decks,1034 AS player_count union all 
-          SELECT 'Main 61'  AS tournament_unique_key, 'Elite' as league,1674 as registered_decks,544 AS player_count union all
+          SELECT 'Main 61'  AS tournament_unique_key, 'Diamond' as league,1674 as registered_decks,544 AS player_count union all
   SELECT 'Main 61'  AS tournament_unique_key, 'Gold' as league,3016 as registered_decks,816 AS player_count union all
    SELECT 'Main 61'  AS tournament_unique_key, 'Silver' as league,4848 as registered_decks,1516 AS player_count union all
     SELECT 'Main 61'  AS tournament_unique_key, 'Bronze' as league,12204 as registered_decks,2927 AS player_count union all
      SELECT 'Main 61'  AS tournament_unique_key, 'Reverse' as league,5058 as registered_decks,1116 AS player_count union all 
-        SELECT 'Main 62'  AS tournament_unique_key, 'Elite' as league,1449 as registered_decks,483 AS player_count union all
+        SELECT 'Main 62'  AS tournament_unique_key, 'Diamond' as league,1449 as registered_decks,483 AS player_count union all
     SELECT 'Main 62'  AS tournament_unique_key, 'Gold' as league,2883 as registered_decks,771 AS player_count union all
    SELECT 'Main 62'  AS tournament_unique_key, 'Silver' as league,4943 as registered_decks,1489 AS player_count union all
     SELECT 'Main 62'  AS tournament_unique_key, 'Bronze' as league,12495 as registered_decks,2848 AS player_count union all
      SELECT 'Main 62'  AS tournament_unique_key, 'Reverse' as league,4696 as registered_decks,1039 AS player_count union all 
-             SELECT 'Main 63'  AS tournament_unique_key, 'Elite' as league,1422 as registered_decks,484 AS player_count union all
+             SELECT 'Main 63'  AS tournament_unique_key, 'Diamond' as league,1422 as registered_decks,484 AS player_count union all
     SELECT 'Main 63'  AS tournament_unique_key, 'Gold' as league,2947 as registered_decks,794 AS player_count union all
    SELECT 'Main 63'  AS tournament_unique_key, 'Silver' as league,4744 as registered_decks,1470 AS player_count union all
     SELECT 'Main 63'  AS tournament_unique_key, 'Bronze' as league,11547 as registered_decks,2679 AS player_count union all
      SELECT 'Main 63'  AS tournament_unique_key, 'Reverse' as league,5331 as registered_decks,1237 AS player_count union all 
-       SELECT 'Main 64'  AS tournament_unique_key, 'Elite' as league,1498 as registered_decks,489 AS player_count union all
+       SELECT 'Main 64'  AS tournament_unique_key, 'Diamond' as league,1498 as registered_decks,489 AS player_count union all
     SELECT 'Main 64'  AS tournament_unique_key, 'Gold' as league,2809 as registered_decks,809 AS player_count union all
    SELECT 'Main 64'  AS tournament_unique_key, 'Silver' as league,5126 as registered_decks,1465 AS player_count union all
     SELECT 'Main 64'  AS tournament_unique_key, 'Bronze' as league,11671 as registered_decks,2748 AS player_count union all
      SELECT 'Main 64'  AS tournament_unique_key, 'Reverse' as league,4993 as registered_decks,1125 AS player_count union all 
-            SELECT 'Main 65'  AS tournament_unique_key, 'Elite' as league,1574 as registered_decks,512 AS player_count union all
+            SELECT 'Main 65'  AS tournament_unique_key, 'Diamond' as league,1574 as registered_decks,512 AS player_count union all
     SELECT 'Main 65'  AS tournament_unique_key, 'Gold' as league,2777 as registered_decks,779 AS player_count union all
    SELECT 'Main 65'  AS tournament_unique_key, 'Silver' as league,4897 as registered_decks,1395 AS player_count union all
     SELECT 'Main 65'  AS tournament_unique_key, 'Bronze' as league,11380 as registered_decks,2724 AS player_count union all
      SELECT 'Main 65'  AS tournament_unique_key, 'Reverse' as league,5175 as registered_decks,1161 AS player_count union all 
-              SELECT 'Main 66'  AS tournament_unique_key, 'Elite' as league,1256 as registered_decks,454 AS player_count union all
+              SELECT 'Main 66'  AS tournament_unique_key, 'Diamond' as league,1256 as registered_decks,454 AS player_count union all
     SELECT 'Main 66'  AS tournament_unique_key, 'Gold' as league,2823 as registered_decks,753 AS player_count union all
    SELECT 'Main 66'  AS tournament_unique_key, 'Silver' as league,5130 as registered_decks,1331 AS player_count union all
     SELECT 'Main 66'  AS tournament_unique_key, 'Bronze' as league,11874 as registered_decks,2755 AS player_count union all
      SELECT 'Main 66'  AS tournament_unique_key, 'Reverse' as league,4606 as registered_decks,1048 AS player_count union all 
-            SELECT 'Main 67'  AS tournament_unique_key, 'Elite' as league,1478 as registered_decks,498 AS player_count union all
+            SELECT 'Main 67'  AS tournament_unique_key, 'Diamond' as league,1478 as registered_decks,498 AS player_count union all
     SELECT 'Main 67'  AS tournament_unique_key, 'Gold' as league,2790 as registered_decks,752 AS player_count union all
    SELECT 'Main 67'  AS tournament_unique_key, 'Silver' as league,4722 as registered_decks,1296 AS player_count union all
     SELECT 'Main 67'  AS tournament_unique_key, 'Bronze' as league,10508 as registered_decks,2533 AS player_count union all
      SELECT 'Main 67'  AS tournament_unique_key, 'Reverse' as league,4722 as registered_decks,1150 AS player_count union all 
-          SELECT 'Main 68'  AS tournament_unique_key, 'Elite' as league,1285 as registered_decks,493 AS player_count union all
+          SELECT 'Main 68'  AS tournament_unique_key, 'Diamond' as league,1285 as registered_decks,493 AS player_count union all
     SELECT 'Main 68'  AS tournament_unique_key, 'Gold' as league,2761 as registered_decks,700 AS player_count union all
    SELECT 'Main 68'  AS tournament_unique_key, 'Silver' as league,5018 as registered_decks,1267 AS player_count union all
     SELECT 'Main 68'  AS tournament_unique_key, 'Bronze' as league,12154 as registered_decks,2696 AS player_count union all
      SELECT 'Main 68'  AS tournament_unique_key, 'Reverse' as league,4922 as registered_decks,1189 AS player_count union all 
-        SELECT 'Main 69'  AS tournament_unique_key, 'Elite' as league,1389 as registered_decks,478 AS player_count union all
+        SELECT 'Main 69'  AS tournament_unique_key, 'Diamond' as league,1389 as registered_decks,478 AS player_count union all
     SELECT 'Main 69'  AS tournament_unique_key, 'Gold' as league,2685 as registered_decks,703 AS player_count union all
    SELECT 'Main 69'  AS tournament_unique_key, 'Silver' as league,4699 as registered_decks,1227 AS player_count union all
     SELECT 'Main 69'  AS tournament_unique_key, 'Bronze' as league,10935 as registered_decks,2515 AS player_count union all
@@ -144,8 +144,9 @@ from
 LEFT JOIN override
   ON gt.tournament_unique_key = override.tournament_unique_key
   and gt.league = override.league
-where gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
+where (gt.start_Timestamp >= NOW() at TIME zone 'UTC' - interval '60 days'
     or gt.tournament_status = 'not started'
+    )
 group by 1,2,3,4,5,6
 order by gt.start_timestamp asc"""
 league_decks_df = pd.read_sql_query(league_decks_query, conn)

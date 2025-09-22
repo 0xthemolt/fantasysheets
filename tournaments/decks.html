@@ -931,9 +931,13 @@
                 <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
             </button>
             <div class="league-dropdown-content">
-                <button class="dropdown-item" data-league="Elite">
-                    <img src="../icons/elite.webp" alt="Elite" class="league-icon">
-                    Elite
+                <button class="dropdown-item" data-league="Diamond">
+                    <img src="../icons/diamond.webp" alt="Diamond" class="league-icon">
+                    Diamond
+                </button>
+                <button class="dropdown-item" data-league="Platinum">
+                    <img src="../icons/platinum.webp" alt="Platinum" class="league-icon">
+                    Platinum
                 </button>
                 <button class="dropdown-item" data-league="Gold">
                     <img src="../icons/gold.webp" alt="Gold" class="league-icon">
@@ -1040,7 +1044,8 @@ let currentFilteredData = null;
 let zeroRewardsFilterActive = false;
 
 const LEAGUE_COLORS = {
-  "elite": "#C78BFF",  
+  "diamond": "#C78BFF",  
+  "platinum": "#4169EF",
         "gold": "#FFCE52",
         "silver": "#A7B8CF",
         "bronze": "#FE8946",
@@ -1119,12 +1124,12 @@ async function initializeTournamentScroller() {
         // Select My Leagues if selectedPlayerHandle is not null
         handleButtonClick('myLeagues');
     } else {
-        // Select "Elite" if selectedPlayerHandle is null
-        selectedLeague = 'Elite';
+        // Select "Diamond" if selectedPlayerHandle is null
+        selectedLeague = 'Diamond';
         const leagueToggle = document.querySelector('.league-toggle');
         leagueToggle.innerHTML = `
             <i class="fas fa-layer-group"></i>
-            Elite
+            Diamond
             <i class="fas fa-chevron-down" style="margin-left: 4px;"></i>
         `;
         fetchData(defaultTournament.tournament_number); // Fetch data for the selected tournament
@@ -1304,7 +1309,7 @@ async function fetchData(tournamentNumber) {
                     .eq('tournament_unique_key', `Main ${tournamentNumber}`)
                     .eq('player_handle', selectedPlayerHandle);
             }
-        } else if (selectedLeague && ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
+        } else if (selectedLeague && ['Diamond','Platinum', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
             // Query path 2: League view
             query = supabaseClient
                 .from('tournament_players')
@@ -1481,7 +1486,7 @@ function updateTableWithData(data, preserveFiltered = false) {
     // Check active filters
     const isMyDecksActive = myDecksButton.classList.contains('active');
     const isMyLeaguesActive = myLeaguesButton.classList.contains('active');
-    const isLeagueSelected = selectedLeague && ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague);
+    const isLeagueSelected = selectedLeague && ['Diamond','Platinum', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague);
 
     // Show/hide rewards summary based on filters
     if ((isMyDecksActive || isMyLeaguesActive || (isLeagueSelected && selectedPlayerHandle)) && selectedPlayerHandle) {
@@ -1495,7 +1500,7 @@ function updateTableWithData(data, preserveFiltered = false) {
                 textureDiv.style.background = `url('/icons/${selectedLeague.toLowerCase()}-texture.webp') no-repeat center`;
                 textureDiv.style.backgroundSize = '1125px 633px';
             } else {
-                // Default to elite texture for My Decks/My Leagues
+                // Default to Diamond texture for My Decks/My Leagues
                 textureDiv.style.background = "url('/icons/main-texture.webp') repeat";
             }
         }
@@ -1602,7 +1607,7 @@ function updateTableWithData(data, preserveFiltered = false) {
         });
 
         // Sort leagues by predefined order
-        const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+        const leagueOrder = ['Diamond', 'Platinum','Gold', 'Silver', 'Bronze', 'Reverse'];
         const sortedLeagues = Object.keys(leagueData).sort((a, b) => 
             leagueOrder.indexOf(a) - leagueOrder.indexOf(b)
         );
@@ -1806,7 +1811,7 @@ function updateTableWithData(data, preserveFiltered = false) {
         });
 
         // Sort leagues by precedence
-        const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+        const leagueOrder = ['Diamond', 'Platinum','Gold', 'Silver', 'Bronze', 'Reverse'];
         const sortedLeagues = Object.values(leagueGroups).sort((a, b) => 
             leagueOrder.indexOf(a.league) - leagueOrder.indexOf(b.league)
         );
@@ -1921,7 +1926,7 @@ function updateTableWithData(data, preserveFiltered = false) {
     }
 
     // Apply league filter
-    if (selectedLeague && ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
+    if (selectedLeague && ['Diamond', 'Platinum','Gold', 'Silver', 'Bronze', 'Reverse'].includes(selectedLeague)) {
         filteredData = filteredData.filter(player => player.league === selectedLeague);
     }
 

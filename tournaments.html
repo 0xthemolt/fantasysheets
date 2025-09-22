@@ -310,11 +310,14 @@
                     }
                 });
                 
-                // Add Leagues Total row with empty sparkline cell
+                // Add Leagues Total row with sparkline
                 html += '<tr class="total-row"><td>Total Decks</td>';
                 let previousTotal = null;
+                const totalDeckValues = []; // Add this to collect values for sparkline
                 Object.values(data).forEach(tournamentData => {
                     const total = safeSum(tournamentData.leagues || [], 'deck_count');
+                    totalDeckValues.push(total); // Collect the total values
+                    
                     let changeHtml = '';
                     if (previousTotal !== null) {
                         const change = total - previousTotal;
@@ -326,7 +329,35 @@
                     </td>`;
                     previousTotal = total;
                 });
-                html += '<td></td></tr>';
+                
+                // Add sparkline for Total Decks
+                if (totalDeckValues.length > 1) {
+                    const sparklineWidth = 180;
+                    const sparklineHeight = 40;
+                    const max = Math.max(...totalDeckValues);
+                    const min = Math.min(...totalDeckValues);
+                    const range = (max - min) || 1;
+                    const firstValue = totalDeckValues[0];
+                    const lastValue = totalDeckValues[totalDeckValues.length - 1];
+                    
+                    let sparkline = `<td style="padding: 0;"><svg width="${sparklineWidth}" height="${sparklineHeight}">
+                        <polyline 
+                            points="${totalDeckValues.map((value, index) => {
+                                const x = (index / (totalDeckValues.length - 1)) * (sparklineWidth - 80) + 40;
+                                const y = (sparklineHeight - 8) - ((value - min) / range) * (sparklineHeight - 16) + 4;
+                                return `${x},${y}`;
+                            }).join(' ')}"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                        />
+                        <text x="2" y="${(sparklineHeight - 8) - ((firstValue - min) / range) * (sparklineHeight - 16) + 4}" fill="white" font-size="10px" text-anchor="start" dy="4">${fmt(firstValue)}</text>
+                        <text x="${sparklineWidth - 2}" y="${(sparklineHeight - 8) - ((lastValue - min) / range) * (sparklineHeight - 16) + 4}" fill="white" font-size="10px" text-anchor="end" dy="4">${fmt(lastValue)}</text>
+                    </svg></td>`;
+                    html += sparkline + '</tr>';
+                } else {
+                    html += '<td>-</td></tr>';
+                }
                 
                 // Add spacing between Deck Counts and Player Counts
                 html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;
@@ -393,11 +424,13 @@
                     }
                 });
                 
-                // Add Total Players row with empty sparkline cell
+                // Add Total Players row with sparkline
                 html += '<tr class="total-row"><td>Total Players</td>';
                 let previousPlayerTotal = null;
+                const totalPlayerValues = []; // Add this to collect values for sparkline
                 Object.values(data).forEach(tournamentData => {
                     const total = tournamentData.total_player_count !== undefined ? tournamentData.total_player_count : 0;
+                    if (total !== 0) totalPlayerValues.push(total); // Only collect non-zero values
                     
                     let changeHtml = '';
                     if (total !== 0 && previousPlayerTotal !== null) {
@@ -410,9 +443,37 @@
                         <span style="font-size: 1.1em">${total !== 0 ? total.toLocaleString() : ''}</span>${changeHtml}
                     </td>`;
                     
-                    previousPlayerTotal = total;
+                    if (total !== 0) previousPlayerTotal = total;
                 });
-                html += '<td></td></tr>';
+
+                // Add sparkline for Total Players
+                if (totalPlayerValues.length > 1) {
+                    const sparklineWidth = 180;
+                    const sparklineHeight = 40;
+                    const max = Math.max(...totalPlayerValues);
+                    const min = Math.min(...totalPlayerValues);
+                    const range = (max - min) || 1;
+                    const firstValue = totalPlayerValues[0];
+                    const lastValue = totalPlayerValues[totalPlayerValues.length - 1];
+                    
+                    let sparkline = `<td style="padding: 0;"><svg width="${sparklineWidth}" height="${sparklineHeight}">
+                        <polyline 
+                            points="${totalPlayerValues.map((value, index) => {
+                                const x = (index / (totalPlayerValues.length - 1)) * (sparklineWidth - 80) + 40;
+                                const y = (sparklineHeight - 8) - ((value - min) / range) * (sparklineHeight - 16) + 4;
+                                return `${x},${y}`;
+                            }).join(' ')}"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                        />
+                        <text x="2" y="${(sparklineHeight - 8) - ((firstValue - min) / range) * (sparklineHeight - 16) + 4}" fill="white" font-size="10px" text-anchor="start" dy="4">${fmt(firstValue)}</text>
+                        <text x="${sparklineWidth - 2}" y="${(sparklineHeight - 8) - ((lastValue - min) / range) * (sparklineHeight - 16) + 4}" fill="white" font-size="10px" text-anchor="end" dy="4">${fmt(lastValue)}</text>
+                    </svg></td>`;
+                    html += sparkline + '</tr>';
+                } else {
+                    html += '<td>-</td></tr>';
+                }
                 
                 // Add spacing between sections
                 html += `<tr style="height: 30px; background-color: #000000 !important;"><td colspan="${Object.keys(data).length + 2}"></td></tr>`;

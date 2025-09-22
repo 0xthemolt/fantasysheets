@@ -60,6 +60,7 @@ left join flatten.vwhero_cards_est_value vcev2
   ,best_rank as (
   select player_id,tournament_unique_key,
   	MIN(case when league = 'Diamond' then unique_player_rank  end) as best_diamond,
+    MIN(case when league = 'Platinum' then unique_player_rank end) as best_platinum,
 	MIN(case when league = 'Gold' then unique_player_rank  end) as best_gold,
 	MIN(case when league = 'Silver' then unique_player_rank  end) as best_silver,
 	MIN(case when league = 'Bronze' then unique_player_rank  end) as best_bronze,
@@ -88,6 +89,7 @@ select  historical_rewards.player_id,historical_rewards.tournament_unique_key,
 	null as decks,
 	COUNT(distinct case when coalesce(reward_pack,0) > 0 then tournament_id end) as itm_decks, /*for each league w/ + 1 card assume at least 1 ITM deck, need this because some rewards history look up are bugged*/
 	MIN(best_diamond) best_diamond,
+    MIN(best_platinum) best_platinum,
 	MIN(best_gold) best_gold,
 	MIN(best_silver) best_silver,
 	MIN(best_bronze) best_bronze,
@@ -111,6 +113,7 @@ group by 1,2
   		COUNT(*) as decks,
   		SUM(case when (coalesce(reward_pack.reward,0) + (coalesce(reward_frag.reward,0)/100)) >=1 then 1 else 0 END) as itm_decks,
 		MIN(case when league = 'Diamond' then unique_player_rank  end) as best_diamond,
+        MIN(case when league = 'Platinum' then unique_player_rank end ) as best_platinum,
 		MIN(case when league = 'Gold' then unique_player_rank  end) as best_gold,
 		MIN(case when league = 'Silver' then unique_player_rank  end) as best_silver,
 		MIN(case when league = 'Bronze' then unique_player_rank  end) as best_bronze,
@@ -191,6 +194,7 @@ select
 	    CASE WHEN h.is_deleted IS NULL AND nbc.player_id IS NULL THEN 3 END
 	], NULL) AS player_types,
     hr.best_diamond as diamond_rank,
+    hr.best_platinum as platinum_rank,
     hr.best_gold as gold_rank,
     hr.best_silver as silver_rank,
     hr.best_bronze as bronze_rank,
@@ -237,12 +241,13 @@ select
 	    CASE WHEN h.is_deleted IS NULL AND nbc.player_id IS NULL THEN 3 END
 	], NULL) AS player_types,
     r.best_diamond as diamond_rank,
+    r.best_platinum as platinum_rank,
     r.best_gold as gold_rank,
     r.best_silver as silver_rank,
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
-    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.003255), 0) as reward_value,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.00313), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,
@@ -273,7 +278,7 @@ cursor.execute(query)
 rows = cursor.fetchall()
 
 # Find the max latest_score_timestamp
-max_timestamp = max(row[20] for row in rows if row[20] is not None)  # Changed from row[19] to row[20]
+max_timestamp = max(row[21] for row in rows if row[21] is not None)  # Changed from row[20] to row[21]
 
 # Convert the results to a list of dictionaries
 player_history = []
@@ -286,21 +291,22 @@ for row in rows:
         'player_handle': player_handle,
         'player_type': row[4],
         'diamond_rank': row[5],
-        'gold_rank': row[6],
-        'silver_rank': row[7],
-        'bronze_rank': row[8],
-        'sub_rank': row[9],
-        'other_rank': row[10],
-        'reward_value': float(row[11]) if row[11] else 0.0,
-        'reward_eth': float(row[12]) if row[12] else 0.0,
-        'reward_pack': int(row[13]) if row[13] else 0,
-        'reward_fan': int(row[14]) if row[14] else 0,
-        'reward_frag': int(row[15]) if row[15] else 0,
-        'reward_gold': int(row[16]) if row[16] else 0,
-        'decks': int(row[17]) if row[17] else 0,
-        'itm_decks': int(row[18]) if row[18] else 0,
-        'decks_est_value': float(row[19]) if row[19] else 0.0,  # Added this line
-        'timestamp': row[20]  # Changed from row[19] to row[20]
+        'platinum_rank': row[6],  # ADD THIS LINE - you were missing it!
+        'gold_rank': row[7],      # Changed from row[6] to row[7]
+        'silver_rank': row[8],    # Changed from row[7] to row[8]
+        'bronze_rank': row[9],    # Changed from row[8] to row[9]
+        'sub_rank': row[10],      # Changed from row[9] to row[10]
+        'other_rank': row[11],    # Changed from row[10] to row[11]
+        'reward_value': float(row[12]) if row[12] else 0.0,  # Changed from row[11] to row[12]
+        'reward_eth': float(row[13]) if row[13] else 0.0,    # Changed from row[12] to row[13]
+        'reward_pack': int(row[14]) if row[14] else 0,       # Changed from row[13] to row[14]
+        'reward_fan': int(row[15]) if row[15] else 0,        # Changed from row[14] to row[15]
+        'reward_frag': int(row[16]) if row[16] else 0,       # Changed from row[15] to row[16]
+        'reward_gold': int(row[17]) if row[17] else 0,       # Changed from row[16] to row[17]
+        'decks': int(row[18]) if row[18] else 0,             # Changed from row[17] to row[18]
+        'itm_decks': int(row[19]) if row[19] else 0,         # Changed from row[18] to row[19]
+        'decks_est_value': float(row[20]) if row[20] else 0.0,  # Changed from row[19] to row[20]
+        'timestamp': row[21]  # Changed from row[20] to row[21]
     }
     player_history.append(player_data)
 

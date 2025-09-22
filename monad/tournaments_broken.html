@@ -146,7 +146,7 @@
             `;
 
             // Define the order of tournament types with "Reverse" last
-            const order = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+            const order = ['Diamond', 'Platinum','Gold', 'Silver', 'Bronze', 'Reverse'];
 
             tournaments.sort((a, b) => {
                 const indexA = order.indexOf(a.name === "Reverse Score" ? "Reverse" : a.name);

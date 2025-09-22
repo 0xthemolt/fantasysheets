@@ -769,8 +769,8 @@
                     </div>
 
                     <div class="optimal-deck-section" style="border: 2px solid #C78BFF; background: linear-gradient(135deg, rgba(199, 139, 255, 0.2) 0%, rgba(176, 118, 230, 0.2) 100%);">
-                        <button id="generateEliteBtn" class="generate-btn" style="background: #C78BFF;">Generate Elite Deck</button>
-                        <div id="elite-deck-result"></div>
+                        <button id="generateDiamondBtn" class="generate-btn" style="background: #C78BFF;">Generate Diamond Deck</button>
+                        <div id="diamond-deck-result"></div>
                     </div>
                 </div>
 
@@ -1045,8 +1045,8 @@
             },
             description: "Max 2 epics + max 4 rares + commons, max 25 stars"
         },
-        elite: {
-            name: "Elite",
+        dimaond: {
+            name: "Diamond",
             color: "#C78BFF",
             maxStars: 50,
             rarityLimits: {
@@ -1678,7 +1678,7 @@
         document.getElementById('generateBronzeBtn').addEventListener('click', () => generateOptimalDeck('bronze'));
         document.getElementById('generateSilverBtn').addEventListener('click', () => generateOptimalDeck('silver'));
         document.getElementById('generateGoldBtn').addEventListener('click', () => generateOptimalDeck('gold'));
-        document.getElementById('generateEliteBtn').addEventListener('click', () => generateOptimalDeck('elite'));
+        document.getElementById('generateDiamondBtn').addEventListener('click', () => generateOptimalDeck('diamond'));
     });
 
     function getRarityMultiplier(rarity) {

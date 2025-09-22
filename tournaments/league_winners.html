@@ -30,7 +30,7 @@
                 }
 
                 const latestTournament = Object.values(data.tournaments)[0];
-                const leagueTypes = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+                const leagueTypes = ['Diamond', 'Platinum','Gold', 'Silver', 'Bronze', 'Reverse'];
                 
                 leagueTypes.forEach(leagueType => {
                     const leagueData = latestTournament.leagues[leagueType];
@@ -135,12 +135,40 @@
         <span id="timestamp"></span> UTC | Values shown if they are in the top 10 of their respective metric
     </div>
     <div class="all-leagues-container">
-        <!-- Elite League -->
+        <!-- Diamond League -->
         <div class="league-section">
-            <h2><img src="../icons/elite.webp" class="league-icon" alt="Elite League"> Elite League</h2>
+            <h2><img src="../icons/diamond.webp" class="league-icon" alt="Diamond League"> Diamond League</h2>
             <div class="tables-container">
                 <div class="table-wrapper">
-                    <table class="league-table elite-table">
+                    <table class="league-table diamond-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    RVA
+                                    <i class="fas fa-info-circle" 
+                                       title="Rewards Value Added (RVA) attempts to show what value a hero's card contributed to the rewards won in a deck.&#10;Calculation: (Card Score / Player Deck Score) * (ETH Won + (Frags Won / 100) * Frag Value)"
+                                       style="font-size: 0.8em; cursor: help;">
+                                    </i>
+                                </th>
+
+                                <th>ITE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platinum League -->
+        <div class="league-section">
+            <h2><img src="../icons/platinum.webp" class="league-icon" alt="Platinum League"> Platinum League</h2>
+            <div class="tables-container">
+                <div class="table-wrapper">
+                    <table class="league-table platinum-table">
                         <thead>
                             <tr>
                                 <th></th>
@@ -266,18 +294,20 @@
             if (!el) return;
             const tn = Number(window.FT_CONFIG?.tournament_number ?? 68);
             // Keep existing label (S4M5) and append tournament number, adjust as needed
-            el.textContent = `S4M5 ${tn}`;
+            el.textContent = `S5M1 ${tn}`;
         });
     </script>
 </body>
 
 <style>
+
      /* Add specific colors for each league table */
-    .elite-table th { background-color: #a8ccde; color: white; }
-    .gold-table th { background-color: #dacc86; color: white; }
-    .silver-table th { background-color: #8b8b8b; color: white; }
-    .bronze-table th { background-color: #a97e48; color: white; }
-    .reverse-table th { background-color: #82EA89; color: white; }
+    .diamond-table th { background-color: #C78BFF; color: white; }
+    .platinum-table th { background-color: #4169EF; color: white; }
+    .gold-table th { background-color: #e8bc4c; color: white; }
+    .silver-table th { background-color: #A7B8CF; color: white; }
+    .bronze-table th { background-color: #e77e41; color: white; }
+    .reverse-table th { background-color: #84d24c; color: white; }
 
     .hero-image {
         border-radius: 0;

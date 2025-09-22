@@ -348,6 +348,9 @@
     <script>
         // Replace the existing seasons definition with:
         const seasons = {
+            5: [
+                { seasonTournament: 1, mainTournament: 70 }
+            ],
             4: [   
                 { seasonTournament: 6, mainTournament: 69 }, 
                 { seasonTournament: 5, mainTournament: 68 },  
@@ -357,14 +360,13 @@
                 { seasonTournament: 1, mainTournament: 64 }
             ],
             3: [
-                { seasonTournament: 6, mainTournament: 63 },
-                { seasonTournament: 5, mainTournament: 62 },
-                { seasonTournament: 4, mainTournament: 61 }
+                { seasonTournament: 6, mainTournament: 63 }
             ]
         };
 
         // Flatten the seasons object into main tournament numbers array for API calls
         const tournamentNumbers = [
+            ...seasons[5].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[4].map(t => t.mainTournament),  // Season 3 tournaments
             ...seasons[3].map(t => t.mainTournament),  // Season 3 tournaments
         ];

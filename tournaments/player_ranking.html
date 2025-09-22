@@ -169,7 +169,7 @@
     <div class="league-selector">
         <label for="leagueSelect">Select League:</label>
         <select id="leagueSelect" onchange="updateRankings()">
-            <!-- Removed the "All Leagues" option since Elite will be default -->
+            <!-- Removed the "All Leagues" option since Diamond will be default -->
         </select>
     </div>
 
@@ -210,7 +210,7 @@
         }
 
         function populateLeagues() {
-            const leagueOrder = ['Elite', 'Gold', 'Silver', 'Bronze', 'Reverse'];
+            const leagueOrder = ['Diamond','Platinum', 'Gold', 'Silver', 'Bronze', 'Reverse'];
             const leagueSelect = document.getElementById('leagueSelect');
             
             // Add "All Leagues" option first
@@ -224,7 +224,7 @@
                 const option = document.createElement('option');
                 option.value = league;
                 option.textContent = league;
-                if (league === 'Elite') {
+                if (league === 'Diamond') {
                     option.selected = true;
                 }
                 leagueSelect.appendChild(option);

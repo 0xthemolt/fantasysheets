@@ -135,9 +135,9 @@ join tournaments
 	on players.player_id  = tournaments.player_id
 left join trade_volume_by_player tvbp
 	on players.player_id = tvbp.player_id
-left join league_ranking touranment_rankings_elite
-    on players.player_id = touranment_rankings_elite.player_id
-    and touranment_rankings_elite.league = 'Elite'
+left join league_ranking touranment_rankings_diamond
+    on players.player_id = touranment_rankings_diamond.player_id
+    and touranment_rankings_diamond.league = 'Diamond'
 left join league_ranking touranment_rankings_gold
     on players.player_id = touranment_rankings_gold.player_id
     and touranment_rankings_gold.league = 'Gold'

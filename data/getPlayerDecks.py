@@ -308,7 +308,7 @@ if not rows:
 #     	,bronze.tournament_id as is_valid_bronze_id
 #     	,silver.tournament_id as is_valid_silver_id
 #     	,gold.tournament_id as is_valid_gold_id
-#     	,elite.tournament_id as is_valid_elite_id
+#     	,diamond.tournament_id as is_valid_diamond_id
 #     from base b
 #    left join current_mains as reverse 
 #     	on b.deck_stars >= reverse.star_cap /*has to be above cap*/
@@ -338,9 +338,9 @@ if not rows:
 #         and b.legendary_cards = 0 /*no legendary*/
 #     	and b.league_name <> 'Gold'
 #     	and gold.tournament_name = 'Gold'
-#     left join current_mains as elite 
-#     	ON b.league_name <> 'Elite'
-#     	and elite.tournament_name = 'Elite'
+#     left join current_mains as diamond 
+#     	ON b.league_name <> 'Diamond'
+#     	and diamond.tournament_name = 'Diamond'
 #    -- where player_handle = '0xthemolt'
 #     --and tournament_player_deck_id = 'Silver Main 24 | 0x162F95a9364c891028d255467F616902A479681a | 246'
 #     )
@@ -380,16 +380,16 @@ if not rows:
 # 	  where tournament_league_unique_key  = 'Gold Main {TOURNAMENT_NUMBER}'
 #   )
 #  )
-#    ,rank_new_elite as (
+#    ,rank_new_diamond as (
 #   select *,row_number() over (order by player_score desc) as new_player_rank
 #   from (
 # 	  select player_id,tournament_league_unique_key,tournament_player_deck_id,player_score,null as player_rank,deck_stars,rare_cards,epic_cards,legendary_cards,is_valid_elite_id as tournament_id
 # 	  from league_finder
-# 	  where is_valid_elite_id is not null /*valid decks that could be in elite but aren't*/
+# 	  where is_valid_diamond_id is not null /*valid decks that could be in diamond but aren't*/
 # 	  union all
 # 	  select player_id,tournament_league_unique_key,tournament_player_deck_id,player_score,player_rank,null as deck_stars,null as rare_cards,null as epic_cards,null as legendary_cards,tournament_id
 # 	  from flatten.get_tournament_past_players 
-# 	  where tournament_league_unique_key  = 'Elite Main {TOURNAMENT_NUMBER}'
+# 	  where tournament_league_unique_key  = 'Diamond Main {TOURNAMENT_NUMBER}'
 #   )
 #   )
 #   , union_all as (
@@ -399,7 +399,7 @@ if not rows:
 #   union all
 #   select * from rank_new_gold where  player_rank is null  /*deck from other league*/
 #   union all
-#    select * from rank_new_elite where  player_rank is null /*deck from other league*/
+#    select * from rank_new_diamond where  player_rank is null /*deck from other league*/
 #   )
 #   ,final as (
 #  select b.player_id,b.tournament_league_unique_key,b.tournament_player_deck_id,b.player_rank,b.player_score,b.eth,b.packs

@@ -61,7 +61,7 @@ with get_db_connection('main') as conn:
     --ghwst.hero_handle  = '0xgaut'
     and gt.tournament_seq_nbr  <= 4 
     and gt.tournament_status = 'finished'
-    and gt.league  = 'Elite'
+    and gt.league  = 'Diamond'
     group by 1
     )
     ,last_main as ( 
@@ -71,8 +71,8 @@ with get_db_connection('main') as conn:
         on ghwst.tournament_id  = gt.tournament_id 
     where 1=1
     --ghwst.hero_handle  = '0xgaut'
-    and gt.tournament_seq_nbr  in (select min(tournament_seq_nbr) from flatten.get_tournaments where tournament_status in ('live','finished') and league = 'Elite')
-    and gt.league = 'Elite'
+    and gt.tournament_seq_nbr  in (select min(tournament_seq_nbr) from flatten.get_tournaments where tournament_status in ('live','finished') and league = 'Diamond')
+    and gt.league = 'Diamond'
     )
     select ghss.hero_handle,ghss.hero_name,ghss.hero_id,ghss.hero_pfp_image_url as hero_image_url
     ,ghss.seven_day_fantasy_score  as seven_day_score

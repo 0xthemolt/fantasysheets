@@ -576,8 +576,10 @@
             
             // Split tournaments for averages calculation (exclude the highest/latest tournament)
             const tournamentsSortedDesc = tournamentNumbers.sort((a, b) => b - a);
-            const currentTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(0, 6); // Latest 6 excluding most recent
-            const priorTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(1, 7);   // Previous 6 (skip latest)
+            //const currentTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(0, 6); // Latest 6 excluding most recent
+            //const priorTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(1, 7);   // Previous 6 (skip latest)
+            const currentTournaments = tournamentsSortedDesc.slice(0, 6); // Include the most recent/current main 
+            const priorTournaments = tournamentsSortedDesc.slice(1, 7);  // Previous 6 (exclude the most recent)
 
             // Calculate both averages for each hero
             Object.values(data).forEach(hero => {
@@ -638,7 +640,8 @@
                 }
                 
                 // Only add current-period class if it's in the average calculation (not the latest tournament)
-                th.className = `number-cell ${isCurrentPeriod && !isLatestTournament ? 'current-period' : ''}`;
+                //th.className = `number-cell ${isCurrentPeriod && !isLatestTournament ? 'current-period' : ''}`;  //!!!!ENABLE THIS FOR EXCLUDIN CURRENT MAIN!!!!
+                th.className = `number-cell ${isCurrentPeriod ? 'current-period' : ''}`;
                 th.dataset.sort = num.toString();
                 
                 // Simple click handler for sorting (no need to check for info icon)

@@ -1332,7 +1332,7 @@ async function fetchData(tournamentNumber) {
 
         // Execute query with limit only if not viewing personal decks/leagues
         const { data, error } = await (!(myDecksButton.classList.contains('active') || myLeaguesButton.classList.contains('active')) 
-            ? query.limit(500)
+            ? query.limit(1000)
             : query);
 
         if (error) {

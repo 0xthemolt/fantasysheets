@@ -144,6 +144,7 @@ select
 from hero_stats h
 join deck_counts d on h.category = d.category and h.tournament_id = d.tournament_id
 )
+/*
 select 
 tournament_unique_key
 ,league
@@ -160,6 +161,7 @@ tournament_unique_key
 from base
 where rnk <= 10
 union all
+*/
 select 
 tournament_unique_key  --0
 ,league

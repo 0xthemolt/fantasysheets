@@ -1165,14 +1165,8 @@
                                         ${formatValue(item.legendary.highest_bid)}
                                         ${
                                             item.legendary.bids && item.legendary.bids.length > 0
-                                            ? (
-                                                item.legendary.is_visavi
-                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"
-                                                    alt="Visavi Bidder" />`
-                                                : `<i class="fas fa-user seller-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>`
-                                            )
+                                            ? `<i class="fas fa-user seller-icon"
+                                                onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.legendary.bids))}', '${item.hero_id}', 'Legendary', '${item.stars}')"></i>`
                                             : ''
                                         }
                                     </td>
@@ -1201,14 +1195,8 @@
                                         ${formatValue(item.epic.highest_bid)}
                                         ${
                                             item.epic.bids && item.epic.bids.length > 0
-                                            ? (
-                                                item.epic.is_visavi
-                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"
-                                                    alt="Visavi Bidder" />`
-                                                : `<i class="fas fa-user seller-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>`
-                                            )
+                                            ? `<i class="fas fa-user seller-icon"
+                                                onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.epic.bids))}', '${item.hero_id}', 'Epic', '${item.stars}')"></i>`
                                             : ''
                                         }
                                     </td>
@@ -1237,14 +1225,8 @@
                                         ${formatValue(item.rare.highest_bid)}
                                         ${
                                             item.rare.bids && item.rare.bids.length > 0
-                                            ? (
-                                                item.rare.is_visavi
-                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"
-                                                    alt="Visavi Bidder" />`
-                                                : `<i class="fas fa-user seller-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>`
-                                            )
+                                            ? `<i class="fas fa-user seller-icon"
+                                                onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.rare.bids))}', '${item.hero_id}', 'Rare', '${item.stars}')"></i>`
                                             : ''
                                         }
                                     </td>
@@ -1273,14 +1255,8 @@
                                         ${formatValue(item.common.highest_bid)}
                                         ${
                                             item.common.bids && item.common.bids.length > 0
-                                            ? (
-                                                item.common.is_visavi
-                                                ? `<img src="../icons/visavi.jpg" class="visavi-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"
-                                                    alt="Visavi Bidder" />`
-                                                : `<i class="fas fa-user seller-icon"
-                                                    onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>`
-                                            )
+                                            ? `<i class="fas fa-user seller-icon"
+                                                onclick="showBidModal('${encodeURIComponent(JSON.stringify(item.common.bids))}', '${item.hero_id}', 'Common', '${item.stars}')"></i>`
                                             : ''
                                         }
                                     </td>

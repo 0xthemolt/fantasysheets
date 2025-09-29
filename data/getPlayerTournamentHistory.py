@@ -247,7 +247,7 @@ select
     r.best_bronze as bronze_rank,
     r.best_reverse as sub_rank,
     null::int as other_rank,
-    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.00323), 0) as reward_value,
+    COALESCE(r.reward_eth + (r.reward_frag / 100 * 0.003), 0) as reward_value,
     COALESCE(r.reward_eth, 0) as reward_eth,
     COALESCE(r.reward_pack, 0) as reward_pack,
     COALESCE(r.reward_fan, 0) as reward_fan,

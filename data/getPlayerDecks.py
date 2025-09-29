@@ -33,11 +33,16 @@ def execute_with_retry(cursor, sql, attempts=2, retry_delay=1):
     last_err = None
     for attempt in range(1, attempts + 1):
         try:
+            print(f"[getPlayerDecks] Executing query attempt {attempt}")
             cursor.execute(sql)
-            return cursor.fetchall()
+            result = cursor.fetchall()
+            print(f"[getPlayerDecks] Query successful, returned {len(result)} rows")
+            return result
         except psycopg2.Error as e:
             last_err = e
             print(f"[getPlayerDecks] Query attempt {attempt} failed: {e}")
+            print(f"[getPlayerDecks] Error code: {e.pgcode}")
+            print(f"[getPlayerDecks] Error details: {e.pgerror}")
             if attempt < attempts:
                 print(f"[getPlayerDecks] Retrying in {retry_delay}s...")
                 time.sleep(retry_delay)

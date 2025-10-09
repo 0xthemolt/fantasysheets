@@ -5,9 +5,9 @@
         "tournament_number": "64",
         "leagues": [
             {
-                "league": "Reverse",
-                "deck_count": 4993,
-                "player_count": 1125
+                "league": "Gold",
+                "deck_count": 2809,
+                "player_count": 809
             },
             {
                 "league": "Bronze",
@@ -15,19 +15,19 @@
                 "player_count": 2748
             },
             {
-                "league": "Silver",
-                "deck_count": 5126,
-                "player_count": 1465
-            },
-            {
                 "league": "Diamond",
                 "deck_count": 1498,
                 "player_count": 489
             },
             {
-                "league": "Gold",
-                "deck_count": 2809,
-                "player_count": 809
+                "league": "Reverse",
+                "deck_count": 4993,
+                "player_count": 1125
+            },
+            {
+                "league": "Silver",
+                "deck_count": 5126,
+                "player_count": 1465
             }
         ],
         "stars": [
@@ -90,9 +90,9 @@
         "tournament_number": "65",
         "leagues": [
             {
-                "league": "Gold",
-                "deck_count": 2777,
-                "player_count": 779
+                "league": "Diamond",
+                "deck_count": 1574,
+                "player_count": 512
             },
             {
                 "league": "Bronze",
@@ -100,19 +100,19 @@
                 "player_count": 2724
             },
             {
-                "league": "Silver",
-                "deck_count": 4897,
-                "player_count": 1395
-            },
-            {
-                "league": "Diamond",
-                "deck_count": 1574,
-                "player_count": 512
-            },
-            {
                 "league": "Reverse",
                 "deck_count": 5175,
                 "player_count": 1161
+            },
+            {
+                "league": "Gold",
+                "deck_count": 2777,
+                "player_count": 779
+            },
+            {
+                "league": "Silver",
+                "deck_count": 4897,
+                "player_count": 1395
             }
         ],
         "stars": [
@@ -155,16 +155,16 @@
                 "card_count": 102844
             },
             {
+                "hero_rarity": "rare",
+                "card_count": 22400
+            },
+            {
                 "hero_rarity": "epic",
                 "card_count": 3404
             },
             {
                 "hero_rarity": "legendary",
                 "card_count": 367
-            },
-            {
-                "hero_rarity": "rare",
-                "card_count": 22400
             }
         ],
         "total_player_count": 3450
@@ -175,14 +175,14 @@
         "tournament_number": "66",
         "leagues": [
             {
-                "league": "Bronze",
-                "deck_count": 11874,
-                "player_count": 2755
-            },
-            {
                 "league": "Reverse",
                 "deck_count": 4606,
                 "player_count": 1048
+            },
+            {
+                "league": "Gold",
+                "deck_count": 2823,
+                "player_count": 753
             },
             {
                 "league": "Silver",
@@ -190,9 +190,9 @@
                 "player_count": 1331
             },
             {
-                "league": "Gold",
-                "deck_count": 2823,
-                "player_count": 753
+                "league": "Bronze",
+                "deck_count": 11874,
+                "player_count": 2755
             },
             {
                 "league": "Diamond",
@@ -236,20 +236,20 @@
         ],
         "rarity": [
             {
-                "hero_rarity": "common",
-                "card_count": 102194
+                "hero_rarity": "rare",
+                "card_count": 22422
             },
             {
                 "hero_rarity": "epic",
                 "card_count": 3454
             },
             {
-                "hero_rarity": "legendary",
-                "card_count": 375
+                "hero_rarity": "common",
+                "card_count": 102194
             },
             {
-                "hero_rarity": "rare",
-                "card_count": 22422
+                "hero_rarity": "legendary",
+                "card_count": 375
             }
         ],
         "total_player_count": 3441
@@ -260,21 +260,6 @@
         "tournament_number": "67",
         "leagues": [
             {
-                "league": "Gold",
-                "deck_count": 2790,
-                "player_count": 752
-            },
-            {
-                "league": "Diamond",
-                "deck_count": 1478,
-                "player_count": 498
-            },
-            {
-                "league": "Reverse",
-                "deck_count": 4722,
-                "player_count": 1150
-            },
-            {
                 "league": "Silver",
                 "deck_count": 4722,
                 "player_count": 1296
@@ -283,6 +268,21 @@
                 "league": "Bronze",
                 "deck_count": 10508,
                 "player_count": 2533
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 4722,
+                "player_count": 1150
+            },
+            {
+                "league": "Diamond",
+                "deck_count": 1478,
+                "player_count": 498
+            },
+            {
+                "league": "Gold",
+                "deck_count": 2790,
+                "player_count": 752
             }
         ],
         "stars": [
@@ -325,16 +325,16 @@
                 "card_count": 101688
             },
             {
-                "hero_rarity": "epic",
-                "card_count": 3437
+                "hero_rarity": "rare",
+                "card_count": 21986
             },
             {
                 "hero_rarity": "legendary",
                 "card_count": 349
             },
             {
-                "hero_rarity": "rare",
-                "card_count": 21986
+                "hero_rarity": "epic",
+                "card_count": 3437
             }
         ],
         "total_player_count": 3301
@@ -345,14 +345,9 @@
         "tournament_number": "68",
         "leagues": [
             {
-                "league": "Reverse",
-                "deck_count": 4922,
-                "player_count": 1189
-            },
-            {
-                "league": "Gold",
-                "deck_count": 2761,
-                "player_count": 700
+                "league": "Silver",
+                "deck_count": 5018,
+                "player_count": 1267
             },
             {
                 "league": "Bronze",
@@ -360,14 +355,19 @@
                 "player_count": 2696
             },
             {
+                "league": "Gold",
+                "deck_count": 2761,
+                "player_count": 700
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 4922,
+                "player_count": 1189
+            },
+            {
                 "league": "Diamond",
                 "deck_count": 1285,
                 "player_count": 493
-            },
-            {
-                "league": "Silver",
-                "deck_count": 5018,
-                "player_count": 1267
             }
         ],
         "stars": [
@@ -406,20 +406,20 @@
         ],
         "rarity": [
             {
-                "hero_rarity": "common",
-                "card_count": 104659
-            },
-            {
                 "hero_rarity": "epic",
                 "card_count": 3473
             },
             {
-                "hero_rarity": "legendary",
-                "card_count": 339
+                "hero_rarity": "common",
+                "card_count": 104659
             },
             {
                 "hero_rarity": "rare",
                 "card_count": 22229
+            },
+            {
+                "hero_rarity": "legendary",
+                "card_count": 339
             }
         ],
         "total_player_count": 3419
@@ -430,19 +430,14 @@
         "tournament_number": "69",
         "leagues": [
             {
-                "league": "Bronze",
-                "deck_count": 10935,
-                "player_count": 2515
+                "league": "Diamond",
+                "deck_count": 1389,
+                "player_count": 478
             },
             {
                 "league": "Silver",
                 "deck_count": 4699,
                 "player_count": 1227
-            },
-            {
-                "league": "Diamond",
-                "deck_count": 1389,
-                "player_count": 478
             },
             {
                 "league": "Gold",
@@ -453,6 +448,11 @@
                 "league": "Reverse",
                 "deck_count": 6113,
                 "player_count": 1226
+            },
+            {
+                "league": "Bronze",
+                "deck_count": 10935,
+                "player_count": 2515
             }
         ],
         "stars": [
@@ -491,6 +491,10 @@
         ],
         "rarity": [
             {
+                "hero_rarity": "rare",
+                "card_count": 21985
+            },
+            {
                 "hero_rarity": "common",
                 "card_count": 103280
             },
@@ -501,10 +505,6 @@
             {
                 "hero_rarity": "legendary",
                 "card_count": 341
-            },
-            {
-                "hero_rarity": "rare",
-                "card_count": 21985
             }
         ],
         "total_player_count": 3267
@@ -515,9 +515,9 @@
         "tournament_number": "70",
         "leagues": [
             {
-                "league": "Platinum",
-                "deck_count": 1480,
-                "player_count": 493
+                "league": "Bronze",
+                "deck_count": 10938,
+                "player_count": 2398
             },
             {
                 "league": "Gold",
@@ -530,19 +530,19 @@
                 "player_count": 1108
             },
             {
+                "league": "Silver",
+                "deck_count": 4723,
+                "player_count": 1285
+            },
+            {
                 "league": "Diamond",
                 "deck_count": 975,
                 "player_count": 290
             },
             {
-                "league": "Bronze",
-                "deck_count": 10938,
-                "player_count": 2398
-            },
-            {
-                "league": "Silver",
-                "deck_count": 4723,
-                "player_count": 1285
+                "league": "Platinum",
+                "deck_count": 1480,
+                "player_count": 493
             }
         ],
         "stars": [
@@ -581,20 +581,20 @@
         ],
         "rarity": [
             {
-                "hero_rarity": "common",
-                "card_count": 99350
-            },
-            {
                 "hero_rarity": "epic",
                 "card_count": 3554
             },
             {
-                "hero_rarity": "legendary",
-                "card_count": 389
-            },
-            {
                 "hero_rarity": "rare",
                 "card_count": 22668
+            },
+            {
+                "hero_rarity": "common",
+                "card_count": 99350
+            },
+            {
+                "hero_rarity": "legendary",
+                "card_count": 389
             }
         ],
         "total_player_count": 3262
@@ -604,6 +604,21 @@
         "tournament_status": "finished",
         "tournament_number": "71",
         "leagues": [
+            {
+                "league": "Gold",
+                "deck_count": 2058,
+                "player_count": 678
+            },
+            {
+                "league": "Platinum",
+                "deck_count": 1933,
+                "player_count": 504
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 4892,
+                "player_count": 1117
+            },
             {
                 "league": "Diamond",
                 "deck_count": 1010,
@@ -615,24 +630,9 @@
                 "player_count": 2364
             },
             {
-                "league": "Platinum",
-                "deck_count": 1933,
-                "player_count": 504
-            },
-            {
-                "league": "Gold",
-                "deck_count": 2058,
-                "player_count": 678
-            },
-            {
                 "league": "Silver",
                 "deck_count": 4314,
                 "player_count": 1250
-            },
-            {
-                "league": "Reverse",
-                "deck_count": 4892,
-                "player_count": 1117
             }
         ],
         "stars": [
@@ -671,16 +671,16 @@
         ],
         "rarity": [
             {
+                "hero_rarity": "legendary",
+                "card_count": 408
+            },
+            {
                 "hero_rarity": "common",
                 "card_count": 95263
             },
             {
                 "hero_rarity": "epic",
                 "card_count": 3551
-            },
-            {
-                "hero_rarity": "legendary",
-                "card_count": 408
             },
             {
                 "hero_rarity": "rare",
@@ -691,23 +691,18 @@
     },
     "10-06 | Main 72": {
         "tournament_unique_key": "Main 72",
-        "tournament_status": "live",
+        "tournament_status": "finished",
         "tournament_number": "72",
         "leagues": [
-            {
-                "league": "Diamond",
-                "deck_count": 992,
-                "player_count": 276
-            },
-            {
-                "league": "Gold",
-                "deck_count": 2279,
-                "player_count": 720
-            },
             {
                 "league": "Platinum",
                 "deck_count": 1683,
                 "player_count": 461
+            },
+            {
+                "league": "Diamond",
+                "deck_count": 992,
+                "player_count": 276
             },
             {
                 "league": "Bronze",
@@ -715,20 +710,25 @@
                 "player_count": 2324
             },
             {
-                "league": "Silver",
-                "deck_count": 4478,
-                "player_count": 1290
-            },
-            {
                 "league": "Reverse",
                 "deck_count": 4474,
                 "player_count": 1045
+            },
+            {
+                "league": "Gold",
+                "deck_count": 2279,
+                "player_count": 720
+            },
+            {
+                "league": "Silver",
+                "deck_count": 4478,
+                "player_count": 1290
             }
         ],
         "stars": [
             {
                 "hero_stars": 1,
-                "card_count": 15142
+                "card_count": 15141
             },
             {
                 "hero_stars": 2,
@@ -736,15 +736,15 @@
             },
             {
                 "hero_stars": 3,
-                "card_count": 23834
+                "card_count": 23833
             },
             {
                 "hero_stars": 4,
-                "card_count": 23353
+                "card_count": 23351
             },
             {
                 "hero_stars": 5,
-                "card_count": 21816
+                "card_count": 21815
             },
             {
                 "hero_stars": 6,
@@ -761,8 +761,8 @@
         ],
         "rarity": [
             {
-                "hero_rarity": "common",
-                "card_count": 99060
+                "hero_rarity": "rare",
+                "card_count": 22510
             },
             {
                 "hero_rarity": "epic",
@@ -773,10 +773,49 @@
                 "card_count": 399
             },
             {
-                "hero_rarity": "rare",
-                "card_count": 22510
+                "hero_rarity": "common",
+                "card_count": 99060
             }
         ],
         "total_player_count": 3189
+    },
+    "10-13 | Main 73": {
+        "tournament_unique_key": "Main 73",
+        "tournament_status": "not started",
+        "tournament_number": "73",
+        "leagues": [
+            {
+                "league": "Bronze",
+                "deck_count": 34,
+                "player_count": null
+            },
+            {
+                "league": "Gold",
+                "deck_count": 11,
+                "player_count": null
+            },
+            {
+                "league": "Platinum",
+                "deck_count": 8,
+                "player_count": null
+            },
+            {
+                "league": "Reverse",
+                "deck_count": 66,
+                "player_count": null
+            },
+            {
+                "league": "Silver",
+                "deck_count": 43,
+                "player_count": null
+            },
+            {
+                "league": "Diamond",
+                "deck_count": 7,
+                "player_count": null
+            }
+        ],
+        "stars": [],
+        "rarity": []
     }
 }

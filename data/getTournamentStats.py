@@ -227,7 +227,6 @@ ORDER BY gt.start_timestamp ASC
 total_players_df = pd.read_sql_query(total_players_query, conn)
 cursor.close()
 
-
 card_stars_query = f"""
 select concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
 gt.start_timestamp,
@@ -242,7 +241,6 @@ group by 1,2,3,4
 order by gt.start_timestamp asc"""
 card_stars_df = pd.read_sql_query(card_stars_query, conn)
 cursor.close()
-
 
 rarity_query = f"""
 WITH override AS (
@@ -372,7 +370,7 @@ select ghwst.tournament_unique_key
 ,sum(case when score = 0 then 1 else 0 end) score_0_count
 from flatten.hero_stats_Tournament ghwst 
 join flatten.get_tournaments gt  
-	on ghwst.tournament_id = gt.tournament_id
+    on ghwst.tournament_id = gt.tournament_id
 where 1=1
 --hero_handle = 'CryptoKaleo'
 --and ghwst.tournament_unique_key  = 'Main 33'
@@ -391,6 +389,30 @@ order by 1,2"""
 tournament_views_df = pd.read_sql_query(tournament_views_query, conn_two)
 print(f"Number of records in tournament_views_df: {len(tournament_views_df)}")
 cursor_two.close()
+
+# NEW QUERY: Deck and Player History
+conn_three = supabase_db_connection()
+cursor_three = conn_three.cursor()
+
+deck_player_history_query = """
+select 
+    concat(to_char(gt.start_timestamp, 'MM-DD'),' | ', gt.tournament_unique_key ) as tournament,
+    gt.start_timestamp,
+    gt.tournament_unique_key,
+    COUNT(*) deck_count,
+    COUNT(distinct player_id) unique_player_count
+from
+    flatten.get_tournaments gt
+join flatten.tournament_players gtpp
+    on gt.tournament_id = gtpp.tournament_id
+where gt.start_timestamp >= '2024-07-01'
+group by 1,2,3
+order by gt.start_timestamp asc
+"""
+
+deck_player_history_df = pd.read_sql_query(deck_player_history_query, conn_three)
+print(f"Number of records in deck_player_history_df: {len(deck_player_history_df)}")
+cursor_three.close()
 
 # Create the JSON structure
 tournaments_data = {}
@@ -436,6 +458,7 @@ for _, row in card_rarity_df.iterrows():
             'hero_rarity': row['hero_rarity'],
             'card_count': int(row['card_count'])
         })
+
 # Process tournament views data
 tournament_views_data = {}
 print("Debug: Number of rows in tournament_views_df:", len(tournament_views_df))
@@ -459,6 +482,19 @@ for _, row in tournament_views_df.iterrows():
 for tournament_key in tournament_views_data:
     tournament_views_data[tournament_key] = list(tournament_views_data[tournament_key].values())
 
+# Process deck_player_history_df - NEW PROCESSING
+deck_player_data = {}
+
+for _, row in deck_player_history_df.iterrows():
+    tournament_key = row['tournament']
+    deck_player_data[tournament_key] = {
+        'tournament_unique_key': row['tournament_unique_key'],
+        'start_timestamp': row['start_timestamp'].isoformat() if pd.notna(row['start_timestamp']) else None,
+        'total_deck_count': int(row['deck_count']),
+        'unique_player_count': int(row['unique_player_count']),
+        'decks_per_player': round(float(row['deck_count']) / float(row['unique_player_count']), 2) if row['unique_player_count'] > 0 else 0
+    }
+
 # Get the absolute path for the output directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
 output_dir = os.path.join(script_dir, 'tournaments')
@@ -473,7 +509,6 @@ with open(output_file, 'w') as f:
 
 print(f"Writing data to: {output_file}")
 
-
 # Write tournament views to separate JSON file
 output_views_file = os.path.join(output_dir, 'tournaments_stats_view_growth.json')
 with open(output_views_file, 'w') as f:
@@ -481,7 +516,28 @@ with open(output_views_file, 'w') as f:
 
 print(f"Writing tournament views data to: {output_views_file}")
 
-# Close the final connection
+# Write deck player history to NEW separate JSON file
+output_deck_player_file = os.path.join(output_dir, 'deck_player_history.json')
+with open(output_deck_player_file, 'w') as f:
+    json.dump(deck_player_data, f, indent=4)
+
+print(f"Writing deck player history data to: {output_deck_player_file}")
+
+# Display summary statistics for the new data
+total_decks = sum(tournament['total_deck_count'] for tournament in deck_player_data.values())
+total_unique_players = sum(tournament['unique_player_count'] for tournament in deck_player_data.values())
+avg_decks_per_tournament = total_decks / len(deck_player_data) if deck_player_data else 0
+avg_players_per_tournament = total_unique_players / len(deck_player_data) if deck_player_data else 0
+
+print(f"\nDeck Player History Summary Statistics:")
+print(f"Total tournaments: {len(deck_player_data)}")
+print(f"Total decks across all tournaments: {total_decks:,}")
+print(f"Total unique players across all tournaments: {total_unique_players:,}")
+print(f"Average decks per tournament: {avg_decks_per_tournament:,.0f}")
+print(f"Average players per tournament: {avg_players_per_tournament:,.0f}")
+
+# Close all connections
+conn_three.close()
 conn.close()
 
 

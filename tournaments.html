@@ -228,9 +228,6 @@
                 // League rows
                 html += `<tr><th colspan="${Object.keys(data).length + 2}">
                     Deck Counts By Leagues
-                    <span onclick="openModal()" style="margin-left: 10px;">
-                      Chart View:  <button class="modal-button"><i class="fas fa-chart-line"></i></button>
-                    </span>
                 </th></tr>`;
                 // Get all unique leagues
                 const leagues = [...new Set(Object.values(data).flatMap(t => t.leagues.map(l => l.league)))];
@@ -365,6 +362,9 @@
                 // Player Count rows
                 html += `<tr><th colspan="${Object.keys(data).length + 2}">
                     Player Counts By Leagues
+                    <span onclick="openPlayerModal()" style="margin-left: 10px;">
+                      Full History View:  <button class="modal-button"><i class="fas fa-chart-line"></i></button>
+                    </span>
                 </th></tr>`;
                 
                 // Use the same sorted leagues for player counts
@@ -576,6 +576,16 @@
         </div>
     </div>
 
+    <div id="playerModalOverlay" class="modal-overlay" onclick="closePlayerModal()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="width: 95%; max-width: 1400px; height: 60vh; padding: 20px; background-color: #000; overflow-x: hidden;">
+            <span class="close-button" onclick="closePlayerModal()" style="color: white;">&times;</span>
+            <h2 style="color: white;">Player & Deck History</h2>
+            <div style="height: calc(100% - 60px);">
+                <canvas id="playerDeckHistoryChart" style="height: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openModal() {
             document.getElementById('modalOverlay').style.display = 'flex';
@@ -701,11 +711,190 @@
 
         function closeModal() {
             document.getElementById('modalOverlay').style.display = 'none';
-            // Optionally destroy charts when modal is closed
+            // Destroy deck count charts
             Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
+                if (chart && chart !== charts.playerDeckHistory) chart.destroy();
             });
+            // Keep playerDeckHistory chart in the charts object but remove others
+            const playerChart = charts.playerDeckHistory;
             charts = {};
+            if (playerChart) charts.playerDeckHistory = playerChart;
+        }
+
+        function openPlayerModal() {
+            document.getElementById('playerModalOverlay').style.display = 'flex';
+            createPlayerDeckHistoryChart();
+        }
+
+        async function createPlayerDeckHistoryChart() {
+            try {
+                // Destroy existing chart if it exists
+                if (charts.playerDeckHistory) {
+                    charts.playerDeckHistory.destroy();
+                }
+
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/data/tournaments/deck_player_history.json?_=${timestamp}`);
+                const data = await response.json();
+
+                // Sort tournaments by start_timestamp
+                const sortedTournaments = Object.entries(data).sort(([, a], [, b]) => 
+                    new Date(a.start_timestamp) - new Date(b.start_timestamp)
+                );
+
+                const labels = sortedTournaments.map(([tournamentKey]) => tournamentKey);
+                const playerData = sortedTournaments.map(([, tournamentData]) => tournamentData.unique_player_count);
+                const deckData = sortedTournaments.map(([, tournamentData]) => tournamentData.total_deck_count);
+
+                const ctx = document.getElementById('playerDeckHistoryChart');
+                
+                charts.playerDeckHistory = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Unique Players',
+                            data: playerData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Total Decks',
+                            data: deckData,
+                            backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Tournament Player & Deck Count History',
+                                font: { size: 20 },
+                                color: 'white',
+                                padding: { top: 10, bottom: 20 }
+                            },
+                            legend: {
+                                labels: {
+                                    color: 'white',
+                                    font: { size: 14 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    afterBody: function(context) {
+                                        const index = context[0].dataIndex;
+                                        const tournamentData = sortedTournaments[index][1];
+                                        return `Decks per Player: ${tournamentData.decks_per_player}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: 'white',
+                                    font: { size: 10 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Unique Players',
+                                    color: 'rgba(75, 192, 192, 1)',
+                                    font: { size: 14 }
+                                },
+                                ticks: {
+                                    color: 'rgba(75, 192, 192, 1)',
+                                    font: { size: 12 }
+                                },
+                                grid: {
+                                    color: 'rgba(75, 192, 192, 0.2)'
+                                },
+                                beginAtZero: true
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Total Decks',
+                                    color: 'rgba(255, 159, 64, 1)',
+                                    font: { size: 14 }
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 159, 64, 1)',
+                                    font: { size: 12 }
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: [{
+                            afterDraw: (chart) => {
+                                const ctx = chart.ctx;
+                                ctx.save();
+                                ctx.font = '10px Arial';
+                                ctx.textAlign = 'center';
+
+                                // Draw values on top of bars
+                                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                                    const meta = chart.getDatasetMeta(datasetIndex);
+                                    meta.data.forEach((bar, index) => {
+                                        const value = dataset.data[index];
+                                        ctx.fillStyle = dataset.borderColor;
+                                        
+                                        if (datasetIndex === 0) { // Players - show above bar
+                                            ctx.fillText(
+                                                value.toLocaleString(),
+                                                bar.x,
+                                                bar.y - 5
+                                            );
+                                        } else { // Decks - show inside bar at top
+                                            ctx.fillText(
+                                                value.toLocaleString(),
+                                                bar.x,
+                                                bar.y + 15
+                                            );
+                                        }
+                                    });
+                                });
+                                ctx.restore();
+                            }
+                        }]
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating player/deck history chart:', error);
+            }
+        }
+
+        function closePlayerModal() {
+            document.getElementById('playerModalOverlay').style.display = 'none';
+            if (charts.playerDeckHistory) {
+                charts.playerDeckHistory.destroy();
+                delete charts.playerDeckHistory;
+            }
         }
     </script>
 </body>

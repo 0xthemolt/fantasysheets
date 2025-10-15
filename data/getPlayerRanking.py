@@ -209,7 +209,7 @@ left join league_ranking touranment_rankings_diamond
     and touranment_rankings_diamond.league = 'Diamond'
 left join league_ranking touranment_rankings_plat
     on players.player_id = touranment_rankings_plat.player_id
-    and touranment_rankings_plat.league = 'Platinunm'
+    and touranment_rankings_plat.league = 'Platinum'
 left join league_ranking touranment_rankings_gold
     on players.player_id = touranment_rankings_gold.player_id
     and touranment_rankings_gold.league = 'Gold'

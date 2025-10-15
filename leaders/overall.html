@@ -271,6 +271,10 @@
                         autocomplete="off"
                         aria-label="Search players">
                     <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
+                    <label style="display: flex; align-items: center; margin-left: 10px; color: #ccc; font-size: 0.9em; cursor: pointer;">
+                        <input type="checkbox" id="heroesFilter" style="margin-right: 5px; width: 16px; height: 16px; border-radius: 50%; cursor: pointer;">
+                        Heroes
+                    </label>
                 </div>
 
                 <div id="comparison-controls">
@@ -298,9 +302,10 @@
                                 <div class="toggle-slider"></div>
                             </div>
                         </th>
-                        <th class="column-header section-end" colspan="4">
+                        <th class="column-header section-end" colspan="3">
                             <i class="fa-solid fa-store"></i> Marketplace
                         </th>
+                        <th class="column-header section-end" title="(Sells + ETH Rewards) - (Buys + Packs)">Net <br><span style="background-color: rgba(76, 175, 80, 0.7); color: white; font-size: 0.6em; padding: 1px 4px; border-radius: 2px; margin-left: 2px;">Updated</span></th>
                         <th class="column-header section-end">Compare</th>
                     </tr>
                     <tr>
@@ -380,7 +385,7 @@
                             Sells
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable section-end" data-sort="netVol" title="(Sells + ETH Rewards) - (Buys - Packs)">
+                        <th class="sortable section-end" data-sort="netVol" title="(Sells + ETH Rewards) - (Buys + Packs)">
                             Net
                             <div class="sort-arrow"></div>
                         </th>
@@ -481,7 +486,8 @@
                     buyVol: player.buy_vol.toFixed(3),
                     packVol: player.pack_vol.toFixed(3),
                     sellVol: player.sell_vol.toFixed(3),
-                    netVol: player.net_vol.toFixed(3)
+                    netVol: player.net_vol.toFixed(3),
+                    isHero: player.is_hero
                 }));
 
             // Update table with real data
@@ -508,12 +514,12 @@
                     <td>${player.hoursSinceLastActivity >= 24 
                         ? Math.round(player.hoursSinceLastActivity/24) + '<span style="color: grey; font-size: 0.8em;"> d</span>' 
                         : '0<span style="color: grey; font-size: 0.8em;"> d</span>'}</td>
-                    <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;">ETH</span></td>
+                    <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td class="section-end">${formatInt(player.cards)}</td>
                     <td>${formatNumberMK(player.fanPoints)}</td>
                     <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td class="section-end">${formatNumberMK(parseFloat(player.rewardFrag))}</td>
-                    <td>${formatInt(player.decks)}</td>
+                    <td>${player.decks >= 1000 ? (player.decks / 1000).toFixed(1) + 'k' : formatInt(player.decks)}</td>
                     <td data-column="league_norm_rank" style="background-color: #1E1526">
                         ${player.diamond == 0 ? '-' : 
                           player.diamond == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
@@ -826,6 +832,69 @@
                     });
                 });
             }
+
+            // Heroes filter functionality
+            const heroesFilter = document.getElementById('heroesFilter');
+            
+            heroesFilter.addEventListener('change', function() {
+                const isHeroesOnly = this.checked;
+                
+                rows.forEach(row => {
+                    const playerCell = row.children[1];
+                    const playerId = playerCell.dataset.playerId;
+                    const player = players.find(p => p.player_id === playerId);
+                    
+                    // Check if row should be visible based on search and hero filter
+                    const searchTerm = searchBox.value.toLowerCase();
+                    const playerName = playerCell.textContent.toLowerCase();
+                    const playerHandle = playerCell.getAttribute('player-handle').toLowerCase();
+                    const matchesSearch = !searchTerm || playerName.includes(searchTerm) || playerHandle.includes(searchTerm);
+                    const matchesHeroFilter = !isHeroesOnly || player.isHero === 1;
+                    
+                    const isVisible = matchesSearch && matchesHeroFilter;
+                    row.style.display = isVisible ? '' : 'none';
+                    
+                    // Update rank for visible rows
+                    if (isVisible) {
+                        row.children[0].textContent = player.originalRank;
+                    }
+                });
+            });
+
+            // Update search functionality to work with hero filter
+            searchBox.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const isHeroesOnly = heroesFilter.checked;
+                
+                clearButton.style.display = searchTerm ? 'flex' : 'none';
+                
+                rows.forEach(row => {
+                    const playerCell = row.children[1];
+                    const playerId = playerCell.dataset.playerId;
+                    const player = players.find(p => p.player_id === playerId);
+                    const playerName = playerCell.textContent.toLowerCase();
+                    const playerHandle = playerCell.getAttribute('player-handle').toLowerCase();
+                    
+                    const matchesSearch = !searchTerm || playerName.includes(searchTerm) || playerHandle.includes(searchTerm);
+                    const matchesHeroFilter = !isHeroesOnly || player.isHero === 1;
+                    
+                    const isVisible = matchesSearch && matchesHeroFilter;
+                    row.style.display = isVisible ? '' : 'none';
+
+                    // During search, restore original rank
+                    if (isVisible) {
+                        row.children[0].textContent = player.originalRank;
+                    }
+                });
+            });
+
+            // Update clear search to also clear hero filter
+            clearButton.addEventListener('click', function() {
+                searchBox.value = '';
+                heroesFilter.checked = false;
+                rows.forEach(row => row.style.display = '');
+                this.style.display = 'none';
+            });
         });
     </script>
 </body>

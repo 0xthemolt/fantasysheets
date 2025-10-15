@@ -47,7 +47,7 @@ having suM(reward_eth) >= .02
 UNION 
 select player_id
 from flatten.get_player_basic_data tp
-where fan_pts_plus_referrals >= 2500000  /*lifetime 5m + fan*/
+where fan_pts_plus_referrals >= 3000000  /*lifetime 3m + fan*/
 )
 ,eth_frags_won as (
 select ph.player_id
@@ -185,12 +185,15 @@ else first_tournament.tournament_unique_key  end as first_tournament
 ,max(coalesce(tvbp.buy_volume,0)) as buy_vol
 ,max(coalesce(tvbp.pack_volume,0)) as pack_vol
 ,max(coalesce(tvbp.sell_volume,0)) as sell_vol
-,max(coalesce(tvbp.sell_volume,0) - coalesce(tvbp.buy_volume,0) - coalesce(tvbp.pack_volume,0)) as net_vol
+,max((coalesce(eth_frags_won.reward_eth,0) + coalesce(tvbp.sell_volume,0)) - (coalesce(tvbp.buy_volume,0) + coalesce(tvbp.pack_volume,0))) as net_vol
 ,max(coalesce(tvbp.trade_count,0)) as trade_count
 ,max(coalesce(tvbp.max_buy,0)) as max_buy
 ,max(coalesce(tvbp.max_sell,0)) as max_sell
 ,max(updated) freshness_timestamp
+,max(case when hc.hero_handle is null then 0 else 1 end) is_hero
 from flatten.get_player_basic_data players
+left join flatten.heroes_current hc 
+    on players.player_handle  = hc.hero_handle
 join flatten.GET_TOURNAMENTS first_tournament
 	on players.first_tournament = first_tournament.tournament_id
 join flatten.GET_TOURNAMENTS last_tournament

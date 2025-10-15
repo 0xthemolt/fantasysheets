@@ -118,6 +118,7 @@
     th[data-sort="stars"] { width: 70px; }
     th[data-sort="decks"] { width: 60px; }
     th[data-sort="diamond"],
+    th[data-sort="platinum"],
     th[data-sort="gold"],
     th[data-sort="silver"],
     th[data-sort="bronze"],
@@ -289,7 +290,7 @@
                         <th class="column-header section-end" colspan="3">
                             <i class="fa-solid fa-coins"></i> Rewards
                         </th>
-                        <th class="column-header section-end" colspan="6" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
+                        <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
                             <i class="fa-solid fa-trophy"></i> Performance
                             <div class="toggle-container">
                                 <button id="toggle-all" class="toggle-button active">All</button>
@@ -316,7 +317,7 @@
                             <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="hoursSinceLastActivity" title="Time since last trade or tournament start">
-                            Last Activity
+                            Activity
                             <div class="sort-arrow"></div>
                         </th>
                         <th class="sortable" data-sort="portfolio">
@@ -347,6 +348,10 @@
                             <img src="../icons/diamond.webp" alt="Diamond" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
                         </th>
+                        <th class="sortable" data-sort="platinum">
+                            <img src="../icons/platinum.webp" alt="Platinum" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
                         <th class="sortable" data-sort="gold">
                             <img src="../icons/gold.webp" alt="Gold" style="height: 16px; vertical-align: middle;">
                             <div class="sort-arrow"></div>
@@ -371,11 +376,11 @@
                             Packs
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable" data-sort="sellVol">
+                        <th class="sortable section-end" data-sort="sellVol">
                             Sells
                             <div class="sort-arrow"></div>
                         </th>
-                        <th class="sortable section-end" data-sort="netVol" title="Sells - Buys - Pack Bought">
+                        <th class="sortable section-end" data-sort="netVol" title="(Sells + ETH Rewards) - (Buys - Packs)">
                             Net
                             <div class="sort-arrow"></div>
                         </th>
@@ -462,11 +467,13 @@
                     decks: Math.round(player.decks),
                     cards: Math.round(player.cards),
                     diamond: Math.round(player.diamond_norm_rank),
+                    platinum: Math.round(player.platinum_norm_rank),
                     gold: Math.round(player.gold_norm_rank),
                     silver: Math.round(player.silver_norm_rank),
                     bronze: Math.round(player.bronze_norm_rank),
                     reverse: Math.round(player.reverse_norm_rank),
                     diamond_l5: Math.round(player.diamond_norm_rank_l5),
+                    platinum_l5: Math.round(player.platinum_norm_rank_l5),
                     gold_l5: Math.round(player.gold_norm_rank_l5),
                     silver_l5: Math.round(player.silver_norm_rank_l5),
                     bronze_l5: Math.round(player.bronze_norm_rank_l5),
@@ -506,73 +513,88 @@
                     <td>${formatNumberMK(player.fanPoints)}</td>
                     <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td class="section-end">${formatNumberMK(parseFloat(player.rewardFrag))}</td>
- 
                     <td>${formatInt(player.decks)}</td>
-                    <td data-column="league_norm_rank" style="background-color: #a8ccde26">
+                    <td data-column="league_norm_rank" style="background-color: #1E1526">
                         ${player.diamond == 0 ? '-' : 
                           player.diamond == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.diamond == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.diamond == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.diamond <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond)}</span>` :
+                          player.diamond <= 10 ? `<span style="display: inline-block; background-color: #C78BFF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond)}</span>` :
                           formatInt(player.diamond)}
                     </td>
-                    <td data-column="league_norm_rank_l5" style="background-color: #a8ccde26; display: none;">
+                    <td data-column="league_norm_rank_l5" style="background-color: #1E1526; display: none;">
                         ${player.diamond_l5 == 0 ? '-' : 
                           player.diamond_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.diamond_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.diamond_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.diamond_l5 <= 10 ? `<span style="display: inline-block; background-color: #4a9eca; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond_l5)}</span>` :
+                          player.diamond_l5 <= 10 ? `<span style="display: inline-block; background-color: #C78BFF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond_l5)}</span>` :
                           formatInt(player.diamond_l5)}
                     </td>
-                    <td data-column="league_norm_rank" style="background-color: #dacc8626">
+                    <td data-column="league_norm_rank" style="background-color: #0A1024">
+                        ${player.platinum == 0 ? '-' : 
+                          player.platinum == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.platinum == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.platinum == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.platinum <= 10 ? `<span style="display: inline-block; background-color: #4169EF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.platinum)}</span>` :
+                          formatInt(player.platinum)}
+                    </td>
+                    <td data-column="league_norm_rank_l5" style="background-color: #0A1024; display: none;">
+                        ${player.platinum_l5 == 0 ? '-' : 
+                          player.platinum_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                          player.platinum_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                          player.platinum_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                          player.platinum_l5 <= 10 ? `<span style="display: inline-block; background-color: #4169EF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.platinum_l5)}</span>` :
+                          formatInt(player.platinum_l5)}
+                    </td>
+                    <td data-column="league_norm_rank" style="background-color: #231C0B">
                         ${player.gold == 0 ? '-' : 
                           player.gold == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.gold == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.gold == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.gold <= 10 ? `<span style="display: inline-block; background-color: #b5a642; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold)}</span>` :
+                          player.gold <= 10 ? `<span style="display: inline-block; background-color: #e8bc4c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold)}</span>` :
                           formatInt(player.gold)}
                     </td>
-                    <td data-column="league_norm_rank_l5" style="background-color: #dacc8626; display: none;">
+                    <td data-column="league_norm_rank_l5" style="background-color: #231C0B; display: none;">
                         ${player.gold_l5 == 0 ? '-' : 
                           player.gold_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.gold_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.gold_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.gold_l5 <= 10 ? `<span style="display: inline-block; background-color: #b5a642; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold_l5)}</span>` :
+                          player.gold_l5 <= 10 ? `<span style="display: inline-block; background-color: #e8bc4c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold_l5)}</span>` :
                           formatInt(player.gold_l5)}
                     </td>
-                    <td data-column="league_norm_rank" style="background-color: #8b8b8b26">
+                    <td data-column="league_norm_rank" style="background-color: #191B1F">
                         ${player.silver == 0 ? '-' : 
                           player.silver == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.silver == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.silver == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.silver <= 10 ? `<span style="display: inline-block; background-color: #8b8b8b; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver)}</span>` :
+                          player.silver <= 10 ? `<span style="display: inline-block; background-color: #A7B8CF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver)}</span>` :
                           formatInt(player.silver)}
                     </td>
-                    <td data-column="league_norm_rank_l5" style="background-color: #8b8b8b26; display: none;">
+                    <td data-column="league_norm_rank_l5" style="background-color: #191B1F; display: none;">
                         ${player.silver_l5 == 0 ? '-' : 
                           player.silver_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.silver_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.silver_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.silver_l5 <= 10 ? `<span style="display: inline-block; background-color: #8b8b8b; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver_l5)}</span>` :
+                          player.silver_l5 <= 10 ? `<span style="display: inline-block; background-color: #A7B8CF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver_l5)}</span>` :
                           formatInt(player.silver_l5)}
                     </td>
-                    <td data-column="league_norm_rank" style="background-color: #a97e4826">
+                    <td data-column="league_norm_rank" style="background-color: #22130A">
                         ${player.bronze == 0 ? '-' : 
                           player.bronze == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.bronze == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.bronze == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.bronze <= 10 ? `<span style="display: inline-block; background-color: #CD7F32; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze)}</span>` :
+                          player.bronze <= 10 ? `<span style="display: inline-block; background-color: #e77e41; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze)}</span>` :
                           formatInt(player.bronze)}
                     </td>
-                    <td data-column="league_norm_rank_l5" style="background-color: #a97e4826; display: none;">
+                    <td data-column="league_norm_rank_l5" style="background-color: #22130A; display: none;">
                         ${player.bronze_l5 == 0 ? '-' : 
                           player.bronze_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.bronze_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.bronze_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.bronze_l5 <= 10 ? `<span style="display: inline-block; background-color: #CD7F32; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze_l5)}</span>` :
+                          player.bronze_l5 <= 10 ? `<span style="display: inline-block; background-color: #e77e41; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze_l5)}</span>` :
                           formatInt(player.bronze_l5)}
                     </td>
-                    <td data-column="league_norm_rank" class="section-end" style="background-color: #82EA8926">
+                    <td data-column="league_norm_rank" class="section-end" style="background-color: #141F0B">
                         ${player.reverse == 0 ? '-' : 
                           player.reverse == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.reverse == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
@@ -580,17 +602,17 @@
                           player.reverse <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse)}</span>` :
                           formatInt(player.reverse)}
                     </td>
-                    <td data-column="league_norm_rank_l5" class="section-end" style="background-color: #82EA8926; display: none;">
+                    <td data-column="league_norm_rank_l5" class="section-end" style="background-color: #141F0B; display: none;">
                         ${player.reverse_l5 == 0 ? '-' : 
                           player.reverse_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
                           player.reverse_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
                           player.reverse_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
-                          player.reverse_l5 <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse_l5)}</span>` :
+                          player.reverse_l5 <= 10 ? `<span style="display: inline-block; background-color: #84d24c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse_l5)}</span>` :
                           formatInt(player.reverse_l5)}
                     </td>
                     <td title="ETH">${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td title="ETH">${formatDecimalOne(player.packVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
-                    <td title="ETH">${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                    <td class="section-end" title="ETH">${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td title="Sells - Buys - Pack Bought" class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td><input type="checkbox" class="compare-checkbox"></td>
                 </tr>
@@ -714,7 +736,7 @@
                     
                     // Determine the actual column to sort by (add _l5 suffix if Last 5 is active)
                     let sortColumn = column;
-                    if (isLast5Active && ['diamond', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
+                    if (isLast5Active && ['diamond', 'platinum', 'gold', 'silver', 'bronze', 'reverse'].includes(column)) {
                         sortColumn = `${column}_l5`;
                     }
 
@@ -725,7 +747,7 @@
                         currentSort.column = sortColumn;
                         // Set specific columns to sort ascending by default
                         const baseColumn = sortColumn.replace('_l5', '');
-                        currentSort.direction = (['diamond', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
+                        currentSort.direction = (['diamond','platinum', 'gold', 'silver', 'bronze', 'reverse'].includes(baseColumn)) ? 'asc' : 'desc';
                     }
 
                     // Update arrow on clicked header

@@ -44,15 +44,15 @@ select
         coalesce(
         	(case 
         	      when t2.league = 'Reverse'  then
-        	      (t.hero_stars / (t.hero_Score + 1) / SUM(hero_stars::float / (hero_score + 1)) OVER (PARTITION BY t.tournament_player_deck_id) )   * (coalesce(eth.reward,0) + (frags.reward / 100 * 0.0024))
+        	      (t.hero_stars / (t.hero_Score + 1) / SUM(hero_stars::float / (hero_score + 1)) OVER (PARTITION BY t.tournament_player_deck_id) )   * (coalesce(eth.reward,0) + (frags.reward / 100 * 0.0019))
 --        	      	case when t.player_score = 0 then eth.reward / 5
 --        	 	    else  
 --        	 	    (1 - (hero_score::decimal / NULLIF(player_score, 0)::decimal)) / 
---         				SUM(1 - (hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * (eth.reward + (frags.reward / 100 * 0.0024))
+--         				SUM(1 - (hero_score::decimal / NULLIF(player_score, 0)::decimal)) OVER(partition by tournament_player_deck_id) * (eth.reward + (frags.reward / 100 * 0.0019))
 --        	 	    end
         	 	  when t2.league <>  'Reverse'  then
         	 	  	case when t.hero_score  = 0 then 0 
-					else (hero_score::float / t.player_score) * (coalesce(eth.reward,0) + (frags.reward / 100 * 0.0024))
+					else (hero_score::float / t.player_score) * (coalesce(eth.reward,0) + (frags.reward / 100 * 0.0019))
 					end
 			end) ,0) as reward_value_added,
         t.db_updated_cst + interval '5 hours' as db_updated_utc

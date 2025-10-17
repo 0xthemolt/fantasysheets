@@ -619,7 +619,7 @@
                     <td title="ETH">${formatDecimalOne(player.buyVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td title="ETH">${formatDecimalOne(player.packVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td class="section-end" title="ETH">${formatDecimalOne(player.sellVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
-                    <td title="Sells - Buys - Pack Bought" class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                    <td title="(Sells + ETH Rewards) - (Buys + Packs)" class="section-end">${formatDecimalOne(player.netVol)} <span style="color: grey; font-size: 0.8em;"></span></td>
                     <td><input type="checkbox" class="compare-checkbox"></td>
                 </tr>
             `).join('');

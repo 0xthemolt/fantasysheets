@@ -293,6 +293,38 @@
     box-sizing: border-box;
     user-select: none;
 }
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background-color 0.3s;
+    margin-left: 8px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.delete-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.hero-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
     </style>
 </head>
 <body>
@@ -703,6 +735,15 @@ async function fetchBids() {
                 }
                 
                 try {
+                    // Only show delete button if this card has bid bot data
+                    const deleteButton = item.bidBot ? `
+                        <button class="delete-btn" 
+                                onclick="deleteBidBot('${item.hero_id}', '${item.rarity}', this.closest('.hero-card'))"
+                                title="Delete bid bot configuration">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : '';
+                    
                     return `
 <div class="${item.cardClass}" data-rarity="${item.rarity}" style="display: flex; flex-direction: column; align-items: center;">
     <div class="hero-main-row" style="display: flex; flex-direction: row; align-items: flex-start; width: 100%;">
@@ -717,7 +758,10 @@ async function fetchBids() {
         </div>
         <div class="card-info-container" style="flex: 1; margin-left: 12px; display: flex; flex-direction: column; align-items: flex-start;">
             <div class="hero-info-block" style="width: 100%;">
-                <h3>${item.name}</h3>
+                <div class="hero-header">
+                    <h3>${item.name}</h3>
+                    ${deleteButton}
+                </div>
                 <a href="https://x.com/${item.handle}/" class="hero-handle" target="_blank">@${item.handle}</a>
                 <p style="color: #888; font-size: 0.8rem; margin: 4px 0;">
                     Floor: ${item.floorPrice ? Number(item.floorPrice).toFixed(4) : 'N/A'}
@@ -986,13 +1030,55 @@ async function fetchBids() {
         renderBids();
     }
     
-    // Add this function to manage the refresh button state
-function toggleRefreshAnimation(show) {
-    const refreshButton = document.getElementById('refresh-button');
-    if (show) {
-        refreshButton.classList.add('spinning');
-    } else {
-        refreshButton.classList.remove('spinning');
+    // Add this function to delete bid bot entries
+async function deleteBidBot(heroId, rarityId, cardElement) {
+    const deleteBtn = cardElement.querySelector('.delete-btn');
+    
+    try {
+        // Disable button and show loading state
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        // Call the stored procedure with correct parameter names (no named parameters, just values)
+        const { data, error } = await supabaseClient.rpc('disable_bid_bot_metadata', {
+            p_hero_id: heroId.toString(),
+            p_rarity_id: parseInt(rarityId)
+        });
+        
+        if (error) {
+            throw error;
+        }
+        
+        console.log(`Function result:`, data);
+        console.log(`Successfully called disable_bid_bot_metadata for hero ${heroId}, rarity ${rarityId}`);
+        
+        // Check if the function actually disabled something (data should be 1 for success, 0 for no match)
+        if (data === 1) {
+            console.log('Bid bot configuration was successfully disabled');
+            
+            // Remove the card from the UI
+            cardElement.style.transition = 'opacity 0.3s ease';
+            cardElement.style.opacity = '0';
+            setTimeout(() => {
+                cardElement.remove();
+            }, 300);
+            
+            // Update the missing bids section
+            setTimeout(() => {
+                fetchBids();
+            }, 500);
+        } else {
+            console.log('No bid bot configuration found to disable');
+            alert('No bid bot configuration found for this hero/rarity combination.');
+        }
+        
+    } catch (error) {
+        console.error('Error disabling bid bot:', error);
+        alert('Failed to disable bid bot configuration. Please try again.');
+        
+        // Re-enable button
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
     }
 }
 

@@ -349,6 +349,7 @@
         // Replace the existing seasons definition with:
         const seasons = {
             5: [
+                { seasonTournament: 6, mainTournament: 75 },
                 { seasonTournament: 5, mainTournament: 74 },
                 { seasonTournament: 4, mainTournament: 73 },
                 { seasonTournament: 3, mainTournament: 72 },
@@ -357,8 +358,7 @@
             ],
             4: [   
                 { seasonTournament: 6, mainTournament: 69 }, 
-                { seasonTournament: 5, mainTournament: 68 },  
-                { seasonTournament: 4, mainTournament: 67 }
+                { seasonTournament: 5, mainTournament: 68 }
             ]
         };
 
@@ -573,10 +573,10 @@
             
             // Split tournaments for averages calculation (exclude the highest/latest tournament)
             const tournamentsSortedDesc = tournamentNumbers.sort((a, b) => b - a);
-            //const currentTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(0, 6); // Latest 6 excluding most recent
-            //const priorTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(1, 7);   // Previous 6 (skip latest)
-            const currentTournaments = tournamentsSortedDesc.slice(0, 6); // Include the most recent/current main 
-            const priorTournaments = tournamentsSortedDesc.slice(1, 7);  // Previous 6 (exclude the most recent)
+            const currentTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(0, 6); // Latest 6 excluding most recent
+            const priorTournaments = tournamentsSortedDesc.filter(num => num !== latestTournament).slice(1, 7);   // Previous 6 (skip latest)
+            // const currentTournaments = tournamentsSortedDesc.slice(0, 6); // Include the most recent/current main 
+            // const priorTournaments = tournamentsSortedDesc.slice(1, 7);  // Previous 6 (exclude the most recent)
 
             // Calculate both averages for each hero
             Object.values(data).forEach(hero => {

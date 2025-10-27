@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXJ5Q7LKKE"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-LXJ5Q7LKKE');
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://pbs.twimg.com">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FantasySheets | Player Rankings</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
+    <link rel="stylesheet" href="../styles.css?v=8e4c2f">
+    <link rel="icon" type="image/png" href="../icons/favicon.webp">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    .controls-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    #search-container {
+        flex: 1;
+    }
+
+    #comparison-controls {
+        margin-left: 1rem;
+        display: none;
+    }
+
+    .text-link {
+    cursor: pointer;
+    }
+
+    .text-link:hover {
+        text-decoration: underline;
+    }
+
+    th.sortable {
+        padding-right: 2px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    th[data-sort="name"] {
+        min-width: 100px;
+    }
+
+    .sort-arrow {
+        position: absolute;
+        right: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .rankings-table {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .rankings-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        box-sizing: border-box;
+        max-width: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding: 8px 4px;
+    }
+
+    th.sortable {
+        padding-right: 2px;
+        position: relative;
+        white-space: nowrap;
+    }
+
+    td img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    .placeholder {
+        background-color: #ccc;
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+    }
+
+    th[data-sort="rank"] { width: 40px; }
+    th[data-sort="player"] { width: 180px; }
+    th[data-sort="firstTournament"] { width: 80px; }
+    th[data-sort="hoursSinceLastActivity"] { width: 60px; }
+    th[data-sort="portfolio"] { width: 60px; }
+    th[data-sort="cards"] { width: 60px; }
+    th[data-sort="fanPoints"],
+    th[data-sort="rewardEth"],
+    th[data-sort="rewardFrag"],
+    th[data-sort="blastGold"],
+    th[data-sort="stars"] { width: 70px; }
+    th[data-sort="decks"] { width: 60px; }
+    th[data-sort="diamond"],
+    th[data-sort="platinum"],
+    th[data-sort="gold"],
+    th[data-sort="silver"],
+    th[data-sort="bronze"],
+    th[data-sort="reverse"] { width: 50px; }
+    th[data-sort="buyVol"],
+    th[data-sort="netVol"] { width: 70px; }
+    th:last-child { width: 40px; }
+
+    td[player-handle] {
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    tbody tr:hover {
+        background-color: #1f2123;
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover td {
+        background-color: #1f2123;
+    }
+
+    tbody tr:hover td.section-end {
+        border-right: 1px solid var(--border-color);
+    }
+
+    .player-handle {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    @media (max-width: 768px) {
+        .rankings-table {
+            margin: 0;
+            padding: 0 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            display: block;
+            white-space: nowrap;
+            max-width: 350px;
+        }
+        
+        th {
+            font-size: 0.85rem;
+        }
+        
+        th[data-sort="rank"],
+        th[data-sort="player"],
+        td:nth-child(1),
+        td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background-color: var(--background-color);
+            z-index: 2;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+        }
+        
+        th[data-sort="player"],
+        td:nth-child(2) {
+            left: 50px;
+        }
+    }
+
+    .toggle-container {
+        display: inline-flex;
+        margin-left: 7px;
+        background-color: #e0e0e0;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        position: relative;
+        overflow: hidden;
+        height: 19px;
+        padding: 2px;
+    }
+
+    .toggle-button {
+        padding: 1px 7px;
+        cursor: pointer;
+        font-size: 0.6rem;
+        line-height: 1.2;
+        border: none;
+        background: none;
+        position: relative;
+        z-index: 2;
+        transition: color 0.3s ease;
+        color: #666;
+        min-width: 34px;
+        text-align: center;
+    }
+
+    .toggle-button.active {
+        color: #000;
+        font-weight: 600;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        height: calc(100% - 4px);
+        width: calc(50% - 4px);
+        background-color: white;
+        border-radius: 2px;
+        transition: transform 0.3s ease;
+        z-index: 1;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* When Last 5 is active, move the slider to the right */
+    #toggle-last5.active ~ .toggle-slider {
+        transform: translateX(100%);
+    }
+
+    .info-div {
+        text-align: center;
+        color: #888;
+        font-size: 0.9em;
+        margin-left: 10px;
+    }
+</style>
+<body>
+    <div class="title-container" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <h1 class="title-header" style="margin: 0;">
+            <a href="../index.html" class="home-link">
+                <i class="fas fa-home"></i>
+            </a>
+            FantasySheets Player Rankings
+        </h1>
+        <div class="info-div" style="margin-top: 4px;">
+            <span style="color: #888; margin-left: 8px;">As of S5M5 | </span>
+            <span style="font-weight: bold;">Criteria</span>
+            <i class="fas fa-info-circle" style="margin-left: 4px; cursor: help;" title="Criteria to be ranked: >=.02 total ETH won in last 3 mains OR 2.5M+ FAN points"></i>
+            
+        </div>
+    </div>
+    <main>
+        <div class="controls-container">
+            <div class="controls-row">
+                <div id="search-container">
+                    <input 
+                        type="text" 
+                        class="search-box" 
+                        id="playerSearch" 
+                        placeholder="Search players..." 
+                        autocomplete="off"
+                        aria-label="Search players">
+                    <div class="clear-search" id="clearSearch" role="button" aria-label="Clear search"></div>
+                    
+                    <!-- New Season Dropdown -->
+                    <select id="seasonSelect" style="margin-left: 10px; padding: 6px 8px; border-radius: 4px; border: 1px solid #555; background-color: #333; color: #fff; font-size: 0.9em;">
+                        <option value="0">Season 0</option>
+                        <option value="1">Season 1</option>
+                        <option value="2">Season 2</option>
+                        <option value="3">Season 3</option>
+                        <option value="4">Season 4</option>
+                        <option value="5">Season 5</option>
+                    </select>
+                    
+                    <label style="display: flex; align-items: center; margin-left: 10px; color: #ccc; font-size: 0.9em; cursor: pointer;">
+                        <input type="checkbox" id="heroesFilter" style="margin-right: 5px; width: 16px; height: 16px; border-radius: 50%; cursor: pointer;">
+                        Heroes
+                    </label>
+                </div>
+
+                <div id="comparison-controls">
+                    <span id="compareSelected" class="text-link compare">Compare</span>
+                    <span id="clearSelection" class="text-link clear">Clear</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="rankings-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="column-header section-end" colspan="6">
+                            <i class="fa-solid fa-user"></i> Player
+                        </th>
+                        <th class="column-header section-end" colspan="3">
+                            <i class="fa-solid fa-coins"></i> Rewards
+                        </th>
+                        <th class="column-header section-end" colspan="7" title="Only tournaments since TGE July 2024. Average normalized score converted to a rank">
+                            <i class="fa-solid fa-trophy"></i> Performance
+                            <div class="toggle-container">
+                                <button id="toggle-all" class="toggle-button active">All</button>
+                                <button id="toggle-last5" class="toggle-button">Last 5</button>
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </th>
+                        <th class="column-header section-end" colspan="3">
+                            <i class="fa-solid fa-store"></i> Marketplace
+                        </th>
+                        <th class="column-header section-end" title="(Sells + ETH Rewards) - (Buys + Packs)">Net <br><span style="background-color: rgba(76, 175, 80, 0.7); color: white; font-size: 0.6em; padding: 1px 4px; border-radius: 2px; margin-left: 2px;">Updated</span></th>
+                        <th class="column-header section-end">Compare</th>
+                    </tr>
+                    <tr>
+                        <th class="sortable" data-sort="rank">
+                            Rank
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="player">
+                            Player
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="firstTournament">
+                            Cohort
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="hoursSinceLastActivity" title="Time since last trade or tournament start">
+                            Activity
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="portfolio">
+                            Port
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="cards">
+                            Cards
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="fanPoints">
+                            <img src="../icons/fan.webp" alt="Fan Points" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="rewardEth">
+                            <img src="../icons/eth.webp" alt="Reward ETH" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="rewardFrag">
+                            <img src="../icons/fragment.webp" alt="Reward Frag" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="decks">
+                            Decks
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="diamond">
+                            <img src="../icons/diamond.webp" alt="Diamond" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="platinum">
+                            <img src="../icons/platinum.webp" alt="Platinum" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="gold">
+                            <img src="../icons/gold.webp" alt="Gold" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="silver">
+                            <img src="../icons/silver.webp" alt="Silver" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="bronze">
+                            <img src="../icons/bronze.webp" alt="Bronze" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="reverse">
+                            <img src="../icons/reverse.webp" alt="Reverse" style="height: 16px; vertical-align: middle;">
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="buyVol">
+                            Buys
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable" data-sort="packVol">
+                            Packs
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="sellVol">
+                            Sells
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th class="sortable section-end" data-sort="netVol" title="(Sells + ETH Rewards) - (Buys + Packs)">
+                            Net
+                            <div class="sort-arrow"></div>
+                        </th>
+                        <th>Compare</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="21" style="text-align: center; padding: 2rem;">
+                            Loading player data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+
+        function formatNumberMK(value) {
+            if (!value && value !== 0) return 'N/A';
+            
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(2) + 'm';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(1) + 'k';
+            }
+            return value.toFixed(1);
+        }
+
+        function formatDecimalOne(value) {
+            if (!value && value !== 0) return 'N/A';
+            return parseFloat(value).toFixed(1);
+        }
+
+        function formatDecimalTwo(value) {
+            if (!value && value !== 0) return 'N/A';
+            return parseFloat(value).toFixed(2);
+        }
+
+        function formatDecimalRank(value) {
+            if (!value && value !== 0) return 'N/A';
+            const num = parseFloat(value);
+            if (num === 1) return '1';
+            if (num < 1) return num.toFixed(3).substring(1);
+            return num.toFixed(3);
+        }
+
+        function formatInt(value) {
+            if (!value && value !== 0) return '0';
+            return value.toLocaleString('en-US');
+        }
+
+        function renderTable(data, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p>No data available</p>';
+                return;
+            }
+
+            // Get headers from the first object
+            const headers = Object.keys(data[0]);
+            
+            // Create table HTML
+            let tableHTML = `
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                ${headers.map(header => `<th>${formatHeader(header)}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    ${headers.map(header => `<td>${formatCellValue(row[header])}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        function formatCellValue(value) {
+            // Handle null, undefined, or empty values
+            if (value === null || value === undefined || value === '') {
+                return '';
+            }
+            
+            // Handle numbers - format appropriately
+            if (typeof value === 'number') {
+                // For very large numbers, use scientific notation or abbreviated format
+                if (Math.abs(value) >= 1000000) {
+                    return value.toLocaleString();
+                }
+                // For decimal numbers, limit decimal places
+                if (value % 1 !== 0) {
+                    return value.toFixed(4).replace(/\.?0+$/, '');
+                }
+                return value.toString();
+            }
+            
+            // Handle URLs (like profile pictures) - create clickable links
+            if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+                if (value.includes('profile_images') || value.includes('.jpg') || value.includes('.png') || value.includes('.gif')) {
+                    return `<img src="${value}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">`;
+                }
+                return `<a href="${value}" target="_blank" rel="noopener noreferrer">${value}</a>`;
+            }
+            
+            // Handle Ethereum addresses - truncate for display
+            if (typeof value === 'string' && value.startsWith('0x') && value.length === 42) {
+                return `<span title="${value}">${value.substring(0, 6)}...${value.substring(38)}</span>`;
+            }
+            
+            // Return string values as-is
+            return value.toString();
+        }
+
+        function formatHeader(header) {
+            return header
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            let players = [];
+            let currentSeason = '0';
+
+            // Function to load player data based on season
+            async function loadPlayerData(season) {
+                const timestamp = new Date().getTime();
+                let dataUrl;
+                
+                if (season === '0') {
+                    dataUrl = `../data/players/player_ranking.json?v=${timestamp}`;
+                } else {
+                    dataUrl = `../data/players/player_ranking_season_${season}.json?v=${timestamp}`;
+                }
+
+                try {
+                    const response = await fetch(dataUrl, {
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to load data for Season ${season}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Transform and sort players by fanPoints (descending)
+                    players = data.players
+    .sort((a, b) => (b.fan_pts || 0) - (a.fan_pts || 0))
+    .map((player, index) => ({
+        originalRank: index + 1,
+        rank: index + 1,
+        name: player.player_name || 'Unknown',
+        handle: player.player_handle || 'unknown',
+        player_id: player.player_id,
+        profilePic: player.profile_picture || '../icons/ft_logo.webp',
+        firstTournament: player.first_tournament || 'Unknown',
+        hoursSinceLastActivity: player.hours_since_last_activity, // Keep null as null
+        rewardEth: (player.reward_eth || 0).toFixed(3),
+        rewardFrag: (player.reward_frag || 0).toFixed(3),
+        portfolio: (player.portfolio || 0).toFixed(3),
+        fanPoints: Math.round(player.fan_pts || 0),
+        blastGold: Math.round(player.blast_gold || 0),
+        stars: Math.round(player.stars || 0),
+        decks: Math.round(player.decks || 0),
+        cards: Math.round(player.cards || 0),
+        diamond: Math.round(player.diamond_norm_rank || 0),
+        platinum: Math.round(player.platinum_norm_rank || 0),
+        gold: Math.round(player.gold_norm_rank || 0),
+        silver: Math.round(player.silver_norm_rank || 0),
+        bronze: Math.round(player.bronze_norm_rank || 0),
+        reverse: Math.round(player.reverse_norm_rank || 0),
+        diamond_l5: Math.round(player.diamond_norm_rank_l5 || 0),
+        platinum_l5: Math.round(player.platinum_norm_rank_l5 || 0),
+        gold_l5: Math.round(player.gold_norm_rank_l5 || 0),
+        silver_l5: Math.round(player.silver_norm_rank_l5 || 0),
+        bronze_l5: Math.round(player.bronze_norm_rank_l5 || 0),
+        reverse_l5: Math.round(player.reverse_norm_rank_l5 || 0),
+        buyVol: player.buy_vol === null ? null : (player.buy_vol || 0).toFixed(3),
+        packVol: player.pack_vol === null ? null : (player.pack_vol || 0).toFixed(3),
+        sellVol: player.sell_vol === null ? null : (player.sell_vol || 0).toFixed(3),
+        netVol: player.net_vol === null ? null : (player.net_vol || 0).toFixed(3),
+        isHero: player.is_hero || 0
+    }));
+
+                updateTable();
+                
+                } catch (error) {
+                    console.error('Error loading player data:', error);
+                    // Show error message in table
+                    const tbody = document.querySelector('tbody');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="21" style="text-align: center; padding: 2rem; color: #ff6b6b;">
+                                Error loading data for Season ${season}. Please try another season.
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // Function to update the table with current players data
+            function updateTable() {
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = players.map(player => `
+                    <tr>
+                        <td>${player.rank}</td>
+                        <td player-handle="${player.handle}" data-player-id="${player.player_id}" style="padding: 0 4px 0 10px;">
+                            <div style="display: flex; align-items: center; margin: 0; padding: 8px 0;">
+                                <img src="${player.profilePic}" alt="${player.name}" 
+                                    onerror="this.onerror=null; this.src='../icons/ft_logo.webp';"
+                                    style="margin: 0;">
+                                <div style="display: flex; align-items: center; margin-left: 6px;">
+                                    <a href="https://fantasy.top/player/${player.player_id}" target="_blank" style="color: inherit; text-decoration: none;">
+                                        <span class="player-handle">${player.name}</span>
+                                    </a>
+                                    <a href="https://x.com/${player.handle}" target="_blank" style="margin-left: 4px;">
+                                        <i class="fa-brands fa-x-twitter" style="font-size: 0.8em; color: #777;"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${player.firstTournament}</td>
+                        <td>${player.hoursSinceLastActivity === null || player.hoursSinceLastActivity === 0 ? '' : 
+                            player.hoursSinceLastActivity >= 24 
+                            ? Math.round(player.hoursSinceLastActivity/24) + '<span style="color: grey; font-size: 0.8em;"> d</span>' 
+                            : '0<span style="color: grey; font-size: 0.8em;"> d</span>'}</td>
+                        <td>${formatDecimalOne(player.portfolio)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                        <td class="section-end">${formatInt(player.cards)}</td>
+                        <td>${formatNumberMK(player.fanPoints)}</td>
+                        <td>${formatDecimalOne(player.rewardEth)} <span style="color: grey; font-size: 0.8em;"></span></td>
+                        <td class="section-end">${formatNumberMK(parseFloat(player.rewardFrag))}</td>
+                        <td>${player.decks >= 1000 ? (player.decks / 1000).toFixed(1) + 'k' : formatInt(player.decks)}</td>
+                        <td data-column="league_norm_rank" style="background-color: #1E1526">
+                            ${player.diamond == 0 ? '-' : 
+                              player.diamond == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.diamond == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.diamond == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.diamond <= 10 ? `<span style="display: inline-block; background-color: #C78BFF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond)}</span>` :
+                              formatInt(player.diamond)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" style="background-color: #1E1526; display: none;">
+                            ${player.diamond_l5 == 0 ? '-' : 
+                              player.diamond_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.diamond_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.diamond_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.diamond_l5 <= 10 ? `<span style="display: inline-block; background-color: #C78BFF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.diamond_l5)}</span>` :
+                              formatInt(player.diamond_l5)}
+                        </td>
+                        <td data-column="league_norm_rank" style="background-color: #0A1024">
+                            ${player.platinum == 0 ? '-' : 
+                              player.platinum == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.platinum == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.platinum == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.platinum <= 10 ? `<span style="display: inline-block; background-color: #4169EF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.platinum)}</span>` :
+                              formatInt(player.platinum)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" style="background-color: #0A1024; display: none;">
+                            ${player.platinum_l5 == 0 ? '-' : 
+                              player.platinum_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.platinum_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.platinum_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.platinum_l5 <= 10 ? `<span style="display: inline-block; background-color: #4169EF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.platinum_l5)}</span>` :
+                              formatInt(player.platinum_l5)}
+                        </td>
+                        <td data-column="league_norm_rank" style="background-color: #231C0B">
+                            ${player.gold == 0 ? '-' : 
+                              player.gold == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.gold == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.gold == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.gold <= 10 ? `<span style="display: inline-block; background-color: #e8bc4c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold)}</span>` :
+                              formatInt(player.gold)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" style="background-color: #231C0B; display: none;">
+                            ${player.gold_l5 == 0 ? '-' : 
+                              player.gold_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.gold_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.gold_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.gold_l5 <= 10 ? `<span style="display: inline-block; background-color: #e8bc4c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.gold_l5)}</span>` :
+                              formatInt(player.gold_l5)}
+                        </td>
+                        <td data-column="league_norm_rank" style="background-color: #191B1F">
+                            ${player.silver == 0 ? '-' : 
+                              player.silver == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.silver == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.silver == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.silver <= 10 ? `<span style="display: inline-block; background-color: #A7B8CF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver)}</span>` :
+                              formatInt(player.silver)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" style="background-color: #191B1F; display: none;">
+                            ${player.silver_l5 == 0 ? '-' : 
+                              player.silver_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.silver_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.silver_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.silver_l5 <= 10 ? `<span style="display: inline-block; background-color: #A7B8CF; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.silver_l5)}</span>` :
+                              formatInt(player.silver_l5)}
+                        </td>
+                        <td data-column="league_norm_rank" style="background-color: #22130A">
+                            ${player.bronze == 0 ? '-' : 
+                              player.bronze == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.bronze == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.bronze == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.bronze <= 10 ? `<span style="display: inline-block; background-color: #e77e41; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze)}</span>` :
+                              formatInt(player.bronze)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" style="background-color: #22130A; display: none;">
+                            ${player.bronze_l5 == 0 ? '-' : 
+                              player.bronze_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.bronze_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.bronze_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.bronze_l5 <= 10 ? `<span style="display: inline-block; background-color: #e77e41; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.bronze_l5)}</span>` :
+                              formatInt(player.bronze_l5)}
+                        </td>
+                        <td data-column="league_norm_rank" class="section-end" style="background-color: #141F0B">
+                            ${player.reverse == 0 ? '-' : 
+                              player.reverse == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.reverse == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.reverse == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.reverse <= 10 ? `<span style="display: inline-block; background-color: #82EA89; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse)}</span>` :
+                              formatInt(player.reverse)}
+                        </td>
+                        <td data-column="league_norm_rank_l5" class="section-end" style="background-color: #141F0B; display: none;">
+                            ${player.reverse_l5 == 0 ? '-' : 
+                              player.reverse_l5 == 1 ? '<i class="fas fa-trophy" style="color: #FFD700;"></i>' :
+                              player.reverse_l5 == 2 ? '<i class="fas fa-trophy" style="color: #C0C0C0;"></i>' :
+                              player.reverse_l5 == 3 ? '<i class="fas fa-trophy" style="color: #CD7F32;"></i>' :
+                              player.reverse_l5 <= 10 ? `<span style="display: inline-block; background-color: #84d24c; color: white; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 0.8em;">${formatInt(player.reverse_l5)}</span>` :
+                              formatInt(player.reverse_l5)}
+                        </td>
+                        <td title="ETH">${player.buyVol === null ? '' : formatDecimalOne(player.buyVol)}</td>
+                        <td title="ETH">${player.packVol === null ? '' : formatDecimalOne(player.packVol)}</td>
+                        <td class="section-end" title="ETH">${player.sellVol === null ? '' : formatDecimalOne(player.sellVol)}</td>
+                        <td title="(Sells + ETH Rewards) - (Buys + Packs)" class="section-end">${player.netVol === null ? '' : formatDecimalOne(player.netVol)}</td>
+                        <td><input type="checkbox" class="compare-checkbox"></td>
+                    </tr>
+                `).join('');
+
+                // Reinitialize event listeners after table update
+                initializeEventListeners();
+            }
+
+            // Season dropdown change handler
+            const seasonSelect = document.getElementById('seasonSelect');
+            seasonSelect.addEventListener('change', async function() {
+                const selectedSeason = this.value;
+                currentSeason = selectedSeason;
+                
+                // Show loading message
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="21" style="text-align: center; padding: 2rem;">
+                            Loading Season ${selectedSeason} data...
+                        </td>
+                    </tr>
+                `;
+                
+                // Clear search and filters when changing seasons
+                document.getElementById('playerSearch').value = '';
+                document.getElementById('heroesFilter').checked = false;
+                document.getElementById('clearSearch').style.display = 'none';
+                
+                // Load new data
+                await loadPlayerData(selectedSeason);
+            });
+
+            // Initialize event listeners function
+            function initializeEventListeners() {
+                const searchBox = document.getElementById('playerSearch');
+                const clearButton = document.getElementById('clearSearch');
+                const rows = document.querySelectorAll('tbody tr');
+
+                // Search functionality
+                const searchHandler = function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const isHeroesOnly = document.getElementById('heroesFilter').checked;
+                    
+                    clearButton.style.display = searchTerm ? 'flex' : 'none';
+                    
+                    rows.forEach(row => {
+                        const playerCell = row.children[1];
+                        const playerId = playerCell.dataset.playerId;
+                        const player = players.find(p => p.player_id === playerId);
+                        const playerName = playerCell.textContent.toLowerCase();
+                        const playerHandle = playerCell.getAttribute('player-handle').toLowerCase();
+                        
+                        const matchesSearch = !searchTerm || playerName.includes(searchTerm) || playerHandle.includes(searchTerm);
+                        const matchesHeroFilter = !isHeroesOnly || player.isHero === 1;
+                        
+                        const isVisible = matchesSearch && matchesHeroFilter;
+                        row.style.display = isVisible ? '' : 'none';
+
+                        // During search, restore original rank
+                        if (isVisible) {
+                            row.children[0].textContent = player.originalRank;
+                        }
+                    });
+                };
+
+                // Remove existing event listeners before adding new ones
+                searchBox.removeEventListener('input', searchHandler);
+                searchBox.addEventListener('input', searchHandler);
+
+                // Clear search
+                clearButton.addEventListener('click', function() {
+                    searchBox.value = '';
+                    document.getElementById('heroesFilter').checked = false;
+                    rows.forEach(row => row.style.display = '');
+                    this.style.display = 'none';
+                });
+
+                // Heroes filter functionality
+                const heroesFilter = document.getElementById('heroesFilter');
+                heroesFilter.addEventListener('change', function() {
+                    const isHeroesOnly = this.checked;
+                    const searchTerm = searchBox.value.toLowerCase();
+                    
+                    rows.forEach(row => {
+                        const playerCell = row.children[1];
+                        const playerId = playerCell.dataset.playerId;
+                        const player = players.find(p => p.player_id === playerId);
+                        
+                        // Safety check - if player not found, skip this row
+                        if (!player) {
+                            console.warn('Player not found for ID:', playerId);
+                            return;
+                        }
+                        
+                        const playerName = playerCell.textContent.toLowerCase();
+                        const playerHandle = playerCell.getAttribute('player-handle').toLowerCase();
+                        
+                        const matchesSearch = !searchTerm || playerName.includes(searchTerm) || playerHandle.includes(searchTerm);
+                        const matchesHeroFilter = !isHeroesOnly || player.isHero === 1;
+                        
+                        const isVisible = matchesSearch && matchesHeroFilter;
+                        row.style.display = isVisible ? '' : 'none';
+                        
+                        // Update rank for visible rows
+                        if (isVisible) {
+                            row.children[0].textContent = player.originalRank;
+                        }
+                    });
+                });
+
+                // Rest of the existing event listeners (comparison, sorting, toggles)...
+                // [Include all the existing event listener code for comparison, sorting, and toggles here]
+            }
+
+            // Load initial data (Season 0)
+            await loadPlayerData('0');
+
+            // ...rest of existing code for comparison, sorting, and toggles...
+        });
+    </script>
+</body>
+</html>
